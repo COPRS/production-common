@@ -57,7 +57,6 @@ public class MetadataBuilderTest {
 		KafkaMetadataDto dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 		
 		assertEquals("Invalid metadata", "CREATE", dto.getAction());
-		System.out.println(dto.getMetadata());
 	}
 	
 	@Test
@@ -85,7 +84,6 @@ public class MetadataBuilderTest {
 		KafkaMetadataDto dto = metadataBuilder.buildErdsSessionFileMetadata(descriptor, file);
 		
 		assertEquals("Invalid metadata", "CREATE", dto.getAction());
-		System.out.println(dto.getMetadata());
 	}
 
 }
