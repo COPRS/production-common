@@ -9,14 +9,14 @@ spring:
 logging:
   level:
     ROOT: ERROR
-    org.springframework: WARN
-    fr.viveris.s1pdgs: INFO
+    org.springframework: INFO
+    fr.viveris.s1pdgs: DEBUG
     kafka: WARN
-  file: ./s1pdgs-ingestor.log
+  file: ./application.log
 
 # KAFKA
 kafka:
-  bootstrap-servers: kafka-svc:9092
+  bootstrap-servers: ${spring.embedded.kafka.brokers}
   group-id: ingestors
   poll-timeout: 3000
   topic:
@@ -25,7 +25,7 @@ kafka:
 
 #FTP
 ftp:
-  host: input-ftpserver-svc
+  host: 172.17.50.10
   port: 21
   username: user
   password: passwd
@@ -35,10 +35,10 @@ ftp:
     mget: -P -R -D
   config-files:
     remote-directory: /config_files/
-    upload-fixed-rate: 1000
+    upload-fixed-rate: 10000
   session-files:
     remote-directory: /erds_sessions/
-    upload-fixed-rate: 1000
+    upload-fixed-rate: 10000
  
 #Object Storage
 storage:
@@ -58,5 +58,7 @@ file:
     local-directory: /data/local-ingestor/config_files/ # Must contains the last /
     read-fixed-rate: 1000
   session-files:
-    local-directory: /data/local-ingestor/erds_sessions/ # Must contains the last /
+    local-directory: /data/local-ingestor/erds_sessions/
     read-fixed-rate: 1000
+
+    

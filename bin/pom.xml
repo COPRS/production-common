@@ -66,11 +66,6 @@
 			<artifactId>aws-java-sdk</artifactId>
 			<version>1.11.271</version>
 		</dependency>
-		<dependency>
-		    <groupId>org.json</groupId>
-		    <artifactId>json</artifactId>
-		    <version>20171018</version>
-		</dependency>
 	</dependencies>
 	
 		<repositories>

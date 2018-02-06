@@ -1,11 +1,20 @@
 package fr.viveris.s1pdgs.ingestor.services.file;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileDescriptor;
+import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileType;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
 
 /**
@@ -26,14 +35,47 @@ public class MetadataBuilder {
 	 */
 	// TODO (throw an exceptionif error)
 	public KafkaMetadataDto buildConfigFileMetadata(ConfigFileDescriptor descriptor, File file) {
-		String info = String.format(
+		/*String info = String.format(
 				"{'productName': %s, 'productClass': %s, 'productType': %s, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
 				descriptor.getProductName(), descriptor.getProductClass(), descriptor.getProductType(), descriptor.getMissionId(), descriptor.getSatelliteId(),
-				descriptor.getKeyObjectStorage());
-		
+				descriptor.getKeyObjectStorage());*/
 		KafkaMetadataDto metadata = new KafkaMetadataDto();
 		metadata.setAction("CREATE");
-		metadata.setMetadata(info);
+		metadata.setMetadata(null);
+		ExtractMetadata extractor = new ExtractMetadata();
+		if(descriptor.getProductType().equals("AUX_OBMEMC")) {
+			try {
+				metadata.setMetadata(extractor.processAUXXMLFile(descriptor, file));
+			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if(descriptor.getProductType().equals("MPL_ORBPRE") || descriptor.getProductType().equals("MPL_ORBSCT")) {
+			try {
+				metadata.setMetadata(extractor.processMPLEOFFile(descriptor, file));
+			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if (descriptor.getProductType().equals("AUX_RESORB")) {
+			try {
+				metadata.setMetadata(extractor.processAUXEOFFile(descriptor, file));
+			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			try {
+				metadata.setMetadata(extractor.processAUXMANIFESTFile(descriptor, file));
+			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		return metadata;
 	}
 
@@ -46,14 +88,31 @@ public class MetadataBuilder {
 	 */
 	// TODO (throw an exceptionif error)
 	public KafkaMetadataDto buildErdsSessionFileMetadata(ErdsSessionFileDescriptor descriptor, File file) {
-		String info = String.format(
+		/*String info = String.format(
 				"{ 'sessionIdentifier': %s, 'productName': %s, 'productType': %s, 'channel': %d, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
 				descriptor.getSessionIdentifier(), descriptor.getProductName(), descriptor.getProductType(),
 				descriptor.getChannel(), descriptor.getMissionId(), descriptor.getSatelliteId(),
-				descriptor.getKeyObjectStorage());
+				descriptor.getKeyObjectStorage());*/
 		KafkaMetadataDto metadata = new KafkaMetadataDto();
 		metadata.setAction("CREATE");
-		metadata.setMetadata(info);
+		metadata.setMetadata(null);
+		ExtractMetadata extractor = new ExtractMetadata();
+		if(descriptor.getProductType() == ErdsSessionFileType.RAW) {
+			try {
+				metadata.setMetadata(extractor.processRAWFile(descriptor));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if(descriptor.getProductType() == ErdsSessionFileType.SESSION) {
+			try {
+				metadata.setMetadata(extractor.processSESSIONFile(descriptor));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		return metadata;
 	}
 }

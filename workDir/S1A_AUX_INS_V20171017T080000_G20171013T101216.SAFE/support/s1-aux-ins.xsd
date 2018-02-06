@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: s1-aux-ins.xsd 10293 2014-01-11 01:55:29Z cherbert@DS.MDA.CA $ -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.10">
+  <xsd:include schemaLocation="s1-object-types.xsd"/>
+  <xsd:complexType name="pgProductModelType">
+    <xsd:annotation>
+      <xsd:documentation>Modeled PG Product LUT.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="pgModelInterval" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Interval between adjacent PG Product values in the list [s].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="values" type="complexArray">
+        <xsd:annotation>
+          <xsd:documentation>Array of modeled complex PG model values.  The pattern contains attribute "count" complex floating point values separated by spaces.  The first value in the array corresponds to the time at the ascending node of the current orbit.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="rollSteeringParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Roll steering parameters.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="referenceAntennaAngle" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Antenna bore sight off nadir angle at the referenceHeight [degrees].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="referenceHeight" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Satellite height at which the instrument elevation angle is aligned with the referenceAntennaAngle [m].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="rollSteeringSensitivity" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Sensitivity of the roll steering versus height [degrees/m].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="pccParamsType">
+    <xsd:annotation>
+      <xsd:documentation>PCC decoding control parameters.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="signal" type="signalType">
+        <xsd:annotation>
+          <xsd:documentation>Signal type.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="order" type="intArray">
+        <xsd:annotation>
+          <xsd:documentation>PCC pulse selection order. This is a list of integers separated by spaces that defines the order in which the pulses are combined using the method below. For example, an entry of:
+&lt;order count="2"&gt;20 19&lt;/order&gt;
+will select the 20th pulse first and the 19th pulse second.
+</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="method" type="calCombinationMethodType">
+        <xsd:annotation>
+          <xsd:documentation>Method to use to combine the calibration pulses selected by the order above. The PCC2 method subtracts the pulses in order and averages over the number of pulses. The Average method add the pulses in order and averages over the number of pulses. The Isolation Subtraction method finds the corresponding isolation pulse PCC params and subtracts the selected isolation pulse from the selected nominal pulse.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="pccParamsListType">
+    <xsd:annotation>
+      <xsd:documentation>List of PCC decoding control parameters indexed by signal type.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="pccParams" type="pccParamsType" minOccurs="5" maxOccurs="6">
+        <xsd:annotation>
+          <xsd:documentation>PCC decoding parameters for controlling the order and way in which calibration pulses are decoded during processing. There are a minimum of 5 entries in the list, one for each nominal calibration pulse, and a maximum of 6 entries in the list for the transmit H polarisation which includes an additional isolation pulse.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of pccParams records in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="internalCalibrationParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Channel dependent instrument parameters.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>Canonical name of the swath to which this set of internal calibration parameters applies. The swath and polarisation are used to index the applicable internalCalibrationParams record. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="polarisation" type="polarisationType">
+        <xsd:annotation>
+          <xsd:documentation>Polarisation to which this set of internal calibration parameters applies. The polarisation andUsed along with the swathNumber are used to index the applicable internalCalibrationParams record.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="timeDelay" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Time delay [s] to be applied to the reference replica, used when the time delay cannot be derived from the extracted replica. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="nominalGain" type="complex">
+        <xsd:annotation>
+          <xsd:documentation>Complex gain to be applied to the reference replica when derived from the nominal chirp.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="extractedGain" type="complex">
+        <xsd:annotation>
+          <xsd:documentation>Complex gain to be applied to the reference replica when derived from the extracted chirp.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="pgProductModel" type="pgProductModelType">
+        <xsd:annotation>
+          <xsd:documentation>Modeled PG product.  The model is relative to the ascending node of the current orbit.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="pgReference" type="complex">
+        <xsd:annotation>
+          <xsd:documentation>Reference absolute PG value that will be defined by offline analysis of the acquired data.  PG values used by the IPF will be normalised by this PG reference value.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="swstBias" type="double">
+        <xsd:annotation>
+          <xsd:documentation>SWST bias [s].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="noise" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Nominal noise value used in processing if no noise value can be calculated from the downlink. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="replicaPccParamsList" type="pccParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>List of PCC decoding control parameters for the extracted replicas at nominal imaging bandwidth.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="pgPccParamsList" type="pccParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>List of PCC decoding control parameters for the PG replicas at 100 MHz bandwidth.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="internalCalibrationParamsListType">
+    <xsd:annotation>
+      <xsd:documentation>Internal calibration parameters list. This element contains a list of swath/polarisation channel dependent instrument parameters. There is an entry for each swath/polarisation combination for a total of 60. The SPPDU document defines an additional 68 swath number codes that can be used if required.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="internalCalibrationParams" type="internalCalibrationParamsType" maxOccurs="88">
+        <xsd:annotation>
+          <xsd:documentation>Internal calibration instrument parameters. This record contains swath/polarisation channel dependent parameters related to the instrument. There may be up to one record per swath (23 nominal swaths) per polarisation (4 polarisation combinations for SM, IW, EW, EN and AN, 2 for WV) for a maximum total of 88.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of internalCalibrationParam records in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="rxVariationCorrectionParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Receive variation correction parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="rxPolarisation" type="rxPolarisationType">
+        <xsd:annotation>
+          <xsd:documentation>Polarisation to which this set of receive correction parameters applies. "H" or "V".</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="gainTrendCoefficients" type="doubleCoefficientArray">
+        <xsd:annotation>
+          <xsd:documentation>Gain trend correction coefficients.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="gainOvershootCoefficients" type="doubleCoefficientArray">
+        <xsd:annotation>
+          <xsd:documentation>Gain overshoot correction coefficients.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="rxVariationCorrectionParamsListType">
+    <xsd:annotation>
+      <xsd:documentation>List of Receive variation correction parameters.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="rxVariationCorrectionParams" type="rxVariationCorrectionParamsType" maxOccurs="2">
+        <xsd:annotation>
+          <xsd:documentation>Receive variation correction parameters record. This record contains the coefficients used to correct the gain variation across the receive window. There is one record per receive polarisation.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of rxVariationCorrectionParams records in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="pulseParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Pulse parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="amplitudeCoefficients" type="floatCoefficientArray">
+        <xsd:annotation>
+          <xsd:documentation>Pulse amplitude coefficients of the nominal imaging chirp replica.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="phaseCoefficients" type="floatCoefficientArray">
+        <xsd:annotation>
+          <xsd:documentation>Pulse phase coefficients of the nominal imaging chirp replica.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="nominalTxPulseLength" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Nominal transmit pulse length [s]. This parameter is used by the pre-processor and the DCE and SLC processors if it is smaller than the Tx Pulse Length (TXPL) extracted from the ISP headers. The nominal transmit pulse length can be set such that the chirp processed bandwidth is small enough to filter out the spurious signals at ±37.5 MHz. Note that if the value of this field is less than or equal to 0, then it is ignored by the IPF and the transmit pulse length extracted from the ISP headers is used.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="radarSamplingRateType">
+    <xsd:annotation>
+      <xsd:documentation>Radar sampling rate type.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>Swath to which this radar sampling rate applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="value" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Radar sampling rate [Hz].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="radarParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Radar parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="azimuthSteeringRate" type="double">
+        <xsd:annotation>
+          <xsd:documentation>TOPSAR azimuth steering rate [degrees/s]. This field is only relevant for IW and EW swaths and is ignored for SM and WV swaths.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ispType">
+    <xsd:annotation>
+      <xsd:documentation>ISP record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>Canonical name of the swath used to acquire the packet(s).</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="signal" type="signalType">
+        <xsd:annotation>
+          <xsd:documentation>Signal type.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="bandwidth" type="bandwidthType">
+        <xsd:annotation>
+          <xsd:documentation>Signal bandwidth.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="numPri" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>The number of packets of this signal type expected in series.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ispListType">
+    <xsd:annotation>
+      <xsd:documentation>List of ISP records.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="isp" type="ispType" maxOccurs="100">
+        <xsd:annotation>
+          <xsd:documentation>The ISP element describes one unique, or a series of unique transmission packets. The packets are identified by the packet signal type and contain the number of PRIs expected ifor this packet type.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>The number of ISP records within the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="sequenceType">
+    <xsd:annotation>
+      <xsd:documentation>ISP sequence record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="string">
+        <xsd:annotation>
+          <xsd:documentation>The name of the activity within the data acquisition to which this sequence belongs. This field is not used by the IPF for processing. It is for informative purposes only and so the range of the field is unbounded.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="repeat" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Sequence repeat flag. For the imaging sequence, this field shall be set to “true” to indentify the ispList that represents the imaging operation. This field shall be set to “false” for all other sequences.  </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="ispList" type="ispListType">
+        <xsd:annotation>
+          <xsd:documentation>ISP list. This element contains contains a list of the expected packets within this sequence in the order they should be received. The number of ISP entries is arbitrary but there are 30 slots defined to capture the worst case EW echo acquisition with PCC2 sequences at the end of each burst.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="sequenceListType">
+    <xsd:annotation>
+      <xsd:documentation>List of ISP sequences.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="sequence" type="sequenceType" maxOccurs="5">
+        <xsd:annotation>
+          <xsd:documentation>This record defines the sequence of expected ISPs for one distinct activity within the data take.  The number of sequences is arbitrary but there are 5 slots nominally allocated for: 1. an initial noise measurement sequence; 2. an initial calibration sequence; 3. an image acquisition sequence; 4. a final calibration sequence; and, 5. a final noise measurement sequence.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of sequence entries in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="swathMapType">
+    <xsd:annotation>
+      <xsd:documentation>Parameters for mapping swath numbers to canonical swath names.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swathNumber" type="swathNumberType">
+        <xsd:annotation>
+          <xsd:documentation>The swath number from the source packet header to map to a particular logical swath within the instrument mode.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>The logical swath to which the swath number applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="swathMapListType">
+    <xsd:annotation>
+      <xsd:documentation>List of swath mapping parameters indexed by swath name.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swathMap" type="swathMapType" maxOccurs="40">
+        <xsd:annotation>
+          <xsd:documentation>Provides a mapping bewteen a particular swath number from the source packet headers to a logical swath within the instrument mode.  In theory the swath number can vary by signal type so the maximum number of swath map elements is 5 swaths * 8 signal types = 40 records. This is the worst case for EW.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of swathMap records in the list</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="timelineType">
+    <xsd:annotation>
+      <xsd:documentation>Timeline ECC program parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="eccNumber" type="eccNumberType">
+        <xsd:annotation>
+          <xsd:documentation>Event Control Code (ECC) number. This field uniquely identifies the ECC program number for this instrument mode and is used by the IPF for timeline selection.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="mode" type="sensorModeType">
+        <xsd:annotation>
+          <xsd:documentation>Instrument mode. This field identifies the instrument mode to which this timeline entry applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="sequenceList" type="sequenceListType">
+        <xsd:annotation>
+          <xsd:documentation>Sequence list. This element is a list of activity sequences that together form the expected transmission sequence from the SAR instrument for the data take.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="swathMapList" type="swathMapListType">
+        <xsd:annotation>
+          <xsd:documentation>Swath mapping list. This element is a list of the swaths applicable to this ECC program and provides a mapping between the swath number fields in the source packet headers and the logical instrument swath name to which they apply.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="timelineListType">
+    <xsd:annotation>
+      <xsd:documentation>List of timeline ECC Program parameters records.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="timeline" type="timelineType" maxOccurs="48">
+        <xsd:annotation>
+          <xsd:documentation>Each timeline element describes the expected packet transmission sequence for one of the operational modes of the satellite.  The SPPDU [A-12] allows for up to 48 entries numbered from 0-47. At minimum, this list must include an entry for the mode of the data being processed.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of timeline entries in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="swathParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Swath parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>Canonical name of the swath to which this set of swathParams applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="radarParams" type="radarParamsType">
+        <xsd:annotation>
+          <xsd:documentation>This DSR contains information related to the SAR instrument</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="pulseParams" type="pulseParamsType">
+        <xsd:annotation>
+          <xsd:documentation>Replica pulse parameters. This DSR contains the characteristics for the nominal replica pulse within this swath.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="rxVariationCorrectionParamsList" type="rxVariationCorrectionParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>List of the receive variation correction parameters used to correct the gain variation across the receive window.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="swathParamsListType">
+    <xsd:annotation>
+      <xsd:documentation>List of swath parameters.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swathParams" type="swathParamsType" maxOccurs="23">
+        <xsd:annotation>
+          <xsd:documentation>Swath Parameters. This record contains swath-dependent parameters related to the instrument. There may be up to one record per swath for a maximum total of 23 records.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of swathParams records in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="huffmanLutType">
+    <xsd:annotation>
+      <xsd:documentation>Huffman decoding LUT record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="baqCode" type="baqCodeType">
+        <xsd:annotation>
+          <xsd:documentation>Bit Rate Code (as extracted from the BAQ block) to which this LUT applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="values" type="intArray">
+        <xsd:annotation>
+          <xsd:documentation>Huffman binary decoding tree values. The tree is implemented using a simple binary coding in which starting at the root, the left side is defined and then the right side is defined. Each node is identified by a 0 followed by a 0 or 1 representing the value of the node. Each leaf is identified by a 1 followed by a 0 or 1 representing the value of the leaf followed by 4 bits representing the MCode value. This encoding scheme is a proposal and will be confirmed prior to CDR.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="huffmanLutListType">
+    <xsd:annotation>
+      <xsd:documentation>List of Huffman decoding LUTs.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="huffmanLut" type="huffmanLutType" minOccurs="5" maxOccurs="5">
+        <xsd:annotation>
+          <xsd:documentation>Huffman decoding LUT. This element contains the Huffman binary tree values for the applicable Bit Rate Code. The MCode is recovered by applying the values in the decoding LUT to the extracted HCode.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of Huffan decoding LUTs in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="rlLutType">
+    <xsd:annotation>
+      <xsd:documentation>Reconstruction Level LUT type for definition the Simple and Normalized Reconstruction LUTs.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="baqCode" type="baqCodeType">
+        <xsd:annotation>
+          <xsd:documentation>Index code for which the LUT applies. For FDBAQ compression this is the Bit Rate Code extracted from the BAQ block and for BAQ compression this is the BAQ mode.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="values" type="doubleArray">
+        <xsd:annotation>
+          <xsd:documentation>NRL LUT values. This element contains fifteen double precision floating point values separated by spaces, one entry for each MCode value. Note that some MCodes are not applicable for some FDBAQ and BAQ modes so in this case the entry shall be "NaN" to signify an invalid index.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="rlLutListType">
+    <xsd:annotation>
+      <xsd:documentation>List of Reconstruction Level LUTs.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="rlLut" type="rlLutType" minOccurs="8" maxOccurs="8">
+        <xsd:annotation>
+          <xsd:documentation>Normalised Reconstruction Levels LUT. This LUT contains the NRL values used to retrieve the normalised reconstructed sample values from the BAQ encoded data. The NRL in the table are indexed by: 1- the Bit Rate Code extracted from the BAQ data block for FDBAQ compression; and, 2- the BAQ mode (3-bit, 4-bit or 5-bit) for BAQ compression.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of NRL LUTs in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="thresholdLutType">
+    <xsd:annotation>
+      <xsd:documentation>Raw data decoding configuration parameters.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="baqCode" type="baqCodeType">
+        <xsd:annotation>
+          <xsd:documentation>BAQ-mode/FDBAQ-BRC to which this set of thresholds applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="thidxThreshold" type="int32">
+        <xsd:annotation>
+          <xsd:documentation>THIDX threshold used to determine whether to use the simple reconstruction method or the normal reconstruction method. If the THIDX extracted from the data is less than or equal to this threshold, then the simple reconstruction method is used; otherwise, the normal reconstruction method is used.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="mCodeThreshold" type="int32">
+        <xsd:annotation>
+          <xsd:documentation>Mcode threshold used in simple reconstruction to determine whether to use the extracted Mcode or the the simple reconstruction LUT. If the Mcode extracted from the data is less than this threshold, then the extracted Mcode is used; otherwise, the simple reconstruction LUT is used.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="thresholdLutListType">
+    <xsd:annotation>
+      <xsd:documentation>List of raw data decoding configuration parameters indexed by encoding mode.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="thresholdLut" type="thresholdLutType" minOccurs="8" maxOccurs="8">
+        <xsd:annotation>
+          <xsd:documentation>Threshold LUT containing the thresholds needed to decode the BAQ and FDBAQ encoded data. There is one record for each of the BAQ-modes/FDBAQ-BRCs for a total of 8.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of thresholdLut records in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="decodingParamsType">
+    <xsd:annotation>
+      <xsd:documentation>List of FDBAQ Lookup Tables.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="huffmanLutList" type="huffmanLutListType">
+        <xsd:annotation>
+          <xsd:documentation>Huffman decoding LUT list. This element contains the Huffman decoding LUTs required to retrieve the HCode value from FDBAQ encoded user data.  There is one LUT for each Bit Rate Code for a total of 5.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="nrlLutList" type="rlLutListType">
+        <xsd:annotation>
+          <xsd:documentation>Normalised Reconstruction Levels LUT list. This element contains the NRL LUTs required to retrieve the normalised reconstructed sample values from the BAQ encoded data. There is one LUT per BAQ mode/FDBAQ Bit Rate Code for a total of 8 LUTs.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="srlLutList" type="rlLutListType">
+        <xsd:annotation>
+          <xsd:documentation>Simple Reconstruction Parameters LUT list. This element contains the Simple Reconstruction Parameters LUTs required to retrieve the simple reconstructed sample values from the BAQ encoded data. There is one LUT per BAQ mode/FDBAQ Bit Rate Code for a total of 8 LUTs.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="sigmaFactorLut" type="floatArray">
+        <xsd:annotation>
+          <xsd:documentation>Sigma Factors LUT. This LUT contains the values used to upscale the normalised reconstructed samples. The sigma factors in the table are indexed by the Threshold Index (THIDX) extracted from the BAQ block. This vector contains 255 single precision floating point numbers separated by spaces.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="thresholdLutList" type="thresholdLutListType">
+        <xsd:annotation>
+          <xsd:documentation>Raw data decoding control LUT list. This element contains the parameters required to decode the BAQ and FDBAQ encoded data.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="tguLut" type="floatArray">
+        <xsd:annotation>
+          <xsd:documentation>TGU temperature calibration LUT used to convert the TGU temperature codes extracted from the sub-commutated ancillary data into the correct temperature values. This is a list of 128 floating point numbers separated by spaces with the index of each entry, numbered 0 .. 127, corresponding to the code for which the temperature value applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="tileLut" type="floatArray">
+        <xsd:annotation>
+          <xsd:documentation>Tile temperature calibration LUT used to convert the Tile temperature codes extracted from the sub-commutated ancillary data into the correct temperature values. This is a list of 256 floating point numbers separated by spaces with the index of each entry, numbered 0 .. 255, corresponding to the code for which the temperature value applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="auxiliaryInstrumentType">
+    <xsd:annotation>
+      <xsd:documentation>Instrument auxiliary file definition (AUX_INS).  This file includes information related to the instrument required for processing.  It is required for data decompression and ISP decoding.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="radarFrequency" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Radar frequency [Hz]. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="deltaTGuard1" type="double">
+        <xsd:annotation>
+          <xsd:documentation>DeltaT Guard 1 parameter from the instrument radar database [s]. This parameter is used to calculate the internal time delay of the extracted reconstructed replicas.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="deltaTSuppr" type="double">
+        <xsd:annotation>
+          <xsd:documentation>DeltaT Suppr parameter from the SSPPDU document [s]. This parameter is used to calculate the times within the PRI for the echo, calibration and noise data.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="rollSteeringParams" type="rollSteeringParamsType">
+        <xsd:annotation>
+          <xsd:documentation>Parameters related to the roll steering law for the instrument. The roll steering law
+defines the off nadir pointing of the antenna mechanical bore sight versus time.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="swathParamsList" type="swathParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>Swath parameters list. This element contains a list of swath dependent instrument parameters. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="internalCalibrationParamsList" type="internalCalibrationParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>Internal calibration parameters list. This element contains a list of swath/polarisation channel dependent instrument parameters.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="timelineList" type="timelineListType">
+        <xsd:annotation>
+          <xsd:documentation>Timeline list. This element contains a list of records that describe the expected packet transmission sequence for each of the Sentinel-1 SAR modes. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="decodingParams" type="decodingParamsType">
+        <xsd:annotation>
+          <xsd:documentation>Raw data decoding parameters. This DSR contains the tables and parameters that the IPF requires to perform image processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="schemaVersion" type="xsd:decimal" use="required" fixed="2.10"/>
+  </xsd:complexType>
+  <xsd:element name="auxiliaryInstrument" type="auxiliaryInstrumentType">
+    <xsd:annotation>
+      <xsd:documentation>Instrument auxiliary file definition (AUX_INS).  This file includes information related to the instrument required for processing.  It is required for data decompression and ISP decoding.</xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+</xsd:schema>

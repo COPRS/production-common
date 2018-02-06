@@ -25,7 +25,7 @@ kafka:
 
 #FTP
 ftp:
-  host: input-ftpserver-svc
+  host: input-ftserver-svc
   port: 21
   username: user
   password: passwd
