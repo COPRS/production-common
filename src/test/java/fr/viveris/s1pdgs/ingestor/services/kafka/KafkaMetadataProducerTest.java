@@ -51,7 +51,7 @@ public class KafkaMetadataProducerTest {
 		      LoggerFactory.getLogger(KafkaMetadataProducerTest.class);
 	
 	// Topic
-	private final static String SENDER_TOPIC = "t_metadata";
+	private final static String SENDER_TOPIC = "t-pdgs-metadata";
 
 	// KAFKA producer
 	@Autowired

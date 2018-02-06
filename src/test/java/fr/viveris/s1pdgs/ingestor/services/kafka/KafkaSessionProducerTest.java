@@ -51,7 +51,7 @@ public class KafkaSessionProducerTest {
 		      LoggerFactory.getLogger(KafkaSessionProducerTest.class);
 	
 	// Topic
-	private final static String SENDER_TOPIC = "t_sessions";
+	private final static String SENDER_TOPIC = "t-pdgs-sessions";
 
 	// KAFKA producer
 	@Autowired
