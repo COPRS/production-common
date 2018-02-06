@@ -1,0 +1,31 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-metadata-catalog
+  profiles:
+    active: prod
+    
+# Logging
+logging:
+  level:
+    ROOT: ERROR
+    org.springframework: WARN
+    fr.viveris.s1pdgs: INFO
+    kafka: WARN
+    org.apache: WARN
+  file: ./s1pdgs-metadata-catalog.log
+
+# KAFKA
+kafka:
+  bootstrap-servers: kafka-svc:9092
+  group-id: metadata-catalog
+  poll-timeout: 500
+  topic:
+    metadata: t-pdgs-metadata
+    
+# Elastic Search
+elasticsearch:
+  host: elasticsearch-svc
+  port: 9200
+  clustername: elasticsearch 
+  index-type: metadata
