@@ -49,10 +49,10 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		
-		String expectedResult = String.format(
+		/*String expectedResult = String.format(
 				"{'productName': %s, 'productClass': %s, 'productType': %s, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
 				descriptor.getProductName(), descriptor.getProductClass(), descriptor.getProductType(), descriptor.getMissionId(), descriptor.getSatelliteId(),
-				descriptor.getKeyObjectStorage());
+				descriptor.getKeyObjectStorage());*/
 		
 		KafkaMetadataDto dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 		
@@ -75,11 +75,11 @@ public class MetadataBuilderTest {
 		
 		File file = new File("erds_sessions/S1A/SESSION1/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		
-		String expectedResult = String.format(
+		/*String expectedResult = String.format(
 				"{ 'sessionIdentifier': %s, 'productName': %s, 'productType': %s, 'channel': %d, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
 				descriptor.getSessionIdentifier(), descriptor.getProductName(), descriptor.getProductType(),
 				descriptor.getChannel(), descriptor.getMissionId(), descriptor.getSatelliteId(),
-				descriptor.getKeyObjectStorage());
+				descriptor.getKeyObjectStorage());*/
 		
 		KafkaMetadataDto dto = metadataBuilder.buildErdsSessionFileMetadata(descriptor, file);
 		

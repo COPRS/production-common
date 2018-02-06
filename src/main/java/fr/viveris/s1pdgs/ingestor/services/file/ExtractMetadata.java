@@ -3,8 +3,6 @@
  */
 package fr.viveris.s1pdgs.ingestor.services.file;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;

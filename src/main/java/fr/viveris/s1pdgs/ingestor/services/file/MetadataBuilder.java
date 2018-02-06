@@ -3,13 +3,10 @@ package fr.viveris.s1pdgs.ingestor.services.file;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
 
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
