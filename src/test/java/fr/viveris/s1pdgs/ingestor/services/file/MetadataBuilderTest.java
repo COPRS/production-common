@@ -51,7 +51,7 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		
-		JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2014-02-12T12:28:19\",\"insertionTime\":\"2018-02-07T11:08:52\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-02-01T00:00:00\",\"productName\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"productType\":\"AUX_OBMEMC\"}");
+		JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2014-02-12T12:28:19\",\"insertionTime\":\"2018-02-07T11:08:52\",\"satelliteId\":\"A\",\"validityStartTime\":\"2014-02-01T00:00:00\",\"productName\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"productType\":\"AUX_OBMEMC\",\"url\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\"}");
 		
 		KafkaMetadataDto dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 		
@@ -76,7 +76,7 @@ public class MetadataBuilderTest {
 		
 		File file = new File("erds_sessions/S1A/SESSION1/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		
-		JSONObject expectedResult = new JSONObject("{\"insertionTime\":\"2018-02-07T13:26:12\",\"sessionid\":\"SESSION1\",\"productName\":\"DCS_02_SESSION1_ch1_DSIB.xml\",\"productType\":\"SESSION\"}");
+		JSONObject expectedResult = new JSONObject("{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"SESSION1\",\"productName\":\"DCS_02_SESSION1_ch1_DSIB.xml\",\"satelliteId\":\"A\",\"productType\":\"SESSION\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\"}");
 		
 		KafkaMetadataDto dto = metadataBuilder.buildErdsSessionFileMetadata(descriptor, file);
 		assertEquals("Invalid length", expectedResult.toString().length(), dto.getMetadata().toString().length());
