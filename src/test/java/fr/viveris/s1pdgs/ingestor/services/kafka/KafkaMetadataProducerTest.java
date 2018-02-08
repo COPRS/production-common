@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -117,13 +118,14 @@ public class KafkaMetadataProducerTest {
 	/**
 	 * Test that producer send message in KAFKA
 	 * @throws InterruptedException
+	 * @throws JSONException 
 	 */
 	@Test
-	public void testSend() throws InterruptedException {
+	public void testSend() throws InterruptedException, JSONException {
 		// send the message
 		KafkaMetadataDto metadata = new KafkaMetadataDto();
 		metadata.setAction("CREATE");
-		metadata.setMetadata("Contains metadata in JSON format");
+		metadata.setMetadata("{\'test\': \'Contains metadata in JSON format\'}");
 		try {
 			senderMetadata.send(metadata);
 		} catch (CancellationException | ExecutionException e) {

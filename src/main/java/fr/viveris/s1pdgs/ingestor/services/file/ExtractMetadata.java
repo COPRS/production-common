@@ -82,7 +82,7 @@ public class ExtractMetadata {
 	 * @throws TransformerException
 	 * @throws JSONException 
 	 */
-	public String processMPLEOFFile(ConfigFileDescriptor descriptor, File file) throws IOException, URISyntaxException, TransformerException, JSONException {
+	public JSONObject processMPLEOFFile(ConfigFileDescriptor descriptor, File file) throws IOException, URISyntaxException, TransformerException, JSONException {
 		//XSLT Transformation
 		Source xsltMPLEOF = new StreamSource(new File("xsltDir/XSLT_MPL_EOF.xslt"));
         Transformer transformerMPL = transFactory.newTransformer(xsltMPLEOF);
@@ -106,7 +106,7 @@ public class ExtractMetadata {
         metadataJSONObject.put("missionid", descriptor.getMissionId());
         metadataJSONObject.put("satelliteid", descriptor.getSatelliteId());
         metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-        return metadataJSONObject.toString();
+        return metadataJSONObject;
 	}
 	
 	/**
@@ -121,7 +121,7 @@ public class ExtractMetadata {
 	 * @throws TransformerException
 	 * @throws JSONException 
 	 */
-	public String processAUXEOFFile(ConfigFileDescriptor descriptor, File file) throws IOException, URISyntaxException, TransformerException, JSONException {
+	public JSONObject processAUXEOFFile(ConfigFileDescriptor descriptor, File file) throws IOException, URISyntaxException, TransformerException, JSONException {
 		//XSLT Transformation
 		Source xsltAUXEOF = new StreamSource(new File("xsltDir/XSLT_AUX_EOF.xslt"));
         Transformer transformerAUX = transFactory.newTransformer(xsltAUXEOF);
@@ -138,7 +138,7 @@ public class ExtractMetadata {
         metadataJSONObject.put("missionid", descriptor.getMissionId());
         metadataJSONObject.put("satelliteid", descriptor.getSatelliteId());
         metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-        return metadataJSONObject.toString();
+        return metadataJSONObject;
 	}
 	
 	/**
@@ -153,7 +153,7 @@ public class ExtractMetadata {
 	 * @throws TransformerException
 	 * @throws JSONException 
 	 */
-	public String processAUXXMLFile(ConfigFileDescriptor descriptor, File file) throws IOException, URISyntaxException, TransformerException, JSONException {
+	public JSONObject processAUXXMLFile(ConfigFileDescriptor descriptor, File file) throws IOException, URISyntaxException, TransformerException, JSONException {
 		//XSLT Transformation
 		Source xsltAUXXML = new StreamSource(new File("xsltDir/XSLT_AUX_XML.xslt"));
         Transformer transformerAUX = transFactory.newTransformer(xsltAUXXML);
@@ -173,7 +173,7 @@ public class ExtractMetadata {
         metadataJSONObject.put("missionid", descriptor.getMissionId());
         metadataJSONObject.put("satelliteid", descriptor.getSatelliteId());
         metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-        return metadataJSONObject.toString();
+        return metadataJSONObject;
 	}
 	
 	/**
@@ -188,7 +188,7 @@ public class ExtractMetadata {
 	 * @throws TransformerException
 	 * @throws JSONException 
 	 */
-	public String processAUXMANIFESTFile(ConfigFileDescriptor descriptor, File file) throws IOException, URISyntaxException, TransformerException, JSONException {
+	public JSONObject processAUXMANIFESTFile(ConfigFileDescriptor descriptor, File file) throws IOException, URISyntaxException, TransformerException, JSONException {
 		//XSLT Transformation
 		Source xsltAUXMANIFEST = new StreamSource(new File("xsltDir/XSLT_AUX_MANIFEST.xslt"));
         Transformer transformerAUX = transFactory.newTransformer(xsltAUXMANIFEST);
@@ -206,7 +206,7 @@ public class ExtractMetadata {
         metadataJSONObject.put("missionid", descriptor.getMissionId());
         metadataJSONObject.put("satelliteid", descriptor.getSatelliteId());
         metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-        return metadataJSONObject.toString();
+        return metadataJSONObject;
 	}
 	
 	/**
@@ -217,13 +217,13 @@ public class ExtractMetadata {
 	 * @return the json object with extracted metadata
 	 * @throws JSONException 
 	 */
-	public String processRAWFile(ErdsSessionFileDescriptor descriptor) throws JSONException {
+	public JSONObject processRAWFile(ErdsSessionFileDescriptor descriptor) throws JSONException {
 		JSONObject metadataJSONObject = new JSONObject();
 		metadataJSONObject.put("productName", descriptor.getProductName());
 		metadataJSONObject.put("productType", descriptor.getProductType());
 		metadataJSONObject.put("sessionid", descriptor.getSessionIdentifier());
 		metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-        return metadataJSONObject.toString();
+        return metadataJSONObject;
 	}
 	
 	/**
@@ -234,12 +234,12 @@ public class ExtractMetadata {
 	 * @return the json object with extracted metadata
 	 * @throws JSONException 
 	 */
-	public String processSESSIONFile(ErdsSessionFileDescriptor descriptor) throws JSONException {
+	public JSONObject processSESSIONFile(ErdsSessionFileDescriptor descriptor) throws JSONException {
 		JSONObject metadataJSONObject = new JSONObject();
 		metadataJSONObject.put("productName", descriptor.getProductName());
 		metadataJSONObject.put("productType", descriptor.getProductType());
 		metadataJSONObject.put("sessionid", descriptor.getSessionIdentifier());
 		metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-        return metadataJSONObject.toString();
+        return metadataJSONObject;
 	}
 }

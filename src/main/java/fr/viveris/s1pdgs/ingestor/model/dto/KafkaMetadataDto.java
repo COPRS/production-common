@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.ingestor.model.dto;
 
 import java.util.Objects;
 
+
 /**
  * DTO object for publishing in topic "metadata"
  * @author Cyrielle Gailliard

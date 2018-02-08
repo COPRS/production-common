@@ -42,7 +42,7 @@ public class MetadataBuilder {
 		ExtractMetadata extractor = new ExtractMetadata();
 		if(descriptor.getProductType().equals("AUX_OBMEMC")) {
 			try {
-				metadata.setMetadata(extractor.processAUXXMLFile(descriptor, file));
+				metadata.setMetadata(extractor.processAUXXMLFile(descriptor, file).toString());
 			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -50,7 +50,7 @@ public class MetadataBuilder {
 		}
 		else if(descriptor.getProductType().equals("MPL_ORBPRE") || descriptor.getProductType().equals("MPL_ORBSCT")) {
 			try {
-				metadata.setMetadata(extractor.processMPLEOFFile(descriptor, file));
+				metadata.setMetadata(extractor.processMPLEOFFile(descriptor, file).toString());
 			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -58,7 +58,7 @@ public class MetadataBuilder {
 		}
 		else if (descriptor.getProductType().equals("AUX_RESORB")) {
 			try {
-				metadata.setMetadata(extractor.processAUXEOFFile(descriptor, file));
+				metadata.setMetadata(extractor.processAUXEOFFile(descriptor, file).toString());
 			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -66,7 +66,7 @@ public class MetadataBuilder {
 		}
 		else {
 			try {
-				metadata.setMetadata(extractor.processAUXMANIFESTFile(descriptor, file));
+				metadata.setMetadata(extractor.processAUXMANIFESTFile(descriptor, file).toString());
 			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -96,7 +96,7 @@ public class MetadataBuilder {
 		ExtractMetadata extractor = new ExtractMetadata();
 		if(descriptor.getProductType() == ErdsSessionFileType.RAW) {
 			try {
-				metadata.setMetadata(extractor.processRAWFile(descriptor));
+				metadata.setMetadata(extractor.processRAWFile(descriptor).toString());
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -104,7 +104,7 @@ public class MetadataBuilder {
 		}
 		else if(descriptor.getProductType() == ErdsSessionFileType.SESSION) {
 			try {
-				metadata.setMetadata(extractor.processSESSIONFile(descriptor));
+				metadata.setMetadata(extractor.processSESSIONFile(descriptor).toString());
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
