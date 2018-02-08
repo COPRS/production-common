@@ -30,7 +30,7 @@ ftp:
   port: 21
   username: user
   password: passwd
-  client-mode: 2
+  client-mode: 0
   local-directory: /data/local-ingestor/
   command-options:
     mget: -P -R -D
