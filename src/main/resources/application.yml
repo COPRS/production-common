@@ -10,7 +10,7 @@ logging:
   level:
     ROOT: ERROR
     org.springframework: WARN
-    fr.viveris.s1pdgs: INFO
+    fr.viveris.s1pdgs: DEBUG
     kafka: WARN
     org.apache: WARN
   file: ./s1pdgs-metadata-catalog.log
@@ -25,7 +25,7 @@ kafka:
     
 # Elastic Search
 elasticsearch:
-  host: elasticsearch-svc
+  host: es-svc
   port: 25000
   clustername: elasticsearch 
   index-type: metadata
