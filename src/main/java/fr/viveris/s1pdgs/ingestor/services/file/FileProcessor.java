@@ -111,26 +111,38 @@ public class FileProcessor {
 				KafkaMetadataDto extractedMetadata = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 				try {
 					senderMetadata.send(extractedMetadata);
+					LOGGER.info("[processConfigFile] Metadata for {} successfully sended",
+							descriptor.getRelativePath());
 				} catch (CancellationException | InterruptedException | ExecutionException e) {
 					LOGGER.error("[processConfigFile] Metadata not published in message queuing for {}",
 							descriptor.getRelativePath());
 				}
 			}
 			// Remove file
-			if (!descriptor.isDirectory()) {
+			LOGGER.info("[processConfigFile] Try for {} remove file",
+					descriptor.getRelativePath());
+			if (!file.isDirectory()) {
 				if (!file.delete()) {
 					LOGGER.error("[processConfigFile] File {} not removed from local storage",
 							descriptor.getRelativePath());
+				} else {
+					LOGGER.info("[processConfigFile] File {} successfully deleted",
+							descriptor.getRelativePath());
 				}
-			}
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Processing of configuration file {} succeeded", file.getPath());
+			} else {
+				LOGGER.info("[processConfigFile] File {} is a directory, must not remove",
+						descriptor.getRelativePath());
 			}
 		} catch (AmazonClientException ae) {
 			LOGGER.error("Processing of configuration file {} failed (step: object storage): {}", file.getPath(),
 					ae.getMessage());
 		} catch (IllegalArgumentException iae) {
-			LOGGER.error("Processing of file {} bypassed: {}", iae.getMessage());
+			LOGGER.error("Processing of configuration file {} bypassed: {}", iae.getMessage());
+		} catch (Exception e) {
+			LOGGER.error("Processing of configuration file {} failed: {}", e.getMessage());
+		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Processing of configuration file {} succeeded", file.getPath());
 		}
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("End processing of configuration file {}", file.getPath());
