@@ -2,7 +2,6 @@ package fr.viveris.s1pdgs.mdcatalog.model.dto;
 
 import java.util.Objects;
 
-import org.json.JSONObject;
 
 /**
  * DTO object for publishing in topic "metadata"
@@ -17,7 +16,7 @@ public class KafkaMetadataDto {
 	/**
 	 * Metadata to publish in JSON format
 	 */
-	private JSONObject metadata;
+	private String metadata;
 
 	/**
 	 * Default constructor
@@ -30,7 +29,7 @@ public class KafkaMetadataDto {
 	 * @param action
 	 * @param metadata
 	 */
-	public KafkaMetadataDto(String action, JSONObject metadata) {
+	public KafkaMetadataDto(String action, String metadata) {
 		this.action = action;
 		this.metadata = metadata;
 	}
@@ -53,14 +52,14 @@ public class KafkaMetadataDto {
 	/**
 	 * @return the metadata
 	 */
-	public JSONObject getMetadata() {
+	public String getMetadata() {
 		return metadata;
 	}
 
 	/**
 	 * @param metadata the metadata to set
 	 */
-	public void setMetadata(JSONObject metadata) {
+	public void setMetadata(String metadata) {
 		this.metadata = metadata;
 	}
 

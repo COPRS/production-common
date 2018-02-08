@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.mdcatalog.services.kafka;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +46,11 @@ public class KafkaConsumer {
 		// Create metadata
 		if (metadata.getAction().equals("CREATE")) {
 			try {
-				if (esServices.isMetadataExist(metadata.getMetadata())) {
-					esServices.createMetadata(metadata.getMetadata());
+				JSONObject metadataToIndex = new JSONObject(metadata.getMetadata());
+				if (esServices.isMetadataExist(metadataToIndex)) {
+					esServices.createMetadata(metadataToIndex);
 				}
-				LOGGER.info("Metadata created for {}", metadata.getMetadata().getString("productName"));
+				LOGGER.info("Metadata created for {}", metadataToIndex.getString("productName"));
 			} catch (Exception e){
 				LOGGER.error(e.getMessage());
 			}
