@@ -16,7 +16,7 @@ logging:
 
 # KAFKA
 kafka:
-  bootstrap-servers: kafka-svc:9092
+  bootstrap-servers: kafka-svc:9093
   group-id: ingestors
   poll-timeout: 3000
   topic:
@@ -26,6 +26,7 @@ kafka:
 #FTP
 ftp:
   host: input-ftpserver-svc
+  #host: 10.109.73.132
   port: 21
   username: user
   password: passwd
