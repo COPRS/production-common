@@ -103,8 +103,9 @@ public class ExtractMetadata {
         metadataJSONObject.put("productName", descriptor.getProductName());
         metadataJSONObject.put("productClass", descriptor.getProductClass());
         metadataJSONObject.put("productType", descriptor.getProductType());	        
-        metadataJSONObject.put("missionid", descriptor.getMissionId());
-        metadataJSONObject.put("satelliteid", descriptor.getSatelliteId());
+        metadataJSONObject.put("missionId", descriptor.getMissionId());
+        metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
         metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
         return metadataJSONObject;
 	}
@@ -135,8 +136,9 @@ public class ExtractMetadata {
         metadataJSONObject.put("productName", descriptor.getProductName());
         metadataJSONObject.put("productClass", descriptor.getProductClass());
         metadataJSONObject.put("productType", descriptor.getProductType());	        
-        metadataJSONObject.put("missionid", descriptor.getMissionId());
-        metadataJSONObject.put("satelliteid", descriptor.getSatelliteId());
+        metadataJSONObject.put("missionId", descriptor.getMissionId());
+        metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
         metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
         return metadataJSONObject;
 	}
@@ -170,8 +172,9 @@ public class ExtractMetadata {
         metadataJSONObject.put("productName", descriptor.getProductName());
         metadataJSONObject.put("productClass", descriptor.getProductClass());
         metadataJSONObject.put("productType", descriptor.getProductType());	        
-        metadataJSONObject.put("missionid", descriptor.getMissionId());
-        metadataJSONObject.put("satelliteid", descriptor.getSatelliteId());
+        metadataJSONObject.put("missionId", descriptor.getMissionId());
+        metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
         metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
         return metadataJSONObject;
 	}
@@ -203,8 +206,9 @@ public class ExtractMetadata {
         metadataJSONObject.put("validityStartTime", jsonFromXmlTmp.getJSONObject("validityStartTime").getString("content"));
         metadataJSONObject.put("productName", descriptor.getProductName());
         metadataJSONObject.put("productType", descriptor.getProductType());	        
-        metadataJSONObject.put("missionid", descriptor.getMissionId());
-        metadataJSONObject.put("satelliteid", descriptor.getSatelliteId());
+        metadataJSONObject.put("missionId", descriptor.getMissionId());
+        metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
         metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
         return metadataJSONObject;
 	}
@@ -221,8 +225,11 @@ public class ExtractMetadata {
 		JSONObject metadataJSONObject = new JSONObject();
 		metadataJSONObject.put("productName", descriptor.getProductName());
 		metadataJSONObject.put("productType", descriptor.getProductType());
-		metadataJSONObject.put("sessionid", descriptor.getSessionIdentifier());
-		metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+		metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
+		metadataJSONObject.put("missionId", descriptor.getMissionId());
+        metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+        metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
         return metadataJSONObject;
 	}
 	
@@ -238,8 +245,11 @@ public class ExtractMetadata {
 		JSONObject metadataJSONObject = new JSONObject();
 		metadataJSONObject.put("productName", descriptor.getProductName());
 		metadataJSONObject.put("productType", descriptor.getProductType());
-		metadataJSONObject.put("sessionid", descriptor.getSessionIdentifier());
-		metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+		metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
+		metadataJSONObject.put("missionId", descriptor.getMissionId());
+        metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+        metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
         return metadataJSONObject;
 	}
 }
