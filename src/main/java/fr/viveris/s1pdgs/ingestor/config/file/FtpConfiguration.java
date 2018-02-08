@@ -13,7 +13,7 @@ import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.config.EnableIntegration;
-import org.springframework.integration.file.filters.AcceptAllFileListFilter;
+import org.springframework.integration.file.filters.AcceptOnceFileListFilter;
 import org.springframework.integration.file.remote.session.CachingSessionFactory;
 import org.springframework.integration.file.remote.session.SessionFactory;
 import org.springframework.integration.file.support.FileExistsMode;
@@ -122,7 +122,7 @@ public class FtpConfiguration {
 	public FtpOutboundGateway gatewayConfig() {
 		FtpOutboundGateway ftpOutboundGateway = new FtpOutboundGateway(ftpSessionFactory(), "mget", "payload");
 		ftpOutboundGateway.setOptions(ftpCommandOptionsMget);
-		ftpOutboundGateway.setFilter(new AcceptAllFileListFilter<>());
+		ftpOutboundGateway.setFilter(new AcceptOnceFileListFilter<>());
 		ftpOutboundGateway.setAutoCreateLocalDirectory(true);
 		ftpOutboundGateway.setFileExistsMode(FileExistsMode.IGNORE);
 		ftpOutboundGateway.setLocalDirectoryExpression(
@@ -141,7 +141,7 @@ public class FtpConfiguration {
 	public FtpOutboundGateway gatewaySession() {
 		FtpOutboundGateway ftpOutboundGateway = new FtpOutboundGateway(ftpSessionFactory(), "mget", "payload");
 		ftpOutboundGateway.setOptions(ftpCommandOptionsMget);
-		ftpOutboundGateway.setFilter(new AcceptAllFileListFilter<>());
+		ftpOutboundGateway.setFilter(new AcceptOnceFileListFilter<>());
 		ftpOutboundGateway.setAutoCreateLocalDirectory(true);
 		ftpOutboundGateway.setFileExistsMode(FileExistsMode.IGNORE);
 		ftpOutboundGateway.setLocalDirectoryExpression(
