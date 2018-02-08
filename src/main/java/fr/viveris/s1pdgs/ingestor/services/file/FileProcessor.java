@@ -1,6 +1,8 @@
 package fr.viveris.s1pdgs.ingestor.services.file;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -122,6 +124,7 @@ public class FileProcessor {
 			LOGGER.info("[processConfigFile] Try for {} remove file",
 					descriptor.getRelativePath());
 			if (!file.isDirectory()) {
+				Files.delete(Paths.get(file.getPath()));
 				if (!file.delete()) {
 					LOGGER.error("[processConfigFile] File {} not removed from local storage",
 							descriptor.getRelativePath());
