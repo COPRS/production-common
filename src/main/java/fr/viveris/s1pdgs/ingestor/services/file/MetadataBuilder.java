@@ -39,7 +39,7 @@ public class MetadataBuilder {
 		metadata.setAction("CREATE");
 		switch (descriptor.getExtension()) {
 		case EOF:
-			if (descriptor.getProductType().equals("AUX_OBMEMC")) {
+			if (descriptor.getProductType().equals("AUX_RESORB")) {
 				metadata.setMetadata(extractor.processEOFFileWithoutNamespace(descriptor, file).toString());
 			} else {
 				metadata.setMetadata(extractor.processEOFFile(descriptor, file).toString());
