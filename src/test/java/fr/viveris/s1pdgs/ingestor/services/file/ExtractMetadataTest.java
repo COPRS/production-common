@@ -16,27 +16,30 @@ public class ExtractMetadataTest {
 	@Test
 	public void testRegexp() {
 
-		String file1 = "S1A";
-		String file2 = "S1A/L20171109175634707000125";
-		String file3 = "S1A/L20171109175634707000125/ch01";
-		String file4 = "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSIB.xml";
+		String file1 = "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE";
+		String file2 = "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/manifest.safe";
+		String file3 = "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/data";
+		String file4 = "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/support";
+		String file5 = "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/support/s1-aux-ins.xsd";
 
 		//String pattern = "^(?!\\.).*";
 		//String pattern = "(?!(\\.writing))";
 		//String pattern = "^[^\\.].*";
 		//"^([a-z0-9]){2}([a-z0-9])((/|\\\\)(\\w+)((/|\\\\)(ch)(0[1-2])((/|\\\\)(\\w*)\\4(\\w*)\\.(XML|RAW))?)?)?$";
 		//^([a-z0-9]){2}([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)(\\w*)\\4(\\w*)\\.(XML|RAW)$
-		String pattern = "^([a-z0-9]){2}([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
+		String pattern = "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
 		Pattern p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 		Matcher m1 = p.matcher(file1);
 		Matcher m2 = p.matcher(file2);
 		Matcher m3 = p.matcher(file3);
 		Matcher m4 = p.matcher(file4);
+		Matcher m5 = p.matcher(file5);
 
-		assertTrue("m1", !m1.matches());
-		assertTrue("m2", !m2.matches());
-		assertTrue("m3", !m3.matches());
+		assertTrue("m1", m1.matches());
+		assertTrue("m2", m2.matches());
+		assertTrue("m3", m3.matches());
 		assertTrue("m4", m4.matches());
+		assertTrue("m5", m5.matches());
 
 	}
 
