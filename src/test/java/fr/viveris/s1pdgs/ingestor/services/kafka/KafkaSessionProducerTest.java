@@ -6,8 +6,6 @@ import static org.springframework.kafka.test.assertj.KafkaConditions.key;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +33,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaSessionDto;
+import fr.viveris.s1pdgs.ingestor.model.exception.KafkaSessionPublicationException;
 
 /**
  * Test the producer for session files
@@ -128,7 +127,7 @@ public class KafkaSessionProducerTest {
 		session.setSessionIdentifier("L20171109175634707000125");
 		try {
 			senderSession.send(session);
-		} catch (CancellationException | ExecutionException e) {
+		} catch (KafkaSessionPublicationException e) {
 			assertFalse("Exception occurred " + e.getMessage(), false);
 		}
 		// check that the message was received

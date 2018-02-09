@@ -57,8 +57,10 @@ file:
   config-files:
     local-directory: /data/local-ingestor/config_files/ # Must contains the last /
     read-fixed-rate: 1000
+    clean-empty-directory-rate: 10000
   session-files:
     local-directory: /data/local-ingestor/erds_sessions/
     read-fixed-rate: 1000
+    clean-empty-directory-rate: 10000
 
     

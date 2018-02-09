@@ -14,6 +14,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaSessionDto;
+import fr.viveris.s1pdgs.ingestor.model.exception.KafkaSessionPublicationException;
 
 /**
  * KAFKA producer for publishing session information. </br>
@@ -47,16 +48,18 @@ public class KafkaSessionProducer {
 	 * 
 	 * @param descriptor
 	 */
-	public boolean send(KafkaSessionDto descriptor)
-			throws CancellationException, InterruptedException, ExecutionException {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[send] Send ERDS session = {}", descriptor);
+	public void send(KafkaSessionDto descriptor) throws KafkaSessionPublicationException {
+		try {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("[send] Send ERDS session = {}", descriptor);
+			}
+			kafkaSessionTemplate.send(kafkaTopic, descriptor).get();
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("[send] Success RDS session = {}", descriptor);
+			}
+		} catch (CancellationException | InterruptedException | ExecutionException e) {
+			throw new KafkaSessionPublicationException(descriptor.getProductName(), e);
 		}
-		kafkaSessionTemplate.send(kafkaTopic, descriptor).get();
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[send] Success RDS session = {}", descriptor);
-		}
-		return true;
 	}
 
 	/**
@@ -69,7 +72,8 @@ public class KafkaSessionProducer {
 			LOGGER.debug("[sendAsynchrone] Send ERDS session = {}", descriptor);
 		}
 
-		ListenableFuture<SendResult<String, KafkaSessionDto>> future = kafkaSessionTemplate.send(kafkaTopic, descriptor.getSessionIdentifier(), descriptor);
+		ListenableFuture<SendResult<String, KafkaSessionDto>> future = kafkaSessionTemplate.send(kafkaTopic,
+				descriptor.getSessionIdentifier(), descriptor);
 
 		// We register a callback to verify whether the messages are sent to the topic
 		// successfully or not

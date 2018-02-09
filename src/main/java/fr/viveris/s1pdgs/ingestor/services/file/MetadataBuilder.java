@@ -1,18 +1,11 @@
 package fr.viveris.s1pdgs.ingestor.services.file;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import javax.xml.transform.TransformerException;
-
-import org.json.JSONException;
-import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileDescriptor;
-import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileType;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
+import fr.viveris.s1pdgs.ingestor.model.exception.MetadataExtractionException;
 
 /**
  * Class to build metadata for configuration and ERDS session files
@@ -20,8 +13,17 @@ import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
  * @author Cyrielle Gailliard
  *
  */
-@Service
 public class MetadataBuilder {
+	
+	private ExtractMetadata extractor;
+	
+	public MetadataBuilder() {
+		this(new ExtractMetadata());
+	}
+	
+	public MetadataBuilder(ExtractMetadata extractor) {
+		this.extractor = extractor;
+	}
 
 	/**
 	 * Build metadata from configuration files
@@ -29,50 +31,29 @@ public class MetadataBuilder {
 	 * @param descriptor
 	 * @param file
 	 * @return
+	 * @throws MetadataExtractionException
 	 */
-	// TODO (throw an exceptionif error)
-	public KafkaMetadataDto buildConfigFileMetadata(ConfigFileDescriptor descriptor, File file) {
-		/*String info = String.format(
-				"{'productName': %s, 'productClass': %s, 'productType': %s, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
-				descriptor.getProductName(), descriptor.getProductClass(), descriptor.getProductType(), descriptor.getMissionId(), descriptor.getSatelliteId(),
-				descriptor.getKeyObjectStorage());*/
+	public KafkaMetadataDto buildConfigFileMetadata(ConfigFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
 		KafkaMetadataDto metadata = new KafkaMetadataDto();
 		metadata.setAction("CREATE");
-		metadata.setMetadata(null);
-		ExtractMetadata extractor = new ExtractMetadata();
-		if(descriptor.getProductType().equals("AUX_OBMEMC")) {
-			try {
-				metadata.setMetadata(extractor.processAUXXMLFile(descriptor, file).toString());
-			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		switch (descriptor.getExtension()) {
+		case EOF:
+			if (descriptor.getProductType().equals("AUX_OBMEMC")) {
+				metadata.setMetadata(extractor.processEOFFileWithoutNamespace(descriptor, file).toString());
+			} else {
+				metadata.setMetadata(extractor.processEOFFile(descriptor, file).toString());
 			}
+			break;
+		case SAFE:
+			metadata.setMetadata(extractor.processSAFEFile(descriptor, file).toString());
+			break;
+		case XML:
+			metadata.setMetadata(extractor.processXMLFile(descriptor, file).toString());
+			break;
+		default:
+			throw new MetadataExtractionException(descriptor.getProductName(), new Exception("Invalid extension"));
 		}
-		else if(descriptor.getProductType().equals("MPL_ORBPRE") || descriptor.getProductType().equals("MPL_ORBSCT")) {
-			try {
-				metadata.setMetadata(extractor.processMPLEOFFile(descriptor, file).toString());
-			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else if (descriptor.getProductType().equals("AUX_RESORB")) {
-			try {
-				metadata.setMetadata(extractor.processAUXEOFFile(descriptor, file).toString());
-			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else {
-			try {
-				metadata.setMetadata(extractor.processAUXMANIFESTFile(descriptor, file).toString());
-			} catch (IOException | URISyntaxException | TransformerException | JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
 		return metadata;
 	}
 
@@ -82,33 +63,22 @@ public class MetadataBuilder {
 	 * @param descriptor
 	 * @param file
 	 * @return
+	 * @throws MetadataExtractionException
 	 */
-	// TODO (throw an exceptionif error)
-	public KafkaMetadataDto buildErdsSessionFileMetadata(ErdsSessionFileDescriptor descriptor, File file) {
-		/*String info = String.format(
-				"{ 'sessionIdentifier': %s, 'productName': %s, 'productType': %s, 'channel': %d, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
-				descriptor.getSessionIdentifier(), descriptor.getProductName(), descriptor.getProductType(),
-				descriptor.getChannel(), descriptor.getMissionId(), descriptor.getSatelliteId(),
-				descriptor.getKeyObjectStorage());*/
+	public KafkaMetadataDto buildErdsSessionFileMetadata(ErdsSessionFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
 		KafkaMetadataDto metadata = new KafkaMetadataDto();
 		metadata.setAction("CREATE");
 		metadata.setMetadata(null);
-		ExtractMetadata extractor = new ExtractMetadata();
-		if(descriptor.getProductType() == ErdsSessionFileType.RAW) {
-			try {
-				metadata.setMetadata(extractor.processRAWFile(descriptor).toString());
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else if(descriptor.getProductType() == ErdsSessionFileType.SESSION) {
-			try {
-				metadata.setMetadata(extractor.processSESSIONFile(descriptor).toString());
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		switch (descriptor.getProductType()) {
+		case RAW:
+			metadata.setMetadata(extractor.processRAWFile(descriptor).toString());
+			break;
+		case SESSION:
+			metadata.setMetadata(extractor.processSESSIONFile(descriptor).toString());
+			break;
+		default:
+			throw new MetadataExtractionException(descriptor.getProductName(), new Exception("Invalid extension"));
 		}
 		return metadata;
 	}

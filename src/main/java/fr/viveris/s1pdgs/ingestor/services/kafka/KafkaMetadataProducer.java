@@ -14,6 +14,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
+import fr.viveris.s1pdgs.ingestor.model.exception.KafkaMetadataPublicationException;
 
 /**
  * KAFKA producer for publishing metadata. </br>
@@ -45,18 +46,21 @@ public class KafkaMetadataProducer {
 	 * Send a message to a topic and wait until one is published
 	 * 
 	 * @param customer
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public boolean send(KafkaMetadataDto metadataCrud) throws CancellationException, InterruptedException, ExecutionException {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[send] Send metadata = {}", metadataCrud);
+	public void send(KafkaMetadataDto metadataCrud) throws KafkaMetadataPublicationException {
+		try {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("[send] Send metadata = {}", metadataCrud);
+			}
+			kafkaMetadataTemplate.send(kafkaTopic, metadataCrud).get();
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("[send] Success metadata = {}", metadataCrud);
+			}
+		} catch (CancellationException | InterruptedException | ExecutionException e) {
+			throw new KafkaMetadataPublicationException(metadataCrud.getMetadata(), e);
 		}
-		kafkaMetadataTemplate.send(kafkaTopic, metadataCrud).get();
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[send] Success metadata = {}", metadataCrud);
-		}
-		return true;
 	}
 
 	/**
@@ -69,7 +73,8 @@ public class KafkaMetadataProducer {
 			LOGGER.debug("[sendAsynchrone] Send metadata = {}", metadataCrud);
 		}
 
-		ListenableFuture<SendResult<String, KafkaMetadataDto>> future = kafkaMetadataTemplate.send(kafkaTopic, metadataCrud);
+		ListenableFuture<SendResult<String, KafkaMetadataDto>> future = kafkaMetadataTemplate.send(kafkaTopic,
+				metadataCrud);
 
 		// We register a callback to verify whether the messages are sent to the topic
 		// successfully or not

@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.ingestor.config.file;
 
 import java.io.File;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,8 @@ import org.springframework.integration.file.RecursiveDirectoryScanner;
 import org.springframework.integration.file.filters.AcceptOnceFileListFilter;
 import org.springframework.integration.file.filters.ChainFileListFilter;
 import org.springframework.messaging.MessageChannel;
+
+import fr.viveris.s1pdgs.ingestor.model.filter.ExclusionRegexpPatternFileListFilter;
 
 /**
  * Configuration class which defined the flows to recursively read the ERDS
@@ -41,6 +44,8 @@ public class FileReaderConfig {
 	@Value("${file.config-files.local-directory}")
 	public String configLocalDirectory;
 
+	private final static String PATTERN_EXCLUSION = "^.*\\.writing$";
+
 	/**
 	 * Channel for configuration files
 	 * 
@@ -52,8 +57,8 @@ public class FileReaderConfig {
 	}
 
 	/**
-	 * Bean which recursively and periodically scan the local directory of configuration file and
-	 * send the flow in the configFileChannel
+	 * Bean which recursively and periodically scan the local directory of
+	 * configuration file and send the flow in the configFileChannel
 	 * 
 	 * @return a message per file/directory
 	 */
@@ -61,7 +66,8 @@ public class FileReaderConfig {
 	@InboundChannelAdapter(value = "configFileChannel", poller = @Poller(fixedRate = "${file.config-files.read-fixed-rate}"))
 	public MessageSource<File> configFileReadingMessageSource() {
 		ChainFileListFilter<File> filter = new ChainFileListFilter<File>();
-		filter.addFilter(new AcceptOnceFileListFilter<>());
+		filter.addFilter(
+				new ExclusionRegexpPatternFileListFilter(Pattern.compile(PATTERN_EXCLUSION, Pattern.CASE_INSENSITIVE)));
 		RecursiveDirectoryScanner scanner = new RecursiveDirectoryScanner();
 		scanner.setFilter(filter);
 
@@ -94,8 +100,8 @@ public class FileReaderConfig {
 	}
 
 	/**
-	 * Bean which recursively and periodically scan the local directory of ERDS session file and send
-	 * the flow in the sessionFileChannel
+	 * Bean which recursively and periodically scan the local directory of ERDS
+	 * session file and send the flow in the sessionFileChannel
 	 * 
 	 * @return a message per file/directory
 	 */
@@ -103,7 +109,10 @@ public class FileReaderConfig {
 	@InboundChannelAdapter(value = "sessionFileChannel", poller = @Poller(fixedRate = "${file.session-files.read-fixed-rate}"))
 	public MessageSource<File> sessionFileReadingMessageSource() {
 		ChainFileListFilter<File> filter = new ChainFileListFilter<File>();
+		filter.addFilter(
+				new ExclusionRegexpPatternFileListFilter(Pattern.compile(PATTERN_EXCLUSION, Pattern.CASE_INSENSITIVE)));
 		filter.addFilter(new AcceptOnceFileListFilter<>());
+		
 		RecursiveDirectoryScanner scanner = new RecursiveDirectoryScanner();
 		scanner.setFilter(filter);
 

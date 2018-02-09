@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.ingestor.config.file;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -14,9 +15,11 @@ import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.file.filters.AcceptOnceFileListFilter;
+import org.springframework.integration.file.filters.ChainFileListFilter;
 import org.springframework.integration.file.remote.session.CachingSessionFactory;
 import org.springframework.integration.file.remote.session.SessionFactory;
 import org.springframework.integration.file.support.FileExistsMode;
+import org.springframework.integration.ftp.filters.FtpRegexPatternFileListFilter;
 import org.springframework.integration.ftp.gateway.FtpOutboundGateway;
 import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
 
@@ -79,6 +82,10 @@ public class FtpConfiguration {
 	@Value("${ftp.command-options.mget}")
 	private String ftpCommandOptionsMget;
 
+	private final static String PATTERN_CONFIG = "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
+	
+	//private final static String PATTERN_SESSION = "^([a-z0-9]){2}([a-z0-9])((/|\\\\)(\\w+))?((/|\\\\)(ch)(0[1-2]))?((/|\\\\)(\\w*)\\4(\\w*)\\.(XML|RAW))?$";
+
 	/**
 	 * FTP session factory to defined the FTP server and client configuration
 	 * 
@@ -115,14 +122,18 @@ public class FtpConfiguration {
 	 * FTP Outbound gateway which retrieve configuration files via the MGET command
 	 * and send files in the channel fetchConfigRecursive
 	 * 
-	 * @return
+	 * @return ^[^\\.].*
 	 */
 	@Bean
 	@ServiceActivator(inputChannel = "fetchConfigRecursive")
 	public FtpOutboundGateway gatewayConfig() {
+		ChainFileListFilter<FTPFile> filter = new ChainFileListFilter<FTPFile>();
+		filter.addFilter(new AcceptOnceFileListFilter<>());
+		filter.addFilter(new FtpRegexPatternFileListFilter(Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE)));
+		
 		FtpOutboundGateway ftpOutboundGateway = new FtpOutboundGateway(ftpSessionFactory(), "mget", "payload");
 		ftpOutboundGateway.setOptions(ftpCommandOptionsMget);
-		ftpOutboundGateway.setFilter(new AcceptOnceFileListFilter<>());
+		ftpOutboundGateway.setFilter(filter);
 		ftpOutboundGateway.setAutoCreateLocalDirectory(true);
 		ftpOutboundGateway.setFileExistsMode(FileExistsMode.IGNORE);
 		ftpOutboundGateway.setLocalDirectoryExpression(
@@ -139,9 +150,13 @@ public class FtpConfiguration {
 	@Bean
 	@ServiceActivator(inputChannel = "fetchSessionRecursive")
 	public FtpOutboundGateway gatewaySession() {
+		ChainFileListFilter<FTPFile> filter = new ChainFileListFilter<FTPFile>();
+		filter.addFilter(new AcceptOnceFileListFilter<>());
+		//filter.addFilter(new FtpRegexPatternFileListFilter(Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE)));
+		
 		FtpOutboundGateway ftpOutboundGateway = new FtpOutboundGateway(ftpSessionFactory(), "mget", "payload");
 		ftpOutboundGateway.setOptions(ftpCommandOptionsMget);
-		ftpOutboundGateway.setFilter(new AcceptOnceFileListFilter<>());
+		ftpOutboundGateway.setFilter(filter);
 		ftpOutboundGateway.setAutoCreateLocalDirectory(true);
 		ftpOutboundGateway.setFileExistsMode(FileExistsMode.IGNORE);
 		ftpOutboundGateway.setLocalDirectoryExpression(

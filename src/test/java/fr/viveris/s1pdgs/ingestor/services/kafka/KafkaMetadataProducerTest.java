@@ -6,8 +6,6 @@ import static org.springframework.kafka.test.assertj.KafkaConditions.key;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -36,9 +34,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
+import fr.viveris.s1pdgs.ingestor.model.exception.KafkaMetadataPublicationException;
 
 /**
  * Test the producer of metadata
+ * 
  * @author Cyrielle Gailliard
  *
  */
@@ -46,11 +46,10 @@ import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
 @SpringBootTest
 @DirtiesContext
 public class KafkaMetadataProducerTest {
-	
+
 	// Logger
-	private static final Logger LOGGER =
-		      LoggerFactory.getLogger(KafkaMetadataProducerTest.class);
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaMetadataProducerTest.class);
+
 	// Topic
 	private final static String SENDER_TOPIC = "t-pdgs-metadata";
 
@@ -69,6 +68,7 @@ public class KafkaMetadataProducerTest {
 
 	/**
 	 * Test set up
+	 * 
 	 * @throws Exception
 	 */
 	@Before
@@ -94,7 +94,7 @@ public class KafkaMetadataProducerTest {
 		container.setupMessageListener(new MessageListener<String, KafkaMetadataDto>() {
 			@Override
 			public void onMessage(ConsumerRecord<String, KafkaMetadataDto> record) {
-				LOGGER.debug("test-listener received message={}",record.toString());
+				LOGGER.debug("test-listener received message={}", record.toString());
 				records.add(record);
 			}
 		});
@@ -117,8 +117,9 @@ public class KafkaMetadataProducerTest {
 
 	/**
 	 * Test that producer send message in KAFKA
+	 * 
 	 * @throws InterruptedException
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	@Test
 	public void testSend() throws InterruptedException, JSONException {
@@ -128,7 +129,7 @@ public class KafkaMetadataProducerTest {
 		metadata.setMetadata("{\'test\': \'Contains metadata in JSON format\'}");
 		try {
 			senderMetadata.send(metadata);
-		} catch (CancellationException | ExecutionException e) {
+		} catch (KafkaMetadataPublicationException e) {
 			assertFalse("Exception occurred " + e.getMessage(), false);
 		}
 		// check that the message was received
