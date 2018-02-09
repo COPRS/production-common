@@ -47,7 +47,7 @@ public class KafkaConsumer {
 		if (metadata.getAction().equals("CREATE")) {
 			try {
 				JSONObject metadataToIndex = new JSONObject(metadata.getMetadata());
-				if (esServices.isMetadataExist(metadataToIndex)) {
+				if (!esServices.isMetadataExist(metadataToIndex)) {
 					esServices.createMetadata(metadataToIndex);
 				}
 				LOGGER.info("Metadata created for {}", metadataToIndex.getString("productName"));

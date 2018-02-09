@@ -27,5 +27,4 @@ kafka:
 elasticsearch:
   host: es-svc
   port: 25000
-  clustername: elasticsearch 
   index-type: metadata
