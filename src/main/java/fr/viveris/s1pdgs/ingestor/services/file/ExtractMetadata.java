@@ -57,12 +57,6 @@ public class ExtractMetadata {
 		this.transFactory = TransformerFactory.newInstance();
 		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	}
-	
-	public boolean testMatch(String pattern, String str) {
-		Pattern p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-		Matcher m = p.matcher(str);
-		return m.matches();
-	}
 
 	/**
 	 * Tool function which returns the content of a file
