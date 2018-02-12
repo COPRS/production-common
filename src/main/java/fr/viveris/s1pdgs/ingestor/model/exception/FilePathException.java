@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.ingestor.model.exception;
 
-public class FilePathException extends FileException {
+public class FilePathException extends FileTerminatedException {
 	
 	private static final long serialVersionUID = 2694835373130815240L;
 	

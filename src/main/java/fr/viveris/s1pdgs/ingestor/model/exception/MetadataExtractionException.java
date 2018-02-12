@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.ingestor.model.exception;
 
-public class MetadataExtractionException extends FileException {
+public class MetadataExtractionException extends FileTerminatedException {
 
 	private static final long serialVersionUID = 2134771514034032034L;
 	

@@ -9,10 +9,10 @@ spring:
 logging:
   level:
     ROOT: ERROR
-    org.springframework: INFO
-    fr.viveris.s1pdgs: DEBUG
+    org.springframework: WARN
+    fr.viveris.s1pdgs: INFO
     kafka: WARN
-  file: ./application.log
+  file: ./s1pdgs-ingestor-test.log
 
 # KAFKA
 kafka:
@@ -35,10 +35,12 @@ ftp:
     mget: -P -R -D
   config-files:
     remote-directory: /config_files/
-    upload-fixed-rate: 10000
+    upload-fixed-rate: 3000
+    cache-max-capacity: 10
   session-files:
     remote-directory: /erds_sessions/
-    upload-fixed-rate: 10000
+    upload-fixed-rate: 5000
+    cache-max-capacity: 70
  
 #Object Storage
 storage:
@@ -51,16 +53,19 @@ storage:
     config-files: config-files
     session-files: session-files
  
- 
 # File
 file:
   config-files:
     local-directory: /data/local-ingestor/config_files/ # Must contains the last /
     read-fixed-rate: 1000
     clean-empty-directory-rate: 10000
+    clean-empty-min-age: 13000
+    cache-max-capacity: 10
   session-files:
     local-directory: /data/local-ingestor/erds_sessions/
     read-fixed-rate: 1000
     clean-empty-directory-rate: 10000
+    clean-empty-min-age: 13000
+    cache-max-capacity: 70
 
     

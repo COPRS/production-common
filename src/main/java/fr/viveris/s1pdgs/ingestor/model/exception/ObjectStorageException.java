@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.ingestor.model.exception;
 
-public class ObjectStorageException extends FileException {
+public class ObjectStorageException extends FileRuntimeException {
 	
 	private static final long serialVersionUID = -3680895691846942569L;
 

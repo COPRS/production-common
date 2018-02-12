@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.ingestor.model.exception;
 
-public class KafkaMetadataPublicationException extends FileException {
+public class KafkaMetadataPublicationException extends FileTerminatedException {
 
 	private static final long serialVersionUID = -7410398897010397040L;
 

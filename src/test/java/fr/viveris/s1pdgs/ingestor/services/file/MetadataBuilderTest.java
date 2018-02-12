@@ -13,17 +13,23 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileType;
 import fr.viveris.s1pdgs.ingestor.model.FileExtension;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
-import fr.viveris.s1pdgs.ingestor.model.exception.FileException;
+import fr.viveris.s1pdgs.ingestor.model.exception.AbstractFileException;
 import fr.viveris.s1pdgs.ingestor.model.exception.MetadataExtractionException;
-import fr.viveris.s1pdgs.ingestor.model.exception.TestFileException;
 
 public class MetadataBuilderTest {
+
+	/**
+	 * Logger
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(MetadataBuilderTest.class);
 
 	@Mock
 	private ExtractMetadata extractor;
@@ -38,7 +44,7 @@ public class MetadataBuilderTest {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				throw new TestFileException(e.getMessage());
+				LOGGER.error(e.getMessage());
 			}
 			return result;
 		}).when(extractor).processEOFFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
@@ -49,7 +55,7 @@ public class MetadataBuilderTest {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				throw new TestFileException(e.getMessage());
+				LOGGER.error(e.getMessage());
 			}
 			return result;
 		}).when(extractor).processEOFFileWithoutNamespace(Mockito.any(ConfigFileDescriptor.class),
@@ -61,7 +67,7 @@ public class MetadataBuilderTest {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				throw new TestFileException(e.getMessage());
+				LOGGER.error(e.getMessage());
 			}
 			return result;
 		}).when(extractor).processXMLFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
@@ -72,7 +78,7 @@ public class MetadataBuilderTest {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				throw new TestFileException(e.getMessage());
+				LOGGER.error(e.getMessage());
 			}
 			return result;
 		}).when(extractor).processSAFEFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
@@ -83,7 +89,7 @@ public class MetadataBuilderTest {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				throw new TestFileException(e.getMessage());
+				LOGGER.error(e.getMessage());
 			}
 			return result;
 		}).when(extractor).processRAWFile(Mockito.any(ErdsSessionFileDescriptor.class));
@@ -94,7 +100,7 @@ public class MetadataBuilderTest {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				throw new TestFileException(e.getMessage());
+				LOGGER.error(e.getMessage());
 			}
 			return result;
 		}).when(extractor).processSESSIONFile(Mockito.any(ErdsSessionFileDescriptor.class));
@@ -104,10 +110,8 @@ public class MetadataBuilderTest {
 	public void testBuildConfigFileMetadataXml() throws JSONException, MetadataExtractionException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
-		descriptor.setDirectory(false);
 		descriptor.setExtension(FileExtension.XML);
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		descriptor.setHasToBeStored(true);
 		descriptor.setHasToExtractMetadata(true);
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setMissionId("S1");
@@ -134,7 +138,7 @@ public class MetadataBuilderTest {
 			assertEquals("Action should be CREATE", "CREATE", dto.getAction());
 			assertNotNull("Metadata should not be null", dto.getMetadata());
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.getMetadata());
-		} catch (FileException fe) {
+		} catch (AbstractFileException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -150,9 +154,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessSESSIONFile(null);
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
-		descriptor.setDirectory(false);
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		descriptor.setHasToBeStored(true);
 		descriptor.setHasToExtractMetadata(true);
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setMissionId("S1");
@@ -237,7 +239,7 @@ public class MetadataBuilderTest {
 			assertEquals("Action should be CREATE", "CREATE", dto.getAction());
 			assertNotNull("Metadata should not be null", dto.getMetadata());
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.getMetadata());
-		} catch (FileException fe) {
+		} catch (AbstractFileException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}

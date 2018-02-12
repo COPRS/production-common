@@ -7,10 +7,11 @@ spring:
     
 # Logging
 logging:
+  config: logback-spring.xml
   level:
     ROOT: ERROR
     org.springframework: ERROR
-    fr.viveris.s1pdgs: INFO
+    fr.viveris.s1pdgs: DEBUG
     kafka: WARN
   file: ./s1pdgs-ingestor.log
 
@@ -18,7 +19,7 @@ logging:
 kafka:
   bootstrap-servers: kafka-svc:9093
   group-id: ingestors
-  poll-timeout: 3000
+  poll-timeout: 500
   topic:
     metadata: t-pdgs-metadata
     sessions: t-pdgs-sessions
@@ -35,18 +36,20 @@ ftp:
     mget: -P -R -D
   config-files:
     remote-directory: /config_files/
-    upload-fixed-rate: 1000
+    upload-fixed-rate: 3000
+    cache-max-capacity: 10
   session-files:
-    remote-directory: /erds_sessions/
-    upload-fixed-rate: 1000
+    remote-directory: /edrs_sessions/
+    upload-fixed-rate: 5000
+    cache-max-capacity: 70
  
 #Object Storage
 storage:
   user:
-    id: MEF5PCBPTXHKOUTCKW3G
-    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
-  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
-  region: eu-west-0
+    id: 
+    secret: 
+  endpoint: 
+  region: 
   buckets:
     config-files: config-files
     session-files: session-files
@@ -57,8 +60,12 @@ file:
   config-files:
     local-directory: /data/local-ingestor/config_files/ # Must contains the last /
     read-fixed-rate: 1000
-    clean-empty-directory-rate: 10000
+    clean-empty-directory-rate: 15000
+    clean-empty-min-age: 13000
+    cache-max-capacity: 10
   session-files:
-    local-directory: /data/local-ingestor/erds_sessions/ # Must contains the last /
+    local-directory: /data/local-ingestor/edrs_sessions/ # Must contains the last /
     read-fixed-rate: 1000
-    clean-empty-directory-rate: 10000
+    clean-empty-directory-rate: 15000
+    clean-empty-min-age: 13000
+    cache-max-capacity: 70

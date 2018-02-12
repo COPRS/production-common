@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.ingestor.model.exception;
 
-public class KafkaSessionPublicationException extends FileException {
+public class KafkaSessionPublicationException extends FileTerminatedException {
 
 	private static final long serialVersionUID = 4003353404276591615L;
 

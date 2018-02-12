@@ -35,6 +35,16 @@ import org.springframework.integration.ftp.session.DefaultFtpSessionFactory;
 @EnableIntegration
 public class FtpConfiguration {
 
+	/**
+	 * Pattern to limit configuration files to download
+	 */
+	private final static String PATTERN_CONFIG = "^(manifest\\.safe)|(support)|(data)|(([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE))|(.*\\.xml)|(.*\\.xsd)$";
+	
+	/**
+	 * Pattern to limit ERDS session files to download
+	 */
+	private final static String PATTERN_SESSION = "^.*\\.(XML|RAW)$";
+
 	// FTP server configuration
 	// -------------------------------------
 
@@ -81,10 +91,18 @@ public class FtpConfiguration {
 	 */
 	@Value("${ftp.command-options.mget}")
 	private String ftpCommandOptionsMget;
-
-	private final static String PATTERN_CONFIG = "^(([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE))|(manifest\\.safe)|(.*\\.xml)|(.*\\.xsd)$";
 	
-	//private final static String PATTERN_SESSION = "^([a-z0-9]){2}([a-z0-9])((/|\\\\)(\\w+))?((/|\\\\)(ch)(0[1-2]))?((/|\\\\)(\\w*)\\4(\\w*)\\.(XML|RAW))?$";
+	/**
+	 * Maximal number of session file name cached
+	 */
+	@Value("${file.session-files.cache-max-capacity}")
+	private int sessionCacheMaxCapacity;
+	
+	/**
+	 * Maximal number of configuration file name cached
+	 */
+	@Value("${file.config-files.cache-max-capacity}")
+	private int configCacheMaxCapacity;
 
 	/**
 	 * FTP session factory to defined the FTP server and client configuration
@@ -129,13 +147,14 @@ public class FtpConfiguration {
 	public FtpOutboundGateway gatewayConfig() {
 		ChainFileListFilter<FTPFile> filter = new ChainFileListFilter<FTPFile>();
 		FtpRegexPatternFileListFilter patternFilter = new FtpRegexPatternFileListFilter(Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
-		patternFilter.setAlwaysAcceptDirectories(true);
-		filter.addFilter(new AcceptOnceFileListFilter<>());
+		//patternFilter.setAlwaysAcceptDirectories(true);
+		filter.addFilter(new AcceptOnceFileListFilter<>(this.configCacheMaxCapacity));
 		filter.addFilter(patternFilter);
 		
 		FtpOutboundGateway ftpOutboundGateway = new FtpOutboundGateway(ftpSessionFactory(), "mget", "payload");
 		ftpOutboundGateway.setOptions(ftpCommandOptionsMget);
 		ftpOutboundGateway.setFilter(filter);
+		ftpOutboundGateway.setFileExistsMode(FileExistsMode.REPLACE_IF_MODIFIED);
 		ftpOutboundGateway.setAutoCreateLocalDirectory(true);
 		ftpOutboundGateway.setFileExistsMode(FileExistsMode.IGNORE);
 		ftpOutboundGateway.setLocalDirectoryExpression(
@@ -153,8 +172,10 @@ public class FtpConfiguration {
 	@ServiceActivator(inputChannel = "fetchSessionRecursive")
 	public FtpOutboundGateway gatewaySession() {
 		ChainFileListFilter<FTPFile> filter = new ChainFileListFilter<FTPFile>();
-		filter.addFilter(new AcceptOnceFileListFilter<>());
-		//filter.addFilter(new FtpRegexPatternFileListFilter(Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE)));
+		FtpRegexPatternFileListFilter patternFilter = new FtpRegexPatternFileListFilter(Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
+		patternFilter.setAlwaysAcceptDirectories(true);
+		filter.addFilter(new AcceptOnceFileListFilter<>(this.sessionCacheMaxCapacity));
+		filter.addFilter(patternFilter);
 		
 		FtpOutboundGateway ftpOutboundGateway = new FtpOutboundGateway(ftpSessionFactory(), "mget", "payload");
 		ftpOutboundGateway.setOptions(ftpCommandOptionsMget);

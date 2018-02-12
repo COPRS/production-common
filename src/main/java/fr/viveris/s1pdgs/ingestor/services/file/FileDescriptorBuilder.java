@@ -22,9 +22,12 @@ public class FileDescriptorBuilder {
 	/**
 	 * Pattern for configuration files to extract data
 	 */
-	private final static String PATTERN_CONFIG = "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
+	private final Pattern patternConfig;
 
-	private final static String PATTERN_SESSION = "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
+	/**
+	 * Pattern for configuration files to extract data
+	 */
+	private final Pattern patternSession;
 
 	/**
 	 * Local directory for configuration files
@@ -36,12 +39,31 @@ public class FileDescriptorBuilder {
 	 */
 	private final String sessionLocalDirectory;
 
-	public FileDescriptorBuilder(final String configLocalDirectory, final String sessionLocalDirectory) {
+	/**
+	 * Constructor
+	 * 
+	 * @param configLocalDirectory
+	 * @param sessionLocalDirectory
+	 * @param patternConfig
+	 * @param patternSession
+	 */
+	public FileDescriptorBuilder(final String configLocalDirectory, final String sessionLocalDirectory,
+			final Pattern patternConfig, final Pattern patternSession) {
 		this.configLocalDirectory = configLocalDirectory;
 		this.sessionLocalDirectory = sessionLocalDirectory;
+		this.patternConfig = patternConfig;
+		this.patternSession = patternSession;
 	}
 
-	public ConfigFileDescriptor buildConfigFileDescriptor(File file) throws FilePathException {
+	/**
+	 * Build descriptor for configuration files from path file
+	 * 
+	 * @param file
+	 * @return
+	 * @throws FilePathException
+	 *             if we have
+	 */
+	public ConfigFileDescriptor buildConfigFileDescriptor(File file) throws FilePathException, IgnoredFileException {
 
 		// Extract object storage key
 		String absolutePath = file.getAbsolutePath();
@@ -51,10 +73,14 @@ public class FileDescriptorBuilder {
 		String relativePath = absolutePath.substring(configLocalDirectory.length());
 		relativePath = relativePath.replace("\\", "/");
 
+		// Ignored if directory
+		if (file.isDirectory()) {
+			throw new IgnoredFileException(relativePath);
+		}
+
 		// Check if key matches the pattern
 		ConfigFileDescriptor configFile = null;
-		Pattern p = Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE);
-		Matcher m = p.matcher(relativePath);
+		Matcher m = patternConfig.matcher(relativePath);
 		if (m.matches()) {
 			// Extract product name
 			String productName = relativePath;
@@ -82,18 +108,8 @@ public class FileDescriptorBuilder {
 			configFile.setProductType(m.group(5));
 			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));
 			configFile.setHasToExtractMetadata(false);
-			if (isRoot && configFile.getExtension() != FileExtension.SAFE) {
+			if (isRoot || filename.equalsIgnoreCase("manifest.safe")) {
 				configFile.setHasToExtractMetadata(true);
-			}
-			if (!isRoot && filename.equalsIgnoreCase("manifest.safe")) {
-				configFile.setHasToExtractMetadata(true);
-			}
-			if (file.isDirectory()) {
-				configFile.setDirectory(true);
-				configFile.setHasToBeStored(false);
-			} else {
-				configFile.setDirectory(false);
-				configFile.setHasToBeStored(true);
 			}
 
 		} else {
@@ -118,8 +134,8 @@ public class FileDescriptorBuilder {
 		if (file.isDirectory()) {
 			throw new IgnoredFileException(relativePath);
 		}
-		Pattern p = Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE);
-		Matcher m = p.matcher(relativePath);
+
+		Matcher m = patternSession.matcher(relativePath);
 		if (m.matches()) {
 			// Ignore the IIF files
 			if (m.group(11).toLowerCase().contains("iif_")) {
@@ -136,7 +152,7 @@ public class FileDescriptorBuilder {
 			descriptor.setSatelliteId(m.group(2));
 			descriptor.setChannel(Integer.parseInt(m.group(7)));
 			descriptor.setSessionIdentifier(m.group(4));
-			descriptor.setKeyObjectStorage(m.group(4)+m.group(5)+m.group(6)+m.group(7)+m.group(8)+m.group(9));
+			descriptor.setKeyObjectStorage(relativePath);
 
 			return descriptor;
 		} else {

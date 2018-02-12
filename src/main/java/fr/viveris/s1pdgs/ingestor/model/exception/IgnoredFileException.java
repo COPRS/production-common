@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.ingestor.model.exception;
 
-public class IgnoredFileException extends FileException {
+public class IgnoredFileException extends FileTerminatedException {
 
 	private static final long serialVersionUID = 6432844848252714971L;
 

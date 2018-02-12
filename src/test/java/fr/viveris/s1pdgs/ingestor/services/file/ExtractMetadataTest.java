@@ -46,10 +46,8 @@ public class ExtractMetadataTest {
 	@Test
 	public void testProcessXMLFile() {
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
-		descriptor.setDirectory(false);
 		descriptor.setExtension(FileExtension.XML);
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		descriptor.setHasToBeStored(true);
 		descriptor.setHasToExtractMetadata(true);
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setMissionId("S1");

@@ -26,16 +26,6 @@ public class ConfigFileDescriptor extends AbstractFileDescriptor {
 	private boolean hasToExtractMetadata;
 
 	/**
-	 * True if has to be stored in object storage
-	 */
-	private boolean hasToBeStored;
-
-	/**
-	 * True if a directory
-	 */
-	private boolean isDirectory;
-
-	/**
 	 * Default constructor
 	 */
 	public ConfigFileDescriptor() {
@@ -88,43 +78,13 @@ public class ConfigFileDescriptor extends AbstractFileDescriptor {
 	}
 
 	/**
-	 * @return the hasToBeStored
-	 */
-	public boolean isHasToBeStored() {
-		return hasToBeStored;
-	}
-
-	/**
-	 * @param hasToBeStored
-	 *            the hasToBeStored to set
-	 */
-	public void setHasToBeStored(boolean hasToBeStored) {
-		this.hasToBeStored = hasToBeStored;
-	}
-
-	/**
-	 * @return the isDirectory
-	 */
-	public boolean isDirectory() {
-		return isDirectory;
-	}
-
-	/**
-	 * @param isDirectory
-	 *            the isDirectory to set
-	 */
-	public void setDirectory(boolean isDirectory) {
-		this.isDirectory = isDirectory;
-	}
-
-	/**
 	 * String formatting
 	 */
 	public String toString() {
 		String info = String.format(
-				"{ 'relativePath': %s, 'filename': %s, 'extension': %s, 'productName': %s, 'productClass': %s, 'productType': %s, 'missionId': %s, 'satelliteId': %s, 'hasToExtractMetadata': %s, 'hasToBeStored': %s, 'isDirectory': %s, 'keyObjectStorage': %s}",
+				"{ 'relativePath': %s, 'filename': %s, 'extension': %s, 'productName': %s, 'productClass': %s, 'productType': %s, 'missionId': %s, 'satelliteId': %s, 'hasToExtractMetadata': %s, 'keyObjectStorage': %s}",
 				relativePath, filename, extension, productName, productClass, productType, missionId, satelliteId,
-				hasToExtractMetadata, hasToBeStored, isDirectory, keyObjectStorage);
+				hasToExtractMetadata, keyObjectStorage);
 		return info;
 	}
 
@@ -147,6 +107,6 @@ public class ConfigFileDescriptor extends AbstractFileDescriptor {
 	@Override
 	public int hashCode() {
 		return Objects.hash(relativePath, filename, extension, productName, productClass, productType, missionId,
-				satelliteId, hasToExtractMetadata, hasToBeStored, isDirectory, keyObjectStorage);
+				satelliteId, hasToExtractMetadata, keyObjectStorage);
 	}
 }
