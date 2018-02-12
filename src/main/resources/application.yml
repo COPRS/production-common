@@ -11,7 +11,7 @@ logging:
   level:
     ROOT: ERROR
     org.springframework: ERROR
-    fr.viveris.s1pdgs: DEBUG
+    fr.viveris.s1pdgs: INFO
     kafka: WARN
   file: ./s1pdgs-ingestor.log
 
@@ -26,7 +26,7 @@ kafka:
 
 #FTP
 ftp:
-  host: input-ftpserver-svc
+  host: 172.17.50.10
   port: 21
   username: user
   password: passwd
@@ -46,10 +46,10 @@ ftp:
 #Object Storage
 storage:
   user:
-    id: 
-    secret: 
-  endpoint: 
-  region: 
+    id: MEF5PCBPTXHKOUTCKW3
+    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
+  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
+  region: eu-west-0
   buckets:
     config-files: config-files
     session-files: session-files
