@@ -3,7 +3,7 @@ spring:
   application:
     name: s1pdgs-metadata-catalog
   profiles:
-    active: prod
+    active: dev
     
 # Logging
 logging:
@@ -13,7 +13,7 @@ logging:
     fr.viveris.s1pdgs: INFO
     kafka: WARN
     org.apache: WARN
-  file: ./metadata-catalog.log
+  file: ./s1pdgs-metadata-catalog-test.log
 
 # KAFKA
 kafka:

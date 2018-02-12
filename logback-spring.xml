@@ -5,34 +5,41 @@
 	<property name="LOG_FILE"
 		value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}" />
 
+	<springProperty scope="context" name="appName"
+		source="spring.application.name" defaultValue="localhost" />
+
 	<springProfile name="dev">
 		<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 			<encoder>
-				<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n
-				</pattern>
+				<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M: %msg %n</pattern>
 			</encoder>
 		</appender>
 		<appender name="ROLLING-FILE"
 			class="ch.qos.logback.core.rolling.RollingFileAppender">
 			<encoder>
-				<pattern>${FILE_LOG_PATTERN}</pattern>
+				<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>
 			</encoder>
 			<file>${LOG_FILE}</file>
 			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 				<fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
 			</rollingPolicy>
 		</appender>
-		<root level="INFO">
+		<root level="DEBUG">
 			<appender-ref ref="CONSOLE" />
 			<appender-ref ref="ROLLING-FILE" />
 		</root>
 	</springProfile>
 
 	<springProfile name="prod">
+		<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+			<encoder>
+				<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>
+			</encoder>
+		</appender>
 		<appender name="ROLLING-FILE"
 			class="ch.qos.logback.core.rolling.RollingFileAppender">
 			<encoder>
-				<pattern>${FILE_LOG_PATTERN}</pattern>
+				<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>
 			</encoder>
 			<file>${LOG_FILE}</file>
 			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -44,12 +51,13 @@
 			</rollingPolicy>
 		</appender>
 
-		<root level="ERROR">
+		<root level="INFO">
+			<appender-ref ref="CONSOLE" />
 			<appender-ref ref="ROLLING-FILE" />
 		</root>
 	</springProfile>
 
-	<logger name="org.springframework" level="INFO" />
+	<logger name="org.springframework" level="WARN" />
 	<logger name="org.apache" level="WARN" />
 	<logger name="kafka" level="WARN" />
 	<logger name="fr.viveris.s1pdgs" level="INFO" />
