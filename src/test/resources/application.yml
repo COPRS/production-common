@@ -1,0 +1,71 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-ingestor
+  profiles:
+    active: prod
+    
+# Logging
+logging:
+  level:
+    ROOT: ERROR
+    org.springframework: WARN
+    fr.viveris.s1pdgs: INFO
+    kafka: WARN
+  file: ./s1pdgs-ingestor-test.log
+
+# KAFKA
+kafka:
+  bootstrap-servers: ${spring.embedded.kafka.brokers}
+  group-id: ingestors
+  poll-timeout: 3000
+  topic:
+    metadata: t-pdgs-metadata
+    sessions: t-pdgs-sessions
+
+#FTP
+ftp:
+  host: 172.17.50.10
+  port: 21
+  username: user
+  password: passwd
+  client-mode: 2
+  local-directory: /data/local-ingestor/
+  command-options:
+    mget: -P -R -D
+  config-files:
+    remote-directory: /config_files/
+    upload-fixed-rate: 3000
+    cache-max-capacity: 10
+  session-files:
+    remote-directory: /erds_sessions/
+    upload-fixed-rate: 5000
+    cache-max-capacity: 70
+ 
+#Object Storage
+storage:
+  user:
+    id: MEF5PCBPTXHKOUTCKW3G
+    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
+  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
+  region: eu-west-0
+  buckets:
+    config-files: config-files
+    session-files: session-files
+ 
+# File
+file:
+  config-files:
+    local-directory: /data/local-ingestor/config_files/ # Must contains the last /
+    read-fixed-rate: 1000
+    clean-empty-directory-rate: 10000
+    clean-empty-min-age: 13000
+    cache-max-capacity: 10
+  session-files:
+    local-directory: /data/local-ingestor/erds_sessions/
+    read-fixed-rate: 1000
+    clean-empty-directory-rate: 10000
+    clean-empty-min-age: 13000
+    cache-max-capacity: 70
+
+    

@@ -1,0 +1,777 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: s1-aux-pp1.xsd 10573 2014-05-29 19:45:40Z cthain $ -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.10">
+  <xsd:include schemaLocation="s1-object-types.xsd"/>
+  <!--
+      ========================================================================
+      Level 1 AUX_PP1 Definitions.
+      ========================================================================
+   -->
+  <xsd:complexType name="aziProcBlockParamsType">
+    <xsd:sequence>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>Swath identifier. This parameter defines the swath to which this record applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="aziProcBandwidth" type="float">
+        <xsd:annotation>
+          <xsd:documentation>Total processing bandwidth [Hz]. This parameter defines the bandwidth (Bw) to use during processing. The processing bandwidth (Bw) must be 0 &lt; Bw &lt;= PRF.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="aziBlockSize" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth processing block size [lines].  Only used for SM and IM modes.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="extraAziProcBlockOverlap" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Extra azimuth block overlap to account for possible variation of Doppler centroid frequency from azimuth block to azimuth block [lines].  Only used for SM and IM modes.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxFdc" type="floatCoefficientArray">
+        <xsd:annotation>
+          <xsd:documentation>For SM this is the maximum expected absolute value of Doppler centroid frequency [Hz]. Used to calculate the SM SLC azimuth matched filter throwaway component of azimuth block overlap as applicable to all azimuth blocks in a segment. This parameter is maxDeltaFdc from [A-11]. Although this field is an array, for SM only the first coefficient is applicable.
+For TOPS this is the polynomial that describes the expected offset and maximum excursion of the Doppler centroid frequency over the total slant range time extent, TSR, of all swaths in the mode. This is an array of five floating point coefficients separated by spaces. The first coefficient is the Doppler centroid offset [Hz] and the remaining coefficients describe the expected variation of the Doppler centroid frequency along range. The polynomial is evaluated as a function of the slant range time t as:
+maxFdc(t) = C0 + C1 * t + C2 * t^2 + C3 * t^3 + C4 * t^4	{t = 0 .. TSR}
+</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="aziProcBlockParamsListType">
+    <xsd:sequence>
+      <xsd:element name="aziProcBlockParams" type="aziProcBlockParamsType" maxOccurs="7">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth processing block parameters record indexed by swath.  There will be one record per swath.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of parameter records in this list. There is one record per swath for each instrument mode.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="ellipsoidParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Ellipsoid and DEM parameters.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="ellipsoidName" type="string">
+        <xsd:annotation>
+          <xsd:documentation>Name of the reference ellipsoid.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="ellipsoidSemiMajorAxis" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Semi-major axis of ellipsoid [m].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="ellipsoidSemiMinorAxis" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Semi-minor axis of ellipsoid [m].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="useDemFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>This flag is used to control the use of a DEM during processing.  Set to true if a DEM is to be used during processing, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="commonProcParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Common processing parameters shared by mulitple processing modules.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="correctIQBiasFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Flag to control the correctin of the constant biases from the I and Q channels. IQ bias correction will be performed if and only if this flag is set to "true".</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="correctIQGainImbalanceFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Flag to control the correctin of the IQ gain imbalance. IQ gain imbalance correction will be performed if and only if this flag is set to "true".</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="correctIQOrthogonalityFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Flag to control the correctin of the IQ orthogonality. IQ orthorgonality correction will be performed if and only if this flag is set to "true".</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="correctBistaticDelayFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Flag to compensate for the bi-static delay. Correction will be performed if and only if this flag is set to "true".</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="correctRxVariationFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Flag to control the correction of the gain variation across the receive window. Receive variation correction will be performed if and only this flag is set to “true”.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="ellipsoidParams" type="ellipsoidParamsType">
+        <xsd:annotation>
+          <xsd:documentation>Ellipsoid and DEM parameters.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="aziProcBlockParamsList" type="aziProcBlockParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth processing block parameters used for SM processing.  One record per SM swath.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="outputMeanExpected" type="double">
+        <xsd:annotation>
+          <xsd:documentation>This parameter specifies the expected mean of the samples in the output mage and is used in verifying that the calculated mean of the output samples is within the tolerated threshold.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="outputMeanThreshold" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Threshold for setting the outputDataMeanOutsideNominalRange flag in the ouput product annotations. This is the value T, such that the measured mean must fall between the outputMeanExpected-T and outputMeanExpected+T.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="outputStdDevExpected" type="double">
+        <xsd:annotation>
+          <xsd:documentation>This parameter specifies the expected standard deviation of the samples in the output image and is used in verifying that the calculated std. dev. of the output samples is within the tolerated threshold.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="outputStdDevThreshold" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Threshold for setting the outputDataStdDevOutsideNominalRange flag in the ouput product annotations.  This is the value D, such that the measured standard deviation must fall between the outputStdDevExpected-D and outputStdDevExpected+D.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="topsFilterConvention" type="topsFilterConventionType">
+        <xsd:annotation>
+          <xsd:documentation>Name of the TOPS filter convention to use during processing. This field controls how the TOPS ramping/de-ramping filters are defined. If set to "Only Echo Lines" then the filter is defined using only the echo lines in a burst; otherwise, if set to "All Lines" then the filter is defined using all the lines in a burst.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="orbitModelMargin" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Additional time to add to the start and end of the orbit model generated by the IPF [s]. This provides margin for performing interpolation near the boundaries of the sensing start and stop times and extrapolation beyond the boundaries of the sensing start and stop times.
+
+For example, if the sensing start time is Tstart, the sensing stop time is Tstop and <orbitModelMargin>2.0</orbitModelMargin>, then the orbit model generated by the IPF will range from (Tstart - 2.0) .. (Tstop + 2.0)</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="replicaThresholdParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Pulse thresholds auxiliary parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="maxXCorrPulseIrw" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Maximum allowable broadening of the IRW of the cross-correlation with the nominal replica [%]. Used for setting the replicaReconstructionFailedFlag in the output product annotations.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxXCorrPulsePslr" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Maximum allowable PSLR of the cross correlation with the nominal replica [dB]. Used for setting the replicaReconstructionFailedFlag in the output product annotations.  </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxXCorrPulseIslr" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Maximum allowable ISLR of the cross correlation with the nominal replica [dB]. Used for setting the replicaReconstructionFailedFlag in the output product annotations.  </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxPgAmpStdFraction" type="float">
+        <xsd:annotation>
+          <xsd:documentation>Maximum deviation from the mean allowed for the PG product amplitude, measured as a fraction of the standard deviation. Relative PG product validation shall fail if this value is exceeded.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxPgPhaseStdFraction" type="float">
+        <xsd:annotation>
+          <xsd:documentation>Maximum deviation from the mean allowed for the PG product phase, measured as a fraction of the standard deviation. Relative PG product validation shall fail if this value is exceeded.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxPgAmpError" type="float">
+        <xsd:annotation>
+          <xsd:documentation>Maximum deviation allowed for a PG product amplitude from the corresponding PG product model value [dB]. Absolute PG product validation shall fail if this value is exceeded.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxPgPhaseError" type="float">
+        <xsd:annotation>
+          <xsd:documentation>Maximum deviation allowed for a PG product phase from the corresponding PG product model value [degrees]. Absolute PG product validation shall fail if this value is exceeded.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxNumInvalidPgValFraction" type="float">
+        <xsd:annotation>
+          <xsd:documentation>Maximum number of invalid PG product values allowed, expressed as a fraction of the total number of PG values. If the percentage of the invalid PG products does not exceed this value, then the invalid PG values will be discarded and only the valid PG values will be further used in the linear interpolation and application to the data. Otherwise if the percentage of the invalid PG products does exceed this value, then all the calculated PG product values will be discarded and replaced with the corresponding PG product model values.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="preProcParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Pre-processing parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="inputMeanExpected" type="double">
+        <xsd:annotation>
+          <xsd:documentation>This parameter specifies the expected mean of the input I and Q samples and is used in verifying that the calculated mean of the output samples is within the tolerated threshold.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="inputMeanThreshold" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Threshold for setting the inputDataMeanOutsideNominalRange flag in the ouput product annotations. This is the value T, such that the measured mean must fall between the inputMeanExpected-T and inputMeanExpected+T. This threshold is used for both the I and Q channels.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="inputStdDevExpected" type="double">
+        <xsd:annotation>
+          <xsd:documentation>This parameter specifies the expected standard deviation of the input I and Q samples and is used in verifying that the calculated std. dev. of the output samples is within the tolerated threshold.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="inputStdDevThreshold" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Threshold for setting the inputDataStdDevOutsideNominalRange flag in the ouput product annotations. This is the value D, such that the measured std. dev. must fall between the inputStdDevExpected-D and inputStdDevExpected+D. This threshold is used for both the I and Q channels.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="terrainHeightAziSpacing" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Frequency of terrain height estimates along azimuth [s].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="terrainHeightAziBlockSize" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Size of the block along azimuth used to calculate an average terrain height [s].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="chirpReplicaSource" type="chirpSourceType">
+        <xsd:annotation>
+          <xsd:documentation>Chirp replica to use during processing. The extracted replica will be used if this parameter is set to "Extracted" and the IPF determines that the reconstructed replica is valid; otherwise, the nominal chirp will be used if this field is set to "Nominal" or the reconstructed replica is deemed invalid. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="replicaThresholds" type="replicaThresholdParamsType">
+        <xsd:annotation>
+          <xsd:documentation>Thresholds used to assess the quality of the replica reconstruction and the PG product.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="missingLinesThreshold" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Threshold for setting the missingLinesSignificant flag in the output product annotations.  This parameter ranges between 0 and 1 and specifies the percentage of missing lines to total lines [%].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="linesPerGapThreshold" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>This parameter specifies the number of consecutive missing lines in the input data which constitute a gap [lines].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="missingGapsThreshold" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Threshold for setting the significantGapsInInputData flag in the output product annotations. This parameter specifies the number of missing gaps permitted in the input data.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="performInternalCalibrationFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Flag controlling the calculation of the internal calibration from the calibration pulses extracted from the downlink. If this flag is set to true then the internal calibration information will be calculated by the IPF using the calibration pulses extracted from the downlink. If this flag is set to false then the internal calibration information will not be calculated from the calibration pulses extracted from the downlink. In addition, if this flag is set to false, the values provided for chirpReplicaSource and pgSource will be ignored and set to "Nominal" and "Model" respectively.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="pgSource" type="pgSourceType">
+        <xsd:annotation>
+          <xsd:documentation>PG source to use during processing.  The PG derived from the extracted replica will be used if this parameter is set to “Extracted” and the IPF determines that the reconstructed replica is valid; otherwise, the pgModel will be used if this field is set to “Model” or the reconstructed replica is deemed invalid.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="dcProcParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Doppler centroid processing auxiliary parameters.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="dcMethod" type="dcMethodType">
+        <xsd:annotation>
+          <xsd:documentation>Doppler centroid estimation method. Although the DCE from both orbit and attitude data and data analysis are always performed and the results provided in the output product annotations, this parameter is used to specify exactly which Doppler centroid estimation method to use during the image focusing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="dcInputData" type="dcInputDataType">
+        <xsd:annotation>
+          <xsd:documentation>Type of input data used for Doppler centroid estimation.  Options are “Raw” and “Range Compressed”.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="dcPredefinedCoefficients" type="floatCoefficientArray">
+        <xsd:annotation>
+          <xsd:documentation>Pre-defined Doppler centroid coefficients.  These Doppler centroid coefficients shall be used during processing if and only if the dcMethod element is set to "Pre-defined". This parameter is an array of up to five double precision floating point numbers separated by spaces. These values represent Doppler centroid coefficients as a function of
+slant range time: d0, d1, d2, d3, and d4 where: Doppler Centroid = d0 + d1(tSR - t0) + d2(tSR-t0)^2 + d3(tSR-t0)^3 + d4(tSRt0)^4
+</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="dcRmsErrorThreshold" type="float">
+        <xsd:annotation>
+          <xsd:documentation>Doppler centroid estimation signal-to-noiseroot mean squared (RMS) error threshold. If the RMS error of the Doppler centroid estimate from data is below this threshold they shall not be used during processing; instead, the Doppler centroid calculated from orbit and attitude shall be used, unless overridden by the dcMethod = Pre-defined.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="slcSwathParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Azimuth processing bandwidth.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>Swath identifier. This parameter defines the swath to which this record applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="gain" type="doubleCoefficientArray">
+        <xsd:annotation>
+          <xsd:documentation>Product and polarisation specific gain. This parameter defines the gain that is applied to each output sample during azimuth processing. This parameter is an array of double precision floating point numbers separated by spaces, one for each of the possible polarisations in the following order: HH HV VV VH</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="instantaneousBandwidth" type="float">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth instantaneous bandwidth [Hz]. This field is applicable only to IW and EW modes.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="nominalBeamWidth" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Nominal width of the beam [degrees].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="slcSwathParamsListType">
+    <xsd:annotation>
+      <xsd:documentation>List of azimuth processing bandwidths indexed by swath.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swathParams" type="slcSwathParamsType" maxOccurs="7">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth processing bandwidth record indexed by swath.  There will be one record per swath for each mode.  For example, for S1 IW there will be 3 records, and for ASAR IM there will be 7 records.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of swathParams records in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="slcProcParamsType">
+    <xsd:annotation>
+      <xsd:documentation>SLC processing auxiliary parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="applyElevationAntennaPatternFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Elevation antenna pattern correction flag. True if the EAP is to be applied, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="applyRangeSpreadingLossFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Range spreading loss correction flag. True if the RSL is to be applied, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="estimateThermalNoiseFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Thermal noise estimation flag. True if thermal noise estimation is to be performed, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="rrfSpectrum" type="rrfSpectrumType">
+        <xsd:annotation>
+          <xsd:documentation>The type of range matched filter to use during processing. "Unextended": range reference function is unextended in frequency domain; "Extended Flat": range reference function is extended and flat in frequency domain; and, "Extended Tapered": range reference function is extended and tapered in frequency domain.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="swathParamsList" type="slcSwathParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>List of azimuth processing bandwidths. There is an entry for each relevant swath within the product.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="rangeParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Range processing parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>Swath identifier. This parameter defines the swath to which this record applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="weightingWindow" type="weightingWindowType">
+        <xsd:annotation>
+          <xsd:documentation>Name of the weighting window to use during processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="windowCoefficient" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Value of the weighting window coefficient to use during processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="processingBandwidth" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Total processing bandwidth [Hz]. This parameter defines the  bandwidth (Bw) to use during processing. For range, the processing bandwidth (Bw) must be 0 &lt; Bw &lt;= pulse Bw, for azimuth the processing bandwidth (Bw) must be 0 &lt; Bw &lt;= PRF.
+</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="lookBandwidth" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Look bandwidth [Hz]. This parameter defines the bandwidth to use for each look during processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="numberOfLooks" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Number of looks. This parameter defines the number of looks to use during multi-look processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="pixelSpacing" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Spacing between pixels in the output image [m].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="multiLookThrowaway" type="int32">
+        <xsd:annotation>
+          <xsd:documentation>Number of ground range samples to be discarded at both block edges .</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="rangeParamsListType">
+    <xsd:annotation>
+      <xsd:documentation>List of range processing parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="rangeParams" type="rangeParamsType" maxOccurs="7">
+        <xsd:annotation>
+          <xsd:documentation>This record contains the set of auxiliary parameters required during range processing. For each product type, there is one record for each applicable swath within the product.  There will be one record per swath for each mode.  For example, for S1 IW there will be 3 records, and for ASAR IM there will be 7 records.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of parameter records in this list. There is one record per swath for each instrument mode.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="azimuthParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Azimuth processing parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="swath" type="swathType">
+        <xsd:annotation>
+          <xsd:documentation>Swath identifier. This parameter defines the swath to which this record applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="weightingWindow" type="weightingWindowType">
+        <xsd:annotation>
+          <xsd:documentation>Name of the weighting window to use during processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="windowCoefficient" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Value of the weighting window coefficient to use during processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="processingBandwidth" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Total processing bandwidth [Hz]. This parameter defines the  bandwidth (Bw) to use during processing. For range, the processing bandwidth (Bw) must be 0 &lt; Bw &lt;= pulse Bw, for azimuth the processing bandwidth (Bw) must be 0 &lt; Bw &lt;= PRF.
+</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="lookBandwidth" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Look bandwidth [Hz]. This parameter defines the bandwidth to use for each look during processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="numberOfLooks" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Number of looks. This parameter defines the number of looks to use during multi-look processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="pixelSpacing" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Spacing between pixels in the output image [m].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="multiLookThrowaway" type="int32">
+        <xsd:annotation>
+          <xsd:documentation>Number of output azimuth samples to be discarded at both block edges .</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="azimuthParamsListType">
+    <xsd:annotation>
+      <xsd:documentation>List of azimuth processing parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="azimuthParams" type="azimuthParamsType" maxOccurs="7">
+        <xsd:annotation>
+          <xsd:documentation>This record contains the set of auxiliary parameters required during azimuth processing. For each product type, there is one record for each applicable swath within the product.  There will be one record per swath for each mode.  For example, for S1 IW there will be 3 records, and for ASAR IM there will be 7 records.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of parameter records in this list. There is one record per swath for each instrument mode.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="grdProcParamsType">
+    <xsd:annotation>
+      <xsd:documentation>GRD processing auxiliary parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="applySrgrConversionFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>SRGR conversion flag. True if SRGR conversion is to be performed, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="removeThermalNoiseFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Thermal noise removal flag. True if thermal noise removal is to be performed, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="qlProcParamsType">
+    <xsd:annotation>
+      <xsd:documentation>Quick-look processing auxiliary parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="rangeDecimationFactor" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Range decimation factor for the image.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="rangeAveragingFactor" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Range averaging factor for the image.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="azimuthDecimationFactor" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth decimation factor for the  image.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="azimuthAveragingFactor" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth averaging factor for the  image.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="postProcParamsType">
+    <xsd:annotation>
+      <xsd:documentation>GRD processing auxiliary parameters record.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="rangeParamsList" type="rangeParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>Range processing parameters. This list contains the swath-dependent auxiliary parameters required for range processing. The list contains a separate record for each swath, indexed using the applicable swath identifier.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="azimuthParamsList" type="azimuthParamsListType">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth processing parameters. This list contains the swath-dependent auxiliary parameters required for azimuth processing. The list contains a separate record for each swath, indexed using the applicable swath identifier. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="annotationVectorStepSize" type="uint32">
+        <xsd:annotation>
+          <xsd:documentation>The decimation factor used on annotation vectors when written to the output product. Inside the IPF, each annotation vector could have a point for every range sample. To reduce product size, only points every annotationVectorStepSize are written to the output annotation vectors.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="generateCalibrationLutsFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Flag to control the generation of the absolute calilbration LUTs. True if the calibration LUTs are to be created, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="applyAzimuthAntennaPatternFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Azimuth Antenna Pattern Flag. True if the AAP is to be applied, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="applyTopsDescallopingFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Perform de-scalloping flag. True if de-scalloping is to be performed, false otherwise. This parameter is only applicable to IW and EW modes.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="detectFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>True to detect power and square root extract measurement data, false otherwise.  This flag should only be set to true for GRD products.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="mergeFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>True to merge the swaths of output data and annotations, false otherwise.  Only valid for IW and EW, not applicable to other modes.  This flag should only be set to true for GRD products. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="createInternalSLCFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>True if the output of post-processing is an internal SLC product, in which case post-processing will pass the input SLC product through without applying further processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="grdProcParams" type="grdProcParamsType">
+        <xsd:annotation>
+          <xsd:documentation>GRD processing auxiliary parameters. This record contains the auxiliary parameters required during GRD image processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="createQlImageFlag" type="bool">
+        <xsd:annotation>
+          <xsd:documentation>Create Quick-look product flag. This flag controls the creation of a Quick-look image. It is set to true if a Quick-look image should be created; or, false otherwise.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="qlProcParams" type="qlProcParamsType">
+        <xsd:annotation>
+          <xsd:documentation>Quick-look processing auxiliary parameters. This record contains the auxiliary parameters required during Quick-look image processing. This structure need only be present if the createQlImageFlag is true.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="l1ProductType">
+    <xsd:annotation>
+      <xsd:documentation>Standard L1 product record that holds the all the applicable auxiliary data for this product type.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="productId" type="string">
+        <xsd:annotation>
+          <xsd:documentation>Product type identifier to which this set of parameters applies. The productId is used to index and find the correct set of auxiliary parameters for each product the IPF is capable of generating.  This field corresponds to the first 9 characters of the product type identifiers listed in the Job Order File_Type field.  For example, the S1 IPF ICD [A-7] defines a product identifier for SM SLC standard products as “SM_SLC__1S”, so the parameters that correspond to this product are identified by the string “SM_SLC__1”.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="commonProcParams" type="commonProcParamsType" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>Common processing auxiliary parameters. This record holds the parameters that are common among multiple steps in the image processing chain.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="preProcParams" type="preProcParamsType" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>Pre-processing auxiliary parameters. This record contains the auxiliary parameters required during image pre-processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="dcProcParams" type="dcProcParamsType" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>Doppler centroid processing auxiliary parameters. This record contains the auxiliary parameters required during Doppler centroid processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="slcProcParams" type="slcProcParamsType" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>SLC processing auxiliary parameters. This record contains the auxiliary parameters required during SLC image processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="postProcParams" type="postProcParamsType" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>Post processing auxiliary parameters. This record contains the auxiliary parameters required during image post processing. This includes: SLC post-processing, GRD processing; Browse processing; and, Quick-look image processing.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="l1ProductListType">
+    <xsd:annotation>
+      <xsd:documentation>Auxiliary parameters list for standard products.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="product" type="l1ProductType" maxOccurs="48">
+        <xsd:annotation>
+          <xsd:documentation>Product auxiliary parameters. This DSR contains all of the auxiliary parameters required to process a single product. The parameters are stored in structures that are grouped together by the logical processing steps used during image creation. The parameters within this DSR and its children are not polarisation dependent and in general apply to the entire product; however, in some cases a distinction must be made amongst swaths and when this is necessary the records are indexed with a swath identifier.  There are 16 standard product types defined in the ICD [A-7] for the IPF so in general there will be 16 product type entries in the list, however more products can be defined and therefore more than 16 product types are allowed in this list.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>The number of elements contained in the list. There is an entry for each standard L1 product type that the IPF is capable of generating.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="scalingLutType">
+    <xsd:annotation>
+      <xsd:documentation>Application scaling LUT.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="outputPixels" type="outputPixelsType">
+        <xsd:annotation>
+          <xsd:documentation>Pixel format. Application scaling LUTs are specific to output pixel data type. This field specifies the output pixel type to which this LUT applies.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="incidenceAngleStart" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Incidence angle of the first value in the LUT [degrees].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="angleIncrement" type="double">
+        <xsd:annotation>
+          <xsd:documentation>Step size of the incidence angle between each value [degrees].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="values" type="floatArray">
+        <xsd:annotation>
+          <xsd:documentation>Application LUT values. This element is a vector containing attribute "count" single precision floating point values separated by spaces [linear].</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="scalingLutListType">
+    <xsd:annotation>
+      <xsd:documentation>List of application scaling LUTs.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="scalingLut" type="scalingLutType" maxOccurs="4">
+        <xsd:annotation>
+          <xsd:documentation>Application scaling LUT record. This record provides the necessary scaling LUT for outputPixels.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of scalingLut records in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="applicationLutType">
+    <xsd:annotation>
+      <xsd:documentation>Application LUT record</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="applicationLutId" type="string">
+        <xsd:annotation>
+          <xsd:documentation>Name of this application scaling LUT.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="scalingLutList" type="scalingLutListType">
+        <xsd:annotation>
+          <xsd:documentation>List of application scaling LUTs for this applicationLutId. There is one entry for each output pixel type.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="applicationLutListType">
+    <xsd:annotation>
+      <xsd:documentation>List of application LUT records.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="applicationLut" type="applicationLutType" minOccurs="2" maxOccurs="20">
+        <xsd:annotation>
+          <xsd:documentation>Application LUT record. This element contains the information required to identify the application scaling LUT specified in the Job Order. The ICD currently defines four default application scaling LUTs, one for each mode.  However, more can be added, so long as the applicationLutId matches the Application_LUT processing parameter in the Job Order.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="count" type="unsignedInt" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Number of applicationLut records in the list.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+  <xsd:complexType name="l1AuxiliaryProcessorParametersType">
+    <xsd:annotation>
+      <xsd:documentation>Sentinel-1 IPF L1 processing parameters auxiliary file specification.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="productList" type="l1ProductListType">
+        <xsd:annotation>
+          <xsd:documentation>List of L1 products containing the applicable auxiliary parameters for each. This list contains an entry for each product the IPF is capable of generating, indexed by its unique product identifier.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="applicationLutList" type="applicationLutListType">
+        <xsd:annotation>
+          <xsd:documentation>List of application LUTs. This element is a list of all available application LUTs. The application identifier used to index the list comes from the Job Order.  </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="schemaVersion" type="xsd:decimal" use="required" fixed="2.10"/>
+  </xsd:complexType>
+  <xsd:element name="l1AuxiliaryProcessorParameters" type="l1AuxiliaryProcessorParametersType">
+    <xsd:annotation>
+      <xsd:documentation>L1 Processor parameters auxiliary file definition (AUX_PP1).</xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+</xsd:schema>
