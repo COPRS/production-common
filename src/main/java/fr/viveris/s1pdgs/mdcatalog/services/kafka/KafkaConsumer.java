@@ -75,7 +75,7 @@ public class KafkaConsumer {
 						}
 					}
 					else {
-						LOGGER.error("File {} doesnot exists", metadata.getMetadataToIndex().getProductName());
+						LOGGER.error("File {} does not exists", metadata.getMetadataToIndex().getProductName());
 					}
 				}
 				if (!esServices.isMetadataExist(metadataToIndex)) {
