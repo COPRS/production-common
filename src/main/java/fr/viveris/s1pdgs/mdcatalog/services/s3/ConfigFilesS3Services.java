@@ -36,6 +36,7 @@ public class ConfigFilesS3Services implements S3Services {
 				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
 			}
 		} catch (SdkClientException sce) {
+			LOGGER.error(sce.toString());
 			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
 		}
 
