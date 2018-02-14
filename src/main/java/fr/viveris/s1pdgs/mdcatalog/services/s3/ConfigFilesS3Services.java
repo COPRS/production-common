@@ -28,7 +28,7 @@ public class ConfigFilesS3Services implements S3Services {
 	@Override
 	public void downloadFile(String keyName, File destionationFile) throws ObjectStorageException {
 		try {
-			if (LOGGER.isDebugEnabled()) {
+			if (LOGGER.isDebugEnabled() || true) {
 				LOGGER.debug("Downloading object {} from bucket {} and copying into {}", keyName, bucketName, destionationFile.getPath());
 			}
 			s3client.getObject(new GetObjectRequest(bucketName, keyName), destionationFile);
