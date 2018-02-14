@@ -68,6 +68,7 @@ public class KafkaConsumer {
 				else if(metadata.getFamilyType().equals("METADATA")) {
 					if(configFilesS3Services.exist(metadata.getMetadataToIndex().getKeyObjectStorage())) {
 						metadataFile = new File(metadata.getMetadataToIndex().getKeyObjectStorage());
+						LOGGER.info("File created : " + metadataFile.getPath());
 						configFilesS3Services.downloadFile(metadata.getMetadataToIndex().getKeyObjectStorage(), metadataFile);
 						metadataToIndex = mdBuilder.buildConfigFileMetadata((ConfigFileDescriptor)(metadata.getMetadataToIndex()), metadataFile);
 						if (!metadataFile.delete()) {
