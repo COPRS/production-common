@@ -31,7 +31,7 @@ public class ConfigFilesS3Services implements S3Services {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Downloading object {} from bucket {} and copying into {}", keyName, bucketName, destionationFile.getPath());
 			}
-			LOGGER.debug("Downloading object {} from bucket {} and copying into {}", keyName, bucketName, destionationFile.getPath());
+			LOGGER.error("Downloading object {} from bucket {} and copying into {}", keyName, bucketName, destionationFile.getPath());
 			s3client.getObject(new GetObjectRequest(bucketName, keyName), destionationFile);
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
