@@ -2,6 +2,8 @@ package fr.viveris.s1pdgs.mdcatalog.model.dto;
 
 import java.util.Objects;
 
+import fr.viveris.s1pdgs.mdcatalog.model.AbstractFileDescriptor;
+
 
 /**
  * DTO object for publishing in topic "metadata"
@@ -14,9 +16,14 @@ public class KafkaMetadataDto {
 	 */
 	private String action;
 	/**
-	 * Metadata to publish in JSON format
+	 * file descriptor of the metadata to index
 	 */
-	private String metadata;
+	private AbstractFileDescriptor metadataToIndex;
+	
+	/**
+	 * Family type of the metadata to index (RAW/SESSION/AUX/MPL)
+	 */
+	private String familyType;
 
 	/**
 	 * Default constructor
@@ -29,9 +36,10 @@ public class KafkaMetadataDto {
 	 * @param action
 	 * @param metadata
 	 */
-	public KafkaMetadataDto(String action, String metadata) {
+	public KafkaMetadataDto(String action, AbstractFileDescriptor metadataToIndex, String familyType) {
 		this.action = action;
-		this.metadata = metadata;
+		this.metadataToIndex = metadataToIndex;
+		this.familyType = familyType;
 	}
 	
 
@@ -49,25 +57,27 @@ public class KafkaMetadataDto {
 		this.action = action;
 	}
 
-	/**
-	 * @return the metadata
-	 */
-	public String getMetadata() {
-		return metadata;
+	public AbstractFileDescriptor getMetadataToIndex() {
+		return metadataToIndex;
 	}
 
-	/**
-	 * @param metadata the metadata to set
-	 */
-	public void setMetadata(String metadata) {
-		this.metadata = metadata;
+	public void setMetadataToIndex(AbstractFileDescriptor metadataToIndex) {
+		this.metadataToIndex = metadataToIndex;
+	}
+
+	public String getFamilyType() {
+		return familyType;
+	}
+
+	public void setFamilyType(String familyType) {
+		this.familyType = familyType;
 	}
 
 	/**
 	 * String formatting (JSON format)
 	 */
 	public String toString() {
-		String info = String.format("{'action': %s, 'metadata': %s}", action, metadata);
+		String info = String.format("{'action': %s, 'metadata': %s}", action, familyType);
 		return info;
 	}
 
@@ -84,11 +94,11 @@ public class KafkaMetadataDto {
 			return false;
 		KafkaMetadataDto meta = (KafkaMetadataDto) o;
 		// field comparison
-		return Objects.equals(action, meta.getAction()) && Objects.equals(metadata, meta.getMetadata());
+		return Objects.equals(action, meta.getAction()) && Objects.equals(metadataToIndex, meta.getMetadataToIndex());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(action, metadata);
+		return Objects.hash(action, metadataToIndex);
 	}
 }
