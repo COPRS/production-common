@@ -11,7 +11,7 @@ logging:
   level:
     ROOT: ERROR
     org.springframework: WARN
-    fr.viveris.s1pdgs: INFO
+    fr.viveris.s1pdgs: DEBUG
     kafka: WARN
     org.apache: WARN
   file: ./s1pdgs-metadata-catalog.log
