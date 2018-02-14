@@ -8,12 +8,12 @@ import java.util.Objects;
  * @author Cyrielle Gailliard
  *
  */
-public class ErdsSessionFileDescriptor extends AbstractFileDescriptor {
+public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 
 	/**
 	 * Product type: RAW or SESSION here
 	 */
-	private ErdsSessionFileType productType;
+	private EdrsSessionFileType productType;
 
 	/**
 	 * Session identifier
@@ -25,14 +25,14 @@ public class ErdsSessionFileDescriptor extends AbstractFileDescriptor {
 	 */
 	private int channel;
 
-	public ErdsSessionFileDescriptor() {
+	public EdrsSessionFileDescriptor() {
 		super();
 	}
 
 	/**
 	 * @return the productType
 	 */
-	public ErdsSessionFileType getProductType() {
+	public EdrsSessionFileType getProductType() {
 		return productType;
 	}
 
@@ -40,7 +40,7 @@ public class ErdsSessionFileDescriptor extends AbstractFileDescriptor {
 	 * @param productType
 	 *            the productType to set
 	 */
-	public void setProductType(ErdsSessionFileType productType) {
+	public void setProductType(EdrsSessionFileType productType) {
 		this.productType = productType;
 	}
 
@@ -96,7 +96,7 @@ public class ErdsSessionFileDescriptor extends AbstractFileDescriptor {
 		// type check and cast
 		if (getClass() != o.getClass())
 			return false;
-		ErdsSessionFileDescriptor sessionFile = (ErdsSessionFileDescriptor) o;
+		EdrsSessionFileDescriptor sessionFile = (EdrsSessionFileDescriptor) o;
 		// field comparison
 		return Objects.equals(keyObjectStorage, sessionFile.getKeyObjectStorage());
 	}

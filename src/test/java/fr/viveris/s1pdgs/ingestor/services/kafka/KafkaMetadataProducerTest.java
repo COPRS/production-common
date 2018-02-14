@@ -126,7 +126,8 @@ public class KafkaMetadataProducerTest {
 		// send the message
 		KafkaMetadataDto metadata = new KafkaMetadataDto();
 		metadata.setAction("CREATE");
-		metadata.setMetadata("{\'test\': \'Contains metadata in JSON format\'}");
+		metadata.setMetadataToIndex(null);
+		metadata.setFamilyType("TEST");
 		try {
 			senderMetadata.send(metadata);
 		} catch (KafkaMetadataPublicationException e) {

@@ -5,8 +5,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
-import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileDescriptor;
-import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileType;
+import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileDescriptor;
+import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.ingestor.model.FileExtension;
 import fr.viveris.s1pdgs.ingestor.model.exception.FilePathException;
 import fr.viveris.s1pdgs.ingestor.model.exception.IgnoredFileException;
@@ -120,7 +120,7 @@ public class FileDescriptorBuilder {
 		return configFile;
 	}
 
-	public ErdsSessionFileDescriptor buildErdsSessionFileDescriptor(File file)
+	public EdrsSessionFileDescriptor buildErdsSessionFileDescriptor(File file)
 			throws FilePathException, IgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
@@ -142,12 +142,12 @@ public class FileDescriptorBuilder {
 				throw new FilePathException(relativePath, relativePath, "IIF file");
 			}
 
-			ErdsSessionFileDescriptor descriptor = new ErdsSessionFileDescriptor();
+			EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
 			descriptor.setFilename(m.group(9));
 			descriptor.setRelativePath(relativePath);
 			descriptor.setProductName(m.group(9));
 			descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));
-			descriptor.setProductType(ErdsSessionFileType.valueFromExtension(descriptor.getExtension()));
+			descriptor.setProductType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));
 			descriptor.setMissionId(m.group(1));
 			descriptor.setSatelliteId(m.group(2));
 			descriptor.setChannel(Integer.parseInt(m.group(7)));
