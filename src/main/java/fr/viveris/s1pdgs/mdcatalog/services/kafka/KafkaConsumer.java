@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.services.s3.ConfigFilesS3Services;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
+import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaMetadataDto;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
@@ -84,13 +86,16 @@ public class KafkaConsumer {
 			try {
 				JSONObject metadataToIndex = new JSONObject();
 				if(metadata.getFamilyType().equals("SESSION") || metadata.getFamilyType().equals("RAW")) {
-					metadataToIndex = mdBuilder.buildEdrsSessionFileMetadata(fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(sessionLocalDirectory + metadata.getMetadataToIndex())));
+					metadataFile = new File(sessionLocalDirectory + metadata.getMetadataToIndex());
+					EdrsSessionFileDescriptor edrsFileDescriptor = fileDescriptorBuilder.buildEdrsSessionFileDescriptor(metadataFile);
+					metadataToIndex = mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor);
 				}
 				else if(metadata.getFamilyType().equals("METADATA")) {
 					if(configFilesS3Services.exist(metadata.getMetadataToIndex())) {
 						metadataFile = new File(configLocalDirectory + metadata.getMetadataToIndex());
 						configFilesS3Services.downloadFile(metadata.getMetadataToIndex(), metadataFile);
-						metadataToIndex = mdBuilder.buildConfigFileMetadata(fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile), metadataFile);
+						ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile);
+						metadataToIndex = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
 						if (!metadataFile.delete()) {
 							LOGGER.error("[processConfigFile] File {} not removed from local storage", metadataFile.getPath());
 						}
@@ -104,7 +109,7 @@ public class KafkaConsumer {
 				}
 				LOGGER.info("Metadata created for {}", metadataToIndex.getString("productName"));
 			} catch (Exception e){
-				LOGGER.error(e.getClass() + e.getMessage());
+				LOGGER.error(e.getMessage());
 			}
 		} else {
 			LOGGER.error("Invalid action {} for metadata {}", metadata.getAction(), metadata.getMetadataToIndex());
