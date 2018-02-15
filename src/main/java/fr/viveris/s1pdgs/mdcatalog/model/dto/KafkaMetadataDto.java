@@ -2,8 +2,6 @@ package fr.viveris.s1pdgs.mdcatalog.model.dto;
 
 import java.util.Objects;
 
-import fr.viveris.s1pdgs.mdcatalog.model.AbstractFileDescriptor;
-
 
 /**
  * DTO object for publishing in topic "metadata"
@@ -18,7 +16,7 @@ public class KafkaMetadataDto {
 	/**
 	 * file descriptor of the metadata to index
 	 */
-	private AbstractFileDescriptor metadataToIndex;
+	private String metadataToIndex;
 	
 	/**
 	 * Family type of the metadata to index (RAW/SESSION/AUX/MPL)
@@ -36,7 +34,7 @@ public class KafkaMetadataDto {
 	 * @param action
 	 * @param metadata
 	 */
-	public KafkaMetadataDto(String action, AbstractFileDescriptor metadataToIndex, String familyType) {
+	public KafkaMetadataDto(String action, String metadataToIndex, String familyType) {
 		this.action = action;
 		this.metadataToIndex = metadataToIndex;
 		this.familyType = familyType;
@@ -57,11 +55,11 @@ public class KafkaMetadataDto {
 		this.action = action;
 	}
 
-	public AbstractFileDescriptor getMetadataToIndex() {
+	public String getMetadataToIndex() {
 		return metadataToIndex;
 	}
 
-	public void setMetadataToIndex(AbstractFileDescriptor metadataToIndex) {
+	public void setMetadataToIndex(String metadataToIndex) {
 		this.metadataToIndex = metadataToIndex;
 	}
 
@@ -77,7 +75,7 @@ public class KafkaMetadataDto {
 	 * String formatting (JSON format)
 	 */
 	public String toString() {
-		String info = String.format("{'action': %s, 'metadataToIndex':%s, 'metadata': %s}", action, metadataToIndex.getKeyObjectStorage(), familyType);
+		String info = String.format("{'action': %s, 'metadataToIndex': %, 'metadata': %s}", action, metadataToIndex, familyType);
 		return info;
 	}
 
