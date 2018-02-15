@@ -19,7 +19,7 @@ logging:
 #Object Storage
 storage:
   user:
-    id: MEF5PCBPTXHKOUTCKW3
+    id: MEF5PCBPTXHKOUTCKW3G
     secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
   endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
   region: eu-west-0
@@ -29,7 +29,7 @@ storage:
 
 # KAFKA
 kafka:
-  bootstrap-servers: kafka-svc:9093
+  bootstrap-servers: 172.17.50.10:9092
   group-id: metadata-catalog
   poll-timeout: 500
   topic:

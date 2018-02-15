@@ -60,7 +60,6 @@ public class ConfigFilesS3Services implements S3Services {
 	@Override
 	public boolean exist(String keyName) throws ObjectStorageException {
 		try {
-			LOGGER.debug("Buckets accessibles {} ", s3client.listBuckets());
 			return s3client.doesObjectExist(bucketName, keyName);
 		} catch (SdkClientException sce) {
 			throw new ObjectStorageException(keyName, keyName, bucketName, sce);

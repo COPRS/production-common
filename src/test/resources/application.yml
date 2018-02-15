@@ -10,7 +10,7 @@ logging:
   level:
     ROOT: ERROR
     org.springframework: WARN
-    fr.viveris.s1pdgs: INFO
+    fr.viveris.s1pdgs: DEBUG
     kafka: WARN
     org.apache: WARN
   file: ./s1pdgs-metadata-catalog-test.log
@@ -18,7 +18,7 @@ logging:
 #Object Storage
 storage:
   user:
-    id: MEF5PCBPTXHKOUTCKW3
+    id: MEF5PCBPTXHKOUTCKW3G
     secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
   endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
   region: eu-west-0
