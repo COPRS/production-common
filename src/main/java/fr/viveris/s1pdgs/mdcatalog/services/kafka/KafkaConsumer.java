@@ -84,7 +84,7 @@ public class KafkaConsumer {
 			try {
 				JSONObject metadataToIndex = new JSONObject();
 				if(metadata.getFamilyType().equals("SESSION") || metadata.getFamilyType().equals("RAW")) {
-					metadataToIndex = mdBuilder.buildEdrsSessionFileMetadata(fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(sessionLocalDirectory+ metadata.getMetadataToIndex())));
+					metadataToIndex = mdBuilder.buildEdrsSessionFileMetadata(fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(sessionLocalDirectory + metadata.getMetadataToIndex())));
 				}
 				else if(metadata.getFamilyType().equals("METADATA")) {
 					if(configFilesS3Services.exist(metadata.getMetadataToIndex())) {
@@ -104,7 +104,7 @@ public class KafkaConsumer {
 				}
 				LOGGER.info("Metadata created for {}", metadataToIndex.getString("productName"));
 			} catch (Exception e){
-				LOGGER.error(e.getMessage());
+				LOGGER.error(e.getClass() + e.getMessage());
 			}
 		} else {
 			LOGGER.error("Invalid action {} for metadata {}", metadata.getAction(), metadata.getMetadataToIndex());
