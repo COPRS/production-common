@@ -85,11 +85,11 @@ public class KafkaConsumer {
 			try {
 				JSONObject metadataToIndex = new JSONObject();
 				if(metadata.getFamilyType().equals("SESSION") || metadata.getFamilyType().equals("RAW")) {
-					metadataToIndex = mdBuilder.buildEdrsSessionFileMetadata(fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(metadata.getMetadataToIndex())));
+					metadataToIndex = mdBuilder.buildEdrsSessionFileMetadata(fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(sessionLocalDirectory+ metadata.getMetadataToIndex())));
 				}
 				else if(metadata.getFamilyType().equals("METADATA")) {
 					if(configFilesS3Services.exist(metadata.getMetadataToIndex())) {
-						metadataFile = new File(metadata.getMetadataToIndex());
+						metadataFile = new File(configLocalDirectory + metadata.getMetadataToIndex());
 						configFilesS3Services.downloadFile(metadata.getMetadataToIndex(), metadataFile);
 						metadataToIndex = mdBuilder.buildConfigFileMetadata(fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile), metadataFile);
 						if (!metadataFile.delete()) {
