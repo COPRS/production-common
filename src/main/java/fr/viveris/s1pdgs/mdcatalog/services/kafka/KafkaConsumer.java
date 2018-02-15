@@ -60,7 +60,6 @@ public class KafkaConsumer {
 	/**
 	 * Builder of file descriptors
 	 */
-	@Autowired
 	private FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(configLocalDirectory, sessionLocalDirectory , Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE), Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
 
 	/**
