@@ -93,9 +93,21 @@ public class KafkaConsumer {
 				else if(metadata.getFamilyType().equals("METADATA")) {
 					if(configFilesS3Services.exist(metadata.getMetadataToIndex())) {
 						metadataFile = new File(configLocalDirectory + metadata.getMetadataToIndex());
+						if (LOGGER.isDebugEnabled()) {
+							LOGGER.debug("Local file {}", metadataFile);
+						}
 						configFilesS3Services.downloadFile(metadata.getMetadataToIndex(), metadataFile);
+						if (LOGGER.isDebugEnabled()) {
+							LOGGER.debug("Local file {} downloaded", metadataFile);
+						}
 						ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile);
+						if (LOGGER.isDebugEnabled()) {
+							LOGGER.debug("ConfigFileDescriptor {}", configFileDescriptor);
+						}
 						metadataToIndex = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
+						if (LOGGER.isDebugEnabled()) {
+							LOGGER.debug("metadataToIndex {}", metadataToIndex);
+						}
 						if (!metadataFile.delete()) {
 							LOGGER.error("[processConfigFile] File {} not removed from local storage", metadataFile.getPath());
 						}
