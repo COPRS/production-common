@@ -126,7 +126,7 @@ public class FileProcessor {
 					}
 					// Send metadata
 					if (descriptor.isHasToExtractMetadata()) {
-						KafkaMetadataDto fileToIndex = new KafkaMetadataDto("CREATE", descriptor, "METADATA");
+						KafkaMetadataDto fileToIndex = new KafkaMetadataDto("CREATE", descriptor.getKeyObjectStorage(), "METADATA");
 						senderMetadata.send(fileToIndex);
 						LOGGER.info("[processConfigFile] Metadata for {} successfully sended",
 								descriptor.getRelativePath());
@@ -180,7 +180,7 @@ public class FileProcessor {
 								new Exception("File already exist in object storage"));
 					}
 					// Send metadata
-					KafkaMetadataDto fileToIndex = new KafkaMetadataDto("CREATE", descriptor, descriptor.getProductType().toString());
+					KafkaMetadataDto fileToIndex = new KafkaMetadataDto("CREATE", descriptor.getKeyObjectStorage(), descriptor.getProductType().toString());
 					senderMetadata.send(fileToIndex);
 					
 					// Publish session file

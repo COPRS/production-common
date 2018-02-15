@@ -59,7 +59,7 @@ public class KafkaMetadataProducer {
 				LOGGER.debug("[send] Success metadata = {}", metadataCrud);
 			}
 		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaMetadataPublicationException(metadataCrud.getMetadataToIndex().getProductName(), e);
+			throw new KafkaMetadataPublicationException(metadataCrud.getMetadataToIndex(), e);
 		}
 	}
 
