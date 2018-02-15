@@ -75,7 +75,7 @@ public class KafkaMetadataDto {
 	 * String formatting (JSON format)
 	 */
 	public String toString() {
-		String info = String.format("{'action': %s, 'metadataToIndex': %, 'metadata': %s}", action, metadataToIndex, familyType);
+		String info = String.format("{'action': %s, 'metadataToIndex': %s, 'metadata': %s}", action, metadataToIndex, familyType);
 		return info;
 	}
 
