@@ -29,9 +29,21 @@ public class KafkaSessionDto {
 	 * Channel number
 	 */
 	private int channel;
+	
+	/**
+	 * Default Constructor
+	 */
+	public KafkaSessionDto() {
+		
+	}
 
 	/**
+	 * Constructor
 	 * 
+	 * @param sessionIdentifier
+	 * @param productName
+	 * @param keyObjectStorage
+	 * @param channel
 	 */
 	public KafkaSessionDto(String sessionIdentifier, String productName, String keyObjectStorage, int channel) {
 		this.sessionIdentifier = sessionIdentifier;
