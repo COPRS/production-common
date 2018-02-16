@@ -54,6 +54,10 @@ public class FileDescriptorBuilder {
 		this.patternConfig = patternConfig;
 		this.patternSession = patternSession;
 	}
+	
+	public String toString() {
+		return String.format("configLocalDirectory : %s, sessionLocalDirectory : %s, patternConfig : %s, patternSession : %s", configLocalDirectory, sessionLocalDirectory, patternConfig.toString(), patternSession.toString());
+	}
 
 	/**
 	 * Build descriptor for configuration files from path file

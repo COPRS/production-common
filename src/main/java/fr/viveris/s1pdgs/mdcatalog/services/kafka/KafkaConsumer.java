@@ -100,6 +100,9 @@ public class KafkaConsumer {
 						if (LOGGER.isDebugEnabled()) {
 							LOGGER.debug("Local file {} downloaded", metadataFile);
 						}
+						if (LOGGER.isDebugEnabled()) {
+							LOGGER.debug("fileDescriptorBuilder {}", fileDescriptorBuilder);
+						}
 						ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile);
 						if (LOGGER.isDebugEnabled()) {
 							LOGGER.debug("ConfigFileDescriptor {}", configFileDescriptor);
