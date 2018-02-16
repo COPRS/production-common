@@ -120,11 +120,7 @@ public class KafkaSessionProducerTest {
 	@Test
 	public void testSend() throws InterruptedException {
 		// send the message
-		KafkaSessionDto session = new KafkaSessionDto();
-		session.setChannel(1);
-		session.setKeyObjectStorage("L20171109175634707000125/DCS_02_L20171109175634707000125_ch1_DSIB.xml");
-		session.setProductName("DCS_02_L20171109175634707000125_ch1_DSIB.xml");
-		session.setSessionIdentifier("L20171109175634707000125");
+		KafkaSessionDto session = new KafkaSessionDto("L20171109175634707000125","DCS_02_L20171109175634707000125_ch1_DSIB.xml","L20171109175634707000125/DCS_02_L20171109175634707000125_ch1_DSIB.xml",1);
 		try {
 			senderSession.send(session);
 		} catch (KafkaSessionPublicationException e) {

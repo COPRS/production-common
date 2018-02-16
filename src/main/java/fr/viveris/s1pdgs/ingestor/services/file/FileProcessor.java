@@ -10,9 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
-import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
-import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileType;
+import fr.viveris.s1pdgs.ingestor.model.FileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaSessionDto;
 import fr.viveris.s1pdgs.ingestor.model.exception.AlreadyExistObjectStorageException;
@@ -115,7 +114,7 @@ public class FileProcessor {
 			// Build model file
 			try {
 				try {
-					ConfigFileDescriptor descriptor = fileDescriptorBuilder.buildConfigFileDescriptor(file);
+					FileDescriptor descriptor = fileDescriptorBuilder.buildConfigFileDescriptor(file);
 					// Store in object storage
 					if (!configFilesS3Services.exist(descriptor.getKeyObjectStorage())) {
 						configFilesS3Services.uploadFile(descriptor.getKeyObjectStorage(), file);
@@ -166,12 +165,12 @@ public class FileProcessor {
 		File file = message.getPayload();
 		if (!file.isDirectory()) {
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Starting processing of ERDS session file {}", file.getPath());
+				LOGGER.info("Starting processing of EDRS session file {}", file.getPath());
 			}
 			// Build model file
 			try {
 				try {
-					EdrsSessionFileDescriptor descriptor = fileDescriptorBuilder.buildErdsSessionFileDescriptor(file);
+					FileDescriptor descriptor = fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
 					// Store in object storage
 					if (!sessionFilesS3Services.exist(descriptor.getKeyObjectStorage())) {
 						sessionFilesS3Services.uploadFile(descriptor.getKeyObjectStorage(), file);
@@ -185,11 +184,7 @@ public class FileProcessor {
 					
 					// Publish session file
 					if (descriptor.getProductType() == EdrsSessionFileType.SESSION) {
-						KafkaSessionDto dtoSession = new KafkaSessionDto();
-						dtoSession.setProductName(descriptor.getProductName());
-						dtoSession.setKeyObjectStorage(descriptor.getKeyObjectStorage());
-						dtoSession.setChannel(descriptor.getChannel());
-						dtoSession.setSessionIdentifier(descriptor.getSessionIdentifier());
+						KafkaSessionDto dtoSession = new KafkaSessionDto(descriptor.getSessionIdentifier(), descriptor.getProductName(), descriptor.getKeyObjectStorage(), descriptor.getChannel());
 						senderSession.send(dtoSession);
 					}
 
@@ -208,7 +203,7 @@ public class FileProcessor {
 				LOGGER.error(fre.getMessage());
 			}
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("End processing of ERDS session file {}", file.getPath());
+				LOGGER.info("End processing of EDRS session file {}", file.getPath());
 			}
 		}
 	}

@@ -4,9 +4,8 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
-import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileType;
+import fr.viveris.s1pdgs.ingestor.model.FileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.FileExtension;
 import fr.viveris.s1pdgs.ingestor.model.exception.FilePathException;
 import fr.viveris.s1pdgs.ingestor.model.exception.IgnoredFileException;
@@ -63,7 +62,7 @@ public class FileDescriptorBuilder {
 	 * @throws FilePathException
 	 *             if we have
 	 */
-	public ConfigFileDescriptor buildConfigFileDescriptor(File file) throws FilePathException, IgnoredFileException {
+	public FileDescriptor buildConfigFileDescriptor(File file) throws FilePathException, IgnoredFileException {
 
 		// Extract object storage key
 		String absolutePath = file.getAbsolutePath();
@@ -79,7 +78,7 @@ public class FileDescriptorBuilder {
 		}
 
 		// Check if key matches the pattern
-		ConfigFileDescriptor configFile = null;
+		FileDescriptor configFile = null;
 		Matcher m = patternConfig.matcher(relativePath);
 		if (m.matches()) {
 			// Extract product name
@@ -97,16 +96,10 @@ public class FileDescriptorBuilder {
 				filename = relativePath.substring(indexLastSeparator + 1);
 			}
 			// Build descriptor
-			configFile = new ConfigFileDescriptor();
-			configFile.setFilename(filename);
+			configFile = new FileDescriptor();
 			configFile.setRelativePath(relativePath);
 			configFile.setKeyObjectStorage(relativePath);
 			configFile.setProductName(productName);
-			configFile.setMissionId(m.group(1));
-			configFile.setSatelliteId(m.group(2));
-			configFile.setProductClass(m.group(4));
-			configFile.setProductType(m.group(5));
-			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));
 			configFile.setHasToExtractMetadata(false);
 			if (isRoot || filename.equalsIgnoreCase("manifest.safe")) {
 				configFile.setHasToExtractMetadata(true);
@@ -120,7 +113,7 @@ public class FileDescriptorBuilder {
 		return configFile;
 	}
 
-	public EdrsSessionFileDescriptor buildErdsSessionFileDescriptor(File file)
+	public FileDescriptor buildEdrsSessionFileDescriptor(File file)
 			throws FilePathException, IgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
@@ -142,14 +135,11 @@ public class FileDescriptorBuilder {
 				throw new FilePathException(relativePath, relativePath, "IIF file");
 			}
 
-			EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
-			descriptor.setFilename(m.group(9));
+			FileDescriptor descriptor = new FileDescriptor();
 			descriptor.setRelativePath(relativePath);
 			descriptor.setProductName(m.group(9));
 			descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));
 			descriptor.setProductType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));
-			descriptor.setMissionId(m.group(1));
-			descriptor.setSatelliteId(m.group(2));
 			descriptor.setChannel(Integer.parseInt(m.group(7)));
 			descriptor.setSessionIdentifier(m.group(4));
 			descriptor.setKeyObjectStorage(relativePath);

@@ -33,8 +33,11 @@ public class KafkaSessionDto {
 	/**
 	 * 
 	 */
-	public KafkaSessionDto() {
-		// TODO Auto-generated constructor stub
+	public KafkaSessionDto(String sessionIdentifier, String productName, String keyObjectStorage, int channel) {
+		this.sessionIdentifier = sessionIdentifier;
+		this.productName = productName;
+		this.keyObjectStorage = keyObjectStorage;
+		this.channel = channel;
 	}
 
 	/**
