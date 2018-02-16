@@ -185,5 +185,11 @@ public class FileDescriptor {
 		// field comparison
 		return Objects.equals(keyObjectStorage, sessionFile.getKeyObjectStorage());
 	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(relativePath, extension, productName, productType, 
+				hasToExtractMetadata, keyObjectStorage, sessionIdentifier, channel);
+	}
 
 }
