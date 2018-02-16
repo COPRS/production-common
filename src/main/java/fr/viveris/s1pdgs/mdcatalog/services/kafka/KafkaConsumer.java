@@ -62,8 +62,7 @@ public class KafkaConsumer {
 	/**
 	 * Builder of file descriptors
 	 */
-	private FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(configLocalDirectory, sessionLocalDirectory , Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE), Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
-
+	private FileDescriptorBuilder fileDescriptorBuilder;
 	/**
 	 * Count down latch which allows the POJO to signal that a message is received
 	 */
@@ -80,6 +79,7 @@ public class KafkaConsumer {
 	public void receive(KafkaMetadataDto metadata) {
 		LOGGER.debug("[receive] Consume message {}", metadata);
 		this.latchMetadata.countDown();
+		this.fileDescriptorBuilder = new FileDescriptorBuilder(configLocalDirectory, sessionLocalDirectory , Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE), Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
 		
 		// Create metadata
 		if (metadata.getAction().equals("CREATE")) {
