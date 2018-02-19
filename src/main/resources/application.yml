@@ -7,14 +7,29 @@ spring:
     
 # Logging
 logging:
-  config: logback-spring.xml
+  config: ${catalog_logging_config:logback-spring.xml}
   level:
-    ROOT: ERROR
-    org.springframework: WARN
-    fr.viveris.s1pdgs: DEBUG
-    kafka: WARN
-    org.apache: WARN
-  file: ./s1pdgs-metadata-catalog.log
+    ROOT: ${catalog_logging_level_root:ERROR}
+    org.springframework: ${catalog_logging_level_orgspringframework:ERROR}
+    fr.viveris.s1pdgs: ${catalog_logging_level_frviveriss1pdgs:INFO}
+    kafka: ${catalog_logging_level_kafka:WARN}
+    org.apache: ${catalog_logging_level_orgapache:WARN}
+  file: ${catalog_logging_file:./s1pdgs-metadata-catalog.log}
+
+# KAFKA
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
+  group-id: ${catalog_kafka_group:metadata-catalog}
+  poll-timeout: ${kafka_poll-timeout:500}
+  topic:
+    metadata: ${kafka_topic_metadata:t-pdgs-metadata}
+    
+# Elastic Search
+elasticsearch:
+  host: ${elastic_host:es-svc}
+  port: ${elastic_port:25000}
+  index-type: ${elastic_index-type:metadata}
+
 
 #Object Storage
 storage:
@@ -26,17 +41,3 @@ storage:
   buckets:
     config-files: config-files
     session-files: session-files
-
-# KAFKA
-kafka:
-  bootstrap-servers: 172.17.50.10:9092
-  group-id: metadata-catalog
-  poll-timeout: 500
-  topic:
-    metadata: t-pdgs-metadata
-    
-# Elastic Search
-elasticsearch:
-  host: es-svc
-  port: 25000
-  index-type: metadata
