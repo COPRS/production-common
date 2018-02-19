@@ -10,19 +10,10 @@ import java.util.Objects;
  */
 public class KafkaConfigFileDto {
 	/**
-	 * Metadata action (CRUD)
-	 */
-	private String action;
-	/**
-	 * file descriptor of the metadata to index
+	 * ObjectKeyStore of the metadata to index
 	 */
 	private String metadataToIndex;
 	
-	/**
-	 * Family type of the metadata to index (RAW/SESSION/AUX/MPL)
-	 */
-	private String familyType;
-
 	/**
 	 * Default constructor
 	 */
@@ -34,26 +25,10 @@ public class KafkaConfigFileDto {
 	 * @param action
 	 * @param metadata
 	 */
-	public KafkaConfigFileDto(String action, String metadataToIndex, String familyType) {
-		this.action = action;
+	public KafkaConfigFileDto(String metadataToIndex) {
 		this.metadataToIndex = metadataToIndex;
-		this.familyType = familyType;
 	}
 	
-
-	/**
-	 * @return the action
-	 */
-	public String getAction() {
-		return action;
-	}
-
-	/**
-	 * @param action the action to set
-	 */
-	public void setAction(String action) {
-		this.action = action;
-	}
 
 	public String getMetadataToIndex() {
 		return metadataToIndex;
@@ -63,19 +38,12 @@ public class KafkaConfigFileDto {
 		this.metadataToIndex = metadataToIndex;
 	}
 
-	public String getFamilyType() {
-		return familyType;
-	}
-
-	public void setFamilyType(String familyType) {
-		this.familyType = familyType;
-	}
 
 	/**
 	 * String formatting (JSON format)
 	 */
 	public String toString() {
-		String info = String.format("{'action': %s, 'metadataToIndex': %s, 'metadata': %s}", action, metadataToIndex, familyType);
+		String info = String.format("{'metadataToIndex': %s}", metadataToIndex);
 		return info;
 	}
 
@@ -92,11 +60,11 @@ public class KafkaConfigFileDto {
 			return false;
 		KafkaConfigFileDto meta = (KafkaConfigFileDto) o;
 		// field comparison
-		return Objects.equals(action, meta.getAction()) && Objects.equals(metadataToIndex, meta.getMetadataToIndex());
+		return Objects.equals(metadataToIndex, meta.getMetadataToIndex()) && Objects.equals(metadataToIndex, meta.getMetadataToIndex());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(action, metadataToIndex);
+		return Objects.hash(metadataToIndex);
 	}
 }

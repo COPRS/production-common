@@ -2,6 +2,8 @@ package fr.viveris.s1pdgs.mdcatalog.model.dto;
 
 import java.util.Objects;
 
+import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileType;
+
 /**
  * Exchanged object in the topic t-pdgs-edrs-sessions
  * 
@@ -16,6 +18,8 @@ public class KafkaEdrsSessionDto {
 	private String objectStorageKey;
 	
 	private int channelId;
+	
+	private EdrsSessionFileType productType;
 
 	/**
 	 * Default constructor
@@ -27,9 +31,10 @@ public class KafkaEdrsSessionDto {
 	/**
 	 * Default constructor
 	 */
-	public KafkaEdrsSessionDto(String objectStorageKey, int channelId) {
+	public KafkaEdrsSessionDto(String objectStorageKey, int channelId, EdrsSessionFileType productType) {
 		this.objectStorageKey = objectStorageKey;
 		this.channelId = channelId;
+		this.productType = productType;
 	}
 
 	/**
@@ -59,6 +64,14 @@ public class KafkaEdrsSessionDto {
 	 */
 	public void setChannelId(int channelId) {
 		this.channelId = channelId;
+	}
+
+	public EdrsSessionFileType getProductType() {
+		return productType;
+	}
+
+	public void setProductType(EdrsSessionFileType productType) {
+		this.productType = productType;
 	}
 
 	/**
