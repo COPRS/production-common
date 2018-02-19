@@ -34,10 +34,10 @@ elasticsearch:
 #Object Storage
 storage:
   user:
-    id: MEF5PCBPTXHKOUTCKW3G
-    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
-  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
-  region: eu-west-0
+    id: ${storage_user_id:MEF5PCBPTXHKOUTCKW3G}
+    secret: ${storage_user_secret:4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo}
+  endpoint: ${storage_endpoint:http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/}
+  region: ${storage_region:eu-west-0}
   buckets:
-    config-files: config-files
-    session-files: session-files
+    config-files: ${storage_buckets_config-files:config-files}
+    session-files: ${storage_buckets_session-files:session-files}
