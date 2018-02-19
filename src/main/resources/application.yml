@@ -7,22 +7,22 @@ spring:
     
 # Logging
 logging:
-  config: logback-spring.xml
+  config: ${ingestor_logging_config:logback-spring.xml}
   level:
-    ROOT: ERROR
-    org.springframework: ERROR
-    fr.viveris.s1pdgs: INFO
-    kafka: WARN
-  file: ./s1pdgs-ingestor.log
+    ROOT: ${ingestor_logging_level_root:ERROR}
+    org.springframework: ${ingestor_logging_level_orgspringframework:ERROR}
+    fr.viveris.s1pdgs: ${ingestor_logging_level_frviveriss1pdgs:INFO}
+    kafka: ${ingestor_logging_level_kafka:WARN}
+  file: ${ingestor_logging_file:./s1pdgs-ingestor.log}
 
 # KAFKA
 kafka:
-  bootstrap-servers: kafka-svc:9093
-  group-id: ingestors
-  poll-timeout: 500
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
+  group-id: ${ingestor_kafka_group:ingestors}
+  poll-timeout: ${kafka_poll-timeout:500}
   topic:
-    metadata: t-pdgs-metadata
-    sessions: t-pdgs-sessions
+    metadata: ${kafka_topic_metadata:t-pdgs-metadata}
+    sessions: ${kafka_topic_sessions:t-pdgs-sessions}
 
 #FTP
 ftp:
@@ -42,30 +42,30 @@ ftp:
     remote-directory: /edrs_sessions/
     upload-fixed-rate: 5000
     cache-max-capacity: 70
- 
+
 #Object Storage
 storage:
   user:
-    id: MEF5PCBPTXHKOUTCKW3G
-    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
-  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
-  region: eu-west-0
+    id: ${storage_user_id:MEF5PCBPTXHKOUTCKW3G}
+    secret: ${storage_user_secret:4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo}
+  endpoint: ${storage_endpoint:http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/}
+  region: ${storage_region:eu-west-0}
   buckets:
-    config-files: config-files
-    session-files: session-files
+    config-files: ${storage_buckets_config-files:config-files}
+    session-files: ${storage_buckets_session-files:session-files}
  
  
 # File
 file:
   config-files:
-    local-directory: /data/local-ingestor/config_files/ # Must contains the last /
-    read-fixed-rate: 1000
-    clean-empty-directory-rate: 15000
-    clean-empty-min-age: 13000
-    cache-max-capacity: 10
+    local-directory: ${ingestor_config-files_local-directory:/data/local-ingestor/config_files/} # Must contains the last /
+    read-fixed-rate: ${ingestor_file_read-fixed-rate:1000}
+    clean-empty-directory-rate: ${ingestor_file_clean-empty-directory-rate:15000}
+    clean-empty-min-age: ${ingestor_file_clean-empty-min-age:13000}
+    cache-max-capacity: ${ingestor_config-files_cache-max-capacity:10}
   session-files:
-    local-directory: /data/local-ingestor/edrs_sessions/ # Must contains the last /
-    read-fixed-rate: 1000
-    clean-empty-directory-rate: 15000
-    clean-empty-min-age: 13000
-    cache-max-capacity: 70
+    local-directory: ${ingestor_session-files_local-directory:/data/local-ingestor/edrs_sessions/} # Must contains the last /
+    read-fixed-rate: ${ingestor_file_read-fixed-rate:1000}
+    clean-empty-directory-rate: ${ingestor_file_clean-empty-directory-rate:15000}
+    clean-empty-min-age: ${ingestor_file_clean-empty-min-age:13000}
+    cache-max-capacity: ${ingestor_session-files_cache-max-capacity:70}
