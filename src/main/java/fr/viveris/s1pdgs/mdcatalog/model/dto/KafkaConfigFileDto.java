@@ -8,7 +8,7 @@ import java.util.Objects;
  * @author Cyrielle Gailliard
  *
  */
-public class KafkaMetadataDto {
+public class KafkaConfigFileDto {
 	/**
 	 * Metadata action (CRUD)
 	 */
@@ -26,7 +26,7 @@ public class KafkaMetadataDto {
 	/**
 	 * Default constructor
 	 */
-	public KafkaMetadataDto() {
+	public KafkaConfigFileDto() {
 	}
 
 	/**
@@ -34,7 +34,7 @@ public class KafkaMetadataDto {
 	 * @param action
 	 * @param metadata
 	 */
-	public KafkaMetadataDto(String action, String metadataToIndex, String familyType) {
+	public KafkaConfigFileDto(String action, String metadataToIndex, String familyType) {
 		this.action = action;
 		this.metadataToIndex = metadataToIndex;
 		this.familyType = familyType;
@@ -90,7 +90,7 @@ public class KafkaMetadataDto {
 		// type check and cast
 		if (getClass() != o.getClass())
 			return false;
-		KafkaMetadataDto meta = (KafkaMetadataDto) o;
+		KafkaConfigFileDto meta = (KafkaConfigFileDto) o;
 		// field comparison
 		return Objects.equals(action, meta.getAction()) && Objects.equals(metadataToIndex, meta.getMetadataToIndex());
 	}

@@ -20,43 +20,28 @@ import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
 public class FileDescriptorBuilder {
 
 	/**
-	 * Pattern for configuration files to extract data
+	 * Pattern for files to extract data
 	 */
-	private final Pattern patternConfig;
+	private final Pattern pattern;
 
 	/**
-	 * Pattern for configuration files to extract data
+	 * Local directory for files
 	 */
-	private final Pattern patternSession;
-
-	/**
-	 * Local directory for configuration files
-	 */
-	private final String configLocalDirectory;
-
-	/**
-	 * Local directory for ERDS session files
-	 */
-	private final String sessionLocalDirectory;
+	private final String localDirectory;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param configLocalDirectory
-	 * @param sessionLocalDirectory
-	 * @param patternConfig
-	 * @param patternSession
+	 * @param localDirectory
+	 * @param pattern
 	 */
-	public FileDescriptorBuilder(final String configLocalDirectory, final String sessionLocalDirectory,
-			final Pattern patternConfig, final Pattern patternSession) {
-		this.configLocalDirectory = configLocalDirectory;
-		this.sessionLocalDirectory = sessionLocalDirectory;
-		this.patternConfig = patternConfig;
-		this.patternSession = patternSession;
+	public FileDescriptorBuilder(final String localDirectory, final Pattern pattern) {
+		this.localDirectory = localDirectory;
+		this.pattern = pattern;
 	}
 	
 	public String toString() {
-		return String.format("configLocalDirectory : %s, sessionLocalDirectory : %s, patternConfig : %s, patternSession : %s", configLocalDirectory, sessionLocalDirectory, patternConfig.toString(), patternSession.toString());
+		return String.format("localDirectory : %s, pattern : %s", localDirectory, pattern.toString());
 	}
 
 	/**
@@ -71,10 +56,10 @@ public class FileDescriptorBuilder {
 
 		// Extract object storage key
 		String absolutePath = file.getAbsolutePath();
-		if (absolutePath.length() <= configLocalDirectory.length()) {
+		if (absolutePath.length() <= localDirectory.length()) {
 			throw new FilePathException(absolutePath, absolutePath, "Filename length is too short");
 		}
-		String relativePath = absolutePath.substring(configLocalDirectory.length());
+		String relativePath = absolutePath.substring(localDirectory.length());
 		relativePath = relativePath.replace("\\", "/");
 
 		// Ignored if directory
@@ -84,7 +69,7 @@ public class FileDescriptorBuilder {
 
 		// Check if key matches the pattern
 		ConfigFileDescriptor configFile = null;
-		Matcher m = patternConfig.matcher(relativePath);
+		Matcher m = pattern.matcher(relativePath);
 		if (m.matches()) {
 			// Extract product name
 			String productName = relativePath;
@@ -128,10 +113,10 @@ public class FileDescriptorBuilder {
 			throws FilePathException, IgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
-		if (absolutePath.length() <= sessionLocalDirectory.length()) {
+		if (absolutePath.length() <= localDirectory.length()) {
 			throw new FilePathException(absolutePath, absolutePath, "Filename too short");
 		}
-		String relativePath = absolutePath.substring(sessionLocalDirectory.length());
+		String relativePath = absolutePath.substring(localDirectory.length());
 		relativePath = relativePath.replace("\\", "/");
 
 		// Ignored if directory
@@ -139,7 +124,7 @@ public class FileDescriptorBuilder {
 			throw new IgnoredFileException(relativePath);
 		}
 
-		Matcher m = patternSession.matcher(relativePath);
+		Matcher m = pattern.matcher(relativePath);
 		if (m.matches()) {
 			// Ignore the IIF files
 			if (m.group(11).toLowerCase().contains("iif_")) {
