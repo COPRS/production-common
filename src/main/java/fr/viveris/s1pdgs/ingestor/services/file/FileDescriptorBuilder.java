@@ -141,7 +141,6 @@ public class FileDescriptorBuilder {
 			descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));
 			descriptor.setProductType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));
 			descriptor.setChannel(Integer.parseInt(m.group(7)));
-			descriptor.setSessionIdentifier(m.group(4));
 			descriptor.setKeyObjectStorage(relativePath);
 
 			return descriptor;

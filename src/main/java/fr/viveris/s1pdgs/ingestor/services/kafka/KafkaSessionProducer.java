@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaSessionDto;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.ingestor.model.exception.KafkaSessionPublicationException;
 
 /**
@@ -35,12 +35,12 @@ public class KafkaSessionProducer {
 	 * KAFKA template for topic "session"
 	 */
 	@Autowired
-	private KafkaTemplate<String, KafkaSessionDto> kafkaSessionTemplate;
+	private KafkaTemplate<String, KafkaEdrsSessionDto> kafkaSessionTemplate;
 
 	/**
 	 * Name of the topic "session"
 	 */
-	@Value("${kafka.topic.sessions}")
+	@Value("${kafka.topic.edrs-sessions}")
 	private String kafkaTopic;
 
 	/**
@@ -48,7 +48,7 @@ public class KafkaSessionProducer {
 	 * 
 	 * @param descriptor
 	 */
-	public void send(KafkaSessionDto descriptor) throws KafkaSessionPublicationException {
+	public void send(KafkaEdrsSessionDto descriptor) throws KafkaSessionPublicationException {
 		try {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("[send] Send ERDS session = {}", descriptor);
@@ -58,7 +58,7 @@ public class KafkaSessionProducer {
 				LOGGER.debug("[send] Success RDS session = {}", descriptor);
 			}
 		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaSessionPublicationException(descriptor.getProductName(), e);
+			throw new KafkaSessionPublicationException(descriptor.getObjectStorageKey(), e);
 		}
 	}
 
@@ -67,19 +67,19 @@ public class KafkaSessionProducer {
 	 * 
 	 * @param descriptor
 	 */
-	public void sendAsynchrone(KafkaSessionDto descriptor) {
+	public void sendAsynchrone(KafkaEdrsSessionDto descriptor) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("[sendAsynchrone] Send ERDS session = {}", descriptor);
 		}
 
-		ListenableFuture<SendResult<String, KafkaSessionDto>> future = kafkaSessionTemplate.send(kafkaTopic,
-				descriptor.getSessionIdentifier(), descriptor);
+		ListenableFuture<SendResult<String, KafkaEdrsSessionDto>> future = kafkaSessionTemplate.send(kafkaTopic,
+				descriptor.getObjectStorageKey(), descriptor);
 
 		// We register a callback to verify whether the messages are sent to the topic
 		// successfully or not
-		future.addCallback(new ListenableFutureCallback<SendResult<String, KafkaSessionDto>>() {
+		future.addCallback(new ListenableFutureCallback<SendResult<String, KafkaEdrsSessionDto>>() {
 			@Override
-			public void onSuccess(SendResult<String, KafkaSessionDto> result) {
+			public void onSuccess(SendResult<String, KafkaEdrsSessionDto> result) {
 				if (LOGGER.isDebugEnabled()) {
 					LOGGER.debug("[sendAsynchrone] Success ERDS session = {}", descriptor);
 				}

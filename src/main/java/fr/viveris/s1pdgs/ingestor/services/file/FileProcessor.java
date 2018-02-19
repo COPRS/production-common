@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.ingestor.model.FileDescriptor;
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaSessionDto;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.ingestor.model.exception.AlreadyExistObjectStorageException;
 import fr.viveris.s1pdgs.ingestor.model.exception.FileRuntimeException;
 import fr.viveris.s1pdgs.ingestor.model.exception.FileTerminatedException;
@@ -125,7 +125,7 @@ public class FileProcessor {
 					}
 					// Send metadata
 					if (descriptor.isHasToExtractMetadata()) {
-						KafkaMetadataDto fileToIndex = new KafkaMetadataDto("CREATE", descriptor.getKeyObjectStorage(), "METADATA");
+						KafkaConfigFileDto fileToIndex = new KafkaConfigFileDto(descriptor.getKeyObjectStorage());
 						senderMetadata.send(fileToIndex);
 						LOGGER.info("[processConfigFile] Metadata for {} successfully sended",
 								descriptor.getRelativePath());
@@ -178,13 +178,9 @@ public class FileProcessor {
 						throw new IgnoredFileException(descriptor.getProductName(),
 								new Exception("File already exist in object storage"));
 					}
-					// Send metadata
-					KafkaMetadataDto fileToIndex = new KafkaMetadataDto("CREATE", descriptor.getKeyObjectStorage(), descriptor.getProductType().toString());
-					senderMetadata.send(fileToIndex);
-					
 					// Publish session file
 					if (descriptor.getProductType() == EdrsSessionFileType.SESSION) {
-						KafkaSessionDto dtoSession = new KafkaSessionDto(descriptor.getSessionIdentifier(), descriptor.getProductName(), descriptor.getKeyObjectStorage(), descriptor.getChannel());
+						KafkaEdrsSessionDto dtoSession = new KafkaEdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(), descriptor.getProductType());
 						senderSession.send(dtoSession);
 					}
 

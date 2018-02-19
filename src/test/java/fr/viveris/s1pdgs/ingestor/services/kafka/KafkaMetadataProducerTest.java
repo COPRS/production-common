@@ -33,7 +33,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.ingestor.model.exception.KafkaMetadataPublicationException;
 
 /**
@@ -58,9 +58,9 @@ public class KafkaMetadataProducerTest {
 	private KafkaMetadataProducer senderMetadata;
 
 	// KAFKA simulated consumer
-	private KafkaMessageListenerContainer<String, KafkaMetadataDto> container;
+	private KafkaMessageListenerContainer<String, KafkaConfigFileDto> container;
 	// records
-	private BlockingQueue<ConsumerRecord<String, KafkaMetadataDto>> records;
+	private BlockingQueue<ConsumerRecord<String, KafkaConfigFileDto>> records;
 
 	// Embedded KAFKA
 	@ClassRule
@@ -78,8 +78,8 @@ public class KafkaMetadataProducerTest {
 		consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
 		// create a Kafka consumer factory
-		DefaultKafkaConsumerFactory<String, KafkaMetadataDto> consumerFactory = new DefaultKafkaConsumerFactory<String, KafkaMetadataDto>(
-				consumerProperties, new StringDeserializer(), new JsonDeserializer<>(KafkaMetadataDto.class));
+		DefaultKafkaConsumerFactory<String, KafkaConfigFileDto> consumerFactory = new DefaultKafkaConsumerFactory<String, KafkaConfigFileDto>(
+				consumerProperties, new StringDeserializer(), new JsonDeserializer<>(KafkaConfigFileDto.class));
 
 		// set the topic that needs to be consumed
 		ContainerProperties containerProperties = new ContainerProperties(SENDER_TOPIC);
@@ -91,9 +91,9 @@ public class KafkaMetadataProducerTest {
 		records = new LinkedBlockingQueue<>();
 
 		// setup a Kafka message listener
-		container.setupMessageListener(new MessageListener<String, KafkaMetadataDto>() {
+		container.setupMessageListener(new MessageListener<String, KafkaConfigFileDto>() {
 			@Override
-			public void onMessage(ConsumerRecord<String, KafkaMetadataDto> record) {
+			public void onMessage(ConsumerRecord<String, KafkaConfigFileDto> record) {
 				LOGGER.debug("test-listener received message={}", record.toString());
 				records.add(record);
 			}
@@ -124,17 +124,15 @@ public class KafkaMetadataProducerTest {
 	@Test
 	public void testSend() throws InterruptedException, JSONException {
 		// send the message
-		KafkaMetadataDto metadata = new KafkaMetadataDto();
-		metadata.setAction("CREATE");
+		KafkaConfigFileDto metadata = new KafkaConfigFileDto();
 		metadata.setMetadataToIndex(null);
-		metadata.setFamilyType("TEST");
 		try {
 			senderMetadata.send(metadata);
 		} catch (KafkaMetadataPublicationException e) {
 			assertFalse("Exception occurred " + e.getMessage(), false);
 		}
 		// check that the message was received
-		ConsumerRecord<String, KafkaMetadataDto> received = records.poll(10, TimeUnit.SECONDS);
+		ConsumerRecord<String, KafkaConfigFileDto> received = records.poll(10, TimeUnit.SECONDS);
 		// Hamcrest Matchers to check the value
 		assertThat(received.value()).isEqualTo(metadata);
 		// AssertJ Condition to check the key

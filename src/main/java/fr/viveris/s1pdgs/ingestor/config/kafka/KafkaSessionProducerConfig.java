@@ -14,7 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaSessionDto;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaSessionProducer;
 
 /**
@@ -49,7 +49,7 @@ public class KafkaSessionProducerConfig {
 	 * @return
 	 */
 	@Bean
-	public ProducerFactory<String, KafkaSessionDto> producerSessionFactory() {
+	public ProducerFactory<String, KafkaEdrsSessionDto> producerSessionFactory() {
 		return new DefaultKafkaProducerFactory<>(producerSessionConfigs());
 	}
 
@@ -58,7 +58,7 @@ public class KafkaSessionProducerConfig {
 	 * @return
 	 */
 	@Bean
-	public KafkaTemplate<String, KafkaSessionDto> kafkaSessionTemplate() {
+	public KafkaTemplate<String, KafkaEdrsSessionDto> kafkaSessionTemplate() {
 		return new KafkaTemplate<>(producerSessionFactory());
 	}
 

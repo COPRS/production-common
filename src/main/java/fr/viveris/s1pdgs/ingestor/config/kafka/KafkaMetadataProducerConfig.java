@@ -14,7 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaMetadataProducer;
 
 /**
@@ -51,7 +51,7 @@ public class KafkaMetadataProducerConfig {
 	 * @return
 	 */
 	@Bean
-	public ProducerFactory<String, KafkaMetadataDto> producerMetadataFactory() {
+	public ProducerFactory<String, KafkaConfigFileDto> producerMetadataFactory() {
 		return new DefaultKafkaProducerFactory<>(producerMetadataConfigs());
 	}
 
@@ -60,7 +60,7 @@ public class KafkaMetadataProducerConfig {
 	 * @return
 	 */
 	@Bean
-	public KafkaTemplate<String, KafkaMetadataDto> kafkaMetadataTemplate() {
+	public KafkaTemplate<String, KafkaConfigFileDto> kafkaMetadataTemplate() {
 		return new KafkaTemplate<>(producerMetadataFactory());
 	}
 

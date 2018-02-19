@@ -37,11 +37,6 @@ public class FileDescriptor {
 	private EdrsSessionFileType productType;
 
 	/**
-	 * Session identifier
-	 */
-	private String sessionIdentifier;
-
-	/**
 	 * Channel number
 	 */
 	private int channel;
@@ -129,20 +124,6 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @return the sessionIdentifier
-	 */
-	public String getSessionIdentifier() {
-		return sessionIdentifier;
-	}
-
-	/**
-	 * @param sessionIdentifier the sessionIdentifier to set
-	 */
-	public void setSessionIdentifier(String sessionIdentifier) {
-		this.sessionIdentifier = sessionIdentifier;
-	}
-
-	/**
 	 * @return the channel
 	 */
 	public int getChannel() {
@@ -189,7 +170,7 @@ public class FileDescriptor {
 	@Override
 	public int hashCode() {
 		return Objects.hash(relativePath, extension, productName, productType, 
-				hasToExtractMetadata, keyObjectStorage, sessionIdentifier, channel);
+				hasToExtractMetadata, keyObjectStorage, channel);
 	}
 
 }
