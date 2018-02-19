@@ -32,7 +32,8 @@ kafka:
   group-id: metadata-catalog
   poll-timeout: 500
   topic:
-    metadata: t-pdgs-metadata
+    config-files: t-pdgs-config-files
+    edrs-sessions: t-pdgs-edrs-sessions
 
 # Elastic Search
 elasticsearch:

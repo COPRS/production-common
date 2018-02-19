@@ -60,7 +60,7 @@ public class KafkaConfigFileDto {
 			return false;
 		KafkaConfigFileDto meta = (KafkaConfigFileDto) o;
 		// field comparison
-		return Objects.equals(metadataToIndex, meta.getMetadataToIndex()) && Objects.equals(metadataToIndex, meta.getMetadataToIndex());
+		return Objects.equals(metadataToIndex, meta.getMetadataToIndex());
 	}
 
 	@Override
