@@ -20,8 +20,8 @@ kafka:
   group-id: ingestors
   poll-timeout: 3000
   topic:
-    metadata: t-pdgs-metadata
-    sessions: t-pdgs-sessions
+    config-files: t-pdgs-config-files
+    edrs-sessions: t-pdgs-edrs-sessions
 
 #FTP
 ftp:
