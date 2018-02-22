@@ -25,6 +25,7 @@ import org.json.XML;
 
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
 
 /**
@@ -69,6 +70,22 @@ public class ExtractMetadata {
 	private String readFile(String fileName, Charset encoding) throws IOException {
 		byte[] encoded = Files.readAllBytes(Paths.get(fileName));
 		return new String(encoded, encoding);
+	}
+	
+	/**
+	 * Function which transform the raw coordinates in the good format
+	 * 
+	 * @param rawCoordinates
+	 * 
+	 * @return the coordinates in good format
+	 */
+	private String processCoordinates(String rawCoordinates) {
+		String returnString = "[";
+		for (String coord : rawCoordinates.split(" ")) {
+			returnString +=  "[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "],";
+		}
+		returnString = returnString.substring(0, returnString.length()-1) + "]" ;
+		return returnString;
 	}
 
 	/**
@@ -287,6 +304,98 @@ public class ExtractMetadata {
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 			return metadataJSONObject;
 		} catch (JSONException e) {
+			throw new MetadataExtractionException(descriptor.getProductName(), e);
+		}
+	}
+	
+	public JSONObject processL0Prod(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
+		try {
+			//XSLT Transformation
+			Source xsltL0MANIFEST = new StreamSource(new File("XSLT_L0_MANIFEST.xslt"));
+	        Transformer transformerL0 = transFactory.newTransformer(xsltL0MANIFEST);
+	        Source l0File = new StreamSource(file);
+	        transformerL0.transform(l0File, new StreamResult(new File("tmp/output.xml")));
+	        //JSON creation
+	        JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
+	        JSONObject metadataJSONObject = new JSONObject();
+	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
+	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("totalNumberOfSlice").has("content")) {
+	        	metadataJSONObject.put("totalNumberOfSlice", jsonFromXmlTmp.getJSONObject("totalNumberOfSlice").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("totalNumberOfSlice").has("content")) {
+	        	metadataJSONObject.put("totalNumberOfSlice", jsonFromXmlTmp.getJSONObject("totalNumberOfSlice").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").has("content")) {
+	        	metadataJSONObject.put("theoreticalSliceLength", jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("pass").has("content")) {
+	        	metadataJSONObject.put("pass", jsonFromXmlTmp.getJSONObject("pass").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("stopTimeANX").has("content")) {
+	        	metadataJSONObject.put("stopTimeANX", jsonFromXmlTmp.getJSONObject("stopTimeANX").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("sliceCoordinates").has("content")) {
+	        	JSONObject coordinates = new JSONObject();
+	        	coordinates.put("type", "Polygon");
+	        	coordinates.put("coordinates", processCoordinates(jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
+	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("sliceNumber").has("content")) {
+	        	metadataJSONObject.put("sliceNumber", jsonFromXmlTmp.getJSONObject("sliceNumber").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
+	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("sliceNumber").has("content")) {
+	        	metadataJSONObject.put("sliceNumber", jsonFromXmlTmp.getJSONObject("sliceNumber").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").has("content")) {
+	        	metadataJSONObject.put("absoluteStopOrbit", jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("circulationFlag").has("content")) {
+	        	metadataJSONObject.put("circulationFlag", jsonFromXmlTmp.getJSONObject("circulationFlag").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("productConsolidation").has("content")) {
+	        	metadataJSONObject.put("productConsolidation", jsonFromXmlTmp.getJSONObject("productConsolidation").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").has("content")) {
+	        	metadataJSONObject.put("absoluteStartOrbit", jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").has("content")) {
+	        	metadataJSONObject.put("instrumentConfigurationId", jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("sliceOverlap").has("content")) {
+	        	metadataJSONObject.put("sliceOverlap", jsonFromXmlTmp.getJSONObject("sliceOverlap").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("startTimeANX").has("content")) {
+	        	metadataJSONObject.put("startTimeANX", jsonFromXmlTmp.getJSONObject("startTimeANX").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("relativeStopOrbit").has("content")) {
+	        	metadataJSONObject.put("relativeStopOrbit", jsonFromXmlTmp.getJSONObject("relativeStopOrbit").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("relativeStartOrbit").has("content")) {
+	        	metadataJSONObject.put("relativeStartOrbit", jsonFromXmlTmp.getJSONObject("relativeStartOrbit").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("startTime").has("content")) {
+	        	metadataJSONObject.put("startTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
+	        }
+	        if(jsonFromXmlTmp.getJSONObject("stopTime").has("content")) {
+	        	metadataJSONObject.put("stopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
+	        }
+	        metadataJSONObject.put("productName", descriptor.getProductName());
+	        metadataJSONObject.put("productClass", descriptor.getClass());
+	        metadataJSONObject.put("productType", descriptor.getProductType());
+	        metadataJSONObject.put("resolution", descriptor.getResolution());
+	        metadataJSONObject.put("missionId", descriptor.getMissionId());
+	        metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+	        metadataJSONObject.put("swathtype", descriptor.getSwathtype());
+	        metadataJSONObject.put("polarisation", descriptor.getPolarisation());
+	        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+	        metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+	        return metadataJSONObject;
+		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(descriptor.getProductName(), e);
 		}
 	}

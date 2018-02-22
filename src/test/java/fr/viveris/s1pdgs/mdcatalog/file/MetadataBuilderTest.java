@@ -111,7 +111,6 @@ public class MetadataBuilderTest {
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.XML);
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		descriptor.setHasToExtractMetadata(true);
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
@@ -155,7 +154,6 @@ public class MetadataBuilderTest {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		descriptor.setHasToExtractMetadata(true);
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");

@@ -6,9 +6,15 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +93,40 @@ public class EsServices {
 		} catch (Exception e) {
 			throw e;
 		}
+	}
+	
+	/**
+	 * Function which return the product that correspond to the lastValCover specification
+	 * If there is no corresponding product return null
+	 * 
+	 * @param productType
+	 * @param beginDate
+	 * @param endDate
+	 * 
+	 * @return the key object storage of the chosen product
+	 * @throws Exception 
+	 */
+	// TODO use Exception
+	public String lastValCover(String productType, String beginDate, String endDate) throws Exception {
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder(); 
+		sourceBuilder.query(QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate)));
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC)); 
+
+		SearchRequest searchRequest = new SearchRequest(productType.toLowerCase());
+		searchRequest.types(indexType);
+		searchRequest.source(sourceBuilder);
+		try {
+			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			if (searchResponse.getHits().totalHits == 1) {
+				return searchResponse.getHits().getAt(0).getSourceAsMap().get("url").toString();
+			}
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return null;
 	}
 
 }

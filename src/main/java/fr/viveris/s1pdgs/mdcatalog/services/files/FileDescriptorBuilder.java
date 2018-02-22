@@ -73,11 +73,9 @@ public class FileDescriptorBuilder {
 		if (m.matches()) {
 			// Extract product name
 			String productName = relativePath;
-			boolean isRoot = true;
 			int indexFirstSeparator = relativePath.indexOf("/");
 			if (indexFirstSeparator != -1) {
 				productName = relativePath.substring(0, indexFirstSeparator);
-				isRoot = false;
 			}
 			// Extract filename
 			String filename = relativePath;
@@ -96,10 +94,6 @@ public class FileDescriptorBuilder {
 			configFile.setProductClass(m.group(4));
 			configFile.setProductType(m.group(5));
 			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));
-			configFile.setHasToExtractMetadata(false);
-			if (isRoot || filename.equalsIgnoreCase("manifest.safe")) {
-				configFile.setHasToExtractMetadata(true);
-			}
 
 		} else {
 			throw new FilePathException(relativePath, relativePath,

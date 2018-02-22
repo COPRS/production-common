@@ -21,11 +21,6 @@ public class ConfigFileDescriptor extends AbstractFileDescriptor {
 	private String productClass;
 
 	/**
-	 * True if metadata can be extracted from this file
-	 */
-	private boolean hasToExtractMetadata;
-
-	/**
 	 * Default constructor
 	 */
 	public ConfigFileDescriptor() {
@@ -62,29 +57,14 @@ public class ConfigFileDescriptor extends AbstractFileDescriptor {
 		this.productClass = productClass;
 	}
 
-	/**
-	 * @return the hasToExtractMetadata
-	 */
-	public boolean isHasToExtractMetadata() {
-		return hasToExtractMetadata;
-	}
-
-	/**
-	 * @param hasToExtractMetadata
-	 *            the hasToExtractMetadata to set
-	 */
-	public void setHasToExtractMetadata(boolean hasToExtractMetadata) {
-		this.hasToExtractMetadata = hasToExtractMetadata;
-	}
 
 	/**
 	 * String formatting
 	 */
 	public String toString() {
 		String info = String.format(
-				"{ 'relativePath': %s, 'filename': %s, 'extension': %s, 'productName': %s, 'productClass': %s, 'productType': %s, 'missionId': %s, 'satelliteId': %s, 'hasToExtractMetadata': %s, 'keyObjectStorage': %s}",
-				relativePath, filename, extension, productName, productClass, productType, missionId, satelliteId,
-				hasToExtractMetadata, keyObjectStorage);
+				"{ 'relativePath': %s, 'filename': %s, 'extension': %s, 'productName': %s, 'productClass': %s, 'productType': %s, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
+				relativePath, filename, extension, productName, productClass, productType, missionId, satelliteId, keyObjectStorage);
 		return info;
 	}
 
@@ -107,6 +87,6 @@ public class ConfigFileDescriptor extends AbstractFileDescriptor {
 	@Override
 	public int hashCode() {
 		return Objects.hash(relativePath, filename, extension, productName, productClass, productType, missionId,
-				satelliteId, hasToExtractMetadata, keyObjectStorage);
+				satelliteId, keyObjectStorage);
 	}
 }

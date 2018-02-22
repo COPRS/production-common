@@ -86,7 +86,7 @@ public class KafkaEdrsSessionFileConsumer {
 		this.mdBuilder = new MetadataBuilder();
 		// Create metadata
 		try {
-			JSONObject metadataToIndex = new JSONObject();
+			JSONObject metadataToIndex;
 			metadataFile = new File(sessionLocalDirectory + metadata.getObjectStorageKey());
 			EdrsSessionFileDescriptor edrsFileDescriptor = fileDescriptorBuilder.buildEdrsSessionFileDescriptor(metadataFile);
 			metadataToIndex = mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor);
