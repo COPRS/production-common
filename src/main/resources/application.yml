@@ -26,10 +26,10 @@ kafka:
 
 #FTP
 ftp:
-  host: input-ftpserver-svc
+  host: ${input_ftp_pasv_address:input-ftpserver-svc}
   port: 21
-  username: user
-  password: passwd
+  username: ${input_ftp_user:user}
+  password: ${input_ftp_pass:passwd}
   client-mode: 2
   local-directory: /data/local-ingestor/
   command-options:
