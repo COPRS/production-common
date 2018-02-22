@@ -18,7 +18,7 @@ logging:
 # KAFKA
 kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
-  group-id: ${ingestor_kafka_group:metadata-catalog}
+  group-id: ${ingestor_kafka_group:ingestors}
   poll-timeout: ${kafka_poll-timeout:500}
   topic:
     config-files: ${kafka_topic_config_files:t-pdgs-config-files}
