@@ -115,15 +115,12 @@ public class ExtractMetadata {
 				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
 			} else {
 				metadataJSONObject.put("validityStopTime",
-						jsonFromXmlTmp.getJSONObject("validityStopTime").get("content").toString().substring(4,
-								jsonFromXmlTmp.getJSONObject("validityStopTime").get("content").toString().length()));
+						jsonFromXmlTmp.getJSONObject("validityStopTime").get("content").toString().substring(4));
 			}
 			metadataJSONObject.put("creationTime",
-					jsonFromXmlTmp.getJSONObject("creationTime").get("content").toString().substring(4,
-							jsonFromXmlTmp.getJSONObject("creationTime").get("content").toString().length()));
+					jsonFromXmlTmp.getJSONObject("creationTime").get("content").toString().substring(4));
 			metadataJSONObject.put("validityStartTime",
-					jsonFromXmlTmp.getJSONObject("validityStartTime").get("content").toString().substring(4,
-							jsonFromXmlTmp.getJSONObject("validityStartTime").get("content").toString().length()));
+					jsonFromXmlTmp.getJSONObject("validityStartTime").get("content").toString().substring(4));
 			metadataJSONObject.put("version", jsonFromXmlTmp.getJSONObject("version").get("content"));
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
@@ -203,8 +200,13 @@ public class ExtractMetadata {
 			if (metadataJSONObject.getString("validityStopTime").equals("UTC=9999-99-99T99:99:99")) {
 				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
 			} else {
-				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("validityStopTime").toString()
-						.substring(4, metadataJSONObject.getString("validityStopTime").toString().length()));
+				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("validityStopTime").substring(4));
+			}
+			if(metadataJSONObject.getString("validityStartTime").substring(0, 4).equals("UTC=")) {
+				metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("validityStartTime").substring(4));
+			}
+			if(metadataJSONObject.getString("creationTime").substring(0, 4).equals("UTC=")) {
+				metadataJSONObject.put("creationTime", metadataJSONObject.getString("creationTime").substring(4));
 			}
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
