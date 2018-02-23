@@ -39,6 +39,11 @@ public class L0OutputFileDescriptor extends AbstractFileDescriptor {
 	private String polarisation;
 	
 	/**
+	 * DataTakeId
+	 */
+	private String dataTakeId;
+	
+	/**
 	 * Default Constructor
 	 */
 	public L0OutputFileDescriptor() {
@@ -52,15 +57,17 @@ public class L0OutputFileDescriptor extends AbstractFileDescriptor {
 	 * @param resolution
 	 * @param swathtype
 	 * @param polarisation
+	 * @param dataTakeId
 	 */
 	public L0OutputFileDescriptor(String productType, String productClass, String resolution, String swathtype,
-			String polarisation) {
+			String polarisation, String dataTakeId) {
 		super();
 		this.productType = productType;
 		this.productClass = productClass;
 		this.resolution = resolution;
 		this.swathtype = swathtype;
 		this.polarisation = polarisation;
+		this.dataTakeId = dataTakeId;
 	}
 
 
@@ -135,6 +142,20 @@ public class L0OutputFileDescriptor extends AbstractFileDescriptor {
 		this.polarisation = polarisation;
 	}
 	
+	/**
+	 * @return the dataTakeId
+	 */
+	public String getDataTakeId() {
+		return dataTakeId;
+	}
+
+	/**
+	 * @param dataTakeId the dataTakeId to set
+	 */
+	public void setDataTakeId(String dataTakeId) {
+		this.dataTakeId = dataTakeId;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		// self check
@@ -154,6 +175,6 @@ public class L0OutputFileDescriptor extends AbstractFileDescriptor {
 	@Override
 	public int hashCode() {
 		return Objects.hash(relativePath, filename, extension, productName, productClass, productType, missionId,
-				satelliteId, keyObjectStorage);
+				satelliteId, keyObjectStorage, dataTakeId);
 	}
 }

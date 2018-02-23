@@ -8,6 +8,7 @@ import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.mdcatalog.model.FileExtension;
+import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
 
@@ -48,7 +49,9 @@ public class FileDescriptorBuilder {
 	 * Build descriptor for configuration files from path file
 	 * 
 	 * @param file
-	 * @return
+	 * 
+	 * @return the config file descriptor
+	 * 
 	 * @throws FilePathException
 	 *             if we have
 	 */
@@ -103,6 +106,16 @@ public class FileDescriptorBuilder {
 		return configFile;
 	}
 
+	/**
+	 * Function which build the file descriptor for edrs session or raw file
+	 * 
+	 * @param file
+	 * 
+	 * @return the edrs file descriptor
+	 * 
+	 * @throws FilePathException
+	 * @throws IgnoredFileException
+	 */
 	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(File file)
 			throws FilePathException, IgnoredFileException {
 		// Extract relative path
@@ -142,5 +155,55 @@ public class FileDescriptorBuilder {
 			throw new FilePathException(relativePath, relativePath,
 					"File does not match the configuration file pattern");
 		}
+	}
+	
+	public L0OutputFileDescriptor buildL0OutputFileDescriptor (File file) 
+			throws FilePathException, IgnoredFileException {
+		// Extract relative path
+		String absolutePath = file.getAbsolutePath();
+		if (absolutePath.length() <= localDirectory.length()) {
+			throw new FilePathException(absolutePath, absolutePath, "Filename too short");
+		}
+		String relativePath = absolutePath.substring(localDirectory.length());
+		relativePath = relativePath.replace("\\", "/");
+
+		// Ignored if directory
+		if (file.isDirectory()) {
+			throw new IgnoredFileException(relativePath);
+		}
+		L0OutputFileDescriptor l0Descriptor = null;
+		Matcher m = pattern.matcher(relativePath);
+		if (m.matches()) {
+			// Extract product name
+			String productName = relativePath;
+			int indexFirstSeparator = relativePath.indexOf("/");
+			if (indexFirstSeparator != -1) {
+				productName = relativePath.substring(0, indexFirstSeparator);
+			}
+			// Extract filename
+			String filename = relativePath;
+			int indexLastSeparator = relativePath.lastIndexOf("/");
+			if (indexFirstSeparator != -1) {
+				filename = relativePath.substring(indexLastSeparator + 1);
+			}
+			l0Descriptor = new L0OutputFileDescriptor();
+			l0Descriptor.setProductName(productName);
+			l0Descriptor.setRelativePath(relativePath);
+			l0Descriptor.setFilename(filename);
+			l0Descriptor.setMissionId(m.group(1));
+			l0Descriptor.setSatelliteId(m.group(2));
+			l0Descriptor.setSwathtype(m.group(3));
+			l0Descriptor.setResolution(m.group(5));
+			l0Descriptor.setProductClass(m.group(7));
+			l0Descriptor.setProductType(m.group(3)+"_"+m.group(4)+m.group(5)+"_"+m.group(6)+m.group(7));
+			l0Descriptor.setPolarisation(m.group(8));
+			l0Descriptor.setDataTakeId(m.group(12));
+		
+		} else {
+			throw new FilePathException(relativePath, relativePath,
+					"File does not match the configuration file pattern");
+		}
+		
+		return l0Descriptor;		
 	}
 }

@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
 
 /**
@@ -16,12 +17,23 @@ import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
  */
 public class MetadataBuilder {
 	
+	/**
+	 * Metadata extractor
+	 */
 	private ExtractMetadata extractor;
 	
+	/**
+	 * Default constructor
+	 */
 	public MetadataBuilder() {
 		this(new ExtractMetadata());
 	}
 	
+	/**
+	 * Constructor with an existing metadata extractor
+	 * 
+	 * @param extractor
+	 */
 	public MetadataBuilder(ExtractMetadata extractor) {
 		this.extractor = extractor;
 	}
@@ -31,7 +43,9 @@ public class MetadataBuilder {
 	 * 
 	 * @param descriptor
 	 * @param file
-	 * @return
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
 	 * @throws MetadataExtractionException
 	 */
 	public JSONObject buildConfigFileMetadata(ConfigFileDescriptor descriptor, File file)
@@ -62,7 +76,9 @@ public class MetadataBuilder {
 	 * 
 	 * @param descriptor
 	 * @param file
-	 * @return
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
 	 * @throws MetadataExtractionException
 	 */
 	public JSONObject buildEdrsSessionFileMetadata(EdrsSessionFileDescriptor descriptor)
@@ -78,6 +94,23 @@ public class MetadataBuilder {
 		default:
 			throw new MetadataExtractionException(descriptor.getProductName(), new Exception("Invalid extension"));
 		}
+		return metadataToIndex;
+	}
+	
+	/**
+	 * Build metadata for L0 product
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL0OutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+		JSONObject metadataToIndex = new JSONObject();
+		metadataToIndex = extractor.processL0Prod(descriptor, file);
 		return metadataToIndex;
 	}
 }

@@ -394,6 +394,7 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 	        metadataJSONObject.put("swathtype", descriptor.getSwathtype());
 	        metadataJSONObject.put("polarisation", descriptor.getPolarisation());
+	        metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 	        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 	        metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 	        return metadataJSONObject;
