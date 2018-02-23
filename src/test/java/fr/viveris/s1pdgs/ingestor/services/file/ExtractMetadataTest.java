@@ -47,7 +47,7 @@ public class ExtractMetadataTest {
 	public void testProcessXMLFile() {
 		FileDescriptor descriptor = new FileDescriptor();
 		descriptor.setExtension(FileExtension.XML);
-		descriptor.setHasToExtractMetadata(true);
+		descriptor.setHasToBePublished(true);
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setProductName("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setRelativePath("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");

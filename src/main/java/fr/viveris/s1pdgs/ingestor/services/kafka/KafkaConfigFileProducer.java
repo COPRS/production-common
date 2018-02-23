@@ -24,12 +24,12 @@ import fr.viveris.s1pdgs.ingestor.model.exception.KafkaMetadataPublicationExcept
  *
  */
 @Service
-public class KafkaMetadataProducer {
+public class KafkaConfigFileProducer {
 
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaMetadataProducer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaConfigFileProducer.class);
 
 	/**
 	 * KAFKA template for topic "metadata"
@@ -59,7 +59,7 @@ public class KafkaMetadataProducer {
 				LOGGER.debug("[send] Success metadata = {}", metadataCrud);
 			}
 		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaMetadataPublicationException(metadataCrud.getMetadataToIndex(), e);
+			throw new KafkaMetadataPublicationException(metadataCrud.getProductName(), e);
 		}
 	}
 

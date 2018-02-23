@@ -45,17 +45,17 @@ import fr.viveris.s1pdgs.ingestor.model.exception.KafkaMetadataPublicationExcept
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-public class KafkaMetadataProducerTest {
+public class KafkaConfigFileProducerTest {
 
 	// Logger
-	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaMetadataProducerTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaConfigFileProducerTest.class);
 
 	// Topic
 	private final static String SENDER_TOPIC = "t-pdgs-config-files";
 
 	// KAFKA producer
 	@Autowired
-	private KafkaMetadataProducer senderMetadata;
+	private KafkaConfigFileProducer senderMetadata;
 
 	// KAFKA simulated consumer
 	private KafkaMessageListenerContainer<String, KafkaConfigFileDto> container;
@@ -125,7 +125,7 @@ public class KafkaMetadataProducerTest {
 	public void testSend() throws InterruptedException, JSONException {
 		// send the message
 		KafkaConfigFileDto metadata = new KafkaConfigFileDto();
-		metadata.setMetadataToIndex(null);
+		metadata.setProductName(null);
 		try {
 			senderMetadata.send(metadata);
 		} catch (KafkaMetadataPublicationException e) {

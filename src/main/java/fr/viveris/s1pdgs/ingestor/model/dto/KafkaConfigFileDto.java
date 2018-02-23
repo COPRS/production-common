@@ -12,7 +12,7 @@ public class KafkaConfigFileDto {
 	/**
 	 * ObjectKeyStore of the metadata to index
 	 */
-	private String metadataToIndex;
+	private String productName;
 	
 	/**
 	 * Default constructor
@@ -25,17 +25,17 @@ public class KafkaConfigFileDto {
 	 * @param action
 	 * @param metadata
 	 */
-	public KafkaConfigFileDto(String metadataToIndex) {
-		this.metadataToIndex = metadataToIndex;
+	public KafkaConfigFileDto(String productName) {
+		this.productName = productName;
 	}
 	
 
-	public String getMetadataToIndex() {
-		return metadataToIndex;
+	public String getProductName() {
+		return productName;
 	}
 
-	public void setMetadataToIndex(String metadataToIndex) {
-		this.metadataToIndex = metadataToIndex;
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 
 
@@ -43,7 +43,7 @@ public class KafkaConfigFileDto {
 	 * String formatting (JSON format)
 	 */
 	public String toString() {
-		String info = String.format("{'metadataToIndex': %s}", metadataToIndex);
+		String info = String.format("{'productName': %s}", productName);
 		return info;
 	}
 
@@ -60,11 +60,11 @@ public class KafkaConfigFileDto {
 			return false;
 		KafkaConfigFileDto meta = (KafkaConfigFileDto) o;
 		// field comparison
-		return Objects.equals(metadataToIndex, meta.getMetadataToIndex());
+		return Objects.equals(productName, meta.getProductName());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(metadataToIndex);
+		return Objects.hash(productName);
 	}
 }

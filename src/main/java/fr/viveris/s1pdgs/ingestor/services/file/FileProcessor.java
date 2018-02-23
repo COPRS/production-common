@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
-import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.ingestor.model.FileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaEdrsSessionDto;
@@ -18,7 +17,7 @@ import fr.viveris.s1pdgs.ingestor.model.exception.AlreadyExistObjectStorageExcep
 import fr.viveris.s1pdgs.ingestor.model.exception.FileRuntimeException;
 import fr.viveris.s1pdgs.ingestor.model.exception.FileTerminatedException;
 import fr.viveris.s1pdgs.ingestor.model.exception.IgnoredFileException;
-import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaMetadataProducer;
+import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaConfigFileProducer;
 import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaSessionProducer;
 import fr.viveris.s1pdgs.ingestor.services.s3.ConfigFilesS3Services;
 import fr.viveris.s1pdgs.ingestor.services.s3.SessionFilesS3Services;
@@ -57,7 +56,7 @@ public class FileProcessor {
 	 * KAFKA producer on the topic "metadata"
 	 */
 	@Autowired
-	KafkaMetadataProducer senderMetadata;
+	KafkaConfigFileProducer senderMetadata;
 
 	/**
 	 * Amazon S3 service for ERDS session files
@@ -124,7 +123,7 @@ public class FileProcessor {
 								new Exception("File already exist in object storage"));
 					}
 					// Send metadata
-					if (descriptor.isHasToExtractMetadata()) {
+					if (descriptor.isHasToBePublished()) {
 						KafkaConfigFileDto fileToIndex = new KafkaConfigFileDto(descriptor.getKeyObjectStorage());
 						senderMetadata.send(fileToIndex);
 						LOGGER.info("[processConfigFile] Metadata for {} successfully sended",
@@ -178,11 +177,9 @@ public class FileProcessor {
 						throw new IgnoredFileException(descriptor.getProductName(),
 								new Exception("File already exist in object storage"));
 					}
-					// Publish session file
-					if (descriptor.getProductType() == EdrsSessionFileType.SESSION) {
-						KafkaEdrsSessionDto dtoSession = new KafkaEdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(), descriptor.getProductType());
-						senderSession.send(dtoSession);
-					}
+					// Publish session or raw file
+					KafkaEdrsSessionDto dtoSession = new KafkaEdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(), descriptor.getProductType());
+					senderSession.send(dtoSession);
 
 				} catch (IgnoredFileException ce) {
 					if (LOGGER.isDebugEnabled()) {

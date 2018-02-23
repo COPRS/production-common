@@ -100,9 +100,9 @@ public class FileDescriptorBuilder {
 			configFile.setRelativePath(relativePath);
 			configFile.setKeyObjectStorage(relativePath);
 			configFile.setProductName(productName);
-			configFile.setHasToExtractMetadata(false);
+			configFile.setHasToBePublished(false);
 			if (isRoot || filename.equalsIgnoreCase("manifest.safe")) {
-				configFile.setHasToExtractMetadata(true);
+				configFile.setHasToBePublished(true);
 			}
 
 		} else {

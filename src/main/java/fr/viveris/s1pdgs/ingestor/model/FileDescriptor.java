@@ -29,7 +29,7 @@ public class FileDescriptor {
 	/**
 	 * True if metadata can be extracted from this file
 	 */
-	private boolean hasToExtractMetadata;
+	private boolean hasToBePublished;
 	
 	/**
 	 * Product type: RAW or SESSION here
@@ -98,15 +98,15 @@ public class FileDescriptor {
 	/**
 	 * @return the hasToExtractMetadata
 	 */
-	public boolean isHasToExtractMetadata() {
-		return hasToExtractMetadata;
+	public boolean isHasToBePublished() {
+		return hasToBePublished;
 	}
 
 	/**
 	 * @param hasToExtractMetadata the hasToExtractMetadata to set
 	 */
-	public void setHasToExtractMetadata(boolean hasToExtractMetadata) {
-		this.hasToExtractMetadata = hasToExtractMetadata;
+	public void setHasToBePublished(boolean hasToBePublished) {
+		this.hasToBePublished = hasToBePublished;
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class FileDescriptor {
 	@Override
 	public int hashCode() {
 		return Objects.hash(relativePath, extension, productName, productType, 
-				hasToExtractMetadata, keyObjectStorage, channel);
+				hasToBePublished, keyObjectStorage, channel);
 	}
 
 }
