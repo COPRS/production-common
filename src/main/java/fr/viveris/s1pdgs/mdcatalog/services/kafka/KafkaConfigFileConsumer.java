@@ -95,8 +95,8 @@ public class KafkaConfigFileConsumer {
 		try {
 			JSONObject metadataToIndex = new JSONObject();
 			if(configFilesS3Services.exist(metadata.getProductName())) {
-				metadataFile = new File(configLocalDirectory + metadata.getProductName());
-				configFilesS3Services.downloadFile(metadata.getProductName(), metadataFile);
+				metadataFile = new File(configLocalDirectory + metadata.getKeyObjectStorage());
+				configFilesS3Services.downloadFile(metadata.getKeyObjectStorage(), metadataFile);
 				ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile);
 				metadataToIndex = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
 				if (!metadataFile.delete()) {
