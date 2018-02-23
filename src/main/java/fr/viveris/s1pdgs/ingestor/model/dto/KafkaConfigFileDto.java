@@ -15,6 +15,11 @@ public class KafkaConfigFileDto {
 	private String productName;
 	
 	/**
+	 * ObjectkeyStorage of the metatdata to index
+	 */
+	private String keyObjectStorage;
+	
+	/**
 	 * Default constructor
 	 */
 	public KafkaConfigFileDto() {
@@ -25,8 +30,9 @@ public class KafkaConfigFileDto {
 	 * @param action
 	 * @param metadata
 	 */
-	public KafkaConfigFileDto(String productName) {
+	public KafkaConfigFileDto(String productName, String keyObjectStorage) {
 		this.productName = productName;
+		this.keyObjectStorage = keyObjectStorage;
 	}
 	
 
@@ -38,6 +44,20 @@ public class KafkaConfigFileDto {
 		this.productName = productName;
 	}
 
+
+	/**
+	 * @return the keyObjectStorage
+	 */
+	public String getKeyObjectStorage() {
+		return keyObjectStorage;
+	}
+
+	/**
+	 * @param keyObjectStorage the keyObjectStorage to set
+	 */
+	public void setKeyObjectStorage(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
+	}
 
 	/**
 	 * String formatting (JSON format)
@@ -60,11 +80,11 @@ public class KafkaConfigFileDto {
 			return false;
 		KafkaConfigFileDto meta = (KafkaConfigFileDto) o;
 		// field comparison
-		return Objects.equals(productName, meta.getProductName());
+		return Objects.equals(productName, meta.getProductName()) && Objects.equals(keyObjectStorage, meta.getKeyObjectStorage());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(productName);
+		return Objects.hash(productName, keyObjectStorage);
 	}
 }
