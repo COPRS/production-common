@@ -5,7 +5,7 @@ package fr.viveris.s1pdgs.ingestor.model;
  * @author Cyrielle Gailliard
  *
  */
-public enum ErdsSessionFileType {
+public enum EdrsSessionFileType {
 	RAW, SESSION;
 	
 	/**
@@ -14,7 +14,7 @@ public enum ErdsSessionFileType {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public static ErdsSessionFileType valueFromExtension(FileExtension extension) throws IllegalArgumentException {
+	public static EdrsSessionFileType valueFromExtension(FileExtension extension) throws IllegalArgumentException {
 		switch (extension) {
 		case XML:
 			return SESSION;

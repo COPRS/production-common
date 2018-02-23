@@ -32,7 +32,8 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaSessionDto;
+import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileType;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.ingestor.model.exception.KafkaSessionPublicationException;
 
 /**
@@ -50,16 +51,16 @@ public class KafkaSessionProducerTest {
 		      LoggerFactory.getLogger(KafkaSessionProducerTest.class);
 	
 	// Topic
-	private final static String SENDER_TOPIC = "t-pdgs-sessions";
+	private final static String SENDER_TOPIC = "t-pdgs-edrs-sessions";
 
 	// KAFKA producer
 	@Autowired
 	private KafkaSessionProducer senderSession;
 
 	// KAFKA simulated consumer
-	private KafkaMessageListenerContainer<String, KafkaSessionDto> container;
+	private KafkaMessageListenerContainer<String, KafkaEdrsSessionDto> container;
 	// records
-	private BlockingQueue<ConsumerRecord<String, KafkaSessionDto>> records;
+	private BlockingQueue<ConsumerRecord<String, KafkaEdrsSessionDto>> records;
 
 	// Embedded KAFKA
 	@ClassRule
@@ -76,8 +77,8 @@ public class KafkaSessionProducerTest {
 		consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
 		// create a Kafka consumer factory
-		DefaultKafkaConsumerFactory<String, KafkaSessionDto> consumerFactory = new DefaultKafkaConsumerFactory<String, KafkaSessionDto>(
-				consumerProperties, new StringDeserializer(), new JsonDeserializer<>(KafkaSessionDto.class));
+		DefaultKafkaConsumerFactory<String, KafkaEdrsSessionDto> consumerFactory = new DefaultKafkaConsumerFactory<String, KafkaEdrsSessionDto>(
+				consumerProperties, new StringDeserializer(), new JsonDeserializer<>(KafkaEdrsSessionDto.class));
 
 		// set the topic that needs to be consumed
 		ContainerProperties containerProperties = new ContainerProperties(SENDER_TOPIC);
@@ -89,9 +90,9 @@ public class KafkaSessionProducerTest {
 		records = new LinkedBlockingQueue<>();
 
 		// setup a Kafka message listener
-		container.setupMessageListener(new MessageListener<String, KafkaSessionDto>() {
+		container.setupMessageListener(new MessageListener<String, KafkaEdrsSessionDto>() {
 			@Override
-			public void onMessage(ConsumerRecord<String, KafkaSessionDto> record) {
+			public void onMessage(ConsumerRecord<String, KafkaEdrsSessionDto> record) {
 				LOGGER.debug("test-listener received message={}",record.toString());
 				records.add(record);
 			}
@@ -120,18 +121,14 @@ public class KafkaSessionProducerTest {
 	@Test
 	public void testSend() throws InterruptedException {
 		// send the message
-		KafkaSessionDto session = new KafkaSessionDto();
-		session.setChannel(1);
-		session.setKeyObjectStorage("L20171109175634707000125/DCS_02_L20171109175634707000125_ch1_DSIB.xml");
-		session.setProductName("DCS_02_L20171109175634707000125_ch1_DSIB.xml");
-		session.setSessionIdentifier("L20171109175634707000125");
+		KafkaEdrsSessionDto session = new KafkaEdrsSessionDto("L20171109175634707000125/DCS_02_L20171109175634707000125_ch1_DSIB.xml",1, EdrsSessionFileType.SESSION);
 		try {
 			senderSession.send(session);
 		} catch (KafkaSessionPublicationException e) {
 			assertFalse("Exception occurred " + e.getMessage(), false);
 		}
 		// check that the message was received
-		ConsumerRecord<String, KafkaSessionDto> received = records.poll(10, TimeUnit.SECONDS);
+		ConsumerRecord<String, KafkaEdrsSessionDto> received = records.poll(10, TimeUnit.SECONDS);
 		// Hamcrest Matchers to check the value
 		assertThat(received.value()).isEqualTo(session);
 		// AssertJ Condition to check the key

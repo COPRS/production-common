@@ -21,15 +21,15 @@ kafka:
   group-id: ${ingestor_kafka_group:ingestors}
   poll-timeout: ${kafka_poll-timeout:500}
   topic:
-    metadata: ${kafka_topic_metadata:t-pdgs-metadata}
-    sessions: ${kafka_topic_sessions:t-pdgs-sessions}
+    config-files: ${kafka_topic_config_files:t-pdgs-config-files}
+    edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
 
 #FTP
 ftp:
-  host: input-ftpserver-svc
+  host: ${input_ftp_pasv_address:input-ftpserver-svc}
   port: 21
-  username: user
-  password: passwd
+  username: ${input_ftp_user:user}
+  password: ${input_ftp_pass:passwd}
   client-mode: 2
   local-directory: /data/local-ingestor/
   command-options:

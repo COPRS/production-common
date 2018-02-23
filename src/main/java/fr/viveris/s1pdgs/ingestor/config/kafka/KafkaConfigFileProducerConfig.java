@@ -14,8 +14,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
-import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaMetadataProducer;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
+import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaConfigFileProducer;
 
 /**
  * Kafka producer dedicated to the topic "metadata"
@@ -24,7 +24,7 @@ import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaMetadataProducer;
  */
 @Configuration
 @EnableKafka
-public class KafkaMetadataProducerConfig {
+public class KafkaConfigFileProducerConfig {
 
 	/**
 	 * URI of KAFKA cluster
@@ -37,7 +37,7 @@ public class KafkaMetadataProducerConfig {
 	 * @return
 	 */
 	@Bean
-	public Map<String, Object> producerMetadataConfigs() {
+	public Map<String, Object> producerConfigFileConfigs() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -51,8 +51,8 @@ public class KafkaMetadataProducerConfig {
 	 * @return
 	 */
 	@Bean
-	public ProducerFactory<String, KafkaMetadataDto> producerMetadataFactory() {
-		return new DefaultKafkaProducerFactory<>(producerMetadataConfigs());
+	public ProducerFactory<String, KafkaConfigFileDto> producerConfigFileFactory() {
+		return new DefaultKafkaProducerFactory<>(producerConfigFileConfigs());
 	}
 
 	/**
@@ -60,8 +60,8 @@ public class KafkaMetadataProducerConfig {
 	 * @return
 	 */
 	@Bean
-	public KafkaTemplate<String, KafkaMetadataDto> kafkaMetadataTemplate() {
-		return new KafkaTemplate<>(producerMetadataFactory());
+	public KafkaTemplate<String, KafkaConfigFileDto> kafkaConfigFileTemplate() {
+		return new KafkaTemplate<>(producerConfigFileFactory());
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class KafkaMetadataProducerConfig {
 	 * @return
 	 */
 	@Bean
-	public KafkaMetadataProducer senderMetadata() {
-		return new KafkaMetadataProducer();
+	public KafkaConfigFileProducer senderMetadata() {
+		return new KafkaConfigFileProducer();
 	}
 }

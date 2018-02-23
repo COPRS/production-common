@@ -16,7 +16,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
 
 /**
  * KAFKA consumer configuration
@@ -61,8 +61,8 @@ public class KafkaConsumerConfig {
 	 * @return
 	 */
 	@Bean
-	public ConsumerFactory<String, KafkaMetadataDto> consumerFactory() {
-		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new JsonDeserializer<>(KafkaMetadataDto.class));
+	public ConsumerFactory<String, KafkaConfigFileDto> consumerFactory() {
+		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new JsonDeserializer<>(KafkaConfigFileDto.class));
 	}
 
 	/**
@@ -70,9 +70,9 @@ public class KafkaConsumerConfig {
 	 * @return
 	 */
 	@Bean
-	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, KafkaMetadataDto>> kafkaListenerContainerFactory() {
+	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, KafkaConfigFileDto>> kafkaListenerContainerFactory() {
 		
-		ConcurrentKafkaListenerContainerFactory<String, KafkaMetadataDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		ConcurrentKafkaListenerContainerFactory<String, KafkaConfigFileDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
 		factory.setConcurrency(1);
 		factory.getContainerProperties();

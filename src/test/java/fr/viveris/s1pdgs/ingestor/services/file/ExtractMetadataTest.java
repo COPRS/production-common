@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
-import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
+import fr.viveris.s1pdgs.ingestor.model.FileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.FileExtension;
 
 public class ExtractMetadataTest {
@@ -45,16 +45,11 @@ public class ExtractMetadataTest {
 
 	@Test
 	public void testProcessXMLFile() {
-		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+		FileDescriptor descriptor = new FileDescriptor();
 		descriptor.setExtension(FileExtension.XML);
-		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		descriptor.setHasToExtractMetadata(true);
+		descriptor.setHasToBePublished(true);
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		descriptor.setMissionId("S1");
-		descriptor.setSatelliteId("A");
-		descriptor.setProductClass("OPER");
 		descriptor.setProductName("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		descriptor.setProductType("AUX_OBMEMC");
 		descriptor.setRelativePath("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		/*
 		 * assertEquals("Invalid length", expectedResult.toString().length(),

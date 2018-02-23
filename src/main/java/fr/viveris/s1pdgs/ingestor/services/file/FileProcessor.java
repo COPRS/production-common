@@ -10,16 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
-import fr.viveris.s1pdgs.ingestor.model.ConfigFileDescriptor;
-import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileDescriptor;
-import fr.viveris.s1pdgs.ingestor.model.ErdsSessionFileType;
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaMetadataDto;
-import fr.viveris.s1pdgs.ingestor.model.dto.KafkaSessionDto;
+import fr.viveris.s1pdgs.ingestor.model.FileDescriptor;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
+import fr.viveris.s1pdgs.ingestor.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.ingestor.model.exception.AlreadyExistObjectStorageException;
 import fr.viveris.s1pdgs.ingestor.model.exception.FileRuntimeException;
 import fr.viveris.s1pdgs.ingestor.model.exception.FileTerminatedException;
 import fr.viveris.s1pdgs.ingestor.model.exception.IgnoredFileException;
-import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaMetadataProducer;
+import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaConfigFileProducer;
 import fr.viveris.s1pdgs.ingestor.services.kafka.KafkaSessionProducer;
 import fr.viveris.s1pdgs.ingestor.services.s3.ConfigFilesS3Services;
 import fr.viveris.s1pdgs.ingestor.services.s3.SessionFilesS3Services;
@@ -58,7 +56,7 @@ public class FileProcessor {
 	 * KAFKA producer on the topic "metadata"
 	 */
 	@Autowired
-	KafkaMetadataProducer senderMetadata;
+	KafkaConfigFileProducer senderMetadata;
 
 	/**
 	 * Amazon S3 service for ERDS session files
@@ -78,11 +76,6 @@ public class FileProcessor {
 	FileDescriptorBuilder fileDescriptorBuilder;
 
 	/**
-	 * Builder of metadata
-	 */
-	MetadataBuilder metadataBuilder;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param configLocalDirectory
@@ -97,7 +90,6 @@ public class FileProcessor {
 		}
 		Pattern patternConfig = Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE);
 		Pattern patternSession = Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE);
-		this.metadataBuilder = new MetadataBuilder();
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(configLocalDirectory, sessionLocalDirectory,
 				patternConfig, patternSession);
 	}
@@ -121,7 +113,7 @@ public class FileProcessor {
 			// Build model file
 			try {
 				try {
-					ConfigFileDescriptor descriptor = fileDescriptorBuilder.buildConfigFileDescriptor(file);
+					FileDescriptor descriptor = fileDescriptorBuilder.buildConfigFileDescriptor(file);
 					// Store in object storage
 					if (!configFilesS3Services.exist(descriptor.getKeyObjectStorage())) {
 						configFilesS3Services.uploadFile(descriptor.getKeyObjectStorage(), file);
@@ -130,10 +122,10 @@ public class FileProcessor {
 						throw new AlreadyExistObjectStorageException(descriptor.getProductName(),
 								new Exception("File already exist in object storage"));
 					}
-					// Extract metadata
-					if (descriptor.isHasToExtractMetadata()) {
-						KafkaMetadataDto extractedMetadata = metadataBuilder.buildConfigFileMetadata(descriptor, file);
-						senderMetadata.send(extractedMetadata);
+					// Send metadata
+					if (descriptor.isHasToBePublished()) {
+						KafkaConfigFileDto fileToIndex = new KafkaConfigFileDto(descriptor.getProductName(), descriptor.getKeyObjectStorage());
+						senderMetadata.send(fileToIndex);
 						LOGGER.info("[processConfigFile] Metadata for {} successfully sended",
 								descriptor.getRelativePath());
 					}
@@ -172,12 +164,12 @@ public class FileProcessor {
 		File file = message.getPayload();
 		if (!file.isDirectory()) {
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Starting processing of ERDS session file {}", file.getPath());
+				LOGGER.info("Starting processing of EDRS session file {}", file.getPath());
 			}
 			// Build model file
 			try {
 				try {
-					ErdsSessionFileDescriptor descriptor = fileDescriptorBuilder.buildErdsSessionFileDescriptor(file);
+					FileDescriptor descriptor = fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
 					// Store in object storage
 					if (!sessionFilesS3Services.exist(descriptor.getKeyObjectStorage())) {
 						sessionFilesS3Services.uploadFile(descriptor.getKeyObjectStorage(), file);
@@ -185,19 +177,9 @@ public class FileProcessor {
 						throw new IgnoredFileException(descriptor.getProductName(),
 								new Exception("File already exist in object storage"));
 					}
-					// Extract metadata
-					KafkaMetadataDto extractedMetadata = metadataBuilder.buildErdsSessionFileMetadata(descriptor, file);
-					senderMetadata.send(extractedMetadata);
-
-					// Publish session file
-					if (descriptor.getProductType() == ErdsSessionFileType.SESSION) {
-						KafkaSessionDto dtoSession = new KafkaSessionDto();
-						dtoSession.setProductName(descriptor.getProductName());
-						dtoSession.setKeyObjectStorage(descriptor.getKeyObjectStorage());
-						dtoSession.setChannel(descriptor.getChannel());
-						dtoSession.setSessionIdentifier(descriptor.getSessionIdentifier());
-						senderSession.send(dtoSession);
-					}
+					// Publish session or raw file
+					KafkaEdrsSessionDto dtoSession = new KafkaEdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(), descriptor.getProductType());
+					senderSession.send(dtoSession);
 
 				} catch (IgnoredFileException ce) {
 					if (LOGGER.isDebugEnabled()) {
@@ -214,7 +196,7 @@ public class FileProcessor {
 				LOGGER.error(fre.getMessage());
 			}
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("End processing of ERDS session file {}", file.getPath());
+				LOGGER.info("End processing of EDRS session file {}", file.getPath());
 			}
 		}
 	}
