@@ -94,9 +94,9 @@ public class KafkaConfigFileConsumer {
 		// Create metadata
 		try {
 			JSONObject metadataToIndex = new JSONObject();
-			if(configFilesS3Services.exist(metadata.getMetadataToIndex())) {
-				metadataFile = new File(configLocalDirectory + metadata.getMetadataToIndex());
-				configFilesS3Services.downloadFile(metadata.getMetadataToIndex(), metadataFile);
+			if(configFilesS3Services.exist(metadata.getProductName())) {
+				metadataFile = new File(configLocalDirectory + metadata.getProductName());
+				configFilesS3Services.downloadFile(metadata.getProductName(), metadataFile);
 				ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile);
 				metadataToIndex = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
 				if (!metadataFile.delete()) {
@@ -104,7 +104,7 @@ public class KafkaConfigFileConsumer {
 				}
 			}
 			else {
-				LOGGER.error("File {} does not exists", metadata.getMetadataToIndex());
+				LOGGER.error("File {} does not exists", metadata.getProductName());
 			}
 			if (!esServices.isMetadataExist(metadataToIndex)) {
 				esServices.createMetadata(metadataToIndex);
