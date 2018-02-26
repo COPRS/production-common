@@ -102,16 +102,18 @@ public class EsServices {
 	 * @param productType
 	 * @param beginDate
 	 * @param endDate
+	 * @param satelliteId
 	 * 
 	 * @return the key object storage of the chosen product
 	 * @throws Exception 
 	 */
 	// TODO use Exception
-	public String lastValCover(String productType, String beginDate, String endDate) throws Exception {
+	public String lastValCover(String productType, String beginDate, String endDate, String satelliteId) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder(); 
 		sourceBuilder.query(QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate)));
+				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC)); 
 
