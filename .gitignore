@@ -5,11 +5,13 @@
 /.mvn/
 /target/
 /reports/
+/bin/
 .project
 .classpath
 .jdk8
 .springBeans
 *.log
+*.gz
 .eclipse-pmd
 .pmd
 .pmdruleset.xml
