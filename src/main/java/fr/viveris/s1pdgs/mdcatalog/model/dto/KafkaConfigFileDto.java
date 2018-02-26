@@ -59,12 +59,12 @@ public class KafkaConfigFileDto {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
-	/**
-	 * String formatting (JSON format)
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
-		String info = String.format("{'metadataToIndex': %s}", productName);
-		return info;
+		return "KafkaConfigFileDto [productName=" + productName + ", keyObjectStorage=" + keyObjectStorage + "]";
 	}
 
 	@Override

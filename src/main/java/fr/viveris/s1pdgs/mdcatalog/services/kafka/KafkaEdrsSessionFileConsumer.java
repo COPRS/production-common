@@ -65,7 +65,7 @@ public class KafkaEdrsSessionFileConsumer {
 	/**
 	 * Count down latch which allows the POJO to signal that a message is received
 	 */
-	private CountDownLatch latchMetadata = new CountDownLatch(1);
+	private CountDownLatch latch = new CountDownLatch(1);
 
 	/**
 	 * Local file for the metadata to extract
@@ -77,11 +77,11 @@ public class KafkaEdrsSessionFileConsumer {
 	 * 
 	 * @param payload
 	 */
-	@KafkaListener(topics = "${kafka.topic.edrs-sessions}", groupId = "${kafka.group-id}", containerFactory="sessionKafkaListenerContainerFactory")
+	@KafkaListener(topics = "${kafka.topic.edrs-sessions}", groupId = "${kafka.group-id}", containerFactory="edrsSessionsKafkaListenerContainerFactory")
 	public void receive(KafkaEdrsSessionDto metadata) {
 		LOGGER.debug("[receive] Consume message {}", metadata);
-		this.latchMetadata.countDown();
-		this.fileDescriptorBuilder = new FileDescriptorBuilder(sessionLocalDirectory, 
+		this.latch.countDown();
+		/*this.fileDescriptorBuilder = new FileDescriptorBuilder(sessionLocalDirectory, 
 				Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
 		this.mdBuilder = new MetadataBuilder();
 		// Create metadata
@@ -96,10 +96,10 @@ public class KafkaEdrsSessionFileConsumer {
 			LOGGER.info("Metadata created for {}", metadataToIndex.getString("productName"));
 		} catch (Exception e){
 			LOGGER.error(e.getMessage());
-		}
+		}*/
 	}
 	
-	public CountDownLatch getLatchMetadata() {
-		return this.latchMetadata;
+	public CountDownLatch getLatch() {
+		return this.latch;
 	}
 }
