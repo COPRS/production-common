@@ -77,7 +77,7 @@ public class KafkaEdrsSessionFileConsumer {
 	 * 
 	 * @param payload
 	 */
-	@KafkaListener(topics = "${kafka.topic.edrs-sessions}", groupId = "${kafka.group-id}")
+	@KafkaListener(topics = "${kafka.topic.edrs-sessions}", groupId = "${kafka.group-id}", containerFactory="sessionKafkaListenerContainerFactory")
 	public void receive(KafkaEdrsSessionDto metadata) {
 		LOGGER.debug("[receive] Consume message {}", metadata);
 		this.latchMetadata.countDown();

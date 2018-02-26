@@ -74,7 +74,7 @@ public class KafkaEdrsSessionFileConsumerConfig {
 	 * Listener containers factory
 	 * @return
 	 */
-	@Bean
+	@Bean(name = "sessionKafkaListenerContainerFactory")
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, KafkaEdrsSessionDto>> kafkaListenerContainerFactory() {
 		
 		ConcurrentKafkaListenerContainerFactory<String, KafkaEdrsSessionDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
