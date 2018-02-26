@@ -19,6 +19,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<spring-kafka.version>1.3.2.RELEASE</spring-kafka.version>
+		<aws-java-sdk.version>1.11.271</aws-java-sdk.version>
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-metadata-catalog-app</project.build.finalName>
 		<project.artifactId>s1pdgs-metadata-catalog-app</project.artifactId>
@@ -60,8 +61,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk</artifactId>
-			<version>1.11.271</version>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>${aws-java-sdk.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -96,14 +97,6 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -112,14 +105,6 @@
 			<url>https://repo.spring.io/snapshot</url>
 			<snapshots>
 				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
