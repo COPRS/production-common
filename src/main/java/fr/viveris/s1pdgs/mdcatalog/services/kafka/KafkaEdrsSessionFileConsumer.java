@@ -81,7 +81,7 @@ public class KafkaEdrsSessionFileConsumer {
 	public void receive(KafkaEdrsSessionDto metadata) {
 		LOGGER.debug("[receive] Consume message {}", metadata);
 		this.latch.countDown();
-		/*this.fileDescriptorBuilder = new FileDescriptorBuilder(sessionLocalDirectory, 
+		this.fileDescriptorBuilder = new FileDescriptorBuilder(sessionLocalDirectory, 
 				Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
 		this.mdBuilder = new MetadataBuilder();
 		// Create metadata
@@ -96,7 +96,7 @@ public class KafkaEdrsSessionFileConsumer {
 			LOGGER.info("Metadata created for {}", metadataToIndex.getString("productName"));
 		} catch (Exception e){
 			LOGGER.error(e.getMessage());
-		}*/
+		}
 	}
 	
 	public CountDownLatch getLatch() {
