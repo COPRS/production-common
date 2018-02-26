@@ -22,10 +22,38 @@ kafka:
   group-id: ${catalog_kafka_group:metadata-catalog}
   poll-timeout: ${kafka_poll-timeout:500}
   topic:
-    metadata: ${kafka_topic_metadata:t-pdgs-metadata}
+    config-files: ${kafka_topic_config_files:t-pdgs-config-files}
+    edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
     
 # Elastic Search
 elasticsearch:
   host: ${elastic_host:es-svc}
   port: ${elastic_port:25000}
   index-type: ${elastic_index-type:metadata}
+
+
+#Object Storage
+storage:
+  user:
+    id: ${storage_user_id:MEF5PCBPTXHKOUTCKW3G}
+    secret: ${storage_user_secret:4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo}
+  endpoint: ${storage_endpoint:http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/}
+  region: ${storage_region:eu-west-0}
+  buckets:
+    config-files: ${storage_buckets_config-files:config-files}
+    session-files: ${storage_buckets_session-files:session-files}
+    
+# File
+file:
+  config-files:
+    local-directory: ${ingestor_config-files_local-directory:/data/local-ingestor/config_files/} # Must contains the last /
+    read-fixed-rate: ${ingestor_file_read-fixed-rate:1000}
+    clean-empty-directory-rate: ${ingestor_file_clean-empty-directory-rate:15000}
+    clean-empty-min-age: ${ingestor_file_clean-empty-min-age:13000}
+    cache-max-capacity: ${ingestor_config-files_cache-max-capacity:10}
+  session-files:
+    local-directory: ${ingestor_session-files_local-directory:/data/local-ingestor/edrs_sessions/} # Must contains the last /
+    read-fixed-rate: ${ingestor_file_read-fixed-rate:1000}
+    clean-empty-directory-rate: ${ingestor_file_clean-empty-directory-rate:15000}
+    clean-empty-min-age: ${ingestor_file_clean-empty-min-age:13000}
+    cache-max-capacity: ${ingestor_session-files_cache-max-capacity:70}
