@@ -104,6 +104,8 @@ public class FileDescriptorBuilder {
 			if (isRoot || filename.equalsIgnoreCase("manifest.safe")) {
 				configFile.setHasToBePublished(true);
 			}
+			configFile.setMissionId(m.group(1));
+			configFile.setSatelliteId(m.group(2));
 
 		} else {
 			throw new FilePathException(relativePath, relativePath,
@@ -135,6 +137,7 @@ public class FileDescriptorBuilder {
 				throw new FilePathException(relativePath, relativePath, "IIF file");
 			}
 
+			// "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
 			FileDescriptor descriptor = new FileDescriptor();
 			descriptor.setRelativePath(relativePath);
 			descriptor.setProductName(m.group(9));
@@ -142,6 +145,8 @@ public class FileDescriptorBuilder {
 			descriptor.setProductType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));
 			descriptor.setChannel(Integer.parseInt(m.group(7)));
 			descriptor.setKeyObjectStorage(relativePath);
+			descriptor.setMissionId(m.group(1));
+			descriptor.setSatelliteId(m.group(2));
 
 			return descriptor;
 		} else {

@@ -124,7 +124,8 @@ public class FileProcessor {
 					}
 					// Send metadata
 					if (descriptor.isHasToBePublished()) {
-						KafkaConfigFileDto fileToIndex = new KafkaConfigFileDto(descriptor.getProductName(), descriptor.getKeyObjectStorage());
+						KafkaConfigFileDto fileToIndex = new KafkaConfigFileDto(descriptor.getProductName(),
+								descriptor.getKeyObjectStorage());
 						senderMetadata.send(fileToIndex);
 						LOGGER.info("[processConfigFile] Metadata for {} successfully sended",
 								descriptor.getRelativePath());
@@ -178,7 +179,9 @@ public class FileProcessor {
 								new Exception("File already exist in object storage"));
 					}
 					// Publish session or raw file
-					KafkaEdrsSessionDto dtoSession = new KafkaEdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(), descriptor.getProductType());
+					KafkaEdrsSessionDto dtoSession = new KafkaEdrsSessionDto(descriptor.getKeyObjectStorage(),
+							descriptor.getChannel(), descriptor.getProductType(), descriptor.getMissionId(),
+							descriptor.getSatelliteId());
 					senderSession.send(dtoSession);
 
 				} catch (IgnoredFileException ce) {

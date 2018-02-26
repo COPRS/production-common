@@ -3,8 +3,6 @@
  */
 package fr.viveris.s1pdgs.ingestor.model;
 
-import java.util.Objects;
-
 /**
  * @author Olivier Bex-Chauvet
  *
@@ -45,6 +43,16 @@ public class FileDescriptor {
 	 * File extension
 	 */
 	private FileExtension extension;
+	
+	/**
+	 * Mission identifier
+	 */
+	private String missionId;
+	
+	/**
+	 * Satellite identifier
+	 */
+	private String satelliteId;
 
 	/**
 	 * Constructor
@@ -150,27 +158,84 @@ public class FileDescriptor {
 	public void setExtension(FileExtension extension) {
 		this.extension = extension;
 	}
-
-	@Override
-	public boolean equals(Object o) {
-		// self check
-		if (this == o)
-			return true;
-		// null check
-		if (o == null)
-			return false;
-		// type check and cast
-		if (getClass() != o.getClass())
-			return false;
-		FileDescriptor sessionFile = (FileDescriptor) o;
-		// field comparison
-		return Objects.equals(keyObjectStorage, sessionFile.getKeyObjectStorage());
-	}
 	
+
+	/**
+	 * @return the missionId
+	 */
+	public String getMissionId() {
+		return missionId;
+	}
+
+	/**
+	 * @param missionId the missionId to set
+	 */
+	public void setMissionId(String missionId) {
+		this.missionId = missionId;
+	}
+
+	/**
+	 * @return the satelliteId
+	 */
+	public String getSatelliteId() {
+		return satelliteId;
+	}
+
+	/**
+	 * @param satelliteId the satelliteId to set
+	 */
+	public void setSatelliteId(String satelliteId) {
+		this.satelliteId = satelliteId;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "FileDescriptor [relativePath=" + relativePath + ", productName=" + productName + ", keyObjectStorage="
+				+ keyObjectStorage + ", hasToBePublished=" + hasToBePublished + ", productType=" + productType
+				+ ", channel=" + channel + ", extension=" + extension + ", missionId=" + missionId + ", satelliteId="
+				+ satelliteId + "]";
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(relativePath, extension, productName, productType, 
-				hasToBePublished, keyObjectStorage, channel);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + channel;
+		result = prime * result + ((extension == null) ? 0 : extension.hashCode());
+		result = prime * result + (hasToBePublished ? 1231 : 1237);
+		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
+		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
+		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
+		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
+		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FileDescriptor other = (FileDescriptor) obj;
+		if (keyObjectStorage == null) {
+			if (other.keyObjectStorage != null)
+				return false;
+		} else if (!keyObjectStorage.equals(other.keyObjectStorage))
+			return false;
+		return true;
 	}
 
 }

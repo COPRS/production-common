@@ -1,7 +1,5 @@
 package fr.viveris.s1pdgs.ingestor.model.dto;
 
-import java.util.Objects;
-
 import fr.viveris.s1pdgs.ingestor.model.EdrsSessionFileType;
 
 /**
@@ -20,6 +18,10 @@ public class KafkaEdrsSessionDto {
 	private int channelId;
 	
 	private EdrsSessionFileType productType;
+	
+	private String satelliteId;
+	
+	private String missionId;
 
 	/**
 	 * Default constructor
@@ -31,10 +33,12 @@ public class KafkaEdrsSessionDto {
 	/**
 	 * Default constructor
 	 */
-	public KafkaEdrsSessionDto(String objectStorageKey, int channelId, EdrsSessionFileType productType) {
+	public KafkaEdrsSessionDto(String objectStorageKey, int channelId, EdrsSessionFileType productType, String missionId, String satelliteId) {
 		this.objectStorageKey = objectStorageKey;
 		this.channelId = channelId;
 		this.productType = productType;
+		this.missionId = missionId;
+		this.satelliteId = satelliteId;
 	}
 
 	/**
@@ -75,32 +79,89 @@ public class KafkaEdrsSessionDto {
 	}
 
 	/**
-	 * String formatting (JSON format)
+	 * @return the satelliteId
 	 */
-	public String toString() {
-		String info = String.format("{'objectStorageKey': %s, 'channelId': %d}", this.objectStorageKey, this.channelId);
-		return info;
+	public String getSatelliteId() {
+		return satelliteId;
 	}
 
+	/**
+	 * @param satelliteId the satelliteId to set
+	 */
+	public void setSatelliteId(String satelliteId) {
+		this.satelliteId = satelliteId;
+	}
+
+	/**
+	 * @return the missionId
+	 */
+	public String getMissionId() {
+		return missionId;
+	}
+
+	/**
+	 * @param missionId the missionId to set
+	 */
+	public void setMissionId(String missionId) {
+		this.missionId = missionId;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
-	public boolean equals(Object o) {
-		// self check
-		if (this == o)
-			return true;
-		// null check
-		if (o == null)
-			return false;
-		// type check and cast
-		if (getClass() != o.getClass())
-			return false;
-		KafkaEdrsSessionDto dto = (KafkaEdrsSessionDto) o;
-		// field comparison
-		return Objects.equals(this.objectStorageKey, dto.getObjectStorageKey());
+	public String toString() {
+		return "KafkaEdrsSessionDto [objectStorageKey=" + objectStorageKey + ", channelId=" + channelId
+				+ ", productType=" + productType + ", satelliteId=" + satelliteId + ", missionId=" + missionId + "]";
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.objectStorageKey);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + channelId;
+		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
+		result = prime * result + ((objectStorageKey == null) ? 0 : objectStorageKey.hashCode());
+		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		KafkaEdrsSessionDto other = (KafkaEdrsSessionDto) obj;
+		if (channelId != other.channelId)
+			return false;
+		if (missionId == null) {
+			if (other.missionId != null)
+				return false;
+		} else if (!missionId.equals(other.missionId))
+			return false;
+		if (objectStorageKey == null) {
+			if (other.objectStorageKey != null)
+				return false;
+		} else if (!objectStorageKey.equals(other.objectStorageKey))
+			return false;
+		if (productType != other.productType)
+			return false;
+		if (satelliteId == null) {
+			if (other.satelliteId != null)
+				return false;
+		} else if (!satelliteId.equals(other.satelliteId))
+			return false;
+		return true;
 	}
 
 }
