@@ -46,6 +46,9 @@ public class L0SlicesS3Services implements S3Services {
 	public File getFile(String keyName, String expectedFilePath) throws ObjectStorageException {
 		try {
 			File f = new File(expectedFilePath);
+			if (f.getParentFile()!=null) {
+				f.getParentFile().mkdirs();
+			}
 			f.createNewFile();
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Downloading object {} from bucket {}", keyName, bucketName);
