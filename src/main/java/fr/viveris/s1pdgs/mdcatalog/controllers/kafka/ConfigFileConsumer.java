@@ -4,7 +4,6 @@
 package fr.viveris.s1pdgs.mdcatalog.controllers.kafka;
 
 import java.io.File;
-import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
 
 import org.json.JSONObject;
@@ -17,14 +16,18 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaConfigFileDto;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.s3.ConfigFilesS3Services;
 
 /**
- * KAFKA consumer.
- * Consume on a topic defined in configuration file
+ * KAFKA consumer. Consume on a topic defined in configuration file
+ * 
  * @author Olivier Bex-Chauvet
  *
  */
@@ -37,86 +40,96 @@ public class ConfigFileConsumer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFileConsumer.class);
 
 	/**
-	 * Elasticsearch services
-	 */
-	@Autowired
-	private EsServices esServices;
-	
-	/**
-	 * Amazon S3 service for configuration files
-	 */
-	@Autowired
-	private ConfigFilesS3Services configFilesS3Services;
-	
-	/**
 	 * Pattern for configuration files to extract data
 	 */
 	private final static String PATTERN_CONFIG = "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
 
 	/**
+	 * Elasticsearch services
+	 */
+	private final EsServices esServices;
+
+	/**
+	 * Amazon S3 service for configuration files
+	 */
+	private final ConfigFilesS3Services configFilesS3Services;
+
+	/**
 	 * Metadata builder
 	 */
-	private MetadataBuilder mdBuilder;
-	
+	private final MetadataBuilder mdBuilder;
+
 	/**
 	 * Local directory for configurations files
 	 */
-	@Value("${file.config-files.local-directory}")
-	private String configLocalDirectory;
-	
+	private final String localDirectory;
+
 	/**
 	 * Builder of file descriptors
 	 */
-	private FileDescriptorBuilder fileDescriptorBuilder;
-	
-	/**
-	 * Count down latch which allows the POJO to signal that a message is received
-	 */
-	private CountDownLatch latchMetadata = new CountDownLatch(1);
+	private final FileDescriptorBuilder fileDescriptorBuilder;
 
-	/**
-	 * Local file for the metadata to extract
-	 */
-	private File metadataFile;
-	
+	@Autowired
+	public ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
+			@Value("${file.config-files.local-directory}") final String localDirectory) {
+		this.localDirectory = localDirectory;
+		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
+				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
+		this.mdBuilder = new MetadataBuilder();
+		this.esServices = esServices;
+		this.configFilesS3Services = configFilesS3Services;
+	}
+
 	/**
 	 * Message listener container. Read a message
 	 * 
 	 * @param payload
 	 */
 	@KafkaListener(topics = "${kafka.topic.config-files}", groupId = "${kafka.group-id}")
-	public void receive(KafkaConfigFileDto metadata) {
-		LOGGER.debug("[receive] Consume message {}", metadata);
-		this.latchMetadata.countDown();
-		this.fileDescriptorBuilder = new FileDescriptorBuilder(configLocalDirectory, 
-				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
-		this.mdBuilder = new MetadataBuilder();
+	public void receive(KafkaConfigFileDto dto) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("[receive] Consume message {}", dto);
+		}
+		File metadataFile = null;
 		// Create metadata
 		try {
-			JSONObject metadataToIndex = new JSONObject();
-			if(configFilesS3Services.exist(metadata.getProductName())) {
-				metadataFile = new File(configLocalDirectory + metadata.getKeyObjectStorage());
-				configFilesS3Services.downloadFile(metadata.getKeyObjectStorage(), metadataFile);
-				ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile);
-				metadataToIndex = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
-				if (!metadataFile.delete()) {
-					LOGGER.error("[processConfigFile] File {} not removed from local storage", metadataFile.getPath());
+			if (configFilesS3Services.exist(dto.getKeyObjectStorage())) {
+
+				// Upload file
+				metadataFile = configFilesS3Services.getFile(dto.getKeyObjectStorage(),
+						this.localDirectory + dto.getKeyObjectStorage());
+
+				// Extract metadata from name
+				ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder
+						.buildConfigFileDescriptor(metadataFile);
+
+				// Build metadata from file and extracted
+				JSONObject metadata = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
+
+				// Publish metadata
+				if (!esServices.isMetadataExist(metadata)) {
+					esServices.createMetadata(metadata);
+				}
+				LOGGER.info("[productName {}] Metadata created", dto.getProductName());
+			} else {
+				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(),
+						"No such L0 ACNs in object storage");
+			}
+		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {
+			LOGGER.error("[productName {}] {}", dto.getProductName(), e1.getMessage());
+		} catch (Exception e) {
+			LOGGER.error("[productName {}] Exception occurred: {}", dto.getProductName(), e.getMessage());
+		} finally {
+			// Remove file
+			if (metadataFile != null) {
+				File parent = metadataFile.getParentFile();
+				metadataFile.delete();
+				// Remove upper directory if needed
+				if (!this.localDirectory.endsWith(parent.getName() + "/")) {
+					parent.delete();
 				}
 			}
-			else {
-				LOGGER.error("File {} does not exists", metadata.getProductName());
-			}
-			if (!esServices.isMetadataExist(metadataToIndex)) {
-				esServices.createMetadata(metadataToIndex);
-			}
-			LOGGER.info("Metadata created for {}", metadataToIndex.getString("productName"));
-		} catch (Exception e){
-			LOGGER.error(e.getMessage());
 		}
 	}
-	
-	public CountDownLatch getLatchMetadata() {
-		return this.latchMetadata;
-	}
-	
+
 }

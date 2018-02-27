@@ -93,6 +93,7 @@ public class L0AcnsConsumer {
 				if (!esServices.isMetadataExist(metadata)) {
 					esServices.createMetadata(metadata);
 				}
+				LOGGER.info("[productName {}] Metadata created", dto.getProductName());
 			} else {
 				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(),
 						"No such L0 ACNs in object storage");

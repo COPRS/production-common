@@ -19,8 +19,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import fr.viveris.s1pdgs.mdcatalog.controllers.kafka.ConfigFileConsumer;
-import fr.viveris.s1pdgs.mdcatalog.controllers.kafka.EdrsSessionFileConsumer;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaL0AcnDto;
@@ -94,15 +92,6 @@ public class KafkaConsumerConfig {
 		return factory;
 	}
 
-	/**
-	 * KAFKA consumer for Config File
-	 * @return
-	 */
-	@Bean
-	public ConfigFileConsumer receiver() {
-		return new ConfigFileConsumer();
-	}
-
 	// ------------------------------------------------------------------------
 	// ------------------------------------------------------------------------
 	// EDRS SESSION FILES
@@ -130,15 +119,6 @@ public class KafkaConsumerConfig {
 		factory.setConcurrency(1);
 		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
 		return factory;
-	}
-
-	/**
-	 * KAFKA consumer for Config File
-	 * @return
-	 */
-	@Bean
-	public EdrsSessionFileConsumer edrsSessionsReceiver() {
-		return new EdrsSessionFileConsumer();
 	}
 
 	// ------------------------------------------------------------------------
