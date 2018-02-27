@@ -31,7 +31,7 @@ public class L0AcnsConsumer {
 	/**
 	 * Pattern for L0 output files
 	 */
-	private static final String PATTERN_L0_OUTPUT = "";
+	private static final String PATTERN_L0_OUTPUT = "^([0-9a-z]{2})([0-9a-z]){1}_(S[1-6]|IW|EW|WM|N[1-6]|EN|Z[1-6]|ZE|ZI|ZW|RF|GP|HK)_(RAW)(_)_(0)(A|C|N|S|_)(SH|SV|HH|HV|VH|DH|DV|__)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$";
 
 	/**
 	 * Amazon S3 service for configuration files
