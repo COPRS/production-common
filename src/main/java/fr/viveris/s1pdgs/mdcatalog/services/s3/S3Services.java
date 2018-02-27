@@ -13,6 +13,12 @@ public interface S3Services {
 	public void downloadFile(String keyName, File destionationFile) throws ObjectStorageException;
 
 	/**
+	 * Get a file from object storage and save it in expectedFilePath
+	 * @param keyName
+	 */
+	public File getFile(String keyName, String expectedFilePath) throws ObjectStorageException;
+
+	/**
 	 * Upload a file in object storage
 	 * @param keyName
 	 * @param uploadFile

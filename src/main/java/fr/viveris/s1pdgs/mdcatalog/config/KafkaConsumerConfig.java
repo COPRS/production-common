@@ -1,7 +1,7 @@
 /**
  * 
  */
-package fr.viveris.s1pdgs.mdcatalog.config.kafka;
+package fr.viveris.s1pdgs.mdcatalog.config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,10 +19,12 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import fr.viveris.s1pdgs.mdcatalog.controllers.kafka.ConfigFileConsumer;
+import fr.viveris.s1pdgs.mdcatalog.controllers.kafka.EdrsSessionFileConsumer;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaEdrsSessionDto;
-import fr.viveris.s1pdgs.mdcatalog.services.kafka.KafkaConfigFileConsumer;
-import fr.viveris.s1pdgs.mdcatalog.services.kafka.KafkaEdrsSessionFileConsumer;
+import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaL0AcnDto;
+import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaL0SliceDto;
 
 /**
  * KAFKA consumer configuration
@@ -62,10 +64,12 @@ public class KafkaConsumerConfig {
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
 		return props;
 	}
-	
-	/**
-	 * CONFIG FILES
-	 */
+
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+	// CONFIG FILES
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 	/**
 	 * Consumer factory
@@ -95,13 +99,15 @@ public class KafkaConsumerConfig {
 	 * @return
 	 */
 	@Bean
-	public KafkaConfigFileConsumer receiver() {
-		return new KafkaConfigFileConsumer();
+	public ConfigFileConsumer receiver() {
+		return new ConfigFileConsumer();
 	}
-	
-	/**
-	 * EDRS SESSION FILES
-	 */
+
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+	// EDRS SESSION FILES
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 	/**
 	 * Consumer factory
@@ -131,7 +137,65 @@ public class KafkaConsumerConfig {
 	 * @return
 	 */
 	@Bean
-	public KafkaEdrsSessionFileConsumer edrsSessionsReceiver() {
-		return new KafkaEdrsSessionFileConsumer();
+	public EdrsSessionFileConsumer edrsSessionsReceiver() {
+		return new EdrsSessionFileConsumer();
+	}
+
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+	// L0 SLICES
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Consumer factory
+	 * @return
+	 */
+	@Bean
+	public ConsumerFactory<String, KafkaL0SliceDto> l0SlicesConsumerFactory() {
+		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new JsonDeserializer<>(KafkaL0SliceDto.class));
+	}
+
+	/**
+	 * Listener containers factory
+	 * @return
+	 */
+	@Bean
+	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, KafkaL0SliceDto>> l0SlicesKafkaListenerContainerFactory() {
+		
+		ConcurrentKafkaListenerContainerFactory<String, KafkaL0SliceDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(l0SlicesConsumerFactory());
+		factory.setConcurrency(1);
+		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
+		return factory;
+	}
+
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+	// L0 ACNS
+	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Consumer factory
+	 * @return
+	 */
+	@Bean
+	public ConsumerFactory<String, KafkaL0AcnDto> l0AcnsConsumerFactory() {
+		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new JsonDeserializer<>(KafkaL0AcnDto.class));
+	}
+
+	/**
+	 * Listener containers factory
+	 * @return
+	 */
+	@Bean
+	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, KafkaL0AcnDto>> l0AcnsKafkaListenerContainerFactory() {
+		
+		ConcurrentKafkaListenerContainerFactory<String, KafkaL0AcnDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(l0AcnsConsumerFactory());
+		factory.setConcurrency(1);
+		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
+		return factory;
 	}
 }

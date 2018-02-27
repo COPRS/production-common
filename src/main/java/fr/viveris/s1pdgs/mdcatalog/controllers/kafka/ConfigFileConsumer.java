@@ -1,7 +1,7 @@
 /**
  * 
  */
-package fr.viveris.s1pdgs.mdcatalog.services.kafka;
+package fr.viveris.s1pdgs.mdcatalog.controllers.kafka;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
@@ -29,12 +29,12 @@ import fr.viveris.s1pdgs.mdcatalog.services.s3.ConfigFilesS3Services;
  *
  */
 @Service
-public class KafkaConfigFileConsumer {
+public class ConfigFileConsumer {
 
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaConfigFileConsumer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFileConsumer.class);
 
 	/**
 	 * Elasticsearch services

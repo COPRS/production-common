@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.mdcatalog.services.s3;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,24 @@ public class ConfigFilesS3Services implements S3Services {
 			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
 		}
 
+	}
+	
+	@Override
+	public File getFile(String keyName, String expectedFilePath) throws ObjectStorageException {
+		try {
+			File f = new File(expectedFilePath);
+			f.createNewFile();
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Downloading object {} from bucket {}", keyName, bucketName);
+			}
+			s3client.getObject(new GetObjectRequest(bucketName, keyName), f);
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
+			}
+			return f;
+		} catch (SdkClientException | IOException sce) {
+			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
+		}
 	}
 
 	@Override

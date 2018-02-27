@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.mdcatalog.config.s3;
+package fr.viveris.s1pdgs.mdcatalog.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
