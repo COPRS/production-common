@@ -3,7 +3,7 @@ spring:
   application:
     name: s1pdgs-ingestor
   profiles:
-    active: prod
+    active: ${ingestor_spring_profile:prod}
     
 # Logging
 logging:
@@ -19,7 +19,7 @@ logging:
 kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
   group-id: ${ingestor_kafka_group:ingestors}
-  poll-timeout: ${kafka_poll-timeout:500}
+  poll-timeout: ${ingestor_kafka_poll-timeout:500}
   topic:
     config-files: ${kafka_topic_config_files:t-pdgs-config-files}
     edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
@@ -46,10 +46,10 @@ ftp:
 #Object Storage
 storage:
   user:
-    id: ${storage_user_id:MEF5PCBPTXHKOUTCKW3G}
-    secret: ${storage_user_secret:4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo}
-  endpoint: ${storage_endpoint:http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/}
-  region: ${storage_region:eu-west-0}
+    id: ${storage_user_id}
+    secret: ${storage_user_secret}
+  endpoint: ${storage_endpoint}
+  region: ${storage_region}
   buckets:
     config-files: ${storage_buckets_config-files:config-files}
     session-files: ${storage_buckets_session-files:session-files}
@@ -59,13 +59,13 @@ storage:
 file:
   config-files:
     local-directory: ${ingestor_config-files_local-directory:/data/local-ingestor/config_files/} # Must contains the last /
-    read-fixed-rate: ${ingestor_file_read-fixed-rate:1000}
-    clean-empty-directory-rate: ${ingestor_file_clean-empty-directory-rate:15000}
-    clean-empty-min-age: ${ingestor_file_clean-empty-min-age:13000}
+    read-fixed-rate: ${ingestor_config-file_read-fixed-rate:1000}
+    clean-empty-directory-rate: ${ingestor_config-file_clean-empty-directory-rate:15000}
+    clean-empty-min-age: ${ingestor_config-file_clean-empty-min-age:13000}
     cache-max-capacity: ${ingestor_config-files_cache-max-capacity:10}
   session-files:
     local-directory: ${ingestor_session-files_local-directory:/data/local-ingestor/edrs_sessions/} # Must contains the last /
-    read-fixed-rate: ${ingestor_file_read-fixed-rate:1000}
-    clean-empty-directory-rate: ${ingestor_file_clean-empty-directory-rate:15000}
-    clean-empty-min-age: ${ingestor_file_clean-empty-min-age:13000}
+    read-fixed-rate: ${ingestor_session-file_read-fixed-rate:1000}
+    clean-empty-directory-rate: ${ingestor_session-file_clean-empty-directory-rate:15000}
+    clean-empty-min-age: ${ingestor_session-file_clean-empty-min-age:13000}
     cache-max-capacity: ${ingestor_session-files_cache-max-capacity:70}
