@@ -121,7 +121,7 @@ public class KafkaSessionProducerTest {
 	@Test
 	public void testSend() throws InterruptedException {
 		// send the message
-		KafkaEdrsSessionDto session = new KafkaEdrsSessionDto("L20171109175634707000125/DCS_02_L20171109175634707000125_ch1_DSIB.xml",1, EdrsSessionFileType.SESSION);
+		KafkaEdrsSessionDto session = new KafkaEdrsSessionDto("S1A/L20171109175634707000125/DCS_02_L20171109175634707000125_ch1_DSIB.xml",1, EdrsSessionFileType.SESSION, "S1","A");
 		try {
 			senderSession.send(session);
 		} catch (KafkaSessionPublicationException e) {

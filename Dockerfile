@@ -1,7 +1,11 @@
 FROM maven:3.5.2-jdk-8-alpine as build
 WORKDIR /app
-COPY . /app
-RUN mvn -B clean package
+COPY pom.xml /app
+RUN mvn dependency:go-offline
+COPY dev/ /app/dev/
+COPY src/ /app/src/
+COPY /logback-spring.xml /app/logback-spring.xml
+RUN mvn -B package
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
