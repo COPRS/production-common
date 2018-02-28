@@ -83,15 +83,15 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException 
 	 */
 	private JSONArray processCoordinates(L0OutputFileDescriptor descriptor, String rawCoordinates) throws MetadataExtractionException {
-		JSONArray Coordinates = new JSONArray();
+		JSONArray coordinates = new JSONArray();
 		try {
 			for (String coord : rawCoordinates.split(" ")) {
-				Coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
+				coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
 			}
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(descriptor.getProductName(), e);
 		}
-		return new JSONArray().put(Coordinates);
+		return new JSONArray().put(coordinates);
 	}
 
 	/**
