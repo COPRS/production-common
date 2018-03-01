@@ -19,6 +19,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -76,16 +77,21 @@ public class ExtractMetadata {
 	 * Function which transform the raw coordinates in the good format
 	 * 
 	 * @param rawCoordinates
+	 * @param descriptor
 	 * 
 	 * @return the coordinates in good format
+	 * @throws MetadataExtractionException 
 	 */
-	private String processCoordinates(String rawCoordinates) {
-		String returnString = "[";
-		for (String coord : rawCoordinates.split(" ")) {
-			returnString +=  "[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "],";
+	private JSONArray processCoordinates(L0OutputFileDescriptor descriptor, String rawCoordinates) throws MetadataExtractionException {
+		JSONArray coordinates = new JSONArray();
+		try {
+			for (String coord : rawCoordinates.split(" ")) {
+				coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
+			}
+		} catch (JSONException e) {
+			throw new MetadataExtractionException(descriptor.getProductName(), e);
 		}
-		returnString = returnString.substring(0, returnString.length()-1) + "]" ;
-		return returnString;
+		return new JSONArray().put(coordinates);
 	}
 
 	/**
@@ -341,7 +347,7 @@ public class ExtractMetadata {
 	        if(jsonFromXmlTmp.getJSONObject("sliceCoordinates").has("content")) {
 	        	JSONObject coordinates = new JSONObject();
 	        	coordinates.put("type", "Polygon");
-	        	coordinates.put("coordinates", processCoordinates(jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
+	        	coordinates.put("coordinates", processCoordinates(descriptor, jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
 	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("sliceNumber").has("content")) {
