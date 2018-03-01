@@ -17,9 +17,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
 
 @Service
-public class SessionFilesS3Services implements S3Services {
+public class L0SlicesS3Services implements S3Services {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SessionFilesS3Services.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(L0SlicesS3Services.class);
 
 	@Autowired
 	private AmazonS3 s3client;

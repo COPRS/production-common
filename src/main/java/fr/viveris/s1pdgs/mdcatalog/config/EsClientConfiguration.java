@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.mdcatalog.config.es;
+package fr.viveris.s1pdgs.mdcatalog.config;
 
 import java.net.UnknownHostException;
 

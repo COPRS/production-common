@@ -34,6 +34,8 @@ kafka:
   topic:
     config-files: t-pdgs-config-files
     edrs-sessions: t-pdgs-edrs-sessions
+    l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}
+    l0-acns: ${kafka_topic_l0_acns:t-pdgs-l0-acns}
 
 # Elastic Search
 elasticsearch:
@@ -45,13 +47,10 @@ elasticsearch:
 file:
   config-files:
     local-directory: ${ingestor_config-files_local-directory:/data/local-ingestor/config_files/} # Must contains the last /
-    read-fixed-rate: ${ingestor_file_read-fixed-rate:1000}
-    clean-empty-directory-rate: ${ingestor_file_clean-empty-directory-rate:15000}
-    clean-empty-min-age: ${ingestor_file_clean-empty-min-age:13000}
-    cache-max-capacity: ${ingestor_config-files_cache-max-capacity:10}
   session-files:
     local-directory: ${ingestor_session-files_local-directory:/data/local-ingestor/edrs_sessions/} # Must contains the last /
-    read-fixed-rate: ${ingestor_file_read-fixed-rate:1000}
-    clean-empty-directory-rate: ${ingestor_file_clean-empty-directory-rate:15000}
-    clean-empty-min-age: ${ingestor_file_clean-empty-min-age:13000}
-    cache-max-capacity: ${ingestor_session-files_cache-max-capacity:70}
+  l0-slices:
+    local-directory: ${ingestor_l0-slices_local-directory:/data/local-ingestor/l0_slices/} # Must contains the last /
+  l0-acns:
+    local-directory: ${ingestor_l0-acns_local-directory:/data/local-ingestor/l0_acns/} # Must contains the last /
+    
