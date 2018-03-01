@@ -22,7 +22,7 @@ kafka:
   group-id: ${catalog_kafka_group:metadata-catalog}
   poll-timeout: ${catalog_kafka_poll-timeout:500}
   topic:
-    config-files: ${kafka_topic_config_files:t-pdgs-config-files}
+    auxiliary-files: ${kafka_topic_auxiliary_files:t-pdgs-auxiliary-files}
     edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
     l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}
     l0-acns: ${kafka_topic_l0_acns:t-pdgs-l0-acns}
@@ -42,13 +42,13 @@ storage:
   endpoint: ${storage_endpoint}
   region: ${storage_region}
   buckets:
-    config-files: ${storage_buckets_config-files:config-files}
+    auxiliary-files: ${storage_buckets_auxiliary-files:auxiliary-files}
     session-files: ${storage_buckets_session-files:session-files}
     
 # File
 file:
-  config-files:
-    local-directory: ${catalog_config-files_local-directory:/data/local-catalog/config_files/} # Must contains the last /
+  auxiliary-files:
+    local-directory: ${catalog_auxiliary-files_local-directory:/data/local-catalog/auxiliary_files/} # Must contains the last /
   session-files:
     local-directory: ${catalog_session-files_local-directory:/data/local-catalog/edrs_sessions/} # Must contains the last /
   l0-slices:
