@@ -42,19 +42,21 @@ public class MetadataController {
 			if (mode.equals("LatestValCover")) {
 				MetadataFile f = esServices.lastValCover(productType, convertDateForSearch(startDate, -dt0),
 						convertDateForSearch(stopDate, dt1), satellite);
-
-				MetadataFileDto response = new MetadataFileDto(f.getProductName(), f.getProductType(),
-						f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
-
+				MetadataFileDto response = null;
+				if (f != null) {
+					response = new MetadataFileDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
+							f.getValidityStart(), f.getValidityStop());
+				}
 				return new ResponseEntity<MetadataFileDto>(response, HttpStatus.OK);
 			} else {
+				LOGGER.error("[productType {}] [mode {}] Unknown mode", productType, mode);
 				return new ResponseEntity<MetadataFileDto>(HttpStatus.BAD_REQUEST);
 			}
 		} catch (ParseException e) {
-			LOGGER.error("Exception occured", e);
+			LOGGER.error("[productType {}] [mode {}] Exception occured: {}", productType, mode, e.getMessage());
 			return new ResponseEntity<MetadataFileDto>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
-			LOGGER.error("Exception occured", e);
+			LOGGER.error("[productType {}] [mode {}] Exception occured: {}", productType, mode, e.getMessage());
 			return new ResponseEntity<MetadataFileDto>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -66,13 +68,18 @@ public class MetadataController {
 		try {
 			MetadataFile f = esServices.get(productType, productName);
 
-			MetadataFileDto response = new MetadataFileDto(f.getProductName(), f.getProductType(),
-					f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
-
-			return new ResponseEntity<MetadataFileDto>(response, HttpStatus.OK);
+			if (f != null) {
+				MetadataFileDto response = new MetadataFileDto(f.getProductName(), f.getProductType(),
+						f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
+				return new ResponseEntity<MetadataFileDto>(response, HttpStatus.OK);
+			} else {
+				LOGGER.error("[productType {}] [productName {}] Not found", productType, productName);
+				return new ResponseEntity<MetadataFileDto>(HttpStatus.NOT_FOUND);
+			}
 
 		} catch (Exception e) {
-			LOGGER.error("Exception occured", e);
+			LOGGER.error("[productType {}] [productName {}] Exception occured: {}", productType, productName,
+					e.getMessage());
 			return new ResponseEntity<MetadataFileDto>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
