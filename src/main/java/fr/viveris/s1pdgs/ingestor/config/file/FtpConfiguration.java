@@ -101,7 +101,7 @@ public class FtpConfiguration {
 	/**
 	 * Maximal number of configuration file name cached
 	 */
-	@Value("${file.config-files.cache-max-capacity}")
+	@Value("${file.auxiliary-files.cache-max-capacity}")
 	private int configCacheMaxCapacity;
 
 	/**

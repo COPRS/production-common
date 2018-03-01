@@ -39,7 +39,7 @@ public class KafkaConfigFileProducer {
 	/**
 	 * Name of the topic "metadata"
 	 */
-	@Value("${kafka.topic.config-files}")
+	@Value("${kafka.topic.auxiliary-files}")
 	private String kafkaTopic;
 
 	/**
