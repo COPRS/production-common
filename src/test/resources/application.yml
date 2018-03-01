@@ -20,7 +20,7 @@ kafka:
   group-id: ingestors
   poll-timeout: 3000
   topic:
-    config-files: t-pdgs-config-files
+    auxiliary-files: t-pdgs-auxiliary-files
     edrs-sessions: t-pdgs-edrs-sessions
 
 #FTP
@@ -33,8 +33,8 @@ ftp:
   local-directory: /data/local-ingestor/
   command-options:
     mget: -P -R -D
-  config-files:
-    remote-directory: /config_files/
+  auxiliary-files:
+    remote-directory: /auxiliary_files/
     upload-fixed-rate: 3000
     cache-max-capacity: 10
   session-files:
@@ -50,13 +50,13 @@ storage:
   endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
   region: eu-west-0
   buckets:
-    config-files: config-files
+    auxiliary-files: auxiliary-files
     session-files: session-files
  
 # File
 file:
-  config-files:
-    local-directory: /data/local-ingestor/config_files/ # Must contains the last /
+  auxiliary-files:
+    local-directory: /data/local-ingestor/auxiliary_files/ # Must contains the last /
     read-fixed-rate: 1000
     clean-empty-directory-rate: 10000
     clean-empty-min-age: 13000

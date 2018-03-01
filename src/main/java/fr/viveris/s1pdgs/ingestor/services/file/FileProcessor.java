@@ -82,7 +82,7 @@ public class FileProcessor {
 	 * @param sessionLocalDirectory
 	 */
 	@Autowired
-	public FileProcessor(@Value("${file.config-files.local-directory}") final String configLocalDirectory,
+	public FileProcessor(@Value("${file.auxiliary-files.local-directory}") final String configLocalDirectory,
 			@Value("${file.session-files.local-directory}") final String sessionLocalDirectory) {
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("[FileProcessor] Build instance of file processor: config files {}, session files {}",

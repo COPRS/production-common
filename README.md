@@ -11,7 +11,7 @@ Then it processes files of its local directory:
 
 ##### In FTP server
 
-	config_files/
+	auxiliary_files/
 		S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml
 		S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF
 		S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE/
@@ -45,7 +45,7 @@ Then it processes files of its local directory:
 
 ##### In object storage
 
-Bucket "config_files"
+Bucket "auxiliary_files"
 
 	S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml
 	S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF
@@ -74,8 +74,8 @@ Below the parameters to configure for the production
 	ftp.host: FTP server hostname (example: input-ftpserver-svc)
 	ftp.username: Username to access to the FTP
 	ftp.password: Password to access to the FTP
-	ftp.config-files.remote-directory: the remote directory where the configuration files shall be uploaded (example: config-files)
-	ftp.config-files.upload-fixed-rate: The fixed rate in milliseconds to retrieve by FTP configuration files (example: 1000)
+	ftp.auxiliary-files.remote-directory: the remote directory where the configuration files shall be uploaded (example: auxiliary-files)
+	ftp.auxiliary-files.upload-fixed-rate: The fixed rate in milliseconds to retrieve by FTP configuration files (example: 1000)
 	ftp.session-files.remote-directory: the remote directory where the session files shall be uploaded (example: erds-sessions)
 	ftp.session-files.upload-fixed-rate: The fixed rate in milliseconds to retrieve by FTP configuration files (example: 1000)
 	
@@ -83,10 +83,10 @@ Below the parameters to configure for the production
 	storage.user.secret: access secret
 	storage.endpoint: object storage endpoint (example: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/)
 	storage.region: object storage region (example: eu-west-0)
-	storage.buckets.config-files: bucket name used for configuration files (example: config-files)
+	storage.buckets.auxiliary-files: bucket name used for configuration files (example: auxiliary-files)
 	storage.buckets.session-files: bucket name used for session files (example: session-files)
 	
-	file.config-files.read-fixed-rate: The fixed rate in milliseconds to read configuration files on local directory (example: 1000)
-	file.config-files.read-fixed-rate: The fixed rate in milliseconds to read session files on local directory (example: 1000)
+	file.auxiliary-files.read-fixed-rate: The fixed rate in milliseconds to read configuration files on local directory (example: 1000)
+	file.auxiliary-files.read-fixed-rate: The fixed rate in milliseconds to read session files on local directory (example: 1000)
 
 #### Logs

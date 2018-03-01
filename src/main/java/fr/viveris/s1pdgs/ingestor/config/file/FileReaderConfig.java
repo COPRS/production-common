@@ -66,8 +66,8 @@ public class FileReaderConfig {
 	@Autowired
 	public FileReaderConfig(@Value("${file.session-files.local-directory}") final String sessionDir,
 			@Value("${file.session-files.cache-max-capacity}") final int sessionCacheMaxCapacity,
-			@Value("${file.config-files.local-directory}") final String configDir,
-			@Value("${file.config-files.cache-max-capacity}") final int configCacheMaxCapacity) {
+			@Value("${file.auxiliary-files.local-directory}") final String configDir,
+			@Value("${file.auxiliary-files.cache-max-capacity}") final int configCacheMaxCapacity) {
 		this.sessionDir = sessionDir;
 		this.sessionCacheMaxCapacity = sessionCacheMaxCapacity;
 		this.configDir = configDir;
@@ -135,7 +135,7 @@ public class FileReaderConfig {
 	 * @return a message per file/directory
 	 */
 	@Bean
-	@InboundChannelAdapter(value = "configFileChannel", poller = @Poller(fixedRate = "${file.config-files.read-fixed-rate}"))
+	@InboundChannelAdapter(value = "configFileChannel", poller = @Poller(fixedRate = "${file.auxiliary-files.read-fixed-rate}"))
 	public MessageSource<File> configFileReadingMessageSource() {
 		ChainFileListFilter<File> filter = new ChainFileListFilter<File>();
 		filter.addFilter(

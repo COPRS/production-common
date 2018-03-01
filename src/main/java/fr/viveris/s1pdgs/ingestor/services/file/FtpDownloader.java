@@ -33,7 +33,7 @@ public class FtpDownloader {
 	/**
 	 * Remote directory for configuration files
 	 */
-	@Value("${ftp.config-files.remote-directory}")
+	@Value("${ftp.auxiliary-files.remote-directory}")
 	private String remoteDirectoryConfigFiles;
 	
 	/**
@@ -45,7 +45,7 @@ public class FtpDownloader {
 	/**
 	 * Task to periodically download configuration files
 	 */
-	@Scheduled(fixedRateString = "${ftp.config-files.upload-fixed-rate}")
+	@Scheduled(fixedRateString = "${ftp.auxiliary-files.upload-fixed-rate}")
 	public void downloadConfigFiles() {
 		List<File> files = ftpGateway.fetchConfigFiles(remoteDirectoryConfigFiles);
 		for (File file : files) {

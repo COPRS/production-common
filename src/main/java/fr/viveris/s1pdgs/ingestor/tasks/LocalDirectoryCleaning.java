@@ -28,15 +28,15 @@ public class LocalDirectoryCleaning {
 	@Autowired
 	public LocalDirectoryCleaning(@Value("${file.session-files.local-directory}") final String sessionLocalDirectory,
 			@Value("${file.session-files.clean-empty-min-age}") final long sessionMinAge,
-			@Value("${file.config-files.local-directory}") final String configLocalDirectory,
-			@Value("${file.config-files.clean-empty-min-age}") final long configMinAge) {
+			@Value("${file.auxiliary-files.local-directory}") final String configLocalDirectory,
+			@Value("${file.auxiliary-files.clean-empty-min-age}") final long configMinAge) {
 		this.sessionLocalDirectory = sessionLocalDirectory;
 		this.configLocalDirectory = configLocalDirectory;
 		this.configMinAge = configMinAge;
 		this.sessionMinAge = sessionMinAge;
 	}
 
-	@Scheduled(fixedDelayString = "${file.config-files.clean-empty-directory-rate}")
+	@Scheduled(fixedDelayString = "${file.auxiliary-files.clean-empty-directory-rate}")
 	public void cleanConfigFilesDirectory() {
 		try {
 			long lastModifiedMin = System.currentTimeMillis() - configMinAge;
