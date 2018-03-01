@@ -97,10 +97,10 @@ public class EsServices {
 			throw e;
 		}
 	}
-	
+
 	/**
-	 * Function which return the product that correspond to the lastValCover specification
-	 * If there is no corresponding product return null
+	 * Function which return the product that correspond to the lastValCover
+	 * specification If there is no corresponding product return null
 	 * 
 	 * @param productType
 	 * @param beginDate
@@ -108,16 +108,16 @@ public class EsServices {
 	 * @param satelliteId
 	 * 
 	 * @return the key object storage of the chosen product
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public MetadataFile lastValCover(String productType, String beginDate, String endDate, String satelliteId) throws Exception {
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder(); 
-		sourceBuilder.query(QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+	public MetadataFile lastValCover(String productType, String beginDate, String endDate, String satelliteId)
+			throws Exception {
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
 				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
 		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC)); 
+		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 
 		SearchRequest searchRequest = new SearchRequest(productType.toLowerCase());
 		searchRequest.types(indexType);
@@ -130,8 +130,12 @@ public class EsServices {
 				r.setProductName(source.get("productName").toString());
 				r.setProductType(productType);
 				r.setKeyObjectStorage(source.get("url").toString());
-				r.setValidityStart(source.get("validityStartTime").toString());
-				r.setValidityStop(source.get("validityStopTime").toString());
+				if (source.containsKey("validityStartTime")) {
+					r.setValidityStart(source.get("validityStartTime").toString());
+				}
+				if (source.containsKey("validityStopTime")) {
+					r.setValidityStop(source.get("validityStopTime").toString());
+				}
 				return r;
 			}
 		} catch (IOException e) {
@@ -139,10 +143,10 @@ public class EsServices {
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Function which return the product that correspond to the lastValCover specification
-	 * If there is no corresponding product return null
+	 * Function which return the product that correspond to the lastValCover
+	 * specification If there is no corresponding product return null
 	 * 
 	 * @param productType
 	 * @param beginDate
@@ -150,22 +154,26 @@ public class EsServices {
 	 * @param satelliteId
 	 * 
 	 * @return the key object storage of the chosen product
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public MetadataFile get(String productType, String productName) throws Exception {
 		try {
 			GetRequest getRequest = new GetRequest(productType.toLowerCase(), indexType, productName);
 
 			GetResponse response = restHighLevelClient.get(getRequest);
-			
+
 			if (response.isExists()) {
 				Map<String, Object> source = response.getSourceAsMap();
 				MetadataFile r = new MetadataFile();
 				r.setProductName(source.get("productName").toString());
 				r.setProductType(productType);
 				r.setKeyObjectStorage(source.get("url").toString());
-				r.setValidityStart(source.get("validityStartTime").toString());
-				r.setValidityStop(source.get("validityStopTime").toString());
+				if (source.containsKey("validityStartTime")) {
+					r.setValidityStart(source.get("validityStartTime").toString());
+				}
+				if (source.containsKey("validityStopTime")) {
+					r.setValidityStop(source.get("validityStopTime").toString());
+				}
 				return r;
 			}
 		} catch (IOException e) {
