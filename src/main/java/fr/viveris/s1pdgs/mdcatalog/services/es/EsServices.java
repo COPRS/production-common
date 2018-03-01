@@ -154,7 +154,7 @@ public class EsServices {
 	 */
 	public MetadataFile get(String productType, String productName) throws Exception {
 		try {
-			GetRequest getRequest = new GetRequest(productType, indexType, productName);
+			GetRequest getRequest = new GetRequest(productType.toLowerCase(), indexType, productName);
 
 			GetResponse response = restHighLevelClient.get(getRequest);
 			
