@@ -23,7 +23,7 @@ public class ConfigFilesS3Services implements S3Services {
 	@Autowired
 	private AmazonS3 s3client;
 
-	@Value("${storage.buckets.config-files}")
+	@Value("${storage.buckets.auxiliary-files}")
 	private String bucketName;
 
 	@Override

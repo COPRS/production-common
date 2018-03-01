@@ -71,7 +71,7 @@ public class ConfigFileConsumer {
 
 	@Autowired
 	public ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
-			@Value("${file.config-files.local-directory}") final String localDirectory) {
+			@Value("${file.auxiliary-files.local-directory}") final String localDirectory) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
@@ -85,7 +85,7 @@ public class ConfigFileConsumer {
 	 * 
 	 * @param payload
 	 */
-	@KafkaListener(topics = "${kafka.topic.config-files}", groupId = "${kafka.group-id}")
+	@KafkaListener(topics = "${kafka.topic.auxiliary-files}", groupId = "${kafka.group-id}")
 	public void receive(KafkaConfigFileDto dto) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("[receive] Consume message {}", dto);

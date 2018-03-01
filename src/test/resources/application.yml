@@ -23,7 +23,7 @@ storage:
   endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
   region: eu-west-0
   buckets:
-    config-files: config-files
+    auxiliary-files: auxiliary-files
     session-files: session-files
 
 # KAFKA
@@ -32,10 +32,10 @@ kafka:
   group-id: metadata-catalog
   poll-timeout: 500
   topic:
-    config-files: t-pdgs-config-files
+    auxiliary-files: t-pdgs-auxiliary-files
     edrs-sessions: t-pdgs-edrs-sessions
-    l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}
-    l0-acns: ${kafka_topic_l0_acns:t-pdgs-l0-acns}
+    l0-slices: t-pdgs-l0-slices
+    l0-acns: t-pdgs-l0-acns
 
 # Elastic Search
 elasticsearch:
@@ -45,8 +45,8 @@ elasticsearch:
     
 # File
 file:
-  config-files:
-    local-directory: ${ingestor_config-files_local-directory:/data/local-ingestor/config_files/} # Must contains the last /
+  auxiliary-files:
+    local-directory: ${ingestor_auxiliary-files_local-directory:/data/local-ingestor/auxiliary_files/} # Must contains the last /
   session-files:
     local-directory: ${ingestor_session-files_local-directory:/data/local-ingestor/edrs_sessions/} # Must contains the last /
   l0-slices:
