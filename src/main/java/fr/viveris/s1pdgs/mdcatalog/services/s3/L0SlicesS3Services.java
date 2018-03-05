@@ -24,7 +24,7 @@ public class L0SlicesS3Services implements S3Services {
 	@Autowired
 	private AmazonS3 s3client;
 
-	@Value("${storage.buckets.session-files}")
+	@Value("${storage.buckets.l0-slices}")
 	private String bucketName;
 
 	@Override

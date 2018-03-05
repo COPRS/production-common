@@ -44,6 +44,8 @@ storage:
   buckets:
     auxiliary-files: ${storage_buckets_auxiliary-files:auxiliary-files}
     session-files: ${storage_buckets_session-files:session-files}
+    l0-acns: ${storage_buckets_l0-acns:acns}
+    l0-slices: ${storage_buckets_l0-slices:l0-slices}
     
 # File
 file:
