@@ -79,7 +79,7 @@ public class L0AcnsConsumer {
 		File metadataFile = null;
 		try {
 			// Upload file
-			if (l0AcnsS3Services.exist(dto.getKeyObjectStorage())) {
+			if (l0AcnsS3Services.exist(dto.getKeyObjectStorage() + "/manifest.safe")) {
 				// Upload file
 				metadataFile = this.l0AcnsS3Services.getFile(dto.getKeyObjectStorage() + "/manifest.safe",
 						this.localDirectory + dto.getKeyObjectStorage() + "/manifest.safe");

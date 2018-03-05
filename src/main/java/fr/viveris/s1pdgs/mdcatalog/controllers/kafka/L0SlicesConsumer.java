@@ -79,7 +79,7 @@ public class L0SlicesConsumer {
 		File metadataFile = null;
 		try {
 			// Upload file
-			if (l0SlicesS3Services.exist(dto.getKeyObjectStorage())) {
+			if (l0SlicesS3Services.exist(dto.getKeyObjectStorage() + "/manifest.safe")) {
 				// Upload file
 				metadataFile = this.l0SlicesS3Services.getFile(dto.getKeyObjectStorage() + "/manifest.safe",
 						this.localDirectory + dto.getKeyObjectStorage() + "/manifest.safe");
