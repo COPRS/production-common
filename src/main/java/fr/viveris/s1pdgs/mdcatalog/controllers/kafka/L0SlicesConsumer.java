@@ -89,7 +89,7 @@ public class L0SlicesConsumer {
 						.buildL0OutputFileDescriptor(metadataFile);
 
 				// Build metadata from file and extracted
-				JSONObject metadata = mdBuilder.buildL0OutputFileMetadata(descriptor, metadataFile);
+				JSONObject metadata = mdBuilder.buildL0SliceOutputFileMetadata(descriptor, metadataFile);
 
 				// Publish metadata
 				if (!esServices.isMetadataExist(metadata)) {
