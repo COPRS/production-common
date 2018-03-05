@@ -401,7 +401,7 @@ public class ExtractMetadata {
 	        	metadataJSONObject.put("stopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
 	        }
 	        metadataJSONObject.put("productName", descriptor.getProductName());
-	        metadataJSONObject.put("productClass", descriptor.getClass());
+	        metadataJSONObject.put("productClass", descriptor.getProductClass());
 	        metadataJSONObject.put("productType", descriptor.getProductType());
 	        metadataJSONObject.put("resolution", descriptor.getResolution());
 	        metadataJSONObject.put("missionId", descriptor.getMissionId());
