@@ -81,8 +81,8 @@ public class L0SlicesConsumer {
 			// Upload file
 			if (l0SlicesS3Services.exist(dto.getKeyObjectStorage())) {
 				// Upload file
-				metadataFile = this.l0SlicesS3Services.getFile(dto.getKeyObjectStorage(),
-						this.localDirectory + dto.getKeyObjectStorage());
+				metadataFile = this.l0SlicesS3Services.getFile(dto.getKeyObjectStorage() + "/manifest.safe",
+						this.localDirectory + dto.getKeyObjectStorage() + "/manifest.safe");
 
 				// Extract metadata from name
 				L0OutputFileDescriptor descriptor = this.fileDescriptorBuilder

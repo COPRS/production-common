@@ -81,8 +81,8 @@ public class L0AcnsConsumer {
 			// Upload file
 			if (l0AcnsS3Services.exist(dto.getKeyObjectStorage())) {
 				// Upload file
-				metadataFile = this.l0AcnsS3Services.getFile(dto.getKeyObjectStorage(),
-						this.localDirectory + dto.getKeyObjectStorage());
+				metadataFile = this.l0AcnsS3Services.getFile(dto.getKeyObjectStorage() + "/manifest.safe",
+						this.localDirectory + dto.getKeyObjectStorage() + "/manifest.safe");
 
 				// Extract metadata from name
 				L0OutputFileDescriptor descriptor = this.fileDescriptorBuilder
