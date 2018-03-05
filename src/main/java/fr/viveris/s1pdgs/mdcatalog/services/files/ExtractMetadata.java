@@ -316,15 +316,23 @@ public class ExtractMetadata {
 		}
 	}
 	
-	public JSONObject processL0Prod(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
+	public JSONObject processL0SliceProd(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
+		return this.processL0Prod(descriptor, file, "tmp/outputl0slices.xml");
+	}
+	
+	public JSONObject processL0AcnProd(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
+		return this.processL0Prod(descriptor, file, "tmp/outputl0acns.xml");
+	}
+	
+	private JSONObject processL0Prod(L0OutputFileDescriptor descriptor, File file, String output) throws MetadataExtractionException {
 		try {
 			//XSLT Transformation
-			Source xsltL0MANIFEST = new StreamSource(new File("XSLT_L0_MANIFEST.xslt"));
+			Source xsltL0MANIFEST = new StreamSource(new File("xsltDir/XSLT_L0_MANIFEST.xslt"));
 	        Transformer transformerL0 = transFactory.newTransformer(xsltL0MANIFEST);
 	        Source l0File = new StreamSource(file);
-	        transformerL0.transform(l0File, new StreamResult(new File("tmp/output.xml")));
+	        transformerL0.transform(l0File, new StreamResult(new File(output)));
 	        //JSON creation
-	        JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
+	        JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
 	        JSONObject metadataJSONObject = new JSONObject();
 	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
 	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").getString("content"));

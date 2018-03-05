@@ -24,7 +24,7 @@ public class L0AcnsS3Services implements S3Services {
 	@Autowired
 	private AmazonS3 s3client;
 
-	@Value("${storage.buckets.session-files}")
+	@Value("${storage.buckets.l0-acns}")
 	private String bucketName;
 
 	@Override

@@ -25,6 +25,8 @@ storage:
   buckets:
     auxiliary-files: auxiliary-files
     session-files: session-files
+    l0-acns: acns
+    l0-slices: l0-slices
 
 # KAFKA
 kafka:

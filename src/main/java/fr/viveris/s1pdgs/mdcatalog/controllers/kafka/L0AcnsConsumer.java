@@ -79,17 +79,17 @@ public class L0AcnsConsumer {
 		File metadataFile = null;
 		try {
 			// Upload file
-			if (l0AcnsS3Services.exist(dto.getKeyObjectStorage())) {
+			if (l0AcnsS3Services.exist(dto.getKeyObjectStorage() + "/manifest.safe")) {
 				// Upload file
-				metadataFile = this.l0AcnsS3Services.getFile(dto.getKeyObjectStorage(),
-						this.localDirectory + dto.getKeyObjectStorage());
+				metadataFile = this.l0AcnsS3Services.getFile(dto.getKeyObjectStorage() + "/manifest.safe",
+						this.localDirectory + dto.getKeyObjectStorage() + "/manifest.safe");
 
 				// Extract metadata from name
 				L0OutputFileDescriptor descriptor = this.fileDescriptorBuilder
 						.buildL0OutputFileDescriptor(metadataFile);
 
 				// Build metadata from file and extracted
-				JSONObject metadata = mdBuilder.buildL0OutputFileMetadata(descriptor, metadataFile);
+				JSONObject metadata = mdBuilder.buildL0AcnOutputFileMetadata(descriptor, metadataFile);
 
 				// Publish metadata
 				if (!esServices.isMetadataExist(metadata)) {

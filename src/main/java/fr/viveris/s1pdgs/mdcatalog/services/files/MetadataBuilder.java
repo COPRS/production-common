@@ -107,10 +107,27 @@ public class MetadataBuilder {
 	 * 
 	 * @throws MetadataExtractionException
 	 */
-	public JSONObject buildL0OutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
+	public JSONObject buildL0SliceOutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
 			throws MetadataExtractionException {
 		JSONObject metadataToIndex = new JSONObject();
-		metadataToIndex = extractor.processL0Prod(descriptor, file);
+		metadataToIndex = extractor.processL0SliceProd(descriptor, file);
+		return metadataToIndex;
+	}
+	
+	/**
+	 * Build metadata for L0 product
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL0AcnOutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+		JSONObject metadataToIndex = new JSONObject();
+		metadataToIndex = extractor.processL0AcnProd(descriptor, file);
 		return metadataToIndex;
 	}
 }
