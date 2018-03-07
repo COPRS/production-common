@@ -50,9 +50,9 @@
 		<stopTimeANX>
 			<xsl:copy-of select="//xfdu:XFDU/metadataSection/metadataObject[@ID='acquisitionPeriod']/metadataWrap/xmlData/s:acquisitionPeriod/s:extension/s1:timeANX/s1:stopTimeANX/text()"/>
 		</stopTimeANX>
-		<totalNumberOfSlice>
+		<!-- <totalNumberOfSlice>
 			<xsl:copy-of select="//xfdu:XFDU/metadataSection/metadataObject/metadataWrap/xmlData/CHANGEME"/>
-		</totalNumberOfSlice>
+		</totalNumberOfSlice>-->
 		<sliceCoordinates>
 			<xsl:copy-of select="//xfdu:XFDU/metadataSection/metadataObject[@ID='measurementFrameSet']/metadataWrap/xmlData/s:frameSet/s:frame/s:footPrint/gml:coordinates/text()"/>
 		</sliceCoordinates>

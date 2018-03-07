@@ -9,9 +9,13 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -23,6 +27,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
@@ -35,6 +43,9 @@ import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
  * @author Olivier Bex-Chauvet
  * 
  */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = "md_extractor")
 public class ExtractMetadata {
 
 	/**
@@ -45,6 +56,18 @@ public class ExtractMetadata {
 	 * Date Format
 	 */
 	private SimpleDateFormat dateFormat;
+	
+	private String typeoverlap;
+	/**
+	 * Map of all the overlap for the different slice type
+	 */
+	private Map<String, Float> typeOverlap;
+	
+	private String typeslicelength;
+	/**
+	 * Map of all the length for the different slice type
+	 */
+	private Map<String, Float> typeSliceLength;
 
 	/**
 	 * Constructor
@@ -56,6 +79,39 @@ public class ExtractMetadata {
 	public ExtractMetadata() {
 		this.transFactory = TransformerFactory.newInstance();
 		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		this.typeOverlap = new HashMap<>();
+		this.typeSliceLength = new HashMap<>();
+	}
+	
+	/**
+	 * Function which construct the 2 hashMaps typeOverlap and typeSliceLength
+	 */
+	@PostConstruct
+	public void initMaps() {
+		// TypeOverlap
+		if (!StringUtils.isEmpty(this.typeoverlap)) {
+			String[] paramsTmp = this.typeoverlap.split("\\|\\|");
+			for (int i=0; i<paramsTmp.length; i++) {
+				if (!StringUtils.isEmpty(paramsTmp[i])) {
+					String[] tmp = paramsTmp[i].split(":", 2);
+					if (tmp.length == 2) {
+						this.typeSliceLength.put(tmp[0], Float.valueOf(tmp[1]));
+					}
+				}
+			}
+		}
+		// TypeSliceLength
+		if (!StringUtils.isEmpty(this.typeslicelength)) {
+			String[] paramsTmp = this.typeslicelength.split("\\|\\|");
+			for (int i=0; i<paramsTmp.length; i++) {
+				if (!StringUtils.isEmpty(paramsTmp[i])) {
+					String[] tmp = paramsTmp[i].split(":", 2);
+					if (tmp.length == 2) {
+						this.typeSliceLength.put(tmp[0], Float.valueOf(tmp[1]));
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -92,6 +148,31 @@ public class ExtractMetadata {
 			throw new MetadataExtractionException(descriptor.getProductName(), e);
 		}
 		return new JSONArray().put(coordinates);
+	}
+	
+	/**
+	 * Function which return the number of slices in a segment
+	 * 
+	 * @param startTimeLong
+	 * @param stopTimeLong
+	 * @param type
+	 * 
+	 * @return an int which is the number of Slices
+	 */
+	private int totalNumberOfSlice(Long startTimeLong, Long stopTimeLong, String type) {
+		int totalNumberOfSlices = 0;
+		float tmpNumberOfSlices = 0F;
+		double fracNumberOfSlices = 0.0;
+		tmpNumberOfSlices = (stopTimeLong - startTimeLong - this.typeOverlap.get(type))/this.typeSliceLength.get(type);
+		fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
+		if((fracNumberOfSlices*this.typeSliceLength.get(type)) < this.typeOverlap.get(type)){
+			totalNumberOfSlices = (int) Math.floor(tmpNumberOfSlices);
+		}
+		else {
+			totalNumberOfSlices = (int) Math.ceil(tmpNumberOfSlices);
+		}
+		System.out.println(totalNumberOfSlices);
+		return Math.max(totalNumberOfSlices, 1);
 	}
 
 	/**
@@ -337,12 +418,6 @@ public class ExtractMetadata {
 	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
 	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").getString("content"));
 	        }
-	        if(jsonFromXmlTmp.getJSONObject("totalNumberOfSlice").has("content")) {
-	        	metadataJSONObject.put("totalNumberOfSlice", jsonFromXmlTmp.getJSONObject("totalNumberOfSlice").getString("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("totalNumberOfSlice").has("content")) {
-	        	metadataJSONObject.put("totalNumberOfSlice", jsonFromXmlTmp.getJSONObject("totalNumberOfSlice").getString("content"));
-	        }
 	        if(jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").has("content")) {
 	        	metadataJSONObject.put("theoreticalSliceLength", jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").getString("content"));
 	        }
@@ -400,6 +475,39 @@ public class ExtractMetadata {
 	        if(jsonFromXmlTmp.getJSONObject("stopTime").has("content")) {
 	        	metadataJSONObject.put("stopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
 	        }
+	        if(descriptor.getProductClass().equals("A") || descriptor.getProductClass().equals("C") || descriptor.getProductClass().equals("N")) {
+	        	if(metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
+	        		if(descriptor.getSwathtype().matches("IW")) {
+	            		metadataJSONObject.put("totalNumberOfSlice", 
+							totalNumberOfSlice(
+									dateFormat.parse(jsonFromXmlTmp.getJSONObject("startTime").getString("content")).getTime()/1000, 
+									dateFormat.parse(jsonFromXmlTmp.getJSONObject("stopTime").getString("content")).getTime()/1000,
+									descriptor.getSwathtype()));
+	        		}	
+		        	else if (descriptor.getSwathtype().matches("EW")) {
+						metadataJSONObject.put("totalNumberOfSlice", 
+								totalNumberOfSlice(
+										dateFormat.parse(jsonFromXmlTmp.getJSONObject("startTime").getString("content")).getTime()/1000, 
+										dateFormat.parse(jsonFromXmlTmp.getJSONObject("stopTime").getString("content")).getTime()/1000,
+										descriptor.getSwathtype()));
+		        	}
+		        	else if (descriptor.getSwathtype().matches("WM")) {
+						metadataJSONObject.put("totalNumberOfSlice", 
+								totalNumberOfSlice(
+										dateFormat.parse(jsonFromXmlTmp.getJSONObject("startTime").getString("content")).getTime()/1000, 
+										dateFormat.parse(jsonFromXmlTmp.getJSONObject("stopTime").getString("content")).getTime()/1000,
+										descriptor.getSwathtype()));
+	
+		        	}
+		        	else if (descriptor.getSwathtype().matches("S[1-6]")) {
+						metadataJSONObject.put("totalNumberOfSlice", 
+								totalNumberOfSlice(
+										dateFormat.parse(jsonFromXmlTmp.getJSONObject("startTime").getString("content")).getTime()/1000, 
+										dateFormat.parse(jsonFromXmlTmp.getJSONObject("stopTime").getString("content")).getTime()/1000,
+										"SM"));
+		        	}
+	        	}
+	        }
 	        metadataJSONObject.put("productName", descriptor.getProductName());
 	        metadataJSONObject.put("productClass", descriptor.getProductClass());
 	        metadataJSONObject.put("productType", descriptor.getProductType());
@@ -412,7 +520,7 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 	        metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 	        return metadataJSONObject;
-		} catch (IOException | TransformerException | JSONException e) {
+		} catch (IOException | TransformerException | JSONException | ParseException e) {
 			throw new MetadataExtractionException(descriptor.getProductName(), e);
 		}
 	}

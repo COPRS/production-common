@@ -56,3 +56,8 @@ file:
   l0-acns:
     local-directory: ${ingestor_l0-acns_local-directory:/data/local-ingestor/l0_acns/} # Must contains the last /
     
+# Metadata Extractor
+md_extractor:
+  typeoverlap: "EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"
+  typeslicelength: "EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"
+      
