@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaL0AcnDto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
@@ -54,6 +55,11 @@ public class L0AcnsConsumer {
 	 * Metadata builder
 	 */
 	private final MetadataBuilder mdBuilder;
+	
+	/**
+	 * 
+	 */
+	private final MetadataExtractorConfig extractorConfig;
 
 	/**
 	 * Local directory to upload files
@@ -62,11 +68,13 @@ public class L0AcnsConsumer {
 
 	@Autowired
 	public L0AcnsConsumer(final EsServices esServices, final L0AcnsS3Services l0AcnsS3Services,
-			@Value("${file.l0-acns.local-directory}") final String localDirectory) {
+			@Value("${file.l0-acns.local-directory}") final String localDirectory,
+			final MetadataExtractorConfig extractorConfig) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_L0_OUTPUT, Pattern.CASE_INSENSITIVE));
-		this.mdBuilder = new MetadataBuilder();
+		this.extractorConfig = extractorConfig;
+		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
 		this.l0AcnsS3Services = l0AcnsS3Services;
 	}

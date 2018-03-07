@@ -1,6 +1,3 @@
-/**
- * 
- */
 package fr.viveris.s1pdgs.mdcatalog.services.files;
 
 import java.io.File;
@@ -12,10 +9,8 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -27,10 +22,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
@@ -43,9 +34,6 @@ import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
  * @author Olivier Bex-Chauvet
  * 
  */
-@Configuration
-@EnableConfigurationProperties
-@ConfigurationProperties(prefix = "md_extractor")
 public class ExtractMetadata {
 
 	/**
@@ -57,13 +45,11 @@ public class ExtractMetadata {
 	 */
 	private SimpleDateFormat dateFormat;
 	
-	private String typeoverlap;
 	/**
 	 * Map of all the overlap for the different slice type
 	 */
 	private Map<String, Float> typeOverlap;
 	
-	private String typeslicelength;
 	/**
 	 * Map of all the length for the different slice type
 	 */
@@ -71,48 +57,26 @@ public class ExtractMetadata {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param factory
-	 * @param dateFormat
-	 * @param pathToWorkingDir
 	 */
-	public ExtractMetadata() {
+	public ExtractMetadata(Map<String, Float> typeOverlap, Map<String, Float> typeSliceLength) {
 		this.transFactory = TransformerFactory.newInstance();
 		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		this.typeOverlap = new HashMap<>();
-		this.typeSliceLength = new HashMap<>();
+		this.typeOverlap = typeOverlap;
+		this.typeSliceLength = typeSliceLength;
 	}
 	
-	/**
-	 * Function which construct the 2 hashMaps typeOverlap and typeSliceLength
+	
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
 	 */
-	@PostConstruct
-	public void initMaps() {
-		// TypeOverlap
-		if (!StringUtils.isEmpty(this.typeoverlap)) {
-			String[] paramsTmp = this.typeoverlap.split("\\|\\|");
-			for (int i=0; i<paramsTmp.length; i++) {
-				if (!StringUtils.isEmpty(paramsTmp[i])) {
-					String[] tmp = paramsTmp[i].split(":", 2);
-					if (tmp.length == 2) {
-						this.typeSliceLength.put(tmp[0], Float.valueOf(tmp[1]));
-					}
-				}
-			}
-		}
-		// TypeSliceLength
-		if (!StringUtils.isEmpty(this.typeslicelength)) {
-			String[] paramsTmp = this.typeslicelength.split("\\|\\|");
-			for (int i=0; i<paramsTmp.length; i++) {
-				if (!StringUtils.isEmpty(paramsTmp[i])) {
-					String[] tmp = paramsTmp[i].split(":", 2);
-					if (tmp.length == 2) {
-						this.typeSliceLength.put(tmp[0], Float.valueOf(tmp[1]));
-					}
-				}
-			}
-		}
+	@Override
+	public String toString() {
+		return "ExtractMetadata [transFactory=" + transFactory + ", dateFormat=" + dateFormat + ", typeOverlap="
+				+ typeOverlap + ", typeSliceLength=" + typeSliceLength + "]";
 	}
+
+
 
 	/**
 	 * Tool function which returns the content of a file
@@ -171,7 +135,6 @@ public class ExtractMetadata {
 		else {
 			totalNumberOfSlices = (int) Math.ceil(tmpNumberOfSlices);
 		}
-		System.out.println(totalNumberOfSlices);
 		return Math.max(totalNumberOfSlices, 1);
 	}
 

@@ -62,7 +62,7 @@ server:
   port: ${catalog_rest_server_port:8080}
   
 # Metadata Extractor
-md_extractor:
-  typeoverlap: ${catalog_md_extractor_type-overlap:"EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"}
-  typeslicelength: ${catalog_md_extractor_type-slice-length:"EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"}
+mdextractor:
+  typeoverlapstr: ${catalog_md_extractor_type-overlap:"EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"}
+  typeslicelengthstr: ${catalog_md_extractor_type-slice-length:"EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"}
   
