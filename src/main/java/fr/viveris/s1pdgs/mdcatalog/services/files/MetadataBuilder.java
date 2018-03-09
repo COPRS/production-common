@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.json.JSONObject;
 
+import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
@@ -21,12 +22,12 @@ public class MetadataBuilder {
 	 * Metadata extractor
 	 */
 	private ExtractMetadata extractor;
-	
+		
 	/**
 	 * Default constructor
 	 */
-	public MetadataBuilder() {
-		this(new ExtractMetadata());
+	public MetadataBuilder(MetadataExtractorConfig extractorConfig) {
+		this(new ExtractMetadata(extractorConfig.getTypeOverlap(), extractorConfig.getTypeSliceLength()));
 	}
 	
 	/**

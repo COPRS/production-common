@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
@@ -63,6 +64,11 @@ public class ConfigFileConsumer {
 	 * Local directory for configurations files
 	 */
 	private final String localDirectory;
+	
+	/**
+	 * 
+	 */
+	private final MetadataExtractorConfig extractorConfig;
 
 	/**
 	 * Builder of file descriptors
@@ -71,11 +77,13 @@ public class ConfigFileConsumer {
 
 	@Autowired
 	public ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
-			@Value("${file.auxiliary-files.local-directory}") final String localDirectory) {
+			@Value("${file.auxiliary-files.local-directory}") final String localDirectory, 
+			final MetadataExtractorConfig extractorConfig) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
-		this.mdBuilder = new MetadataBuilder();
+		this.extractorConfig = extractorConfig;
+		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
 		this.configFilesS3Services = configFilesS3Services;
 	}

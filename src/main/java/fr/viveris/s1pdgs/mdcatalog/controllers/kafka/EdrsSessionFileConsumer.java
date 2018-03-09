@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
@@ -53,6 +54,11 @@ public class EdrsSessionFileConsumer {
 	private final MetadataBuilder mdBuilder;
 	
 	/**
+	 * 
+	 */
+	private final MetadataExtractorConfig extractorConfig;
+	
+	/**
 	 * Local directory for sessions files
 	 */
 	private final String localDirectory;
@@ -63,11 +69,13 @@ public class EdrsSessionFileConsumer {
 	private final FileDescriptorBuilder fileDescriptorBuilder;
 	
 	public EdrsSessionFileConsumer(final EsServices esServices,
-			@Value("${file.session-files.local-directory}") final String localDirectory) {
+			@Value("${file.session-files.local-directory}") final String localDirectory,
+			final MetadataExtractorConfig extractorConfig) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
-		this.mdBuilder = new MetadataBuilder();
+		this.extractorConfig = extractorConfig;
+		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
 	}
 	
