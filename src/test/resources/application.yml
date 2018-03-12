@@ -27,6 +27,8 @@ storage:
     session-files: session-files
     l0-acns: acns
     l0-slices: l0-slices
+    l1-a: l1-a
+    l1-slices: l1-slices
 
 # KAFKA
 kafka:
@@ -38,6 +40,8 @@ kafka:
     edrs-sessions: t-pdgs-edrs-sessions
     l0-slices: t-pdgs-l0-slices
     l0-acns: t-pdgs-l0-acns
+    l1-a: t-pdgs-l1-a
+    l1-slices: t-pdgs-l1-slices
 
 # Elastic Search
 elasticsearch:
@@ -48,13 +52,17 @@ elasticsearch:
 # File
 file:
   auxiliary-files:
-    local-directory: ${ingestor_auxiliary-files_local-directory:/data/local-ingestor/auxiliary_files/} # Must contains the last /
+    local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
   session-files:
-    local-directory: ${ingestor_session-files_local-directory:/data/local-ingestor/edrs_sessions/} # Must contains the last /
+    local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
   l0-slices:
-    local-directory: ${ingestor_l0-slices_local-directory:/data/local-ingestor/l0_slices/} # Must contains the last /
+    local-directory: /data/local-catalog/l0_slices/ # Must contains the last /
   l0-acns:
-    local-directory: ${ingestor_l0-acns_local-directory:/data/local-ingestor/l0_acns/} # Must contains the last /
+    local-directory: /data/local-catalog/l0_acns/ # Must contains the last /
+  l1-slices:
+    local-directory: /data/local-catalog/l1_slices/ # Must contains the last /
+  l1-a:
+    local-directory: /data/local-catalog/l1_a/ # Must contains the last /
     
 # Metadata Extractor
 mdextractor:

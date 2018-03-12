@@ -8,6 +8,7 @@ import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.L1OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
 
 /**
@@ -99,7 +100,7 @@ public class MetadataBuilder {
 	}
 	
 	/**
-	 * Build metadata for L0 product
+	 * Build metadata for L0 Slice
 	 * 
 	 * @param descriptor
 	 * @param file
@@ -116,7 +117,7 @@ public class MetadataBuilder {
 	}
 	
 	/**
-	 * Build metadata for L0 product
+	 * Build metadata for L0 ACN
 	 * 
 	 * @param descriptor
 	 * @param file
@@ -129,6 +130,40 @@ public class MetadataBuilder {
 			throws MetadataExtractionException {
 		JSONObject metadataToIndex = new JSONObject();
 		metadataToIndex = extractor.processL0AcnProd(descriptor, file);
+		return metadataToIndex;
+	}
+	
+	/**
+	 * Build metadata for L0 Slice
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL1SliceOutputFileMetadata(L1OutputFileDescriptor descriptor, File file) 
+			throws MetadataExtractionException {
+		JSONObject metadataToIndex = new JSONObject();
+		metadataToIndex = extractor.processL1SliceProd(descriptor, file);
+		return metadataToIndex;
+	}
+	
+	/**
+	 * Build metadata for L0 Annotations
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL1AcnOutputFileMetadata(L1OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+		JSONObject metadataToIndex = new JSONObject();
+		metadataToIndex = extractor.processL1AProd(descriptor, file);
 		return metadataToIndex;
 	}
 }
