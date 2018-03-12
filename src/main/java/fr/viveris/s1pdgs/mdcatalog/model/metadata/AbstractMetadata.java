@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.mdcatalog.model;
+package fr.viveris.s1pdgs.mdcatalog.model.metadata;
 
 /**
  * Class describing the metdata of a file
@@ -6,7 +6,7 @@ package fr.viveris.s1pdgs.mdcatalog.model;
  * @author Cyrielle Gailliard
  *
  */
-public class MetadataFile {
+public abstract class AbstractMetadata {
 
 	/**
 	 * Product name
@@ -34,13 +34,6 @@ public class MetadataFile {
 	private String validityStop;
 
 	/**
-	 * Default constructor
-	 */
-	public MetadataFile() {
-
-	}
-
-	/**
 	 * Constrcutor using fields
 	 * 
 	 * @param productName
@@ -49,24 +42,8 @@ public class MetadataFile {
 	 * @param validityStart
 	 * @param validityStop
 	 */
-	public MetadataFile(String productName, String productType, String keyObjectStorage, String validityStart,
-			String validityStop) {
+	public AbstractMetadata() {
 		super();
-		this.productName = productName;
-		this.productType = productType;
-		this.keyObjectStorage = keyObjectStorage;
-		this.validityStart = validityStart;
-		this.validityStop = validityStop;
-	}
-
-	/**
-	 * Clone
-	 * 
-	 * @param obj
-	 */
-	public MetadataFile(MetadataFile obj) {
-		this(obj.getProductName(), obj.getProductType(), obj.getKeyObjectStorage(), obj.getValidityStart(),
-				obj.getValidityStop());
 	}
 
 	/**
@@ -185,7 +162,7 @@ public class MetadataFile {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MetadataFile other = (MetadataFile) obj;
+		AbstractMetadata other = (AbstractMetadata) obj;
 		if (keyObjectStorage == null) {
 			if (other.keyObjectStorage != null)
 				return false;

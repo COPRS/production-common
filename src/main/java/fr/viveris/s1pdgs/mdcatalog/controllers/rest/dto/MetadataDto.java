@@ -6,39 +6,32 @@ package fr.viveris.s1pdgs.mdcatalog.controllers.rest.dto;
  * @author Cyrielle Gailliard
  *
  */
-public class MetadataFileDto {
+public abstract class MetadataDto {
 
 	/**
 	 * Product name
 	 */
-	private String productName;
+	protected String productName;
 
 	/**
 	 * Product type
 	 */
-	private String productType;
+	protected String productType;
 
 	/**
 	 * Key in object storage
 	 */
-	private String keyObjectStorage;
+	protected String keyObjectStorage;
 
 	/**
 	 * Validity start time
 	 */
-	private String validityStart;
+	protected String validityStart;
 
 	/**
 	 * Validity stop time
 	 */
-	private String validityStop;
-
-	/**
-	 * Default constructor
-	 */
-	public MetadataFileDto() {
-
-	}
+	protected String validityStop;
 
 	/**
 	 * Constrcutor using fields
@@ -49,7 +42,7 @@ public class MetadataFileDto {
 	 * @param validityStart
 	 * @param validityStop
 	 */
-	public MetadataFileDto(String productName, String productType, String keyObjectStorage, String validityStart,
+	public MetadataDto(String productName, String productType, String keyObjectStorage, String validityStart,
 			String validityStop) {
 		super();
 		this.productName = productName;
@@ -64,7 +57,7 @@ public class MetadataFileDto {
 	 * 
 	 * @param obj
 	 */
-	public MetadataFileDto(MetadataFileDto obj) {
+	public MetadataDto(MetadataDto obj) {
 		this(obj.getProductName(), obj.getProductType(), obj.getKeyObjectStorage(), obj.getValidityStart(),
 				obj.getValidityStop());
 	}
@@ -185,7 +178,7 @@ public class MetadataFileDto {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MetadataFileDto other = (MetadataFileDto) obj;
+		MetadataDto other = (MetadataDto) obj;
 		if (keyObjectStorage == null) {
 			if (other.keyObjectStorage != null)
 				return false;

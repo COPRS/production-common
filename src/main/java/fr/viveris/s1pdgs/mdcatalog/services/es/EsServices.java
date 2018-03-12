@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.mdcatalog.services.es;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.elasticsearch.action.get.GetRequest;
@@ -22,7 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import fr.viveris.s1pdgs.mdcatalog.model.MetadataFile;
+import fr.viveris.s1pdgs.mdcatalog.model.metadata.EdrsSessionMetadata;
+import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0SliceMetadata;
+import fr.viveris.s1pdgs.mdcatalog.model.metadata.SearchMetadata;
 
 /**
  * Service for accessing to elasticsearch data
@@ -110,12 +113,15 @@ public class EsServices {
 	 * @return the key object storage of the chosen product
 	 * @throws Exception
 	 */
-	public MetadataFile lastValCover(String productType, String beginDate, String endDate, String satelliteId)
+	public SearchMetadata lastValCover(String productType, String beginDate, String endDate, String satelliteId, int instrumentConfId)
 			throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
 				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
+		if (instrumentConfId != -1) {
+			// TODO en fonction du type on ajoute ou non le critere
+		}
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 
@@ -126,7 +132,7 @@ public class EsServices {
 			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
 				Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
-				MetadataFile r = new MetadataFile();
+				SearchMetadata r = new SearchMetadata();
 				r.setProductName(source.get("productName").toString());
 				r.setProductType(productType);
 				r.setKeyObjectStorage(source.get("url").toString());
@@ -156,30 +162,67 @@ public class EsServices {
 	 * @return the key object storage of the chosen product
 	 * @throws Exception
 	 */
-	public MetadataFile get(String productType, String productName) throws Exception {
+	public EdrsSessionMetadata getEdrsSession(String productType, String productName) throws Exception {
+		Map<String, Object> source = this.getRequest(productType, productName);
+		EdrsSessionMetadata r = new EdrsSessionMetadata();
+		r.setProductType(productType);
+		r.setProductName(productName);
+		r.setKeyObjectStorage(source.get("url").toString());
+		if (source.containsKey("validityStartTime")) {
+			r.setValidityStart(source.get("validityStartTime").toString());
+		}
+		if (source.containsKey("validityStopTime")) {
+			r.setValidityStop(source.get("validityStopTime").toString());
+		}
+		return r;
+	}
+	
+	public L0SliceMetadata getL0Slice(String productType, String productName) throws Exception {
+		Map<String, Object> source = this.getRequest(productType, productName);
+		L0SliceMetadata r = new L0SliceMetadata();
+		r.setProductType(productType);
+		r.setProductName(productName);
+		if (source.containsKey("url")) {
+			r.setProductName(source.get("url").toString());
+		} else {
+			// TODO throw custom exception Malformed object
+		}
+		if (source.containsKey("instrumentConfigurationId")) {
+			r.setInstrumentConfigurationId(Integer.parseInt(source.get("sliceNumber").toString()));
+		} else {
+			// TODO throw custom exception Malformed object
+		}
+		if (source.containsKey("sliceNumber")) {
+			r.setNumberSlice(Integer.parseInt(source.get("sliceNumber").toString()));
+		} else {
+			// TODO throw custom exception Malformed object
+		}
+		if (source.containsKey("startTime")) {
+			r.setValidityStart(source.get("startTime").toString());
+		} else {
+			// TODO throw custom exception Malformed object
+		}
+		if (source.containsKey("stopTime")) {
+			r.setValidityStop(source.get("stopTime").toString());
+		} else {
+			// TODO throw custom exception Malformed object
+		}
+		return r;
+	}
+
+
+	private Map<String, Object> getRequest(String productType, String productName) throws Exception {
 		try {
 			GetRequest getRequest = new GetRequest(productType.toLowerCase(), indexType, productName);
 
 			GetResponse response = restHighLevelClient.get(getRequest);
 
 			if (response.isExists()) {
-				Map<String, Object> source = response.getSourceAsMap();
-				MetadataFile r = new MetadataFile();
-				r.setProductName(source.get("productName").toString());
-				r.setProductType(productType);
-				r.setKeyObjectStorage(source.get("url").toString());
-				if (source.containsKey("validityStartTime")) {
-					r.setValidityStart(source.get("validityStartTime").toString());
-				}
-				if (source.containsKey("validityStopTime")) {
-					r.setValidityStop(source.get("validityStopTime").toString());
-				}
-				return r;
+				return response.getSourceAsMap();
 			}
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
-		return null;
+		return new HashMap<>();
 	}
-
 }
