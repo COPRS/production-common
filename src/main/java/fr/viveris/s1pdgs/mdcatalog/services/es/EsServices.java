@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataCreationException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataMalformedException;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0SliceMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.SearchMetadata;
@@ -78,7 +80,6 @@ public class EsServices {
 	 * @param product
 	 * @throws Exception
 	 */
-	// TODO use Exception
 	public void createMetadata(JSONObject product) throws Exception {
 		try {
 			String productType = product.getString("productType").toLowerCase();
@@ -89,16 +90,12 @@ public class EsServices {
 
 			IndexResponse response = restHighLevelClient.index(request);
 			if (response.status() != RestStatus.CREATED) {
-				throw new Exception(String.format("Metadata not created for %s: %s %s", productName, response.status(),
-						response.getResult()));
+				throw new MetadataCreationException(productName, response.status().toString(),
+						response.getResult().toString());
 			}
-		} catch (JSONException je) {
-			throw new Exception(je.getMessage());
-		} catch (IOException io) {
-			throw new Exception(io.getMessage());
-		} catch (Exception e) {
-			throw e;
-		}
+		} catch (JSONException | IOException e) {
+			throw new Exception(e);
+		} 
 	}
 
 	/**
@@ -116,11 +113,15 @@ public class EsServices {
 	public SearchMetadata lastValCover(String productType, String beginDate, String endDate, String satelliteId, int instrumentConfId)
 			throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
 		if (instrumentConfId != -1) {
-			// TODO en fonction du type on ajoute ou non le critere
+			sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+					.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+					.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+					.must(QueryBuilders.termQuery("instrumentConfigurationId.keyword", instrumentConfId)));
+		} else {
+			sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+					.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+					.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
 		}
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
@@ -185,27 +186,27 @@ public class EsServices {
 		if (source.containsKey("url")) {
 			r.setProductName(source.get("url").toString());
 		} else {
-			// TODO throw custom exception Malformed object
+			throw new MetadataMalformedException(productName);
 		}
 		if (source.containsKey("instrumentConfigurationId")) {
 			r.setInstrumentConfigurationId(Integer.parseInt(source.get("sliceNumber").toString()));
 		} else {
-			// TODO throw custom exception Malformed object
+			throw new MetadataMalformedException(productName);
 		}
 		if (source.containsKey("sliceNumber")) {
 			r.setNumberSlice(Integer.parseInt(source.get("sliceNumber").toString()));
 		} else {
-			// TODO throw custom exception Malformed object
+			throw new MetadataMalformedException(productName);
 		}
 		if (source.containsKey("startTime")) {
 			r.setValidityStart(source.get("startTime").toString());
 		} else {
-			// TODO throw custom exception Malformed object
+			throw new MetadataMalformedException(productName);
 		}
 		if (source.containsKey("stopTime")) {
 			r.setValidityStop(source.get("stopTime").toString());
 		} else {
-			// TODO throw custom exception Malformed object
+			throw new MetadataMalformedException(productName);
 		}
 		return r;
 	}

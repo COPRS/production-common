@@ -32,8 +32,12 @@ public class L0SliceMetadataController {
 	public ResponseEntity<L0SliceMetadataDto> get(@PathVariable(name = "productType") String productType,
 			@PathVariable(name = "productName") String productName) {
 		try {
-			// TODO, if productType = blank, extract it from the productName
-			L0SliceMetadata f = esServices.getL0Slice(productType, productName);
+			L0SliceMetadata f;
+			if(productType.equals("")) {
+				f = esServices.getL0Slice(productName.substring(4, 14), productName);
+			} else {
+				f = esServices.getL0Slice(productType, productName);
+			}
 
 			if (f != null) {
 				L0SliceMetadataDto response = new L0SliceMetadataDto(f.getProductName(), f.getProductType(),
