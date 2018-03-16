@@ -87,7 +87,6 @@ public class KafkaConsumerConfig {
 		
 		ConcurrentKafkaListenerContainerFactory<String, KafkaConfigFileDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
-		factory.setConcurrency(1);
 		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
 		return factory;
 	}
@@ -116,7 +115,6 @@ public class KafkaConsumerConfig {
 		
 		ConcurrentKafkaListenerContainerFactory<String, KafkaEdrsSessionDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(edrsSessionsConsumerFactory());
-		factory.setConcurrency(1);
 		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
 		return factory;
 	}
@@ -145,7 +143,6 @@ public class KafkaConsumerConfig {
 		
 		ConcurrentKafkaListenerContainerFactory<String, KafkaL0SliceDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(l0SlicesConsumerFactory());
-		factory.setConcurrency(1);
 		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
 		return factory;
 	}
@@ -174,7 +171,6 @@ public class KafkaConsumerConfig {
 		
 		ConcurrentKafkaListenerContainerFactory<String, KafkaL0AcnDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(l0AcnsConsumerFactory());
-		factory.setConcurrency(1);
 		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
 		return factory;
 	}

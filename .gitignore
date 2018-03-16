@@ -13,3 +13,4 @@
 .eclipse-pmd
 .pmd
 .pmdruleset.xml
+.factory*

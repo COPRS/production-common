@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.mdcatalog.model;
 
+import fr.viveris.s1pdgs.mdcatalog.model.exception.IllegalFileExtension;
+
 /**
  * Enumeration for ERDS session file type
  * @author Cyrielle Gailliard
@@ -14,15 +16,14 @@ public enum EdrsSessionFileType {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public static EdrsSessionFileType valueFromExtension(FileExtension extension) throws IllegalArgumentException {
+	public static EdrsSessionFileType valueFromExtension(FileExtension extension) throws IllegalFileExtension {
 		switch (extension) {
 		case XML:
 			return SESSION;
 		case RAW:
 			return RAW;
 		default:
-			// TODO custome exception
-			throw new IllegalArgumentException("Cannot retrieve ERDS session file type from extension " + extension);
+			throw new IllegalFileExtension(extension.toString());
 		}
 	}
 }

@@ -11,6 +11,7 @@ import fr.viveris.s1pdgs.mdcatalog.model.FileExtension;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.IllegalFileExtension;
 
 /**
  * Service to build file descriptor
@@ -115,9 +116,10 @@ public class FileDescriptorBuilder {
 	 * 
 	 * @throws FilePathException
 	 * @throws IgnoredFileException
+	 * @throws IllegalFileExtension 
 	 */
 	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(File file)
-			throws FilePathException, IgnoredFileException {
+			throws FilePathException, IgnoredFileException, IllegalFileExtension {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.length()) {
@@ -143,7 +145,11 @@ public class FileDescriptorBuilder {
 			descriptor.setRelativePath(relativePath);
 			descriptor.setProductName(m.group(9));
 			descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));
-			descriptor.setProductType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));
+			try {
+				descriptor.setProductType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));
+			} catch (IllegalFileExtension e) {
+				throw e;
+			}
 			descriptor.setMissionId(m.group(1));
 			descriptor.setSatelliteId(m.group(2));
 			descriptor.setChannel(Integer.parseInt(m.group(7)));
