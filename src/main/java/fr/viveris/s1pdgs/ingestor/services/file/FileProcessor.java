@@ -125,7 +125,7 @@ public class FileProcessor {
 					// Send metadata
 					if (descriptor.isHasToBePublished()) {
 						KafkaConfigFileDto fileToIndex = new KafkaConfigFileDto(descriptor.getProductName(),
-								descriptor.getKeyObjectStorage());
+								descriptor.getProductName());
 						senderMetadata.send(fileToIndex);
 						LOGGER.info("[processConfigFile] Metadata for {} successfully sended",
 								descriptor.getRelativePath());
