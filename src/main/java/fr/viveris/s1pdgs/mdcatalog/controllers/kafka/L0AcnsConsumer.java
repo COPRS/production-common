@@ -55,7 +55,7 @@ public class L0AcnsConsumer {
 	 * Metadata builder
 	 */
 	private final MetadataBuilder mdBuilder;
-	
+
 	/**
 	 * 
 	 */
@@ -66,10 +66,18 @@ public class L0AcnsConsumer {
 	 */
 	private final String localDirectory;
 
+	/**
+	 * Manifest filename
+	 */
+	private final String manifestFilename;
+	private final String fileWithManifestExt;
+
 	@Autowired
 	public L0AcnsConsumer(final EsServices esServices, final L0AcnsS3Services l0AcnsS3Services,
 			@Value("${file.l0-acns.local-directory}") final String localDirectory,
-			final MetadataExtractorConfig extractorConfig) {
+			final MetadataExtractorConfig extractorConfig,
+			@Value("${file.manifest-filename}") final String manifestFilename,
+			@Value("${file.file-with-manifest-ext}") final String fileWithManifestExt) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_L0_OUTPUT, Pattern.CASE_INSENSITIVE));
@@ -77,6 +85,8 @@ public class L0AcnsConsumer {
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
 		this.l0AcnsS3Services = l0AcnsS3Services;
+		this.manifestFilename = manifestFilename;
+		this.fileWithManifestExt = fileWithManifestExt;
 	}
 
 	@KafkaListener(topics = "${kafka.topic.l0-acns}", groupId = "${kafka.group-id}", containerFactory = "l0AcnsKafkaListenerContainerFactory")
@@ -86,11 +96,15 @@ public class L0AcnsConsumer {
 		}
 		File metadataFile = null;
 		try {
+			// Build key object storage
+			String keyObs = dto.getKeyObjectStorage();
+			if (dto.getKeyObjectStorage().toLowerCase().endsWith(this.fileWithManifestExt.toLowerCase())) {
+				keyObs += "/" + manifestFilename;
+			}
 			// Upload file
-			if (l0AcnsS3Services.exist(dto.getKeyObjectStorage() + "/manifest.safe")) {
+			if (l0AcnsS3Services.exist(keyObs)) {
 				// Upload file
-				metadataFile = this.l0AcnsS3Services.getFile(dto.getKeyObjectStorage() + "/manifest.safe",
-						this.localDirectory + dto.getKeyObjectStorage() + "/manifest.safe");
+				metadataFile = this.l0AcnsS3Services.getFile(keyObs, this.localDirectory + keyObs);
 
 				// Extract metadata from name
 				L0OutputFileDescriptor descriptor = this.fileDescriptorBuilder
@@ -105,8 +119,7 @@ public class L0AcnsConsumer {
 				}
 				LOGGER.info("[productName {}] Metadata created", dto.getProductName());
 			} else {
-				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(),
-						"No such L0 ACNs in object storage");
+				throw new FilePathException(dto.getProductName(), keyObs, "No such L0 ACNs in object storage");
 			}
 
 		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {

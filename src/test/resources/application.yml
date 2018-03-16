@@ -47,6 +47,8 @@ elasticsearch:
     
 # File
 file:
+  file-with-manifest-ext: .safe
+  manifest-filename: manifest.safe
   auxiliary-files:
     local-directory: ${ingestor_auxiliary-files_local-directory:/data/local-ingestor/auxiliary_files/} # Must contains the last /
   session-files:

@@ -64,7 +64,7 @@ public class ConfigFileConsumer {
 	 * Local directory for configurations files
 	 */
 	private final String localDirectory;
-	
+
 	/**
 	 * 
 	 */
@@ -75,10 +75,18 @@ public class ConfigFileConsumer {
 	 */
 	private final FileDescriptorBuilder fileDescriptorBuilder;
 
+	/**
+	 * Manifest filename
+	 */
+	private final String manifestFilename;
+	private final String fileWithManifestExt;
+
 	@Autowired
 	public ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
-			@Value("${file.auxiliary-files.local-directory}") final String localDirectory, 
-			final MetadataExtractorConfig extractorConfig) {
+			@Value("${file.auxiliary-files.local-directory}") final String localDirectory,
+			final MetadataExtractorConfig extractorConfig,
+			@Value("${file.manifest-filename}") final String manifestFilename,
+			@Value("${file.file-with-manifest-ext}") final String fileWithManifestExt) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
@@ -86,6 +94,8 @@ public class ConfigFileConsumer {
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
 		this.configFilesS3Services = configFilesS3Services;
+		this.manifestFilename = manifestFilename;
+		this.fileWithManifestExt = fileWithManifestExt;
 	}
 
 	/**
@@ -101,11 +111,15 @@ public class ConfigFileConsumer {
 		File metadataFile = null;
 		// Create metadata
 		try {
-			if (configFilesS3Services.exist(dto.getKeyObjectStorage())) {
+			// Build key object storage
+			String keyObs = dto.getKeyObjectStorage();
+			if (dto.getKeyObjectStorage().toLowerCase().endsWith(this.fileWithManifestExt.toLowerCase())) {
+				keyObs += "/" + manifestFilename;
+			}
+			if (configFilesS3Services.exist(keyObs)) {
 
 				// Upload file
-				metadataFile = configFilesS3Services.getFile(dto.getKeyObjectStorage(),
-						this.localDirectory + dto.getKeyObjectStorage());
+				metadataFile = configFilesS3Services.getFile(keyObs, this.localDirectory + keyObs);
 
 				// Extract metadata from name
 				ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder

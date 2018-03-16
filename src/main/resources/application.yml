@@ -48,6 +48,8 @@ storage:
     
 # File
 file:
+  file-with-manifest-ext: ${catalog_file-with-manifest-ext:.safe}
+  manifest-filename: ${catalog_manifest-filename:manifest.safe}
   auxiliary-files:
     local-directory: ${catalog_auxiliary-files_local-directory:/data/local-catalog/auxiliary_files/} # Must contains the last /
   session-files:
