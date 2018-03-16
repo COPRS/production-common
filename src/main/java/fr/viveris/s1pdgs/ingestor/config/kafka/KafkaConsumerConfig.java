@@ -74,7 +74,6 @@ public class KafkaConsumerConfig {
 		
 		ConcurrentKafkaListenerContainerFactory<String, KafkaConfigFileDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
-		factory.setConcurrency(1);
 		factory.getContainerProperties();
 		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
 		return factory;
