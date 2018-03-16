@@ -20,7 +20,7 @@ import fr.viveris.s1pdgs.mdcatalog.model.metadata.SearchMetadata;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 
 @RestController
-@RequestMapping(path = "/search")
+@RequestMapping(path = "/metadata")
 public class SearchMetadataController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchMetadataController.class);
@@ -32,7 +32,7 @@ public class SearchMetadataController {
 		this.esServices = esServices;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/search")
 	public ResponseEntity<SearchMetadataDto> search(@RequestParam(name = "productType") String productType,
 			@RequestParam(name = "mode") String mode, @RequestParam(name = "satellite") String satellite,
 			@RequestParam(name = "t0") String startDate, @RequestParam(name = "t1") String stopDate,
