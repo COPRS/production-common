@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataCreationException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataMalformedException;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.EdrsSessionMetadata;
+import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0AcnMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0SliceMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.SearchMetadata;
 
@@ -95,7 +96,7 @@ public class EsServices {
 			}
 		} catch (JSONException | IOException e) {
 			throw new Exception(e);
-		} 
+		}
 	}
 
 	/**
@@ -110,18 +111,20 @@ public class EsServices {
 	 * @return the key object storage of the chosen product
 	 * @throws Exception
 	 */
-	public SearchMetadata lastValCover(String productType, String beginDate, String endDate, String satelliteId, int instrumentConfId)
-			throws Exception {
+	public SearchMetadata lastValCover(String productType, String beginDate, String endDate, String satelliteId,
+			int instrumentConfId) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		if (instrumentConfId != -1) {
-			sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-					.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-					.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-					.must(QueryBuilders.termQuery("instrumentConfigurationId.keyword", instrumentConfId)));
+			sourceBuilder
+					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+							.must(QueryBuilders.termQuery("instrumentConfigurationId.keyword", instrumentConfId)));
 		} else {
-			sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-					.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-					.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
+			sourceBuilder
+					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
 		}
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
@@ -177,19 +180,96 @@ public class EsServices {
 		}
 		return r;
 	}
-	
+
 	public L0SliceMetadata getL0Slice(String productType, String productName) throws Exception {
 		Map<String, Object> source = this.getRequest(productType, productName);
+		return this.extractInfoForL0Slice(source, productType, productName);
+	}
+
+	public L0AcnMetadata getL0Acn(String productType, String datatakeId) throws Exception {
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("dataTakeId.keyword", datatakeId)));
+
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
+
+		SearchRequest searchRequest = new SearchRequest(productType.toLowerCase());
+		searchRequest.types(indexType);
+		searchRequest.source(sourceBuilder);
+		try {
+			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			if (searchResponse.getHits().totalHits >= 1) {
+				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productType);
+			}
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return null;
+	}
+
+	private Map<String, Object> getRequest(String productType, String productName) throws Exception {
+		try {
+			GetRequest getRequest = new GetRequest(productType.toLowerCase(), indexType, productName);
+
+			GetResponse response = restHighLevelClient.get(getRequest);
+
+			if (response.isExists()) {
+				return response.getSourceAsMap();
+			}
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return new HashMap<>();
+	}
+
+	private L0AcnMetadata extractInfoForL0ACN(Map<String, Object> source, String productType)
+			throws MetadataMalformedException {
+		L0AcnMetadata r = new L0AcnMetadata();
+		r.setProductType(productType);
+		if (source.containsKey("productName")) {
+			r.setProductName(source.get("productName").toString());
+		}
+		if (source.containsKey("url")) {
+			r.setKeyObjectStorage(source.get("url").toString());
+		} else {
+			throw new MetadataMalformedException(r.getProductName());
+		}
+		if (source.containsKey("instrumentConfigurationId")) {
+			r.setInstrumentConfigurationId(Integer.parseInt(source.get("instrumentConfigurationId").toString()));
+		} else {
+			throw new MetadataMalformedException(r.getProductName());
+		}
+		if (source.containsKey("totalNumberOfSlice")) {
+			r.setNumberOfSlices(Integer.parseInt(source.get("totalNumberOfSlice").toString()));
+		} else {
+			throw new MetadataMalformedException(r.getProductName());
+		}
+		if (source.containsKey("startTime")) {
+			r.setValidityStart(source.get("startTime").toString());
+		} else {
+			throw new MetadataMalformedException(r.getProductName());
+		}
+		if (source.containsKey("stopTime")) {
+			r.setValidityStop(source.get("stopTime").toString());
+		} else {
+			throw new MetadataMalformedException(r.getProductName());
+		}
+		return r;
+	}
+
+	private L0SliceMetadata extractInfoForL0Slice(Map<String, Object> source, String productType, String productName)
+			throws MetadataMalformedException {
+
 		L0SliceMetadata r = new L0SliceMetadata();
 		r.setProductType(productType);
 		r.setProductName(productName);
 		if (source.containsKey("url")) {
-			r.setProductName(source.get("url").toString());
+			r.setKeyObjectStorage(source.get("url").toString());
 		} else {
 			throw new MetadataMalformedException(productName);
 		}
 		if (source.containsKey("instrumentConfigurationId")) {
-			r.setInstrumentConfigurationId(Integer.parseInt(source.get("sliceNumber").toString()));
+			r.setInstrumentConfigurationId(Integer.parseInt(source.get("instrumentConfigurationId").toString()));
 		} else {
 			throw new MetadataMalformedException(productName);
 		}
@@ -208,22 +288,11 @@ public class EsServices {
 		} else {
 			throw new MetadataMalformedException(productName);
 		}
-		return r;
-	}
-
-
-	private Map<String, Object> getRequest(String productType, String productName) throws Exception {
-		try {
-			GetRequest getRequest = new GetRequest(productType.toLowerCase(), indexType, productName);
-
-			GetResponse response = restHighLevelClient.get(getRequest);
-
-			if (response.isExists()) {
-				return response.getSourceAsMap();
-			}
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
+		if (source.containsKey("dataTakeId")) {
+			r.setDatatakeId(source.get("dataTakeId").toString());
+		} else {
+			throw new MetadataMalformedException(productName);
 		}
-		return new HashMap<>();
+		return r;
 	}
 }

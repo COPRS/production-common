@@ -399,12 +399,6 @@ public class ExtractMetadata {
 	        if(jsonFromXmlTmp.getJSONObject("sliceNumber").has("content")) {
 	        	metadataJSONObject.put("sliceNumber", jsonFromXmlTmp.getJSONObject("sliceNumber").getString("content"));
 	        }
-	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
-	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").getString("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceNumber").has("content")) {
-	        	metadataJSONObject.put("sliceNumber", jsonFromXmlTmp.getJSONObject("sliceNumber").getString("content"));
-	        }
 	        if(jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").has("content")) {
 	        	metadataJSONObject.put("absoluteStopOrbit", jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").getString("content"));
 	        }

@@ -37,8 +37,8 @@ public class SearchMetadataController {
 			@RequestParam(name = "mode") String mode, @RequestParam(name = "satellite") String satellite,
 			@RequestParam(name = "t0") String startDate, @RequestParam(name = "t1") String stopDate,
 			@RequestParam(name = "insConfId", defaultValue = "-1") int insConfId,
-			@RequestParam(value = "dt0", defaultValue = "0") int dt0,
-			@RequestParam(value = "dt1", defaultValue = "0") int dt1) {
+			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
+			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
 		try {
 			if (mode.equals("LatestValCover")) {
 				SearchMetadata f = esServices.lastValCover(productType, convertDateForSearch(startDate, -dt0),
@@ -63,9 +63,9 @@ public class SearchMetadataController {
 
 	}
 
-	private String convertDateForSearch(String dateStr, int delta) throws ParseException {
+	private String convertDateForSearch(String dateStr, double delta) throws ParseException {
 		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-		LocalDateTime timePlus = time.plusSeconds(delta);
+		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
 		return timePlus.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 }
