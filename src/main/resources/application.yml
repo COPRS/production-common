@@ -2,8 +2,6 @@
 spring:
   application:
     name: s1pdgs-metadata-catalog
-  profiles:
-    active: ${catalog_spring_profile:prod}
     
 # Logging
 logging:
