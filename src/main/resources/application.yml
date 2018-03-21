@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: ${scaler_spring_appname}
+    
+# Logging
+logging:
+  config: ${scaler_logging_config:logback-spring.xml}
+  level:
+    ROOT: ${scaler_logging_level_root:ERROR}
+    org.springframework: ${scaler_logging_level_orgspringframework:ERROR}
+    fr.viveris.s1pdgs: ${scaler_logging_level_frviveriss1pdgs:DEBUG}
+    kafka: ${scaler_logging_level_kafka:WARN}
+    org.apache: ${scaler_logging_level_apache:WARN}
+  file: ${scaler_logging_file:./s1pdgs-scaler.log}
+  
+# Kafka
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers}
+  client-id: ${scaler_kafka_client-id:spdgs-scaler}
+  request-timeout-ms: ${scaler_kafka_request-timeout-ms:5000}
+  session-timeout-ms: ${scaler_kafka_session-timeout-ms:5000}
+  topics:
+    l1-jobs: ${kafka_topic_l1_jobs}
+  group-id-per-topic:
+    l1-jobs: ${scaler_kafka_group-id_l1-jobs:l1-job-generators}
+    
+scaler:
+  fixed-delay-ms: ${scaler_fixed-delay-ms:500}
