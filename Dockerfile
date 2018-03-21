@@ -11,5 +11,5 @@ FROM openjdk:8-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/s1pdgs-scaler-1.0.0.jar /app/s1pdgs-scaler.jar
 COPY /logback-spring.xml logback-spring.xml
-COPY /src/main/resources/application.yml /etc/catalog/application.yml application.yml
+COPY /src/main/resources/application.yml application.yml
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app/s1pdgs-scaler.jar", "--spring.config.location=classpath:/application.yml"]
