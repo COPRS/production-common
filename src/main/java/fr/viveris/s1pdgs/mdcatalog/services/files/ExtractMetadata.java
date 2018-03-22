@@ -489,8 +489,9 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("polarisation", descriptor.getPolarisation());
 	        metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 	        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-	        metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-	        metadataJSONObject.put("creationTime", dateFormat.format(new Date()));
+	        String dt = dateFormat.format(new Date());
+	        metadataJSONObject.put("insertionTime", dt);
+	        metadataJSONObject.put("creationTime", dt);
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException | ParseException e) {
 			throw new MetadataExtractionException(descriptor.getProductName(), e);
@@ -597,8 +598,9 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("polarisation", descriptor.getPolarisation());
 	        metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 	        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-	        metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-	        metadataJSONObject.put("creationTime", dateFormat.format(new Date()));
+	        String dt = dateFormat.format(new Date());
+	        metadataJSONObject.put("insertionTime", dt);
+	        metadataJSONObject.put("creationTime", dt);
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(descriptor.getProductName(), e);
