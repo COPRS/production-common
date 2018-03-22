@@ -17,7 +17,8 @@ logging:
 # KAFKA
 kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
-  group-id: ${catalog_kafka_group:metadata-catalog}
+  group-id: ${catalog_kafka_group:metadata-catalogs}
+  client-id: ${catalog_kafka_client:metadata-catalog}
   poll-timeout: ${catalog_kafka_poll-timeout:500}
   topic:
     auxiliary-files: ${kafka_topic_auxiliary_files:t-pdgs-auxiliary-files}

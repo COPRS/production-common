@@ -31,7 +31,8 @@ storage:
 # KAFKA
 kafka:
   bootstrap-servers: ${spring.embedded.kafka.brokers}
-  group-id: metadata-catalog
+  group-id: metadata-catalogs
+  client-id: metadata-catalog
   poll-timeout: 500
   topic:
     auxiliary-files: t-pdgs-auxiliary-files

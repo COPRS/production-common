@@ -3,6 +3,8 @@
  */
 package fr.viveris.s1pdgs.mdcatalog.config;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +47,12 @@ public class KafkaConsumerConfig {
 	 */
 	@Value("${kafka.group-id}")
 	private String kafkaGroupId;
+
+	/**
+	 * Client identifier for KAFKA
+	 */
+	@Value("${kafka.client-id}")
+	protected String kafkaClientId;
 	/**
 	 * Pool timeout for consumption
 	 */
@@ -62,6 +70,13 @@ public class KafkaConsumerConfig {
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
+		try {
+			InetAddress myHost = InetAddress.getLocalHost();
+			String hostname = myHost.getHostName();
+			props.put(ConsumerConfig.CLIENT_ID_CONFIG, hostname);
+		} catch (UnknownHostException ex) {
+			props.put(ConsumerConfig.CLIENT_ID_CONFIG, this.kafkaClientId);
+		}
 		return props;
 	}
 
