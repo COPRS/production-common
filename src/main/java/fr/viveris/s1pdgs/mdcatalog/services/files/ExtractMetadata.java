@@ -442,9 +442,11 @@ public class ExtractMetadata {
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("startTime").has("content")) {
 	        	metadataJSONObject.put("startTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
+	        	metadataJSONObject.put("validityStartTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("stopTime").has("content")) {
 	        	metadataJSONObject.put("stopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
+	        	metadataJSONObject.put("validityStopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
 	        }
 	        if(descriptor.getProductClass().equals("A") || descriptor.getProductClass().equals("C") || descriptor.getProductClass().equals("N")) {
 	        	if(metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
@@ -584,9 +586,11 @@ public class ExtractMetadata {
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("startTime").has("content")) {
 	        	metadataJSONObject.put("startTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
+	        	metadataJSONObject.put("validityStartTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("stopTime").has("content")) {
 	        	metadataJSONObject.put("stopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
+	        	metadataJSONObject.put("validityStopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
 	        }
 	        metadataJSONObject.put("productName", descriptor.getProductName());
 	        metadataJSONObject.put("productClass", descriptor.getProductClass());
