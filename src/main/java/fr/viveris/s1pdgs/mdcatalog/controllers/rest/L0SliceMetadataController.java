@@ -78,6 +78,8 @@ public class L0SliceMetadataController {
 			String l0aProductType = l0sliceProductType.replaceAll("0S", "0A");
 			String l0cProductType = l0sliceProductType.replaceAll("0S", "0C");
 			String l0nProductType = l0sliceProductType.replaceAll("0S", "0N");
+			
+			LOGGER.info("A {} C {} N {}", l0aProductType, l0cProductType, l0nProductType);
 
 			// Retrieve slice
 			L0SliceMetadata f = esServices.getL0Slice(l0sliceProductType, productName);
@@ -88,6 +90,8 @@ public class L0SliceMetadataController {
 
 			// Retrieve ACN
 			List<L0AcnMetadataDto> r = new ArrayList<>();
+			
+			LOGGER.info("Call getACN for {} {}", l0aProductType, f.getDatatakeId());
 			L0AcnMetadata l0a = esServices.getL0Acn(l0aProductType, f.getDatatakeId());
 			if (l0a != null) {
 				L0AcnMetadataDto l0aDto = new L0AcnMetadataDto(l0a.getProductName(), l0a.getProductType(),
@@ -100,6 +104,7 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
+			LOGGER.info("Call getACN for {} {}", l0cProductType, f.getDatatakeId());
 			L0AcnMetadata l0c = esServices.getL0Acn(l0cProductType, f.getDatatakeId());
 			if (l0c != null) {
 				L0AcnMetadataDto l0cDto = new L0AcnMetadataDto(l0c.getProductName(), l0c.getProductType(),
@@ -112,6 +117,7 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
+			LOGGER.info("Call getACN for {} {}", l0nProductType, f.getDatatakeId());
 			L0AcnMetadata l0n = esServices.getL0Acn(l0nProductType, f.getDatatakeId());
 			if (l0n != null) {
 				L0AcnMetadataDto l0nDto = new L0AcnMetadataDto(l0n.getProductName(), l0n.getProductType(),
