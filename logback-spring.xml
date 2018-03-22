@@ -5,6 +5,9 @@
 	<property name="LOG_FILE"
 		value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}" />
 
+	<springProperty scope="context" name="appName"
+		source="spring.application.name" defaultValue="localhost" />
+
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>

@@ -205,6 +205,7 @@ public class FileDescriptorBuilder {
 			l0Descriptor.setProductType(m.group(3)+"_"+m.group(4)+m.group(5)+"_"+m.group(6)+m.group(7));
 			l0Descriptor.setPolarisation(m.group(8));
 			l0Descriptor.setDataTakeId(m.group(12));
+			l0Descriptor.setKeyObjectStorage(productName);
 		
 		} else {
 			throw new FilePathException(relativePath, relativePath,
@@ -255,6 +256,7 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setProductType(m.group(2)+"_"+m.group(3)+m.group(4)+"_"+m.group(5)+m.group(6));
 			l1Descriptor.setPolarisation(m.group(6));
 			l1Descriptor.setDataTakeId(m.group(11));
+			l1Descriptor.setKeyObjectStorage(productName);
 						
 		} else {
 			throw new FilePathException(relativePath, relativePath,

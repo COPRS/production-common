@@ -262,7 +262,9 @@ public class EsServices {
 
 		L0SliceMetadata r = new L0SliceMetadata();
 		r.setProductType(productType);
-		r.setProductName(productName);
+		if (source.containsKey("productName")) {
+			r.setProductName(source.get("productName").toString());
+		}
 		if (source.containsKey("url")) {
 			r.setKeyObjectStorage(source.get("url").toString());
 		} else {
