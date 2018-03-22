@@ -24,7 +24,7 @@ public class L1AS3Services implements S3Services {
 	@Autowired
 	private AmazonS3 s3client;
 
-	@Value("${storage.buckets.l1-a}")
+	@Value("${storage.buckets.l1-acns}")
 	private String bucketName;
 
 	@Override

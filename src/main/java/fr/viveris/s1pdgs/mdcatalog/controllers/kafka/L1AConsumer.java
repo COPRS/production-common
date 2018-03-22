@@ -72,7 +72,7 @@ public class L1AConsumer {
 	
 	@Autowired
 	public L1AConsumer(final EsServices esServices, final L1AS3Services l1AS3Services,
-			@Value("${file.l1-a.local-directory}") final String localDirectory, 
+			@Value("${file.l1-acns.local-directory}") final String localDirectory, 
 			final MetadataExtractorConfig extractorConfig) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
@@ -88,7 +88,7 @@ public class L1AConsumer {
 	 * 
 	 * @param payload
 	 */
-	@KafkaListener(topics = "${kafka.topic.l1-a}", groupId = "${kafka.group-id}")
+	@KafkaListener(topics = "${kafka.topic.l1-acns}", groupId = "${kafka.group-id}")
 	public void receive(KafkaL1ADto dto) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("[receive] Consume message {}", dto);

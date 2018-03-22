@@ -25,7 +25,7 @@ kafka:
     l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}
     l0-acns: ${kafka_topic_l0_acns:t-pdgs-l0-acns}
     l1-slices: ${kafka_topic_l1_slices:t-pdgs-l1-slices}
-    l1-a: ${kafka_topic_l1_a=:t-pdgs-l1-a}
+    l1-acns: ${kafka_topic_l1_acns:t-pdgs-l1-acns}
     
 # Elastic Search
 elasticsearch:
@@ -45,7 +45,7 @@ storage:
     session-files: ${storage_buckets_session-files:session-files}
     l0-acns: ${storage_buckets_l0-acns:acns}
     l0-slices: ${storage_buckets_l0-slices:l0-slices}
-    l1-a: ${storage_buckets_l1-a:l1-a}
+    l1-acns: ${storage_buckets_l1-acns:l1-acns}
     l1-slices: ${storage_buckets_l1-slices:l1-slices}
     
 # File
@@ -62,8 +62,8 @@ file:
     local-directory: ${catalog_l0-acns_local-directory:/data/local-catalog/l0_acns/} # Must contains the last /
   l1-slices:
     local-directory: ${catalog_l1-slices_local-directory:/data/local-catalog/l1_slices/} # Must contains the last /
-  l1-a:
-    local-directory: ${catalog_l1-a_local-directory:/data/local-catalog/l1_a/} # Must contains the last /
+  l1-acns:
+    local-directory: ${catalog_l1-acns_local-directory:/data/local-catalog/l1_acns/} # Must contains the last /
 
 # REST controller
 server:
