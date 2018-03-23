@@ -41,8 +41,8 @@ public class SearchMetadataController {
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
 		try {
 			if (mode.equals("LatestValCover")) {
-				SearchMetadata f = esServices.lastValCover(productType, convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999Z")),
-						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000Z")), satellite, insConfId);
+				SearchMetadata f = esServices.lastValCover(productType, convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")), satellite, insConfId);
 				SearchMetadataDto response = null;
 				if (f != null) {
 					response = new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
