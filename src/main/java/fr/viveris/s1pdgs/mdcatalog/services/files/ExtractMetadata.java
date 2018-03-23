@@ -301,6 +301,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("creationTime", jsonFromXmlTmp.getJSONObject("creationTime").getString("content"));
 			metadataJSONObject.put("validityStartTime",
 					jsonFromXmlTmp.getJSONObject("validityStartTime").getString("content"));
+			metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productType", descriptor.getProductType());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
