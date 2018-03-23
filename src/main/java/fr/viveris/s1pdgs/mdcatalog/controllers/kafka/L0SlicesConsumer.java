@@ -91,9 +91,9 @@ public class L0SlicesConsumer {
 
 	@KafkaListener(topics = "${kafka.topic.l0-slices}", groupId = "${kafka.group-id}", containerFactory = "l0SlicesKafkaListenerContainerFactory")
 	public void receive(KafkaL0SliceDto dto) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[receive] Consume message {}", dto);
-		}
+		LOGGER.info("[MONITOR] [Step 0] [l0-slice] [productName {}] Starting metadata extraction",
+				dto.getProductName());
+
 		File metadataFile = null;
 		try {
 			// Build key object storage
@@ -104,32 +104,41 @@ public class L0SlicesConsumer {
 			// Upload file
 			if (l0SlicesS3Services.exist(keyObs)) {
 				// Upload file
+				LOGGER.info("[MONITOR] [Step 1] [l0-slice] [productName {}] Downloading file {}", dto.getProductName(),
+						keyObs);
 				metadataFile = this.l0SlicesS3Services.getFile(keyObs, this.localDirectory + keyObs);
 
 				// Extract metadata from name
+				LOGGER.info("[MONITOR] [Step 2] [l0-slice] [productName {}] Building file descriptor",
+						dto.getProductName());
 				L0OutputFileDescriptor descriptor = this.fileDescriptorBuilder
 						.buildL0OutputFileDescriptor(metadataFile);
 
 				// Build metadata from file and extracted
+				LOGGER.info("[MONITOR] [Step 3] [l0-slice] [productName {}] Building metadata", dto.getProductName());
 				JSONObject metadata = mdBuilder.buildL0SliceOutputFileMetadata(descriptor, metadataFile);
 
 				// Publish metadata
+				LOGGER.info("[MONITOR] [Step 4] [l0-slice] [productName {}] Publishing metadata", dto.getProductName());
 				if (!esServices.isMetadataExist(metadata)) {
 					esServices.createMetadata(metadata);
 				}
-				LOGGER.info("[productName {}] Metadata created", dto.getProductName());
+
 			} else {
 				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(),
 						"No such L0 Slices in object storage");
 			}
 
 		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {
-			LOGGER.error("[productName {}] {}", dto.getProductName(), e1.getMessage());
+			LOGGER.error("[MONITOR] [l0-slice] [productName {}] {}", dto.getProductName(), e1.getMessage());
 		} catch (Exception e) {
-			LOGGER.error("[productName {}] Exception occurred: {}", dto.getProductName(), e.getMessage());
+			LOGGER.error("[MONITOR] [l0-slice] [productName {}] Exception occurred: {}", dto.getProductName(),
+					e.getMessage());
 		} finally {
 			// Remove file
 			if (metadataFile != null) {
+				LOGGER.info("[MONITOR] [Step 5] [l0-slice] [productName {}] Removing downloaded file",
+						dto.getProductName());
 				File parent = metadataFile.getParentFile();
 				metadataFile.delete();
 				// Remove upper directory if needed

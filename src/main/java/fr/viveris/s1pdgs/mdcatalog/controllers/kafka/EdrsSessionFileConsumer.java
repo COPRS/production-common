@@ -25,8 +25,8 @@ import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
 
 /**
- * KAFKA consumer.
- * Consume on a topic defined in configuration file
+ * KAFKA consumer. Consume on a topic defined in configuration file
+ * 
  * @author Olivier Bex-Chauvet
  *
  */
@@ -37,7 +37,7 @@ public class EdrsSessionFileConsumer {
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(EdrsSessionFileConsumer.class);
-	
+
 	/**
 	 * Pattern for ERDS session files to extract data
 	 */
@@ -47,27 +47,27 @@ public class EdrsSessionFileConsumer {
 	 * Elasticsearch services
 	 */
 	private final EsServices esServices;
-	
+
 	/**
 	 * Metadata builder
 	 */
 	private final MetadataBuilder mdBuilder;
-	
+
 	/**
 	 * 
 	 */
 	private final MetadataExtractorConfig extractorConfig;
-	
+
 	/**
 	 * Local directory for sessions files
 	 */
 	private final String localDirectory;
-	
+
 	/**
 	 * Builder of file descriptors
 	 */
 	private final FileDescriptorBuilder fileDescriptorBuilder;
-	
+
 	public EdrsSessionFileConsumer(final EsServices esServices,
 			@Value("${file.session-files.local-directory}") final String localDirectory,
 			final MetadataExtractorConfig extractorConfig) {
@@ -78,34 +78,37 @@ public class EdrsSessionFileConsumer {
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
 	}
-	
+
 	/**
 	 * Message listener container. Read a message
 	 * 
 	 * @param payload
 	 */
-	@KafkaListener(topics = "${kafka.topic.edrs-sessions}", groupId = "${kafka.group-id}", containerFactory="edrsSessionsKafkaListenerContainerFactory")
+	@KafkaListener(topics = "${kafka.topic.edrs-sessions}", groupId = "${kafka.group-id}", containerFactory = "edrsSessionsKafkaListenerContainerFactory")
 	public void receive(KafkaEdrsSessionDto dto) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[receive] Consume message {}", dto);
-		}
-		
+		LOGGER.info("[MONITOR] [Step 0] [session] [obs {}] Starting metadata extraction", dto.getObjectStorageKey());
+
 		try {
 			// Extract metadata from name
-			EdrsSessionFileDescriptor edrsFileDescriptor = fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(this.localDirectory + dto.getObjectStorageKey()));
-			
+			LOGGER.info("[MONITOR] [Step 2] [session] [obs {}] Extracting from filename", dto.getObjectStorageKey());
+			EdrsSessionFileDescriptor edrsFileDescriptor = fileDescriptorBuilder
+					.buildEdrsSessionFileDescriptor(new File(this.localDirectory + dto.getObjectStorageKey()));
+
 			// Build metadata from file and extracted
+			LOGGER.info("[MONITOR] [Step 3] [session] [obs {}] Extracting from file", dto.getObjectStorageKey());
 			JSONObject metadata = mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor);
+
 			// Publish metadata
+			LOGGER.info("[MONITOR] [Step 4] [session] [obs {}] Publishing metadata", dto.getObjectStorageKey());
 			if (!esServices.isMetadataExist(metadata)) {
 				esServices.createMetadata(metadata);
 			}
-			LOGGER.info("[productName {}] Metadata created", dto.getObjectStorageKey());
-			
+
 		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {
-			LOGGER.error("[productName {}] {}", dto.getObjectStorageKey(), e1.getMessage());
+			LOGGER.error("[MONITOR] [session] [obs {}] {}", dto.getObjectStorageKey(), e1.getMessage());
 		} catch (Exception e) {
-			LOGGER.error("[productName {}] Exception occurred: {}", dto.getObjectStorageKey(), e.getMessage());
+			LOGGER.error("[MONITOR] [session] [obs {}] Exception occurred: {}", dto.getObjectStorageKey(),
+					e.getMessage());
 		}
 	}
 }
