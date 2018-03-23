@@ -63,10 +63,10 @@ public class SearchMetadataController {
 
 	}
 
-	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter formatter) throws ParseException {
+	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter) throws ParseException {
 		
-		LocalDateTime time = LocalDateTime.parse(dateStr, formatter);
+		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
-		return timePlus.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		return timePlus.format(outFormatter);
 	}
 }
