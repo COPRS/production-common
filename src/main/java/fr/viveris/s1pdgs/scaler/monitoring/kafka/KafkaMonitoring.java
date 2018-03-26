@@ -10,6 +10,7 @@ import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.KafkaPerGroupPerTopicMoni
 
 /**
  * Service to monitor KAFKA
+ * 
  * @author Cyrielle Gailliard
  *
  */
@@ -23,6 +24,7 @@ public class KafkaMonitoring {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param kafkaService
 	 */
 	@Autowired
@@ -32,6 +34,7 @@ public class KafkaMonitoring {
 
 	/**
 	 * Get monitor for a given group and a given topic
+	 * 
 	 * @param groupId
 	 * @param topicName
 	 * @return
@@ -43,6 +46,12 @@ public class KafkaMonitoring {
 			monitor.setNbPartitions(desc.getDescriptionPerPartition().size());
 			desc.getDescriptionPerPartition().forEach((k, v) -> {
 				monitor.getLagPerPartition().put(Integer.valueOf(v.getId()), Long.valueOf(v.getLag()));
+			});
+		}
+		if (desc.getDescriptionPerConsumer() != null) {
+			monitor.setNbConsumers(desc.getDescriptionPerConsumer().size());
+			desc.getDescriptionPerConsumer().forEach((k, v) -> {
+				monitor.getLagPerConsumers().put(v.getConsumerId(), Long.valueOf(v.getTotalLag()));
 			});
 		}
 		return monitor;
