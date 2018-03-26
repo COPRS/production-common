@@ -8,54 +8,30 @@
 	<springProperty scope="context" name="appName"
 		source="spring.application.name" defaultValue="localhost" />
 
-	<springProfile name="dev">
-		<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-			<encoder>
-				<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M: %msg %n</pattern>
-			</encoder>
-		</appender>
-		<appender name="ROLLING-FILE"
-			class="ch.qos.logback.core.rolling.RollingFileAppender">
-			<encoder>
-				<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>
-			</encoder>
-			<file>${LOG_FILE}</file>
-			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-				<fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
-			</rollingPolicy>
-		</appender>
-		<root level="DEBUG">
-			<appender-ref ref="CONSOLE" />
-			<appender-ref ref="ROLLING-FILE" />
-		</root>
-	</springProfile>
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>
+		</encoder>
+	</appender>
+	<appender name="ROLLING-FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>
+		</encoder>
+		<file>${LOG_FILE}</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+	</appender>
 
-	<springProfile name="prod">
-		<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-			<encoder>
-				<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>
-			</encoder>
-		</appender>
-		<appender name="ROLLING-FILE"
-			class="ch.qos.logback.core.rolling.RollingFileAppender">
-			<encoder>
-				<pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n</pattern>
-			</encoder>
-			<file>${LOG_FILE}</file>
-			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-				<fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
-				<timeBasedFileNamingAndTriggeringPolicy
-					class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-					<maxFileSize>10MB</maxFileSize>
-				</timeBasedFileNamingAndTriggeringPolicy>
-			</rollingPolicy>
-		</appender>
-
-		<root level="INFO">
-			<appender-ref ref="CONSOLE" />
-			<appender-ref ref="ROLLING-FILE" />
-		</root>
-	</springProfile>
+	<root level="INFO">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="ROLLING-FILE" />
+	</root>
 
 	<logger name="org.springframework" level="WARN" />
 	<logger name="org.apache" level="WARN" />

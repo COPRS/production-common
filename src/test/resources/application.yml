@@ -2,8 +2,6 @@
 spring:
   application:
     name: s1pdgs-metadata-catalog
-  profiles:
-    active: dev
     
 # Logging
 logging:
@@ -13,6 +11,7 @@ logging:
     fr.viveris.s1pdgs: DEBUG
     kafka: WARN
     org.apache: WARN
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
   file: ./s1pdgs-metadata-catalog-test.log
 
 #Object Storage
@@ -27,17 +26,22 @@ storage:
     session-files: session-files
     l0-acns: acns
     l0-slices: l0-slices
+    l1-acns: l1-acns
+    l1-slices: l1-slices
 
 # KAFKA
 kafka:
-  bootstrap-servers: ${spring.embedded.kafka.brokers}
-  group-id: metadata-catalog
+  bootstrap-servers: 172.17.50.10:9200
+  group-id: metadata-catalogs
+  client-id: metadata-catalog
   poll-timeout: 500
   topic:
     auxiliary-files: t-pdgs-auxiliary-files
     edrs-sessions: t-pdgs-edrs-sessions
     l0-slices: t-pdgs-l0-slices
     l0-acns: t-pdgs-l0-acns
+    l1-acns: t-pdgs-l1-acns
+    l1-slices: t-pdgs-l1-slices
 
 # Elastic Search
 elasticsearch:
@@ -50,13 +54,17 @@ file:
   file-with-manifest-ext: .safe
   manifest-filename: manifest.safe
   auxiliary-files:
-    local-directory: ${ingestor_auxiliary-files_local-directory:/data/local-ingestor/auxiliary_files/} # Must contains the last /
+    local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
   session-files:
-    local-directory: ${ingestor_session-files_local-directory:/data/local-ingestor/edrs_sessions/} # Must contains the last /
+    local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
   l0-slices:
-    local-directory: ${ingestor_l0-slices_local-directory:/data/local-ingestor/l0_slices/} # Must contains the last /
+    local-directory: /data/local-catalog/l0_slices/ # Must contains the last /
   l0-acns:
-    local-directory: ${ingestor_l0-acns_local-directory:/data/local-ingestor/l0_acns/} # Must contains the last /
+    local-directory: /data/local-catalog/l0_acns/ # Must contains the last /
+  l1-slices:
+    local-directory: /data/local-catalog/l1_slices/ # Must contains the last /
+  l1-acns:
+    local-directory: /data/local-catalog/l1_acns/ # Must contains the last /
     
 # Metadata Extractor
 mdextractor:

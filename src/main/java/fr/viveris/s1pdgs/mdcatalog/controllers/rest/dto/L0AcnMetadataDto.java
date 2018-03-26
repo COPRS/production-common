@@ -6,20 +6,20 @@ package fr.viveris.s1pdgs.mdcatalog.controllers.rest.dto;
  * @author Cyrielle Gailliard
  *
  */
-public class L0SliceMetadataDto extends MetadataDto {
+public class L0AcnMetadataDto extends MetadataDto {
 	
 	private int instrumentConfigurationId;
 	
-	private int numberSlice;
+	private int numberOfSlices;
 	
 	private String datatakeId;
 
-	public L0SliceMetadataDto(String productName, String productType, String keyObjectStorage,
+	public L0AcnMetadataDto(String productName, String productType, String keyObjectStorage,
 			String validityStart, String validityStop) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
 	}
 
-	public L0SliceMetadataDto(L0SliceMetadataDto obj) {
+	public L0AcnMetadataDto(L0AcnMetadataDto obj) {
 		this(obj.getProductName(), obj.getProductType(), obj.getKeyObjectStorage(), obj.getValidityStart(),
 				obj.getValidityStop());
 	}
@@ -39,17 +39,17 @@ public class L0SliceMetadataDto extends MetadataDto {
 	}
 
 	/**
-	 * @return the numberSlice
+	 * @return the numberOfSlices
 	 */
-	public int getNumberSlice() {
-		return numberSlice;
+	public int getNumberOfSlices() {
+		return numberOfSlices;
 	}
 
 	/**
-	 * @param numberSlice the numberSlice to set
+	 * @param numberOfSlices the numberOfSlices to set
 	 */
-	public void setNumberSlice(int numberSlice) {
-		this.numberSlice = numberSlice;
+	public void setNumberOfSlices(int numberOfSlices) {
+		this.numberOfSlices = numberOfSlices;
 	}
 
 	/**

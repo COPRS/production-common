@@ -105,9 +105,9 @@ public class ConfigFileConsumer {
 	 */
 	@KafkaListener(topics = "${kafka.topic.auxiliary-files}", groupId = "${kafka.group-id}")
 	public void receive(KafkaConfigFileDto dto) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[receive] Consume message {}", dto);
-		}
+		LOGGER.info("[MONITOR] [Step 0] [auxiliary] [productName {}] Starting metadata extraction",
+				dto.getProductName());
+
 		File metadataFile = null;
 		// Create metadata
 		try {
@@ -119,31 +119,40 @@ public class ConfigFileConsumer {
 			if (configFilesS3Services.exist(keyObs)) {
 
 				// Upload file
+				LOGGER.info("[MONITOR] [Step 1] [auxiliary] [productName {}] Downloading file {}", dto.getProductName(),
+						keyObs);
 				metadataFile = configFilesS3Services.getFile(keyObs, this.localDirectory + keyObs);
 
 				// Extract metadata from name
+				LOGGER.info("[MONITOR] [Step 2] [auxiliary] [productName {}] Extracting from filename",
+						dto.getProductName());
 				ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder
 						.buildConfigFileDescriptor(metadataFile);
 
 				// Build metadata from file and extracted
+				LOGGER.info("[MONITOR] [Step 3] [auxiliary] [productName {}] Extracting from file",
+						dto.getProductName());
 				JSONObject metadata = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
 
 				// Publish metadata
+				LOGGER.info("[MONITOR] [Step 4] [auxiliary] [productName {}] Publishing metadata",
+						dto.getProductName());
 				if (!esServices.isMetadataExist(metadata)) {
 					esServices.createMetadata(metadata);
 				}
-				LOGGER.info("[productName {}] Metadata created", dto.getProductName());
 			} else {
 				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(),
 						"No such L0 ACNs in object storage");
 			}
 		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {
-			LOGGER.error("[productName {}] {}", dto.getProductName(), e1.getMessage());
+			LOGGER.error("[MONITOR] [productName {}] {}", dto.getProductName(), e1.getMessage());
 		} catch (Exception e) {
-			LOGGER.error("[productName {}] Exception occurred: {}", dto.getProductName(), e.getMessage());
+			LOGGER.error("[MONITOR] [productName {}] Exception occurred: {}", dto.getProductName(), e.getMessage());
 		} finally {
 			// Remove file
 			if (metadataFile != null) {
+				LOGGER.info("[MONITOR] [Step 5] [auxiliary] [productName {}] Removing downloaded file",
+						dto.getProductName());
 				File parent = metadataFile.getParentFile();
 				metadataFile.delete();
 				// Remove upper directory if needed
@@ -152,6 +161,7 @@ public class ConfigFileConsumer {
 				}
 			}
 		}
+		LOGGER.info("[MONITOR] [Step 0] [auxiliary] [productName {}] End", dto.getProductName());
 	}
 
 }

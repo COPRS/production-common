@@ -1,14 +1,14 @@
 package fr.viveris.s1pdgs.mdcatalog.model.metadata;
 
-public class L0SliceMetadata extends AbstractMetadata {
+public class L0AcnMetadata extends AbstractMetadata {
 	
 	private int instrumentConfigurationId;
 	
-	private int numberSlice;
+	private int numberOfSlices;
 	
 	private String datatakeId;
 
-	public L0SliceMetadata() {
+	public L0AcnMetadata() {
 		super();
 	}
 
@@ -25,19 +25,20 @@ public class L0SliceMetadata extends AbstractMetadata {
 	public void setInstrumentConfigurationId(int instrumentConfigurationId) {
 		this.instrumentConfigurationId = instrumentConfigurationId;
 	}
+	
 
 	/**
-	 * @return the numberSlice
+	 * @return the numberOfSlices
 	 */
-	public int getNumberSlice() {
-		return numberSlice;
+	public int getNumberOfSlices() {
+		return numberOfSlices;
 	}
 
 	/**
-	 * @param numberSlice the numberSlice to set
+	 * @param numberOfSlices the numberOfSlices to set
 	 */
-	public void setNumberSlice(int numberSlice) {
-		this.numberSlice = numberSlice;
+	public void setNumberOfSlices(int numberOfSlices) {
+		this.numberOfSlices = numberOfSlices;
 	}
 
 	/**
