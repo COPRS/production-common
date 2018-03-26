@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: s1pdgs-scaler
+    
+# Logging
+logging:
+  config: logback-spring.xml
+  level:
+    ROOT: ERROR
+    org.springframework: ERROR
+    fr.viveris.s1pdgs: DEBUG
+    kafka: WARN
+    org.apache.zookeeper.ClientCnxn: WARN
+    org.apache: WARN
+  file: ./s1pdgs-scaler.log
+  
+# Kafka
+kafka:
+  bootstrap-servers: 172.17.50.10:9092,172.17.50.10:9093
+  client-id: spdgs-scaler
+  request-timeout-ms: 5000
+  session-timeout-ms: 5000
+  topics:
+    l1-jobs: t-pdgs-l1-jobs
+  group-id-per-topic:
+    l1-jobs: l1-job-generators
+    
+scaler:
+  fixed-delay-ms: 500
