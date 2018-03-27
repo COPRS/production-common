@@ -119,7 +119,7 @@ public class L1SlicesConsumer {
 				// Upload file
 				LOGGER.info("[MONITOR] [Step 1] [l1-slice] [productName {}] Downloading file {}", dto.getProductName(),
 						keyObs);
-				metadataFile = l1SlicesS3Services.getFile(dto.getKeyObjectStorage(), this.localDirectory + keyObs);
+				metadataFile = l1SlicesS3Services.getFile(keyObs, this.localDirectory + keyObs);
 
 				// Extract metadata from name
 				LOGGER.info("[MONITOR] [Step 2] [l1-slice] [productName {}] Building file descriptor",
