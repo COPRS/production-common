@@ -216,7 +216,6 @@ public class KafkaConsumerConfig {
 		
 		ConcurrentKafkaListenerContainerFactory<String, KafkaL1SliceDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(l1SlicesConsumerFactory());
-		factory.setConcurrency(1);
 		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
 		return factory;
 	}
@@ -245,7 +244,6 @@ public class KafkaConsumerConfig {
 		
 		ConcurrentKafkaListenerContainerFactory<String, KafkaL1ADto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(l1AConsumerFactory());
-		factory.setConcurrency(1);
 		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
 		return factory;
 	}

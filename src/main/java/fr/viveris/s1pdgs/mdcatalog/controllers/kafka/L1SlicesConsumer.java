@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.L1OutputFileDescriptor;
@@ -28,6 +29,7 @@ import fr.viveris.s1pdgs.mdcatalog.services.s3.L1SlicesS3Services;
  * @author Olivier Bex-Chauvet
  *
  */
+@Service
 public class L1SlicesConsumer {
 
 	/**
