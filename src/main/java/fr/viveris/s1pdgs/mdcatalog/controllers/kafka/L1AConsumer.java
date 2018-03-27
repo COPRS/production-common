@@ -98,7 +98,7 @@ public class L1AConsumer {
 	 * 
 	 * @param payload
 	 */
-	@KafkaListener(topics = "${kafka.topic.l1-acns}", groupId = "${kafka.group-id}")
+	@KafkaListener(topics = "${kafka.topic.l1-acns}", groupId = "${kafka.group-id}", containerFactory = "l1AKafkaListenerContainerFactory")
 	public void receive(KafkaL1ADto dto) {
 		LOGGER.info("[MONITOR] [Step 0] [l1-acn] [productName {}] Starting metadata extraction", dto.getProductName());
 

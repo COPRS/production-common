@@ -98,7 +98,7 @@ public class L1SlicesConsumer {
 	 * 
 	 * @param payload
 	 */
-	@KafkaListener(topics = "${kafka.topic.l1-slices}", groupId = "${kafka.group-id}")
+	@KafkaListener(topics = "${kafka.topic.l1-slices}", groupId = "${kafka.group-id}", containerFactory = "l1SlicesKafkaListenerContainerFactory")
 	public void receive(KafkaL1SliceDto dto) {
 		LOGGER.info("[MONITOR] [Step 0] [l1-slice] [productName {}] Starting metadata extraction",
 				dto.getProductName());
