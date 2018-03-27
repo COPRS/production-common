@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.L1OutputFileDescriptor;
@@ -28,6 +29,7 @@ import fr.viveris.s1pdgs.mdcatalog.services.s3.L1SlicesS3Services;
  * @author Olivier Bex-Chauvet
  *
  */
+@Service
 public class L1SlicesConsumer {
 
 	/**
@@ -38,7 +40,7 @@ public class L1SlicesConsumer {
 	/**
 	 * Pattern for configuration files to extract data
 	 */
-	private final static String PATTERN_CONFIG = "^(S1A|S1B|ASA)_(S[1-6]|IW|EW|WM|N[1-6]|EN|IM)_(SLC|GRD|OCN)(F|H|M|_)_(1|2)(A|S)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\\\w{1,}\\\\.SAFE(/.*)?$";
+	private final static String PATTERN_CONFIG = "^(S1A|S1B|ASA)_(S[1-6]|IW|EW|WM|N[1-6]|EN|IM)_(SLC|GRD|OCN)(F|H|M|_)_(1|2)(A|S)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$";
 
 	/**
 	 * Elasticsearch services
@@ -70,10 +72,18 @@ public class L1SlicesConsumer {
 	 */
 	private final FileDescriptorBuilder fileDescriptorBuilder;
 
+	/**
+	 * Manifest filename
+	 */
+	private final String manifestFilename;
+	private final String fileWithManifestExt;
+
 	@Autowired
 	public L1SlicesConsumer(final EsServices esServices, final L1SlicesS3Services l1SlicesS3Services,
 			@Value("${file.l1-slices.local-directory}") final String localDirectory,
-			final MetadataExtractorConfig extractorConfig) {
+			final MetadataExtractorConfig extractorConfig,
+			@Value("${file.manifest-filename}") final String manifestFilename,
+			@Value("${file.file-with-manifest-ext}") final String fileWithManifestExt) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
@@ -81,6 +91,8 @@ public class L1SlicesConsumer {
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
 		this.l1SlicesS3Services = l1SlicesS3Services;
+		this.manifestFilename = manifestFilename;
+		this.fileWithManifestExt = fileWithManifestExt;
 	}
 
 	/**
@@ -88,7 +100,7 @@ public class L1SlicesConsumer {
 	 * 
 	 * @param payload
 	 */
-	@KafkaListener(topics = "${kafka.topic.l1-slices}", groupId = "${kafka.group-id}")
+	@KafkaListener(topics = "${kafka.topic.l1-slices}", groupId = "${kafka.group-id}", containerFactory = "l1SlicesKafkaListenerContainerFactory")
 	public void receive(KafkaL1SliceDto dto) {
 		LOGGER.info("[MONITOR] [Step 0] [l1-slice] [productName {}] Starting metadata extraction",
 				dto.getProductName());
@@ -96,13 +108,18 @@ public class L1SlicesConsumer {
 		File metadataFile = null;
 		// Create metadata
 		try {
-			if (l1SlicesS3Services.exist(dto.getKeyObjectStorage())) {
+			// Build key object storage
+			String keyObs = dto.getKeyObjectStorage();
+			if (dto.getKeyObjectStorage().toLowerCase().endsWith(this.fileWithManifestExt.toLowerCase())) {
+				keyObs += "/" + manifestFilename;
+			}
+			// Upload file
+			if (l1SlicesS3Services.exist(keyObs)) {
 
 				// Upload file
 				LOGGER.info("[MONITOR] [Step 1] [l1-slice] [productName {}] Downloading file {}", dto.getProductName(),
-						dto.getKeyObjectStorage());
-				metadataFile = l1SlicesS3Services.getFile(dto.getKeyObjectStorage(),
-						this.localDirectory + dto.getKeyObjectStorage());
+						keyObs);
+				metadataFile = l1SlicesS3Services.getFile(keyObs, this.localDirectory + keyObs);
 
 				// Extract metadata from name
 				LOGGER.info("[MONITOR] [Step 2] [l1-slice] [productName {}] Building file descriptor",

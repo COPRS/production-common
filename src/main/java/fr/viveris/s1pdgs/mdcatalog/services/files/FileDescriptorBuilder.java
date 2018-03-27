@@ -92,7 +92,7 @@ public class FileDescriptorBuilder {
 			configFile = new ConfigFileDescriptor();
 			configFile.setFilename(filename);
 			configFile.setRelativePath(relativePath);
-			configFile.setKeyObjectStorage(relativePath);
+			configFile.setKeyObjectStorage(productName);
 			configFile.setProductName(productName);
 			configFile.setMissionId(m.group(1));
 			configFile.setSatelliteId(m.group(2));
