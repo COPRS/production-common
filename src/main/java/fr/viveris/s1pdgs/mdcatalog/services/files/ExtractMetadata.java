@@ -109,6 +109,9 @@ public class ExtractMetadata {
 			for (String coord : rawCoordinates.split(" ")) {
 				coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
 			}
+			if(!rawCoordinates.split(" ")[0].equals(rawCoordinates.split(" ")[rawCoordinates.split(" ").length-1])) {
+				coordinates.put(new JSONArray("[" + (rawCoordinates.split(" ")[0].split(","))[1] + "," + (rawCoordinates.split(" ")[0].split(","))[0] + "]"));
+			}
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(productName, e);
 		}
