@@ -114,7 +114,7 @@ public class EsServices {
 	public SearchMetadata lastValCover(String productType, String beginDate, String endDate, String satelliteId,
 			int instrumentConfId) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		if (instrumentConfId != -1) {
+		if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
 			sourceBuilder
 					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
