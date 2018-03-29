@@ -254,7 +254,7 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setResolution(m.group(4));
 			l1Descriptor.setProductClass(m.group(6));
 			l1Descriptor.setProductType(m.group(2)+"_"+m.group(3)+m.group(4)+"_"+m.group(5)+m.group(6));
-			l1Descriptor.setPolarisation(m.group(6));
+			l1Descriptor.setPolarisation(m.group(7));
 			l1Descriptor.setDataTakeId(m.group(11));
 			l1Descriptor.setKeyObjectStorage(productName);
 						
