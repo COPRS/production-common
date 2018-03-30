@@ -68,7 +68,7 @@ public class Scaler {
 
 		try {
 			ApiClient client = Config.defaultClient();
-	        Configuration.setDefaultApiClient(client);
+			Configuration.setDefaultApiClient(client);
 	        CoreV1Api api = new CoreV1Api();
 	        
 			// Monitor KAFKA
@@ -86,7 +86,8 @@ public class Scaler {
 
 			// Scale
 		} catch (Exception e) {
-			LOGGER.error("Error during scaling: {}", e.getMessage());
+			LOGGER.error("Error {}", e);
+			//LOGGER.error("Error during scaling: {}", e.getMessage());
 		}
 		LOGGER.info("[MONITOR] [Step 0] End");
 	}
