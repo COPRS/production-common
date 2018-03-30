@@ -10,7 +10,9 @@ import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoring;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoringProperties;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.SpdgsTopic;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.KafkaPerGroupPerTopicMonitor;
-import io.fabric8.kubernetes.api.model.ServiceList;
+import io.fabric8.kubernetes.client.AutoAdaptableKubernetesClient;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.ConfigBuilder;
 /*import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.CoreV1Api;
@@ -18,7 +20,6 @@ import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.KubeConfig;
 import io.kubernetes.client.util.authenticators.GCPAuthenticator;*/
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 /**
@@ -45,8 +46,7 @@ public class Scaler {
 	 */
 	private final KafkaMonitoringProperties kafkaProperties;
 
-	private KubernetesClient client;
-
+	
 	/**
 	 * Constructor
 	 * 
@@ -74,7 +74,7 @@ public class Scaler {
 		
 
 		try {
-			client = new DefaultKubernetesClient();
+			
 	        
 			// Monitor KAFKA
 			LOGGER.info("[MONITOR] [Step 1] Starting monitoring KAFKA");
@@ -86,9 +86,31 @@ public class Scaler {
 			// Monitor K8S
 			LOGGER.info("[MONITOR] [Step 2] Starting monitoring Wrappers");
 	        //V1PodList list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
-			ServiceList myServices = client.services().list();
-	        LOGGER.info("[MONITOR] [Step 2] Wrappers successfully monitored: {}", myServices);
-			// Calculate value for scaling
+			String master = "https://192.168.42.51:6443";
+			Config config = new ConfigBuilder().withMasterUrl(master)
+	          .withTrustCerts(true)
+	          .withUsername("admin")
+	          .withPassword("admin")
+	          .withNamespace("default")
+	          .build();
+	        try (final KubernetesClient client = new AutoAdaptableKubernetesClient(config)) {
+
+	        	LOGGER.info("[MONITOR] [Step 2] Wrappers successfully monitored: {}", client.pods().list());
+				
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            LOGGER.error(e.getMessage(), e);
+
+
+	            Throwable[] suppressed = e.getSuppressed();
+	            if (suppressed != null) {
+	                for (Throwable t : suppressed) {
+	                	LOGGER.error(t.getMessage(), t);
+	                }
+	            }
+			}
+	        // Calculate value for scaling
 
 			// Scale
 		} catch (Exception e) {
