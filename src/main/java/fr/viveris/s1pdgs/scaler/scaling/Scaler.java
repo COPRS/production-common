@@ -89,8 +89,7 @@ public class Scaler {
 
 			// Scale
 		} catch (Exception e) {
-			LOGGER.error("Error {}", e);
-			//LOGGER.error("Error during scaling: {}", e.getMessage());
+			LOGGER.error("Error during scaling: {}", e.getMessage());
 		}
 		LOGGER.info("[MONITOR] [Step 0] End");
 	}
