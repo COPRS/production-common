@@ -89,8 +89,7 @@ public class Scaler {
 			String master = "https://192.168.42.51:6443";
 			Config config = new ConfigBuilder().withMasterUrl(master)
 	          .withTrustCerts(true)
-	          .withUsername("admin")
-	          .withPassword("admin")
+	          .withUsername("system:basic-user")
 	          .withNamespace("default")
 	          .build();
 	        try (final KubernetesClient client = new AutoAdaptableKubernetesClient(config)) {
@@ -98,18 +97,7 @@ public class Scaler {
 	        	LOGGER.info("[MONITOR] [Step 2] Wrappers successfully monitored: {}", client.pods().list());
 				
 
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            LOGGER.error(e.getMessage(), e);
-
-
-	            Throwable[] suppressed = e.getSuppressed();
-	            if (suppressed != null) {
-	                for (Throwable t : suppressed) {
-	                	LOGGER.error(t.getMessage(), t);
-	                }
-	            }
-			}
+	        }
 	        // Calculate value for scaling
 
 			// Scale
