@@ -89,7 +89,8 @@ public class Scaler {
 			String master = "https://192.168.42.51:6443";
 			Config config = new ConfigBuilder().withMasterUrl(master)
 	          .withTrustCerts(true)
-	          .withUsername("system:basic-user")
+	          .withUsername("admin")
+	          .withPassword("MyadminL0g1n")
 	          .withNamespace("default")
 	          .build();
 	        try (final KubernetesClient client = new AutoAdaptableKubernetesClient(config)) {
