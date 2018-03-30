@@ -15,6 +15,8 @@ import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.util.Config;
+import io.kubernetes.client.util.KubeConfig;
+import io.kubernetes.client.util.authenticators.GCPAuthenticator;
 
 /**
  * L1 resources scaler
@@ -67,6 +69,7 @@ public class Scaler {
 		
 
 		try {
+			KubeConfig.registerAuthenticator(new GCPAuthenticator());
 			ApiClient client = Config.defaultClient();
 			Configuration.setDefaultApiClient(client);
 	        CoreV1Api api = new CoreV1Api();
