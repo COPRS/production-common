@@ -10,13 +10,16 @@ import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoring;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoringProperties;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.SpdgsTopic;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.KafkaPerGroupPerTopicMonitor;
-import io.kubernetes.client.ApiClient;
+import io.fabric8.kubernetes.api.model.ServiceList;
+/*import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.KubeConfig;
-import io.kubernetes.client.util.authenticators.GCPAuthenticator;
+import io.kubernetes.client.util.authenticators.GCPAuthenticator;*/
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 
 /**
  * L1 resources scaler
@@ -41,6 +44,8 @@ public class Scaler {
 	 * Kafka properties
 	 */
 	private final KafkaMonitoringProperties kafkaProperties;
+
+	private KubernetesClient client;
 
 	/**
 	 * Constructor
@@ -69,10 +74,7 @@ public class Scaler {
 		
 
 		try {
-			KubeConfig.registerAuthenticator(new GCPAuthenticator());
-			ApiClient client = Config.defaultClient();
-			Configuration.setDefaultApiClient(client);
-	        CoreV1Api api = new CoreV1Api();
+			client = new DefaultKubernetesClient();
 	        
 			// Monitor KAFKA
 			LOGGER.info("[MONITOR] [Step 1] Starting monitoring KAFKA");
@@ -83,8 +85,9 @@ public class Scaler {
 
 			// Monitor K8S
 			LOGGER.info("[MONITOR] [Step 2] Starting monitoring Wrappers");
-	        V1PodList list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
-	        LOGGER.info("[MONITOR] [Step 2] Wrappers successfully monitored: {}", list);
+	        //V1PodList list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
+			ServiceList myServices = client.services().list();
+	        LOGGER.info("[MONITOR] [Step 2] Wrappers successfully monitored: {}", myServices);
 			// Calculate value for scaling
 
 			// Scale
