@@ -15,6 +15,8 @@ public class K8SProperties {
 	
 	private String clientKey;
 	
+	private String clientCertData;
+	
 	private String namespace;
 
 	public K8SProperties() {
@@ -61,6 +63,20 @@ public class K8SProperties {
 	 */
 	public void setClientKey(String clientKey) {
 		this.clientKey = clientKey;
+	}
+
+	/**
+	 * @return the clientCertData
+	 */
+	public String getClientCertData() {
+		return clientCertData;
+	}
+
+	/**
+	 * @param clientCertData the clientCertData to set
+	 */
+	public void setClientCertData(String clientCertData) {
+		this.clientCertData = clientCertData;
 	}
 
 	/**

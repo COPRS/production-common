@@ -20,8 +20,9 @@ public class K8SAdminConfiguration {
 		Config config = new ConfigBuilder().withMasterUrl(properties.getMasterUrl())
 		          /*.withTrustCerts(true)*/
 		          .withUsername(properties.getUsername())
-		          .withPassword(properties.getClientKey())
-		          //.withClientKeyData(properties.getClientKey())
+		          //.withPassword(properties.getClientKey())
+		          .withClientKeyData(properties.getClientKey())
+		          .withClientCertData(properties.getClientCertData())
 		          .withNamespace("default")
 		          .build();
 		return config;
