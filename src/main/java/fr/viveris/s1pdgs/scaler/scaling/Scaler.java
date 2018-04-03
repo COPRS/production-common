@@ -1,5 +1,8 @@
 package fr.viveris.s1pdgs.scaler.scaling;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,16 +13,10 @@ import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoring;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoringProperties;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.SpdgsTopic;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.KafkaPerGroupPerTopicMonitor;
+import fr.viveris.s1pdgs.scaler.monitoring.wrappers.model.*;
 import io.fabric8.kubernetes.client.AutoAdaptableKubernetesClient;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
-/*import io.kubernetes.client.ApiClient;
-import io.kubernetes.client.Configuration;
-import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.models.V1PodList;
-import io.kubernetes.client.util.Config;
-import io.kubernetes.client.util.KubeConfig;
-import io.kubernetes.client.util.authenticators.GCPAuthenticator;*/
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 /**
@@ -70,6 +67,7 @@ public class Scaler {
 	 */
 	@Scheduled(fixedDelayString = "${scaler.fixed-delay-ms}")
 	public void scale() {
+		List<Wrapper> listWrapper = new ArrayList<>();
 		LOGGER.info("[MONITOR] [Step 0] Starting scaling");
 		
 
@@ -84,9 +82,9 @@ public class Scaler {
 			LOGGER.info("[MONITOR] [Step 1] KAFKA successfully monitored: {}", monitorKafka);
 
 			// Monitor K8S
+			//Listing all the L1 wrappers pods
 			LOGGER.info("[MONITOR] [Step 2] Starting monitoring Wrappers");
-	        //V1PodList list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
-			String master = "https://192.168.42.51:6443";
+	        String master = "https://192.168.42.51:6443";
 			Config config = new ConfigBuilder().withMasterUrl(master)
 	          /*.withTrustCerts(true)*/
 	          .withUsername("cluster-admin")
@@ -94,10 +92,13 @@ public class Scaler {
 	          .withNamespace("default")*/
 	          .build();
 	        try (final KubernetesClient client = new AutoAdaptableKubernetesClient(config)) {
-
 	        	LOGGER.info("[MONITOR] [Step 2] Wrappers successfully monitored: {}", client.pods().list());
-				
-
+			}
+	        //Retrieving L1 Wrappers pods info
+	        
+	        // Retrieving the status from the L1 Wrapper
+	        for (Wrapper wrapper : listWrapper) {
+	        	wrapper.getHostName();
 	        }
 	        // Calculate value for scaling
 
