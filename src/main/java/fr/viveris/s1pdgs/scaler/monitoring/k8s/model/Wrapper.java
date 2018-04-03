@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.monitoring.wrappers.model;
+package fr.viveris.s1pdgs.scaler.monitoring.k8s.model;
 
 import java.util.Date;
 
