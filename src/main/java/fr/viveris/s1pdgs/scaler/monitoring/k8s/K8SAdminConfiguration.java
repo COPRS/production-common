@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import io.fabric8.kubernetes.client.AutoAdaptableKubernetesClient;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 @Configuration
@@ -29,7 +29,7 @@ public class K8SAdminConfiguration {
 	
 	@Bean
 	public KubernetesClient k8sClient() {
-		KubernetesClient client = new AutoAdaptableKubernetesClient(k8sConfig());
+		KubernetesClient client = new DefaultKubernetesClient(k8sConfig());
 		return client;
 	}
 

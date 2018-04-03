@@ -11,6 +11,7 @@ logging:
     fr.viveris.s1pdgs: ${scaler_logging_level_frviveriss1pdgs:DEBUG}
     kafka: ${scaler_logging_level_kafka:WARN}
     org.apache: ${scaler_logging_level_apache:WARN}
+    io.fabric8.kubernetes: ${scaler_logging_level_fabric8:INFO}
   file: ${scaler_logging_file:./s1pdgs-scaler.log}
   
 # Kafka

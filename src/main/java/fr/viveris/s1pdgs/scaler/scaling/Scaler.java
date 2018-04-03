@@ -83,7 +83,7 @@ public class Scaler {
 			PodList pods = this.k8sClient.pods().list();
 			if (!CollectionUtils.isEmpty(pods.getItems())) {
 				pods.getItems().forEach(pod -> {
-					LOGGER.info("[MONITOR] [Step 2] Pod {}", pod);
+					LOGGER.info("[MONITOR] [Step 2] Pod name {} ip {}", pod.getMetadata().getName(), pod.getStatus().getPodIP());
 				});
 			}
 			LOGGER.info("[MONITOR] [Step 2] K8S successfully monitored: ");
@@ -92,7 +92,7 @@ public class Scaler {
 
 			// Scale
 		} catch (Exception e) {
-			LOGGER.error("Error during scaling: {}", e.getMessage());
+			LOGGER.error("Error during scaling: {}", e);
 		}
 		LOGGER.info("[MONITOR] [Step 0] End");
 	}
