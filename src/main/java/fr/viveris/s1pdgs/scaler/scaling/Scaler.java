@@ -11,9 +11,8 @@ import org.springframework.util.CollectionUtils;
 
 import fr.viveris.s1pdgs.scaler.k8s.K8SAdministration;
 import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoring;
-import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoringProperties;
 import fr.viveris.s1pdgs.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
-import fr.viveris.s1pdgs.scaler.kafka.model.SpdgsTopic;
+import fr.viveris.s1pdgs.scaler.openstack.OpenStackAdministration;
 
 /**
  * L1 resources scaler
@@ -34,12 +33,9 @@ public class Scaler {
 	 */
 	private final KafkaMonitoring kafkaMonitoring;
 
-	/**
-	 * Kafka properties
-	 */
-	private final KafkaMonitoringProperties kafkaProperties;
-
 	private final K8SAdministration k8SAdministration;
+
+	private final OpenStackAdministration osAdministration;
 
 	public enum ScalingAction {
 		ALLOC, FREE, NOTHING, ERROR
@@ -52,11 +48,11 @@ public class Scaler {
 	 * @param properties
 	 */
 	@Autowired
-	public Scaler(final KafkaMonitoringProperties kafkaProperties, final KafkaMonitoring kafkaMonitoring,
-			final K8SAdministration k8SAdministration) {
+	public Scaler(final KafkaMonitoring kafkaMonitoring, final K8SAdministration k8SAdministration,
+			final OpenStackAdministration osAdministration) {
 		this.kafkaMonitoring = kafkaMonitoring;
-		this.kafkaProperties = kafkaProperties;
 		this.k8SAdministration = k8SAdministration;
+		this.osAdministration = osAdministration;
 	}
 
 	/**
@@ -80,9 +76,7 @@ public class Scaler {
 
 			// Monitor KAFKA
 			LOGGER.info("[MONITOR] [Step 2] Starting monitoring KAFKA");
-			KafkaPerGroupPerTopicMonitor monitorKafka = this.kafkaMonitoring.getPerGroupPerTopicMonitor(
-					kafkaProperties.getGroupIdPerTopic().get(SpdgsTopic.L1_JOBS),
-					kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS));
+			KafkaPerGroupPerTopicMonitor monitorKafka = this.kafkaMonitoring.monitorL1Jobs();
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("[MONITOR] [Step 2] Monitored information {}", monitorKafka);
 			}
@@ -118,7 +112,7 @@ public class Scaler {
 		}
 		LOGGER.info("[MONITOR] [Step 0] End");
 	}
-	
+
 	private long calculateMonitoredValue() {
 		return 0;
 	}
@@ -128,28 +122,26 @@ public class Scaler {
 	}
 
 	private void addRessources() {
-		
-		
+
 		// Create VM
-		
+
 		// All labels
-		
+
 		// Launchs pods
 	}
 
 	private void freeRessources() {
-		
 
 	}
 
 	private void deleteUnusedResources() {
 		// Retrieve K8S workers set in pause with no active pods
-		List<String> nodeNamesToDelete = this.k8SAdministration.getWrapperNodesToDelete();
-		
+		List<String> serverIdsToDelete = this.k8SAdministration.getExternalIdsOfWrapperNodesToDelete();
+
 		// Remove the corresponding VM
-		if (nodeNamesToDelete != null && !CollectionUtils.isEmpty(nodeNamesToDelete)) {
-			nodeNamesToDelete.forEach(name -> {
-				
+		if (serverIdsToDelete != null && !CollectionUtils.isEmpty(serverIdsToDelete)) {
+			serverIdsToDelete.forEach(serverId -> {
+				this.osAdministration.deleteServer(serverId);
 			});
 		}
 	}

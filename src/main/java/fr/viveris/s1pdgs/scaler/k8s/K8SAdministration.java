@@ -9,11 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import fr.viveris.s1pdgs.scaler.k8s.model.NodeDesc;
+import fr.viveris.s1pdgs.scaler.k8s.model.PodDesc;
 import fr.viveris.s1pdgs.scaler.k8s.services.NodeService;
 import fr.viveris.s1pdgs.scaler.k8s.services.PodService;
-import io.fabric8.kubernetes.api.model.NodeAddress;
-import io.fabric8.kubernetes.api.model.NodeList;
-import io.fabric8.kubernetes.api.model.PodList;
 
 @Service
 public class K8SAdministration {
@@ -33,7 +32,7 @@ public class K8SAdministration {
 	}
 
 	/**
-	 * Get the names of the K8S nodes which shall be deleted.<br/>
+	 * Get the external identifiers of the K8S nodes which shall be deleted.<br/>
 	 * <ul>
 	 * A node shall be deleted if:
 	 * <li>it is configured to host wrappers</li>
@@ -43,8 +42,8 @@ public class K8SAdministration {
 	 * 
 	 * @return
 	 */
-	public List<String> getWrapperNodesToDelete() {
-		List<String> nodeNames = new ArrayList<>();
+	public List<String> getExternalIdsOfWrapperNodesToDelete() {
+		List<String> externalIds = new ArrayList<>();
 
 		// Build labels
 		Map<String, String> labels = new HashMap<>();
@@ -52,40 +51,31 @@ public class K8SAdministration {
 		labels.put(properties.getLabelWrapperStateUnused().getLabel(),
 				properties.getLabelWrapperStateUnused().getValue());
 		// Get nodes labellised unused
-		NodeList unusedNodes = this.nodeService.getNodesWithLabels(labels);
-		if (unusedNodes != null && !CollectionUtils.isEmpty(unusedNodes.getItems())) {
+		List<NodeDesc> unusedNodes = this.nodeService.getNodesWithLabels(labels);
+		if (!CollectionUtils.isEmpty(unusedNodes)) {
 			// Get wrapper pods
-			PodList l1WrapperPods = this.podService.getPodsWithLabel(properties.getLabelWrapperApp().getLabel(),
+			List<PodDesc> l1WrapperPods = this.podService.getPodsWithLabel(properties.getLabelWrapperApp().getLabel(),
 					properties.getLabelWrapperApp().getValue());
 			// Extract the list of used host IPs
-			Map<String, Integer> hostIps = new HashMap<>();
-			if (l1WrapperPods != null && !CollectionUtils.isEmpty(l1WrapperPods.getItems())) {
-				l1WrapperPods.getItems().forEach(pod -> {
-					if (hostIps.containsKey(pod.getStatus().getHostIP())) {
-						Integer i = hostIps.get(pod.getStatus().getHostIP());
-						hostIps.put(pod.getStatus().getHostIP(), i + 1);
+			Map<String, Integer> usedNodeNames = new HashMap<>();
+			if (!CollectionUtils.isEmpty(l1WrapperPods)) {
+				l1WrapperPods.forEach(podDesc -> {
+					if (usedNodeNames.containsKey(podDesc.getNodeName())) {
+						Integer i = usedNodeNames.get(podDesc.getNodeName());
+						usedNodeNames.put(podDesc.getNodeName(), i + 1);
 					} else {
-						hostIps.put(pod.getStatus().getHostIP(), 0);
+						usedNodeNames.put(podDesc.getNodeName(), 0);
 					}
 				});
 			}
 			// Build the return
-			unusedNodes.getItems().forEach(node -> {
-				boolean found = false;
-				if (!CollectionUtils.isEmpty(node.getStatus().getAddresses())) {
-					for (int i = 0; i < node.getStatus().getAddresses().size(); i++) {
-						NodeAddress nodeAddress = node.getStatus().getAddresses().get(i);
-						if (hostIps.containsKey(nodeAddress.getAddress())) {
-							found = true;
-						}
-					}
-				}
-				if (!found) {
-					nodeNames.add(node.getMetadata().getName());
+			unusedNodes.forEach(nodeDesc -> {
+				if (!usedNodeNames.containsKey(nodeDesc.getName())) {
+					externalIds.add(nodeDesc.getExternalId());
 				}
 			});
 		}
 
-		return nodeNames;
+		return externalIds;
 	}
 }

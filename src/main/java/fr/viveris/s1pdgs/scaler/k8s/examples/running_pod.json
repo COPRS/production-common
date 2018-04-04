@@ -1,0 +1,168 @@
+#curl http://localhost:8080/api/v1/namespaces/default/pods/l1-scaler-0
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "l1-scaler-0",
+    "generateName": "l1-scaler-",
+    "namespace": "default",
+    "selfLink": "/api/v1/namespaces/default/pods/l1-scaler-0",
+    "uid": "06cbcfb4-3727-11e8-b605-fa163eaeaa5e",
+    "resourceVersion": "6140859",
+    "creationTimestamp": "2018-04-03T10:08:59Z",
+    "labels": {
+      "app": "l1-scaler",
+      "controller-revision-hash": "l1-scaler-5c85bbcb85"
+    },
+    "annotations": {
+      "kubernetes.io/created-by": "{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"StatefulSet\",\"namespace\":\"default\",\"name\":\"l1-scaler\",\"uid\":\"06cabdda-3727-11e8-b605-fa163eaeaa5e\",\"apiVersion\":\"apps/v1beta1\",\"resourceVersion\":\"6140836\"}}\n"
+    },
+    "ownerReferences": [
+      {
+        "apiVersion": "apps/v1beta1",
+        "kind": "StatefulSet",
+        "name": "l1-scaler",
+        "uid": "06cabdda-3727-11e8-b605-fa163eaeaa5e",
+        "controller": true,
+        "blockOwnerDeletion": true
+      }
+    ]
+  },
+  "spec": {
+    "volumes": [
+      {
+        "name": "default-token-rf94g",
+        "secret": {
+          "secretName": "default-token-rf94g",
+          "defaultMode": 420
+        }
+      }
+    ],
+    "containers": [
+      {
+        "name": "l1-scaler",
+        "image": "registry.geohub.space/wo7/scaler:SPDGS-48",
+        "envFrom": [
+          {
+            "configMapRef": {
+              "name": "s1pdgs-config"
+            }
+          },
+          {
+            "configMapRef": {
+              "name": "l1-scaler-config"
+            }
+          }
+        ],
+        "resources": {
+
+        },
+        "volumeMounts": [
+          {
+            "name": "default-token-rf94g",
+            "readOnly": true,
+            "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+          }
+        ],
+        "terminationMessagePath": "/dev/termination-log",
+        "terminationMessagePolicy": "File",
+        "imagePullPolicy": "Always",
+        "securityContext": {
+          "privileged": false
+        }
+      }
+    ],
+    "restartPolicy": "Always",
+    "terminationGracePeriodSeconds": 30,
+    "dnsPolicy": "ClusterFirst",
+    "serviceAccountName": "default",
+    "serviceAccount": "default",
+    "nodeName": "k8s-node-w-1",
+    "securityContext": {
+
+    },
+    "imagePullSecrets": [
+      {
+        "name": "regsecret"
+      }
+    ],
+    "hostname": "l1-scaler-0",
+    "subdomain": "l1-scaler-svc",
+    "affinity": {
+      "nodeAffinity": {
+        "requiredDuringSchedulingIgnoredDuringExecution": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "wrapperconfig",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "schedulerName": "default-scheduler",
+    "tolerations": [
+      {
+        "key": "node.alpha.kubernetes.io/notReady",
+        "operator": "Exists",
+        "effect": "NoExecute",
+        "tolerationSeconds": 300
+      },
+      {
+        "key": "node.alpha.kubernetes.io/unreachable",
+        "operator": "Exists",
+        "effect": "NoExecute",
+        "tolerationSeconds": 300
+      }
+    ]
+  },
+  "status": {
+    "phase": "Running",
+    "conditions": [
+      {
+        "type": "Initialized",
+        "status": "True",
+        "lastProbeTime": null,
+        "lastTransitionTime": "2018-04-03T10:08:59Z"
+      },
+      {
+        "type": "Ready",
+        "status": "True",
+        "lastProbeTime": null,
+        "lastTransitionTime": "2018-04-03T10:09:04Z"
+      },
+      {
+        "type": "PodScheduled",
+        "status": "True",
+        "lastProbeTime": null,
+        "lastTransitionTime": "2018-04-03T10:08:59Z"
+      }
+    ],
+    "hostIP": "192.168.42.101",
+    "podIP": "10.47.0.5",
+    "startTime": "2018-04-03T10:08:59Z",
+    "containerStatuses": [
+      {
+        "name": "l1-scaler",
+        "state": {
+          "running": {
+            "startedAt": "2018-04-03T10:09:03Z"
+          }
+        },
+        "lastState": {
+
+        },
+        "ready": true,
+        "restartCount": 0,
+        "image": "registry.geohub.space/wo7/scaler:SPDGS-48",
+        "imageID": "docker-pullable://registry.geohub.space/wo7/scaler@sha256:306d73be3648b2a02697b52daa2970554d881bbbf5ddc27942eb3357f4ad444e",
+        "containerID": "docker://f63080f68a892465b318e300d567a7284370298a6e18142e19821cd4f8bbf970"
+      }
+    ],
+    "qosClass": "BestEffort"
+  }
+}[

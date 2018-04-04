@@ -45,6 +45,16 @@ k8s:
   label-wrapper-app:
     label: app
     value: l1-wrapper
-  
+
+# Openstack
+openstack:
+  server:
+    endpoint: https://iam.eu-west-0.prod-cloud-ocb.orange-business.com/v3
+    domain-id: d04910ec738940b09f447805fab037bb
+    project-id: c49bc6063b8e4349995f9e72654ceffd
+    credential-username: patrice.caubet
+    credential-password: Tlse2018
+
+#Scaler
 scaler:
   fixed-delay-ms: ${scaler_fixed-delay-ms:500}

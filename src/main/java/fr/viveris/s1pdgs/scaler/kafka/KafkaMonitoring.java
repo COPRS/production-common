@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.scaler.kafka.model.ConsumerGroupsDescription;
 import fr.viveris.s1pdgs.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
+import fr.viveris.s1pdgs.scaler.kafka.model.SpdgsTopic;
 import fr.viveris.s1pdgs.scaler.kafka.services.KafkaService;
 
 /**
@@ -19,6 +20,11 @@ import fr.viveris.s1pdgs.scaler.kafka.services.KafkaService;
 public class KafkaMonitoring {
 
 	/**
+	 * Kafka properties
+	 */
+	private final KafkaMonitoringProperties kafkaProperties;
+
+	/**
 	 * KAFKA service
 	 */
 	private final KafkaService kafkaService;
@@ -29,18 +35,18 @@ public class KafkaMonitoring {
 	 * @param kafkaService
 	 */
 	@Autowired
-	public KafkaMonitoring(final KafkaService kafkaService) {
+	public KafkaMonitoring(final KafkaMonitoringProperties kafkaProperties, final KafkaService kafkaService) {
+		this.kafkaProperties = kafkaProperties;
 		this.kafkaService = kafkaService;
 	}
 
-	/**
-	 * Get monitor for a given group and a given topic
-	 * 
-	 * @param groupId
-	 * @param topicName
-	 * @return
-	 */
-	public KafkaPerGroupPerTopicMonitor getPerGroupPerTopicMonitor(String groupId, String topicName) {
+	public KafkaPerGroupPerTopicMonitor monitorL1Jobs() {
+		String groupId = kafkaProperties.getGroupIdPerTopic().get(SpdgsTopic.L1_JOBS);
+		String topicName = kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS);
+		return this.monitorGroupPerTopic(groupId, topicName);
+	}
+
+	private KafkaPerGroupPerTopicMonitor monitorGroupPerTopic(String groupId, String topicName) {
 		ConsumerGroupsDescription desc = this.kafkaService.describeConsumerGroup(groupId, topicName);
 		KafkaPerGroupPerTopicMonitor monitor = new KafkaPerGroupPerTopicMonitor(new Date(), groupId, topicName);
 		if (desc.getDescriptionPerPartition() != null) {
