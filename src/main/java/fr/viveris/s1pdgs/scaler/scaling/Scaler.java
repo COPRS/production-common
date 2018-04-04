@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.scaler.scaling;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +9,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import fr.viveris.s1pdgs.scaler.monitoring.k8s.K8SAdministration;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoring;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoringProperties;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.SpdgsTopic;
 import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.KafkaPerGroupPerTopicMonitor;
-import io.fabric8.kubernetes.api.model.PodList;
-import io.fabric8.kubernetes.client.KubernetesClient;
 
 /**
  * L1 resources scaler
@@ -38,7 +39,11 @@ public class Scaler {
 	 */
 	private final KafkaMonitoringProperties kafkaProperties;
 
-	private final KubernetesClient k8sClient;
+	private final K8SAdministration k8SAdministration;
+
+	public enum ScalingAction {
+		ALLOC, FREE, NOTHING, ERROR
+	};
 
 	/**
 	 * Constructor
@@ -48,10 +53,10 @@ public class Scaler {
 	 */
 	@Autowired
 	public Scaler(final KafkaMonitoringProperties kafkaProperties, final KafkaMonitoring kafkaMonitoring,
-			final KubernetesClient k8sClient) {
+			final K8SAdministration k8SAdministration) {
 		this.kafkaMonitoring = kafkaMonitoring;
 		this.kafkaProperties = kafkaProperties;
-		this.k8sClient = k8sClient;
+		this.k8SAdministration = k8SAdministration;
 	}
 
 	/**
@@ -69,31 +74,83 @@ public class Scaler {
 
 		try {
 
+			// Delete unused resources
+			LOGGER.info("[MONITOR] [Step 1] Starting removing unused resources");
+			this.deleteUnusedResources();
+
 			// Monitor KAFKA
-			LOGGER.info("[MONITOR] [Step 1] Starting monitoring KAFKA");
+			LOGGER.info("[MONITOR] [Step 2] Starting monitoring KAFKA");
 			KafkaPerGroupPerTopicMonitor monitorKafka = this.kafkaMonitoring.getPerGroupPerTopicMonitor(
 					kafkaProperties.getGroupIdPerTopic().get(SpdgsTopic.L1_JOBS),
 					kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS));
-			LOGGER.info("[MONITOR] [Step 1] KAFKA successfully monitored: {}", monitorKafka);
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("[MONITOR] [Step 2] Monitored information {}", monitorKafka);
+			}
 
 			// Monitor K8S
 			// Listing all the L1 wrappers pods
-			LOGGER.info("[MONITOR] [Step 2] Starting monitoring K8S");
-			//List<Pod> pods = 
-			PodList pods = this.k8sClient.pods().list();
-			if (!CollectionUtils.isEmpty(pods.getItems())) {
-				pods.getItems().forEach(pod -> {
-					LOGGER.info("[MONITOR] [Step 2] Pod name {} ip {}", pod.getMetadata().getName(), pod.getStatus().getPodIP());
-				});
-			}
-			LOGGER.info("[MONITOR] [Step 2] K8S successfully monitored: ");
+			LOGGER.info("[MONITOR] [Step 3] Starting monitoring K8S");
 
 			// Calculate value for scaling
+			LOGGER.info("[MONITOR] [Step 5] Starting determinating scaling action");
+			long monitoredValue = this.calculateMonitoredValue();
+			ScalingAction scalingAction = this.needScaling(monitoredValue);
 
 			// Scale
+			LOGGER.info("[MONITOR] [Step 6] Starting applying scaling action {}", scalingAction.name());
+			switch (scalingAction) {
+			case ALLOC:
+				this.addRessources();
+				break;
+			case FREE:
+				this.freeRessources();
+				break;
+			case NOTHING:
+				LOGGER.debug("");
+				break;
+			default:
+				LOGGER.error("");
+				break;
+			}
+
 		} catch (Exception e) {
 			LOGGER.error("Error during scaling: {}", e);
 		}
 		LOGGER.info("[MONITOR] [Step 0] End");
+	}
+	
+	private long calculateMonitoredValue() {
+		return 0;
+	}
+
+	private ScalingAction needScaling(long monitoredValue) {
+		return ScalingAction.NOTHING;
+	}
+
+	private void addRessources() {
+		
+		
+		// Create VM
+		
+		// All labels
+		
+		// Launchs pods
+	}
+
+	private void freeRessources() {
+		
+
+	}
+
+	private void deleteUnusedResources() {
+		// Retrieve K8S workers set in pause with no active pods
+		List<String> nodeNamesToDelete = this.k8SAdministration.getWrapperNodesToDelete();
+		
+		// Remove the corresponding VM
+		if (nodeNamesToDelete != null && !CollectionUtils.isEmpty(nodeNamesToDelete)) {
+			nodeNamesToDelete.forEach(name -> {
+				
+			});
+		}
 	}
 }
