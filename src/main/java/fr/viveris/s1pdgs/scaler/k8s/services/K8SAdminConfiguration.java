@@ -1,9 +1,10 @@
-package fr.viveris.s1pdgs.scaler.monitoring.k8s;
+package fr.viveris.s1pdgs.scaler.k8s.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import fr.viveris.s1pdgs.scaler.k8s.K8SProperties;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;

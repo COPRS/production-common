@@ -9,11 +9,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import fr.viveris.s1pdgs.scaler.monitoring.k8s.K8SAdministration;
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoring;
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.KafkaMonitoringProperties;
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.SpdgsTopic;
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.KafkaPerGroupPerTopicMonitor;
+import fr.viveris.s1pdgs.scaler.k8s.K8SAdministration;
+import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoring;
+import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoringProperties;
+import fr.viveris.s1pdgs.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
+import fr.viveris.s1pdgs.scaler.kafka.model.SpdgsTopic;
 
 /**
  * L1 resources scaler

@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.monitoring.kafka.model;
+package fr.viveris.s1pdgs.scaler.kafka.model;
 
 public class PartitionDescription {
 	

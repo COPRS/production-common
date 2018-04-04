@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.monitoring.k8s;
+package fr.viveris.s1pdgs.scaler.k8s.services;
 
 import java.util.Map;
 

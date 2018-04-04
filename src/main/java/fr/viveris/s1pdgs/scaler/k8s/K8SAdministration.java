@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.monitoring.k8s;
+package fr.viveris.s1pdgs.scaler.k8s;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import fr.viveris.s1pdgs.scaler.k8s.services.NodeService;
+import fr.viveris.s1pdgs.scaler.k8s.services.PodService;
 import io.fabric8.kubernetes.api.model.NodeAddress;
 import io.fabric8.kubernetes.api.model.NodeList;
 import io.fabric8.kubernetes.api.model.PodList;

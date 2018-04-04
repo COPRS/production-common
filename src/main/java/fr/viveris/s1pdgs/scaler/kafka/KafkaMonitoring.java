@@ -1,12 +1,13 @@
-package fr.viveris.s1pdgs.scaler.monitoring.kafka;
+package fr.viveris.s1pdgs.scaler.kafka;
 
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.ConsumerGroupsDescription;
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.KafkaPerGroupPerTopicMonitor;
+import fr.viveris.s1pdgs.scaler.kafka.model.ConsumerGroupsDescription;
+import fr.viveris.s1pdgs.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
+import fr.viveris.s1pdgs.scaler.kafka.services.KafkaService;
 
 /**
  * Service to monitor KAFKA

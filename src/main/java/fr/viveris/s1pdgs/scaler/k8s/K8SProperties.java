@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.monitoring.k8s;
+package fr.viveris.s1pdgs.scaler.k8s;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

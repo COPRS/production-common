@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.monitoring.k8s.model;
+package fr.viveris.s1pdgs.scaler.k8s.model;
 
 public class NodeDescription {
 
