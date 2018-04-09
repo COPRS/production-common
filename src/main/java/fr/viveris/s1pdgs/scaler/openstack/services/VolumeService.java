@@ -40,7 +40,6 @@ public class VolumeService {
 		boolean createVolumeFlag = false;
 		while (createVolumeCount < volumeMaxLoop) {
 			if (osClient.blockStorage().volumes().get(v.getId()).getStatus() == Volume.Status.AVAILABLE) {
-				System.out.println("volume Created successfully");
 				createVolumeFlag = true;
 				break;
 			}

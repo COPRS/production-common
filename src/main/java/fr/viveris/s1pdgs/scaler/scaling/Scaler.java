@@ -1,5 +1,6 @@
 package fr.viveris.s1pdgs.scaler.scaling;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -17,6 +18,9 @@ import fr.viveris.s1pdgs.scaler.k8s.WrapperProperties;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodLogicalStatus;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperNodeMonitor;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperPodMonitor;
+import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.PodResourceException;
+import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.UnknownKindExecption;
+import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.UnknownVolumeNameException;
 import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoring;
 import fr.viveris.s1pdgs.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
 import fr.viveris.s1pdgs.scaler.openstack.OpenStackAdministration;
@@ -183,7 +187,7 @@ public class Scaler {
 		return ScalingAction.NOTHING;
 	}
 
-	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) {
+	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) throws FileNotFoundException, PodResourceException, UnknownKindExecption, UnknownVolumeNameException {
 		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
 		int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
 		int maxNbServers = this.wrapperProperties.getNbMaxServers();
@@ -239,6 +243,8 @@ public class Scaler {
 
 		// Launchs pods
 		LOGGER.info("[MONITOR] [Step 4] 3 - Starting launching pods");
+		this.k8SAdministration.launchWrapperPodsPool();
+		LOGGER.info("[MONITOR] [Step 4] 3 - All pods launched");
 	}
 
 	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) {

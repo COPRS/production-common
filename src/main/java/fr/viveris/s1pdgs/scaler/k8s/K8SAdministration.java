@@ -1,5 +1,6 @@
 package fr.viveris.s1pdgs.scaler.k8s;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,9 @@ import org.springframework.util.CollectionUtils;
 
 import fr.viveris.s1pdgs.scaler.k8s.model.NodeDesc;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodDesc;
+import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.PodResourceException;
+import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.UnknownKindExecption;
+import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.UnknownVolumeNameException;
 import fr.viveris.s1pdgs.scaler.k8s.services.NodeService;
 import fr.viveris.s1pdgs.scaler.k8s.services.PodService;
 
@@ -89,7 +93,9 @@ public class K8SAdministration {
 		this.nodeService.editLabelToNode(nodeName, wrapperProperties.getLabelWrapperStateUnused().getLabel(), wrapperProperties.getLabelWrapperStateUnused().getValue());
 	}
 	
-	public void launchWrapperPodsPool() {
-		
+	public void launchWrapperPodsPool() throws FileNotFoundException, PodResourceException, UnknownKindExecption, UnknownVolumeNameException {
+		for(int i = 0; i < this.wrapperProperties.getNbPoolingPods(); i++) {
+			this.podService.createPod();
+		}
 	}
 }
