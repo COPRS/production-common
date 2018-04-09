@@ -156,8 +156,7 @@ public class Scaler {
 		Stream<WrapperPodMonitor> activeWrapperPods = wrapperNodeMonitors.stream()
 				.filter(nodeMonitor -> nodeMonitor != null && !CollectionUtils.isEmpty(nodeMonitor.getWrapperPods()))
 				.flatMap(nodeMonitor -> nodeMonitor.getWrapperPods().stream())
-				.filter(wrapperPod -> wrapperPod.getLogicalStatus() == PodLogicalStatus.WAITING
-						|| wrapperPod.getLogicalStatus() == PodLogicalStatus.PROCESSING);
+				.filter(wrapperPod -> wrapperPod.getLogicalStatus() != PodLogicalStatus.STOPPING);
 		long totalRemainingTime = activeWrapperPods.mapToLong(wrapperPod -> wrapperPod.getRemainingExecutionTime())
 				.sum();
 		long numberWrappers = activeWrapperPods.count();
