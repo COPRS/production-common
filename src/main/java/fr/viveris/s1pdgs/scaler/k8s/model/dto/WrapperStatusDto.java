@@ -1,12 +1,10 @@
-package fr.viveris.s1pdgs.scaler.k8s.model;
-
-import java.util.Date;
+package fr.viveris.s1pdgs.scaler.k8s.model.dto;
 
 /**
  * @author Olivier Bex-Chauvet
  *
  */
-public class WrapperStatus {
+public class WrapperStatusDto {
 	
 	/**
 	 * Enum of all the status of the wrappers
@@ -18,17 +16,12 @@ public class WrapperStatus {
 
 	private Status status;
 	
-	private Date lastChange;
+	private long timeSinceLastChange;
 	
 	private int errorCounter;
 	
-	public WrapperStatus() {
-	}
-	
-	public WrapperStatus(Status status, Date lastChange, int errorCounter) {
-		this.status = status;
-		this.lastChange = lastChange;
-		this.errorCounter = errorCounter;
+	public WrapperStatusDto() {
+		
 	}
 
 	/**
@@ -46,17 +39,17 @@ public class WrapperStatus {
 	}
 
 	/**
-	 * @return the lastChange
+	 * @return the timeSinceLastChange
 	 */
-	public Date getLastChange() {
-		return lastChange;
+	public long getTimeSinceLastChange() {
+		return timeSinceLastChange;
 	}
 
 	/**
-	 * @param lastChange the lastChange to set
+	 * @param timeSinceLastChange the timeSinceLastChange to set
 	 */
-	public void setLastChange(Date lastChange) {
-		this.lastChange = lastChange;
+	public void setTimeSinceLastChange(long timeSinceLastChange) {
+		this.timeSinceLastChange = timeSinceLastChange;
 	}
 
 	/**

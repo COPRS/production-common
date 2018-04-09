@@ -17,14 +17,6 @@ public class K8SProperties {
 	private String clientKey;
 	private String clientCertData;
 	private String namespace;
-	
-	// -------------------------
-	// Wrapper configuration
-	// -------------------------
-	private LabelKubernetes labelWrapperConfig;
-	private LabelKubernetes labelWrapperStateUsed;
-	private LabelKubernetes labelWrapperStateUnused;
-	private LabelKubernetes labelWrapperApp;
 
 	public K8SProperties() {
 		
@@ -98,98 +90,5 @@ public class K8SProperties {
 	 */
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
-	}
-
-	/**
-	 * @return the labelWrapperConfig
-	 */
-	public LabelKubernetes getLabelWrapperConfig() {
-		return labelWrapperConfig;
-	}
-
-	/**
-	 * @param labelWrapperConfig the labelWrapperConfig to set
-	 */
-	public void setLabelWrapperConfig(LabelKubernetes labelWrapperConfig) {
-		this.labelWrapperConfig = labelWrapperConfig;
-	}
-
-	/**
-	 * @return the labelWrapperStateUsed
-	 */
-	public LabelKubernetes getLabelWrapperStateUsed() {
-		return labelWrapperStateUsed;
-	}
-
-	/**
-	 * @param labelWrapperStateUsed the labelWrapperStateUsed to set
-	 */
-	public void setLabelWrapperStateUsed(LabelKubernetes labelWrapperStateUsed) {
-		this.labelWrapperStateUsed = labelWrapperStateUsed;
-	}
-
-	/**
-	 * @return the labelWrapperStateUnused
-	 */
-	public LabelKubernetes getLabelWrapperStateUnused() {
-		return labelWrapperStateUnused;
-	}
-
-	/**
-	 * @param labelWrapperStateUnused the labelWrapperStateUnused to set
-	 */
-	public void setLabelWrapperStateUnused(LabelKubernetes labelWrapperStateUnused) {
-		this.labelWrapperStateUnused = labelWrapperStateUnused;
-	}
-
-	/**
-	 * @return the labelWrapperApp
-	 */
-	public LabelKubernetes getLabelWrapperApp() {
-		return labelWrapperApp;
-	}
-
-	/**
-	 * @param labelWrapperApp the labelWrapperApp to set
-	 */
-	public void setLabelWrapperApp(LabelKubernetes labelWrapperApp) {
-		this.labelWrapperApp = labelWrapperApp;
-	}
-
-	public static class LabelKubernetes {
-		private String label;
-		private String value;
-		public LabelKubernetes() {
-			
-		}
-		public LabelKubernetes(String label, String value) {
-			this.label = label;
-			this.value = value;
-		}
-		/**
-		 * @return the label
-		 */
-		public String getLabel() {
-			return label;
-		}
-		/**
-		 * @param label the label to set
-		 */
-		public void setLabel(String label) {
-			this.label = label;
-		}
-		/**
-		 * @return the value
-		 */
-		public String getValue() {
-			return value;
-		}
-		/**
-		 * @param value the value to set
-		 */
-		public void setValue(String value) {
-			this.value = value;
-		}
-		
 	}
 }

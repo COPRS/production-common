@@ -17,7 +17,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public class NodeService {
 
 	private final KubernetesClient k8sClient;
-	
+
 	private final K8SNodeToNodeDesc nodeConverter;
 
 	@Autowired
@@ -28,6 +28,7 @@ public class NodeService {
 
 	/**
 	 * Get nodes with labels
+	 * 
 	 * @param labels
 	 * @return
 	 */
@@ -42,7 +43,25 @@ public class NodeService {
 		return r;
 	}
 
-	public void removeLabelFromNode(String nodeName, String label) {
-		k8sClient.nodes().withName(nodeName).edit().editMetadata().removeFromLabels(label).endMetadata().done();
+	/**
+	 * Get nodes with labels
+	 * 
+	 * @param labels
+	 * @return
+	 */
+	public List<NodeDesc> getNodesWithLabel(String label, String value) {
+		List<NodeDesc> r = new ArrayList<>();
+		NodeList nodes = k8sClient.nodes().withLabel(label, value).list();
+		if (nodes != null && !CollectionUtils.isEmpty(nodes.getItems())) {
+			nodes.getItems().forEach(node -> {
+				r.add(this.nodeConverter.apply(node));
+			});
+		}
+		return r;
+	}
+
+	public void editLabelToNode(String nodeName, String label, String value) {
+		k8sClient.nodes().withName(nodeName).edit().editMetadata().removeFromLabels(label).addToLabels(label, value)
+				.endMetadata().done();
 	}
 }

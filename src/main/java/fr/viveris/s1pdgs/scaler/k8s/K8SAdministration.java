@@ -17,16 +17,16 @@ import fr.viveris.s1pdgs.scaler.k8s.services.PodService;
 @Service
 public class K8SAdministration {
 
-	private final K8SProperties properties;
+	private final WrapperProperties wrapperProperties;
 
 	private final NodeService nodeService;
 
 	private final PodService podService;
 
 	@Autowired
-	public K8SAdministration(final K8SProperties properties, final NodeService nodeService,
+	public K8SAdministration(final WrapperProperties wrapperProperties, final NodeService nodeService,
 			final PodService podService) {
-		this.properties = properties;
+		this.wrapperProperties = wrapperProperties;
 		this.nodeService = nodeService;
 		this.podService = podService;
 	}
@@ -47,15 +47,17 @@ public class K8SAdministration {
 
 		// Build labels
 		Map<String, String> labels = new HashMap<>();
-		labels.put(properties.getLabelWrapperConfig().getLabel(), properties.getLabelWrapperConfig().getValue());
-		labels.put(properties.getLabelWrapperStateUnused().getLabel(),
-				properties.getLabelWrapperStateUnused().getValue());
+		labels.put(wrapperProperties.getLabelWrapperConfig().getLabel(),
+				wrapperProperties.getLabelWrapperConfig().getValue());
+		labels.put(wrapperProperties.getLabelWrapperStateUnused().getLabel(),
+				wrapperProperties.getLabelWrapperStateUnused().getValue());
 		// Get nodes labellised unused
 		List<NodeDesc> unusedNodes = this.nodeService.getNodesWithLabels(labels);
 		if (!CollectionUtils.isEmpty(unusedNodes)) {
 			// Get wrapper pods
-			List<PodDesc> l1WrapperPods = this.podService.getPodsWithLabel(properties.getLabelWrapperApp().getLabel(),
-					properties.getLabelWrapperApp().getValue());
+			List<PodDesc> l1WrapperPods = this.podService.getPodsWithLabel(
+					wrapperProperties.getLabelWrapperApp().getLabel(),
+					wrapperProperties.getLabelWrapperApp().getValue());
 			// Extract the list of used host IPs
 			Map<String, Integer> usedNodeNames = new HashMap<>();
 			if (!CollectionUtils.isEmpty(l1WrapperPods)) {
@@ -77,5 +79,17 @@ public class K8SAdministration {
 		}
 
 		return externalIds;
+	}
+	
+	public void setWrapperNodeUsable(String nodeName) {
+		this.nodeService.editLabelToNode(nodeName, wrapperProperties.getLabelWrapperStateUsed().getLabel(), wrapperProperties.getLabelWrapperStateUsed().getValue());
+	}
+	
+	public void setWrapperNodeUnusable(String nodeName) {
+		this.nodeService.editLabelToNode(nodeName, wrapperProperties.getLabelWrapperStateUnused().getLabel(), wrapperProperties.getLabelWrapperStateUnused().getValue());
+	}
+	
+	public void launchWrapperPodsPool() {
+		
 	}
 }
