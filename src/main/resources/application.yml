@@ -54,7 +54,7 @@ wrapper:
     average-s: ${scaler_wrapper_execution-time_average-s:900}
     min-threshold-s: ${scaler_wrapper_execution-time_min-threshold-s:900.0}
     max-threshold-s: ${scaler_wrapper_execution-time_max-threshold-s:1800.0}
-  tempo-pooling-ms: ${scaler_wrapper_tempo-pooling-ms:500}
+  tempo-pooling-ms: ${scaler_wrapper_tempo-pooling-ms:10000}
   tempo-scaling-s: ${scaler_wrapper_tempo-scaling-s:600}
   tempo-delete-resources-s: ${scaler_wrapper_tempo-delete-resources-s:600}
   wait-pod-deletion-ms: ${scaler_wrapper_wait-pod-deletion-ms:10000}
@@ -106,5 +106,5 @@ dev:
     kafka-monitoring: ${scaler_dev_kafka-monitoring:true}
     k8s-monitoring: ${scaler_dev_k8s-monitoring:true}
     value-monitored: ${scaler_dev_value-monitored:true}
-    scaling: ${scaler_dev_scaling:true}
-    unused-ressources-deletion: ${scaler_dev_unused-ressources-deletion:true}
+    scaling: ${scaler_dev_scaling:false}
+    unused-ressources-deletion: ${scaler_dev_unused-ressources-deletion:false}
