@@ -25,20 +25,16 @@ public class ServerService {
 	private final int fipMaxLoop;
 	private final int fipTempoLoopMs;
 
-	private final OSClientV3 osClient;
-
 	@Autowired
-	public ServerService(final OSClientV3 osClient,
-			@Value("${openstack.service.floating-ip.creation.max-loop}") final int fipMaxLoop,
+	public ServerService(@Value("${openstack.service.floating-ip.creation.max-loop}") final int fipMaxLoop,
 			@Value("${openstack.service.floating-ip.creation.tempo-loop-ms}") final int fipTempoLoopMs,
 			@Value("${openstack.service.server.creation.max-wait-ms}") final int serverMaxWaitMs) {
-		this.osClient = osClient;
 		this.fipMaxLoop = fipMaxLoop;
 		this.fipTempoLoopMs = fipTempoLoopMs;
 		this.serverMaxWaitMs = serverMaxWaitMs;
 	}
 
-	public String createAndBootServer(ServerDesc desc) throws OsServerException {
+	public String createAndBootServer(OSClientV3 osClient, ServerDesc desc) throws OsServerException {
 		
 		ServerCreateBuilder builder = Builders.server().name(desc.getName()).flavor(desc.getFlavor())
 				.keypairName(desc.getKeySecurity())
@@ -64,7 +60,7 @@ public class ServerService {
 		return server.getId();
 	}
 
-	public void createFloatingIp(String serverId, String floatingNetworkId) throws OsServerException {
+	public void createFloatingIp(OSClientV3 osClient, String serverId, String floatingNetworkId) throws OsServerException {
 		List<? extends InterfaceAttachment> nicID = osClient.compute().servers().interfaces().list(serverId);
 		String portid = nicID.get(0).getPortId();
 		NetFloatingIP fip = osClient.networking().floatingip()
@@ -92,7 +88,7 @@ public class ServerService {
 		}
 	}
 
-	public void delete(String serverId) {
+	public void delete(OSClientV3 osClient, String serverId) {
 		osClient.compute().servers().delete(serverId);
 	}
 
