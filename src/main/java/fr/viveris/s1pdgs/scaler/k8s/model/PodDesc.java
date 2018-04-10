@@ -13,6 +13,8 @@ public class PodDesc {
 	
 	private String nodeIpAddress;
 	
+	private PodStatus status;
+	
 	private Map<AddressType, String> addresses;
 	
 	private Map<String, String> labels;
@@ -21,6 +23,7 @@ public class PodDesc {
 		this.name = name;
 		this.addresses = new HashMap<>();
 		this.labels = new HashMap<>();
+		this.status = PodStatus.Unknown;
 	}
 
 	/**
@@ -109,6 +112,20 @@ public class PodDesc {
 	 */
 	public void addLabels(String label, String value) {
 		this.labels.put(label, value);
+	}
+
+	/**
+	 * @return the status
+	 */
+	public PodStatus getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(PodStatus status) {
+		this.status = status;
 	}
 
 	/* (non-Javadoc)

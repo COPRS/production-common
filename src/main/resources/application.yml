@@ -57,6 +57,7 @@ wrapper:
   tempo-pooling-ms: ${scaler_wrapper_tempo-pooling-ms:500}
   tempo-scaling-s: ${scaler_wrapper_tempo-scaling-s:600}
   tempo-delete-resources-s: ${scaler_wrapper_tempo-delete-resources-s:600}
+  wait-pod-deletion-ms: ${scaler_wrapper_wait-pod-deletion-ms:10000}
   rest-api:
     port: ${scaler_wrapper_rest-api_port:8080}
 
@@ -97,4 +98,11 @@ openstack:
         max-loop: ${scaler_os_service_vol_creation_max-loop:120}
         tempo-loop-ms: ${scaler_os_service_vol_creation_tempo-loop-ms:1000}
 
-  
+dev:
+  activations: 
+    pod-deletion: ${scaler_dev_pod-deletion:true}
+    kafka-monitoring: ${scaler_dev_kafka-monitoring:true}
+    k8s-monitoring: ${scaler_dev_k8s-monitoring:true}
+    value-monitored: ${scaler_dev_value-monitored:true}
+    scaling: ${scaler_dev_scaling:true}
+    unused-ressources-deletion: ${scaler_dev_unused-ressources-deletion:true}

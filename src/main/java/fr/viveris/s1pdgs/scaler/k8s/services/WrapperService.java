@@ -36,9 +36,9 @@ public class WrapperService {
 		this.port = port;
 	}
 
-	public WrapperDesc getWrapperStatus(String podName) throws WrapperException {
+	public WrapperDesc getWrapperStatus(String podName, String podIp) throws WrapperException {
 		try {
-			String uri = "http://" + podName + ":" + this.port + "/wrapper/status";
+			String uri = "http://" + podIp + ":" + this.port + "/wrapper/status";
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Call rest api: {}", uri);
 			}
@@ -84,6 +84,25 @@ public class WrapperService {
 			return r;
 		} catch (RestClientException e) {
 			String message = String.format("Cannot retrieve status for wrapper %s: %s", podName, e.getMessage());
+			throw new WrapperException(message, e);
+		}
+	}
+
+	public void stopWrapper(String ip) throws WrapperException {
+		try {
+			String uri = "http://" + ip + ":" + this.port + "/wrapper/stop";
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Call rest api: {}", uri);
+			}
+
+			ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.POST, null, String.class);
+			if (response.getStatusCode() != HttpStatus.OK) {
+				String message = String.format("Query for retrieving %s wrapper status failed with code %s", ip,
+						response.getStatusCode());
+				throw new WrapperException(message);
+			}
+		} catch (RestClientException e) {
+			String message = String.format("Cannot retrieve status for wrapper %s: %s", ip, e.getMessage());
 			throw new WrapperException(message, e);
 		}
 	}

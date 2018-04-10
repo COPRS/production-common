@@ -3,6 +3,7 @@ package fr.viveris.s1pdgs.scaler.scaling;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -12,15 +13,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import fr.viveris.s1pdgs.scaler.DevProperties;
 import fr.viveris.s1pdgs.scaler.k8s.K8SAdministration;
 import fr.viveris.s1pdgs.scaler.k8s.K8SMonitoring;
 import fr.viveris.s1pdgs.scaler.k8s.WrapperProperties;
+import fr.viveris.s1pdgs.scaler.k8s.model.AddressType;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodLogicalStatus;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperNodeMonitor;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperPodMonitor;
 import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.PodResourceException;
 import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.UnknownKindExecption;
 import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.UnknownVolumeNameException;
+import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.WrapperException;
 import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoring;
 import fr.viveris.s1pdgs.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
 import fr.viveris.s1pdgs.scaler.openstack.OpenStackAdministration;
@@ -52,6 +56,8 @@ public class Scaler {
 
 	private final WrapperProperties wrapperProperties;
 
+	private final DevProperties devProperties;
+
 	private long lastScalingTimestamp = 0;
 	private long lastDeletingResourcesTimestamp = 0;
 
@@ -68,12 +74,13 @@ public class Scaler {
 	@Autowired
 	public Scaler(final KafkaMonitoring kafkaMonitoring, final K8SMonitoring k8SMonitoring,
 			final K8SAdministration k8SAdministration, final OpenStackAdministration osAdministration,
-			final WrapperProperties wrapperProperties) {
+			final WrapperProperties wrapperProperties, final DevProperties devProperties) {
 		this.kafkaMonitoring = kafkaMonitoring;
 		this.k8SMonitoring = k8SMonitoring;
 		this.k8SAdministration = k8SAdministration;
 		this.osAdministration = osAdministration;
 		this.wrapperProperties = wrapperProperties;
+		this.devProperties = devProperties;
 	}
 
 	/**
@@ -93,60 +100,110 @@ public class Scaler {
 
 			long currentTimestamp = System.currentTimeMillis();
 
+			// Delete pod in succeeded state
+			if (devProperties.getActivations().get("pod-deletion") == true) {
+				LOGGER.info("[MONITOR] [Step 1] Deleting L1 wrapper pods in K8S succeeded phase");
+				List<String> deletedPods = this.removeSucceededPods();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("[MONITOR] [Step 1] Delete pods {}", deletedPods);
+				}
+			} else {
+				LOGGER.info("[MONITOR] [Step 1] Deleting L1 wrapper pods in K8S succeeded phase bypassed");
+			}
+
 			// Monitor KAFKA
-			LOGGER.info("[MONITOR] [Step 1] Starting monitoring KAFKA");
-			KafkaPerGroupPerTopicMonitor monitorKafka = this.kafkaMonitoring.monitorL1Jobs();
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("[MONITOR] [Step 1] Monitored information {}", monitorKafka);
+			KafkaPerGroupPerTopicMonitor monitorKafka = null;
+			if (devProperties.getActivations().get("kafka-monitoring") == true) {
+				LOGGER.info("[MONITOR] [Step 2] Starting monitoring KAFKA");
+				monitorKafka = this.kafkaMonitoring.monitorL1Jobs();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("[MONITOR] [Step 2] Monitored information {}", monitorKafka);
+				}
+			} else {
+				LOGGER.info("[MONITOR] [Step 2] Starting monitoring KAFKA bypassed");
 			}
 
 			// Monitor K8S
 			// Listing all the L1 wrappers pods
-			LOGGER.info("[MONITOR] [Step 2] Starting monitoring K8S");
-			List<WrapperNodeMonitor> wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("[MONITOR] [Step 2] Monitored information {}", wrapperNodeMonitors);
+			List<WrapperNodeMonitor> wrapperNodeMonitors = new ArrayList<>();
+			if (devProperties.getActivations().get("k8s-monitoring") == true) {
+				LOGGER.info("[MONITOR] [Step 3] Starting monitoring K8S");
+				wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("[MONITOR] [Step 3] Monitored information {}", wrapperNodeMonitors);
+				}
+			} else {
+				LOGGER.info("[MONITOR] [Step 3] Starting monitoring K8S bypassed");
 			}
 
 			// Calculate value for scaling
-			LOGGER.info("[MONITOR] [Step 3] Starting determinating scaling action");
-			double monitoredValue = this.calculateMonitoredValue(monitorKafka, wrapperNodeMonitors);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("[MONITOR] [Step 3] Monitored value {}", monitoredValue);
+			double monitoredValue = -1;
+			if (devProperties.getActivations().get("value-monitored") == true) {
+				LOGGER.info("[MONITOR] [Step 4] Starting determinating scaling action");
+				monitoredValue = this.calculateMonitoredValue(monitorKafka, wrapperNodeMonitors);
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("[MONITOR] [Step 4] Monitored value {}", monitoredValue);
+				}
+			} else {
+				LOGGER.info("[MONITOR] [Step 4] Starting determinating scaling action bypassed");
 			}
-			ScalingAction scalingAction = this.needScaling(monitoredValue, this.lastScalingTimestamp, currentTimestamp);
 
 			// Scale
-			LOGGER.info("[MONITOR] [Step 4] Starting applying scaling action {}", scalingAction.name());
-			switch (scalingAction) {
-			case ALLOC:
-				this.addRessources(wrapperNodeMonitors);
-				break;
-			case FREE:
-				this.freeRessources(wrapperNodeMonitors);
-				break;
-			case NOTHING:
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("[MONITOR] [Step 4] Scaling bypassed this loop");
+			if (devProperties.getActivations().get("scaling") == true) {
+				ScalingAction scalingAction = this.needScaling(monitoredValue, this.lastScalingTimestamp,
+						currentTimestamp);
+				LOGGER.info("[MONITOR] [Step 5] Starting applying scaling action {}", scalingAction.name());
+				switch (scalingAction) {
+				case ALLOC:
+					this.addRessources(wrapperNodeMonitors);
+					break;
+				case FREE:
+					this.freeRessources(wrapperNodeMonitors);
+					break;
+				case NOTHING:
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("[MONITOR] [Step 5] Scaling bypassed this loop");
+					}
+					break;
+				default:
+					LOGGER.error("");
+					break;
 				}
-				break;
-			default:
-				LOGGER.error("");
-				break;
+			} else {
+				LOGGER.info("[MONITOR] [Step 5] Starting applying scaling action bypassed");
 			}
-
 			// Delete unused resources
-			LOGGER.info("[MONITOR] [Step 5] Starting removing unused resources");
-			if (!this.deleteUnusedResources(this.lastDeletingResourcesTimestamp, currentTimestamp)) {
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("[MONITOR] [Step 5] Removing unused resources bypassed this loop");
+			if (devProperties.getActivations().get("unused-ressources-deletion") == true) {
+				LOGGER.info("[MONITOR] [Step 6] Starting removing unused resources");
+				if (!this.deleteUnusedResources(this.lastDeletingResourcesTimestamp, currentTimestamp)) {
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("[MONITOR] [Step 6] Removing unused resources bypassed this loop");
+					}
 				}
+			} else {
+				LOGGER.info("[MONITOR] [Step 6] Starting removing unused resources bypassed");
 			}
-
 		} catch (Exception e) {
-			LOGGER.error("Error during scaling: {}", e);
+			LOGGER.error("[MONITOR] Error during scaling: {}", e);
 		}
 		LOGGER.info("[MONITOR] [Step 0] End");
+	}
+
+	private List<String> removeSucceededPods()
+			throws FileNotFoundException, PodResourceException, UnknownKindExecption {
+		List<String> deletedPods = this.k8SAdministration.deleteTerminatedWrapperPods();
+		if (!CollectionUtils.isEmpty(deletedPods)) {
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+
+			}
+		} else {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("No succeeded pod to delete");
+			}
+		}
+		return deletedPods;
 	}
 
 	private double calculateMonitoredValue(KafkaPerGroupPerTopicMonitor monitorKafka,
@@ -186,7 +243,8 @@ public class Scaler {
 		return ScalingAction.NOTHING;
 	}
 
-	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) throws FileNotFoundException, PodResourceException, UnknownKindExecption, UnknownVolumeNameException {
+	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors)
+			throws FileNotFoundException, PodResourceException, UnknownKindExecption, UnknownVolumeNameException {
 		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
 		int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
 		int maxNbServers = this.wrapperProperties.getNbMaxServers();
@@ -196,7 +254,7 @@ public class Scaler {
 		int nbAllocatedServer = 0;
 
 		// Check if one or several of our nodes can be reaffected
-		LOGGER.info("[MONITOR] [Step 4] 1 - Starting setting reusable nodes");
+		LOGGER.info("[MONITOR] [Step 5] 1 - Starting setting reusable nodes");
 		List<WrapperNodeMonitor> reusableNodes = new ArrayList<>();
 		for (WrapperNodeMonitor nodeMonitor : wrapperNodeMonitors) {
 			String valueWrapperConfig = nodeMonitor.getDescription().getLabels()
@@ -211,21 +269,21 @@ public class Scaler {
 			int nbNodesToReused = Math.min(nbReusableNodes, nbNeededServer);
 			for (int i = 0; i < nbNodesToReused; i++) {
 				String nodeName = reusableNodes.get(i).getDescription().getName();
-				LOGGER.info("[MONITOR] [Step 4] 1 - Starting setting reusable for node {}", nodeName);
+				LOGGER.info("[MONITOR] [Step 5] 1 - Starting setting reusable for node {}", nodeName);
 				this.k8SAdministration.setWrapperNodeUsable(nodeName);
 				nbAllocatedServer++;
 			}
 		} else {
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("[MONITOR] [Step 4] 1 - No unused nodes to reuse");
+				LOGGER.debug("[MONITOR] [Step 5] 1 - No unused nodes to reuse");
 			}
 		}
 
 		// Create VM
-		LOGGER.info("[MONITOR] [Step 4] 2 - Starting creating servers");
+		LOGGER.info("[MONITOR] [Step 5] 2 - Starting creating servers");
 		if (nbNeededServer > nbAllocatedServer) {
 			if (nbServers >= maxNbServers) {
-				LOGGER.warn("[MONITOR] [Step 4] 2 - Maximal number of servers reached, cannot create another one");
+				LOGGER.warn("[MONITOR] [Step 5] 2 - Maximal number of servers reached, cannot create another one");
 			} else {
 				int nbCreatedServer = 0;
 				while ((nbNeededServer > nbAllocatedServer + nbCreatedServer)
@@ -236,21 +294,65 @@ public class Scaler {
 			}
 		} else {
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("[MONITOR] [Step 4] 2 - No need to create new servers");
+				LOGGER.debug("[MONITOR] [Step 5] 2 - No need to create new servers");
 			}
 		}
 
 		// Launchs pods
-		LOGGER.info("[MONITOR] [Step 4] 3 - Starting launching pods");
+		LOGGER.info("[MONITOR] [Step 5] 3 - Starting launching pods");
 		this.k8SAdministration.launchWrapperPodsPool();
-		LOGGER.info("[MONITOR] [Step 4] 3 - All pods launched");
+		LOGGER.info("[MONITOR] [Step 5] 3 - All pods launched");
 	}
 
-	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) {
+	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) throws WrapperException {
+		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
+		int minNbServers = this.wrapperProperties.getNbMinServers();
+		int nbServers = wrapperNodeMonitors.size();
+		int nbFreeServer = 0;
+		int nbFreePods = 0;
 
+		LOGGER.info("[MONITOR] [Step 5] 1 - Starting freeing ressources");
+		while ((nbServers - nbFreeServer > minNbServers) && (nbFreePods < nbPoolingPods)) {
+			// We determine the VM to free
+			WrapperNodeMonitor nodeToFree = wrapperNodeMonitors.stream().collect(Collectors.minBy((n1, n2) -> Long
+					.compare(n1.getMaxRemainingExecTimeForActivesPods(), n2.getMaxRemainingExecTimeForActivesPods())))
+					.get();
+			List<WrapperPodMonitor> activePods = nodeToFree.getActivesPods();
+			int nbVmActivesPods = activePods.size();
+			LOGGER.info("[MONITOR] [Step 5] 1 - Starting freeing ressources of node {} with {} active pods",
+					nodeToFree.getDescription().getName(), nbVmActivesPods);
+			if (nbVmActivesPods > nbPoolingPods) {
+				// We stop nbPoolingPods pods by settings their status to STOPPING
+				this.k8SAdministration.stopWrapperPods(activePods.stream()
+						.filter(pod -> pod.getDescription() != null
+								&& !CollectionUtils.isEmpty(pod.getDescription().getAddresses()))
+						.map(pod -> pod.getDescription().getAddresses().get(AddressType.INTERNAL_IP))
+						.collect(Collectors.toList()).subList(0, nbPoolingPods));
+				nbFreePods = nbPoolingPods;
+			} else {
+				// We stop nbVmActivesPods pods by settings their status to STOPPING
+				this.k8SAdministration.stopWrapperPods(activePods.stream()
+						.filter(pod -> pod.getDescription() != null
+								&& !CollectionUtils.isEmpty(pod.getDescription().getAddresses()))
+						.map(pod -> pod.getDescription().getAddresses().get(AddressType.INTERNAL_IP))
+						.collect(Collectors.toList()));
+				nbFreePods = nbVmActivesPods;
+				// We deactivate the server by setting its label wrapperstate to unused
+				this.k8SAdministration.setWrapperNodeUnusable(nodeToFree.getDescription().getName());
+				nbFreeServer++;
+			}
+		}
+
+		if (nbFreePods < nbPoolingPods) {
+			int t = nbPoolingPods - nbFreePods;
+			int s = nbServers - nbFreeServer;
+			LOGGER.warn("[MONITOR] [Step 5] 1 - Cannot stop {} pods because minimal number of servers {} reached", t,
+					s);
+		}
 	}
 
-	private boolean deleteUnusedResources(long lastDeletingResourcesTimestamp, long currentTimestamp) {
+	private boolean deleteUnusedResources(long lastDeletingResourcesTimestamp, long currentTimestamp)
+			throws FileNotFoundException, PodResourceException, UnknownKindExecption {
 		long tempoDeletingResources = wrapperProperties.getTempoDeleteResourcesS();
 		// Check if period is OK
 		boolean periodOk = true;
@@ -261,14 +363,20 @@ public class Scaler {
 		}
 
 		if (periodOk) {
+			// Remove pods in succeeded state if necessary
+			LOGGER.info("[MONITOR] [Step 6] 1 - Starting removing pods in succeeded phase");
+			this.removeSucceededPods();
+
 			// Retrieve K8S workers set in pause with no active pods
-			List<String> serverIdsToDelete = this.k8SAdministration.getExternalIdsOfWrapperNodesToDelete();
+			LOGGER.info("[MONITOR] [Step 6] 2 - Starting retrieving nodes to delete");
+			List<WrapperNodeMonitor> nodesToDelete = this.k8SMonitoring.monitorNodesToDelete();
 
 			// Remove the corresponding VM
-			if (serverIdsToDelete != null && !CollectionUtils.isEmpty(serverIdsToDelete)) {
-				serverIdsToDelete.forEach(serverId -> {
-					LOGGER.info("[MONITOR] [Step 5] [serverId {}] Starting removing server", serverId);
-					this.osAdministration.deleteServer(serverId);
+			if (!CollectionUtils.isEmpty(nodesToDelete)) {
+				nodesToDelete.forEach(node -> {
+					LOGGER.info("[MONITOR] [Step 6] [serverId {}] 3 - Starting removing server",
+							node.getDescription().getExternalId());
+					this.osAdministration.deleteServer(node.getDescription().getExternalId());
 				});
 			}
 

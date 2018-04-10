@@ -157,9 +157,17 @@ public class KafkaPerGroupPerTopicMonitor {
 		return lagPerPartition;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "{monitoringDate: " + monitoringDate + ", groupId: " + groupId + ", topicName: " + topicName
+				+ ", nbConsumers: " + nbConsumers + ", nbPartitions: " + nbPartitions + ", lagPerConsumers: "
+				+ lagPerConsumers + ", lagPerPartition: " + lagPerPartition + "}";
+	}
+
+	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -167,34 +175,16 @@ public class KafkaPerGroupPerTopicMonitor {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
+		result = prime * result + ((lagPerConsumers == null) ? 0 : lagPerConsumers.hashCode());
+		result = prime * result + ((lagPerPartition == null) ? 0 : lagPerPartition.hashCode());
 		result = prime * result + ((monitoringDate == null) ? 0 : monitoringDate.hashCode());
+		result = prime * result + nbConsumers;
+		result = prime * result + nbPartitions;
 		result = prime * result + ((topicName == null) ? 0 : topicName.hashCode());
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		String lagPerConsumersToString = "{";
-		for (String keyConsumer : this.lagPerConsumers.keySet()) {
-			lagPerConsumersToString += keyConsumer + ": " + this.lagPerConsumers.get(keyConsumer) + ",";
-		}
-		String lagPerPartitionsToString = "{";
-		for (Integer keyPartition : this.lagPerPartition.keySet()) {
-			lagPerPartitionsToString += keyPartition + ": " + this.lagPerPartition.get(keyPartition) + ",";
-		}
-		return "{monitoringDate: " + monitoringDate + ", groupId: " + groupId + ", topicName: " + topicName
-				+ ", nbConsumers: " + nbConsumers + ", nbPartitions: " + nbPartitions + ", lagPerConsumers: "
-				+ lagPerConsumersToString + ", lagPerPartition: " + lagPerPartitionsToString + "}";
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -211,10 +201,24 @@ public class KafkaPerGroupPerTopicMonitor {
 				return false;
 		} else if (!groupId.equals(other.groupId))
 			return false;
+		if (lagPerConsumers == null) {
+			if (other.lagPerConsumers != null)
+				return false;
+		} else if (!lagPerConsumers.equals(other.lagPerConsumers))
+			return false;
+		if (lagPerPartition == null) {
+			if (other.lagPerPartition != null)
+				return false;
+		} else if (!lagPerPartition.equals(other.lagPerPartition))
+			return false;
 		if (monitoringDate == null) {
 			if (other.monitoringDate != null)
 				return false;
 		} else if (!monitoringDate.equals(other.monitoringDate))
+			return false;
+		if (nbConsumers != other.nbConsumers)
+			return false;
+		if (nbPartitions != other.nbPartitions)
 			return false;
 		if (topicName == null) {
 			if (other.topicName != null)
@@ -223,5 +227,6 @@ public class KafkaPerGroupPerTopicMonitor {
 			return false;
 		return true;
 	}
+	
 
 }

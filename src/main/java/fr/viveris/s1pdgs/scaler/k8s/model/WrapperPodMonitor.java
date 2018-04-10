@@ -2,9 +2,7 @@ package fr.viveris.s1pdgs.scaler.k8s.model;
 
 public class WrapperPodMonitor {
 	
-	private String podName;
-	
-	private PodStatus status;
+	private PodDesc description;
 	
 	private PodLogicalStatus logicalStatus;
 	
@@ -12,47 +10,25 @@ public class WrapperPodMonitor {
 	
 	private long remainingExecutionTime;
 
-	public WrapperPodMonitor() {
-		this.logicalStatus = PodLogicalStatus.WAITING;
+	public WrapperPodMonitor(PodDesc desc) {
+		this.description = desc;
+		this.logicalStatus = PodLogicalStatus.STOPPING;
 		this.passedExecutionTime = 0;
 		this.remainingExecutionTime = 0;
-	}
-
-	/**
-	 * @param podName
-	 * @param status
-	 * @param logicalStatus
-	 */
-	public WrapperPodMonitor(String podName) {
-		this();
 	}
 
 	/**
 	 * @return the podName
 	 */
 	public String getPodName() {
-		return podName;
-	}
-
-	/**
-	 * @param podName the podName to set
-	 */
-	public void setPodName(String podName) {
-		this.podName = podName;
+		return description.getName();
 	}
 
 	/**
 	 * @return the status
 	 */
 	public PodStatus getStatus() {
-		return status;
-	}
-
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(PodStatus status) {
-		this.status = status;
+		return description.getStatus();
 	}
 
 	/**
@@ -97,14 +73,27 @@ public class WrapperPodMonitor {
 		this.remainingExecutionTime = remainingExecutionTime;
 	}
 
+	/**
+	 * @return the description
+	 */
+	public PodDesc getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(PodDesc description) {
+		this.description = description;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "{podName: " + podName + ", status: " + status + ", logicalStatus: " + logicalStatus
-				+ ", passedExecutionTime: " + passedExecutionTime + ", remainingExecutionTime: " + remainingExecutionTime
-				+ "}";
+		return "{description: " + description + ", logicalStatus: " + logicalStatus + ", passedExecutionTime: "
+				+ passedExecutionTime + ", remainingExecutionTime: " + remainingExecutionTime + "}";
 	}
 
 	/* (non-Javadoc)
@@ -114,11 +103,10 @@ public class WrapperPodMonitor {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((logicalStatus == null) ? 0 : logicalStatus.hashCode());
 		result = prime * result + (int) (passedExecutionTime ^ (passedExecutionTime >>> 32));
-		result = prime * result + ((podName == null) ? 0 : podName.hashCode());
 		result = prime * result + (int) (remainingExecutionTime ^ (remainingExecutionTime >>> 32));
-		result = prime * result + ((status == null) ? 0 : status.hashCode());
 		return result;
 	}
 
@@ -134,18 +122,16 @@ public class WrapperPodMonitor {
 		if (getClass() != obj.getClass())
 			return false;
 		WrapperPodMonitor other = (WrapperPodMonitor) obj;
+		if (description == null) {
+			if (other.description != null)
+				return false;
+		} else if (!description.equals(other.description))
+			return false;
 		if (logicalStatus != other.logicalStatus)
 			return false;
 		if (passedExecutionTime != other.passedExecutionTime)
 			return false;
-		if (podName == null) {
-			if (other.podName != null)
-				return false;
-		} else if (!podName.equals(other.podName))
-			return false;
 		if (remainingExecutionTime != other.remainingExecutionTime)
-			return false;
-		if (status != other.status)
 			return false;
 		return true;
 	}

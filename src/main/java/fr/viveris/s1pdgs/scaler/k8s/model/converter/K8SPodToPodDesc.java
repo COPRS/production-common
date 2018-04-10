@@ -4,6 +4,7 @@ import org.springframework.util.CollectionUtils;
 
 import fr.viveris.s1pdgs.scaler.k8s.model.AddressType;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodDesc;
+import fr.viveris.s1pdgs.scaler.k8s.model.PodStatus;
 import io.fabric8.kubernetes.api.model.Pod;
 
 /**
@@ -24,6 +25,7 @@ public class K8SPodToPodDesc implements SuperConverter<Pod, PodDesc> {
 		if (!CollectionUtils.isEmpty(t.getMetadata().getLabels())) {
 			n.addLabels(t.getMetadata().getLabels());
 		}
+		n.setStatus(PodStatus.valueOf(t.getStatus().getPhase()));
 		return n;
 	}
 	
