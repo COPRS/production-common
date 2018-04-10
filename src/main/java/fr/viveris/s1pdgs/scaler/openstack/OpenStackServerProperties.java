@@ -243,10 +243,12 @@ public class OpenStackServerProperties {
 		private String bootDeviceName;
 		private String flavor;
 		private String keySecurity;
-		private String securityGroup;
+		private List<String> securityGroups;
 		private List<String> networks;
 		private String availableZone;
+		private boolean floatingActivation;
 		private String floatingNetwork;
+		private boolean bootableOnVolume;
 
 		public ServerProperties() {
 
@@ -315,16 +317,16 @@ public class OpenStackServerProperties {
 		/**
 		 * @return the securityGroup
 		 */
-		public String getSecurityGroup() {
-			return securityGroup;
+		public List<String> getSecurityGroups() {
+			return securityGroups;
 		}
 
 		/**
 		 * @param securityGroup
 		 *            the securityGroup to set
 		 */
-		public void setSecurityGroup(String securityGroup) {
-			this.securityGroup = securityGroup;
+		public void setSecurityGroups(List<String> securityGroups) {
+			this.securityGroups = securityGroups;
 		}
 
 		/**
@@ -358,6 +360,20 @@ public class OpenStackServerProperties {
 		}
 
 		/**
+		 * @return the floatingActivation
+		 */
+		public boolean isFloatingActivation() {
+			return floatingActivation;
+		}
+
+		/**
+		 * @param floatingActivation the floatingActivation to set
+		 */
+		public void setFloatingActivation(boolean floatingActivation) {
+			this.floatingActivation = floatingActivation;
+		}
+
+		/**
 		 * @return the floatingNetwork
 		 */
 		public String getFloatingNetwork() {
@@ -369,6 +385,20 @@ public class OpenStackServerProperties {
 		 */
 		public void setFloatingNetwork(String floatingNetwork) {
 			this.floatingNetwork = floatingNetwork;
+		}
+
+		/**
+		 * @return the bootableOnVolume
+		 */
+		public boolean isBootableOnVolume() {
+			return bootableOnVolume;
+		}
+
+		/**
+		 * @param bootableOnVolume the bootableOnVolume to set
+		 */
+		public void setBootableOnVolume(boolean bootableOnVolume) {
+			this.bootableOnVolume = bootableOnVolume;
 		}
 
 	}

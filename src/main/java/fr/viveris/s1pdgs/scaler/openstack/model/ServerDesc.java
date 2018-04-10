@@ -7,16 +7,20 @@ public class ServerDesc {
 
 	private String id;
 	private String name;
-	private String bootVolume;
-	private String bootDeviceName;
 	private String flavor;
 	private String keySecurity;
-	private String securityGroup;
+	private List<String> securityGroups;
 	private List<String> networks;
 	private String availableZone;
+	
+	private boolean bootableOnVolume;
+	private String bootVolume;
+	private String bootDeviceName;
 
 	public ServerDesc() {
 		this.networks = new ArrayList<>();
+		this.securityGroups = new ArrayList<>();
+		this.bootableOnVolume = false;
 	}
 
 	/**
@@ -48,17 +52,17 @@ public class ServerDesc {
 	}
 
 	/**
+	 * @return the bootableOnVolume
+	 */
+	public boolean isBootableOnVolume() {
+		return bootableOnVolume;
+	}
+
+	/**
 	 * @return the bootVolume
 	 */
 	public String getBootVolume() {
 		return bootVolume;
-	}
-
-	/**
-	 * @param bootVolume the bootVolume to set
-	 */
-	public void setBootVolume(String bootVolume) {
-		this.bootVolume = bootVolume;
 	}
 
 	/**
@@ -67,12 +71,11 @@ public class ServerDesc {
 	public String getBootDeviceName() {
 		return bootDeviceName;
 	}
-
-	/**
-	 * @param bootDeviceName the bootDeviceName to set
-	 */
-	public void setBootDeviceName(String bootDeviceName) {
+	
+	public void setBootableOnVolumeInformation(String bootVolume, String bootDeviceName) {
+		this.bootableOnVolume = true;
 		this.bootDeviceName = bootDeviceName;
+		this.bootVolume = bootVolume;
 	}
 
 	/**
@@ -106,15 +109,15 @@ public class ServerDesc {
 	/**
 	 * @return the securityGroup
 	 */
-	public String getSecurityGroup() {
-		return securityGroup;
+	public List<String> getSecurityGroups() {
+		return securityGroups;
 	}
 
 	/**
 	 * @param securityGroup the securityGroup to set
 	 */
-	public void setSecurityGroup(String securityGroup) {
-		this.securityGroup = securityGroup;
+	public void addSecurityGroups(List<String> securityGroups) {
+		this.securityGroups.addAll(securityGroups);
 	}
 
 	/**
@@ -170,13 +173,8 @@ public class ServerDesc {
 			return this;
 		}
 
-		public ServerDescBuilder bootVolume(String bootVolume) {
-			this.m.bootVolume = bootVolume;
-			return this;
-		}
-
-		public ServerDescBuilder bootDeviceName(String bootDeviceName) {
-			this.m.bootDeviceName = bootDeviceName;
+		public ServerDescBuilder bootOnVolumeInformation(String bootVolume, String bootDeviceName) {
+			this.m.setBootableOnVolumeInformation(bootVolume, bootDeviceName);
 			return this;
 		}
 
@@ -190,8 +188,8 @@ public class ServerDesc {
 			return this;
 		}
 
-		public ServerDescBuilder securityGroup(String securityGroup) {
-			this.m.securityGroup = securityGroup;
+		public ServerDescBuilder securityGroups(List<String> securityGroups) {
+			this.m.securityGroups.addAll(securityGroups);
 			return this;
 		}
 
