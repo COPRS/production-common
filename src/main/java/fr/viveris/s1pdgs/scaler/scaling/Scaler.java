@@ -215,11 +215,11 @@ public class Scaler {
 				.mapToLong(wrapperPod -> wrapperPod.getRemainingExecutionTime()).sum();
 		long numberWrappers = activeWrapperPods.stream().count();
 
-		double monitoredValue = ((totalLag * averageExecutionTime) + totalRemainingTime) / numberWrappers;
+		double monitoredValue = ((totalLag * averageExecutionTime) + (totalRemainingTime / 1000)) / numberWrappers;
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug(
 					"[MONITOR] [Step 4] [totalLag {}] [averageExecutionTime {}] [totalRemainingTime {}] [numberWrappers {}] [monitoredValue {}]",
-					totalLag, averageExecutionTime, totalRemainingTime, numberWrappers, monitoredValue);
+					totalLag, averageExecutionTime, totalRemainingTime / 1000, numberWrappers, monitoredValue);
 		}
 
 		return monitoredValue;

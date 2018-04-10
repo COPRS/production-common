@@ -118,7 +118,7 @@ public class K8SMonitoring {
 									.getWrapperStatus(pod.getName(), pod.getAddresses().get(AddressType.INTERNAL_IP));
 							podMonitor.setLogicalStatus(wrapper.getStatus());
 							podMonitor.setPassedExecutionTime(wrapper.getTimeSinceLastChange());
-							podMonitor.setRemainingExecutionTime(wrapperProperties.getExecutionTime().getAverageS()
+							podMonitor.setRemainingExecutionTime(wrapperProperties.getExecutionTime().getAverageS()*1000
 									- wrapper.getTimeSinceLastChange());
 						}
 						nodeMonitor.addWrapperPod(podMonitor);
