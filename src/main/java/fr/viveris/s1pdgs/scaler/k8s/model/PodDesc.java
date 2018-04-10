@@ -133,8 +133,8 @@ public class PodDesc {
 	 */
 	@Override
 	public String toString() {
-		return "{name: " + name + ", nodeName: " + nodeName + ", nodeIpAddress: " + nodeIpAddress + ", addresses: "
-				+ addresses + ", labels: " + labels + "}";
+		return "{name: " + name + ", nodeName: " + nodeName + ", nodeIpAddress: " + nodeIpAddress + ", status: "
+				+ status + ", addresses: " + addresses + ", labels: " + labels + "}";
 	}
 
 	/* (non-Javadoc)
@@ -149,6 +149,7 @@ public class PodDesc {
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((nodeIpAddress == null) ? 0 : nodeIpAddress.hashCode());
 		result = prime * result + ((nodeName == null) ? 0 : nodeName.hashCode());
+		result = prime * result + ((status == null) ? 0 : status.hashCode());
 		return result;
 	}
 
@@ -188,6 +189,8 @@ public class PodDesc {
 			if (other.nodeName != null)
 				return false;
 		} else if (!nodeName.equals(other.nodeName))
+			return false;
+		if (status != other.status)
 			return false;
 		return true;
 	}
