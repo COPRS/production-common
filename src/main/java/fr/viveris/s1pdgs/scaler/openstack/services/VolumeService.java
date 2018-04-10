@@ -2,7 +2,9 @@ package fr.viveris.s1pdgs.scaler.openstack.services;
 
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.model.identity.v3.Token;
 import org.openstack4j.model.storage.block.Volume;
+import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,10 +21,10 @@ public class VolumeService {
 	private final OSClientV3 osClient;
 
 	@Autowired
-	public VolumeService(final OSClientV3 osClient, 
+	public VolumeService(final Token osToken, 
 			@Value("${openstack.service.floating-ip.creation.max-loop}") final int volumeMaxLoop, 
 			@Value("${openstack.service.floating-ip.creation.tempo-loop-ms}") final int volumeTempoLoopMs) {
-		this.osClient = osClient;
+		this.osClient = OSFactory.clientFromToken(osToken);
 		this.volumeMaxLoop = volumeMaxLoop;
 		this.volumeTempoLoopMs = volumeTempoLoopMs;
 	}
