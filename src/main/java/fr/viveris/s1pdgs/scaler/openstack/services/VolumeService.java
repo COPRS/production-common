@@ -18,8 +18,8 @@ public class VolumeService {
 
 	@Autowired
 	public VolumeService(
-			@Value("${openstack.service.floating-ip.creation.max-loop}") final int volumeMaxLoop, 
-			@Value("${openstack.service.floating-ip.creation.tempo-loop-ms}") final int volumeTempoLoopMs) {
+			@Value("${openstack.service.volume.creation.max-loop}") final int volumeMaxLoop, 
+			@Value("${openstack.service.volume.creation.tempo-loop-ms}") final int volumeTempoLoopMs) {
 		this.volumeMaxLoop = volumeMaxLoop;
 		this.volumeTempoLoopMs = volumeTempoLoopMs;
 	}
