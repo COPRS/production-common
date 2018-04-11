@@ -58,7 +58,7 @@ public class OpenStackAdministration {
 			}
 		}
 		if (serverProperties.isFloatingActivation()) {
-			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, s.getAccessIPv4());
+			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, s.getAddresses());
 			this.serverService.deleteFloatingIp(osClient, serverId, s.getAccessIPv4());
 		}
 		this.serverService.delete(osClient, serverId);
