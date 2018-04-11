@@ -93,8 +93,8 @@ public class ServerService {
 		}
 	}
 
-	public void deleteFloatingIp(OSClientV3 osClient, String serverId, String floatingIp) {
-		osClient.compute().floatingIps().removeFloatingIP(serverId, floatingIp);
+	public void deleteFloatingIp(OSClientV3 osClient, String serverId, String floatingIpId) {
+		osClient.networking().floatingip().delete(floatingIpId);
 	}
 
 	public void delete(OSClientV3 osClient, String serverId) {

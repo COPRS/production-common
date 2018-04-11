@@ -56,9 +56,9 @@ public class OpenStackAdministration {
 		Server s = this.serverService.get(osClient, serverId);
 		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
 		if (serverProperties.isFloatingActivation()) {
-			String floatingIP = getFloatingIpForServer(osClient, serverId);
-			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, floatingIP);
-			this.serverService.deleteFloatingIp(osClient, serverId, floatingIP);
+			String floatingIPID = getFloatingIpIdForServer(osClient, serverId);
+			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, floatingIPID);
+			this.serverService.deleteFloatingIp(osClient, serverId, floatingIPID);
 		}
 		this.serverService.delete(osClient, serverId);
 		if (serverProperties.isBootableOnVolume()) {
@@ -110,13 +110,13 @@ public class OpenStackAdministration {
 		return serverId;
 	}
 	
-	public String getFloatingIpForServer(OSClientV3 osClient, String serverId) {
+	public String getFloatingIpIdForServer(OSClientV3 osClient, String serverId) {
         List<? extends InterfaceAttachment> nicID = osClient.compute().servers().interfaces().list(serverId);
         String portid = nicID.get(0).getPortId();
         List<? extends NetFloatingIP> fips = osClient.networking().floatingip().list();
         for (NetFloatingIP netFloatingIP : fips) {
                if (netFloatingIP.getPortId() != null && netFloatingIP.getPortId().equals(portid)) {
-                     return netFloatingIP.getFloatingIpAddress();
+                     return netFloatingIP.getId();
                }
         }
         return "";
