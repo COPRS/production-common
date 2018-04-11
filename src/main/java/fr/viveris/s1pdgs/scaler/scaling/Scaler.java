@@ -154,9 +154,11 @@ public class Scaler {
 				switch (scalingAction) {
 				case ALLOC:
 					this.addRessources(wrapperNodeMonitors);
+					this.lastScalingTimestamp = currentTimestamp;
 					break;
 				case FREE:
 					this.freeRessources(wrapperNodeMonitors);
+					this.lastScalingTimestamp = currentTimestamp;
 					break;
 				case NOTHING:
 					if (LOGGER.isDebugEnabled()) {
