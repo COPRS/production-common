@@ -55,17 +55,17 @@ public class OpenStackAdministration {
 		OSClientV3 osClient = this.osClient();
 		Server s = this.serverService.get(osClient, serverId);
 		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
+		if (serverProperties.isFloatingActivation()) {
+			String floatingIP = getFloatingIpForServer(osClient, serverId);
+			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, floatingIP);
+			this.serverService.deleteFloatingIp(osClient, serverId, floatingIP);
+		}
 		this.serverService.delete(osClient, serverId);
 		if (serverProperties.isBootableOnVolume()) {
 			for (String v : s.getOsExtendedVolumesAttached()) {
 				LOGGER.debug("[serverId {}] Deleting volume {}", serverId, v);
 				this.volumeService.deleteVolume(osClient, v);
 			}
-		}
-		if (serverProperties.isFloatingActivation()) {
-			String floatingIP = getFloatingIpForServer(osClient, serverId);
-			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, floatingIP);
-			this.serverService.deleteFloatingIp(osClient, serverId, floatingIP);
 		}
 	}
 

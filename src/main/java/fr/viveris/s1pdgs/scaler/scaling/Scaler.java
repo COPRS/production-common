@@ -3,6 +3,7 @@ package fr.viveris.s1pdgs.scaler.scaling;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -304,14 +305,16 @@ public class Scaler {
 	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) throws WrapperException {
 		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
 		int minNbServers = this.wrapperProperties.getNbMinServers();
-		int nbServers = wrapperNodeMonitors.size();
+		List<WrapperNodeMonitor> localWrapperNodeMonitors = wrapperNodeMonitors.stream()
+				.filter(node -> hasLabels(node.getDescription().getLabels())).collect(Collectors.toList());
+		int nbServers = localWrapperNodeMonitors.size();
 		int nbFreeServer = 0;
 		int nbFreePods = 0;
 
 		LOGGER.info("[MONITOR] [Step 5] 1 - Starting freeing ressources");
 		while ((nbServers - nbFreeServer > minNbServers) && (nbFreePods < nbPoolingPods)) {
 			// We determine the VM to free
-			WrapperNodeMonitor nodeToFree = wrapperNodeMonitors.stream().collect(Collectors.minBy((n1, n2) -> Long
+			WrapperNodeMonitor nodeToFree = localWrapperNodeMonitors.stream().collect(Collectors.minBy((n1, n2) -> Long
 					.compare(n1.getMaxRemainingExecTimeForActivesPods(), n2.getMaxRemainingExecTimeForActivesPods())))
 					.get();
 			List<WrapperPodMonitor> activePods = nodeToFree.getActivesPods();
@@ -346,6 +349,11 @@ public class Scaler {
 			LOGGER.warn("[MONITOR] [Step 5] 1 - Cannot stop {} pods because minimal number of servers {} reached", t,
 					s);
 		}
+	}
+	
+	private boolean hasLabels(Map<String, String> labels) {
+		return labels.containsKey(this.wrapperProperties.getLabelWrapperStateUsed().getLabel()) 
+				&& labels.containsValue(this.wrapperProperties.getLabelWrapperStateUsed().getValue());
 	}
 
 	private boolean deleteUnusedResources(long lastDeletingResourcesTimestamp, long currentTimestamp)
