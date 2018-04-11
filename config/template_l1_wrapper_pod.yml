@@ -44,6 +44,12 @@ spec:
     volumeMounts:
     - mountPath: /data/localWD/
       name: fast-wrapper-pv-storage
+    livenessProbe:
+      httpGet:
+        path: /wrapper/status
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 15
     envFrom:
     - configMapRef:
         name: s1pdgs-config

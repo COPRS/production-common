@@ -224,7 +224,7 @@ public class Scaler {
 	}
 
 	private ScalingAction needScaling(double monitoredValue, long lastScalingTimestamp, long currentTimestamp) {
-		long tempoScaling = wrapperProperties.getTempoScalingS();
+		long tempoScaling = (wrapperProperties.getTempoScalingS()*1000);
 		// Check if period is OK
 		boolean periodOk = true;
 		if (tempoScaling != 0) {
@@ -353,7 +353,7 @@ public class Scaler {
 
 	private boolean deleteUnusedResources(long lastDeletingResourcesTimestamp, long currentTimestamp)
 			throws FileNotFoundException, PodResourceException, UnknownKindExecption {
-		long tempoDeletingResources = wrapperProperties.getTempoDeleteResourcesS();
+		long tempoDeletingResources = (wrapperProperties.getTempoDeleteResourcesS()*1000);
 		// Check if period is OK
 		boolean periodOk = true;
 		if (tempoDeletingResources != 0) {
