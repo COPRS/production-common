@@ -219,7 +219,7 @@ public class Scaler {
 		long numberWrappers = activeWrapperPods.stream().count();
 
 		double monitoredValue = 0;
-		if (numberWrappers> 0) {
+		if (numberWrappers > 0) {
 			monitoredValue = ((totalLag * averageExecutionTime) + (totalRemainingTime / 1000)) / numberWrappers;
 		}
 		if (LOGGER.isDebugEnabled()) {
@@ -249,7 +249,6 @@ public class Scaler {
 		int nbServers = wrapperNodeMonitors.size();
 		float div = nbPoolingPods / nbPodsPerServer;
 		int nbNeededServer = Math.round(div);
-		int nbAllocatedServer = 0;
 
 		// Check if one or several of our nodes can be reaffected
 		LOGGER.info("[MONITOR] [Step 5] 1 - Starting setting reusable nodes");
@@ -262,6 +261,7 @@ public class Scaler {
 				reusableNodes.add(nodeMonitor);
 			}
 		}
+		int nbAllocatedServer = 0;
 		int nbReusableNodes = reusableNodes.size();
 		if (nbReusableNodes > 0) {
 			int nbNodesToReused = Math.min(nbReusableNodes, nbNeededServer);
@@ -279,17 +279,18 @@ public class Scaler {
 
 		// Create VM
 		LOGGER.info("[MONITOR] [Step 5] 2 - Starting creating servers");
+		int nbCreatedServer = 0;
 		if (nbNeededServer > nbAllocatedServer) {
 			if (nbServers >= maxNbServers) {
 				LOGGER.warn("[MONITOR] [Step 5] 2 - Maximal number of servers reached, cannot create another one");
 			} else {
-				int nbCreatedServer = 0;
 				while ((nbNeededServer > nbAllocatedServer + nbCreatedServer)
 						&& (nbServers + nbCreatedServer < maxNbServers)) {
 					this.osAdministration.createServerForL1Wrappers("[MONITOR] [Step 4] 2 - ");
 					nbCreatedServer++;
 				}
 			}
+			
 		} else {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("[MONITOR] [Step 5] 2 - No need to create new servers");
@@ -297,8 +298,11 @@ public class Scaler {
 		}
 
 		// Launchs pods
-		LOGGER.info("[MONITOR] [Step 5] 3 - Starting launching pods");
-		this.k8SAdministration.launchWrapperPodsPool();
+		int nbPodToLaunch = (nbAllocatedServer + nbCreatedServer) * nbPodsPerServer;
+		LOGGER.info("[MONITOR] [Step 5] 3 - Starting launching pods {} on {} reused nodes and {} new nodes", nbPodToLaunch, nbAllocatedServer, nbCreatedServer);
+		if (nbPodToLaunch > 0) {
+			this.k8SAdministration.launchWrapperPodsPool(nbPodToLaunch);
+		}
 		LOGGER.info("[MONITOR] [Step 5] 3 - All pods launched");
 	}
 
@@ -350,9 +354,9 @@ public class Scaler {
 					s);
 		}
 	}
-	
+
 	private boolean hasLabels(Map<String, String> labels) {
-		return labels.containsKey(this.wrapperProperties.getLabelWrapperStateUsed().getLabel()) 
+		return labels.containsKey(this.wrapperProperties.getLabelWrapperStateUsed().getLabel())
 				&& labels.containsValue(this.wrapperProperties.getLabelWrapperStateUsed().getValue());
 	}
 
