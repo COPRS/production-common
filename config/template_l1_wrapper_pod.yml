@@ -38,6 +38,8 @@ spec:
   - name: l1-wrapper
     image: registry.geohub.space/wo7/template_java:SPDGS-4
     imagePullPolicy: Always
+    ports:
+    - containerPort: 8080
     resources:
       requests:
         cpu: '7'
