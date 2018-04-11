@@ -4,12 +4,15 @@ import java.util.List;
 
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.compute.InterfaceAttachment;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
 import org.openstack4j.model.network.NetFloatingIP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsServerException;
 @Service
 public class ServerService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServerService.class);
 	private final int serverMaxWaitMs;
 	private final int fipMaxLoop;
 	private final int fipTempoLoopMs;
@@ -94,7 +98,27 @@ public class ServerService {
 	}
 
 	public void delete(OSClientV3 osClient, String serverId) {
-		osClient.compute().servers().delete(serverId);
+		ActionResponse deleteRespone = osClient.compute().servers().delete(serverId);
+		if(deleteRespone.isSuccess()) {
+			LOGGER.debug("[serverId {}] Server is deleted", serverId);
+		}
+		boolean deleteServerStatus = false;
+		for(int i = 0; i < 10; i++) {
+			if (osClient.compute().servers().get(serverId) == null) {
+				deleteServerStatus = true;
+				LOGGER.debug("[serverId {}] Server is deleted", serverId);
+				break;
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				LOGGER.error("[serverId {}] Fail to sleep : {}", serverId, e.getMessage());
+			}
+		} 
+		if (!deleteServerStatus) {
+			LOGGER.error("[serverId {}] Fail to delete server", serverId);
+		}
+		
 	}
 	
 	public Server get(OSClientV3 osClient, String serverId) {

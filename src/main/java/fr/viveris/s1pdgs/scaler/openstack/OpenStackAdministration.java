@@ -1,8 +1,12 @@
 package fr.viveris.s1pdgs.scaler.openstack;
 
+import java.util.List;
+
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.Identifier;
+import org.openstack4j.model.compute.InterfaceAttachment;
 import org.openstack4j.model.compute.Server;
+import org.openstack4j.model.network.NetFloatingIP;
 import org.openstack4j.openstack.OSFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +55,7 @@ public class OpenStackAdministration {
 		OSClientV3 osClient = this.osClient();
 		Server s = this.serverService.get(osClient, serverId);
 		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
+		this.serverService.delete(osClient, serverId);
 		if (serverProperties.isBootableOnVolume()) {
 			for (String v : s.getOsExtendedVolumesAttached()) {
 				LOGGER.debug("[serverId {}] Deleting volume {}", serverId, v);
@@ -58,10 +63,10 @@ public class OpenStackAdministration {
 			}
 		}
 		if (serverProperties.isFloatingActivation()) {
-			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, s.getAddresses());
-			this.serverService.deleteFloatingIp(osClient, serverId, s.getAccessIPv4());
+			String floatingIP = getFloatingIpForServer(osClient, serverId);
+			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, floatingIP);
+			this.serverService.deleteFloatingIp(osClient, serverId, floatingIP);
 		}
-		this.serverService.delete(osClient, serverId);
 	}
 
 	public String createServerForL1Wrappers(String logPrefix) throws OsVolumeException, OsServerException {
@@ -104,4 +109,16 @@ public class OpenStackAdministration {
 
 		return serverId;
 	}
+	
+	public String getFloatingIpForServer(OSClientV3 osClient, String serverId) {
+        List<? extends InterfaceAttachment> nicID = osClient.compute().servers().interfaces().list(serverId);
+        String portid = nicID.get(0).getPortId();
+        List<? extends NetFloatingIP> fips = osClient.networking().floatingip().list();
+        for (NetFloatingIP netFloatingIP : fips) {
+               if (netFloatingIP.getPortId().equals(portid)) {
+                     return netFloatingIP.getFloatingIpAddress();
+               }
+        }
+        return "";
+  }
 }
