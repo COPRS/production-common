@@ -231,21 +231,11 @@ public class Scaler {
 	}
 
 	private ScalingAction needScaling(double monitoredValue, long lastScalingTimestamp, long currentTimestamp) {
-		long tempoScaling = (wrapperProperties.getTempoScalingS()*1000);
-		// Check if period is OK
-		boolean periodOk = true;
-		if (tempoScaling != 0) {
-			if (lastScalingTimestamp + tempoScaling > currentTimestamp) {
-				periodOk = false;
-			}
+		if (monitoredValue < this.wrapperProperties.getExecutionTime().getMinThresholdS()) {
+			return ScalingAction.FREE;
 		}
-		if (periodOk) {
-			if (monitoredValue < this.wrapperProperties.getExecutionTime().getMinThresholdS()) {
-				return ScalingAction.FREE;
-			}
-			if (monitoredValue > this.wrapperProperties.getExecutionTime().getMaxThresholdS()) {
-				return ScalingAction.ALLOC;
-			}
+		if (monitoredValue > this.wrapperProperties.getExecutionTime().getMaxThresholdS()) {
+			return ScalingAction.ALLOC;
 		}
 		return ScalingAction.NOTHING;
 	}
@@ -360,39 +350,26 @@ public class Scaler {
 
 	private boolean deleteUnusedResources(long lastDeletingResourcesTimestamp, long currentTimestamp)
 			throws FileNotFoundException, PodResourceException, UnknownKindExecption {
-		long tempoDeletingResources = (wrapperProperties.getTempoDeleteResourcesS()*1000);
-		// Check if period is OK
-		boolean periodOk = true;
-		if (tempoDeletingResources != 0) {
-			if (lastDeletingResourcesTimestamp + tempoDeletingResources > currentTimestamp) {
-				periodOk = false;
-			}
+		// Remove pods in succeeded state if necessary
+		LOGGER.info("[MONITOR] [Step 6] 1 - Starting removing pods in succeeded phase");
+		this.removeSucceededPods();
+
+		// Retrieve K8S workers set in pause with no active pods
+		LOGGER.info("[MONITOR] [Step 6] 2 - Starting retrieving nodes to delete");
+		List<WrapperNodeMonitor> nodesToDelete = this.k8SMonitoring.monitorNodesToDelete();
+
+		// Remove the corresponding VM
+		if (!CollectionUtils.isEmpty(nodesToDelete)) {
+			nodesToDelete.forEach(node -> {
+				LOGGER.info("[MONITOR] [Step 6] [serverId {}] 3 - Starting removing server",
+						node.getDescription().getExternalId());
+				this.osAdministration.deleteServer(node.getDescription().getExternalId());
+			});
 		}
 
-		if (periodOk) {
-			// Remove pods in succeeded state if necessary
-			LOGGER.info("[MONITOR] [Step 6] 1 - Starting removing pods in succeeded phase");
-			this.removeSucceededPods();
+		// Set last timestamp
+		this.lastDeletingResourcesTimestamp = currentTimestamp;
 
-			// Retrieve K8S workers set in pause with no active pods
-			LOGGER.info("[MONITOR] [Step 6] 2 - Starting retrieving nodes to delete");
-			List<WrapperNodeMonitor> nodesToDelete = this.k8SMonitoring.monitorNodesToDelete();
-
-			// Remove the corresponding VM
-			if (!CollectionUtils.isEmpty(nodesToDelete)) {
-				nodesToDelete.forEach(node -> {
-					LOGGER.info("[MONITOR] [Step 6] [serverId {}] 3 - Starting removing server",
-							node.getDescription().getExternalId());
-					this.osAdministration.deleteServer(node.getDescription().getExternalId());
-				});
-			}
-
-			// Set last timestamp
-			this.lastDeletingResourcesTimestamp = currentTimestamp;
-
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 }
