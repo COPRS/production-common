@@ -90,7 +90,7 @@ public class Scaler {
 	 * <li>4: Scales the L1 resources</li>
 	 * <ul>
 	 */
-	@Scheduled(fixedDelayString = "${wrapper.tempo-pooling-ms}")
+	@Scheduled(fixedRateString = "${wrapper.tempo-pooling-ms}")
 	public void scale() {
 		LOGGER.info("[MONITOR] [Step 0] Starting scaling");
 

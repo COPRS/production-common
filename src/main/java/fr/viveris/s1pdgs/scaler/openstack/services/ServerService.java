@@ -35,10 +35,10 @@ public class ServerService {
 	}
 
 	public String createAndBootServer(OSClientV3 osClient, ServerDesc desc) throws OsServerException {
-		
+
 		ServerCreateBuilder builder = Builders.server().name(desc.getName()).flavor(desc.getFlavor())
-				.keypairName(desc.getKeySecurity())
-				.networks(desc.getNetworks()).availabilityZone(desc.getAvailableZone());
+				.keypairName(desc.getKeySecurity()).networks(desc.getNetworks())
+				.availabilityZone(desc.getAvailableZone());
 		if (!CollectionUtils.isEmpty(desc.getSecurityGroups())) {
 			for (String g : desc.getSecurityGroups()) {
 				builder = builder.addSecurityGroup(g);
@@ -46,11 +46,11 @@ public class ServerService {
 		}
 		if (desc.isBootableOnVolume()) {
 			// Link volume to boot index
-			BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping().uuid(desc.getBootVolume())
-					.deviceName(desc.getBootDeviceName()).bootIndex(0);
+			BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping()
+					.uuid(desc.getBootVolume()).deviceName(desc.getBootDeviceName()).bootIndex(0);
 			builder = builder.blockDevice(blockDeviceMappingBuilder.build());
 		}
-		
+
 		// Create server
 		ServerCreate serverCreate = builder.build();
 		Server server = osClient.compute().servers().bootAndWaitActive(serverCreate, serverMaxWaitMs);
@@ -60,7 +60,8 @@ public class ServerService {
 		return server.getId();
 	}
 
-	public void createFloatingIp(OSClientV3 osClient, String serverId, String floatingNetworkId) throws OsServerException {
+	public void createFloatingIp(OSClientV3 osClient, String serverId, String floatingNetworkId)
+			throws OsServerException {
 		List<? extends InterfaceAttachment> nicID = osClient.compute().servers().interfaces().list(serverId);
 		String portid = nicID.get(0).getPortId();
 		NetFloatingIP fip = osClient.networking().floatingip()
@@ -88,8 +89,16 @@ public class ServerService {
 		}
 	}
 
+	public void deleteFloatingIp(OSClientV3 osClient, String serverId, String floatingIp) {
+		osClient.compute().floatingIps().removeFloatingIP(serverId, floatingIp);
+	}
+
 	public void delete(OSClientV3 osClient, String serverId) {
 		osClient.compute().servers().delete(serverId);
+	}
+	
+	public Server get(OSClientV3 osClient, String serverId) {
+		return osClient.compute().servers().get(serverId);
 	}
 
 }

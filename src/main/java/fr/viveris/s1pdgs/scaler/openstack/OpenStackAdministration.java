@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.scaler.openstack;
 
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.Identifier;
+import org.openstack4j.model.compute.Server;
 import org.openstack4j.openstack.OSFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class OpenStackAdministration {
 	private final ServerService serverService;
 
 	private final VolumeService volumeService;
-	
+
 	private OSClientV3 osClient() {
 		OSClientV3 os = OSFactory.builderV3().endpoint(osProperties.getEndpoint())
 				.credentials(osProperties.getCredentialUsername(), osProperties.getCredentialPassword(),
@@ -48,6 +49,18 @@ public class OpenStackAdministration {
 
 	public void deleteServer(String serverId) {
 		OSClientV3 osClient = this.osClient();
+		Server s = this.serverService.get(osClient, serverId);
+		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
+		if (serverProperties.isBootableOnVolume()) {
+			for (String v : s.getOsExtendedVolumesAttached()) {
+				LOGGER.debug("[serverId {}] Deleting volume {}", serverId, v);
+				this.volumeService.deleteVolume(osClient, v);
+			}
+		}
+		if (serverProperties.isFloatingActivation()) {
+			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, s.getAccessIPv4());
+			this.serverService.deleteFloatingIp(osClient, serverId, s.getAccessIPv4());
+		}
 		this.serverService.delete(osClient, serverId);
 	}
 

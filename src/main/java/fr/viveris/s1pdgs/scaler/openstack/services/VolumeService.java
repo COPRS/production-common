@@ -54,5 +54,9 @@ public class VolumeService {
 		}
 		return v.getId();
 	}
+	
+	public void deleteVolume(OSClientV3 osClient, String volumeId) {
+		osClient.blockStorage().volumes().delete(volumeId);
+	}
 
 }
