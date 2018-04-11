@@ -16,18 +16,15 @@ public class VolumeService {
 	private final int volumeMaxLoop;
 	private final int volumeTempoLoopMs;
 
-	private final OSClientV3 osClient;
-
 	@Autowired
-	public VolumeService(final OSClientV3 osClient, 
-			@Value("${openstack.service.floating-ip.creation.max-loop}") final int volumeMaxLoop, 
-			@Value("${openstack.service.floating-ip.creation.tempo-loop-ms}") final int volumeTempoLoopMs) {
-		this.osClient = osClient;
+	public VolumeService(
+			@Value("${openstack.service.volume.creation.max-loop}") final int volumeMaxLoop, 
+			@Value("${openstack.service.volume.creation.tempo-loop-ms}") final int volumeTempoLoopMs) {
 		this.volumeMaxLoop = volumeMaxLoop;
 		this.volumeTempoLoopMs = volumeTempoLoopMs;
 	}
 
-	public String createVolumeAndBoot(VolumeDesc desc) throws OsVolumeException {
+	public String createVolumeAndBoot(OSClientV3 osClient, VolumeDesc desc) throws OsVolumeException {
 
 		// Create volume
 		Volume v = osClient.blockStorage().volumes()

@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import fr.viveris.s1pdgs.scaler.k8s.model.AddressType;
 import fr.viveris.s1pdgs.scaler.k8s.model.NodeDesc;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodDesc;
+import fr.viveris.s1pdgs.scaler.k8s.model.PodLogicalStatus;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodStatus;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperDesc;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperNodeMonitor;
@@ -114,12 +115,15 @@ public class K8SMonitoring {
 					for (PodDesc pod : podsPerNodes.get(node.getName())) {
 						WrapperPodMonitor podMonitor = new WrapperPodMonitor(pod);
 						if (pod.getStatus() == PodStatus.Running) {
-							WrapperDesc wrapper = this.wrapperService
-									.getWrapperStatus(pod.getName(), pod.getAddresses().get(AddressType.INTERNAL_IP));
+							WrapperDesc wrapper = this.wrapperService.getWrapperStatus(pod.getName(),
+									pod.getAddresses().get(AddressType.INTERNAL_IP));
 							podMonitor.setLogicalStatus(wrapper.getStatus());
-							podMonitor.setPassedExecutionTime(wrapper.getTimeSinceLastChange());
-							podMonitor.setRemainingExecutionTime(wrapperProperties.getExecutionTime().getAverageS()
-									- wrapper.getTimeSinceLastChange());
+							if (wrapper.getStatus().equals(PodLogicalStatus.PROCESSING)) {
+								podMonitor.setPassedExecutionTime(wrapper.getTimeSinceLastChange());
+								podMonitor.setRemainingExecutionTime(
+										wrapperProperties.getExecutionTime().getAverageS() * 1000
+												- wrapper.getTimeSinceLastChange());
+							}
 						}
 						nodeMonitor.addWrapperPod(podMonitor);
 					}

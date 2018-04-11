@@ -76,7 +76,7 @@ public class PodService {
 			throw e;
 		}
 
-		if (!CollectionUtils.isEmpty(resources)) {
+		if (CollectionUtils.isEmpty(resources)) {
 			throw new PodResourceException("No resources loaded from file: " + "config/template_l1_wrapper_pod.yml");
 		}
 

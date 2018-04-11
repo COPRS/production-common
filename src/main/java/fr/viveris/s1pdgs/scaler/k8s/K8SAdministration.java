@@ -71,7 +71,7 @@ public class K8SAdministration {
 		if (!CollectionUtils.isEmpty(pods)) {
 			for (PodDesc pod : pods) {
 				String podName = pod.getName();
-				String suffixe = podName.substring(podName.lastIndexOf('-') + 1);
+				String suffixe = podName.substring(podName.lastIndexOf('-'));
 				Boolean ret = this.podService.deletePod(suffixe);
 				if (ret != null && ret) {
 					deletedPodsName.add(pod.getName());

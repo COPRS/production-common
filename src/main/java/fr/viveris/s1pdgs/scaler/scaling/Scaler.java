@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ import fr.viveris.s1pdgs.scaler.k8s.K8SAdministration;
 import fr.viveris.s1pdgs.scaler.k8s.K8SMonitoring;
 import fr.viveris.s1pdgs.scaler.k8s.WrapperProperties;
 import fr.viveris.s1pdgs.scaler.k8s.model.AddressType;
-import fr.viveris.s1pdgs.scaler.k8s.model.PodLogicalStatus;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperNodeMonitor;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperPodMonitor;
 import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.PodResourceException;
@@ -92,7 +90,7 @@ public class Scaler {
 	 * <li>4: Scales the L1 resources</li>
 	 * <ul>
 	 */
-	@Scheduled(fixedDelayString = "${wrapper.scaler.fixed-delay-ms}")
+	@Scheduled(fixedDelayString = "${wrapper.tempo-pooling-ms}")
 	public void scale() {
 		LOGGER.info("[MONITOR] [Step 0] Starting scaling");
 
@@ -156,9 +154,11 @@ public class Scaler {
 				switch (scalingAction) {
 				case ALLOC:
 					this.addRessources(wrapperNodeMonitors);
+					this.lastScalingTimestamp = currentTimestamp;
 					break;
 				case FREE:
 					this.freeRessources(wrapperNodeMonitors);
+					this.lastScalingTimestamp = currentTimestamp;
 					break;
 				case NOTHING:
 					if (LOGGER.isDebugEnabled()) {
@@ -210,15 +210,22 @@ public class Scaler {
 			List<WrapperNodeMonitor> wrapperNodeMonitors) {
 		long totalLag = monitorKafka.getLagPerPartition().values().stream().mapToLong(Long::longValue).sum();
 		long averageExecutionTime = this.wrapperProperties.getExecutionTime().getAverageS();
-		Stream<WrapperPodMonitor> activeWrapperPods = wrapperNodeMonitors.stream()
+		List<WrapperPodMonitor> activeWrapperPods = wrapperNodeMonitors.stream()
 				.filter(nodeMonitor -> nodeMonitor != null && !CollectionUtils.isEmpty(nodeMonitor.getWrapperPods()))
-				.flatMap(nodeMonitor -> nodeMonitor.getWrapperPods().stream())
-				.filter(wrapperPod -> wrapperPod.getLogicalStatus() != PodLogicalStatus.STOPPING);
-		long totalRemainingTime = activeWrapperPods.mapToLong(wrapperPod -> wrapperPod.getRemainingExecutionTime())
-				.sum();
-		long numberWrappers = activeWrapperPods.count();
+				.flatMap(nodeMonitor -> nodeMonitor.getActivesPods().stream()).collect(Collectors.toList());
+		long totalRemainingTime = activeWrapperPods.stream()
+				.mapToLong(wrapperPod -> wrapperPod.getRemainingExecutionTime()).sum();
+		long numberWrappers = activeWrapperPods.stream().count();
 
-		double monitoredValue = ((totalLag * averageExecutionTime) + totalRemainingTime) / numberWrappers;
+		double monitoredValue = 0;
+		if (numberWrappers> 0) {
+			monitoredValue = ((totalLag * averageExecutionTime) + (totalRemainingTime / 1000)) / numberWrappers;
+		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug(
+					"[MONITOR] [Step 4] [totalLag {}] [averageExecutionTime {}] [totalRemainingTime {}] [numberWrappers {}] [monitoredValue {}]",
+					totalLag, averageExecutionTime, totalRemainingTime / 1000, numberWrappers, monitoredValue);
+		}
 
 		return monitoredValue;
 	}

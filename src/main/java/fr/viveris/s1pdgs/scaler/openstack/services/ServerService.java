@@ -8,10 +8,12 @@ import org.openstack4j.model.compute.InterfaceAttachment;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
+import org.openstack4j.model.compute.builder.ServerCreateBuilder;
 import org.openstack4j.model.network.NetFloatingIP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import fr.viveris.s1pdgs.scaler.openstack.model.ServerDesc;
 import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsServerException;
@@ -23,29 +25,34 @@ public class ServerService {
 	private final int fipMaxLoop;
 	private final int fipTempoLoopMs;
 
-	private final OSClientV3 osClient;
-
 	@Autowired
-	public ServerService(final OSClientV3 osClient, 
-			@Value("${openstack.service.floating-ip.creation.max-loop}") final int fipMaxLoop, 
-			@Value("${openstack.service.floating-ip.creation.tempo-loop-ms}") final int fipTempoLoopMs, 
+	public ServerService(@Value("${openstack.service.floating-ip.creation.max-loop}") final int fipMaxLoop,
+			@Value("${openstack.service.floating-ip.creation.tempo-loop-ms}") final int fipTempoLoopMs,
 			@Value("${openstack.service.server.creation.max-wait-ms}") final int serverMaxWaitMs) {
-		this.osClient = osClient;
 		this.fipMaxLoop = fipMaxLoop;
 		this.fipTempoLoopMs = fipTempoLoopMs;
 		this.serverMaxWaitMs = serverMaxWaitMs;
 	}
 
-	public String createAndBootServer(ServerDesc desc) throws OsServerException {
-		// Link volume to boot index
-		BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping().uuid(desc.getBootVolume())
-				.deviceName("/dev/vda").bootIndex(0);
+	public String createAndBootServer(OSClientV3 osClient, ServerDesc desc) throws OsServerException {
+		
+		ServerCreateBuilder builder = Builders.server().name(desc.getName()).flavor(desc.getFlavor())
+				.keypairName(desc.getKeySecurity())
+				.networks(desc.getNetworks()).availabilityZone(desc.getAvailableZone());
+		if (!CollectionUtils.isEmpty(desc.getSecurityGroups())) {
+			for (String g : desc.getSecurityGroups()) {
+				builder = builder.addSecurityGroup(g);
+			}
+		}
+		if (desc.isBootableOnVolume()) {
+			// Link volume to boot index
+			BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping().uuid(desc.getBootVolume())
+					.deviceName(desc.getBootDeviceName()).bootIndex(0);
+			builder = builder.blockDevice(blockDeviceMappingBuilder.build());
+		}
+		
 		// Create server
-		ServerCreate serverCreate = Builders.server().name(desc.getName()).flavor(desc.getFlavor())
-				.blockDevice(blockDeviceMappingBuilder.build()).keypairName(desc.getKeySecurity())
-				.networks(desc.getNetworks()).availabilityZone(desc.getAvailableZone())
-				.addSecurityGroup(desc.getSecurityGroup()).build();
-		// Boot server
+		ServerCreate serverCreate = builder.build();
 		Server server = osClient.compute().servers().bootAndWaitActive(serverCreate, serverMaxWaitMs);
 		if (server.getStatus() != Server.Status.ACTIVE) {
 			throw new OsServerException(String.format("Server not created after %d ms", serverMaxWaitMs));
@@ -53,7 +60,7 @@ public class ServerService {
 		return server.getId();
 	}
 
-	public void createFloatingIp(String serverId, String floatingNetworkId) throws OsServerException {
+	public void createFloatingIp(OSClientV3 osClient, String serverId, String floatingNetworkId) throws OsServerException {
 		List<? extends InterfaceAttachment> nicID = osClient.compute().servers().interfaces().list(serverId);
 		String portid = nicID.get(0).getPortId();
 		NetFloatingIP fip = osClient.networking().floatingip()
@@ -81,7 +88,7 @@ public class ServerService {
 		}
 	}
 
-	public void delete(String serverId) {
+	public void delete(OSClientV3 osClient, String serverId) {
 		osClient.compute().servers().delete(serverId);
 	}
 
