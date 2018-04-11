@@ -27,8 +27,8 @@ public class WrapperNodeMonitor {
 		this.nbWrapperPdsPerLogicalStatus = new HashMap<>();
 		PodLogicalStatus[] values = PodLogicalStatus.values();
 		for (PodLogicalStatus v : values) {
-			this.maxWrapperPodsRemainingExecTimePerLogicalStatus.put(v, -1L);
-			this.nbWrapperPdsPerLogicalStatus.put(v, -1);
+			this.maxWrapperPodsRemainingExecTimePerLogicalStatus.put(v, 0L);
+			this.nbWrapperPdsPerLogicalStatus.put(v, 0);
 		}
 	}
 
