@@ -115,7 +115,7 @@ public class OpenStackAdministration {
         String portid = nicID.get(0).getPortId();
         List<? extends NetFloatingIP> fips = osClient.networking().floatingip().list();
         for (NetFloatingIP netFloatingIP : fips) {
-               if (netFloatingIP.getPortId().equals(portid)) {
+               if (netFloatingIP != null && netFloatingIP.getPortId().equals(portid)) {
                      return netFloatingIP.getFloatingIpAddress();
                }
         }
