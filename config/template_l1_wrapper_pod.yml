@@ -30,6 +30,10 @@ spec:
             operator: In
             values:
             - l1
+          - key: wrapperstate
+            operator: In
+            values:
+            - used
   volumes:
   - name: fast-wrapper-pv-storage
     persistentVolumeClaim:
