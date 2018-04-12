@@ -48,9 +48,9 @@ public class K8SAdministration {
 				wrapperProperties.getLabelWrapperStateUnused().getValue());
 	}
 
-	public void launchWrapperPodsPool()
+	public void launchWrapperPodsPool(int nbPods)
 			throws FileNotFoundException, PodResourceException, UnknownKindExecption, UnknownVolumeNameException {
-		for (int i = 0; i < this.wrapperProperties.getNbPoolingPods(); i++) {
+		for (int i = 0; i < nbPods; i++) {
 			this.podService.createPod();
 		}
 	}
