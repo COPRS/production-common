@@ -325,13 +325,13 @@ public class Scaler {
 			int nbVmActivesPods = activePods.size();
 			LOGGER.info("[MONITOR] [Step 5] 1 - Starting freeing ressources of node {} with {} active pods",
 					nodeToFree.getDescription().getName(), nbVmActivesPods);
-			if (nbVmActivesPods > nbPoolingPods) {
+			if (nbVmActivesPods + nbFreePods > nbPoolingPods) {
 				// We stop nbPoolingPods pods by settings their status to STOPPING
 				this.k8SAdministration.stopWrapperPods(activePods.stream()
 						.filter(pod -> pod.getDescription() != null
 								&& !CollectionUtils.isEmpty(pod.getDescription().getAddresses()))
 						.map(pod -> pod.getDescription().getAddresses().get(AddressType.INTERNAL_IP))
-						.collect(Collectors.toList()).subList(0, nbPoolingPods));
+						.collect(Collectors.toList()).subList(0, nbPoolingPods-nbFreePods));
 				nbFreePods = nbPoolingPods;
 			} else {
 				// We stop nbVmActivesPods pods by settings their status to STOPPING
@@ -340,7 +340,7 @@ public class Scaler {
 								&& !CollectionUtils.isEmpty(pod.getDescription().getAddresses()))
 						.map(pod -> pod.getDescription().getAddresses().get(AddressType.INTERNAL_IP))
 						.collect(Collectors.toList()));
-				nbFreePods = nbVmActivesPods;
+				nbFreePods += nbVmActivesPods;
 				// We deactivate the server by setting its label wrapperstate to unused
 				this.k8SAdministration.setWrapperNodeUnusable(nodeToFree.getDescription().getName());
 				nbFreeServer++;
