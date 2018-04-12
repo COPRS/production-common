@@ -341,6 +341,9 @@ public class Scaler {
 				this.k8SAdministration.setWrapperNodeUnusable(nodeToFree.getDescription().getName());
 				nbFreeServer++;
 			}
+			localWrapperNodeMonitors = localWrapperNodeMonitors.stream()
+					.filter(node -> !node.getDescription().getName()
+							.equals(nodeToFree.getDescription().getName())).collect(Collectors.toList());
 		}
 
 		if (nbFreePods < nbPoolingPods) {
