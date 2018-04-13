@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.monitoring.kafka;
+package fr.viveris.s1pdgs.scaler.kafka.services;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,9 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.ConsumerDescription;
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.ConsumerGroupsDescription;
-import fr.viveris.s1pdgs.scaler.monitoring.kafka.model.PartitionDescription;
+import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoringProperties;
+import fr.viveris.s1pdgs.scaler.kafka.model.ConsumerDescription;
+import fr.viveris.s1pdgs.scaler.kafka.model.ConsumerGroupsDescription;
+import fr.viveris.s1pdgs.scaler.kafka.model.PartitionDescription;
 import kafka.admin.AdminClient;
 import kafka.admin.AdminClient.ConsumerSummary;
 

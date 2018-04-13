@@ -1,10 +1,12 @@
-package fr.viveris.s1pdgs.scaler.monitoring.kafka;
+package fr.viveris.s1pdgs.scaler.kafka;
 
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import fr.viveris.s1pdgs.scaler.kafka.model.SpdgsTopic;
 
 /**
  * Properties used for monitoring KAFKA

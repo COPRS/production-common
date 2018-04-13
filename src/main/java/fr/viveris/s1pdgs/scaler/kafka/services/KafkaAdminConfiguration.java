@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.monitoring.kafka;
+package fr.viveris.s1pdgs.scaler.kafka.services;
 
 import java.util.Properties;
 
@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoringProperties;
 import kafka.admin.AdminClient;
 
 /**

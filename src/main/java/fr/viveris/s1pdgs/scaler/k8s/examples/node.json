@@ -1,0 +1,449 @@
+#curl http://localhost:8080/api/v1/nodes/k8s-node-w-1
+{
+  "kind": "Node",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "k8s-node-w-1",
+    "selfLink": "/api/v1/nodes/k8s-node-w-1",
+    "uid": "9abb5222-2061-11e8-b605-fa163eaeaa5e",
+    "resourceVersion": "6295922",
+    "creationTimestamp": "2018-03-05T10:40:21Z",
+    "labels": {
+      "failure-domain.beta.kubernetes.io/zone": "eu-west-0b",
+      "kubernetes.io/hostname": "k8s-node-w-1",
+      "beta.kubernetes.io/arch": "amd64",
+      "beta.kubernetes.io/instance-type": "h1.2xlarge.4",
+      "beta.kubernetes.io/os": "linux",
+      "failure-domain.beta.kubernetes.io/region": "eu-west-0"
+    },
+    "annotations": {
+      "node.alpha.kubernetes.io/ttl": "0",
+      "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+    }
+  },
+  "spec": {
+    "externalID": "a1c19980-4ad2-4972-aaa9-498becd55f20",
+    "providerID": "openstack:///a1c19980-4ad2-4972-aaa9-498becd55f20"
+  },
+  "status": {
+    "capacity": {
+      "cpu": "8",
+      "memory": "32780756Ki",
+      "pods": "110"
+    },
+    "allocatable": {
+      "cpu": "8",
+      "memory": "32678356Ki",
+      "pods": "110"
+    },
+    "conditions": [
+      {
+        "type": "OutOfDisk",
+        "status": "False",
+        "lastHeartbeatTime": "2018-04-04T12:07:55Z",
+        "lastTransitionTime": "2018-03-05T10:40:21Z",
+        "reason": "KubeletHasSufficientDisk",
+        "message": "kubelet has sufficient disk space available"
+      },
+      {
+        "type": "MemoryPressure",
+        "status": "False",
+        "lastHeartbeatTime": "2018-04-04T12:07:55Z",
+        "lastTransitionTime": "2018-03-05T10:40:21Z",
+        "reason": "KubeletHasSufficientMemory",
+        "message": "kubelet has sufficient memory available"
+      },
+      {
+        "type": "DiskPressure",
+        "status": "False",
+        "lastHeartbeatTime": "2018-04-04T12:07:55Z",
+        "lastTransitionTime": "2018-03-13T11:21:53Z",
+        "reason": "KubeletHasNoDiskPressure",
+        "message": "kubelet has no disk pressure"
+      },
+      {
+        "type": "Ready",
+        "status": "True",
+        "lastHeartbeatTime": "2018-04-04T12:07:55Z",
+        "lastTransitionTime": "2018-03-05T10:40:21Z",
+        "reason": "KubeletReady",
+        "message": "kubelet is posting ready status"
+      }
+    ],
+    "addresses": [
+      {
+        "type": "InternalIP",
+        "address": "192.168.42.101"
+      },
+      {
+        "type": "Hostname",
+        "address": "k8s-node-w-1"
+      }
+    ],
+    "daemonEndpoints": {
+      "kubeletEndpoint": {
+        "Port": 10250
+      }
+    },
+    "nodeInfo": {
+      "machineID": "609bbd29e32a4898e604f49bff82a88c",
+      "systemUUID": "984B851A-581C-4E17-BE5B-9DFC4B00191E",
+      "bootID": "855b3fd9-63fd-4c11-8c0f-761d39d941b1",
+      "kernelVersion": "3.10.0-693.11.6.el7.x86_64",
+      "osImage": "CentOS Linux 7 (Core)",
+      "containerRuntimeVersion": "docker://1.12.6",
+      "kubeletVersion": "v1.8.5",
+      "kubeProxyVersion": "v1.8.5",
+      "operatingSystem": "linux",
+      "architecture": "amd64"
+    },
+    "images": [
+      {
+        "names": [
+          "gcr.io/google_samples/k8skafka@sha256:1be8f40245992b94196c998d42a27da3840104c41eb78b8a389276a2c5d3b96f",
+          "gcr.io/google_samples/k8skafka:v1"
+        ],
+        "sizeBytes": 385091514
+      },
+      {
+        "names": [
+          "gcr.io/google-containers/fluentd-elasticsearch@sha256:de60e9048b3b79c4e53e66dc3b8ee58b4be2a88395a4b33407f8bbadc9548dfb",
+          "gcr.io/google-containers/fluentd-elasticsearch:1.20"
+        ],
+        "sizeBytes": 300761936
+      },
+      {
+        "names": [
+          "gcr.io/google_samples/k8szk@sha256:eee48b4ab091324993baec42ee542f26836acfd24821eb3891e5a7c281b80dad",
+          "gcr.io/google_samples/k8szk:v3"
+        ],
+        "sizeBytes": 276574299
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/syslog@sha256:2863e4f03d4f9f02d13d3f2dce25d351e198778d7aeab359c5cca9f858df7131",
+          "registry.geohub.space/wo7/syslog:poc-1.2.0",
+          "registry.geohub.space/wo7/syslog:t-pdgs-140"
+        ],
+        "sizeBytes": 222066234
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/syslog@sha256:217fa6098a4484f19466d0cbea5a1c814d4c742afe55e7174639a148784e986f"
+        ],
+        "sizeBytes": 222066226
+      },
+      {
+        "names": [
+          "docker.io/kincl/kubernetes-logging-syslog@sha256:12365466b2fc00398e2cd13c44d0f24e36af127544fdd7695a3ba96b8e30a4d7",
+          "docker.io/kincl/kubernetes-logging-syslog:latest"
+        ],
+        "sizeBytes": 220892489
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/ftpserver@sha256:dafd0b4b472ff7447fc63b786dd6d75fd70fd7cb226b0b447875fdfa3da83d36",
+          "registry.geohub.space/wo7/ftpserver:poc-1.2.0"
+        ],
+        "sizeBytes": 157971816
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/ftpserver@sha256:c941572aa4fe157e0474c1cd8c1f822f424af99672046eeabc12021ab1437696",
+          "registry.geohub.space/wo7/ftpserver:latest"
+        ],
+        "sizeBytes": 156762302
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:c6a239d63832656815b95b22caba71e35eb190b979e67b887cd537012882d2eb"
+        ],
+        "sizeBytes": 139894091
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:ca2f49da993f64b1e333db897b01f97309df43573fa285c6013ce5d659785bea",
+          "registry.geohub.space/wo7/metadata_catalog:poc-1.2.1"
+        ],
+        "sizeBytes": 128416125
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:3308d1e38beaa76f6751aff241f32204c5701d65f896379bfa84dfd492e60b29",
+          "registry.geohub.space/wo7/metadata_catalog:latest",
+          "registry.geohub.space/wo7/metadata_catalog:poc-1.2.0"
+        ],
+        "sizeBytes": 128416124
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:890ba6b5d9edabe35ef6b9cd18d02ea7c2d4df1f7d3c68e745d2d0ac59dce2ee"
+        ],
+        "sizeBytes": 128416085
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:495dbc3b12135dad500b6dae6ac72be0a6506b49e1c5cf8e9a835a53ebbc9236"
+        ],
+        "sizeBytes": 128416083
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:9bab6de5887dbcef0659feab3d02b3ff42f089750732fdaae1cacdd9ad615231"
+        ],
+        "sizeBytes": 128416045
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:84518636b5989d246610dcb3df11e2bb34d0a1e9e2e1d954d1d1af3b52f45442"
+        ],
+        "sizeBytes": 128416043
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:42882712c6840213b4ba84668ab18da2b9fae0720fea62a028206b723d8eedba",
+          "registry.geohub.space/wo7/metadata_catalog:sprint3_corrections"
+        ],
+        "sizeBytes": 128416042
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:1fb3703589d6b217aa5a42e096ef4f70b52f456d7abb4e05df50b77a1026e594"
+        ],
+        "sizeBytes": 128415628
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:5422eb09d125018ad6a08f7a7b1c95d57851ee4df63d8c872399bba8ab56b464",
+          "registry.geohub.space/wo7/metadata_catalog:SPDGS-15"
+        ],
+        "sizeBytes": 128415624
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:61533b21fe82b980c56e46e64733d75fb40b116e3c7d6538361421a441603a77"
+        ],
+        "sizeBytes": 128413905
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:6ab6b68ca9eef89a1b2b60f7fac5b9b0d6d5b20ac4b54655355d56578fe8b364"
+        ],
+        "sizeBytes": 128413904
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:3ded0fba5a87e5180abfd9206e38355638ddde6da0e237e1dede420f9ddeb56b"
+        ],
+        "sizeBytes": 128413904
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:90a958aaf16a727c9181ab0484b118e9ee9eb5c061de938e5afdaf25576ea427"
+        ],
+        "sizeBytes": 128413826
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:5d40116f252c02a2d48d920f15f7179d8082e1a478621041621f650e05e1afc0"
+        ],
+        "sizeBytes": 128413658
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:fbc8b43271833e54f2395f708dc439001b5a2fcdd1dc394db2e08bf35f8ef352"
+        ],
+        "sizeBytes": 128413517
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:a77e529450b912d6650ffc31bf4f8287f2427d17f2f0d0a5ed1c2d6baa7bb0e7"
+        ],
+        "sizeBytes": 128391502
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/metadata_catalog@sha256:accbd121aca93d505502299226299c429d86458225b823664c401a6aaecf2ee1"
+        ],
+        "sizeBytes": 128390762
+      },
+      {
+        "names": [
+          "registry.ac2n.eu/wo7/metadata_catalog@sha256:de3d8233b522aeb65ec08c714e0e81ffde82e09ab8524a0b5813f0f9b2e3a3f2",
+          "registry.geohub.space/wo7/metadata_catalog@sha256:de3d8233b522aeb65ec08c714e0e81ffde82e09ab8524a0b5813f0f9b2e3a3f2",
+          "registry.ac2n.eu/wo7/metadata_catalog:SPDGS-15"
+        ],
+        "sizeBytes": 128390761
+      },
+      {
+        "names": [
+          "registry.ac2n.eu/wo7/metadata_catalog@sha256:a24eadf9915c40db0397347e486d1d30cf073005da88b328d4d681123fa3a5a6",
+          "registry.ac2n.eu/wo7/metadata_catalog:latest"
+        ],
+        "sizeBytes": 128380498
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:306d73be3648b2a02697b52daa2970554d881bbbf5ddc27942eb3357f4ad444e",
+          "registry.geohub.space/wo7/scaler:SPDGS-48"
+        ],
+        "sizeBytes": 122964050
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:143dc179391221d5bcd3ee1ff385a370c34a355c0f9c9bd53bb0b2afd0eb565d"
+        ],
+        "sizeBytes": 122962741
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:417b5ff64c2e0a217169713edef49901aecc3f3e9e228e1348f0b632ef2efbff"
+        ],
+        "sizeBytes": 122954503
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:9ff51596da72a32f3d883e4655d4e322d3a6ce4bce59e52340e0888c4df4c4fa"
+        ],
+        "sizeBytes": 122954316
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:790af6827fa91038ce815b8abad8570fea43d9f65f97558541cc6c379a4bf870"
+        ],
+        "sizeBytes": 122954291
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:de34ed5b0a260db4e734f117be577db5c920b30a9b62e15203e0c68a8b927681"
+        ],
+        "sizeBytes": 122954220
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:32c4f8dee7c0f0a071d3b26c38a34e96242c1ca84636a5a690490cac36b958cb"
+        ],
+        "sizeBytes": 122954184
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:f2e38245bce8439ac3589a591868077c52bc79769846fb343be89759986eaba2",
+          "registry.geohub.space/wo7/scaler:latest",
+          "registry.geohub.space/wo7/scaler:poc-1.2.0"
+        ],
+        "sizeBytes": 113730798
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:a6fa3487da000ccc873ec5ec32fb44a3a50aea8083f573cd55b81fcfdbb32165",
+          "registry.geohub.space/wo7/scaler:SPDGS-47"
+        ],
+        "sizeBytes": 113730592
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/scaler@sha256:f6ac20786950b855295aee47a5fd288df061c40a7497ac127e0a4304c5f51980"
+        ],
+        "sizeBytes": 113730488
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l1_job_generator@sha256:a6f17a4a9ea7e03d59415e60c23d0f790dbe57a8a871f950e39fd0e663c7757b",
+          "registry.geohub.space/wo7/l1_job_generator:latest",
+          "registry.geohub.space/wo7/l1_job_generator:poc-1.2.1"
+        ],
+        "sizeBytes": 109774438
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l1_job_generator@sha256:23de9bf7b74038626f33c144a3a545cdd26a67fa2004a84155c3a21e80bee895",
+          "registry.geohub.space/wo7/l1_job_generator:SPDGS-27",
+          "registry.geohub.space/wo7/l1_job_generator:poc-1.2.0"
+        ],
+        "sizeBytes": 109774435
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l0_job_generator@sha256:cddefde4975332eaa55079a6998f441e05626f93d484f998595d3435bda38f5a",
+          "registry.geohub.space/wo7/l0_job_generator:latest",
+          "registry.geohub.space/wo7/l0_job_generator:poc-1.2.0"
+        ],
+        "sizeBytes": 109774422
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l1_job_generator@sha256:78e853b8fc34d7ccd39b9917d07e2f6f0b53f65e452f2517a94fb45b7ee6ddbe"
+        ],
+        "sizeBytes": 109773815
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l1_job_generator@sha256:3167852cfc6fc2d16cb53df5354ffb9757a06cb863e21fbdf0d87d681d581b6f"
+        ],
+        "sizeBytes": 109773694
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l0_job_generator@sha256:2117a3a186a416e45b4fa1adad21d2d20d17686f87ccec07d23d2fb897290ec6"
+        ],
+        "sizeBytes": 109773533
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l0_job_generator@sha256:a60b683403b74cb54bd96ecea345d2726e91062cf6a0856ad52072b2294198bb",
+          "registry.geohub.space/wo7/l0_job_generator:SPDGS-15"
+        ],
+        "sizeBytes": 109773522
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l0_job_generator@sha256:53d6e65f8a5a253ec51d1057ca4dc2d4c9fe6c1f915ba74b24750c018b31e4fa"
+        ],
+        "sizeBytes": 109772507
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l0_job_generator@sha256:ccb2a74458a799393cde1437293c9abc49c4455aab547e12ef3d2f04dbbd3302"
+        ],
+        "sizeBytes": 109772461
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l0_job_generator@sha256:af8d511267a9dfa6034f5fa545fb1fd859459e0b724b286d5a57200393d50ce1"
+        ],
+        "sizeBytes": 109772411
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l0_job_generator@sha256:c6f6a157e81b929a3579ea77d748b53278d9e0be09a754b285bb6c58d4c9cd2e"
+        ],
+        "sizeBytes": 109772397
+      },
+      {
+        "names": [
+          "registry.geohub.space/wo7/l0_job_generator@sha256:d8697d709baa47379e96523777e692e3f9e54363635bffc8366c22188a84ef43"
+        ],
+        "sizeBytes": 109772229
+      }
+    ],
+    "volumesInUse": [
+      "kubernetes.io/cinder/3b1fb909-2d7d-4abd-bfac-3ce9c1aa36ea",
+      "kubernetes.io/cinder/6fd88c97-660e-4e50-9980-3cf08bade4a5",
+      "kubernetes.io/cinder/806931bc-99e1-4b3f-ac16-4e639dcf56bb"
+    ],
+    "volumesAttached": [
+      {
+        "name": "kubernetes.io/cinder/3b1fb909-2d7d-4abd-bfac-3ce9c1aa36ea",
+        "devicePath": "/dev/vdc"
+      },
+      {
+        "name": "kubernetes.io/cinder/6fd88c97-660e-4e50-9980-3cf08bade4a5",
+        "devicePath": "/dev/vdd"
+      },
+      {
+        "name": "kubernetes.io/cinder/806931bc-99e1-4b3f-ac16-4e639dcf56bb",
+        "devicePath": "/dev/vde"
+      }
+    ]
+  }
+}
