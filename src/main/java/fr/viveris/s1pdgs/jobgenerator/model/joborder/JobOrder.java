@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.persistence.oxm.annotations.XmlPath;
 
+import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+
 /**
  * Class describing the content of a file jobOrder.xml
  * 
@@ -26,7 +28,7 @@ public class JobOrder {
 	 * Global configuration
 	 */
 	@XmlElement(name = "Ipf_Conf")
-	private JobOrderConf conf;
+	private AbstractJobOrderConf conf;
 
 	/**
 	 * Processors
@@ -40,7 +42,6 @@ public class JobOrder {
 	 */
 	@XmlPath("List_of_Ipf_Procs/@count")
 	private int nbProcs;
-
 
 	/**
 	 * Default constructor
@@ -56,19 +57,27 @@ public class JobOrder {
 	 * 
 	 * @param obj
 	 */
-	public JobOrder(JobOrder obj) {
+	public JobOrder(JobOrder obj, ProcessLevel level) {
 		this();
 		if (obj.getConf() != null) {
-			this.conf = new JobOrderConf(obj.getConf());
+			switch (level) {
+			case L0:
+				this.conf = new L0JobOrderConf(obj.getConf());
+				break;
+			case L1:
+				this.conf = new L1JobOrderConf(obj.getConf());
+				break;
+			}
 		}
-		this.procs.addAll(obj.getProcs().stream().filter(item -> item != null).map(item -> new JobOrderProc(item)).collect(Collectors.toList()));
+		this.procs.addAll(obj.getProcs().stream().filter(item -> item != null).map(item -> new JobOrderProc(item))
+				.collect(Collectors.toList()));
 		this.nbProcs = this.procs.size();
 	}
 
 	/**
 	 * @return the conf
 	 */
-	public JobOrderConf getConf() {
+	public AbstractJobOrderConf getConf() {
 		return conf;
 	}
 
@@ -76,10 +85,9 @@ public class JobOrder {
 	 * @param conf
 	 *            the conf to set
 	 */
-	public void setConf(JobOrderConf conf) {
+	public void setConf(AbstractJobOrderConf conf) {
 		this.conf = conf;
 	}
-
 
 	/**
 	 * @return the procs
@@ -107,7 +115,7 @@ public class JobOrder {
 	 */
 	@Override
 	public String toString() {
-		return "JobOrder [conf=" + conf + ", procs="+ procs + ", nbProcs=" + nbProcs + "]";
+		return "JobOrder [conf=" + conf + ", procs=" + procs + ", nbProcs=" + nbProcs + "]";
 	}
 
 	/*

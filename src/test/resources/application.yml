@@ -67,6 +67,7 @@ job-generator:
 
 # L0 Process configuration
 process:
+  level: "L0"
   paramstr: "Processing_Mode:NRT||Timeout:10"
   loglevelstdout: DEBUG
   loglevelstderr: INFO

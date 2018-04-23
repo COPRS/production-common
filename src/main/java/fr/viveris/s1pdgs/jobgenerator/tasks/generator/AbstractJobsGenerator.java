@@ -198,6 +198,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		// Retrieve task table
 		try {
 			this.taskTable = (TaskTable) xmlConverter.convertFromXMLToObject(xmlFile.getAbsolutePath());
+			this.taskTable.setLevel(this.l0ProcessSettings.getLevel());
 		} catch (IOException | JAXBException e) {
 			throw new BuildTaskTableException(e.getMessage(), e, this.taskTableXmlName);
 		}
@@ -284,7 +285,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 						job.getProduct().getIdentifier());
 			}
 			job.setTaskTableName(this.taskTableXmlName);
-			job.setJobOrder(new JobOrder(this.jobOrderTemplate));
+			job.setJobOrder(new JobOrder(this.jobOrderTemplate, this.l0ProcessSettings.getLevel()));
 			// Add only metadata query with compatible mode
 			this.metadataSearchQueries.forEach((k, v) -> {
 				job.getMetadataQueries().put(k, new SearchMetadataResult(new SearchMetadataQuery(v)));
