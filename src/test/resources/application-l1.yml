@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: s1pdgs-l1-wrapper
+
+# Logging
+logging:
+  file: ./s1pdgs-l1-wrapper.log
+
+kafka:
+  group-id: l1-wrappers
+  client-id: l1-wrapper
+  enable-consumer:
+    l0-jobs: false
+    l1-jobs: true
+    
+process:
+  size-batch-s3-upload: 5
+  size-batch-s3-download: 5

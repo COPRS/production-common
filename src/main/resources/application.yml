@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: ${wrapper_spring_appname:s1pdgs-wrapper}
+    
+# Logging
+logging:
+  config: ${wrapper_logging_config:logback-spring.xml}
+  level:
+    ROOT: ${wrapper_logging_level_root:ERROR}
+    org.springframework: ${wrapper_logging_level_orgspringframework:ERROR}
+    fr.viveris.s1pdgs: ${wrapper_logging_level_frviveriss1pdgs:INFO}
+    kafka: ${wrapper_logging_level_kafka:WARN}
+    org.apache: ${wrapper_logging_level_orgapache:WARN}
+  file: ${wrapper_logging_file:./s1pdgs-wrapper.log}
+  
+# Kafka
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
+  group-id: ${wrapper_kafka_group:l0-wrappers}
+  client-id: ${wrapper_kafka_client:wrapper}
+  poll-timeout: ${wrapper_kafka_poll-timeout:500}
+  max-poll-interval-ms: ${wrapper_kafka_max-poll-interval-ms:3600000}
+  max-pool-records: ${wrapper_kafka_max-pool-records:1}
+  session-timeout-ms: ${wrapper_kafka_session-timeout-ms:10000}
+  heartbeat-interval-ms: ${wrapper_kafka_heartbeat-interval-ms:3000}
+  topic:
+    l0-jobs: ${kafka_topic_l0_jobs:t-pdgs-l0-jobs}
+    l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}
+    l0-acns: ${kafka_topic_l0_acns:t-pdgs-l0-acns}
+    l0-reports: ${kafka_topic_l0_report:t-pdgs-l0-reports}
+    l1-jobs: ${kafka_topic_l1_jobs:t-pdgs-l1-jobs}
+    l1-slices: ${kafka_topic_l1_slices:t-pdgs-l1-slices}
+    l1-acns: ${kafka_topic_l1_acns:t-pdgs-l1-acns}
+    l1-reports: ${kafka_topic_l1_reports:t-pdgs-l1-reports}
+  enable-consumer:
+    l0-jobs: ${wrapper_kafka_enable-consumer_l0-jobs:true}
+    l1-jobs: ${wrapper_kafka_enable-consumer_l1-jobs:false}
+    
+#Object Storage
+storage:
+  user:
+    id: ${storage_user_id}
+    secret: ${storage_user_secret}
+  endpoint: ${storage_endpoint}
+  region: ${storage_region}
+  buckets:
+    auxiliary-files: ${storage_buckets_auxiliary-files:auxiliary-files}
+    edrs-sessions: ${storage_buckets_session-files:session-files}
+    l0-slices: ${storage_buckets_l0-slices:l0-slices}
+    l0-acns: ${storage_buckets_l0-acns:acns}
+    l1-slices: ${storage_buckets_l1-slices:l1-slices}
+    l1-acns: ${storage_buckets_l1-acns:l1-acns}
+    
+# REST controller
+server:
+  port: ${wrapper_rest_server_port:8080}
+    
+process:
+  size-batch-s3-upload: ${wrapper_process_size-batch-s3-upload:20}
+  size-batch-s3-download: ${wrapper_process_size-batch-s3-download:5}
+
+status:
+  delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}
+  max-error-counter: ${wrapper_status_max-error-counter:3}
+
+dev:
+  steps-activation:
+    download: ${wrapper_process_dev-steps-activation_download:true}
+    execution: ${wrapper_process_dev-steps-activation_execution:true}
+    upload: ${wrapper_process_dev-steps-activation_upload:true}
+    erasing: ${wrapper_process_dev-steps-activation_erasing:true}

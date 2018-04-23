@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: s1pdgs-l0-wrapper
+    
+# Logging
+logging:
+  config: logback-spring.xml
+  level:
+    ROOT: ${level0_wrapper_logging_level_root:ERROR}
+    org.springframework: ${level0_wrapper_logging_level_orgspringframework:ERROR}
+    fr.viveris.s1pdgs: DEBUG
+    kafka: ${level0_wrapper_logging_level_kafka:WARN}
+    org.apache: ${level0_wrapper_logging_level_orgapache:WARN}
+    com.amazonaws: INFO
+  file: ${level0_wrapper_logging_file:./s1pdgs-level0-wrapper.log}
+  
+# Kafka
+kafka:
+  bootstrap-servers: ${spring.embedded.kafka.brokers}
+  group-id: l0-wrappers
+  client-id: l0-wrapper
+  poll-timeout: 500
+  max-poll-interval-ms: ${wrapper_kafka_max-poll-interval-ms:3600000}
+  max-pool-records: ${wrapper_kafka_max-pool-records:1}
+  session-timeout-ms: ${wrapper_kafka_session-timeout-ms:10000}
+  heartbeat-interval-ms: ${wrapper_kafka_heartbeat-interval-ms:3000}
+  topic:
+    l0-jobs: t-pdgs-l0-jobs
+    l0-slices: t-pdgs-l0-slices
+    l0-acns: t-pdgs-l0-acns
+    l0-reports: t-pdgs-l0-reports
+    l1-jobs: t-pdgs-l1-jobs
+    l1-slices: t-pdgs-l1-slices
+    l1-acns: t-pdgs-l1-acns
+    l1-reports: t-pdgs-l1-reports
+  enable-consumer:
+    l0-jobs: true
+    l1-jobs: false
+    
+#Object Storage
+storage:
+  user:
+    id: MEF5PCBPTXHKOUTCKW3G
+    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
+  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
+  region: eu-west-0
+  buckets:
+    auxiliary-files: ${storage_buckets_auxiliary-files:auxiliary-files}
+    edrs-sessions: ${storage_buckets_session-files:session-files}
+    l0-slices: ${storage_buckets_l0-slices:l0-slices}
+    l0-acns: ${storage_buckets_l0-acns:acns}
+    l1-slices: ${storage_buckets_l1-slices:l1-slices}
+    l1-acns: ${storage_buckets_l1-acns:l1-acns}
+    
+server:
+  port: ${wrapper_rest_server_port:8080}
+  
+process:
+  size-batch-s3-upload: 20
+  size-batch-s3-download: 5
+
+status:
+  delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}
+  max-error-counter: ${wrapper_status_max-error-counter:3}
+    
+dev:
+  steps-activation:
+    download: ${wrapper_process_dev-steps-activation_download:true}
+    execution: ${wrapper_process_dev-steps-activation_execution:true}
+    upload: ${wrapper_process_dev-steps-activation_upload:true}
+    erasing: ${wrapper_process_dev-steps-activation_erasing:true}
