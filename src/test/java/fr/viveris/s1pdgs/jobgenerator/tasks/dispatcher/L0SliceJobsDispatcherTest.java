@@ -66,10 +66,10 @@ public class L0SliceJobsDispatcherTest {
 	@Mock
 	private XmlConverter xmlConverter;
 
-	private File taskTable1 = new File("./l1_config/task_tables/EN_RAW__0_GRDF_1.xml");
-	private File taskTable2 = new File("./l1_config/task_tables/EW_RAW__0_GRDH_1.xml");
-	private File taskTable3 = new File("./l1_config/task_tables/EW_RAW__0_GRDM_1.xml");
-	private File taskTable4 = new File("./l1_config/task_tables/IW_RAW__0_GRDH_1.xml");
+	private File taskTable1 = new File("./data_test/l1_config/task_tables/EN_RAW__0_GRDF_1.xml");
+	private File taskTable2 = new File("./data_test/l1_config/task_tables/EW_RAW__0_GRDH_1.xml");
+	private File taskTable3 = new File("./data_test/l1_config/task_tables/EW_RAW__0_GRDM_1.xml");
+	private File taskTable4 = new File("./data_test/l1_config/task_tables/IW_RAW__0_GRDH_1.xml");
 	private int nbTaskTables;
 
 	private L0SliceJobsDispatcher dispatcher;
@@ -95,7 +95,7 @@ public class L0SliceJobsDispatcherTest {
 
 		// Mock the job generator settings
 		doAnswer(i -> {
-			return "./l1_config/task_tables/";
+			return "./data_test/l1_config/task_tables/";
 		}).when(jobGeneratorSettings).getDirectoryoftasktables();
 		doAnswer(i -> {
 			return 25;
@@ -132,7 +132,7 @@ public class L0SliceJobsDispatcherTest {
 		}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(Mockito.any(), Mockito.any());
 
 		// Retrieve number of tasktables
-		File taskTableDirectory = new File("./l1_config/task_tables");
+		File taskTableDirectory = new File("./data_test/l1_config/task_tables");
 		if (taskTableDirectory.isDirectory()) {
 			String[] files = taskTableDirectory.list();
 			if (files != null) {
@@ -146,7 +146,7 @@ public class L0SliceJobsDispatcherTest {
 
 		// Return the dispatcher
 		this.dispatcher = new L0SliceJobsDispatcher(jobGeneratorSettings, jobsGeneratorFactory,
-				jobGenerationTaskScheduler, xmlConverter, "./l1_config/routing.xml");
+				jobGenerationTaskScheduler, xmlConverter, "./data_test/l1_config/routing.xml");
 	}
 
 	@Test

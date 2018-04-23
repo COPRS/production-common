@@ -86,7 +86,7 @@ public class EdrsSessionJobDispatcherTest {
 	private void mockJobGeneratorSettings() {
 		// Mock the job generator settings
 		doAnswer(i -> {
-			return "./l0_config/task_tables/";
+			return "./data_test/l0_config/task_tables/";
 		}).when(jobGeneratorSettings).getDirectoryoftasktables();
 		doAnswer(i -> {
 			return 4;
@@ -98,7 +98,7 @@ public class EdrsSessionJobDispatcherTest {
 
 	@Test
 	public void testCreate() {
-		File taskTable1 = new File("./l0_config/task_tables/TaskTable.AIOP.xml");
+		File taskTable1 = new File("./data_test/l0_config/task_tables/TaskTable.AIOP.xml");
 
 		// Mocks
 		try {
@@ -125,7 +125,7 @@ public class EdrsSessionJobDispatcherTest {
 	 */
 	@Test
 	public void testInitialize() {
-		File taskTable1 = new File("./l0_config/task_tables/TaskTable.AIOP.xml");
+		File taskTable1 = new File("./data_test/l0_config/task_tables/TaskTable.AIOP.xml");
 
 		// Mocks
 		this.mockJobGeneratorSettings();
@@ -161,7 +161,7 @@ public class EdrsSessionJobDispatcherTest {
 	 */
 	@Test
 	public void testDispatch() {
-		File taskTable1 = new File("./l0_config/task_tables/TaskTable.AIOP.xml");
+		File taskTable1 = new File("./data_test/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
 		Job<EdrsSession> job1 = new Job<EdrsSession>(p);
 
@@ -204,7 +204,7 @@ public class EdrsSessionJobDispatcherTest {
 	 */
 	@Test(expected = JobGenerationException.class)
 	public void testDispatchThrow() throws JobGenerationException, JobDispatcherException {
-		File taskTable1 = new File("./l0_config/task_tables/TaskTable.AIOP.xml");
+		File taskTable1 = new File("./data_test/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
 		Job<EdrsSession> job1 = new Job<EdrsSession>(p);
 

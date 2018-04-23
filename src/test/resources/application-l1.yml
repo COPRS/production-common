@@ -10,7 +10,7 @@ kafka:
     l0-slices: true
 
 job-generator:
-  directoryoftasktables: ./l1_config/task_tables/
+  directoryoftasktables: ./data_test/l1_config/task_tables/
   maxnumberoftasktables: 40
   
 process:
