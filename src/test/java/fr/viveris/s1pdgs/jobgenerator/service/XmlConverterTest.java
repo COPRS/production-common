@@ -294,7 +294,7 @@ public class XmlConverterTest {
 	@Test
 	public void testUnmarshalingL1Routing() {
 		try {
-			L1Routing converted = (L1Routing) xmlConverter.convertFromXMLToObject("./l1_config/routing.xml");
+			L1Routing converted = (L1Routing) xmlConverter.convertFromXMLToObject("./data_test/l1_config/routing.xml");
 			L1Routing expected = TestL1Utils.buildL1Routing();
 
 			assertEquals("0", expected.getRoutes().get(0), converted.getRoutes().get(0));

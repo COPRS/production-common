@@ -89,7 +89,7 @@ public class AbstractJobDispatcherTest {
 	 */
 	@Test
 	public void testConstructor() {
-		this.mockJobGeneratorSettings(4, "./l0_config/task_tables/");
+		this.mockJobGeneratorSettings(4, "./data_test/l0_config/task_tables/");
 		AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
 		assertTrue(dispatcher.generators.isEmpty());
 	}

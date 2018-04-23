@@ -28,7 +28,7 @@ public class JobGeneratorSettingsTest {
 
 	@Test
 	public void testSettings() {
-		assertEquals("Invalid directory", "./l0_config/task_tables/", taskTablesSettings.getDirectoryoftasktables());
+		assertEquals("Invalid directory", "./data_test/l0_config/task_tables/", taskTablesSettings.getDirectoryoftasktables());
 		assertEquals("Invalid directory", 500, taskTablesSettings.getScheduledfixedrate());
 		assertEquals("Invalid maxnumberoftasktables", 2, taskTablesSettings.getMaxnumberoftasktables());
 		assertEquals("Invalid maxnumberofjobs", 20, taskTablesSettings.getMaxnumberofjobs());

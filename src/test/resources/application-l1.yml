@@ -10,16 +10,17 @@ kafka:
     l0-slices: true
 
 job-generator:
-  directoryoftasktables: ./l1_config/task_tables/
+  directoryoftasktables: ./data_test/l1_config/task_tables/
   maxnumberoftasktables: 40
   
 process:
+  level: "L1"
   paramstr: "Processing_Mode:NRT||Timeout:10"
   loglevelstdout: DEBUG
   loglevelstderr: INFO
   processingstation: WILE
   outputregexpstr: "SM_RAW__0S:^S1[A-B]_S[1-6]_RAW__0S.*$||AN_RAW__0S:^S1[A-B]_N[1-6]_RAW__0S.*$||ZS_RAW__0S:^S1[A-B]_Z[1-6]_RAW__0S.*$||REP_L0PSA_:^S1[A|B|_]_OPER_REP_ACQ.*$||REP_EFEP_:^S1[A|B|_]_OPER_REP_PASS.*.EOF$"
-  
+    
 pattern-l0-slices:
   regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
   placeMatchSatelliteId: 2

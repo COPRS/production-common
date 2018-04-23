@@ -26,6 +26,7 @@ import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.L0AcnMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.L0SliceMetadata;
@@ -90,6 +91,9 @@ public class L0SlicesJobsGeneratorTest {
 			Map<String, String> r = new HashMap<String, String>(2);
 			return r;
 		}).when(processSettings).getParams();
+		Mockito.doAnswer(i -> {
+			return ProcessLevel.L1;
+		}).when(processSettings).getLevel();
 		Mockito.doAnswer(i -> {
 			Map<String, String> r = new HashMap<String, String>(5);
 			r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");

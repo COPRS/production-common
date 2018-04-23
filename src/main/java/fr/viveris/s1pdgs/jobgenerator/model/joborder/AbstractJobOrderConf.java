@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.eclipse.persistence.oxm.annotations.XmlPath;
-
 /**
  * Class of job order configuration
  * 
@@ -19,87 +17,72 @@ import org.eclipse.persistence.oxm.annotations.XmlPath;
  */
 @XmlRootElement(name = "Ipf_Conf")
 @XmlAccessorType(XmlAccessType.NONE)
-public class JobOrderConf {
+public abstract class AbstractJobOrderConf {
 
 	/**
 	 * Processor name
 	 */
 	@XmlElement(name = "Processor_Name")
-	private String processorName;
+	protected String processorName;
 
 	/**
 	 * Processor version
 	 */
 	@XmlElement(name = "Version")
-	private String version;
+	protected String version;
 
 	/**
 	 * Stdout log level
 	 */
 	@XmlElement(name = "Stdout_Log_Level")
-	private String stdoutLogLevel;
+	protected String stdoutLogLevel;
 
 	/**
 	 * Stderr log level
 	 */
 	@XmlElement(name = "Stderr_Log_Level")
-	private String stderrLogLevel;
+	protected String stderrLogLevel;
 
 	/**
 	 * Indicates if the environment is a test environment or not
 	 */
 	@XmlElement(name = "Test")
-	private boolean test;
+	protected boolean test;
 
 	/**
 	 * Global activation of the breakpoints
 	 */
 	@XmlElement(name = "Breakpoint_Enable")
-	private boolean breakPointEnable;
+	protected boolean breakPointEnable;
 
 	/**
 	 * Processing station
 	 */
 	@XmlElement(name = "Processing_Station")
-	private String processingStation;
+	protected String processingStation;
 
 	/**
 	 * Sensing time of the concerned session
 	 */
 	@XmlElement(name = "Sensing_Time")
-	private JobOrderSensingTime sensingTime;
+	protected JobOrderSensingTime sensingTime;
 	
 	/**
 	 * Configuration files
 	 */
 	@XmlElementWrapper(name = "Config_Files")
 	@XmlElement(name = "Conf_File_Name")
-	private List<String> configFiles;
-	
-	/**
-	 * Dynamic processing parameters
-	 */
-	@XmlElementWrapper(name = "List_of_Dynamic_Processing_Parameters")
-	@XmlElement(name = "Dynamic_Processing_Parameter")
-	private List<JobOrderProcParam> procParams;
-
-	/**
-	 * Number of processors. Automatically field
-	 */
-	@XmlPath("List_of_Dynamic_Processing_Parameters/@count")
-	private int nbProcParams;
+	protected List<String> configFiles;
 
 
 	/**
 	 * Default constructor
 	 */
-	public JobOrderConf() {
+	public AbstractJobOrderConf() {
 		super();
 		this.test = false;
 		this.breakPointEnable = false;
 		this.configFiles = new ArrayList<>();
-		this.procParams = new ArrayList<>();
-		this.nbProcParams = 0;
 	}
 
 	/**
@@ -107,7 +90,7 @@ public class JobOrderConf {
 	 * 
 	 * @param obj
 	 */
-	public JobOrderConf(JobOrderConf obj) {
+	public AbstractJobOrderConf(AbstractJobOrderConf obj) {
 		this();
 		this.processorName = obj.getProcessorName();
 		this.version = obj.getVersion();
@@ -115,8 +98,6 @@ public class JobOrderConf {
 		this.stderrLogLevel = obj.getStderrLogLevel();
 		this.test = obj.isTest();
 		this.processingStation = obj.getProcessingStation();
-		this.procParams = obj.getProcParams();
-		this.nbProcParams = obj.getProcParams().size();
 		this.configFiles = obj.getConfigFiles();
 		if (obj.getSensingTime() != null) {
 			this.sensingTime = new JobOrderSensingTime(obj.getSensingTime());
@@ -278,30 +259,20 @@ public class JobOrderConf {
 	/**
 	 * @return the procParams
 	 */
-	public List<JobOrderProcParam> getProcParams() {
-		return procParams;
-	}
+	public abstract List<JobOrderProcParam> getProcParams();
 	
 
-	public void addProcParam(JobOrderProcParam param) {
-		this.procParams.add(param);
-		this.nbProcParams ++;
-	}
+	public abstract void addProcParam(JobOrderProcParam param);
 
 	/**
 	 * @param procParams the procParams to set
 	 */
-	public void setProcParams(List<JobOrderProcParam> procParams) {
-		this.procParams = procParams;
-		this.nbProcParams = procParams.size();
-	}
+	public abstract void setProcParams(List<JobOrderProcParam> procParams);
 
 	/**
 	 * @return the nbProcParams
 	 */
-	public int getNbProcParams() {
-		return nbProcParams;
-	}
+	public abstract int getNbProcParams();
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -311,7 +282,7 @@ public class JobOrderConf {
 		return "JobOrderConf [processorName=" + processorName + ", version=" + version + ", stdoutLogLevel="
 				+ stdoutLogLevel + ", stderrLogLevel=" + stderrLogLevel + ", test=" + test + ", breakPointEnable="
 				+ breakPointEnable + ", processingStation=" + processingStation + ", sensingTime=" + sensingTime
-				+ ", configFiles=" + configFiles + ", procParams=" + procParams + "]";
+				+ ", configFiles=" + configFiles + "]";
 	}
 
 	/* (non-Javadoc)
@@ -323,7 +294,6 @@ public class JobOrderConf {
 		int result = 1;
 		result = prime * result + (breakPointEnable ? 1231 : 1237);
 		result = prime * result + ((configFiles == null) ? 0 : configFiles.hashCode());
-		result = prime * result + ((procParams == null) ? 0 : procParams.hashCode());
 		result = prime * result + ((processingStation == null) ? 0 : processingStation.hashCode());
 		result = prime * result + ((processorName == null) ? 0 : processorName.hashCode());
 		result = prime * result + ((sensingTime == null) ? 0 : sensingTime.hashCode());
@@ -345,18 +315,13 @@ public class JobOrderConf {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		JobOrderConf other = (JobOrderConf) obj;
+		AbstractJobOrderConf other = (AbstractJobOrderConf) obj;
 		if (breakPointEnable != other.breakPointEnable)
 			return false;
 		if (configFiles == null) {
 			if (other.configFiles != null)
 				return false;
 		} else if (!configFiles.equals(other.configFiles))
-			return false;
-		if (procParams == null) {
-			if (other.procParams != null)
-				return false;
-		} else if (!procParams.equals(other.procParams))
 			return false;
 		if (processingStation == null) {
 			if (other.processingStation != null)

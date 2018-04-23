@@ -10,6 +10,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
+import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+
 /**
  * Extraction class of "l0-process" configuration properties
  * 
@@ -20,6 +22,8 @@ import org.springframework.util.StringUtils;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "process")
 public class ProcessSettings {
+	
+	private ProcessLevel level;
 
 	/**
 	 * Lof level for the sdtout
@@ -88,6 +92,20 @@ public class ProcessSettings {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @return the level
+	 */
+	public ProcessLevel getLevel() {
+		return level;
+	}
+
+	/**
+	 * @param level the level to set
+	 */
+	public void setLevel(ProcessLevel level) {
+		this.level = level;
 	}
 
 	/**

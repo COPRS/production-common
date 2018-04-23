@@ -32,6 +32,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductMode;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
@@ -113,6 +114,9 @@ public class AbstractJobsGeneratorTest {
 			r.put("REP_EFEP_", "^S1[A|B|_]_OPER_REP_PASS.*.EOF$");
 			return r;
 		}).when(processSettings).getOutputregexps();
+		Mockito.doAnswer(i -> {
+			return ProcessLevel.L0;
+		}).when(processSettings).getLevel();
 	}
 
 	private void mockJobGeneratorSettings() {

@@ -58,6 +58,7 @@ job-generator:
     
     
 process:
+  level: ${job_process_level}
   paramstr: ${job_process_params}
   loglevelstdout: ${job_process_loglevelstdout:INFO}
   loglevelstderr: ${job_process_loglevelstderr:INFO}

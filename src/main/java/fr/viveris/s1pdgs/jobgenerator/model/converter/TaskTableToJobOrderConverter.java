@@ -1,11 +1,13 @@
 package fr.viveris.s1pdgs.jobgenerator.model.converter;
 
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderBreakpoint;
-import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderOutput;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProc;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.L0JobOrderConf;
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.L1JobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderDestination;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.TaskTable;
@@ -31,7 +33,15 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
 		final TaskTableTaskToJobOrderProc procConverter = new TaskTableTaskToJobOrderProc();
 
 		final JobOrder order = new JobOrder();
-		final JobOrderConf conf = new JobOrderConf();
+		AbstractJobOrderConf conf = null;
+		switch (t.getLevel()) {
+		case L0:
+			conf = new L0JobOrderConf();
+			break;
+		default:
+			conf = new L1JobOrderConf();
+			break;
+		}
 		conf.setProcessorName(t.getProcessorName());
 		conf.setVersion(t.getVersion());
 		if (t.getTest() == TaskTableTestEnum.YES) {

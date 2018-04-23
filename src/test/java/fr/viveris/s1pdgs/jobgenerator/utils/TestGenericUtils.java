@@ -2,13 +2,15 @@ package fr.viveris.s1pdgs.jobgenerator.utils;
 
 import java.util.ArrayList;
 
+import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderBreakpoint;
-import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderOutput;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProc;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.L0JobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderDestination;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.TaskTable;
@@ -34,6 +36,7 @@ public class TestGenericUtils {
 		t.setProcessorName("AIO_PROCESSOR");
 		t.setVersion("01.00");
 		t.setTest(TaskTableTestEnum.NO);
+		t.setLevel(ProcessLevel.L0);
 
 		t.addDynProcParam(new TaskTableDynProcParam("Processing_Mode", "String", "NRT"));
 		t.addDynProcParam(new TaskTableDynProcParam("PT_Assembly", "String", "yes"));
@@ -193,7 +196,7 @@ public class TestGenericUtils {
 	}
 
 	public static JobOrder buildJobOrderTemplateAIOP(boolean xmlOnly) {
-		JobOrderConf conf = new JobOrderConf();
+		AbstractJobOrderConf conf = new L0JobOrderConf();
 		conf.setProcessorName("AIO_PROCESSOR");
 		conf.setVersion("01.00");
 		conf.setStderrLogLevel("INFO");
@@ -333,6 +336,7 @@ public class TestGenericUtils {
 		t.setProcessorName("IW_RAW__0_GRDH_1");
 		t.setVersion("02.84");
 		t.setTest(TaskTableTestEnum.NO);
+		t.setLevel(ProcessLevel.L1);
 
 		t.addDynProcParam(new TaskTableDynProcParam("Application_LUT", "String", "IW_Default"));
 		t.addDynProcParam(new TaskTableDynProcParam("Timeliness_Category", "String", "NRT-3h"));

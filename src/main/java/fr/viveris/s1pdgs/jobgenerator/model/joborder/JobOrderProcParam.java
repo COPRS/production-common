@@ -3,14 +3,12 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Class of a dynamic parameter in the job order
  * @author Cyrielle Gailliard
  *
  */
-@XmlRootElement(name = "Dynamic_Processing_Parameter")
 @XmlAccessorType(XmlAccessType.NONE)
 public class JobOrderProcParam {
 	

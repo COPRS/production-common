@@ -26,6 +26,7 @@ import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
+import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderOutput;
@@ -106,6 +107,10 @@ public class JobsGeneratorFactoryTest {
 
 			TaskTable expectedTaskTable = TestGenericUtils.buildTaskTableAIOP();
 			Mockito.when(xmlConverter.convertFromXMLToObject(Mockito.anyString())).thenReturn(expectedTaskTable);
+
+			Mockito.doAnswer(i -> {
+				return ProcessLevel.L0;
+			}).when(l0ProcessSettings).getLevel();
 
 			JobsGeneratorFactory factory = new JobsGeneratorFactory(l0ProcessSettings, jobGeneratorSettings,
 					xmlConverter, metadataService, kafkaJobsSender);
@@ -263,6 +268,11 @@ public class JobsGeneratorFactoryTest {
 	public void testCreateJobGeneratorForL0Slice() {
 		try {
 
+
+			Mockito.doAnswer(i -> {
+				return ProcessLevel.L1;
+			}).when(l0ProcessSettings).getLevel();
+			
 			TaskTable expectedTaskTable = TestGenericUtils.buildTaskTableIW();
 			Mockito.when(xmlConverter.convertFromXMLToObject(Mockito.anyString())).thenReturn(expectedTaskTable);
 

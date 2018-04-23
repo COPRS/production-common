@@ -46,10 +46,10 @@ level0:
   dir-extractor-sessions: ./tmp/
   
 level1:
-  pathroutingxmlfile: ./l1_config/routing.xml
+  pathroutingxmlfile: ./data_test/l1_config/routing.xml
 
 job-generator:
-  directoryoftasktables: ./l0_config/task_tables/
+  directoryoftasktables: ./data_test/l0_config/task_tables/
   maxnumberoftasktables: 2
   maxnumberofjobs: 20
   scheduledfixedrate: 500
@@ -67,6 +67,7 @@ job-generator:
 
 # L0 Process configuration
 process:
+  level: "L0"
   paramstr: "Processing_Mode:NRT||Timeout:10"
   loglevelstdout: DEBUG
   loglevelstderr: INFO
