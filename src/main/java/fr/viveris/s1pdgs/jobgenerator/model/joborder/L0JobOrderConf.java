@@ -1,6 +1,8 @@
 package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -9,11 +11,12 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.persistence.oxm.annotations.XmlPath;
+import org.springframework.util.CollectionUtils;
 
 @XmlRootElement(name = "Ipf_Conf")
 @XmlAccessorType(XmlAccessType.NONE)
 public class L0JobOrderConf extends AbstractJobOrderConf {
-	
+
 	/**
 	 * Dynamic processing parameters
 	 */
@@ -32,6 +35,8 @@ public class L0JobOrderConf extends AbstractJobOrderConf {
 	 */
 	public L0JobOrderConf() {
 		super();
+		this.procParams = new ArrayList<>();
+		this.nbProcParams = 0;
 	}
 
 	/**
@@ -41,6 +46,12 @@ public class L0JobOrderConf extends AbstractJobOrderConf {
 	 */
 	public L0JobOrderConf(AbstractJobOrderConf obj) {
 		super(obj);
+		this.procParams = new ArrayList<>();
+		this.nbProcParams = 0;
+		if (!CollectionUtils.isEmpty(obj.getProcParams())) {
+			this.procParams.addAll(obj.getProcParams().stream().filter(item -> item != null)
+					.map(item -> new JobOrderProcParam(item)).collect(Collectors.toList()));
+		}
 	}
 
 	@Override
@@ -52,15 +63,16 @@ public class L0JobOrderConf extends AbstractJobOrderConf {
 	public int getNbProcParams() {
 		return this.nbProcParams;
 	}
-	
+
 	@Override
 	public void addProcParam(JobOrderProcParam param) {
 		this.procParams.add(param);
-		this.nbProcParams ++;
+		this.nbProcParams++;
 	}
 
 	/**
-	 * @param procParams the procParams to set
+	 * @param procParams
+	 *            the procParams to set
 	 */
 	@Override
 	public void setProcParams(List<JobOrderProcParam> procParams) {

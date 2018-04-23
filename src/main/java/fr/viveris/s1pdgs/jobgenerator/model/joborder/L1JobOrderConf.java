@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.persistence.oxm.annotations.XmlPath;
+import org.springframework.util.CollectionUtils;
 
 @XmlRootElement(name = "Ipf_Conf")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -47,6 +49,10 @@ public class L1JobOrderConf extends AbstractJobOrderConf {
 		super(obj);
 		this.procParams = obj.getProcParams();
 		this.nbProcParams = obj.getProcParams().size();
+		if (!CollectionUtils.isEmpty(obj.getProcParams())) {
+			this.procParams.addAll(obj.getProcParams().stream().filter(item -> item != null)
+					.map(item -> new JobOrderProcParam(item)).collect(Collectors.toList()));
+		}
 	}
 
 	@Override
