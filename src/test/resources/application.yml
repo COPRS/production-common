@@ -65,6 +65,8 @@ process:
   size-batch-s3-upload:  20
   timeout-batch-s3-download-s: 120
   size-batch-s3-download: 5
+  wait-active-process-nb-max-loop: 12
+  wait-active-process-tempo-s: 10
 
 status:
   delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}

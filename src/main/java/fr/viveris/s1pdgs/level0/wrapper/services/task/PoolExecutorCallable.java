@@ -52,7 +52,8 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 		int counter = 0;
 		try {
 			// Wait for being active (i.e. wait for download of at least one input)
-			while (counter < properties.getWaitActiveProcessNbMaxLoop() && !isActive() && !Thread.currentThread().isInterrupted()) {
+			while (counter < properties.getWaitActiveProcessNbMaxLoop() && !isActive()
+					&& !Thread.currentThread().isInterrupted()) {
 				if (LOGGER.isDebugEnabled()) {
 					LOGGER.debug("Wait for processor executor being active");
 				}
@@ -67,9 +68,12 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 			return false;
 		}
 
+		LOGGER.debug("counter {} isActive {} isInterrupted {} getWaitActiveProcessNbMaxLoop {}", counter, isActive(),
+				Thread.currentThread().isInterrupted(), properties.getWaitActiveProcessNbMaxLoop());
+
 		if (!isActive()) {
-			throw new ProcessTimeoutException(
-					"Process executor not set as active after " + counter * properties.getWaitActiveProcessTempoS() + " seconds");
+			throw new ProcessTimeoutException("Process executor not set as active after "
+					+ counter * properties.getWaitActiveProcessTempoS() + " seconds");
 		}
 
 		LOGGER.info("{} Start launching processes", this.prefixMonitorLogs);

@@ -23,3 +23,5 @@ process:
   size-batch-s3-upload:  5
   timeout-batch-s3-download-s: 120
   size-batch-s3-download: 5
+  wait-active-process-nb-max-loop: 60
+  wait-active-process-tempo-s: 10
