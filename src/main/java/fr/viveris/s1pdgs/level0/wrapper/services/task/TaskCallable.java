@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
+
 public class TaskCallable implements Callable<TaskResult> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TaskCallable.class);
@@ -25,11 +27,11 @@ public class TaskCallable implements Callable<TaskResult> {
 	}
 
 	@Override
-	public TaskResult call() {
+	public TaskResult call() throws InternalErrorException {
 		LOGGER.info("[task {}] [workDirectory {}] Starting call", this.binaryPath, this.workDirectory);
-		
+
 		int r = -1;
-		
+
 		Process process = null;
 		try {
 			ProcessBuilder builder = new ProcessBuilder();
@@ -38,25 +40,25 @@ public class TaskCallable implements Callable<TaskResult> {
 
 			process = builder.start();
 			StreamGobbler streamGobblerStdout = new StreamGobbler(process.getInputStream(), LOGGER::debug);
-			StreamGobbler streamGobblerStderr = new StreamGobbler(process.getErrorStream(), LOGGER::error);
+			StreamGobbler streamGobblerStderr = new StreamGobbler(process.getErrorStream(), LOGGER::debug);
 			Executors.newSingleThreadExecutor().submit(streamGobblerStdout);
 			Executors.newSingleThreadExecutor().submit(streamGobblerStderr);
 			r = process.waitFor();
 
 		} catch (InterruptedException ie) {
-			LOGGER.error("[task {}] [workDirectory {}]  InterruptedException {}", this.binaryPath, this.workDirectory,
+			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException {}", this.binaryPath, this.workDirectory,
 					ie.getMessage());
 			Thread.currentThread().interrupt();
 		} catch (IOException ioe) {
-			LOGGER.error("[task {}] [workDirectory {}] IOException {}", this.binaryPath, this.workDirectory,
-					ioe.getMessage());
+			throw new InternalErrorException("Cannot build the command for the task " + this.binaryPath, ioe);
 		} finally {
 			if (process != null) {
 				process.destroy();
 			}
 		}
-		LOGGER.info("[task {}] [workDirectory {}] Ending call with exit code {}", this.binaryPath, this.workDirectory, r);
-		
+		LOGGER.info("[task {}] [workDirectory {}] Ending call with exit code {}", this.binaryPath, this.workDirectory,
+				r);
+
 		return new TaskResult(this.binaryPath, r);
 	}
 

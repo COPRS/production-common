@@ -3,7 +3,6 @@ package fr.viveris.s1pdgs.level0.wrapper.services.kafka;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.kafka.common.KafkaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.ReportDto;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.KafkaSendException;
 
 /**
  * 
@@ -43,14 +43,14 @@ public class L0ReportProducer {
 	 * 
 	 * @param descriptor
 	 */
-	public void send(ReportDto descriptor) throws KafkaException {
+	public void send(ReportDto descriptor) throws KafkaSendException {
 		try {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("[send] Send L0_ACN = {}", descriptor);
 			}
 			kafkaL0ReportTemplate.send(kafkaTopic, descriptor).get();
 		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaException(String.format("Error during sending %S in queue system", descriptor.getProductName()), e);
+			throw new KafkaSendException(kafkaTopic, descriptor.getProductName(), e.getMessage(), e);
 		}
 	}
 }

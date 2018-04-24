@@ -4,12 +4,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import fr.viveris.s1pdgs.level0.wrapper.model.ApplicationLevel;
+
 @Component
 public class AppStatus {
 
 	private final WrapperStatus status;
 	
 	private boolean shallBeStopped;
+	
+	@Value("${status.app-level}")
+	private ApplicationLevel level;
 	
 	@Value("${status.max-error-counter}")
 	private int maxErrorCounter;
@@ -57,6 +62,13 @@ public class AppStatus {
 	 */
 	public synchronized void setShallBeStopped(boolean shallBeStopped) {
 		this.shallBeStopped = shallBeStopped;
+	}
+
+	/**
+	 * @return the level
+	 */
+	public ApplicationLevel getLevel() {
+		return level;
 	}
 
 	public class WrapperStatus {

@@ -16,7 +16,7 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObsS3Exception;
 
 public abstract class AbstractS3Services implements S3Services {
 
@@ -32,7 +32,7 @@ public abstract class AbstractS3Services implements S3Services {
 	}
 
 	@Override
-	public int downloadFiles(String prefixKey, String directoryPath) throws ObjectStorageException {
+	public int downloadFiles(String prefixKey, String directoryPath) throws ObsS3Exception {
 		int nbObj = 0;
 		try {
 			if (LOGGER.isDebugEnabled()) {
@@ -62,20 +62,17 @@ public abstract class AbstractS3Services implements S3Services {
 						bucketName, directoryPath);
 			}
 		} catch (AmazonServiceException ase) {
-			LOGGER.error(ase.getMessage(), ase);
-			throw new ObjectStorageException(prefixKey, prefixKey, bucketName, ase);
+			throw new ObsS3Exception(prefixKey, bucketName, ase);
 		} catch (AmazonClientException sce) {
-			LOGGER.error(sce.getMessage(), sce);
-			throw new ObjectStorageException(prefixKey, prefixKey, bucketName, sce);
+			throw new ObsS3Exception(prefixKey, bucketName, sce);
 		} catch (IOException e) {
-			LOGGER.error(e.getMessage(), e);
-			throw new ObjectStorageException(prefixKey, prefixKey, bucketName, e);
+			throw new ObsS3Exception(prefixKey, bucketName, e);
 		}
 		return nbObj;
 	}
 
 	@Override
-	public int uploadDirectory(String prefix, File directory) throws ObjectStorageException {
+	public int uploadDirectory(String prefix, File directory) throws ObsS3Exception {
 		int r = 0;
 		if (directory.isDirectory()) {
 			File[] childs = directory.listFiles();
@@ -97,7 +94,7 @@ public abstract class AbstractS3Services implements S3Services {
 	}
 
 	@Override
-	public void uploadFile(String keyName, File uploadFile) throws ObjectStorageException {
+	public void uploadFile(String keyName, File uploadFile) throws ObsS3Exception {
 		try {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Uploading object {} in bucket {}", keyName, bucketName);
@@ -108,21 +105,21 @@ public abstract class AbstractS3Services implements S3Services {
 				LOGGER.debug("Upload object {} in bucket {} succeeded", keyName, bucketName);
 			}
 		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
+			throw new ObsS3Exception(keyName, bucketName, sce);
 		}
 	}
 
 	@Override
-	public boolean exist(String keyName) throws ObjectStorageException {
+	public boolean exist(String keyName) throws ObsS3Exception {
 		try {
 			return s3client.doesObjectExist(bucketName, keyName);
 		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
+			throw new ObsS3Exception(keyName, bucketName, sce);
 		}
 	}
 
 	@Override
-	public int getNbObjects(String prefix) throws ObjectStorageException {
+	public int getNbObjects(String prefix) throws ObsS3Exception {
 		int nbObj = 0;
 		try {
 			ObjectListing objectListing = s3client.listObjects(bucketName, prefix);
@@ -130,7 +127,7 @@ public abstract class AbstractS3Services implements S3Services {
 				nbObj = objectListing.getObjectSummaries().size();
 			}
 		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(prefix, prefix, bucketName, sce);
+			throw new ObsS3Exception(prefix, bucketName, sce);
 		}
 		return nbObj;
 	}

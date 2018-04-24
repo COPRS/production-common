@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobPoolDto;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobTaskDto;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.ProcessExecutionException;
 
 /**
@@ -73,7 +75,7 @@ public class PoolProcessor {
 	 * @throws ExecutionException
 	 * @throws IOException
 	 */
-	public void process() throws ProcessExecutionException {
+	public void process() throws CodedException {
 		boolean stopAllProcessCall = false;
 		try {
 			LOGGER.info("{} 1 - Submitting tasks {}", this.prefixMonitorLogs, this.pool.getTasks());
@@ -82,6 +84,12 @@ public class PoolProcessor {
 			}
 			LOGGER.info("{} 2 - Waiting for tasks execution", this.prefixMonitorLogs);
 			for (int i = 0; i < this.nbTasks; i++) {
+				// Check if interrupted
+				if (Thread.currentThread().isInterrupted()) {
+					stopAllProcessCall = true;
+					throw new InternalErrorException("Pool Processing thread has been interrupted");
+				}
+				// Wait for a task
 				Future<TaskResult> future = service.take();
 				//TODO set in configuration file
 				TaskResult r = future.get(30, TimeUnit.MINUTES);
@@ -93,19 +101,25 @@ public class PoolProcessor {
 					LOGGER.warn("{} 2 - Task {} exit with warning code {}", this.prefixMonitorLogs, task, exitCode);
 				} else {
 					this.stopAllTasks();
-					throw new ProcessExecutionException(
-							String.format("Task %s failed with code %d", task, exitCode));
+					throw new ProcessExecutionException(exitCode, "Task " + task + " failed");
 				}
 			}
-		} catch (ExecutionException | InterruptedException | TimeoutException e) {
+		} catch (InterruptedException | TimeoutException e) {
 			stopAllProcessCall = true;
-			throw new ProcessExecutionException(e.getMessage(), e);
+			throw new InternalErrorException(e.getMessage(), e);
+		} catch (ExecutionException e) {
+			stopAllProcessCall = true;
+			if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+				throw (CodedException) e.getCause();
+			} else {
+				throw new InternalErrorException(e.getMessage(), e);
+			}
 		} finally {
 			if (stopAllProcessCall) {
 				try {
 					this.stopAllTasks();
 				} catch (InterruptedException ie) {
-					throw new ProcessExecutionException(ie.getMessage(), ie);
+					throw new InternalErrorException(ie.getMessage(), ie);
 				} 
 			}
 		}

@@ -15,7 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobOutputDto;
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObsS3Exception;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.UnknownFamilyException;
 import fr.viveris.s1pdgs.level0.wrapper.model.kafka.FileQueueMessage;
 import fr.viveris.s1pdgs.level0.wrapper.model.kafka.ObsQueueMessage;
 import fr.viveris.s1pdgs.level0.wrapper.model.s3.S3UploadFile;
@@ -75,14 +78,20 @@ public class OutputProcessor {
 	/**
 	 * Function which process all the output of L0 process
 	 * 
-	 * @throws ObjectStorageException
+	 * @throws ObsS3Exception
 	 * @throws IOException
 	 */
-	public void processOutput() throws ObjectStorageException, IOException {
+	public void processOutput() throws CodedException {
 
 		LOGGER.info("{} 1 - Starting organizing outputs", this.prefixMonitorLogs);
 
-		List<String> lines = Files.lines(Paths.get(this.listFile)).collect(Collectors.toList());
+		List<String> lines = null;
+		try {
+			lines = Files.lines(Paths.get(this.listFile)).collect(Collectors.toList());
+		} catch (IOException ioe) {
+			throw new InternalErrorException("Cannot parse result list file " + this.listFile + ": " + ioe.getMessage(),
+					ioe);
+		}
 		List<S3UploadFile> uploadBatch = new ArrayList<>();
 		List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 		List<FileQueueMessage> reportToPublish = new ArrayList<>();
@@ -138,8 +147,7 @@ public class OutputProcessor {
 					LOGGER.info("Output {} will be ignored", productName);
 					break;
 				default:
-					throw new IllegalArgumentException(
-							"Family not managed in output processor " + matchOutput.getFamily());
+					throw new UnknownFamilyException("Family not managed in output processor ", family.name());
 				}
 			} else {
 				LOGGER.warn("Output {} ignored because no found matching regular expression", productName);
@@ -162,36 +170,53 @@ public class OutputProcessor {
 				Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
 				boolean stop = false;
 				while (!stop && iter.hasNext()) {
-					ObsQueueMessage msg = iter.next();
-					if (!sublist.get(0).getKey().startsWith(msg.getKeyObs())) {
-						LOGGER.info("{} 2 - Publishing KAFKA message for output {}", this.prefixMonitorLogs,
-								msg.getProductName());
-						this.outputProcuderFactory.sendOutput(msg);
-						iter.remove();
+					if (!Thread.currentThread().isInterrupted()) {
+						ObsQueueMessage msg = iter.next();
+						if (!sublist.get(0).getKey().startsWith(msg.getKeyObs())) {
+							LOGGER.info("{} 2 - Publishing KAFKA message for output {}", this.prefixMonitorLogs,
+									msg.getProductName());
+							this.outputProcuderFactory.sendOutput(msg);
+							iter.remove();
+						} else {
+							stop = true;
+						}
 					} else {
-						stop = true;
+						throw new InternalErrorException("The current thread as been interrupted");
 					}
 				}
 			}
 			LOGGER.info("{} 2 - Uploading batch {} ", this.prefixMonitorLogs, i);
-			this.s3Factory.uploadFilesPerBatch(sublist);
+			if (!Thread.currentThread().isInterrupted()) {
+				this.s3Factory.uploadFilesPerBatch(sublist);
+			} else {
+				throw new InternalErrorException("The current thread as been interrupted");
+			}
 		}
 		LOGGER.info("{} 2 - Publishing KAFKA messages for the last batch", this.prefixMonitorLogs);
 		Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
 		while (iter.hasNext()) {
-			ObsQueueMessage msg = iter.next();
-			LOGGER.info("{} 2 - Publishing KAFKA message for output {}", this.prefixMonitorLogs, msg.getProductName());
-			this.outputProcuderFactory.sendOutput(msg);
-			iter.remove();
+			if (!Thread.currentThread().isInterrupted()) {
+				ObsQueueMessage msg = iter.next();
+				LOGGER.info("{} 2 - Publishing KAFKA message for output {}", this.prefixMonitorLogs,
+						msg.getProductName());
+				this.outputProcuderFactory.sendOutput(msg);
+				iter.remove();
+			} else {
+				throw new InternalErrorException("The current thread as been interrupted");
+			}
 		}
 
 		// Publish reports
 		LOGGER.info("{} 3 - Starting processing not object storage compatible outputs", this.prefixMonitorLogs);
 		if (!reportToPublish.isEmpty()) {
 			for (FileQueueMessage msg : reportToPublish) {
-				LOGGER.info("{} 3 - Publishing KAFKA message for output {}", this.prefixMonitorLogs,
-						msg.getProductName());
-				this.outputProcuderFactory.sendOutput(msg);
+				if (!Thread.currentThread().isInterrupted()) {
+					LOGGER.info("{} 3 - Publishing KAFKA message for output {}", this.prefixMonitorLogs,
+							msg.getProductName());
+					this.outputProcuderFactory.sendOutput(msg);
+				} else {
+					throw new InternalErrorException("The current thread as been interrupted");
+				}
 			}
 		}
 	}
