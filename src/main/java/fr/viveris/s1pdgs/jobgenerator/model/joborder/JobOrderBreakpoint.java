@@ -10,9 +10,11 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.persistence.oxm.annotations.XmlPath;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Class listing the breakpoint configuration in a job order
+ * 
  * @author Cyrielle Gailliard
  *
  */
@@ -25,7 +27,7 @@ public class JobOrderBreakpoint {
 	 */
 	@XmlElement(name = "Enable")
 	private String enable;
-	
+
 	/**
 	 * List of breakpoints
 	 */
@@ -50,22 +52,26 @@ public class JobOrderBreakpoint {
 
 	/**
 	 * Construction with all fields
+	 * 
 	 * @param enable
 	 * @param files
 	 */
 	public JobOrderBreakpoint(String enable, List<String> files) {
 		this();
 		this.enable = enable;
-		this.files.addAll(files);
-		this.nbFiles = this.files.size();
+		if (!CollectionUtils.isEmpty(files)) {
+			this.files.addAll(files);
+			this.nbFiles = this.files.size();
+		}
 	}
-	
+
 	/**
 	 * Clone
+	 * 
 	 * @param obj
 	 */
 	public JobOrderBreakpoint(JobOrderBreakpoint obj) {
-		this(obj.getEnable(), obj.files);
+		this(obj.getEnable(), obj.getFiles());
 	}
 
 	/**
@@ -76,7 +82,8 @@ public class JobOrderBreakpoint {
 	}
 
 	/**
-	 * @param enable the enable to set
+	 * @param enable
+	 *            the enable to set
 	 */
 	public void setEnable(String enable) {
 		this.enable = enable;
@@ -90,7 +97,8 @@ public class JobOrderBreakpoint {
 	}
 
 	/**
-	 * @param files the files to set
+	 * @param files
+	 *            the files to set
 	 */
 	public void addFiles(List<String> files) {
 		this.files.addAll(files);
@@ -104,7 +112,9 @@ public class JobOrderBreakpoint {
 		return nbFiles;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -112,7 +122,9 @@ public class JobOrderBreakpoint {
 		return "JobOrderBreakpoint [enable=" + enable + ", files=" + files + ", nbFiles=" + nbFiles + "]";
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -125,7 +137,9 @@ public class JobOrderBreakpoint {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -152,5 +166,4 @@ public class JobOrderBreakpoint {
 		return true;
 	}
 
-	
 }
