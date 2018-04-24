@@ -14,12 +14,14 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 
 import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.config.DevProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
@@ -47,6 +49,8 @@ public class JobProcessor implements Callable<Boolean> {
 	private final OutputProcessor outputProcessor;
 
 	private final DevProperties devProperties;
+
+	private final ApplicationProperties properties;
 
 	private final ExecutorService poolProcessExecutorService;
 	private final CompletionService<Boolean> poolProcessCompletionService;
@@ -80,15 +84,16 @@ public class JobProcessor implements Callable<Boolean> {
 	 * @param sizeS3DownloadBatch
 	 * @param outputListFile
 	 */
-	public JobProcessor(final JobDto job, final AppStatus appStatus, final DevProperties devProperties,
-			final String kafkaListenerContainerId, final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry,
-			final S3Factory s3Factory, final OutputProcuderFactory outputProcuderFactory, final int sizeS3UploadBatch,
-			final int sizeS3DownloadBatch, final String outputListFile) {
+	public JobProcessor(final JobDto job, final AppStatus appStatus, final ApplicationProperties properties,
+			final DevProperties devProperties, final String kafkaListenerContainerId,
+			final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry, final S3Factory s3Factory,
+			final OutputProcuderFactory outputProcuderFactory, final String outputListFile) {
 		super();
 
 		this.job = job;
 		this.appStatus = appStatus;
 		this.devProperties = devProperties;
+		this.properties = properties;
 		this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
 		this.kafkaListenerContainerId = kafkaListenerContainerId;
 
@@ -112,17 +117,19 @@ public class JobProcessor implements Callable<Boolean> {
 				job.getWorkDirectory());
 
 		// Initialize the pool processor executor
-		this.poolProcessorExecutor = new PoolExecutorCallable(this.job, this.prefixLogPoolProcessor);
+		this.poolProcessorExecutor = new PoolExecutorCallable(this.properties, this.job, this.prefixLogPoolProcessor);
 		this.poolProcessExecutorService = Executors.newSingleThreadExecutor();
 		this.poolProcessCompletionService = new ExecutorCompletionService<>(poolProcessExecutorService);
 
 		// Initialize the input downloader
 		inputDownloader = new InputDownloader(s3Factory, this.job.getWorkDirectory(), this.job.getInputs(),
-				sizeS3DownloadBatch, this.prefixLogInputDownloader, poolProcessorExecutor, this.appStatus.getLevel());
+				this.properties.getSizeBatchS3Download(), this.prefixLogInputDownloader, poolProcessorExecutor,
+				this.properties.getLevel());
 
 		// Initiliaze the outpt processor
 		outputProcessor = new OutputProcessor(s3Factory, outputProcuderFactory, this.job.getWorkDirectory(),
-				this.job.getOutputs(), outputListFile, sizeS3UploadBatch, this.prefixLogPoolOutputProcessor);
+				this.job.getOutputs(), outputListFile, this.properties.getSizeBatchS3Upload(),
+				this.prefixLogPoolOutputProcessor);
 
 	}
 
@@ -197,17 +204,20 @@ public class JobProcessor implements Callable<Boolean> {
 		LOGGER.info("{} Starting process executor", this.prefixLogPoolProcessor);
 		this.poolProcessCompletionService.submit(this.poolProcessorExecutor);
 	}
-	
+
 	private void waitForPoolProcessesEnding() throws InterruptedException, CodedException {
 		if (!Thread.currentThread().isInterrupted()) {
 			try {
-				this.poolProcessCompletionService.take().get();
+				this.poolProcessCompletionService.take().get(this.properties.getTimeoutProcessAllTasksS(),
+						TimeUnit.SECONDS);
 			} catch (ExecutionException e) {
 				if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
 					throw (CodedException) e.getCause();
 				} else {
 					throw new InternalErrorException(e.getMessage(), e);
 				}
+			} catch (TimeoutException e) {
+				throw new InternalErrorException(e.getMessage(), e);
 			}
 		} else {
 			throw new InterruptedException("Current thread is interrupted");
@@ -217,11 +227,13 @@ public class JobProcessor implements Callable<Boolean> {
 	private void terminateProcessesExecution() {
 		this.poolProcessExecutorService.shutdownNow();
 		try {
-			if (!this.poolProcessExecutorService.awaitTermination(10, TimeUnit.SECONDS)) {
+			if (!this.poolProcessExecutorService.awaitTermination(this.properties.getTimeoutProcessStopS(),
+					TimeUnit.SECONDS)) {
 				// TODO send kill
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			// Conserves the interruption
+			Thread.currentThread().interrupt();
 		}
 	}
 

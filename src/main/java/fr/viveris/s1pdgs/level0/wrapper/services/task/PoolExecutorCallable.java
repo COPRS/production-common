@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobPoolDto;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
@@ -20,15 +21,13 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PoolExecutorCallable.class);
 
-	private static final int WAIT_ACTIVE_MAX_COUNTER = 30;
-
-	private static final int WAIT_ACTIVE_TEMPO_MS = 10000;
-
 	private boolean active = false;
 
 	private final List<PoolProcessor> processors;
 
 	private String prefixMonitorLogs;
+
+	private final ApplicationProperties properties;
 
 	/**
 	 * Constructor
@@ -36,14 +35,16 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 	 * @param numberOfPoolSize
 	 * @param pools
 	 */
-	public PoolExecutorCallable(JobDto job, String prefixMonitorLogs) {
+	public PoolExecutorCallable(final ApplicationProperties properties, JobDto job, String prefixMonitorLogs) {
+		this.properties = properties;
 		this.prefixMonitorLogs = prefixMonitorLogs;
 		int counter = 0;
 		this.processors = new ArrayList<>(job.getPools().size());
 		for (JobPoolDto pool : job.getPools()) {
 			counter++;
 			this.processors.add(new PoolProcessor(pool, job.getJobOrder(), job.getWorkDirectory(),
-					String.format("%s [pool %d]", prefixMonitorLogs, counter)));
+					String.format("%s [pool %d]", prefixMonitorLogs, counter),
+					this.properties.getTimeoutProcessOneTaskS()));
 		}
 	}
 
@@ -51,11 +52,11 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 		int counter = 0;
 		try {
 			// Wait for being active (i.e. wait for download of at least one input)
-			while (counter < WAIT_ACTIVE_MAX_COUNTER && !isActive() && !Thread.currentThread().isInterrupted()) {
+			while (counter < properties.getWaitActiveProcessNbMaxLoop() && !isActive() && !Thread.currentThread().isInterrupted()) {
 				if (LOGGER.isDebugEnabled()) {
 					LOGGER.debug("Wait for processor executor being active");
 				}
-				Thread.sleep(WAIT_ACTIVE_TEMPO_MS);
+				Thread.sleep(properties.getWaitActiveProcessTempoS() * 1000);
 				counter++;
 			}
 		} catch (InterruptedException ie) {
@@ -68,7 +69,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 
 		if (!isActive()) {
 			throw new ProcessTimeoutException(
-					"Process executor not set as active after " + counter * WAIT_ACTIVE_TEMPO_MS + " ms");
+					"Process executor not set as active after " + counter * properties.getWaitActiveProcessTempoS() + " seconds");
 		}
 
 		LOGGER.info("{} Start launching processes", this.prefixMonitorLogs);

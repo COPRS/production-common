@@ -1,7 +1,6 @@
 package fr.viveris.s1pdgs.level0.wrapper.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
@@ -9,6 +8,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.config.DevProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
 import fr.viveris.s1pdgs.level0.wrapper.services.kafka.OutputProcuderFactory;
@@ -30,12 +30,10 @@ public class L0JobConsumer extends AbstractJobConsumer {
 	 */
 	@Autowired
 	public L0JobConsumer(final S3Factory s3Factory, final OutputProcuderFactory outputProcuderFactory,
-			@Value("${process.size-batch-s3-upload}") final int sizeS3UploadBatch,
-			@Value("${process.size-batch-s3-download}") final int sizeS3DownloadBatch,
-			final DevProperties devProperties, final AppStatus appStatus,
+			final ApplicationProperties properties, final DevProperties devProperties, final AppStatus appStatus,
 			final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry) {
-		super(s3Factory, outputProcuderFactory, sizeS3UploadBatch, sizeS3DownloadBatch, devProperties, appStatus,
-				kafkaListenerEndpointRegistry, "kafkaListenerContainerL0");
+		super(s3Factory, outputProcuderFactory, properties, devProperties, appStatus, kafkaListenerEndpointRegistry,
+				"kafkaListenerContainerL0");
 	}
 
 	/**

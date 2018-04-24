@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObsUnknownObjectException;
@@ -28,6 +28,8 @@ import fr.viveris.s1pdgs.level0.wrapper.model.s3.S3UploadFile;
 
 @Service
 public class S3Factory {
+
+	private final ApplicationProperties properties;
 
 	/**
 	 * Amazon S3 service for configuration files
@@ -48,10 +50,11 @@ public class S3Factory {
 	private final L1AcnsS3Services l1AcnsS3Services;
 
 	@Autowired
-	public S3Factory(final SessionFilesS3Services sessionFilesS3Services,
+	public S3Factory(final ApplicationProperties properties, final SessionFilesS3Services sessionFilesS3Services,
 			final ConfigFilesS3Services configFilesS3Services, final L0SlicesS3Services l0SlicesS3Services,
 			final L0AcnsS3Services l0AcnsS3Services, final L1SlicesS3Services l1SlicesS3Services,
 			final L1AcnsS3Services l1AcnsS3Services) {
+		this.properties = properties;
 		this.sessionFilesS3Services = sessionFilesS3Services;
 		this.configFilesS3Services = configFilesS3Services;
 		this.l0SlicesS3Services = l0SlicesS3Services;
@@ -97,9 +100,7 @@ public class S3Factory {
 
 			for (int i = 0; i < filesToDownload.size(); i++) {
 				try {
-					Future<Boolean> future;
-					future = service.take();
-					future.get(20, TimeUnit.MINUTES);
+					service.take().get(this.properties.getTimeoutBatchS3DownloadS(), TimeUnit.SECONDS);
 				} catch (InterruptedException | TimeoutException e) {
 					throw new InternalErrorException(e.getMessage(), e);
 				} catch (ExecutionException e) {
@@ -113,7 +114,7 @@ public class S3Factory {
 		} finally {
 			workerThread.shutdownNow();
 			try {
-				workerThread.awaitTermination(10, TimeUnit.SECONDS);
+				workerThread.awaitTermination(this.properties.getTimeoutBatchS3DownloadS(), TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				throw new InternalErrorException(e.getMessage(), e);
 			}
@@ -153,9 +154,7 @@ public class S3Factory {
 
 			for (int i = 0; i < filesToUpload.size(); i++) {
 				try {
-					Future<Boolean> future;
-					future = service.take();
-					future.get(20, TimeUnit.MINUTES);
+					service.take().get(this.properties.getTimeoutBatchS3UploadS(), TimeUnit.SECONDS);
 				} catch (InterruptedException | TimeoutException e) {
 					throw new InternalErrorException(e.getMessage(), e);
 				} catch (ExecutionException e) {
@@ -169,7 +168,7 @@ public class S3Factory {
 		} finally {
 			workerThread.shutdownNow();
 			try {
-				workerThread.awaitTermination(10, TimeUnit.SECONDS);
+				workerThread.awaitTermination(this.properties.getTimeoutBatchS3UploadS(), TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				throw new InternalErrorException(e.getMessage(), e);
 			}

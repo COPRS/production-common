@@ -14,6 +14,7 @@ import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
 
 import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.config.DevProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException.ErrorCode;
@@ -35,11 +36,9 @@ public class AbstractJobConsumer {
 
 	protected final OutputProcuderFactory outputProcuderFactory;
 
-	protected final int sizeS3UploadBatch;
-
-	protected final int sizeS3DownloadBatch;
-
 	protected final DevProperties devProperties;
+	
+	protected final ApplicationProperties properties;
 
 	// KAFKA listener endpoint registry
 	protected final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
@@ -58,14 +57,13 @@ public class AbstractJobConsumer {
 	 * @param sizeS3DownloadBatch
 	 */
 	public AbstractJobConsumer(final S3Factory s3Factory, final OutputProcuderFactory outputProcuderFactory,
-			final int sizeS3UploadBatch, final int sizeS3DownloadBatch, final DevProperties devProperties,
+			final ApplicationProperties properties, final DevProperties devProperties,
 			final AppStatus appStatus, final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry,
 			final String listenerContainerId) {
 		super();
 		this.s3Factory = s3Factory;
 		this.outputProcuderFactory = outputProcuderFactory;
-		this.sizeS3UploadBatch = sizeS3UploadBatch;
-		this.sizeS3DownloadBatch = sizeS3DownloadBatch;
+		this.properties = properties;
 		this.devProperties = devProperties;
 		this.appStatus = appStatus;
 		this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
@@ -110,12 +108,8 @@ public class AbstractJobConsumer {
 					job.getProductIdentifier(), job.getWorkDirectory()));
 
 		} else {
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException ie) {
-				// TODO
-			}
 			LOGGER.info("{} End job generation: nothing done because the wrapper shall be stopped", prefixLogStart);
+			this.appStatus.forceStopping();
 		}
 	}
 
@@ -133,12 +127,11 @@ public class AbstractJobConsumer {
 	private void cleanPreviousExecution(String prefixLog) {
 		LOGGER.info("{} Resetting worker thread pool", prefixLog);
 		try {
-			Future<Boolean> future = this.jobWorkerService.poll(10, TimeUnit.SECONDS);
+			Future<Boolean> future = this.jobWorkerService.poll(this.properties.getTimeoutProcessCheckStopS(), TimeUnit.SECONDS);
 			if (future == null) {
-				LOGGER.warn("{} Cannot retrieve last execution after 10 seconds: force shutdown of previous job",
-						prefixLog);
+				LOGGER.warn("{} Cannot retrieve last execution after {} seconds: force shutdown of previous job",
+						prefixLog, this.properties.getTimeoutProcessCheckStopS());
 				this.jobWorkerThreadPool.shutdownNow();
-				this.jobWorkerService.poll(500, TimeUnit.MILLISECONDS);
 			}
 		} catch (InterruptedException e) {
 			LOGGER.error("{} [code {}] Exception occurred during resetting {}", prefixLog, e.getMessage());
@@ -148,8 +141,8 @@ public class AbstractJobConsumer {
 	}
 
 	private void launchJob(JobDto job, String outputListFile) {
-		this.jobWorkerService.submit(new JobProcessor(job, this.appStatus, this.devProperties, this.listenerContainerId,
-				kafkaListenerEndpointRegistry, s3Factory, outputProcuderFactory, sizeS3UploadBatch, sizeS3DownloadBatch,
+		this.jobWorkerService.submit(new JobProcessor(job, this.appStatus, this.properties, this.devProperties, this.listenerContainerId,
+				kafkaListenerEndpointRegistry, s3Factory, outputProcuderFactory, 
 				outputListFile));
 		nbCurrentTasks++;
 	}

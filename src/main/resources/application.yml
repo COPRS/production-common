@@ -56,7 +56,14 @@ server:
   port: ${wrapper_rest_server_port:8080}
     
 process:
-  size-batch-s3-upload: ${wrapper_process_size-batch-s3-upload:20}
+  level: ${wrapper_process_level}
+  timeout-process-one-task-s: ${wrapper_process_timeout-process-one-task-s}
+  timeout-process-all-tasks-s: ${wrapper_process_timeout-process-all-tasks-s}
+  timeout-process-stop-s: ${wrapper_process_timeout-process-stop-s}
+  timeout-process-check-stop-s: ${wrapper_process_timeout-process-check-stop-s}
+  timeout-batch-s3-upload-s: ${wrapper_process_timeout-batch-s3-upload-s}
+  size-batch-s3-upload:  ${wrapper_process_size-batch-s3-upload:20}
+  timeout-batch-s3-download-s: ${wrapper_process_timeout-batch-s3-download-s}
   size-batch-s3-download: ${wrapper_process_size-batch-s3-download:5}
 
 status:
