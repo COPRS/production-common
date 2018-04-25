@@ -54,9 +54,9 @@ public class FileReaderConfig {
 	private final int configCacheMaxCapacity;
 
 	/**
-	 * Pattern to exclusion temporarly file (.writing here)
+	 * Pattern to exclusion temporary file (.writing here)
 	 */
-	private final static String PATTERN_EXCLUSION = "^.*\\.writing$";
+	private final static String PATTERN_EXCLUSION = "^\\..*"; //"^.*\\.writing$";
 
 	/**
 	 * Constructor

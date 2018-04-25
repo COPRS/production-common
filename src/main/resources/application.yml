@@ -24,25 +24,6 @@ kafka:
     auxiliary-files: ${kafka_topic_auxiliary_files:t-pdgs-auxiliary-files}
     edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
 
-#FTP
-ftp:
-  host: ${input_ftp_pasv_address:input-ftpserver-svc}
-  port: 21
-  username: ${input_ftp_user:user}
-  password: ${input_ftp_pass:passwd}
-  client-mode: 2
-  local-directory: /data/local-ingestor/
-  command-options:
-    mget: -P -R -D
-  auxiliary-files:
-    remote-directory: /auxiliary_files/
-    upload-fixed-rate: 3000
-    cache-max-capacity: 10
-  session-files:
-    remote-directory: /edrs_sessions/
-    upload-fixed-rate: 5000
-    cache-max-capacity: 70
-
 #Object Storage
 storage:
   user:
