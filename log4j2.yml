@@ -1,0 +1,70 @@
+Configuration:
+  status: warn
+  name: YAMLConfigTest
+  properties:
+    property:
+      name: envHostname
+      value: ${env:HOSTNAME}
+    property:
+      name: envAppName
+      value: ${env:wrapper_spring_appname:-s1pdgs-wrapper-app}
+  thresholdFilter:
+    level: debug
+  appenders:
+    Console:
+      name: STDOUT
+      PatternLayout:
+        Pattern: "[date %d{dd-MM-yyyy HH:mm:ss.SSS}] [podName ${envHostname}] [appName ${envAppName}] [thread %thread] [level %-5level] [message %msg] %n"
+    RollingFile:
+      name: FILE
+      fileName: ${env:wrapper_logging_file:-./s1pdgs-wrapper.log}
+      filePattern: "s1pdgs-wrapper.log.%d{yyyy-MM-dd-hh-mm}.gz"
+      PatternLayout:
+        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}[%thread] %-5level: %msg %n"
+      Policies:
+        SizeBasedTriggeringPolicy:
+          size: 10 MB
+      DefaultRollOverStrategy:
+        max: 30
+    Kafka:
+      name: KAFKA_ERROR
+      topic: t-pdgs-errors
+      PatternLayout:
+        Pattern: "[date %d{dd-MM-yyyy HH:mm:ss.SSS}] [podName ${envHostname}] [appName ${envAppName}] [thread %thread] [level %-5level] [message %msg] %n"
+      Property:
+        name: bootstrap.servers
+        value: 172.17.50.10:9092
+      Filters:
+        ThresholdFilter:
+          level: error
+  Loggers:
+    logger:
+      - name: fr.viveris.s1pdgs
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+          - ref: KAFKA_ERROR
+      - name: org.springframework
+        level: warn
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: kafka
+        level: warn
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: org.apache
+        level: warn
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+    Root:
+      level: error
+      AppenderRef:
+        ref: STDOUT

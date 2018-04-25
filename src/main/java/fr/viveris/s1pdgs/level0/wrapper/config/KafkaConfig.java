@@ -13,8 +13,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,7 +56,7 @@ import fr.viveris.s1pdgs.level0.wrapper.services.kafka.L1SlicesProducer;
 @EnableKafka
 public class KafkaConfig {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaConfig.class);
+	private static final Logger LOGGER = LogManager.getLogger(KafkaConfig.class);
 
 	/**
 	 * URI of KAFKA cluster

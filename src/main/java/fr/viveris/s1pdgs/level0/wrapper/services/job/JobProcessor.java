@@ -16,8 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 
 import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
@@ -38,7 +38,7 @@ public class JobProcessor implements Callable<Boolean> {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(JobProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(JobProcessor.class);
 
 	private final JobDto job;
 

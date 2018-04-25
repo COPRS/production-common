@@ -3,8 +3,8 @@ package fr.viveris.s1pdgs.level0.wrapper.services.s3;
 import java.io.File;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.AmazonClientException;
@@ -20,7 +20,7 @@ import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObsS3Exception;
 
 public abstract class AbstractS3Services implements S3Services {
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractS3Services.class);
+	protected static final Logger LOGGER = LogManager.getLogger(AbstractS3Services.class);
 
 	protected final AmazonS3 s3client;
 

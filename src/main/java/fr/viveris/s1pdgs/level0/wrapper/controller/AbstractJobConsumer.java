@@ -7,8 +7,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
@@ -27,7 +27,7 @@ public class AbstractJobConsumer {
 	/**
 	 * Logger
 	 */
-	protected static final Logger LOGGER = LoggerFactory.getLogger(L1JobConsumer.class);
+	protected static final Logger LOGGER = LogManager.getLogger(L1JobConsumer.class);
 
 	/**
 	 * Amazon S3 servive for session and raw files

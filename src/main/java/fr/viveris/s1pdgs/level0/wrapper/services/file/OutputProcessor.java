@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobOutputDto;
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
@@ -34,7 +34,7 @@ public class OutputProcessor {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(OutputProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(OutputProcessor.class);
 
 	/**
 	 * Amazon S3 service for L0 slices
@@ -164,9 +164,7 @@ public class OutputProcessor {
 			List<S3UploadFile> sublist = uploadBatch.subList(i * this.sizeS3UploadBatch, lastIndex);
 
 			if (i > 0) {
-				if (LOGGER.isInfoEnabled()) {
-					LOGGER.info("{} 2 - Publishing KAFKA messages for batch {}", this.prefixMonitorLogs, i - 1);
-				}
+				LOGGER.info("{} 2 - Publishing KAFKA messages for batch {}", this.prefixMonitorLogs, i - 1);
 				Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
 				boolean stop = false;
 				while (!stop && iter.hasNext()) {

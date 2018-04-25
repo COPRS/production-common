@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobPoolDto;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobTaskDto;
@@ -27,7 +27,7 @@ public class PoolProcessor {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(PoolProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(PoolProcessor.class);
 
 	/**
 	 * List of pool

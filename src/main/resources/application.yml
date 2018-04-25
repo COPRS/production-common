@@ -4,7 +4,7 @@ spring:
     
 # Logging
 logging:
-  config: ${wrapper_logging_config:logback-spring.xml}
+  config: ${wrapper_logging_config:log4j2.yml}
   level:
     ROOT: ${wrapper_logging_level_root:ERROR}
     org.springframework: ${wrapper_logging_level_orgspringframework:ERROR}
@@ -32,6 +32,7 @@ kafka:
     l1-slices: ${kafka_topic_l1_slices:t-pdgs-l1-slices}
     l1-acns: ${kafka_topic_l1_acns:t-pdgs-l1-acns}
     l1-reports: ${kafka_topic_l1_reports:t-pdgs-l1-reports}
+    errors: ${kafka_topic_errors:t-pdgs-l1-reports}
   enable-consumer:
     l0-jobs: ${wrapper_kafka_enable-consumer_l0-jobs:true}
     l1-jobs: ${wrapper_kafka_enable-consumer_l1-jobs:false}

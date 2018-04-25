@@ -1,10 +1,11 @@
 spring:
   application:
     name: s1pdgs-l0-wrapper
+    version: 2.3.1
     
 # Logging
 logging:
-  config: logback-spring.xml
+  config: log4j2.yml
   level:
     ROOT: ${level0_wrapper_logging_level_root:ERROR}
     org.springframework: ${level0_wrapper_logging_level_orgspringframework:ERROR}
@@ -16,7 +17,7 @@ logging:
   
 # Kafka
 kafka:
-  bootstrap-servers: ${spring.embedded.kafka.brokers}
+  bootstrap-servers: 172.17.50.10:9092 #${spring.embedded.kafka.brokers}
   group-id: l0-wrappers
   client-id: l0-wrapper
   poll-timeout: 500
@@ -33,6 +34,7 @@ kafka:
     l1-slices: t-pdgs-l1-slices
     l1-acns: t-pdgs-l1-acns
     l1-reports: t-pdgs-l1-reports
+    errors: t-pdgs-errors
   enable-consumer:
     l0-jobs: true
     l1-jobs: false
