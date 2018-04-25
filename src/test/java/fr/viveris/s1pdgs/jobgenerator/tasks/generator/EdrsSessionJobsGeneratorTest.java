@@ -26,6 +26,7 @@ import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
+import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
@@ -86,8 +87,8 @@ public class EdrsSessionJobsGeneratorTest {
 
 		JobsGeneratorFactory factory = new JobsGeneratorFactory(l0ProcessSettings, jobGeneratorSettings, xmlConverter,
 				metadataService, kafkaJobsSender);
-		generator = (EdrsSessionJobsGenerator) factory
-				.createJobGeneratorForEdrsSession(new File("./data_test/generic_config/task_tables/TaskTable.AIOP.xml"));
+		generator = (EdrsSessionJobsGenerator) factory.createJobGeneratorForEdrsSession(
+				new File("./data_test/generic_config/task_tables/TaskTable.AIOP.xml"));
 	}
 
 	private void mockProcessSettings() {
@@ -204,7 +205,7 @@ public class EdrsSessionJobsGeneratorTest {
 		Mockito.doAnswer(i -> {
 			return null;
 		}).when(this.metadataService).getEdrsSession(Mockito.anyString(), Mockito.anyString());
-		
+
 		EdrsSessionProduct session = TestL0Utils.buildEdrsSessionProduct(true);
 		Job<EdrsSession> job = new Job<EdrsSession>(session);
 		try {
@@ -220,32 +221,29 @@ public class EdrsSessionJobsGeneratorTest {
 		EdrsSessionProduct sessionComplete = TestL0Utils.buildEdrsSessionProduct(false);
 		Job<EdrsSession> job = new Job<EdrsSession>(sessionComplete);
 		job.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
-		JobDto dto = new JobDto(sessionComplete.getIdentifier(), "/data/test/workdir/", "/data/test/workdir/JobOrder.xml");
+		JobDto dto = new JobDto(sessionComplete.getIdentifier(), "/data/test/workdir/",
+				"/data/test/workdir/JobOrder.xml");
 
 		generator.customJobDto(job, dto);
 		int nbChannel1 = sessionComplete.getObject().getChannel1().getRawNames().size();
 		int nbChannel2 = sessionComplete.getObject().getChannel2().getRawNames().size();
 		assertTrue(dto.getInputs().size() == nbChannel1 + nbChannel2);
 		for (int i = 0; i < nbChannel1; i++) {
-			assertEquals(sessionComplete.getObject().getChannel1().getRawNames().get(i).getObjectStorageKey(),
-					dto.getInputs().get(i).getContentRef());
-			assertEquals(ProductFamily.RAW.name(), dto.getInputs().get(i).getFamily());
-			assertEquals(
-					"/data/test/workdir/ch01/"
-							+ sessionComplete.getObject().getChannel1().getRawNames().get(i).getFileName(),
-					dto.getInputs().get(i).getLocalPath());
-		}
-		for (int i = 0; i < nbChannel2; i++) {
-			assertEquals(sessionComplete.getObject().getChannel2().getRawNames().get(i).getObjectStorageKey(),
-					dto.getInputs().get(i + nbChannel1).getContentRef());
-			assertEquals(ProductFamily.RAW.name(), dto.getInputs().get(i + nbChannel1).getFamily());
-			assertEquals(
-					"/data/test/workdir/ch02/"
-							+ sessionComplete.getObject().getChannel2().getRawNames().get(i).getFileName(),
-					dto.getInputs().get(i + nbChannel1).getLocalPath());
+			EdrsSessionFileRaw raw1 = sessionComplete.getObject().getChannel1().getRawNames().get(i);
+			EdrsSessionFileRaw raw2 = sessionComplete.getObject().getChannel2().getRawNames().get(i);
+			int indexRaw1 = i * 2;
+			int indexRaw2 = i * 2 + 1;
+			assertEquals(raw1.getObjectStorageKey(), dto.getInputs().get(indexRaw1).getContentRef());
+			assertEquals(ProductFamily.RAW.name(), dto.getInputs().get(indexRaw1).getFamily());
+			assertEquals("/data/test/workdir/ch01/" + raw1.getFileName(),
+					dto.getInputs().get(indexRaw1).getLocalPath());
+			assertEquals(raw2.getObjectStorageKey(), dto.getInputs().get(indexRaw2).getContentRef());
+			assertEquals(ProductFamily.RAW.name(), dto.getInputs().get(indexRaw2).getFamily());
+			assertEquals("/data/test/workdir/ch02/" + raw2.getFileName(),
+					dto.getInputs().get(indexRaw2).getLocalPath());
 		}
 	}
-	
+
 	@Test
 	public void testCustomJobOrder() {
 		EdrsSessionProduct sessionComplete = TestL0Utils.buildEdrsSessionProduct(false);
@@ -257,7 +255,7 @@ public class EdrsSessionJobsGeneratorTest {
 				assertEquals("S1A", param.getValue());
 			}
 		});
-		
+
 		EdrsSessionProduct sessionComplete1 = TestL0Utils.buildEdrsSessionProduct(false);
 		sessionComplete1.setMissionId("S2");
 		Job<EdrsSession> job1 = new Job<EdrsSession>(sessionComplete1);

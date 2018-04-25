@@ -2,7 +2,6 @@ package fr.viveris.s1pdgs.jobgenerator.tasks.generator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
@@ -14,6 +13,7 @@ import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobInputDto;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
+import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
@@ -91,21 +91,38 @@ public class EdrsSessionJobsGenerator extends AbstractJobsGenerator<EdrsSession>
 	protected void customJobDto(Job<EdrsSession> job, JobDto dto) {
 		// Add input relative to the channels
 		if (job.getProduct() != null) {
+			int nb1 = 0;
+			int nb2 = 0;
+			
+			// Retrieve number of channels and sort them per alphabetic order
 			if (job.getProduct().getObject().getChannel1() != null
 					&& !CollectionUtils.isEmpty(job.getProduct().getObject().getChannel1().getRawNames())) {
-				dto.addInputs(job.getProduct().getObject().getChannel1().getRawNames().stream()
-						.map(rawNames -> new JobInputDto(ProductFamily.RAW.name(),
-								dto.getWorkDirectory() + "ch01/" + rawNames.getFileName(),
-								rawNames.getObjectStorageKey()))
-						.collect(Collectors.toList()));
+				nb1 = job.getProduct().getObject().getChannel1().getRawNames().size();
+				// sort by alphabetic order
+				job.getProduct().getObject().getChannel1().getRawNames().stream().sorted((p1, p2) -> p1.getFileName().compareTo(p2.getFileName()));
 			}
 			if (job.getProduct().getObject().getChannel2() != null
 					&& !CollectionUtils.isEmpty(job.getProduct().getObject().getChannel2().getRawNames())) {
-				dto.addInputs(job.getProduct().getObject().getChannel2().getRawNames().stream()
-						.map(rawNames -> new JobInputDto(ProductFamily.RAW.name(),
-								dto.getWorkDirectory() + "ch02/" + rawNames.getFileName(),
-								rawNames.getObjectStorageKey()))
-						.collect(Collectors.toList()));
+				nb2 = job.getProduct().getObject().getChannel2().getRawNames().size();
+				// sort by alphabetic order
+				job.getProduct().getObject().getChannel2().getRawNames().stream().sorted((p1, p2) -> p1.getFileName().compareTo(p2.getFileName()));
+			}
+			
+			// Add raw to the job order, one file per channel
+			int nb = Math.max(nb1, nb2);
+			for (int i=0; i < nb; i++) {
+				if (i < nb1) {
+					EdrsSessionFileRaw raw = job.getProduct().getObject().getChannel1().getRawNames().get(i);
+					dto.addInput(new JobInputDto(ProductFamily.RAW.name(),
+								dto.getWorkDirectory() + "ch01/" + raw.getFileName(),
+								raw.getObjectStorageKey()));
+				}
+				if (i < nb2) {
+					EdrsSessionFileRaw raw = job.getProduct().getObject().getChannel2().getRawNames().get(i);
+					dto.addInput(new JobInputDto(ProductFamily.RAW.name(),
+								dto.getWorkDirectory() + "ch02/" + raw.getFileName(),
+								raw.getObjectStorageKey()));
+				}
 			}
 		}
 	}

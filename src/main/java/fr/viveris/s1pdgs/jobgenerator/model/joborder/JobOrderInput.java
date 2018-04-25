@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.persistence.oxm.annotations.XmlPath;
+import org.springframework.util.CollectionUtils;
 
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;
@@ -103,7 +105,6 @@ public class JobOrderInput {
 			this.nbTimeIntervals = this.timeIntervals.size();
 		}
 	}
-	
 
 	/**
 	 * Clone
@@ -111,9 +112,21 @@ public class JobOrderInput {
 	 * @param obj
 	 */
 	public JobOrderInput(JobOrderInput obj) {
-		this(obj.getFileType(), obj.getFileNameType(), obj.getFilenames(), obj.getTimeIntervals(), obj.getFamily());
+		this();
+		this.family = obj.getFamily();
+		this.fileType = obj.getFileType();
+		this.fileNameType = obj.getFileNameType();
+		if (!CollectionUtils.isEmpty(obj.getFilenames())) {
+			this.filenames.addAll(obj.getFilenames().stream().filter(item -> item != null)
+					.map(item -> new JobOrderInputFile(item)).collect(Collectors.toList()));
+			this.nbFilenames = this.filenames.size();
+		}
+		if (!CollectionUtils.isEmpty(obj.getTimeIntervals())) {
+			this.timeIntervals.addAll(obj.getTimeIntervals().stream().filter(item -> item != null)
+					.map(item -> new JobOrderTimeInterval(item)).collect(Collectors.toList()));
+			this.nbTimeIntervals = this.timeIntervals.size();
+		}
 	}
-
 
 	/**
 	 * @return the fileType
