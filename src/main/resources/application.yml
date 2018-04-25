@@ -1,0 +1,48 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: ${archives_application_name:s1pdgs-archives}
+    
+# Logging
+logging:
+  config: ${archives_logging_config:logback-spring.xml}
+  level:
+    ROOT: ${archives_logging_level_root:ERROR}
+    org.springframework: ${archives_logging_level_orgspringframework:ERROR}
+    fr.viveris.s1pdgs: ${archives_logging_level_frviveriss1pdgs:INFO}
+    kafka: ${archives_logging_level_kafka:WARN}
+    org.apache: ${archives_logging_level_orgapache:WARN}
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+  file: ${archives_logging_file:./s1pdgs-archives.log}
+
+# KAFKA
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
+  group-id: ${archives_kafka_group:archives}
+  client-id: ${archives_kafka_client:archives}
+  poll-timeout: ${archives_kafka_poll-timeout:500}
+  topic:
+    slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices,t-pdgs-l1-slices}
+    reports: ${kafka_topic_l0_report:t-pdgs-l0-reports,t-pdgs-l1-reports}
+  enable-consumer:
+    slice: ${archives_kafka_enable-consumer_slices:true}
+    report: ${archives_kafka_enable-consumer_reports:false}
+
+#Object Storage
+storage:
+  user:
+    id: ${storage_user_id}
+    secret: ${storage_user_secret}
+  endpoint: ${storage_endpoint}
+  region: ${storage_region}
+  buckets:
+    l0-slices: ${storage_buckets_l0-slices:l0-slices}
+    l1-slices: ${storage_buckets_l1-slices:l1-slices}
+    
+# File
+file:
+  slices:
+    local-directory: ${archives_slices_local-directory:/data/slices/} # Must contains the last /
+  reports:
+    local-directory: ${archives_reports_local-directory:/data/reports/} # Must contains the last /
+    
