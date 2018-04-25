@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -19,12 +18,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObsUnknownObjectException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.UnknownFamilyException;
 import fr.viveris.s1pdgs.level0.wrapper.model.s3.S3DownloadFile;
 import fr.viveris.s1pdgs.level0.wrapper.model.s3.S3UploadFile;
 
 @Service
 public class S3Factory {
+
+	private final ApplicationProperties properties;
 
 	/**
 	 * Amazon S3 service for configuration files
@@ -45,10 +50,11 @@ public class S3Factory {
 	private final L1AcnsS3Services l1AcnsS3Services;
 
 	@Autowired
-	public S3Factory(final SessionFilesS3Services sessionFilesS3Services,
+	public S3Factory(final ApplicationProperties properties, final SessionFilesS3Services sessionFilesS3Services,
 			final ConfigFilesS3Services configFilesS3Services, final L0SlicesS3Services l0SlicesS3Services,
 			final L0AcnsS3Services l0AcnsS3Services, final L1SlicesS3Services l1SlicesS3Services,
 			final L1AcnsS3Services l1AcnsS3Services) {
+		this.properties = properties;
 		this.sessionFilesS3Services = sessionFilesS3Services;
 		this.configFilesS3Services = configFilesS3Services;
 		this.l0SlicesS3Services = l0SlicesS3Services;
@@ -57,7 +63,7 @@ public class S3Factory {
 		this.l1AcnsS3Services = l1AcnsS3Services;
 	}
 
-	public void downloadFilesPerBatch(List<S3DownloadFile> filesToDownload) throws ObjectStorageException {
+	public void downloadFilesPerBatch(List<S3DownloadFile> filesToDownload) throws CodedException {
 		// First check all families
 		Map<String, DownloadFileCallable> callables = new HashMap<>();
 		for (S3DownloadFile file : filesToDownload) {
@@ -79,8 +85,8 @@ public class S3Factory {
 						new DownloadFileCallable(l0AcnsS3Services, file.getKey(), file.getLocalPath()));
 				break;
 			default:
-				throw new IllegalArgumentException(
-						"Family not managed for download in the object storage " + file.getFamily());
+				throw new UnknownFamilyException("Family not managed for download in the object storage",
+						file.getFamily().name());
 			}
 		}
 
@@ -94,24 +100,28 @@ public class S3Factory {
 
 			for (int i = 0; i < filesToDownload.size(); i++) {
 				try {
-					Future<Boolean> future;
-					future = service.take();
-					future.get(20, TimeUnit.MINUTES);
-				} catch (InterruptedException | TimeoutException | ExecutionException e) {
-					throw new ObjectStorageException(e.getMessage(), e);
+					service.take().get(this.properties.getTimeoutBatchS3DownloadS(), TimeUnit.SECONDS);
+				} catch (InterruptedException | TimeoutException e) {
+					throw new InternalErrorException(e.getMessage(), e);
+				} catch (ExecutionException e) {
+					if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+						throw (CodedException) e.getCause();
+					} else {
+						throw new InternalErrorException(e.getMessage(), e);
+					}
 				}
 			}
 		} finally {
 			workerThread.shutdownNow();
 			try {
-				workerThread.awaitTermination(10, TimeUnit.SECONDS);
+				workerThread.awaitTermination(this.properties.getTimeoutBatchS3DownloadS(), TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
-				throw new ObjectStorageException(e.getMessage(), e);
+				throw new InternalErrorException(e.getMessage(), e);
 			}
 		}
 	}
 
-	public void uploadFilesPerBatch(List<S3UploadFile> filesToUpload) throws ObjectStorageException {
+	public void uploadFilesPerBatch(List<S3UploadFile> filesToUpload) throws CodedException {
 		// First check all families
 		Map<String, UploadFileCallable> callables = new HashMap<>();
 		for (S3UploadFile file : filesToUpload) {
@@ -129,8 +139,8 @@ public class S3Factory {
 				callables.put(file.getKey(), new UploadFileCallable(l1AcnsS3Services, file.getKey(), file.getFile()));
 				break;
 			default:
-				throw new IllegalArgumentException(
-						"Family not managed for upload in the object storage " + file.getFamily());
+				throw new UnknownFamilyException("Family not managed for upload in the object storage",
+						file.getFamily().name());
 			}
 		}
 
@@ -144,19 +154,23 @@ public class S3Factory {
 
 			for (int i = 0; i < filesToUpload.size(); i++) {
 				try {
-					Future<Boolean> future;
-					future = service.take();
-					future.get(20, TimeUnit.MINUTES);
-				} catch (InterruptedException | TimeoutException | ExecutionException e) {
-					throw new ObjectStorageException(e.getMessage(), e);
+					service.take().get(this.properties.getTimeoutBatchS3UploadS(), TimeUnit.SECONDS);
+				} catch (InterruptedException | TimeoutException e) {
+					throw new InternalErrorException(e.getMessage(), e);
+				} catch (ExecutionException e) {
+					if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+						throw (CodedException) e.getCause();
+					} else {
+						throw new InternalErrorException(e.getMessage(), e);
+					}
 				}
 			}
 		} finally {
 			workerThread.shutdownNow();
 			try {
-				workerThread.awaitTermination(10, TimeUnit.SECONDS);
+				workerThread.awaitTermination(this.properties.getTimeoutBatchS3UploadS(), TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
-				throw new ObjectStorageException(e.getMessage(), e);
+				throw new InternalErrorException(e.getMessage(), e);
 			}
 		}
 	}
@@ -178,7 +192,7 @@ class DownloadFileCallable implements Callable<Boolean> {
 	}
 
 	@Override
-	public Boolean call() throws Exception {
+	public Boolean call() throws CodedException {
 		// Extract last final path
 		String basePath = localPath;
 		String filename = localPath;
@@ -191,7 +205,7 @@ class DownloadFileCallable implements Callable<Boolean> {
 		// Download objects in base path according object keys
 		int nbFiles = service.downloadFiles(key, basePath);
 		if (nbFiles <= 0) {
-			throw new ObjectStorageException("Object does not exist", key, service.getBucketName());
+			throw new ObsUnknownObjectException(key, service.getBucketName(), "Object does not exist");
 		}
 
 		// If needed rename the file/folder
@@ -223,7 +237,7 @@ class UploadFileCallable implements Callable<Boolean> {
 	}
 
 	@Override
-	public Boolean call() throws Exception {
+	public Boolean call() throws CodedException {
 		if (file.isDirectory()) {
 			int nbObj = service.getNbObjects(key);
 			if (nbObj > 0) {

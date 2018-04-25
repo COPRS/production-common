@@ -19,13 +19,19 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import fr.viveris.s1pdgs.level0.wrapper.TestUtils;
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObsS3Exception;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.UnknownFamilyException;
 import fr.viveris.s1pdgs.level0.wrapper.model.s3.S3DownloadFile;
 import fr.viveris.s1pdgs.level0.wrapper.model.s3.S3UploadFile;
 
 public class S3FactoryTest {
+	
+	@Mock
+	private ApplicationProperties properties;
 
 	@Mock
 	private ConfigFilesS3Services configFilesS3Services;
@@ -52,7 +58,9 @@ public class S3FactoryTest {
 		MockitoAnnotations.initMocks(this);
 	}
 	
-	private void mockForDownload() throws ObjectStorageException {
+	private void mockForDownload() throws ObsS3Exception {
+		doReturn(1L).when(this.properties).getTimeoutBatchS3DownloadS();
+		
 		doNothing().when(this.configFilesS3Services).uploadFile(Mockito.anyString(), Mockito.any());
 		doReturn(true).when(this.configFilesS3Services).exist(Mockito.anyString());
 		doReturn(6).when(this.configFilesS3Services).downloadFiles(Mockito.anyString(),
@@ -83,11 +91,13 @@ public class S3FactoryTest {
 		doReturn(1).when(this.l1AcnsS3Services).downloadFiles(Mockito.anyString(),
 				Mockito.anyString());
 
-		this.s3Factory = new S3Factory(sessionFilesS3Services, configFilesS3Services, l0SlicesS3Services,
+		this.s3Factory = new S3Factory(properties, sessionFilesS3Services, configFilesS3Services, l0SlicesS3Services,
 				l0AcnsS3Services, l1SlicesS3Services, l1AcnsS3Services);
 	}
 	
-	private void mockForUpload() throws ObjectStorageException {
+	private void mockForUpload() throws ObsS3Exception {
+		doReturn(1L).when(this.properties).getTimeoutBatchS3UploadS();
+		
 		doReturn(0).when(this.configFilesS3Services).uploadDirectory(Mockito.anyString(), Mockito.any());
 		doNothing().when(this.configFilesS3Services).uploadFile(Mockito.anyString(), Mockito.any());
 		doReturn(false).when(this.configFilesS3Services).exist(Mockito.anyString());
@@ -124,12 +134,12 @@ public class S3FactoryTest {
 		doReturn(1).when(this.l1AcnsS3Services).downloadFiles(Mockito.anyString(),
 				Mockito.anyString());
 
-		this.s3Factory = new S3Factory(sessionFilesS3Services, configFilesS3Services, l0SlicesS3Services,
+		this.s3Factory = new S3Factory(properties, sessionFilesS3Services, configFilesS3Services, l0SlicesS3Services,
 				l0AcnsS3Services, l1SlicesS3Services, l1AcnsS3Services);
 	}
 
 	@Test
-	public void testDownloadBatch() throws ObjectStorageException {
+	public void testDownloadBatch() throws CodedException {
 		this.mockForDownload();
 		JobDto dto = TestUtils.buildL0JobDto();
 		List<S3DownloadFile> downloadToBatch = new ArrayList<>();
@@ -161,8 +171,8 @@ public class S3FactoryTest {
 				Mockito.eq(TestUtils.getAbsolutePath(dto.getInputs().get(0).getLocalPath())));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testDownloadInvalidFamily() throws ObjectStorageException {
+	@Test(expected = UnknownFamilyException.class)
+	public void testDownloadInvalidFamily() throws CodedException {
 		this.mockForDownload();
 		JobDto dto = TestUtils.buildL0JobDto();
 		List<S3DownloadFile> downloadToBatch = new ArrayList<>();
@@ -184,7 +194,7 @@ public class S3FactoryTest {
 	}
 
 	@Test
-	public void testUploadProduct() throws ObjectStorageException, IOException {
+	public void testUploadProduct() throws CodedException, IOException {
 		this.mockForUpload();
 		// Create a temp dir for test
 		File f = new File("./key3");
@@ -211,8 +221,8 @@ public class S3FactoryTest {
 		verify(this.l0AcnsS3Services, times(1)).uploadFile(Mockito.eq("key2"), Mockito.eq(new File("key2")));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testUploadInvalidFamily() throws ObjectStorageException {
+	@Test(expected = UnknownFamilyException.class)
+	public void testUploadInvalidFamily() throws CodedException {
 		this.mockForUpload();
 		List<S3UploadFile> upload = new ArrayList<>();
 		upload.add(new S3UploadFile(ProductFamily.L0_ACN, "key1", new File("key1")));

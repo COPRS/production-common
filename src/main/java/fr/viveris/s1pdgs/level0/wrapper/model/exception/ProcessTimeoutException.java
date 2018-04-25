@@ -8,7 +8,7 @@ package fr.viveris.s1pdgs.level0.wrapper.model.exception;
  * @author Cyrielle Gailliard
  *
  */
-public class KafkaException extends Exception {
+public class ProcessTimeoutException extends CodedException {
 
 	/**
 	 * Serial UID
@@ -19,15 +19,7 @@ public class KafkaException extends Exception {
 	 * Constructor
 	 * @param message
 	 */
-	public KafkaException(String message) {
-		super(message);
-	}
-
-	/**
-	 * Constructor
-	 * @param message
-	 */
-	public KafkaException(String message, Throwable e) {
-		super(message, e);
+	public ProcessTimeoutException(String message) {
+		super(ErrorCode.PROCESS_TIMEOUT, message);
 	}
 }

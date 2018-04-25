@@ -18,8 +18,8 @@ public class TestUtils {
 		dto.addInput(buildAuxiliaryInputDto("MPL_DLF.xml"));
 		dto.addInput(buildJobInputDto());
 		dto.addInput(buildRawInputDto("SESSIONID_ch1_001.raw", 1));
-		dto.addInput(buildRawInputDto("SESSIONID_ch1_002.raw", 1));
 		dto.addInput(buildRawInputDto("SESSIONID_ch2_001.raw", 2));
+		dto.addInput(buildRawInputDto("SESSIONID_ch1_002.raw", 1));
 		dto.addInput(buildRawInputDto("SESSIONID_ch2_002.raw", 2));
 		dto.addInput(new JobInputDto("RAW", WORKDIR + "ch01/testrename.raw", "SESSIONID_ch1_003.raw"));
 		

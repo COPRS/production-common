@@ -2,7 +2,7 @@ package fr.viveris.s1pdgs.level0.wrapper.services.s3;
 
 import java.io.File;
 
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObsS3Exception;
 
 public interface S3Services {
 
@@ -13,18 +13,18 @@ public interface S3Services {
 	 * @param prefixKey
 	 * @param directoryPath
 	 * @return
-	 * @throws ObjectStorageException
+	 * @throws ObsS3Exception
 	 */
-	public int downloadFiles(String prefixKey, String directoryPath) throws ObjectStorageException;
+	public int downloadFiles(String prefixKey, String directoryPath) throws ObsS3Exception;
 
 	/**
 	 * Upload file/directory into object storage and return the number of uploaded objects
 	 * @param keyName
 	 * @param uploadFile
 	 * @return
-	 * @throws ObjectStorageException
+	 * @throws ObsS3Exception
 	 */
-	public int uploadDirectory(String keyName, File uploadFile) throws ObjectStorageException;
+	public int uploadDirectory(String keyName, File uploadFile) throws ObsS3Exception;
 	
 	/**
 	 * Upload a file in object storage
@@ -32,11 +32,11 @@ public interface S3Services {
 	 * @param keyName
 	 * @param uploadFile
 	 */
-	public void uploadFile(String keyName, File uploadFile) throws ObjectStorageException;
+	public void uploadFile(String keyName, File uploadFile) throws ObsS3Exception;
 	
-	public boolean exist(String keyName) throws ObjectStorageException;
+	public boolean exist(String keyName) throws ObsS3Exception;
 	
-	public int getNbObjects(String prefix) throws ObjectStorageException;
+	public int getNbObjects(String prefix) throws ObsS3Exception;
 
 	public String getBucketName();
 

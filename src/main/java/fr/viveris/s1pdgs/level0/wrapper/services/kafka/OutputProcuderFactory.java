@@ -13,6 +13,9 @@ import fr.viveris.s1pdgs.level0.wrapper.controller.dto.L0SliceDto;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.L1AcnDto;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.L1SliceDto;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.ReportDto;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.UnknownFamilyException;
 import fr.viveris.s1pdgs.level0.wrapper.model.kafka.FileQueueMessage;
 import fr.viveris.s1pdgs.level0.wrapper.model.kafka.ObsQueueMessage;
 
@@ -61,22 +64,28 @@ public class OutputProcuderFactory {
 		this.senderL1Reports = senderL1Reports;
 	}
 
-	public void sendOutput(FileQueueMessage msg) throws IOException {
-		switch (msg.getFamily()) {
-		case L0_REPORT:
-			ReportDto dtoReport = new ReportDto(msg.getProductName(), this.readFile(msg.getFile()));
-			this.senderL0Reports.send(dtoReport);
-			break;
-		case L1_REPORT:
-			ReportDto dtoL1Report = new ReportDto(msg.getProductName(), this.readFile(msg.getFile()));
-			this.senderL1Reports.send(dtoL1Report);
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid family for sending FileQueueMessage " + msg.getFamily());
+	public void sendOutput(FileQueueMessage msg) throws CodedException {
+		try {
+			switch (msg.getFamily()) {
+			case L0_REPORT:
+				ReportDto dtoReport = new ReportDto(msg.getProductName(), this.readFile(msg.getFile()));
+				this.senderL0Reports.send(dtoReport);
+				break;
+			case L1_REPORT:
+				ReportDto dtoL1Report = new ReportDto(msg.getProductName(), this.readFile(msg.getFile()));
+				this.senderL1Reports.send(dtoL1Report);
+				break;
+			default:
+				throw new UnknownFamilyException("Invalid family for sending FileQueueMessage ",
+						msg.getFamily().name());
+			}
+		} catch (IOException ioe) {
+			throw new InternalErrorException("Cannot read file for " + msg.getProductName() + ": " + ioe.getMessage(),
+					ioe);
 		}
 	}
 
-	public void sendOutput(ObsQueueMessage msg) throws IOException {
+	public void sendOutput(ObsQueueMessage msg) throws CodedException {
 		switch (msg.getFamily()) {
 		case L0_PRODUCT:
 			L0SliceDto dtoSlice = new L0SliceDto(msg.getProductName(), msg.getKeyObs());
@@ -95,7 +104,7 @@ public class OutputProcuderFactory {
 			this.senderL1Acns.send(dtoAcn1);
 			break;
 		default:
-			throw new IllegalArgumentException("Invalid family for sending ObsQueueMessage " + msg.getFamily());
+			throw new UnknownFamilyException("Invalid family for sending ObsQueueMessage ", msg.getFamily().name());
 		}
 	}
 

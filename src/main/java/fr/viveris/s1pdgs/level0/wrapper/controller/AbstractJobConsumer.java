@@ -14,9 +14,10 @@ import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
 
 import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.config.DevProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
-import fr.viveris.s1pdgs.level0.wrapper.services.job.JobProcessingResult;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException.ErrorCode;
 import fr.viveris.s1pdgs.level0.wrapper.services.job.JobProcessor;
 import fr.viveris.s1pdgs.level0.wrapper.services.kafka.OutputProcuderFactory;
 import fr.viveris.s1pdgs.level0.wrapper.services.s3.S3Factory;
@@ -35,18 +36,16 @@ public class AbstractJobConsumer {
 
 	protected final OutputProcuderFactory outputProcuderFactory;
 
-	protected final int sizeS3UploadBatch;
-
-	protected final int sizeS3DownloadBatch;
-
 	protected final DevProperties devProperties;
+	
+	protected final ApplicationProperties properties;
 
 	// KAFKA listener endpoint registry
 	protected final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 	protected final String listenerContainerId;
 
 	protected final ExecutorService jobWorkerThreadPool;
-	protected final CompletionService<JobProcessingResult> jobWorkerService;
+	protected final CompletionService<Boolean> jobWorkerService;
 	protected int nbCurrentTasks = 0;
 
 	protected final AppStatus appStatus;
@@ -58,14 +57,13 @@ public class AbstractJobConsumer {
 	 * @param sizeS3DownloadBatch
 	 */
 	public AbstractJobConsumer(final S3Factory s3Factory, final OutputProcuderFactory outputProcuderFactory,
-			final int sizeS3UploadBatch, final int sizeS3DownloadBatch, final DevProperties devProperties,
+			final ApplicationProperties properties, final DevProperties devProperties,
 			final AppStatus appStatus, final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry,
 			final String listenerContainerId) {
 		super();
 		this.s3Factory = s3Factory;
 		this.outputProcuderFactory = outputProcuderFactory;
-		this.sizeS3UploadBatch = sizeS3UploadBatch;
-		this.sizeS3DownloadBatch = sizeS3DownloadBatch;
+		this.properties = properties;
 		this.devProperties = devProperties;
 		this.appStatus = appStatus;
 		this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
@@ -80,81 +78,83 @@ public class AbstractJobConsumer {
 	 * @param payload
 	 */
 	protected void internalReceive(JobDto job, Acknowledgment acknowledgment, String outputListFile) {
-		LOGGER.info("[MONITOR] [Step 0] [productName {}] [workDir {}] Starting job generation",
+
+		// Initialize logs
+		String prefixLog = "[MONITOR]";
+		String prefixLogStart = String.format("%s [step 0] [productName %s] [workDir %s]", prefixLog,
 				job.getProductIdentifier(), job.getWorkDirectory());
+
+		LOGGER.info("{} Starting job generation", prefixLogStart);
+
 		if (!this.appStatus.isShallBeStopped()) {
 
 			this.appStatus.setProcessing();
 
-			try {
+			// Ack message
+			this.ackMessage(acknowledgment, String.format("%s [step 1a] [productName %s] [workDir %s]", prefixLog,
+					job.getProductIdentifier(), job.getWorkDirectory()));
 
-				// Ack message
-				LOGGER.info("[MONITOR] [Step 1] [productName {}] [workDir {}] Acknowledging message",
-						job.getProductIdentifier(), job.getWorkDirectory());
-				try {
-					acknowledgment.acknowledge();
-				} catch (Exception e) {
-					LOGGER.error(
-							"[MONITOR] [Step 1] [productName {}] [workDir {}] Exception occurred during acknowledgment {}",
-							job.getProductIdentifier(), job.getWorkDirectory(), e.getMessage());
-					this.appStatus.setError();
-				}
-
-				// Remove the last executed future if needed, wait for task ending if necessary
-				if (this.nbCurrentTasks > 0) {
-					LOGGER.info("[MONITOR] [Step 1-b] [productName {}] [workDir {}] Resetting worker thread pool",
-							job.getProductIdentifier(), job.getWorkDirectory());
-					try {
-						Future<JobProcessingResult> future = this.jobWorkerService.poll(10, TimeUnit.SECONDS);
-						if (future == null) {
-							LOGGER.warn(
-									"[MONITOR] [Step 1-b] [productName {}] [workDir {}] Cannot retrieve last execution after 10 seconds: force shutdown of previous job",
-									job.getProductIdentifier(), job.getWorkDirectory());
-							this.jobWorkerThreadPool.shutdownNow();
-							this.jobWorkerService.poll(500, TimeUnit.MILLISECONDS);
-						}
-					} catch (InterruptedException e) {
-						LOGGER.error(
-								"[MONITOR] [Step 1-b] [productName {}] [workDir {}] Exception occurred during resetting {}",
-								job.getProductIdentifier(), job.getWorkDirectory(), e.getMessage());
-						this.appStatus.setError();
-					}
-					this.nbCurrentTasks = 0;
-				}
-
-				// Launch job
-				this.jobWorkerService.submit(new JobProcessor(s3Factory, outputProcuderFactory,
-						kafkaListenerEndpointRegistry, sizeS3UploadBatch, sizeS3DownloadBatch, this.devProperties,
-						this.listenerContainerId, job, this.appStatus, outputListFile));
-				nbCurrentTasks++;
-
-				// Set the consumer in pause
-				LOGGER.info("[MONITOR] [Step 1-b] [productName {}] [workDir {}] Setting the consumer in pause",
-						job.getProductIdentifier(), job.getWorkDirectory());
-				MessageListenerContainer listenerContainer = this.kafkaListenerEndpointRegistry
-						.getListenerContainer(this.listenerContainerId);
-				if (listenerContainer != null) {
-					listenerContainer.pause();
-				} else {
-					LOGGER.warn("[MONITOR] [Step 1-b] [productName {}] [workDir {}] Cannot retrieve listenerContainer",
-							job.getProductIdentifier(), job.getWorkDirectory());
-				}
-
-			} catch (Exception e) {
-				LOGGER.error("[MONITOR] [productName {}] [workDir {}] Exception occurred : {}",
-						job.getProductIdentifier(), job.getWorkDirectory(), e.getMessage());
-				this.appStatus.setError();
+			// Remove the last executed future if needed, wait for task ending if necessary
+			if (this.nbCurrentTasks > 0) {
+				this.cleanPreviousExecution(String.format("%s [step 1b] [productName %s] [workDir %s]", prefixLog,
+						job.getProductIdentifier(), job.getWorkDirectory()));
 			}
-			
+
+			// Launch job
+			this.launchJob(job, outputListFile);
+
+			// Set the consumer in pause
+			this.pauseConsumer(String.format("%s [step 1c] [productName %s] [workDir %s]", prefixLog,
+					job.getProductIdentifier(), job.getWorkDirectory()));
+
 		} else {
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException ie) {
+			LOGGER.info("{} End job generation: nothing done because the wrapper shall be stopped", prefixLogStart);
+			this.appStatus.forceStopping();
+		}
+	}
 
+	private void ackMessage(Acknowledgment acknowledgment, String prefixLog) {
+		LOGGER.info("{} Acknowledging message", prefixLog);
+		try {
+			acknowledgment.acknowledge();
+		} catch (Exception e) {
+			LOGGER.error("{} [code {}] Exception occurred during acknowledgment {}", prefixLog,
+					ErrorCode.KAFKA_COMMIT_ERROR.getCode(), e.getMessage());
+			this.appStatus.setError();
+		}
+	}
+
+	private void cleanPreviousExecution(String prefixLog) {
+		LOGGER.info("{} Resetting worker thread pool", prefixLog);
+		try {
+			Future<Boolean> future = this.jobWorkerService.poll(this.properties.getTimeoutProcessCheckStopS(), TimeUnit.SECONDS);
+			if (future == null) {
+				LOGGER.warn("{} Cannot retrieve last execution after {} seconds: force shutdown of previous job",
+						prefixLog, this.properties.getTimeoutProcessCheckStopS());
+				this.jobWorkerThreadPool.shutdownNow();
 			}
-			LOGGER.info(
-					"[MONITOR] [Step 0] [productName {}] [workDir {}] End job generation: nothing done because the wrapper shall be stopped",
-					job.getProductIdentifier(), job.getWorkDirectory());
+		} catch (InterruptedException e) {
+			LOGGER.error("{} [code {}] Exception occurred during resetting {}", prefixLog, e.getMessage());
+			this.appStatus.setError();
+		}
+		this.nbCurrentTasks = 0;
+	}
+
+	private void launchJob(JobDto job, String outputListFile) {
+		this.jobWorkerService.submit(new JobProcessor(job, this.appStatus, this.properties, this.devProperties, this.listenerContainerId,
+				kafkaListenerEndpointRegistry, s3Factory, outputProcuderFactory, 
+				outputListFile));
+		nbCurrentTasks++;
+	}
+
+	private void pauseConsumer(String prefixLog) {
+		LOGGER.info("{} Setting the consumer in pause", prefixLog);
+		MessageListenerContainer listenerContainer = this.kafkaListenerEndpointRegistry
+				.getListenerContainer(this.listenerContainerId);
+		if (listenerContainer != null) {
+			listenerContainer.pause();
+		} else {
+			LOGGER.warn("{} Cannot retrieve listenerContainer", prefixLog);
 		}
 	}
 

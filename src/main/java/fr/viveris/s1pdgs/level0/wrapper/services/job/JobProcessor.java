@@ -8,182 +8,284 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 
 import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
+import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.config.DevProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
-import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobPoolDto;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.InputDownloaderException;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObjectStorageException;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.ProcessExecutionException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException.ErrorCode;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
 import fr.viveris.s1pdgs.level0.wrapper.services.file.InputDownloader;
 import fr.viveris.s1pdgs.level0.wrapper.services.file.OutputProcessor;
 import fr.viveris.s1pdgs.level0.wrapper.services.kafka.OutputProcuderFactory;
 import fr.viveris.s1pdgs.level0.wrapper.services.s3.S3Factory;
-import fr.viveris.s1pdgs.level0.wrapper.services.task.PoolProcessor;
+import fr.viveris.s1pdgs.level0.wrapper.services.task.PoolExecutorCallable;
 
-public class JobProcessor implements Callable<JobProcessingResult> {
+public class JobProcessor implements Callable<Boolean> {
 
 	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(JobProcessor.class);
 
-	/**
-	 * Amazon S3 servive for session and raw files
-	 */
-	private final S3Factory s3Factory;
+	private final JobDto job;
 
-	private final OutputProcuderFactory outputProcuderFactory;
+	private final AppStatus appStatus;
 
-	private final int sizeS3UploadBatch;
+	private final InputDownloader inputDownloader;
 
-	private final int sizeS3DownloadBatch;
+	private final OutputProcessor outputProcessor;
 
 	private final DevProperties devProperties;
+
+	private final ApplicationProperties properties;
+
+	private final ExecutorService poolProcessExecutorService;
+	private final CompletionService<Boolean> poolProcessCompletionService;
+	private final PoolExecutorCallable poolProcessorExecutor;
 
 	// KAFKA listener endpoint registry
 	private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 	private final String kafkaListenerContainerId;
 
-	private final JobDto job;
+	private final String prefixLog;
+	private final String prefixLogPoolProcessor;
+	private final String prefixLogInputDownloader;
+	private final String prefixLogPoolOutputProcessor;
+	private final String prefixLogErasing;
+	private final String prefixLogResuming;
+	private final String prefixLogStatus;
+	private final String prefixLogEnd;
+	private final String prefixLogError;
 
-	private final AppStatus appStatus;
-	
-	private final String outputListFile;
-
-	public JobProcessor(final S3Factory s3Factory, final OutputProcuderFactory outputProcuderFactory,
-			final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry, final int sizeS3UploadBatch,
-			final int sizeS3DownloadBatch, final DevProperties devProperties, final String kafkaListenerContainerId,
-			final JobDto job, final AppStatus appStatus, final String outputListFile) {
+	/**
+	 * Constructor
+	 * 
+	 * @param job
+	 * @param appStatus
+	 * @param devProperties
+	 * @param kafkaListenerContainerId
+	 * @param kafkaListenerEndpointRegistry
+	 * @param s3Factory
+	 * @param outputProcuderFactory
+	 * @param sizeS3UploadBatch
+	 * @param sizeS3DownloadBatch
+	 * @param outputListFile
+	 */
+	public JobProcessor(final JobDto job, final AppStatus appStatus, final ApplicationProperties properties,
+			final DevProperties devProperties, final String kafkaListenerContainerId,
+			final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry, final S3Factory s3Factory,
+			final OutputProcuderFactory outputProcuderFactory, final String outputListFile) {
 		super();
-		this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
-		this.s3Factory = s3Factory;
-		this.outputProcuderFactory = outputProcuderFactory;
-		this.sizeS3UploadBatch = sizeS3UploadBatch;
-		this.sizeS3DownloadBatch = sizeS3DownloadBatch;
-		this.devProperties = devProperties;
-		this.kafkaListenerContainerId = kafkaListenerContainerId;
+
 		this.job = job;
 		this.appStatus = appStatus;
-		this.outputListFile = outputListFile;
+		this.devProperties = devProperties;
+		this.properties = properties;
+		this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
+		this.kafkaListenerContainerId = kafkaListenerContainerId;
+
+		// initalize logs
+		this.prefixLog = "[MONITOR]";
+		this.prefixLogPoolProcessor = String.format("%s [step 3] [productName %s] [workDir %s]", this.prefixLog,
+				job.getProductIdentifier(), job.getWorkDirectory());
+		this.prefixLogInputDownloader = String.format("%s [step 2] [productName %s] [workDir %s]", this.prefixLog,
+				job.getProductIdentifier(), job.getWorkDirectory());
+		this.prefixLogPoolOutputProcessor = String.format("%s [step 4] [productName %s] [workDir %s]", this.prefixLog,
+				job.getProductIdentifier(), job.getWorkDirectory());
+		this.prefixLogErasing = String.format("%s [step 5] [productName %s] [workDir %s]", this.prefixLog,
+				job.getProductIdentifier(), job.getWorkDirectory());
+		this.prefixLogResuming = String.format("%s [step 6] [productName %s] [workDir %s]", this.prefixLog,
+				job.getProductIdentifier(), job.getWorkDirectory());
+		this.prefixLogStatus = String.format("%s [step 7] [productName %s] [workDir %s]", this.prefixLog,
+				job.getProductIdentifier(), job.getWorkDirectory());
+		this.prefixLogEnd = String.format("%s [step 0] [productName %s] [workDir %s]", this.prefixLog,
+				job.getProductIdentifier(), job.getWorkDirectory());
+		this.prefixLogError = String.format("[productName %s] [workDir %s]", job.getProductIdentifier(),
+				job.getWorkDirectory());
+
+		// Initialize the pool processor executor
+		this.poolProcessorExecutor = new PoolExecutorCallable(this.properties, this.job, this.prefixLogPoolProcessor);
+		this.poolProcessExecutorService = Executors.newSingleThreadExecutor();
+		this.poolProcessCompletionService = new ExecutorCompletionService<>(poolProcessExecutorService);
+
+		// Initialize the input downloader
+		inputDownloader = new InputDownloader(s3Factory, this.job.getWorkDirectory(), this.job.getInputs(),
+				this.properties.getSizeBatchS3Download(), this.prefixLogInputDownloader, poolProcessorExecutor,
+				this.properties.getLevel());
+
+		// Initiliaze the outpt processor
+		outputProcessor = new OutputProcessor(s3Factory, outputProcuderFactory, this.job.getWorkDirectory(),
+				this.job.getOutputs(), outputListFile, this.properties.getSizeBatchS3Upload(),
+				this.prefixLogPoolOutputProcessor);
+
 	}
 
+	/**
+	 * Execute a job
+	 */
 	@Override
-	public JobProcessingResult call() throws Exception {
-		Boolean activation = null;
+	public Boolean call() throws Exception {
+		int step = 2;
+		boolean poolProcessorInProgress = false;
 
 		try {
-
-			activation = devProperties.getStepsActivation().get("download");
-			if (activation == null || activation) {
-				LOGGER.info("[MONITOR] [Step 2] [productName {}] [workDir {}] Preparing local working directory",
-						job.getProductIdentifier(), job.getWorkDirectory());
-				InputDownloader inputDownloader = new InputDownloader(this.s3Factory, job.getWorkDirectory(),
-						job.getInputs(), this.sizeS3DownloadBatch,
-						String.format("[MONITOR] [Step 2] [productName %s] [workDir %s]", job.getProductIdentifier(),
-								job.getWorkDirectory()));
-				inputDownloader.processInputs();
+			step = 3;
+			if (devProperties.getStepsActivation().get("execution")) {
+				this.processPoolProcesses();
+				poolProcessorInProgress = true;
 			} else {
-				LOGGER.info(
-						"[MONITOR] [Step 2] [productName {}] [workDir {}] Preparing local working directory bypassed",
-						job.getProductIdentifier(), job.getWorkDirectory());
+				LOGGER.info("{} Executing processes bypassed", this.prefixLogPoolProcessor);
 			}
 
-			activation = devProperties.getStepsActivation().get("execution");
-			if (activation == null || activation) {
-				int counter = 0;
-				for (JobPoolDto pool : job.getPools()) {
-					counter++;
-					LOGGER.info("[MONITOR] [Step 3] [productName {}] [workDir {}] [pool {}] Executing processes",
-							job.getProductIdentifier(), job.getWorkDirectory(), counter);
-					PoolProcessor taskProcessor = new PoolProcessor(pool, job.getJobOrder(), job.getWorkDirectory(),
-							String.format("[MONITOR] [Step 3] [productName %s] [workDir %s] [pool %d]",
-									job.getProductIdentifier(), job.getWorkDirectory(), counter));
-					taskProcessor.process();
-				}
+			step = 2;
+			if (devProperties.getStepsActivation().get("download")) {
+				this.processInputs();
 			} else {
-				LOGGER.info("[MONITOR] [Step 3] [productName {}] [workDir {}] Executing processes bypassed",
-						job.getProductIdentifier(), job.getWorkDirectory());
+				LOGGER.info("{} Preparing local working directory bypassed", this.prefixLogInputDownloader);
 			}
 
-			activation = devProperties.getStepsActivation().get("upload");
-			if (activation == null || activation) {
-				LOGGER.info("[MONITOR] [Step 4] [productName {}] [workDir {}] Processing l0 outputs",
-						job.getProductIdentifier(), job.getWorkDirectory());
-				OutputProcessor outputProcessor = new OutputProcessor(this.s3Factory, this.outputProcuderFactory,
-						job.getWorkDirectory(), job.getOutputs(), this.outputListFile,
-						this.sizeS3UploadBatch, String.format("[MONITOR] [Step 4] [productName %s] [workDir %s]",
-								job.getProductIdentifier(), job.getWorkDirectory()));
-				outputProcessor.processOutput();
+			step++;
+			if (devProperties.getStepsActivation().get("execution")) {
+				this.waitForPoolProcessesEnding();
+				poolProcessorInProgress = false;
 			} else {
-				LOGGER.info("[MONITOR] [Step 4] [productName {}] [workDir {}] Processing l0 outputs bypasssed",
-						job.getProductIdentifier(), job.getWorkDirectory());
+				LOGGER.info("{} Executing processes bypassed", this.prefixLogPoolProcessor);
 			}
 
-		} catch (InputDownloaderException e) {
-			LOGGER.error("[MONITOR] [productName {}] [workDir {}] Problem during creating working directory : {}",
-					job.getProductIdentifier(), job.getWorkDirectory(), e.getMessage());
+			step++;
+			if (devProperties.getStepsActivation().get("upload")) {
+				this.processOutputs();
+			} else {
+				LOGGER.info("{} Processing l0 outputs bypasssed", prefixLogPoolOutputProcessor);
+			}
+
+		} catch (CodedException e) {
+			// Log occurred error
+			LOGGER.error("{} [step {}] {} [code {}] {}", this.prefixLog, step, this.prefixLogError,
+					e.getCode().getCode(), e.getMessage());
 			this.appStatus.setError();
-		} catch (ProcessExecutionException e) {
-			LOGGER.error("[MONITOR] [productName {}] [workDir {}] Problem during executing tasks : {}",
-					job.getProductIdentifier(), job.getWorkDirectory(), e.getMessage());
-			this.appStatus.setError();
-		} catch (IllegalArgumentException | ObjectStorageException | IOException e) {
-			LOGGER.error("[MONITOR] [productName {}] [workDir {}] Problem during processing outputs : {}",
-					job.getProductIdentifier(), job.getWorkDirectory(), e.getMessage());
-			this.appStatus.setError();
+
 		} finally {
-			activation = devProperties.getStepsActivation().get("erasing");
-			if (activation == null || activation) {
-				try {
-					LOGGER.info("[MONITOR] [Step 5] [productName {}] [workDir {}] Erasing local working directory",
-							job.getProductIdentifier(), job.getWorkDirectory());
-					delete(job.getWorkDirectory());
-				} catch (IOException e) {
-					LOGGER.error("[MONITOR] [productName {}] [workDir {}] Failed to erase local working directory",
-							job.getProductIdentifier(), job.getWorkDirectory(), e.getMessage());
-					this.appStatus.setError();
-				}
-			} else {
-				LOGGER.info("[MONITOR] [Step 5] [productName {}] [workDir {}] Erasing local working directory bypassed",
-						job.getProductIdentifier(), job.getWorkDirectory());
+
+			if (poolProcessorInProgress) {
+				this.terminateProcessesExecution();
 			}
 
-			LOGGER.info("[MONITOR] [Step 6] [productName {}] [workDir {}] Resuming consumer",
-					job.getProductIdentifier(), job.getWorkDirectory());
-			if (this.kafkaListenerEndpointRegistry.getListenerContainer(this.kafkaListenerContainerId) != null) {
-				this.kafkaListenerEndpointRegistry.getListenerContainer(this.kafkaListenerContainerId).resume();
+			if (devProperties.getStepsActivation().get("erasing")) {
+				this.eraseLocalDirectory();
 			} else {
-				LOGGER.info(
-						"[MONITOR] [Step 6] [productName {}] [workDir {}] Cannot resume consumer because no listener {}",
-						job.getProductIdentifier(), job.getWorkDirectory(), this.kafkaListenerContainerId);
+				LOGGER.info("{} Erasing local working directory bypassed", this.prefixLogErasing);
 			}
 
-			LOGGER.info("[MONITOR] [Step 7] [productName {}] [workDir {}] Checking status consumer",
-					job.getProductIdentifier(), job.getWorkDirectory());
-			if (this.appStatus.getStatus().isStopping()) {
-				System.exit(0);
-			} else if (this.appStatus.getStatus().isFatalError()) {
-				System.exit(-1);
-			} else {
-				this.appStatus.setWaiting();
-			}
+			this.resumeConsumer();
+
+			this.checkingStatus();
 		}
 
-		LOGGER.info("[MONITOR] [Step 0] [productName {}] End L0 job generation", job.getProductIdentifier());
+		LOGGER.info("{} End L0 job generation", this.prefixLogEnd);
 
-		return null;
+		return true;
 	}
 
-	private void delete(String path) throws IOException {
-		Path p = Paths.get(path);
-		Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
-				.peek(System.out::println).forEach(File::delete);
+	private void processPoolProcesses() {
+		LOGGER.info("{} Starting process executor", this.prefixLogPoolProcessor);
+		this.poolProcessCompletionService.submit(this.poolProcessorExecutor);
 	}
 
+	private void waitForPoolProcessesEnding() throws InterruptedException, CodedException {
+		if (!Thread.currentThread().isInterrupted()) {
+			try {
+				this.poolProcessCompletionService.take().get(this.properties.getTimeoutProcessAllTasksS(),
+						TimeUnit.SECONDS);
+			} catch (ExecutionException e) {
+				if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+					throw (CodedException) e.getCause();
+				} else {
+					throw new InternalErrorException(e.getMessage(), e);
+				}
+			} catch (TimeoutException e) {
+				throw new InternalErrorException(e.getMessage(), e);
+			}
+		} else {
+			throw new InterruptedException("Current thread is interrupted");
+		}
+	}
+
+	private void terminateProcessesExecution() {
+		this.poolProcessExecutorService.shutdownNow();
+		try {
+			if (!this.poolProcessExecutorService.awaitTermination(this.properties.getTimeoutProcessStopS(),
+					TimeUnit.SECONDS)) {
+				// TODO send kill
+			}
+		} catch (InterruptedException e) {
+			// Conserves the interruption
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void processInputs() throws CodedException, InterruptedException {
+		if (!Thread.currentThread().isInterrupted()) {
+			LOGGER.info("{} Preparing local working directory", this.prefixLogInputDownloader);
+			inputDownloader.processInputs();
+		} else {
+			throw new InterruptedException("Current thread is interrupted");
+		}
+	}
+
+	private void processOutputs() throws InterruptedException, CodedException {
+		if (!Thread.currentThread().isInterrupted()) {
+			LOGGER.info("{} Processing l0 outputs", prefixLogPoolOutputProcessor);
+			outputProcessor.processOutput();
+		} else {
+			throw new InterruptedException("Current thread is interrupted");
+		}
+	}
+
+	private void eraseLocalDirectory() {
+		try {
+			LOGGER.info("{} Erasing local working directory", this.prefixLogErasing);
+			Path p = Paths.get(job.getWorkDirectory());
+			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
+					.peek(System.out::println).forEach(File::delete);
+		} catch (IOException e) {
+			LOGGER.error("{} [code {}] Failed to erase local working directory", this.prefixLogErasing,
+					ErrorCode.INTERNAL_ERROR.getCode());
+			this.appStatus.setError();
+		}
+	}
+
+	private void resumeConsumer() {
+		LOGGER.info("{} Resuming consumer", this.prefixLogResuming);
+		if (this.kafkaListenerEndpointRegistry.getListenerContainer(this.kafkaListenerContainerId) != null) {
+			this.kafkaListenerEndpointRegistry.getListenerContainer(this.kafkaListenerContainerId).resume();
+		} else {
+			LOGGER.info("{} [code {}] Cannot resume consumer because no listener {}", this.prefixLogResuming,
+					ErrorCode.KAFKA_RESUMING_ERROR.getCode(), this.kafkaListenerContainerId);
+		}
+	}
+
+	private void checkingStatus() {
+		LOGGER.info("{} Checking status consumer", this.prefixLogStatus);
+		if (this.appStatus.getStatus().isStopping()) {
+			System.exit(0);
+		} else if (this.appStatus.getStatus().isFatalError()) {
+			System.exit(-1);
+		} else {
+			this.appStatus.setWaiting();
+		}
+	}
 }
