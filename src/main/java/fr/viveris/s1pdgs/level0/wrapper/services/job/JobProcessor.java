@@ -16,8 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 
 import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
@@ -175,7 +175,7 @@ public class JobProcessor implements Callable<Boolean> {
 		} catch (CodedException e) {
 			// Log occurred error
 			LOGGER.error("{} [step {}] {} [code {}] {}", this.prefixLog, step, this.prefixLogError,
-					e.getCode().getCode(), e.getMessage());
+					e.getCode().getCode(), e.getLogMessage());
 			this.appStatus.setError();
 
 		} finally {

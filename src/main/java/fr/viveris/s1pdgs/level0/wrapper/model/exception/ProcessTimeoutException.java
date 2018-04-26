@@ -22,4 +22,8 @@ public class ProcessTimeoutException extends CodedException {
 	public ProcessTimeoutException(String message) {
 		super(ErrorCode.PROCESS_TIMEOUT, message);
 	}
+
+	public String getLogMessage() {
+		return String.format("[msg %s]", getMessage());
+	}
 }

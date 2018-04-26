@@ -18,4 +18,8 @@ public class UnknownFamilyException extends CodedException {
 		return family;
 	}
 
+	public String getLogMessage() {
+		return String.format("[msg %s]", getMessage());
+	}
+
 }

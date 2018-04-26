@@ -12,4 +12,8 @@ public class InternalErrorException extends CodedException {
 		super(ErrorCode.INTERNAL_ERROR, message, e);
 	}
 
+	public String getLogMessage() {
+		return String.format("[msg %s]", getMessage());
+	}
+
 }

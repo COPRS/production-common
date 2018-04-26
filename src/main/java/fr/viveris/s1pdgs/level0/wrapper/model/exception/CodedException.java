@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.level0.wrapper.model.exception;
 
-public class CodedException extends Exception {
+public abstract class CodedException extends Exception {
 
 	private static final long serialVersionUID = -3674800585523293639L;
 
@@ -38,5 +38,7 @@ public class CodedException extends Exception {
 			return this.code;
 		}
 	}
+	
+	public abstract String getLogMessage();
 
 }

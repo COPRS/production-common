@@ -28,4 +28,8 @@ public class KafkaSendException extends CodedException {
 		return productName;
 	}
 
+	public String getLogMessage() {
+		return String.format("[topic %s] [productName %s] [msg %s]", this.topic, this.productName, getMessage());
+	}
+
 }
