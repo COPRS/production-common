@@ -3,11 +3,14 @@ Configuration:
   name: YAMLConfigTest
   properties:
     property:
+      name: appVersion
+      value: 1.0.0
+    property:
+      name: appName
+      value: s1pdgs-wrapper-app
+    property:
       name: envHostname
       value: ${env:HOSTNAME}
-    property:
-      name: envAppName
-      value: ${env:wrapper_spring_appname:-s1pdgs-wrapper-app}
     property:
       name: envFilename
       value: ${env:wrapper_logging_file:-./s1pdgs-wrapper.log}
@@ -17,13 +20,13 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} %-5level: %msg [%thread] %n"
+        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}-${appVersion} %-5level: %msg [%thread] %n"
     RollingFile:
       name: FILE
       fileName: ${envFilename}
       filePattern: "${envFilename}.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
-        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} %-5level: %msg [%thread] %n"
+        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}-${appVersion} %-5level: %msg [%thread] %n"
       Policies:
         SizeBasedTriggeringPolicy:
           size: 10 MB
@@ -31,9 +34,9 @@ Configuration:
         max: 30
     Kafka:
       name: KAFKA_ERROR
-      topic: t-pdgs-errors
+      topic: ${env:kafka_topic_errors:-t-pdgs-errors}
       PatternLayout:
-        Pattern: "[date %d{dd-MM-yyyy HH:mm:ss.SSS}] [podName ${envHostname}] [appName ${envAppName}] [thread %thread] [level %-5level] [message %msg] %n"
+        Pattern: "[date %d{dd-MM-yyyy HH:mm:ss.SSS}] [podName ${envHostname}] [app ${appName}-${appVersion}] [thread %thread] [level %-5level] [message %msg] %n"
       Property:
         name: bootstrap.servers
         value: ${env:kafka_bootstrap-servers:-kafka-svc:9093}
@@ -63,6 +66,12 @@ Configuration:
           - ref: FILE
       - name: org.apache
         level: ${env:wrapper_logging_level_orgapache:-warn}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: com.amazonaws
+        level: ${env:wrapper_logging_level_amazonaws:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT

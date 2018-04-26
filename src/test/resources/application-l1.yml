@@ -1,11 +1,3 @@
-spring:
-  application:
-    name: s1pdgs-l1-wrapper
-
-# Logging
-logging:
-  file: ./s1pdgs-l1-wrapper.log
-
 kafka:
   group-id: l1-wrappers
   client-id: l1-wrapper
