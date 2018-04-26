@@ -8,7 +8,7 @@ RUN mvn dependency:go-offline
 COPY src/ /app/src/
 COPY dev/ /app/dev/
 COPY data_test/ /app/data_test/
-COPY /logback-spring.xml /app/logback-spring.xml
+COPY /log4j2.yml /app/log4j2.yml
 RUN	mvn -B package
 
 FROM registry.geohub.space/wo7/${PROCESS_IMAGE}:${PROCESS_VERSION}
