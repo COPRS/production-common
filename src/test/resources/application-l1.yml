@@ -1,7 +1,3 @@
-# Logging
-logging:
-  file: ./s1pdgs-l1-jobgenerator.log
-
 kafka:
   group-id: l1-jobgenerators
   client-id: l1-job-generator

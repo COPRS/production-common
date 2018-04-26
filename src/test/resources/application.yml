@@ -5,13 +5,7 @@ spring:
     
 # Logging
 logging:
-  config: logback-spring.xml
-  level:
-    ROOT: ERROR
-    org.springframework: ERROR
-    fr.viveris.s1pdgs: INFO
-    kafka: WARN
-  file: ./s1pdgs-l0-jobgenerator.log
+  config: ./test/log4j2-test.yml
  
 metadata:
   host: localhost:8080
