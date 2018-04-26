@@ -1,32 +1,19 @@
 Configuration:
   status: warn
   name: YAMLConfigTest
-  properties:
-    property:
-      name: appVersion
-      value: 1.0.0
-    property:
-      name: appName
-      value: s1pdgs-wrapper-app
-    property:
-      name: envHostname
-      value: ${env:HOSTNAME}
-    property:
-      name: envFilename
-      value: ${env:wrapper_logging_file:-./s1pdgs-wrapper.log}
   thresholdFilter:
     level: debug
   appenders:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}-${appVersion} %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-wrapper-app:1.0.0 %-5level: %msg [%thread] %n"
     RollingFile:
       name: FILE
-      fileName: ${envFilename}
-      filePattern: "${envFilename}.%d{yyyy-MM-dd-hh-mm}.gz"
+      fileName: ${env:wrapper_logging_file:-./s1pdgs-wrapper.log}
+      filePattern: "${env:wrapper_logging_file:-./s1pdgs-wrapper.log}.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
-        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}-${appVersion} %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-wrapper-app:1.0.0 %-5level: %msg [%thread] %n"
       Policies:
         SizeBasedTriggeringPolicy:
           size: 10 MB
@@ -36,7 +23,7 @@ Configuration:
       name: KAFKA_ERROR
       topic: ${env:kafka_topic_errors:-t-pdgs-errors}
       PatternLayout:
-        Pattern: "[date %d{dd-MM-yyyy HH:mm:ss.SSS}] [podName ${envHostname}] [app ${appName}-${appVersion}] [thread %thread] [level %-5level] [message %msg] %n"
+        Pattern: "[date %d{yyyy-MM-dd HH:mm:ss.SSS}] [podName ${env:HOSTNAME}] [app s1pdgs-wrapper-app:1.0.0] [thread %thread] [level %-5level] [message %msg] %n"
       Property:
         name: bootstrap.servers
         value: 172.17.50.7:9092
