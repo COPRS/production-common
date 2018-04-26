@@ -6,11 +6,11 @@ spring:
 logging:
   config: ${wrapper_logging_config:log4j2.yml}
   level:
-    ROOT: ${wrapper_logging_level_root:ERROR}
-    org.springframework: ${wrapper_logging_level_orgspringframework:ERROR}
-    fr.viveris.s1pdgs: ${wrapper_logging_level_frviveriss1pdgs:INFO}
-    kafka: ${wrapper_logging_level_kafka:WARN}
-    org.apache: ${wrapper_logging_level_orgapache:WARN}
+    ROOT: ${wrapper_logging_level_root:error}
+    org.springframework: ${wrapper_logging_level_orgspringframework:error}
+    fr.viveris.s1pdgs: ${wrapper_logging_level_frviveriss1pdgs:info}
+    kafka: ${wrapper_logging_level_kafka:warn}
+    org.apache: ${wrapper_logging_level_orgapache:warn}
   file: ${wrapper_logging_file:./s1pdgs-wrapper.log}
   
 # Kafka
