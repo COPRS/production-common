@@ -164,7 +164,8 @@ public class OutputProcessor {
 			List<S3UploadFile> sublist = uploadBatch.subList(i * this.sizeS3UploadBatch, lastIndex);
 
 			if (i > 0) {
-				LOGGER.info("{} 2 - Publishing KAFKA messages for batch {}", this.prefixMonitorLogs, i - 1);
+				int j = i -1;
+				LOGGER.info("{} 2 - Publishing KAFKA messages for batch {}", this.prefixMonitorLogs, j);
 				Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
 				boolean stop = false;
 				while (!stop && iter.hasNext()) {
