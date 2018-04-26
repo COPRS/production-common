@@ -6,7 +6,6 @@ COPY dev/ /app/dev/
 COPY test/ /app/test/
 COPY config/ /app/config/
 COPY src/ /app/src/
-COPY /logback-spring.xml /app/logback-spring.xml
 RUN mkdir /app/tmp/ && \
 	mkdir /app/tmp/sessions/ && \
 	mvn -B package
