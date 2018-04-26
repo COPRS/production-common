@@ -1,0 +1,82 @@
+Configuration:
+  status: warn
+  name: YAMLConfigTest
+  properties:
+    property:
+      name: appVersion
+      value: 1.0.0
+    property:
+      name: appName
+      value: ${env:archives_application_name:s1pdgs-archives}
+    property:
+      name: envHostname
+      value: ${env:HOSTNAME}
+    property:
+      name: envFilename
+      value: ${archives_logging_file:./s1pdgs-archives.log}
+  thresholdFilter:
+    level: debug
+  appenders:
+    Console:
+      name: STDOUT
+      PatternLayout:
+        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}-${appVersion} %-5level: %msg [%thread] %n"
+    RollingFile:
+      name: FILE
+      fileName: ${envFilename}
+      filePattern: "${envFilename}.%d{yyyy-MM-dd-hh-mm}.gz"
+      PatternLayout:
+        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}-${appVersion} %-5level: %msg [%thread] %n"
+      Policies:
+        SizeBasedTriggeringPolicy:
+          size: 10 MB
+      DefaultRollOverStrategy:
+        max: 30
+    Kafka:
+      name: KAFKA_ERROR
+      topic: ${env:kafka_topic_errors:-t-pdgs-errors}
+      PatternLayout:
+        Pattern: "[date %d{dd-MM-yyyy HH:mm:ss.SSS}] [podName ${envHostname}] [app ${appName}-${appVersion}] [thread %thread] [level %-5level] [message %msg] %n"
+      Property:
+        name: bootstrap.servers
+        value: ${env:kafka_bootstrap-servers:-kafka-svc:9093}
+      Filters:
+        ThresholdFilter:
+          level: error
+  Loggers:
+    logger:
+      - name: fr.viveris.s1pdgs
+        level: ${env:archives_logging_level_frviveriss1pdgs:-info}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+          - ref: KAFKA_ERROR
+      - name: org.springframework
+        level: ${env:archives_logging_level_orgspringframework:-error}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: kafka
+        level: ${env:archives_logging_level_kafka:-warn}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: org.apache
+        level: ${env:archives_logging_level_orgapache:-warn}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: com.amazonaws
+        level: ${env:archives_logging_level_amazonaws:-warn}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+    Root:
+      level: ${env:archives_logging_level_root:-error}
+      AppenderRef:
+        ref: STDOUT
