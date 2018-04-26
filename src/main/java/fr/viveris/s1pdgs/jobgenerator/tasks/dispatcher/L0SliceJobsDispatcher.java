@@ -9,8 +9,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,7 +36,7 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(L0SliceJobsDispatcher.class);
+	private static final Logger LOGGER = LogManager.getLogger(L0SliceJobsDispatcher.class);
 
 	private final XmlConverter xmlConverter;
 

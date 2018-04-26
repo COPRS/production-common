@@ -7,8 +7,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -39,7 +39,7 @@ public class L0SlicesConsumer {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(L0SlicesConsumer.class);
+	private static final Logger LOGGER = LogManager.getLogger(L0SlicesConsumer.class);
 
 	private final L0SliceJobsDispatcher l0SliceJobsDispatcher;
 
