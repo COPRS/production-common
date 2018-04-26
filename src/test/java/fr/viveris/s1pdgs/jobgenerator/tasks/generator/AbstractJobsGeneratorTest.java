@@ -96,7 +96,7 @@ public class AbstractJobsGeneratorTest {
 
 		generator = new AbstractJobsGeneratorImpl(xmlConverter, metadataService, processSettings, jobGeneratorSettings,
 				kafkaJobsSender);
-		generator.initialize(new File("./data_test/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
+		generator.initialize(new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
 		generator.setMode(ProductMode.SLICING);
 	}
 

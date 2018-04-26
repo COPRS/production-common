@@ -88,7 +88,7 @@ public class EdrsSessionJobsGeneratorTest {
 		JobsGeneratorFactory factory = new JobsGeneratorFactory(l0ProcessSettings, jobGeneratorSettings, xmlConverter,
 				metadataService, kafkaJobsSender);
 		generator = (EdrsSessionJobsGenerator) factory.createJobGeneratorForEdrsSession(
-				new File("./data_test/generic_config/task_tables/TaskTable.AIOP.xml"));
+				new File("./test/data/generic_config/task_tables/TaskTable.AIOP.xml"));
 	}
 
 	private void mockProcessSettings() {

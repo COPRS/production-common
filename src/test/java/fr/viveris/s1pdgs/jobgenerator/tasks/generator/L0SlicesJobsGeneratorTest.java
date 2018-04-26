@@ -83,7 +83,7 @@ public class L0SlicesJobsGeneratorTest {
 		JobsGeneratorFactory factory = new JobsGeneratorFactory(processSettings, jobGeneratorSettings, xmlConverter,
 				metadataService, kafkaJobsSender);
 		generator = (L0SlicesJobsGenerator) factory
-				.createJobGeneratorForL0Slice(new File("./data_test/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
+				.createJobGeneratorForL0Slice(new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
 	}
 
 	private void mockProcessSettings() {

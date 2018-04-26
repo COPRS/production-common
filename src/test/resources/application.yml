@@ -46,10 +46,10 @@ level0:
   dir-extractor-sessions: ./tmp/
   
 level1:
-  pathroutingxmlfile: ./data_test/l1_config/routing.xml
+  pathroutingxmlfile: ./test/data/l1_config/routing.xml
 
 job-generator:
-  directoryoftasktables: ./data_test/l0_config/task_tables/
+  directoryoftasktables: ./test/data/l0_config/task_tables/
   maxnumberoftasktables: 2
   maxnumberofjobs: 20
   scheduledfixedrate: 500

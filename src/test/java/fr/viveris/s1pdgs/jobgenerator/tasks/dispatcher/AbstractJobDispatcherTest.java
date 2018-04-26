@@ -89,7 +89,7 @@ public class AbstractJobDispatcherTest {
 	 */
 	@Test
 	public void testConstructor() {
-		this.mockJobGeneratorSettings(4, "./data_test/l0_config/task_tables/");
+		this.mockJobGeneratorSettings(4, "./test/data/l0_config/task_tables/");
 		AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
 		assertTrue(dispatcher.generators.isEmpty());
 	}
@@ -100,7 +100,7 @@ public class AbstractJobDispatcherTest {
 	 */
 	@Test
 	public void testNbMaxTaskTables() {
-		this.mockJobGeneratorSettings(1, "./data_test");
+		this.mockJobGeneratorSettings(1, "./test/data");
 		AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
 		try {
 			dispatcher.initTaskTables();
@@ -119,7 +119,7 @@ public class AbstractJobDispatcherTest {
 	public void testInitialize() {
 
 		// Mocks
-		this.mockJobGeneratorSettings(4, "./data_test/generic_config/task_tables/");
+		this.mockJobGeneratorSettings(4, "./test/data/generic_config/task_tables/");
 		doAnswer(i -> {
 			return null;
 		}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(Mockito.any(), Mockito.any());

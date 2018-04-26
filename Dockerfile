@@ -3,7 +3,7 @@ WORKDIR /app
 COPY pom.xml /app
 RUN mvn dependency:go-offline
 COPY dev/ /app/dev/
-COPY data_test/ /app/data_test/
+COPY test/ /app/test/
 COPY src/ /app/src/
 COPY /logback-spring.xml /app/logback-spring.xml
 RUN mkdir /app/tmp/ && \

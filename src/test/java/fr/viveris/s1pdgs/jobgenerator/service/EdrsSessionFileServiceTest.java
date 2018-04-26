@@ -67,8 +67,8 @@ public class EdrsSessionFileServiceTest {
 		fileCh1.createNewFile();
 		fileCh2 = new File("./tmp/DCS_02_L20171109175634707000125_ch2_DSIB.xml");
 		fileCh2.createNewFile();
-		FileCopyUtils.copy(new File("./data_test/DCS_02_L20171109175634707000125_ch1_DSIB.xml"), fileCh1);
-		FileCopyUtils.copy(new File("./data_test/DCS_02_L20171109175634707000125_ch2_DSIB.xml"), fileCh2);
+		FileCopyUtils.copy(new File("./test/data/DCS_02_L20171109175634707000125_ch1_DSIB.xml"), fileCh1);
+		FileCopyUtils.copy(new File("./test/data/DCS_02_L20171109175634707000125_ch2_DSIB.xml"), fileCh2);
 		session1 = TestL0Utils.createEdrsSessionFileChannel1(true);
 		session2 = TestL0Utils.createEdrsSessionFileChannel2(true);
 
