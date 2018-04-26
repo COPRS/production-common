@@ -111,7 +111,7 @@ public class PoolProcessor {
 			throw new InternalErrorException(e.getMessage(), e);
 		} catch (ExecutionException e) {
 			stopAllProcessCall = true;
-			if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+			if (e.getCause() instanceof CodedException) {
 				throw (CodedException) e.getCause();
 			} else {
 				throw new InternalErrorException(e.getMessage(), e);

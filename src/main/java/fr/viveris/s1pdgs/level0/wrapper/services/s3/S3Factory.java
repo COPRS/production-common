@@ -104,7 +104,7 @@ public class S3Factory {
 				} catch (InterruptedException | TimeoutException e) {
 					throw new InternalErrorException(e.getMessage(), e);
 				} catch (ExecutionException e) {
-					if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+					if (e.getCause() instanceof CodedException) {
 						throw (CodedException) e.getCause();
 					} else {
 						throw new InternalErrorException(e.getMessage(), e);
@@ -158,7 +158,7 @@ public class S3Factory {
 				} catch (InterruptedException | TimeoutException e) {
 					throw new InternalErrorException(e.getMessage(), e);
 				} catch (ExecutionException e) {
-					if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+					if (e.getCause() instanceof CodedException) {
 						throw (CodedException) e.getCause();
 					} else {
 						throw new InternalErrorException(e.getMessage(), e);

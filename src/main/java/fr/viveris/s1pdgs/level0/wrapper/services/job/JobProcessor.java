@@ -211,7 +211,7 @@ public class JobProcessor implements Callable<Boolean> {
 				this.poolProcessCompletionService.take().get(this.properties.getTimeoutProcessAllTasksS(),
 						TimeUnit.SECONDS);
 			} catch (ExecutionException e) {
-				if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+				if (e.getCause() instanceof CodedException) {
 					throw (CodedException) e.getCause();
 				} else {
 					throw new InternalErrorException(e.getMessage(), e);
