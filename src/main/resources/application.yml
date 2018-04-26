@@ -3,18 +3,6 @@ spring:
   application:
     name: ${archives_application_name:s1pdgs-archives}
     
-# Logging
-logging:
-  config: ${archives_logging_config:logback-spring.xml}
-  level:
-    ROOT: ${archives_logging_level_root:ERROR}
-    org.springframework: ${archives_logging_level_orgspringframework:ERROR}
-    fr.viveris.s1pdgs: ${archives_logging_level_frviveriss1pdgs:INFO}
-    kafka: ${archives_logging_level_kafka:WARN}
-    org.apache: ${archives_logging_level_orgapache:WARN}
-    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
-  file: ${archives_logging_file:./s1pdgs-archives.log}
-
 # KAFKA
 kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
