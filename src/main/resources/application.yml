@@ -1,6 +1,9 @@
 spring:
   application:
     name: s1pdgs-wrapper-app
+    
+logging:
+  config: ${wrapper_logging_config:log4j2.yml}
   
 # Kafka
 kafka:

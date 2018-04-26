@@ -39,7 +39,7 @@ Configuration:
         Pattern: "[date %d{dd-MM-yyyy HH:mm:ss.SSS}] [podName ${envHostname}] [app ${appName}-${appVersion}] [thread %thread] [level %-5level] [message %msg] %n"
       Property:
         name: bootstrap.servers
-        value: ${env:kafka_bootstrap-servers:-kafka-svc:9093}
+        value: 172.17.50.7:9092
       Filters:
         ThresholdFilter:
           level: error

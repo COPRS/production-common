@@ -1,10 +1,13 @@
 spring:
   application:
     name: s1pdgs-wrapper-app
+    
+logging:
+  config: ${wrapper_logging_config:./test/log4j2-test.yml}
   
 # Kafka
 kafka:
-  bootstrap-servers: 172.17.50.10:9092 #${spring.embedded.kafka.brokers}
+  bootstrap-servers: ${spring.embedded.kafka.brokers}
   group-id: l0-wrappers
   client-id: l0-wrapper
   poll-timeout: 500
