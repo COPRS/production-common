@@ -16,4 +16,5 @@ RUN mkdir /data/ && \
 	mkdir /data/sessions/ 
 COPY --from=build /app/target/s1pdgs-job-generator-1.0.0.jar s1pdgs-job-generator.jar
 COPY /config/log/log4j2.yml log4j2.yml
+COPY /src/main/resources/application.yml application.yml
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app/s1pdgs-job-generator.jar"]
