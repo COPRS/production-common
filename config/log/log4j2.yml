@@ -42,45 +42,44 @@ Configuration:
         ThresholdFilter:
           level: error
   Loggers:
-    AsyncLogger:
+    logger:
       - name: fr.viveris.s1pdgs
         level: ${env:scaler_logging_level_frviveriss1pdgs:-info}
         additivity: false
-        includeLocation: true
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
           - ref: KAFKA_ERROR
       - name: org.springframework
         level: ${env:scaler_logging_level_orgspringframework:-error}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
       - name: kafka
         level: ${env:scaler_logging_level_kafka:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
       - name: org.apache
         level: ${env:scaler_logging_level_orgapache:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
       - name: io.fabric8
         level: ${env:scaler_logging_level_k8s:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
       - name: org.pacesys
         level: ${env:scaler_logging_level_openstack:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
     Root:
       level: ${env:scaler_logging_level_root:-error}
       AppenderRef:
