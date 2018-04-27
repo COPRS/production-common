@@ -42,39 +42,38 @@ Configuration:
         ThresholdFilter:
           level: error
   Loggers:
-    AsyncLogger:
+    logger:
       - name: fr.viveris.s1pdgs
         level: ${env:job_logging_level_frviveriss1pdgs:-info}
         additivity: false
-        includeLocation: true
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
           - ref: KAFKA_ERROR
       - name: org.springframework
         level: ${env:job_logging_level_orgspringframework:-error}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
       - name: kafka
         level: ${env:job_logging_level_kafka:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
       - name: org.apache
         level: ${env:job_logging_level_orgapache:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
       - name: com.amazonaws
         level: ${env:job_logging_level_amazonaws:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: RANDOM_ACCESS_FILE
+          - ref: FILE
     Root:
       level: ${env:job_logging_level_root:-error}
       AppenderRef:
