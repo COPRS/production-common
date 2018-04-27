@@ -87,7 +87,7 @@ public class KafkaConsumerConfig {
 	 * Consumer factory
 	 * @return
 	 */
-	@Bean
+	@Bean(name = "slicesConsumerFactory")
 	public ConsumerFactory<String, SliceDto> slicesConsumerFactory() {
 		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new JsonDeserializer<>(SliceDto.class));
 	}
@@ -96,7 +96,7 @@ public class KafkaConsumerConfig {
 	 * Listener containers factory
 	 * @return
 	 */
-	@Bean
+	@Bean(name = "slicesKafkaListenerContainerFactory")
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SliceDto>> slicesKafkaListenerContainerFactory() {
 		ConcurrentKafkaListenerContainerFactory<String, SliceDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(slicesConsumerFactory());
@@ -114,7 +114,7 @@ public class KafkaConsumerConfig {
 	 * Consumer factory
 	 * @return
 	 */
-	@Bean
+	@Bean(name = "reportConsumerFactory")
 	public ConsumerFactory<String, ReportDto> reportConsumerFactory() {
 		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new JsonDeserializer<>(ReportDto.class));
 	}
@@ -123,7 +123,7 @@ public class KafkaConsumerConfig {
 	 * Listener containers factory
 	 * @return
 	 */
-	@Bean
+	@Bean(name = "reportKafkaListenerContainerFactory")
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ReportDto>> reportKafkaListenerContainerFactory() {
 		ConcurrentKafkaListenerContainerFactory<String, ReportDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(reportConsumerFactory());
