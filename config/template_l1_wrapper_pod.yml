@@ -40,7 +40,7 @@ spec:
       claimName: fast-wrapper-pv-claim
   containers:
   - name: l1-wrapper
-    image: registry.geohub.space/wo7/wrapper/l1:SPDGS-133
+    image: registry.geohub.space/wo7/wrapper/l1:latest
     imagePullPolicy: Always
     ports:
     - containerPort: 8080
