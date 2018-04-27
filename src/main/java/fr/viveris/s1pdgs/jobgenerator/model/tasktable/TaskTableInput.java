@@ -10,6 +10,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.util.StringUtils;
+
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableInputMode;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum;
 
@@ -152,6 +154,13 @@ public class TaskTableInput {
 	public String toString() {
 		return "TaskTableInput [id=" + id + ", reference=" + reference + ", mode=" + mode + ", mandatory=" + mandatory
 				+ ", alternatives=" + alternatives + "]";
+	}
+	
+	public String toLogMessage() {
+		if (StringUtils.isEmpty(reference)) {
+			return id;
+		}
+		return reference;
 	}
 
 	/* (non-Javadoc)

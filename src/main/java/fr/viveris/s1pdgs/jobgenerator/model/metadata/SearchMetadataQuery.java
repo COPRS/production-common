@@ -49,7 +49,8 @@ public class SearchMetadataQuery {
 	 * @param deltaTime1
 	 * @param fileType
 	 */
-	public SearchMetadataQuery(int identifier, String retrievalMode, double deltaTime0, double deltaTime1, String productType) {
+	public SearchMetadataQuery(int identifier, String retrievalMode, double deltaTime0, double deltaTime1,
+			String productType) {
 		this();
 		this.identifier = identifier;
 		this.retrievalMode = retrievalMode;
@@ -143,7 +144,9 @@ public class SearchMetadataQuery {
 		this.productType = productType;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -152,7 +155,13 @@ public class SearchMetadataQuery {
 				+ deltaTime0 + ", deltaTime1=" + deltaTime1 + ", productType=" + productType + "]";
 	}
 
-	/* (non-Javadoc)
+	public String toLogMessage() {
+		return identifier + "|" + retrievalMode + "|" + deltaTime0 + "|" + deltaTime1 + "|" + productType;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -165,7 +174,9 @@ public class SearchMetadataQuery {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override

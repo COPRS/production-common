@@ -1,7 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.tasks.generator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.util.CollectionUtils;
 
@@ -10,8 +10,8 @@ import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobInputDto;
+import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
@@ -29,8 +29,8 @@ public class EdrsSessionJobsGenerator extends AbstractJobsGenerator<EdrsSession>
 	}
 
 	@Override
-	protected void preSearch(Job<EdrsSession> job) throws MetadataMissingException {
-		List<String> missingRaws = new ArrayList<>();
+	protected void preSearch(Job<EdrsSession> job) throws InputsMissingException {
+		Map<String, String> missingRaws = new HashMap<>();
 		// Channel 1
 		if (job.getProduct().getObject().getChannel1() != null
 				&& job.getProduct().getObject().getChannel1().getRawNames() != null) {
@@ -40,10 +40,10 @@ public class EdrsSessionJobsGenerator extends AbstractJobsGenerator<EdrsSession>
 					if (file != null) {
 						raw.setObjectStorageKey(file.getKeyObjectStorage());
 					} else {
-						missingRaws.add(String.format("[raw %s]", raw.getFileName()));
+						missingRaws.put(raw.getFileName(), "No raw with name");
 					}
 				} catch (MetadataException me) {
-					missingRaws.add(String.format("[raw %s] [error %s]", raw.getFileName(), me.getMessage()));
+					missingRaws.put(raw.getFileName(), me.getMessage());
 				}
 			});
 		}
@@ -56,15 +56,15 @@ public class EdrsSessionJobsGenerator extends AbstractJobsGenerator<EdrsSession>
 					if (file != null) {
 						raw.setObjectStorageKey(file.getKeyObjectStorage());
 					} else {
-						missingRaws.add(String.format("[raw %s]", raw.getFileName()));
+						missingRaws.put(raw.getFileName(), "No raw with name");
 					}
 				} catch (MetadataException me) {
-					missingRaws.add(String.format("[raw %s] [error %s]", raw.getFileName(), me.getMessage()));
+					missingRaws.put(raw.getFileName(), me.getMessage());
 				}
 			});
 		}
 		if (!missingRaws.isEmpty()) {
-			throw new MetadataMissingException(missingRaws);
+			throw new InputsMissingException(missingRaws);
 		}
 	}
 

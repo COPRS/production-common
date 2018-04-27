@@ -24,7 +24,7 @@ import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataMissingException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
@@ -195,7 +195,7 @@ public class EdrsSessionJobsGeneratorTest {
 				assertEquals(sessionComplete.getObject().getChannel2().getRawNames().get(i).getObjectStorageKey(),
 						session.getObject().getChannel2().getRawNames().get(i).getObjectStorageKey());
 			}
-		} catch (MetadataMissingException e) {
+		} catch (InputsMissingException e) {
 			fail("MetadataMissingException raised: " + e.getMessage());
 		}
 	}
@@ -211,8 +211,9 @@ public class EdrsSessionJobsGeneratorTest {
 		try {
 			generator.preSearch(job);
 			fail("MetadataMissingException shall be raised");
-		} catch (MetadataMissingException e) {
-			assertTrue(e.getMessage().contains("DCS_02_L20171109175634707000125_ch1_DSDB_0000"));
+		} catch (InputsMissingException e) {
+			assertTrue(e.getMissingMetadata().containsKey("DCS_02_L20171109175634707000125_ch1_DSDB_00001.raw"));
+			assertTrue(e.getMissingMetadata().containsKey("DCS_02_L20171109175634707000125_ch1_DSDB_00023.raw"));
 		}
 	}
 

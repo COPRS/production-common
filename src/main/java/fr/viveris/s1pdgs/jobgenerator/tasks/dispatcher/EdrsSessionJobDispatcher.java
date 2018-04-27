@@ -4,17 +4,15 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
@@ -41,18 +39,18 @@ public class EdrsSessionJobDispatcher extends AbstractJobsDispatcher<EdrsSession
 	}
 
 	@PostConstruct
-	public void initialize() throws BuildTaskTableException, JobDispatcherException {
+	public void initialize() throws AbstractCodedException {
 		// Init job generators from task tables
 		super.initTaskTables();
 	}
 
 	@Override
-	protected AbstractJobsGenerator<EdrsSession> createJobGenerator(File xmlFile) throws BuildTaskTableException {
+	protected AbstractJobsGenerator<EdrsSession> createJobGenerator(File xmlFile) throws AbstractCodedException {
 		return this.jobsGeneratorFactory.createJobGeneratorForEdrsSession(xmlFile);
 	}
 
 	@Override
-	public void dispatch(Job<EdrsSession> job) throws JobGenerationException, JobDispatcherException {
+	public void dispatch(Job<EdrsSession> job) throws AbstractCodedException {
 		LOGGER.info("[MONITOR] [Step 2] [productName {}] [taskTable {}] Caching job", job.getProduct().getIdentifier(),
 				TASK_TABLE_NAME);
 		this.generators.get(TASK_TABLE_NAME).addJob(job);

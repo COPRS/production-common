@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -29,10 +29,13 @@ import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobInputDto;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobOutputDto;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobPoolDto;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobTaskDto;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException.ErrorCode;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.GenerationStatusEnum;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.JobGenerationStatus;
@@ -113,6 +116,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 	protected List<List<String>> tasks;
 	protected ProductMode mode;
 	protected String prefixLogMonitor;
+	protected String prefixLogMonitorRemove;
 
 	/**
 	 * Template of job order. Contains all information except ones specific to the
@@ -172,7 +176,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		// Build task table
 		this.taskTableXmlName = xmlFile.getName();
 		this.buildTaskTable(xmlFile);
-		this.prefixLogMonitor = "[MONITOR] [Step 3] [taskTable " + this.taskTableXmlName + "]";
+		this.prefixLogMonitor = "[MONITOR] [step 3] [taskTable " + this.taskTableXmlName + "]";
+		this.prefixLogMonitorRemove = "[MONITOR] [step 4] [taskTable " + this.taskTableXmlName + "]";
 
 		// Build jobOrder
 		this.buildJobOrderTemplate();
@@ -200,7 +205,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 			this.taskTable = (TaskTable) xmlConverter.convertFromXMLToObject(xmlFile.getAbsolutePath());
 			this.taskTable.setLevel(this.l0ProcessSettings.getLevel());
 		} catch (IOException | JAXBException e) {
-			throw new BuildTaskTableException(e.getMessage(), e, this.taskTableXmlName);
+			throw new BuildTaskTableException(this.taskTableXmlName, e.getMessage(), e);
 		}
 	}
 
@@ -276,17 +281,15 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 	/**
 	 * 
 	 * @param session
-	 * @throws JobGenerationException
+	 * @throws MaxNumberCachedJobsReachException
 	 */
-	public void addJob(Job<T> job) throws JobGenerationException {
+	public void addJob(Job<T> job) throws MaxNumberCachedJobsReachException {
 		if (!this.cachedJobs.containsKey(job.getProduct().getIdentifier())) {
 			if (this.cachedJobs.size() >= this.jobGeneratorSettings.getMaxnumberofjobs()) {
-				throw new JobGenerationException("Too much jobs in progress", this.taskTableXmlName,
-						job.getProduct().getIdentifier());
+				throw new MaxNumberCachedJobsReachException(this.taskTableXmlName, "Too much jobs in progress");
 			}
 			job.setTaskTableName(this.taskTableXmlName);
 			job.setJobOrder(new JobOrder(this.jobOrderTemplate, this.l0ProcessSettings.getLevel()));
-			// Add only metadata query with compatible mode
 			this.metadataSearchQueries.forEach((k, v) -> {
 				job.getMetadataQueries().put(k, new SearchMetadataResult(new SearchMetadataQuery(v)));
 			});
@@ -304,13 +307,13 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		// Process jobs
 		List<String> keysJobs = new ArrayList<>(this.cachedJobs.keySet());
 		if (!CollectionUtils.isEmpty(keysJobs)) {
-			LOGGER.info("{} Trying job generation for cached products", this.prefixLogMonitor);
+			LOGGER.debug("{} Trying job generation for cached products", this.prefixLogMonitor);
 
 			keysJobs.forEach(k -> {
 				if (k != null && this.cachedJobs.containsKey(k)) {
 					Job<T> v = this.cachedJobs.get(k);
 					JobGenerationStatus status = v.getStatus();
-					LOGGER.info("{} [productName {}] [status {}] Trying job generation", this.prefixLogMonitor,
+					LOGGER.debug("{} [productName {}] [status {}] Trying job generation", this.prefixLogMonitor,
 							v.getProduct().getIdentifier(), status);
 
 					// Check if we can do a loop
@@ -335,6 +338,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 					}
 
 					if (todo) {
+						LOGGER.info("{} [productName {}] [status {}] Trying job generation", this.prefixLogMonitor,
+								v.getProduct().getIdentifier(), status);
 
 						// Check primary input
 						if (status.getStatus() == GenerationStatusEnum.NOT_READY) {
@@ -343,10 +348,9 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 										this.prefixLogMonitor, v.getProduct().getIdentifier());
 								this.preSearch(v);
 								status.updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
-							} catch (MetadataMissingException e) {
-								status.updateStatus(GenerationStatusEnum.NOT_READY);
+							} catch (InputsMissingException e) {
 								LOGGER.warn("{} [productName {}] 1 - Pre-requirements not checked: {}",
-										this.prefixLogMonitor, v.getProduct().getIdentifier(), e.getMessage());
+										this.prefixLogMonitor, v.getProduct().getIdentifier(), e.getLogMessage());
 							}
 						}
 
@@ -357,21 +361,24 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 										v.getProduct().getIdentifier());
 								this.inputsSearch(v);
 								status.updateStatus(GenerationStatusEnum.READY);
-							} catch (MetadataMissingException e) {
-								status.updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
+							} catch (InputsMissingException e) {
 								LOGGER.warn("{} [productName {}] 2 - Inputs not found: {}", this.prefixLogMonitor,
-										v.getProduct().getIdentifier(), e.getMessage());
+										v.getProduct().getIdentifier(), e.getLogMessage());
 							}
 						}
 
 						// Prepare and send job if ready
 						if (status.getStatus() == GenerationStatusEnum.READY) {
-							LOGGER.info("{} [productName {}] 3 - Sending job", this.prefixLogMonitor,
-									v.getProduct().getIdentifier());
-							this.send(v);
-
-							// Remove from cached object
-							this.cachedJobs.remove(k);
+							try {
+								LOGGER.info("{} [productName {}] 3 - Sending job", this.prefixLogMonitor,
+										v.getProduct().getIdentifier());
+								this.send(v);
+								this.cachedJobs.remove(k);
+							} catch (AbstractCodedException e) {
+								status.updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
+								LOGGER.warn("{} [productName {}] 3 - Job not send: {}", this.prefixLogMonitor,
+										v.getProduct().getIdentifier(), e.getLogMessage());
+							}
 						}
 					}
 				}
@@ -385,9 +392,9 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		}
 	}
 
-	protected abstract void preSearch(Job<T> job) throws MetadataMissingException;
+	protected abstract void preSearch(Job<T> job) throws InputsMissingException;
 
-	protected void inputsSearch(Job<T> job) throws MetadataMissingException {
+	protected void inputsSearch(Job<T> job) throws InputsMissingException {
 		// First, we evaluate each input query with no found file
 		LOGGER.info("{} [productName {}] 2a - Requesting metadata", this.prefixLogMonitor,
 				job.getProduct().getIdentifier());
@@ -401,8 +408,9 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 						v.setResult(file);
 					}
 				} catch (MetadataException me) {
-					LOGGER.error("[TaskTable {}] [productName {}] Exception occurred when searching alternative {}: {}",
-							this.taskTableXmlName, job.getProduct().getIdentifier(), v.getQuery().getProductType(),
+					LOGGER.warn(
+							"{} [productName {}] [alternative {}] Exception occurred when searching alternative: {}",
+							this.prefixLogMonitor, job.getProduct().getIdentifier(), v.getQuery().toLogMessage(),
 							me.getMessage());
 				}
 			}
@@ -415,7 +423,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		Map<String, JobOrderInput> referenceInputs = new HashMap<>();
 		for (TaskTablePool pool : this.taskTable.getPools()) {
 			for (TaskTableTask task : pool.getTasks()) {
-				List<String> missingMetadata = new ArrayList<>();
+				Map<String, String> missingMetadata = new HashMap<>();
 				List<JobOrderInput> futureInputs = new ArrayList<>();
 				for (TaskTableInput input : task.getInputs()) {
 					// If it is a reference
@@ -448,7 +456,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 										}
 
 										// Retrieve family
-										ProductFamily family = ProductFamily.fromValue(this.jobGeneratorSettings.getDefaultoutputfamily());
+										ProductFamily family = ProductFamily
+												.fromValue(this.jobGeneratorSettings.getDefaultoutputfamily());
 										if (this.jobGeneratorSettings.getOutputfamilies()
 												.containsKey(alt.getFileType())) {
 											family = this.jobGeneratorSettings.getOutputfamilies()
@@ -500,8 +509,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 
 							} else {
 								if (input.getMandatory() == TaskTableMandatoryEnum.YES) {
-									missingMetadata.add(String.format("[task %s] [task number %d] [input %s]",
-											task.getFileName(), counterProc, input.getId()));
+									missingMetadata.put(input.toLogMessage(), "");
 								}
 							}
 						}
@@ -516,22 +524,58 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 				if (missingMetadata.isEmpty()) {
 					job.getJobOrder().getProcs().get(counterProc - 1).setInputs(futureInputs);
 				} else {
-					throw new MetadataMissingException(missingMetadata);
+					throw new InputsMissingException(missingMetadata);
 				}
 			}
 		}
 	}
 
-	protected void send(Job<T> job) {
+	protected void send(Job<T> job) throws AbstractCodedException {
 
-		try {
+		// First step: update job if not already done
+		if (StringUtils.isEmpty(job.getWorkDirectory())) {
 			LOGGER.info("{} [productName {}] 3a - Building common job", this.prefixLogMonitor,
 					job.getProduct().getIdentifier());
 			int inc = INCREMENT_JOB.incrementAndGet();
 			job.setWorkDirectory("/data/localWD/" + inc + "/");
-			String jobOrder = "/data/localWD/" + inc + "/JobOrder." + inc + ".xml"; 
+			job.setWorkDirectoryInc(inc);
 
-			final JobDto r = new JobDto(job.getProduct().getIdentifier(), job.getWorkDirectory(), jobOrder);
+			// For each input and output of the job order, prefix by the working directory
+			job.getJobOrder().getProcs().stream()
+					.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
+					.flatMap(proc -> proc.getInputs().stream()).forEach(input -> {
+						input.getFilenames().forEach(filename -> {
+							filename.setFilename(job.getWorkDirectory() + filename.getFilename());
+						});
+						input.getTimeIntervals().forEach(interval -> {
+							interval.setFileName(job.getWorkDirectory() + interval.getFileName());
+						});
+					});
+			job.getJobOrder().getProcs().stream()
+					.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
+					.flatMap(proc -> proc.getOutputs().stream()).forEach(output -> {
+						output.setFileName(job.getWorkDirectory() + output.getFileName());
+					});
+
+			// Apply implementation build job
+			SimpleDateFormat dateFormat = new SimpleDateFormat(JobOrderSensingTime.DATE_FORMAT);
+			job.getJobOrder().getConf()
+					.setSensingTime(new JobOrderSensingTime(dateFormat.format(job.getProduct().getStartTime()),
+							dateFormat.format(job.getProduct().getStopTime())));
+
+			// Custom Job order according implementation
+			this.customJobOrder(job);
+		} else {
+			LOGGER.info("{} [productName {}] 3a - Common job already built", this.prefixLogMonitor,
+					job.getProduct().getIdentifier());
+		}
+
+		// Second, build the DTO
+		String jobOrder = "/data/localWD/" + job.getWorkDirectoryInc() + "/JobOrder." + job.getWorkDirectoryInc()
+		+ ".xml";
+		final JobDto r = new JobDto(job.getProduct().getIdentifier(), job.getWorkDirectory(), jobOrder);
+		
+		try {
 
 			// For each input and output of the job order, prefix by the working directory
 			job.getJobOrder().getProcs().stream()
@@ -607,14 +651,13 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 					job.getProduct().getIdentifier());
 			this.customJobDto(job, r);
 
-			LOGGER.info("{} [productName {}] 3a - Publishing job", this.prefixLogMonitor,
-					job.getProduct().getIdentifier());
-			this.kafkaJobsSender.send(r);
-
 		} catch (IOException | JAXBException e) {
-			e.printStackTrace();
-
+			throw new InternalErrorException("Cannot send the job", e);
 		}
+
+		// Thrid, send the job
+		LOGGER.info("{} [productName {}] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier());
+		this.kafkaJobsSender.send(r);
 	}
 
 	protected abstract void customJobOrder(Job<T> job);
@@ -629,16 +672,18 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 				JobGenerationStatus status = entry.getValue().getStatus();
 				if (status.getStatus() == GenerationStatusEnum.NOT_READY
 						&& status.getNbRetries() >= this.jobGeneratorSettings.getWaitprimarycheck().getRetries()) {
-					LOGGER.error(String.format("[job id %s] [tasktable %s] Waiting for primary check since too long",
-							entry.getValue().getProduct().getIdentifier(), entry.getValue().getTaskTableName()));
+					LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
+							this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
+							ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for primary check since too long",
+							status.getNbRetries(), this.jobGeneratorSettings.getWaitmetadatainput().getRetries());
 					return true;
 				}
 				if (status.getStatus() == GenerationStatusEnum.PRIMARY_CHECK
 						&& status.getNbRetries() >= this.jobGeneratorSettings.getWaitmetadatainput().getRetries()) {
-					LOGGER.error(String.format(
-							"[job id %s] [tasktable %s] [retries %d] [conf retries %s] Waiting for input check since too long",
-							entry.getValue().getProduct().getIdentifier(), entry.getValue().getTaskTableName(),
-							status.getNbRetries(), this.jobGeneratorSettings.getWaitmetadatainput().getRetries()));
+					LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
+							this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
+							ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for input check since too long",
+							status.getNbRetries(), this.jobGeneratorSettings.getWaitmetadatainput().getRetries());
 					return true;
 				}
 			}

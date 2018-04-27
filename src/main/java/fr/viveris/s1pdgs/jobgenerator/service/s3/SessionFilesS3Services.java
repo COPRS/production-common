@@ -3,18 +3,20 @@ package fr.viveris.s1pdgs.jobgenerator.service.s3;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.jobgenerator.exception.ObsS3Exception;
 
 @Service
 public class SessionFilesS3Services implements S3Services {
@@ -28,7 +30,7 @@ public class SessionFilesS3Services implements S3Services {
 	private String bucketName;
 
 	@Override
-	public void downloadFile(String keyName, File output) throws ObjectStorageException {
+	public void downloadFile(String keyName, File output) throws ObsS3Exception {
 		try {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Downloading object {} from bucket {}", keyName, bucketName);
@@ -37,13 +39,15 @@ public class SessionFilesS3Services implements S3Services {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
 			}
-		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
+		} catch (AmazonServiceException ase) {
+			throw new ObsS3Exception(keyName, bucketName, ase);
+		} catch (AmazonClientException sce) {
+			throw new ObsS3Exception(keyName, bucketName, sce);
 		}
 	}
 	
 	@Override
-	public File getFile(String keyName, String expectedFilePath) throws ObjectStorageException {
+	public File getFile(String keyName, String expectedFilePath) throws ObsS3Exception {
 		try {
 			File f = new File(expectedFilePath);
 			f.createNewFile();
@@ -55,13 +59,15 @@ public class SessionFilesS3Services implements S3Services {
 				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
 			}
 			return f;
-		} catch (SdkClientException | IOException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
+		} catch (SdkClientException sce) {
+			throw new ObsS3Exception(keyName, bucketName, sce);
+		} catch (IOException e) {
+			throw new ObsS3Exception(keyName, bucketName, e);
 		}
 	}
 
 	@Override
-	public void uploadFile(String keyName, File uploadFile) throws ObjectStorageException {
+	public void uploadFile(String keyName, File uploadFile) throws ObsS3Exception {
 		try {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Uploading object {} in bucket {}", keyName, bucketName);
@@ -71,67 +77,18 @@ public class SessionFilesS3Services implements S3Services {
 				LOGGER.debug("Upload object {} in bucket {} succeeded", keyName, bucketName);
 			}
 		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
+			throw new ObsS3Exception(keyName, bucketName, sce);
 		}
 
 	}
 
 	@Override
-	public boolean exist(String keyName) throws ObjectStorageException {
+	public boolean exist(String keyName) throws ObsS3Exception {
 		try {
 			return s3client.doesObjectExist(bucketName, keyName);
 		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
+			throw new ObsS3Exception(keyName, bucketName, sce);
 		}
 	}
-	
-	/**
-	 *     private PutObjectResult upload(InputStream inputStream, String uploadKey) {
-        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, uploadKey, inputStream, new ObjectMetadata());
-
-        putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
-
-        PutObjectResult putObjectResult = amazonS3.putObject(putObjectRequest);
-
-        IOUtils.closeQuietly(inputStream);
-
-        return putObjectResult;
-    }
-
-    public List<PutObjectResult> upload(MultipartFile[] multipartFiles) {
-        List<PutObjectResult> putObjectResults = new ArrayList<>();
-
-        Arrays.stream(multipartFiles)
-                .filter(multipartFile -> !StringUtils.isEmpty(multipartFile.getOriginalFilename()))
-                .forEach(multipartFile -> {
-                    try {
-                        putObjectResults.add(upload(multipartFile.getInputStream(), multipartFile.getOriginalFilename()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-        return putObjectResults;
-    }
-
-    public ResponseEntity<byte[]> download(String key) throws IOException {
-        GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, key);
-
-        S3Object s3Object = amazonS3.getObject(getObjectRequest);
-
-        S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
-
-        byte[] bytes = IOUtils.toByteArray(objectInputStream);
-
-        String fileName = URLEncoder.encode(key, "UTF-8").replaceAll("\\+", "%20");
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.setContentLength(bytes.length);
-        httpHeaders.setContentDispositionFormData("attachment", fileName);
-
-        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
-    }
-    }**/
 
 }

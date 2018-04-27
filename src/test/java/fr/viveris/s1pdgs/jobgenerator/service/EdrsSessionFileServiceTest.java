@@ -1,7 +1,6 @@
 package fr.viveris.s1pdgs.jobgenerator.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 
@@ -17,11 +16,10 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.FileCopyUtils;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.EdrsSessionException;
-import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
+import fr.viveris.s1pdgs.jobgenerator.exception.ObsS3Exception;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
-import fr.viveris.s1pdgs.jobgenerator.service.EdrsSessionFileService;
-import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.service.s3.SessionFilesS3Services;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestL0Utils;
 
@@ -94,48 +92,27 @@ public class EdrsSessionFileServiceTest {
 	}
 
 	@Test
-	public void testInvalidChannel() {
+	public void testCreateSessionFile() throws AbstractCodedException {
 		try {
-			service.createSessionFile("KEY_OBS_SESSION_1_1", 3);
-			fail("An exception shall be raised");
-		} catch (ObjectStorageException ose) {
-			fail("Invalid exception raised");
-		} catch (EdrsSessionException e) {
-			assertTrue(e.getMessage().toLowerCase().contains("invalid channel"));
-		}
-
-		try {
-			service.createSessionFile("KEY_OBS_SESSION_1_1", 0);
-			fail("An exception shall be raised");
-		} catch (ObjectStorageException ose) {
-			fail("Invalid exception raised");
-		} catch (EdrsSessionException e) {
-			assertTrue(e.getMessage().toLowerCase().contains("invalid channel"));
-		}
-	}
-
-	@Test
-	public void testCreateSessionFile() {
-		try {
-			EdrsSessionFile r1 = service.createSessionFile("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml", 1);
+			EdrsSessionFile r1 = service.createSessionFile("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml");
 			Mockito.verify(s3Services, times(1)).getFile(Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"),
 					Mockito.eq("./tmp/KEY_OBS_SESSION_1_1.xml"));
 			Mockito.verify(xmlConverter, times(1)).convertFromXMLToObject(Mockito.eq(fileCh1.getAbsolutePath()));
 			assertEquals(session1, r1);
 
-			EdrsSessionFile r2 = service.createSessionFile("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml", 2);
+			EdrsSessionFile r2 = service.createSessionFile("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml");
 			Mockito.verify(s3Services, times(1)).getFile(Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"),
 					Mockito.eq("./tmp/KEY_OBS_SESSION_1_2.xml"));
 			Mockito.verify(xmlConverter, times(1)).convertFromXMLToObject(Mockito.eq(fileCh2.getAbsolutePath()));
 			assertEquals(session2, r2);
 
-			EdrsSessionFile r3 = service.createSessionFile("KEY_OBS_SESSION_1_2.xml", 2);
+			EdrsSessionFile r3 = service.createSessionFile("KEY_OBS_SESSION_1_2.xml");
 			Mockito.verify(s3Services, times(1)).getFile(Mockito.eq("KEY_OBS_SESSION_1_2.xml"),
 					Mockito.eq("./tmp/KEY_OBS_SESSION_1_2.xml"));
 			Mockito.verify(xmlConverter, times(2)).convertFromXMLToObject(Mockito.eq(fileCh2.getAbsolutePath()));
 			assertEquals(session2, r3);
 
-		} catch (ObjectStorageException | EdrsSessionException | IOException | JAXBException e) {
+		} catch (ObsS3Exception | InvalidFormatProduct | IOException | JAXBException e) {
 			fail("Invalid exception raised " + e.getMessage());
 		}
 	}

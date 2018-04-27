@@ -28,9 +28,10 @@ import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataMissingException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
@@ -218,7 +219,7 @@ public class AbstractJobsGeneratorTest {
 		}
 	}
 
-	private void mockKafkaSender() {
+	private void mockKafkaSender() throws AbstractCodedException {
 		Mockito.doAnswer(i -> {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.writeValue(new File("./tmp/jobDtoGeneric.json"), i.getArgument(0));
@@ -256,13 +257,13 @@ public class AbstractJobsGeneratorTest {
 			generator.addJob(job2);
 			assertEquals(2, generator.cachedJobs.size());
 			assertTrue(generator.cachedJobs.containsKey("SESSION_2"));
-		} catch (JobGenerationException e) {
+		} catch (MaxNumberCachedJobsReachException e) {
 			fail("SessionProcessingException raised: " + e.getMessage());
 		}
 	}
 
-	@Test(expected = JobGenerationException.class)
-	public void testAddJobsMaxNumber() throws JobGenerationException {
+	@Test(expected = MaxNumberCachedJobsReachException.class)
+	public void testAddJobsMaxNumber() throws MaxNumberCachedJobsReachException {
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
 		Job<String> job1 = new Job<String>(p1);
 		AstractProductImpl p2 = new AstractProductImpl("SESSION_2", "A", "S1A", new Date(), new Date(), "product2");
@@ -275,7 +276,7 @@ public class AbstractJobsGeneratorTest {
 			assertEquals(1, generator.cachedJobs.size());
 			assertTrue(generator.cachedJobs.containsKey("SESSION_1"));
 			generator.addJob(job2);
-		} catch (JobGenerationException e) {
+		} catch (MaxNumberCachedJobsReachException e) {
 			fail("SessionProcessingException raised: " + e.getMessage());
 		}
 
@@ -294,7 +295,7 @@ public class AbstractJobsGeneratorTest {
 			generator.addJob(job2);
 			assertEquals(1, generator.cachedJobs.size());
 			assertTrue(generator.cachedJobs.containsKey("SESSION_1"));
-		} catch (JobGenerationException e) {
+		} catch (MaxNumberCachedJobsReachException e) {
 			fail("SessionProcessingException raised: " + e.getMessage());
 		}
 	}
@@ -339,7 +340,7 @@ class AbstractJobsGeneratorImpl extends AbstractJobsGenerator<String> {
 	}
 
 	@Override
-	protected void preSearch(Job<String> job) throws MetadataMissingException {
+	protected void preSearch(Job<String> job) throws InputsMissingException {
 		counterPreSearch++;
 
 	}

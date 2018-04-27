@@ -19,9 +19,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberTaskTablesReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
@@ -105,10 +106,10 @@ public class AbstractJobDispatcherTest {
 		try {
 			dispatcher.initTaskTables();
 			fail("An exception shall be raised");
-		} catch (BuildTaskTableException e) {
+		} catch (MaxNumberTaskTablesReachException e) {
+			assertTrue(e.getMessage().contains("Too much task"));
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
-		} catch (JobDispatcherException e) {
-			assertTrue(e.getMessage().contains("too much task"));
 		}
 	}
 
@@ -137,7 +138,7 @@ public class AbstractJobDispatcherTest {
 
 
 			assertTrue(dispatcher.getCounter() == 2);
-		} catch (BuildTaskTableException | JobDispatcherException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 	}
@@ -161,7 +162,7 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<String> {
 	}
 
 	@Override
-	public void dispatch(Job<String> job) throws JobGenerationException {
+	public void dispatch(Job<String> job) throws MaxNumberCachedJobsReachException {
 
 	}
 

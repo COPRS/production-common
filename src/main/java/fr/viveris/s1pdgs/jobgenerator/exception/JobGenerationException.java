@@ -4,39 +4,36 @@
 package fr.viveris.s1pdgs.jobgenerator.exception;
 
 /**
- * Exception occurred during job generation
+ * Abstract class for custom exception concerning jobs
+ * 
  * @author Cyrielle Gailliard
  *
  */
-public class JobGenerationException extends JobException {
+public class JobGenerationException extends AbstractCodedException {
+
+	private static final long serialVersionUID = -1059947384304413070L;
 
 	/**
-	 * Serial UID
+	 * Task table XML filename
 	 */
-	private static final long serialVersionUID = -7488001919910076897L;
-	
-	/**
-	 * Generic message
-	 */
-	private static final String MESSAGE = "[session %s] [taskTable %s] Job generation failed: %s";
+	protected String taskTable;
 
-	/**
-	 * Constructor
-	 * @param message
-	 * @param taskTable
-	 */
-	public JobGenerationException(String message, String taskTable, String session) {
-		super(String.format(MESSAGE, session, taskTable, message), taskTable);
+	public JobGenerationException(String taskTable, ErrorCode code, String message) {
+		super(code, message);
+		this.taskTable = taskTable;
 	}
 
-	/**
-	 * Constructor
-	 * @param message
-	 * @param cause
-	 * @param taskTable
-	 */
-	public JobGenerationException(String message, Throwable cause, String taskTable, String session) {
-		super(String.format(MESSAGE, session, taskTable, message), cause, taskTable);
+	public JobGenerationException(String taskTable, ErrorCode code, String message, Throwable e) {
+		super(code, message, e);
+		this.taskTable = taskTable;
 	}
 
+	public String getTaskTable() {
+		return taskTable;
+	}
+
+	@Override
+	public String getLogMessage() {
+		return String.format("[taskTable %s] [msg %s]", this.taskTable, this.getMessage());
+	}
 }
