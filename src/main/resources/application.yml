@@ -1,6 +1,6 @@
 spring:
   application:
-    name: ${scaler_spring_appname}
+    name: ${scaler_spring_appname:s2pdgs-scaler}
     
 # Logging
 logging:
