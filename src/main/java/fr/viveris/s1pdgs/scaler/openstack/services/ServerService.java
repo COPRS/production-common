@@ -11,8 +11,8 @@ import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
 import org.openstack4j.model.network.NetFloatingIP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsServerException;
 @Service
 public class ServerService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ServerService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ServerService.class);
 	private final int serverMaxWaitMs;
 	private final int fipMaxLoop;
 	private final int fipTempoLoopMs;
