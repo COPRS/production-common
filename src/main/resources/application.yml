@@ -9,7 +9,7 @@ kafka:
   group-id: ${archives_kafka_group:archives}
   client-id: ${archives_kafka_client:archives}
   poll-timeout: ${archives_kafka_poll-timeout:500}
-  topic:
+  topics:
     slices: ${archives_kafka_topic_slices:t-pdgs-l0-slices,t-pdgs-l1-slices}
     reports: ${archives_kafka_topic_reports:t-pdgs-l0-reports,t-pdgs-l1-reports}
   enable-consumer:
