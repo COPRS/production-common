@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
 
 public class TaskCallable implements Callable<TaskResult> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TaskCallable.class);
+	private static final Logger LOGGER = LogManager.getLogger(TaskCallable.class);
 
 	private final String binaryPath;
 

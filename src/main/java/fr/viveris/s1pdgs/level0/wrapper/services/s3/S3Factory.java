@@ -13,8 +13,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -104,7 +104,7 @@ public class S3Factory {
 				} catch (InterruptedException | TimeoutException e) {
 					throw new InternalErrorException(e.getMessage(), e);
 				} catch (ExecutionException e) {
-					if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+					if (e.getCause() instanceof CodedException) {
 						throw (CodedException) e.getCause();
 					} else {
 						throw new InternalErrorException(e.getMessage(), e);
@@ -158,7 +158,7 @@ public class S3Factory {
 				} catch (InterruptedException | TimeoutException e) {
 					throw new InternalErrorException(e.getMessage(), e);
 				} catch (ExecutionException e) {
-					if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+					if (e.getCause() instanceof CodedException) {
 						throw (CodedException) e.getCause();
 					} else {
 						throw new InternalErrorException(e.getMessage(), e);
@@ -222,7 +222,7 @@ class DownloadFileCallable implements Callable<Boolean> {
 
 class UploadFileCallable implements Callable<Boolean> {
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(UploadFileCallable.class);
+	protected static final Logger LOGGER = LogManager.getLogger(UploadFileCallable.class);
 
 	private S3Services service;
 

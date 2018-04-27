@@ -81,7 +81,7 @@ public class OutputProducerFactoryTest {
 	@Test
 	public void testSendReport() throws CodedException {
 		this.outputProcuderFactory.sendOutput(
-				new FileQueueMessage(ProductFamily.L0_REPORT, "test.txt", new File("./data_test/report.txt")));
+				new FileQueueMessage(ProductFamily.L0_REPORT, "test.txt", new File("./test/data/report.txt")));
 		verify(this.senderProducts, never()).send(Mockito.any());
 		verify(this.senderAcns, never()).send(Mockito.any());
 		verify(this.senderL0Reports, times(1)).send(Mockito.eq(new ReportDto("test.txt", "Test report file")));
@@ -115,7 +115,7 @@ public class OutputProducerFactoryTest {
 	@Test
 	public void testSendL1Report() throws CodedException {
 		this.outputProcuderFactory.sendOutput(
-				new FileQueueMessage(ProductFamily.L1_REPORT, "test.txt", new File("./data_test/report.txt")));
+				new FileQueueMessage(ProductFamily.L1_REPORT, "test.txt", new File("./test/data/report.txt")));
 		verify(this.senderProducts, never()).send(Mockito.any());
 		verify(this.senderAcns, never()).send(Mockito.any());
 		verify(this.senderL1Reports, times(1)).send(Mockito.eq(new ReportDto("test.txt", "Test report file")));
@@ -149,6 +149,6 @@ public class OutputProducerFactoryTest {
 	@Test(expected = UnknownFamilyException.class)
 	public void testInvalidFamilyForFile() throws CodedException {
 		this.outputProcuderFactory
-				.sendOutput(new FileQueueMessage(ProductFamily.JOB, "test.txt", new File("./data_test/report.txt")));
+				.sendOutput(new FileQueueMessage(ProductFamily.JOB, "test.txt", new File("./test/data/report.txt")));
 	}
 }

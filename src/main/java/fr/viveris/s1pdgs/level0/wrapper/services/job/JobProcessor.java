@@ -16,8 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 
 import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
@@ -38,7 +38,7 @@ public class JobProcessor implements Callable<Boolean> {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(JobProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(JobProcessor.class);
 
 	private final JobDto job;
 
@@ -175,7 +175,7 @@ public class JobProcessor implements Callable<Boolean> {
 		} catch (CodedException e) {
 			// Log occurred error
 			LOGGER.error("{} [step {}] {} [code {}] {}", this.prefixLog, step, this.prefixLogError,
-					e.getCode().getCode(), e.getMessage());
+					e.getCode().getCode(), e.getLogMessage());
 			this.appStatus.setError();
 
 		} finally {
@@ -211,7 +211,7 @@ public class JobProcessor implements Callable<Boolean> {
 				this.poolProcessCompletionService.take().get(this.properties.getTimeoutProcessAllTasksS(),
 						TimeUnit.SECONDS);
 			} catch (ExecutionException e) {
-				if (e.getCause().getClass().isAssignableFrom(CodedException.class)) {
+				if (e.getCause() instanceof CodedException) {
 					throw (CodedException) e.getCause();
 				} else {
 					throw new InternalErrorException(e.getMessage(), e);

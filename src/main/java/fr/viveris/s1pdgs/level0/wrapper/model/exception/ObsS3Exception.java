@@ -36,4 +36,7 @@ public class ObsS3Exception extends CodedException {
 		return bucket;
 	}
 
+	public String getLogMessage() {
+		return String.format("[bucket %s] [key %s] [msg %s]", this.bucket, this.key, getMessage());
+	}
 }

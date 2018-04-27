@@ -29,4 +29,8 @@ public class ProcessExecutionException extends CodedException {
 	public int getExitCode() {
 		return this.exitCode;
 	}
+
+	public String getLogMessage() {
+		return String.format("[exitCode %d] [msg %s]", this.exitCode, getMessage());
+	}
 }

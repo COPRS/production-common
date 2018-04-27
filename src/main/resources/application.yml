@@ -1,17 +1,9 @@
 spring:
   application:
-    name: ${wrapper_spring_appname:s1pdgs-wrapper}
+    name: s1pdgs-wrapper-app
     
-# Logging
 logging:
-  config: ${wrapper_logging_config:logback-spring.xml}
-  level:
-    ROOT: ${wrapper_logging_level_root:ERROR}
-    org.springframework: ${wrapper_logging_level_orgspringframework:ERROR}
-    fr.viveris.s1pdgs: ${wrapper_logging_level_frviveriss1pdgs:INFO}
-    kafka: ${wrapper_logging_level_kafka:WARN}
-    org.apache: ${wrapper_logging_level_orgapache:WARN}
-  file: ${wrapper_logging_file:./s1pdgs-wrapper.log}
+  config: ${wrapper_logging_config:log4j2.yml}
   
 # Kafka
 kafka:
@@ -32,6 +24,7 @@ kafka:
     l1-slices: ${kafka_topic_l1_slices:t-pdgs-l1-slices}
     l1-acns: ${kafka_topic_l1_acns:t-pdgs-l1-acns}
     l1-reports: ${kafka_topic_l1_reports:t-pdgs-l1-reports}
+    errors: ${kafka_topic_errors:t-pdgs-l1-reports}
   enable-consumer:
     l0-jobs: ${wrapper_kafka_enable-consumer_l0-jobs:true}
     l1-jobs: ${wrapper_kafka_enable-consumer_l1-jobs:false}

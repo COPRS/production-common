@@ -7,15 +7,15 @@ COPY pom.xml /app
 RUN mvn dependency:go-offline
 COPY src/ /app/src/
 COPY dev/ /app/dev/
-COPY data_test/ /app/data_test/
-COPY /logback-spring.xml /app/logback-spring.xml
+COPY test/ /app/test/
+COPY config/ /app/config/
 RUN	mvn -B package
 
 FROM registry.geohub.space/wo7/${PROCESS_IMAGE}:${PROCESS_VERSION}
 RUN yum install -y java-1.8.0-openjdk && yum clean all
 WORKDIR /app
 COPY --from=build /app/target/s1pdgs-wrapper-1.0.0.jar s1pdgs-wrapper.jar
-COPY /logback-spring.xml logback-spring.xml
+COPY /config/log/log4j2.yml log4j2.yml
 COPY /src/main/resources/application.yml application.yml
 #CMD /var/tmp/configure_pdgs_custom.sh pac1 8 ; ulimit -s unlimited ;
 #ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app/s1pdgs-wrapper.jar","--spring.config.location=classpath:/application.yml"]
