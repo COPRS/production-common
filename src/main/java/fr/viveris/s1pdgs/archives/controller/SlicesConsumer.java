@@ -51,7 +51,7 @@ public class SlicesConsumer {
 		switch (dto.getProductName().charAt(12)) {
 		case '0': // Slice L0
 			try {
-				if(this.l0SlicesS3Services.exist(dto.getKeyObjectStorage())) {
+				if(this.l0SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
 					this.l0SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume);
 					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
 				}
@@ -64,7 +64,7 @@ public class SlicesConsumer {
 			break;
 		case '1': // Slice L1
 			try {
-				if(this.l1SlicesS3Services.exist(dto.getKeyObjectStorage())) {
+				if(this.l1SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
 					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume);
 					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
 				}
