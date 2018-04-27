@@ -26,7 +26,7 @@ public class ReportsConsumer {
 	 */
 	private final String sharedVolume;
 	
-	public ReportsConsumer(@Value("${kafka.topic.reports}") final String sharedVolume) {
+	public ReportsConsumer(@Value("${file.reports.local-directory}") final String sharedVolume) {
 		this.sharedVolume = sharedVolume;
 	}
 

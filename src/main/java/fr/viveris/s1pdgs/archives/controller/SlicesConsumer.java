@@ -39,7 +39,7 @@ public class SlicesConsumer {
 	 * @param l1SlicesS3Services
 	 */
 	public SlicesConsumer(final L0SlicesS3Services l0SlicesS3Services, final L1SlicesS3Services l1SlicesS3Services, 
-			@Value("${kafka.topic.slices}") final String sharedVolume) {
+			@Value("${file.slices.local-directory}") final String sharedVolume) {
 		this.l0SlicesS3Services = l0SlicesS3Services;
 		this.l1SlicesS3Services = l1SlicesS3Services;
 		this.sharedVolume = sharedVolume;
