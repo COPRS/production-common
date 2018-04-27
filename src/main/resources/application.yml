@@ -1,8 +1,6 @@
 spring:
   application:
     name: ${job_spring_appname:s1pdgs-jobgenerator}
-  profiles:
-    active: ${job_spring_profile:prod}
     
 # Logging
 logging:
