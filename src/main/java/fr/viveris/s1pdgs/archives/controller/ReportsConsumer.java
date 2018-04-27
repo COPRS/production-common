@@ -30,7 +30,7 @@ public class ReportsConsumer {
 		this.sharedVolume = sharedVolume;
 	}
 
-	@KafkaListener(topics = "${kafka.topic.reports}", groupId = "${kafka.group-id}", containerFactory = "reportKafkaListenerContainerFactory")
+	@KafkaListener(topics = "#{'${kafka.topics.reports}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "reportKafkaListenerContainerFactory")
 	public void receive(ReportDto dto) {
 		LOGGER.info("[MONITOR] [Step 0] [reports] [productName {}] Starting distribution of Report",
 				dto.getProductName());

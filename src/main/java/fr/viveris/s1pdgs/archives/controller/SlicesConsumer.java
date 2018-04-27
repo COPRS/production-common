@@ -45,7 +45,7 @@ public class SlicesConsumer {
 		this.sharedVolume = sharedVolume;
 	}
 
-	@KafkaListener(topics = "${kafka.topic.slices}", groupId = "${kafka.group-id}", containerFactory = "kafkaListenerContainerFactory")
+	@KafkaListener(topics = "#{'${kafka.topics.slices}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "kafkaListenerContainerFactory")
 	public void receive(SliceDto dto) {
 		LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Starting distribution of Slice", dto.getProductName());
 		switch (dto.getProductName().charAt(12)) {
