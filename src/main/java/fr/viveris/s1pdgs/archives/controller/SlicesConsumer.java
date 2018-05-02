@@ -65,11 +65,11 @@ public class SlicesConsumer {
 		case "L1_PRODUCT": // Slice L1
 			try {
 				if(this.l1SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
-					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + "/" + dto.getFamilyName());
+					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + "/" + dto.getFamilyName().toLowerCase());
 					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
 				}
 				else {
-					LOGGER.error("[MONITOR] [slice] [productName {}] Slice does not exists in Object Storage", dto.getProductName().toLowerCase());
+					LOGGER.error("[MONITOR] [slice] [productName {}] Slice does not exists in Object Storage", dto.getProductName());
 				}
 			} catch (ObjectStorageException e) {
 				LOGGER.error("[MONITOR] [slice] [productName {}] {}", dto.getProductName(), e.getMessage());
