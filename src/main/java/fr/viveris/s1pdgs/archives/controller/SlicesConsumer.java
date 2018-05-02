@@ -49,7 +49,7 @@ public class SlicesConsumer {
 	public void receive(SliceDto dto) {
 		LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Starting distribution of Slice", dto.getProductName());
 		switch (dto.getFamilyName()) {
-		case "l0": // Slice L0
+		case "L0_PRODUCT": // Slice L0
 			try {
 				if(this.l0SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
 					this.l0SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + "/" + dto.getFamilyName().toLowerCase());
@@ -62,7 +62,7 @@ public class SlicesConsumer {
 				LOGGER.error("[MONITOR] [slice] [productName {}] {}", dto.getProductName(), e.getMessage());
 			}
 			break;
-		case "l1": // Slice L1
+		case "L1_PRODUCT": // Slice L1
 			try {
 				if(this.l1SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
 					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + "/" + dto.getFamilyName());
