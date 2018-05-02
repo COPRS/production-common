@@ -52,7 +52,7 @@ public class SlicesConsumer {
 		case "l0": // Slice L0
 			try {
 				if(this.l0SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
-					this.l0SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + dto.getFamilyName().toLowerCase());
+					this.l0SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + "/" + dto.getFamilyName().toLowerCase());
 					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
 				}
 				else {
@@ -65,7 +65,7 @@ public class SlicesConsumer {
 		case "l1": // Slice L1
 			try {
 				if(this.l1SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
-					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + dto.getFamilyName());
+					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + "/" + dto.getFamilyName());
 					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
 				}
 				else {
