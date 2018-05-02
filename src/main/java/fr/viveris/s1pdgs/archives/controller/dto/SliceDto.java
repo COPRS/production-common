@@ -7,14 +7,19 @@ package fr.viveris.s1pdgs.archives.controller.dto;
  */
 public class SliceDto {
 	/**
-	 * Product name of the metadata to index
+	 * Product name of the slice
 	 */
 	private String productName;
 	
 	/**
-	 * ObjectkeyStorage of the metatdata to index
+	 * ObjectkeyStorage of the slice
 	 */
 	private String keyObjectStorage;
+	
+	/**
+	 * Family name of the slice (l0 or l1)
+	 */
+	private String familyName;
 
 	/**
 	 * Default constructor
@@ -27,10 +32,11 @@ public class SliceDto {
 	 * @param productName
 	 * @param keyObjectStorage
 	 */
-	public SliceDto(String productName, String keyObjectStorage) {
+	public SliceDto(String productName, String keyObjectStorage, String familyName) {
 		this();
 		this.productName = productName;
 		this.keyObjectStorage = keyObjectStorage;
+		this.familyName = familyName;
 	}
 
 	/**
@@ -61,12 +67,27 @@ public class SliceDto {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
+	/**
+	 * @return the familyName
+	 */
+	public String getFamilyName() {
+		return familyName;
+	}
+
+	/**
+	 * @param familyName the familyName to set
+	 */
+	public void setFamilyName(String familyName) {
+		this.familyName = familyName;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "KafkaL0SliceDto [productName=" + productName + ", keyObjectStorage=" + keyObjectStorage + "]";
+		return "SliceDto [productName=" + productName + ", keyObjectStorage=" + keyObjectStorage + ", familyName="
+				+ familyName + "]";
 	}
 
 	/* (non-Javadoc)
@@ -76,6 +97,7 @@ public class SliceDto {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((familyName == null) ? 0 : familyName.hashCode());
 		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
 		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
 		return result;
@@ -93,6 +115,11 @@ public class SliceDto {
 		if (getClass() != obj.getClass())
 			return false;
 		SliceDto other = (SliceDto) obj;
+		if (familyName == null) {
+			if (other.familyName != null)
+				return false;
+		} else if (!familyName.equals(other.familyName))
+			return false;
 		if (keyObjectStorage == null) {
 			if (other.keyObjectStorage != null)
 				return false;

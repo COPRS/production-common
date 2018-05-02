@@ -48,11 +48,11 @@ public class SlicesConsumer {
 	@KafkaListener(topics = "#{'${kafka.topics.slices}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "kafkaListenerContainerFactory")
 	public void receive(SliceDto dto) {
 		LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Starting distribution of Slice", dto.getProductName());
-		switch (dto.getProductName().charAt(12)) {
-		case '0': // Slice L0
+		switch (dto.getFamilyName()) {
+		case "l0": // Slice L0
 			try {
 				if(this.l0SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
-					this.l0SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume);
+					this.l0SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + dto.getFamilyName().toLowerCase());
 					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
 				}
 				else {
@@ -62,14 +62,14 @@ public class SlicesConsumer {
 				LOGGER.error("[MONITOR] [slice] [productName {}] {}", dto.getProductName(), e.getMessage());
 			}
 			break;
-		case '1': // Slice L1
+		case "l1": // Slice L1
 			try {
 				if(this.l1SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
-					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume);
+					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + dto.getFamilyName());
 					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
 				}
 				else {
-					LOGGER.error("[MONITOR] [slice] [productName {}] Slice does not exists in Object Storage", dto.getProductName());
+					LOGGER.error("[MONITOR] [slice] [productName {}] Slice does not exists in Object Storage", dto.getProductName().toLowerCase());
 				}
 			} catch (ObjectStorageException e) {
 				LOGGER.error("[MONITOR] [slice] [productName {}] {}", dto.getProductName(), e.getMessage());
