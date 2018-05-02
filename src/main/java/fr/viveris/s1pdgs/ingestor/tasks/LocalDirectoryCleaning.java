@@ -2,8 +2,8 @@ package fr.viveris.s1pdgs.ingestor.tasks;
 
 import java.io.File;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LocalDirectoryCleaning {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(LocalDirectoryCleaning.class);
+	private static final Logger LOGGER = LogManager.getLogger(LocalDirectoryCleaning.class);
 
 	private final String sessionLocalDirectory;
 

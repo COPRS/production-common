@@ -2,17 +2,10 @@
 spring:
   application:
     name: s1pdgs-ingestor
-  profiles:
-    active: prod
     
 # Logging
 logging:
-  level:
-    ROOT: ERROR
-    org.springframework: WARN
-    fr.viveris.s1pdgs: INFO
-    kafka: WARN
-  file: ./s1pdgs-ingestor-test.log
+  config: ./test/log4j2.yml
 
 # KAFKA
 kafka:

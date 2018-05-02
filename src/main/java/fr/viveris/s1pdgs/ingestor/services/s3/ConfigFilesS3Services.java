@@ -2,8 +2,8 @@ package fr.viveris.s1pdgs.ingestor.services.s3;
 
 import java.io.File;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import fr.viveris.s1pdgs.ingestor.model.exception.ObjectStorageException;
 
 @Service
 public class ConfigFilesS3Services implements S3Services {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFilesS3Services.class);
+	private static final Logger LOGGER = LogManager.getLogger(ConfigFilesS3Services.class);
 
 	@Autowired
 	private AmazonS3 s3client;

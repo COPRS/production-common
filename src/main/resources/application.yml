@@ -2,18 +2,10 @@
 spring:
   application:
     name: s1pdgs-ingestor
-  profiles:
-    active: ${ingestor_spring_profile:prod}
     
 # Logging
 logging:
-  config: ${ingestor_logging_config:logback-spring.xml}
-  level:
-    ROOT: ${ingestor_logging_level_root:ERROR}
-    org.springframework: ${ingestor_logging_level_orgspringframework:ERROR}
-    fr.viveris.s1pdgs: ${ingestor_logging_level_frviveriss1pdgs:INFO}
-    kafka: ${ingestor_logging_level_kafka:WARN}
-  file: ${ingestor_logging_file:./s1pdgs-ingestor.log}
+  config: ${ingestor_logging_config:log4j2.yml}
 
 # KAFKA
 kafka:
