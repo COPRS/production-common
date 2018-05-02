@@ -4,12 +4,12 @@ public class FilePathException extends FileTerminatedException {
 	
 	private static final long serialVersionUID = 2694835373130815240L;
 	
-	private static final String MESSAGE = "Description extraction failed for %s: %s";
+	private static final String MESSAGE = "Description extraction failed: %s";
 	
 	private String path;
 
 	public FilePathException(String productName, String path, String msg) {
-		super(String.format(MESSAGE, path, msg), path);
+		super(ErrorCode.INGESTOR_INVALID_PATH, productName, String.format(MESSAGE, msg));
 		this.path = path;
 	}
 
@@ -20,11 +20,9 @@ public class FilePathException extends FileTerminatedException {
 		return path;
 	}
 
-	/**
-	 * @param path the path to set
-	 */
-	public void setPath(String path) {
-		this.path = path;
+	@Override
+	public String getLogMessage() {
+		return String.format("[path %s] [msg %s]", this.path, getMessage());
 	}
 
 }

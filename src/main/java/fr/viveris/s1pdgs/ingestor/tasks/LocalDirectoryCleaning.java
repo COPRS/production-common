@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import fr.viveris.s1pdgs.ingestor.model.exception.AbstractFileException.ErrorCode;
+
 @Component
 public class LocalDirectoryCleaning {
 
@@ -48,7 +50,8 @@ public class LocalDirectoryCleaning {
 				}
 			}
 		} catch (SecurityException e) {
-			LOGGER.error("Error during removing empty directories for config files", e.getMessage());
+			LOGGER.error("[code {}] [msg Error during removing empty directories for config files: {}]",
+					ErrorCode.INGESTOR_CLEAN.getCode(), e.getMessage());
 		}
 	}
 
@@ -64,7 +67,8 @@ public class LocalDirectoryCleaning {
 				}
 			}
 		} catch (SecurityException e) {
-			LOGGER.error("Error during removing empty directories for ERDS session files", e.getMessage());
+			LOGGER.error("[code {}] [msg Error during removing empty directories for ERDS session files: {}",
+					ErrorCode.INGESTOR_CLEAN.getCode(), e.getMessage());
 		}
 	}
 

@@ -74,7 +74,7 @@ public class FileDescriptorBuilder {
 
 		// Ignored if directory
 		if (file.isDirectory()) {
-			throw new IgnoredFileException(relativePath);
+			throw new IgnoredFileException(relativePath, file.getName());
 		}
 
 		// Check if key matches the pattern
@@ -127,7 +127,7 @@ public class FileDescriptorBuilder {
 
 		// Ignored if directory
 		if (file.isDirectory()) {
-			throw new IgnoredFileException(relativePath);
+			throw new IgnoredFileException(relativePath, file.getName());
 		}
 
 		Matcher m = patternSession.matcher(relativePath);

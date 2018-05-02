@@ -3,18 +3,15 @@ package fr.viveris.s1pdgs.ingestor.services.kafka;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
-import fr.viveris.s1pdgs.ingestor.model.exception.KafkaMetadataPublicationException;
+import fr.viveris.s1pdgs.ingestor.model.exception.KafkaAuxFilesPublicationException;
 
 /**
  * KAFKA producer for publishing metadata. </br>
@@ -49,7 +46,7 @@ public class KafkaConfigFileProducer {
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
-	public void send(KafkaConfigFileDto metadataCrud) throws KafkaMetadataPublicationException {
+	public void send(KafkaConfigFileDto metadataCrud) throws KafkaAuxFilesPublicationException {
 		try {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("[send] Send metadata = {}", metadataCrud);
@@ -59,38 +56,8 @@ public class KafkaConfigFileProducer {
 				LOGGER.debug("[send] Success metadata = {}", metadataCrud);
 			}
 		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaMetadataPublicationException(metadataCrud.getProductName(), e);
+			throw new KafkaAuxFilesPublicationException(metadataCrud.getProductName(), e);
 		}
-	}
-
-	/**
-	 * Send a message asynchronously to a topic
-	 * 
-	 * @param metadataCrud
-	 */
-	public void sendAsynchrone(KafkaConfigFileDto metadataCrud) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[sendAsynchrone] Send metadata = {}", metadataCrud);
-		}
-
-		ListenableFuture<SendResult<String, KafkaConfigFileDto>> future = kafkaMetadataTemplate.send(kafkaTopic,
-				metadataCrud);
-
-		// We register a callback to verify whether the messages are sent to the topic
-		// successfully or not
-		future.addCallback(new ListenableFutureCallback<SendResult<String, KafkaConfigFileDto>>() {
-			@Override
-			public void onSuccess(SendResult<String, KafkaConfigFileDto> result) {
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("[sendAsynchrone] Success metadata = {}", metadataCrud);
-				}
-			}
-
-			@Override
-			public void onFailure(Throwable e) {
-				LOGGER.error("[sendAsynchrone] Failed: {}", e.getMessage());
-			}
-		});
 	}
 
 }
