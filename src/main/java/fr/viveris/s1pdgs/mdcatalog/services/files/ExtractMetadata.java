@@ -55,29 +55,19 @@ public class ExtractMetadata {
 	 * Map of all the length for the different slice type
 	 */
 	private Map<String, Float> typeSliceLength;
+	
+	private String xsltDirectory;
 
 	/**
 	 * Constructor
 	 */
-	public ExtractMetadata(Map<String, Float> typeOverlap, Map<String, Float> typeSliceLength) {
+	public ExtractMetadata(Map<String, Float> typeOverlap, Map<String, Float> typeSliceLength, String xsltDirectory) {
 		this.transFactory = TransformerFactory.newInstance();
 		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		this.typeOverlap = typeOverlap;
 		this.typeSliceLength = typeSliceLength;
+		this.xsltDirectory = xsltDirectory;
 	}
-	
-	
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "ExtractMetadata [transFactory=" + transFactory + ", dateFormat=" + dateFormat + ", typeOverlap="
-				+ typeOverlap + ", typeSliceLength=" + typeSliceLength + "]";
-	}
-
-
 
 	/**
 	 * Tool function which returns the content of a file
@@ -157,7 +147,8 @@ public class ExtractMetadata {
 	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
 			// XSLT Transformation
-			Source xsltMPLEOF = new StreamSource(new File("xsltDir/XSLT_MPL_EOF.xslt"));
+			String xsltFilename = this.xsltDirectory + "XSLT_MPL_EOF.xslt";
+			Source xsltMPLEOF = new StreamSource(new File(xsltFilename));
 			Transformer transformerMPL = transFactory.newTransformer(xsltMPLEOF);
 			Source mplMetadataFile = new StreamSource(file);
 			transformerMPL.transform(mplMetadataFile, new StreamResult(new File("tmp/output.xml")));
@@ -205,7 +196,8 @@ public class ExtractMetadata {
 			throws MetadataExtractionException {
 		try {
 			// XSLT Transformation
-			Source xsltAUXEOF = new StreamSource(new File("xsltDir/XSLT_AUX_EOF.xslt"));
+			String xsltFilename = this.xsltDirectory + "XSLT_AUX_EOF.xslt";
+			Source xsltAUXEOF = new StreamSource(new File(xsltFilename));
 			Transformer transformerAUX = transFactory.newTransformer(xsltAUXEOF);
 			Source auxMetadataFile = new StreamSource(file);
 			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
@@ -245,7 +237,8 @@ public class ExtractMetadata {
 	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
 			// XSLT Transformation
-			Source xsltAUXXML = new StreamSource(new File("xsltDir/XSLT_AUX_XML.xslt"));
+			String xsltFilename = this.xsltDirectory + "XSLT_AUX_XML.xslt";
+			Source xsltAUXXML = new StreamSource(new File(xsltFilename));
 			Transformer transformerAUX = transFactory.newTransformer(xsltAUXXML);
 			Source auxMetadataFile = new StreamSource(file);
 			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
@@ -291,7 +284,8 @@ public class ExtractMetadata {
 	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
 			// XSLT Transformation
-			Source xsltAUXMANIFEST = new StreamSource(new File("xsltDir/XSLT_AUX_MANIFEST.xslt"));
+			String xsltFilename = this.xsltDirectory + "XSLT_AUX_MANIFEST.xslt";
+			Source xsltAUXMANIFEST = new StreamSource(new File(xsltFilename));
 			Transformer transformerAUX = transFactory.newTransformer(xsltAUXMANIFEST);
 			Source auxMetadataFile = new StreamSource(file);
 			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
@@ -389,7 +383,8 @@ public class ExtractMetadata {
 	private JSONObject processL0Prod(L0OutputFileDescriptor descriptor, File file, String output) throws MetadataExtractionException {
 		try {
 			//XSLT Transformation
-			Source xsltL1MANIFEST = new StreamSource(new File("xsltDir/XSLT_L0_MANIFEST.xslt"));
+			String xsltFilename = this.xsltDirectory + "XSLT_L0_MANIFEST.xslt";
+			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
 	        Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);
 	        Source l1File = new StreamSource(file);
 	        transformerL0.transform(l1File, new StreamResult(new File(output)));
@@ -527,7 +522,8 @@ public class ExtractMetadata {
 			throws MetadataExtractionException {
 		try {
 			//XSLT Transformation
-			Source xsltL0MANIFEST = new StreamSource(new File("xsltDir/XSLT_L1_MANIFEST.xslt"));
+			String xsltFilename = this.xsltDirectory + "XSLT_L1_MANIFEST.xslt";
+			Source xsltL0MANIFEST = new StreamSource(new File(xsltFilename));
 	        Transformer transformerL0 = transFactory.newTransformer(xsltL0MANIFEST);
 	        Source l0File = new StreamSource(file);
 	        transformerL0.transform(l0File, new StreamResult(new File(output)));
