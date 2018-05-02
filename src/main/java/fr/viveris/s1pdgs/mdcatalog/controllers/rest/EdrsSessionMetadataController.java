@@ -1,7 +1,7 @@
 package fr.viveris.s1pdgs.mdcatalog.controllers.rest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +19,7 @@ import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 @RequestMapping(path = "/edrsSession")
 public class EdrsSessionMetadataController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(EdrsSessionMetadataController.class);
+	private static final Logger LOGGER = LogManager.getLogger(EdrsSessionMetadataController.class);
 
 	private final EsServices esServices;
 

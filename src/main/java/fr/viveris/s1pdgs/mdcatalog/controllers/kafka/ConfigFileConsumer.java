@@ -7,8 +7,8 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -38,7 +38,7 @@ public class ConfigFileConsumer {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFileConsumer.class);
+	private static final Logger LOGGER = LogManager.getLogger(ConfigFileConsumer.class);
 
 	/**
 	 * Pattern for configuration files to extract data
