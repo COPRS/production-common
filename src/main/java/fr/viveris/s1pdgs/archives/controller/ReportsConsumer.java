@@ -32,14 +32,14 @@ public class ReportsConsumer {
 
 	@KafkaListener(topics = "#{'${kafka.topics.reports}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "reportKafkaListenerContainerFactory")
 	public void receive(ReportDto dto) {
-		LOGGER.info("[MONITOR] [Step 0] [reports] [productName {}] Starting distribution of Report",
+		LOGGER.info("[MONITOR] [Step 0] [Reports] [productName {}] Starting distribution of Report",
 				dto.getProductName());
 		try {
 			File report = new File(this.sharedVolume + "/" + dto.getFamilyName().toLowerCase() + dto.getProductName());
 			FileUtils.writeFile(report, dto.getContent());
-			LOGGER.info("[MONITOR] [Step 0] [reports] [productName {}] Report distributed",	dto.getProductName());
+			LOGGER.info("[MONITOR] [Step 0] [Reports] [productName {}] Report distributed",	dto.getProductName());
 		} catch (IOException e) {
-			LOGGER.error("[MONITOR] [reports] [productName {}] {}", dto.getProductName(), e.getMessage());
+			LOGGER.error("[MONITOR] [Reports] [productName {}] {}", dto.getProductName(), e.getMessage());
 		}
 	}
 }

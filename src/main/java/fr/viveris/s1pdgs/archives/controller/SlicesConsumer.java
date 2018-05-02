@@ -47,36 +47,36 @@ public class SlicesConsumer {
 
 	@KafkaListener(topics = "#{'${kafka.topics.slices}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "kafkaListenerContainerFactory")
 	public void receive(SliceDto dto) {
-		LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Starting distribution of Slice", dto.getProductName());
+		LOGGER.info("[MONITOR] [Step 0] [Slice] [productName {}] Starting distribution of Slice", dto.getProductName());
 		switch (dto.getFamilyName()) {
 		case "L0_PRODUCT": // Slice L0
 			try {
 				if(this.l0SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
 					this.l0SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + "/" + dto.getFamilyName().toLowerCase());
-					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
+					LOGGER.info("[MONITOR] [Step 0] [L0 Slice] [productName {}] Slice distributed", dto.getProductName());
 				}
 				else {
-					LOGGER.error("[MONITOR] [slice] [productName {}] Slice does not exists in Object Storage", dto.getProductName());
+					LOGGER.error("[MONITOR] [L0 Slice] [productName {}] Slice does not exists in Object Storage", dto.getProductName());
 				}
 			} catch (ObjectStorageException e) {
-				LOGGER.error("[MONITOR] [slice] [productName {}] {}", dto.getProductName(), e.getMessage());
+				LOGGER.error("[MONITOR] [L0 Slice] [productName {}] {}", dto.getProductName(), e.getMessage());
 			}
 			break;
 		case "L1_PRODUCT": // Slice L1
 			try {
 				if(this.l1SlicesS3Services.getNbObjects(dto.getKeyObjectStorage()) > 0) {
 					this.l1SlicesS3Services.downloadFiles(dto.getKeyObjectStorage(), this.sharedVolume + "/" + dto.getFamilyName().toLowerCase());
-					LOGGER.info("[MONITOR] [Step 0] [slice] [productName {}] Slice distributed", dto.getProductName());
+					LOGGER.info("[MONITOR] [Step 0] [L1 Slice] [productName {}] Slice distributed", dto.getProductName());
 				}
 				else {
-					LOGGER.error("[MONITOR] [slice] [productName {}] Slice does not exists in Object Storage", dto.getProductName());
+					LOGGER.error("[MONITOR] [L1 Slice] [productName {}] Slice does not exists in Object Storage", dto.getProductName());
 				}
 			} catch (ObjectStorageException e) {
-				LOGGER.error("[MONITOR] [slice] [productName {}] {}", dto.getProductName(), e.getMessage());
+				LOGGER.error("[MONITOR] [L1 Slice] [productName {}] {}", dto.getProductName(), e.getMessage());
 			}
 			break;
 		default:
-			LOGGER.error("[MONITOR] [slice] [productName {}] Slice level unknown", dto.getProductName());
+			LOGGER.error("[MONITOR] [Slice] [productName {}] Slice level unknown", dto.getProductName());
 			break;
 		}
 	}
