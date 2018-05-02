@@ -68,11 +68,11 @@ public class OutputProcuderFactory {
 		try {
 			switch (msg.getFamily()) {
 			case L0_REPORT:
-				ReportDto dtoReport = new ReportDto(msg.getProductName(), this.readFile(msg.getFile()));
+				ReportDto dtoReport = new ReportDto(msg.getProductName(), this.readFile(msg.getFile()), msg.getFamily().toString());
 				this.senderL0Reports.send(dtoReport);
 				break;
 			case L1_REPORT:
-				ReportDto dtoL1Report = new ReportDto(msg.getProductName(), this.readFile(msg.getFile()));
+				ReportDto dtoL1Report = new ReportDto(msg.getProductName(), this.readFile(msg.getFile()), msg.getFamily().toString());
 				this.senderL1Reports.send(dtoL1Report);
 				break;
 			default:
@@ -88,7 +88,7 @@ public class OutputProcuderFactory {
 	public void sendOutput(ObsQueueMessage msg) throws CodedException {
 		switch (msg.getFamily()) {
 		case L0_PRODUCT:
-			L0SliceDto dtoSlice = new L0SliceDto(msg.getProductName(), msg.getKeyObs());
+			L0SliceDto dtoSlice = new L0SliceDto(msg.getProductName(), msg.getKeyObs(), msg.getFamily().toString());
 			this.senderL0Products.send(dtoSlice);
 			break;
 		case L0_ACN:
@@ -96,7 +96,7 @@ public class OutputProcuderFactory {
 			this.senderL0Acns.send(dtoAcn);
 			break;
 		case L1_PRODUCT:
-			L1SliceDto dtoSlice1 = new L1SliceDto(msg.getProductName(), msg.getKeyObs());
+			L1SliceDto dtoSlice1 = new L1SliceDto(msg.getProductName(), msg.getKeyObs(), msg.getFamily().toString());
 			this.senderL1Products.send(dtoSlice1);
 			break;
 		case L1_ACN:

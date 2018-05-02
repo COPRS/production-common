@@ -84,7 +84,7 @@ public class OutputProducerFactoryTest {
 				new FileQueueMessage(ProductFamily.L0_REPORT, "test.txt", new File("./test/data/report.txt")));
 		verify(this.senderProducts, never()).send(Mockito.any());
 		verify(this.senderAcns, never()).send(Mockito.any());
-		verify(this.senderL0Reports, times(1)).send(Mockito.eq(new ReportDto("test.txt", "Test report file")));
+		verify(this.senderL0Reports, times(1)).send(Mockito.eq(new ReportDto("test.txt", "Test report file", "L0_REPORT")));
 		verify(this.senderL1Products, never()).send(Mockito.any());
 		verify(this.senderL1Acns, never()).send(Mockito.any());
 		verify(this.senderL1Reports, never()).send(Mockito.any());
@@ -93,7 +93,7 @@ public class OutputProducerFactoryTest {
 	@Test
 	public void testSendProduct() throws CodedException {
 		this.outputProcuderFactory.sendOutput(new ObsQueueMessage(ProductFamily.L0_PRODUCT, "test.txt", "test.txt"));
-		verify(this.senderProducts, times(1)).send(Mockito.eq(new L0SliceDto("test.txt", "test.txt")));
+		verify(this.senderProducts, times(1)).send(Mockito.eq(new L0SliceDto("test.txt", "test.txt", "L0_PRODUCT")));
 		verify(this.senderAcns, never()).send(Mockito.any());
 		verify(this.senderL0Reports, never()).send(Mockito.any());
 		verify(this.senderL1Products, never()).send(Mockito.any());
@@ -118,7 +118,7 @@ public class OutputProducerFactoryTest {
 				new FileQueueMessage(ProductFamily.L1_REPORT, "test.txt", new File("./test/data/report.txt")));
 		verify(this.senderProducts, never()).send(Mockito.any());
 		verify(this.senderAcns, never()).send(Mockito.any());
-		verify(this.senderL1Reports, times(1)).send(Mockito.eq(new ReportDto("test.txt", "Test report file")));
+		verify(this.senderL1Reports, times(1)).send(Mockito.eq(new ReportDto("test.txt", "Test report file", "L1_REPORT")));
 		verify(this.senderL1Products, never()).send(Mockito.any());
 		verify(this.senderL1Acns, never()).send(Mockito.any());
 		verify(this.senderL0Reports, never()).send(Mockito.any());
@@ -127,7 +127,7 @@ public class OutputProducerFactoryTest {
 	@Test
 	public void testSendL1Product() throws CodedException {
 		this.outputProcuderFactory.sendOutput(new ObsQueueMessage(ProductFamily.L1_PRODUCT, "test.txt", "test.txt"));
-		verify(this.senderL1Products, times(1)).send(Mockito.eq(new L1SliceDto("test.txt", "test.txt")));
+		verify(this.senderL1Products, times(1)).send(Mockito.eq(new L1SliceDto("test.txt", "test.txt", "L1_PRODUCT")));
 		verify(this.senderAcns, never()).send(Mockito.any());
 		verify(this.senderL0Reports, never()).send(Mockito.any());
 		verify(this.senderProducts, never()).send(Mockito.any());
