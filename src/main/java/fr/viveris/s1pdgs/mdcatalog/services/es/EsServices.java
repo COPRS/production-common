@@ -83,7 +83,7 @@ public class EsServices {
 	 */
 	public void createMetadata(JSONObject product) throws Exception {
 		try {
-			String productType = product.getString("productType").toLowerCase();
+			String productType = product.get("productType").toString().toLowerCase();
 			String productName = product.getString("productName");
 
 			IndexRequest request = new IndexRequest(productType, indexType, productName).source(product.toString(),
