@@ -16,8 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import fr.viveris.s1pdgs.jobgenerator.config.L0SlicePatternSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.L0SliceDto;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
@@ -59,7 +58,7 @@ public class L0SlicesConsumerTest {
 	}
 
 	@Test
-	public void testProductNameNotMatch() throws JobGenerationException, JobDispatcherException {
+	public void testProductNameNotMatch() throws AbstractCodedException {
 		String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 		String fileNotMatch = "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 		L0SliceDto dto = new L0SliceDto(fileNotMatch, file);
@@ -71,7 +70,7 @@ public class L0SlicesConsumerTest {
 	}
 
 	@Test
-	public void testReceiveOk() throws JobGenerationException, ParseException, JobDispatcherException {
+	public void testReceiveOk() throws AbstractCodedException, ParseException {
 		String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 		L0SliceDto dto = new L0SliceDto(file, file);
 

@@ -5,13 +5,7 @@ spring:
     
 # Logging
 logging:
-  config: logback-spring.xml
-  level:
-    ROOT: ERROR
-    org.springframework: ERROR
-    fr.viveris.s1pdgs: INFO
-    kafka: WARN
-  file: ./s1pdgs-l0-jobgenerator.log
+  config: ./test/log4j2-test.yml
  
 metadata:
   host: localhost:8080
@@ -46,10 +40,10 @@ level0:
   dir-extractor-sessions: ./tmp/
   
 level1:
-  pathroutingxmlfile: ./data_test/l1_config/routing.xml
+  pathroutingxmlfile: ./test/data/l1_config/routing.xml
 
 job-generator:
-  directoryoftasktables: ./data_test/l0_config/task_tables/
+  directoryoftasktables: ./test/data/l0_config/task_tables/
   maxnumberoftasktables: 2
   maxnumberofjobs: 20
   scheduledfixedrate: 500

@@ -22,9 +22,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
 import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.product.EdrsSessionProduct;
@@ -86,7 +87,7 @@ public class EdrsSessionJobDispatcherTest {
 	private void mockJobGeneratorSettings() {
 		// Mock the job generator settings
 		doAnswer(i -> {
-			return "./data_test/l0_config/task_tables/";
+			return "./test/data/l0_config/task_tables/";
 		}).when(jobGeneratorSettings).getDirectoryoftasktables();
 		doAnswer(i -> {
 			return 4;
@@ -98,7 +99,7 @@ public class EdrsSessionJobDispatcherTest {
 
 	@Test
 	public void testCreate() {
-		File taskTable1 = new File("./data_test/l0_config/task_tables/TaskTable.AIOP.xml");
+		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 
 		// Mocks
 		try {
@@ -115,7 +116,7 @@ public class EdrsSessionJobDispatcherTest {
 			dispatcher.createJobGenerator(taskTable1);
 			verify(jobsGeneratorFactory, times(1)).createJobGeneratorForEdrsSession(any());
 			verify(jobsGeneratorFactory, times(1)).createJobGeneratorForEdrsSession(eq(taskTable1));
-		} catch (BuildTaskTableException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 	}
@@ -125,7 +126,7 @@ public class EdrsSessionJobDispatcherTest {
 	 */
 	@Test
 	public void testInitialize() {
-		File taskTable1 = new File("./data_test/l0_config/task_tables/TaskTable.AIOP.xml");
+		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 
 		// Mocks
 		this.mockJobGeneratorSettings();
@@ -151,7 +152,7 @@ public class EdrsSessionJobDispatcherTest {
 
 			assertTrue(dispatcher.generators.size() == 1);
 			assertTrue(dispatcher.generators.containsKey(taskTable1.getName()));
-		} catch (BuildTaskTableException | JobDispatcherException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 	}
@@ -161,7 +162,7 @@ public class EdrsSessionJobDispatcherTest {
 	 */
 	@Test
 	public void testDispatch() {
-		File taskTable1 = new File("./data_test/l0_config/task_tables/TaskTable.AIOP.xml");
+		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
 		Job<EdrsSession> job1 = new Job<EdrsSession>(p);
 
@@ -175,7 +176,7 @@ public class EdrsSessionJobDispatcherTest {
 				return null;
 			}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(any(), any());
 			doNothing().when(mockGenerator).addJob(eq(job1));
-		} catch (BuildTaskTableException | JobGenerationException e1) {
+		} catch (BuildTaskTableException | MaxNumberCachedJobsReachException e1) {
 			fail("Invalid raised exception: " + e1.getMessage());
 		}
 
@@ -183,7 +184,7 @@ public class EdrsSessionJobDispatcherTest {
 		EdrsSessionJobDispatcher dispatcher = this.createSessionDispatcher();
 		try {
 			dispatcher.initTaskTables();
-		} catch (BuildTaskTableException | JobDispatcherException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 
@@ -191,7 +192,7 @@ public class EdrsSessionJobDispatcherTest {
 		try {
 			dispatcher.dispatch(job1);
 			verify(mockGenerator, times(1)).addJob(eq(job1));
-		} catch (JobGenerationException | JobDispatcherException e) {
+		} catch (AbstractCodedException e) {
 			fail("Exception raised: " + e.getMessage());
 		}
 	}
@@ -199,12 +200,12 @@ public class EdrsSessionJobDispatcherTest {
 	/**
 	 * Test dispatch
 	 * 
-	 * @throws JobGenerationException
+	 * @throws MaxNumberCachedJobsReachException
 	 * @throws JobDispatcherException 
 	 */
-	@Test(expected = JobGenerationException.class)
-	public void testDispatchThrow() throws JobGenerationException, JobDispatcherException {
-		File taskTable1 = new File("./data_test/l0_config/task_tables/TaskTable.AIOP.xml");
+	@Test(expected = MaxNumberCachedJobsReachException.class)
+	public void testDispatchThrow() throws AbstractCodedException {
+		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
 		Job<EdrsSession> job1 = new Job<EdrsSession>(p);
 
@@ -217,8 +218,8 @@ public class EdrsSessionJobDispatcherTest {
 			doAnswer(i -> {
 				return null;
 			}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(any(), any());
-			doThrow(JobGenerationException.class).when(mockGenerator).addJob(eq(job1));
-		} catch (BuildTaskTableException | JobGenerationException e1) {
+			doThrow(MaxNumberCachedJobsReachException.class).when(mockGenerator).addJob(eq(job1));
+		} catch (BuildTaskTableException | MaxNumberCachedJobsReachException e1) {
 			fail("Invalid raised exception: " + e1.getMessage());
 		}
 
@@ -226,7 +227,7 @@ public class EdrsSessionJobDispatcherTest {
 		EdrsSessionJobDispatcher dispatcher = this.createSessionDispatcher();
 		try {
 			dispatcher.initTaskTables();
-		} catch (BuildTaskTableException | JobDispatcherException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 

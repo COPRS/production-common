@@ -1,18 +1,10 @@
 spring:
   application:
     name: ${job_spring_appname:s1pdgs-jobgenerator}
-  profiles:
-    active: ${job_spring_profile:prod}
     
 # Logging
 logging:
-  config: ${job_logging_config:logback-spring.xml}
-  level:
-    ROOT: ${job_logging_level_root:ERROR}
-    org.springframework: ${job_logging_level_orgspringframework:ERROR}
-    fr.viveris.s1pdgs: ${job_logging_level_frviveriss1pdgs:INFO}
-    kafka: ${job_logging_level_kafka:WARN}
-  file: ${job_logging_file:./s1pdgs-jobgenerator.log}
+  config: ${job_logging_config:log4j2.yml}
  
 metadata:
   host: ${catalog_rest_host:metadata-catalog-svc:8080}

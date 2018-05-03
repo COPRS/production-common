@@ -116,7 +116,7 @@ public class JobsGeneratorFactoryTest {
 					xmlConverter, metadataService, kafkaJobsSender);
 
 			AbstractJobsGenerator<EdrsSession> generator = factory
-					.createJobGeneratorForEdrsSession(new File("./data_test/generic_config/task_tables/task_tables/TaskTable.AIOP.xml"));
+					.createJobGeneratorForEdrsSession(new File("./test/data/generic_config/task_tables/task_tables/TaskTable.AIOP.xml"));
 
 			// Check Task table
 			this.checkInitializeWithTaskTableAIOPTaskTable(expectedTaskTable, generator.taskTable);
@@ -280,7 +280,7 @@ public class JobsGeneratorFactoryTest {
 					xmlConverter, metadataService, kafkaJobsSender);
 
 			AbstractJobsGenerator<L0Slice> generator = factory
-					.createJobGeneratorForL0Slice(new File("./data_test/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
+					.createJobGeneratorForL0Slice(new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
 
 			// Check Task table
 			this.checkInitializeWithTaskTableIWTaskTable(expectedTaskTable, generator.taskTable);

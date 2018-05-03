@@ -3,8 +3,8 @@ package fr.viveris.s1pdgs.jobgenerator.controller;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,10 +12,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.EdrsSessionDto;
-import fr.viveris.s1pdgs.jobgenerator.exception.EdrsSessionException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
-import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException.ErrorCode;
+import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedSessionsReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
@@ -37,7 +37,7 @@ public class EdrsSessionsConsumer {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(EdrsSessionsConsumer.class);
+	private static final Logger LOGGER = LogManager.getLogger(EdrsSessionsConsumer.class);
 
 	/**
 	 * Jobs dispatcher
@@ -98,26 +98,31 @@ public class EdrsSessionsConsumer {
 	public void receive(EdrsSessionDto dto) {
 
 		if ("SESSION".equalsIgnoreCase(dto.getProductType())) {
-			LOGGER.info("[MONITOR] [Step 0] [obs {}] Starting job generation", dto.getObjectStorageKey());
+			LOGGER.info("[MONITOR] [step 0] [productName {}] Starting job generation", dto.getObjectStorageKey());
 
+			int step = 999;
 			try {
 				// Clean sessions for whom the last message has been consumed for too long
 				// TODO set in a scheduled function, warning about concurrency
-				LOGGER.info("[MONITOR] [Step x] Removing old sessions");
+				LOGGER.info("[MONITOR] [step 999] Removing old sessions");
 				cachedSessions.entrySet().stream()
 						.filter(entry -> entry.getValue() != null && entry.getValue().getObject()
 								.getLastTimestampMessageReception() < System.currentTimeMillis() - this.maxAgeSession)
 						.forEach(entry -> {
 							EdrsSessionProduct removedSession = cachedSessions.remove(entry.getKey());
-							LOGGER.error(String.format(
-									"[MONITOR] [Step x] [productName %s] Removed from cached because no message received for too long",
-									removedSession.getIdentifier()));
+							LOGGER.error("[MONITOR] [step 999] [productName {}] [code {}] [msg {}]",
+									removedSession.getIdentifier(), ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(),
+									"Removed from cached because no message received for too long");
 						});
 
+				step = 1;
+				// Check dto channel
+				if (dto.getChannelId() != 1 && dto.getChannelId() != 2) {
+					throw new InvalidFormatProduct("Invalid channel identifier " + dto.getChannelId());
+				}
 				// Create the EdrsSessionFile object from the consumed message
-				LOGGER.info("[MONITOR] [Step 1] [obs {}] Building product", dto.getObjectStorageKey());
-				EdrsSessionFile file = edrsSessionFileService.createSessionFile(dto.getObjectStorageKey(),
-						dto.getChannelId());
+				LOGGER.info("[MONITOR] [step 1] [productName {}] Building product", dto.getObjectStorageKey());
+				EdrsSessionFile file = edrsSessionFileService.createSessionFile(dto.getObjectStorageKey());
 
 				// If session exist and raws of each channel are available => send the session
 				// to the job dispatcher
@@ -127,8 +132,9 @@ public class EdrsSessionsConsumer {
 					session = cachedSessions.get(file.getSessionId());
 					session.getObject().setChannel(file, dto.getChannelId());
 					if (session.getObject().getChannel1() != null && session.getObject().getChannel2() != null) {
+						step = 2;
 						this.cachedSessions.remove(file.getSessionId());
-						LOGGER.info("[MONITOR] [Step 2] [productName {}] Dispatching session", file.getSessionId());
+						LOGGER.info("[MONITOR] [step 2] [productName {}] Dispatching session", file.getSessionId());
 						this.edrsSessionJobDispatcher.dispatch(new Job<EdrsSession>(session));
 					} else {
 						session.getObject().setLastTimestampMessageReception(System.currentTimeMillis());
@@ -141,18 +147,16 @@ public class EdrsSessionsConsumer {
 						session.getObject().setChannel(file, dto.getChannelId());
 						cachedSessions.put(file.getSessionId(), session);
 					} else {
-						LOGGER.error(String.format(
-								"[MONITOR] [productName %s] Maximal number of cached sessions reached: message rejected",
-								file.getSessionId()));
+						throw new MaxNumberCachedSessionsReachException("Maximal number of cached sessions reached");
 					}
 				}
-				
-			} catch (EdrsSessionException | ObjectStorageException | JobGenerationException
-					| JobDispatcherException e) {
-				LOGGER.error("[MONITOR] [obs {}] {} ", dto.getObjectStorageKey(), e.getMessage());
+
+			} catch (AbstractCodedException e) {
+				LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step, dto.getObjectStorageKey(),
+						e.getCode().getCode(), e.getLogMessage());
 			}
-			
-			LOGGER.info("[MONITOR] [Step 0] [obs {}] End", dto.getObjectStorageKey());
+
+			LOGGER.info("[MONITOR] [step 0] [productName {}] End", dto.getObjectStorageKey());
 		}
 	}
 

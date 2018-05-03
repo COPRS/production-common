@@ -24,6 +24,7 @@ import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
@@ -83,7 +84,7 @@ public class L0SlicesJobsGeneratorTest {
 		JobsGeneratorFactory factory = new JobsGeneratorFactory(processSettings, jobGeneratorSettings, xmlConverter,
 				metadataService, kafkaJobsSender);
 		generator = (L0SlicesJobsGenerator) factory
-				.createJobGeneratorForL0Slice(new File("./data_test/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
+				.createJobGeneratorForL0Slice(new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
 	}
 
 	private void mockProcessSettings() {
@@ -225,7 +226,7 @@ public class L0SlicesJobsGeneratorTest {
 		}
 	}
 
-	private void mockKafkaSender() {
+	private void mockKafkaSender() throws AbstractCodedException {
 		Mockito.doAnswer(i -> {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.writeValue(new File("./tmp/jobDtoL1.json"), i.getArgument(0));

@@ -7,9 +7,10 @@ import java.util.Map;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
 import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberTaskTablesReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
@@ -60,16 +61,15 @@ public abstract class AbstractJobsDispatcher<T> {
 	 * @throws BuildTaskTableException
 	 * @throws JobDispatcherException
 	 */
-	protected void initTaskTables() throws BuildTaskTableException, JobDispatcherException {
+	protected void initTaskTables() throws AbstractCodedException {
 		// Retrieve list of XML files in the directory
 		File directoryXml = new File(this.jobGeneratorSettings.getDirectoryoftasktables());
 		if (directoryXml != null && directoryXml.isDirectory()) {
 			File[] taskTableFiles = directoryXml.listFiles(parameter -> parameter.isFile());
 			if (taskTableFiles != null) {
 				if (taskTableFiles.length > this.jobGeneratorSettings.getMaxnumberoftasktables()) {
-					// TODO check if error list
-					throw new JobDispatcherException(String.format(
-							"Initialization of dispatcher failed: too much task tables %d", taskTableFiles.length));
+					throw new MaxNumberTaskTablesReachException(String.format(
+							"Too much task tables %d", taskTableFiles.length));
 				}
 				for (File taskTableFile : taskTableFiles) {
 					AbstractJobsGenerator<T> jobGenerator = this.createJobGenerator(taskTableFile);
@@ -81,7 +81,7 @@ public abstract class AbstractJobsDispatcher<T> {
 		}
 	}
 
-	protected abstract AbstractJobsGenerator<T> createJobGenerator(File xmlFile) throws BuildTaskTableException;
+	protected abstract AbstractJobsGenerator<T> createJobGenerator(File xmlFile) throws AbstractCodedException;
 
 	/**
 	 * Dispatch an EDRS session file. <br/>
@@ -94,5 +94,5 @@ public abstract class AbstractJobsDispatcher<T> {
 	 * @return
 	 * @throws JobDispatcherException
 	 */
-	public abstract void dispatch(Job<T> job) throws JobGenerationException, JobDispatcherException;
+	public abstract void dispatch(Job<T> job) throws AbstractCodedException;
 }

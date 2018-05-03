@@ -9,8 +9,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -18,9 +18,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
+import fr.viveris.s1pdgs.jobgenerator.exception.MissingRoutingEntryException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.l1routing.L1Routing;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
@@ -36,7 +36,7 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(L0SliceJobsDispatcher.class);
+	private static final Logger LOGGER = LogManager.getLogger(L0SliceJobsDispatcher.class);
 
 	private final XmlConverter xmlConverter;
 
@@ -59,7 +59,7 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 	}
 
 	@PostConstruct
-	public void initialize() throws BuildTaskTableException, JobDispatcherException {
+	public void initialize() throws AbstractCodedException {
 		// Init job generators from task tables
 		super.initTaskTables();
 
@@ -73,19 +73,18 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 				});
 			}
 		} catch (IOException | JAXBException e) {
-			throw new JobDispatcherException(
-					String.format("Initialization of dispatcher failed: cannot parse routing XML file located in %s",
-							this.pathRoutingXmlFile));
+			throw new InternalErrorException(
+					String.format("Cannot parse routing XML file located in %s", this.pathRoutingXmlFile));
 		}
 	}
 
 	@Override
-	protected AbstractJobsGenerator<L0Slice> createJobGenerator(File xmlFile) throws BuildTaskTableException {
+	protected AbstractJobsGenerator<L0Slice> createJobGenerator(File xmlFile) throws AbstractCodedException {
 		return this.jobsGeneratorFactory.createJobGeneratorForL0Slice(xmlFile);
 	}
 
 	@Override
-	public void dispatch(Job<L0Slice> job) throws JobGenerationException, JobDispatcherException {
+	public void dispatch(Job<L0Slice> job) throws AbstractCodedException {
 		String key = job.getProduct().getObject().getAcquisition() + "_" + job.getProduct().getSatelliteId();
 		if (this.routingMap.containsKey(key)) {
 			for (String taskTable : this.routingMap.get(key)) {
@@ -103,7 +102,7 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 				}
 			}
 		} else {
-			throw new JobDispatcherException(String.format("No found routing entries for %s", key));
+			throw new MissingRoutingEntryException(String.format("No found routing entries for %s", key));
 		}
 	}
 

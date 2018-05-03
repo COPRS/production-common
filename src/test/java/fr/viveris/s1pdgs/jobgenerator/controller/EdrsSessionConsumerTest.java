@@ -71,10 +71,10 @@ public class EdrsSessionConsumerTest {
 		stop1.set(Calendar.MILLISECOND, 0);
 		Mockito.doAnswer(i -> {
 			return TestL0Utils.createEdrsSessionFileChannel1(true);
-		}).when(edrsSessionFileService).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"), Mockito.eq(1));
+		}).when(edrsSessionFileService).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"));
 		Mockito.doAnswer(i -> {
 			return TestL0Utils.createEdrsSessionFileChannel2(true);
-		}).when(edrsSessionFileService).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_2"), Mockito.eq(2));
+		}).when(edrsSessionFileService).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_2"));
 		Mockito.doAnswer(i -> {
 			EdrsSessionFile r = new EdrsSessionFile();
 			r.setSessionId("SESSION_2");
@@ -82,7 +82,7 @@ public class EdrsSessionConsumerTest {
 			r.setStopTime(stop1.getTime());
 			r.setRawNames(Arrays.asList(new EdrsSessionFileRaw("file1.raw","file1.raw"), new EdrsSessionFileRaw("file2.raw","file2.raw")));
 			return r;
-		}).when(edrsSessionFileService).createSessionFile(Mockito.eq("KEY_OBS_SESSION_2_1"), Mockito.eq(1));
+		}).when(edrsSessionFileService).createSessionFile(Mockito.eq("KEY_OBS_SESSION_2_1"));
 		Mockito.doAnswer(i -> {
 			EdrsSessionFile r = new EdrsSessionFile();
 			r.setSessionId("SESSION_2");
@@ -90,7 +90,7 @@ public class EdrsSessionConsumerTest {
 			r.setStopTime(stop1.getTime());
 			r.setRawNames(Arrays.asList(new EdrsSessionFileRaw("file1.raw","file1.raw"), new EdrsSessionFileRaw("file2.raw","file2.raw")));
 			return r;
-		}).when(edrsSessionFileService).createSessionFile(Mockito.eq("KEY_OBS_SESSION_2_2"), Mockito.eq(2));
+		}).when(edrsSessionFileService).createSessionFile(Mockito.eq("KEY_OBS_SESSION_2_2"));
 	}
 
 	private Map<String, EdrsSessionProduct> getCachedSessions(EdrsSessionsConsumer edrsSessionsConsumer) {
@@ -157,7 +157,7 @@ public class EdrsSessionConsumerTest {
 				10000, 2);
 		EdrsSessionDto dto1 = new EdrsSessionDto("object storage key", 1, "RAW", "S1", "A");
 		edrsSessionsConsumer.receive(dto1);
-		Mockito.verify(edrsSessionFileService, never()).createSessionFile(Mockito.anyString(), Mockito.anyInt());
+		Mockito.verify(edrsSessionFileService, never()).createSessionFile(Mockito.anyString());
 		Mockito.verify(jobsDispatcher, never()).dispatch(Mockito.any());
 		Map<String, EdrsSessionProduct> s = this.getCachedSessions(edrsSessionsConsumer);
 		assertTrue("Cached session map shall be empty", s.isEmpty());
@@ -175,15 +175,13 @@ public class EdrsSessionConsumerTest {
 
 		edrsSessionsConsumer.receive(dto1);
 		Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
-		Mockito.verify(edrsSessionFileService, times(1)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"),
-				Mockito.eq(1));
+		Mockito.verify(edrsSessionFileService, times(1)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"));
 		assertTrue("One session shall be cached", s.size() == 1);
 		assertTrue("The cached session shall be L20171109175634707000125", s.containsKey("L20171109175634707000125"));
 
 		edrsSessionsConsumer.receive(dto3);
 		Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
-		Mockito.verify(edrsSessionFileService, times(1)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_2_1"),
-				Mockito.eq(1));
+		Mockito.verify(edrsSessionFileService, times(1)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_2_1"));
 		assertTrue("One session shall be cached", s.size() == 1);
 		assertTrue("The cached session shall be L20171109175634707000125", s.containsKey("L20171109175634707000125"));
 	}
@@ -198,15 +196,13 @@ public class EdrsSessionConsumerTest {
 
 		edrsSessionsConsumer.receive(dto1);
 		Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
-		Mockito.verify(edrsSessionFileService, times(1)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"),
-				Mockito.eq(1));
+		Mockito.verify(edrsSessionFileService, times(1)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"));
 		assertTrue("One session shall be cached", s.size() == 1);
 		assertTrue("The cached session shall be L20171109175634707000125", s.containsKey("L20171109175634707000125"));
 
 		edrsSessionsConsumer.receive(dto1);
 		Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
-		Mockito.verify(edrsSessionFileService, times(2)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"),
-				Mockito.eq(1));
+		Mockito.verify(edrsSessionFileService, times(2)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"));
 		assertTrue("One session shall be cached", s.size() == 1);
 		assertTrue("The cached session shall be L20171109175634707000125", s.containsKey("L20171109175634707000125"));
 	}

@@ -7,8 +7,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,8 +16,9 @@ import org.springframework.stereotype.Component;
 
 import fr.viveris.s1pdgs.jobgenerator.config.L0SlicePatternSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.L0SliceDto;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
@@ -33,13 +34,13 @@ import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.L0SliceJobsDispatcher;
 @Component
 @ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "l0-slices")
 public class L0SlicesConsumer {
-	
+
 	protected static final String DATE_FORMAT = "yyyyMMdd'T'HHmmss";
 
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(L0SlicesConsumer.class);
+	private static final Logger LOGGER = LogManager.getLogger(L0SlicesConsumer.class);
 
 	private final L0SliceJobsDispatcher l0SliceJobsDispatcher;
 
@@ -75,49 +76,52 @@ public class L0SlicesConsumer {
 	 */
 	@KafkaListener(topics = "${kafka.topics.l0-slices}", groupId = "${kafka.group-id}", containerFactory = "l0SlicesKafkaListenerContainerFactory")
 	public void receive(L0SliceDto dto) {
-		
-		LOGGER.info("[MONITOR] [Step 0] [productName {}] Starting job generation", dto.getProductName());
-		
+
+		LOGGER.info("[MONITOR] [step 0] [productName {}] Starting job generation", dto.getProductName());
+		int step = 1;
+
 		try {
-			
-			LOGGER.info("[MONITOR] [Step 1] [productName {}] Building product", dto.getProductName());
+
+			LOGGER.info("[MONITOR] [step 1] [productName {}] Building product", dto.getProductName());
 			Matcher m = l0SLicesPattern.matcher(dto.getProductName());
-			if (m.matches()) {
-				String satelliteId = m.group(this.l0SlicePatternSettings.getPlaceMatchSatelliteId());
-				String missionId = m.group(this.l0SlicePatternSettings.getPlaceMatchMissionId());
-				String acquisition = m.group(this.l0SlicePatternSettings.getPlaceMatchAcquisition());
-				String startTime = m.group(this.l0SlicePatternSettings.getPlaceMatchStartTime());
-				String stopTime = m.group(this.l0SlicePatternSettings.getPlaceMatchStopTime());
-				Date dateStart = this.convertDate(startTime);
-				Date dateStop = this.convertDate(stopTime);
-
-				// Initialize the JOB
-				L0Slice slice = new L0Slice(acquisition);
-				L0SliceProduct product = new L0SliceProduct(dto.getProductName(), satelliteId, missionId, dateStart,
-						dateStop, slice);
-				Job<L0Slice> job = new Job<>(product);
-
-				// Dispatch job
-				LOGGER.info("[MONITOR] [Step 2] [productName {}] Dispatching product", dto.getProductName());
-				this.l0SliceJobsDispatcher.dispatch(job);
-			} else {
-				LOGGER.error("[MONITOR] [productName {}] Don't match with regular expression {}", dto.getProductName(),
-						this.l0SlicePatternSettings.getRegexp());
+			if (!m.matches()) {
+				throw new InvalidFormatProduct(
+						"Don't match with regular expression " + this.l0SlicePatternSettings.getRegexp());
 			}
-		} catch (JobDispatcherException e) {
-			LOGGER.error("[MONITOR] [productName {}] {}", dto.getProductName(), e.getMessage());
-		} catch (JobGenerationException e) {
-			LOGGER.error("[MONITOR] [productName {}] {}", dto.getProductName(), e.getMessage());
-		} catch (ParseException e) {
-			LOGGER.error("[MONITOR] [productName {}] {}", dto.getProductName(), e.getMessage());
+			String satelliteId = m.group(this.l0SlicePatternSettings.getPlaceMatchSatelliteId());
+			String missionId = m.group(this.l0SlicePatternSettings.getPlaceMatchMissionId());
+			String acquisition = m.group(this.l0SlicePatternSettings.getPlaceMatchAcquisition());
+			String startTime = m.group(this.l0SlicePatternSettings.getPlaceMatchStartTime());
+			String stopTime = m.group(this.l0SlicePatternSettings.getPlaceMatchStopTime());
+			Date dateStart = this.convertDate(startTime);
+			Date dateStop = this.convertDate(stopTime);
+
+			// Initialize the JOB
+			L0Slice slice = new L0Slice(acquisition);
+			L0SliceProduct product = new L0SliceProduct(dto.getProductName(), satelliteId, missionId, dateStart,
+					dateStop, slice);
+			Job<L0Slice> job = new Job<>(product);
+
+			// Dispatch job
+			step++;
+			LOGGER.info("[MONITOR] [step 2] [productName {}] Dispatching product", dto.getProductName());
+			this.l0SliceJobsDispatcher.dispatch(job);
+			
+		} catch (AbstractCodedException e) {
+			LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step, dto.getProductName(),
+					e.getCode().getCode(), e.getLogMessage());
 		}
 
-		LOGGER.info("[MONITOR] [Step 0] [productName {}] End", dto.getProductName());
+		LOGGER.info("[MONITOR] [step 0] [productName {}] End", dto.getProductName());
 	}
 
-	private Date convertDate(String dateStr) throws ParseException {
-		DateFormat format = new SimpleDateFormat(DATE_FORMAT);
-		return format.parse(dateStr);
+	private Date convertDate(String dateStr) throws InternalErrorException {
+		try {
+			DateFormat format = new SimpleDateFormat(DATE_FORMAT);
+			return format.parse(dateStr);
+		} catch (ParseException pe) {
+			throw new InternalErrorException("Cannot convert date " + dateStr, pe);
+		}
 	}
 
 }

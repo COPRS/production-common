@@ -2,15 +2,15 @@ package fr.viveris.s1pdgs.jobgenerator.tasks.generator;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
+import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
@@ -30,8 +30,8 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 	}
 
 	@Override
-	protected void preSearch(Job<L0Slice> job) throws MetadataMissingException {
-		List<String> missingMetadata = new ArrayList<>();
+	protected void preSearch(Job<L0Slice> job) throws InputsMissingException {
+		Map<String, String> missingMetadata = new HashMap<>();
 		// Retrieve instrument configuration id and slice number
 		try {
 			L0SliceMetadata file = this.metadataService.getSlice("blank", job.getProduct().getIdentifier());
@@ -40,8 +40,8 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 			job.getProduct().getObject().setNumberSlice(file.getNumberSlice());
 			job.getProduct().getObject().setDataTakeId(file.getDatatakeId());
 		} catch (MetadataException e) {
-			missingMetadata.add(job.getProduct().getIdentifier());
-			throw new MetadataMissingException(missingMetadata);
+			missingMetadata.put(job.getProduct().getIdentifier(), "No Slice: " + e.getMessage());
+			throw new InputsMissingException(missingMetadata);
 		}
 		// Retrieve Total_Number_Of_Slices
 		try {
@@ -51,8 +51,8 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 			job.getProduct().getObject().setStartDateFromMetadata(acn.getValidityStart());
 			job.getProduct().getObject().setStopDateFromMetadata(acn.getValidityStop());
 		} catch (MetadataException e) {
-			missingMetadata.add(job.getProduct().getIdentifier());
-			throw new MetadataMissingException(missingMetadata);
+			missingMetadata.put(job.getProduct().getIdentifier(), "No ACNs: " + e.getMessage());
+			throw new InputsMissingException(missingMetadata);
 		}
 	}
 

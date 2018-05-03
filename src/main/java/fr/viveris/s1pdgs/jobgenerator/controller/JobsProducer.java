@@ -1,15 +1,16 @@
 package fr.viveris.s1pdgs.jobgenerator.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
+import fr.viveris.s1pdgs.jobgenerator.exception.KafkaSendException;
 
 /**
  * Kafka producer for the topic "t-pdgs-l0-jobs" or "t-pdgs-l1-jobs"
@@ -22,7 +23,7 @@ public class JobsProducer {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(JobsProducer.class);
+	private static final Logger LOGGER = LogManager.getLogger(JobsProducer.class);
 
 	/**
 	 * KAFKA template producer
@@ -40,30 +41,17 @@ public class JobsProducer {
 	 * Send a message asynchronously to a topic
 	 * 
 	 * @param customer
+	 * @throws KafkaSendException 
 	 */
-	public void send(JobDto dto) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Send data={} in topic={}", dto, kafkaTopic);
+	public void send(JobDto dto) throws KafkaSendException {
+		try {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("[send] Send job = {}", dto);
+			}
+			kafkaJobsTemplate.send(kafkaTopic, dto).get();
+		} catch (CancellationException | InterruptedException | ExecutionException e) {
+			throw new KafkaSendException(kafkaTopic, dto.getProductIdentifier(), e.getMessage(), e);
 		}
-		ListenableFuture<SendResult<String, JobDto>> future = kafkaJobsTemplate.send(kafkaTopic, dto);
-
-		// We register a callback to verify whether the messages are sent to the topic
-		// successfully or not
-		future.addCallback(new ListenableFutureCallback<SendResult<String, JobDto>>() {
-			@Override
-			public void onSuccess(SendResult<String, JobDto> result) {
-				if (LOGGER.isInfoEnabled()) {
-					LOGGER.info("[MONITOR] [job {}] Job successfully published in topic={}", dto.getProductIdentifier(),
-							kafkaTopic);
-				}
-			}
-
-			@Override
-			public void onFailure(Throwable e) {
-				LOGGER.error("[MONITOR] [job {}] Job publication in topic {} failed: {}", dto.getProductIdentifier(), kafkaTopic,
-						e.getMessage());
-			}
-		});
 	}
 
 }

@@ -83,7 +83,7 @@ public class XmlConverterTest {
 			final Calendar calEnd = new Calendar.Builder().setTimeOfDay(15, 17, 25).setDate(2017, Calendar.DECEMBER, 13)
 					.setTimeZone(TimeZone.getTimeZone("UTC")).build();
 			EdrsSessionFile fileChannel1 = (EdrsSessionFile) xmlConverter
-					.convertFromXMLToObject("./data_test/DCS_02_L20171109175634707000125_ch1_DSIB.xml");
+					.convertFromXMLToObject("./test/data/DCS_02_L20171109175634707000125_ch1_DSIB.xml");
 			assertEquals("Session identifiers not equaled", "L20171109175634707000125", fileChannel1.getSessionId());
 			assertEquals("Start times not equaled", calStart.getTimeInMillis(), fileChannel1.getStartTime().getTime());
 			assertEquals("End times not equaled", calEnd.getTimeInMillis(), fileChannel1.getStopTime().getTime());
@@ -99,7 +99,7 @@ public class XmlConverterTest {
 	@Test
 	public void testUnmarshalingTaskTable() {
 		try {
-			TaskTable taskTable = (TaskTable) xmlConverter.convertFromXMLToObject("./data_test/generic_config/task_tables/TaskTable.AIOP.xml");
+			TaskTable taskTable = (TaskTable) xmlConverter.convertFromXMLToObject("./test/data/generic_config/task_tables/TaskTable.AIOP.xml");
 			TaskTable expectedTaskTable = TestL0Utils.buildTaskTableAIOP();
 
 			assertEquals("[TaskTable] Invalid processor name", expectedTaskTable.getProcessorName(),
@@ -294,7 +294,7 @@ public class XmlConverterTest {
 	@Test
 	public void testUnmarshalingL1Routing() {
 		try {
-			L1Routing converted = (L1Routing) xmlConverter.convertFromXMLToObject("./data_test/l1_config/routing.xml");
+			L1Routing converted = (L1Routing) xmlConverter.convertFromXMLToObject("./test/data/l1_config/routing.xml");
 			L1Routing expected = TestL1Utils.buildL1Routing();
 
 			assertEquals("0", expected.getRoutes().get(0), converted.getRoutes().get(0));

@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.EdrsSessionException;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
+import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.service.s3.SessionFilesS3Services;
@@ -60,15 +62,10 @@ public class EdrsSessionFileService {
 	 * @param keyObjectStorage
 	 * @param channelId
 	 * @return
-	 * @throws EdrsSessionException
+	 * @throws InvalidFormatProduct
 	 * @throws ObjectStorageException
 	 */
-	public EdrsSessionFile createSessionFile(String keyObjectStorage, int channelId)
-			throws EdrsSessionException, ObjectStorageException {
-		// Check
-		if (channelId != 1 && channelId != 2) {
-			throw new EdrsSessionException(String.format("[key %s] Invalid channel %d", keyObjectStorage, channelId));
-		}
+	public EdrsSessionFile createSessionFile(String keyObjectStorage) throws AbstractCodedException {
 
 		// Extract filename from the key object storage
 		String id = keyObjectStorage;
@@ -77,15 +74,14 @@ public class EdrsSessionFileService {
 			id = keyObjectStorage.substring(lastIndex + 1);
 		}
 
-		File tmpFile = null;
+		// Download file
+		File tmpFile = s3Services.getFile(keyObjectStorage, this.pathTempDirectory + id);
+
+		// Convert it
 		try {
-			// Download file
-			tmpFile = s3Services.getFile(keyObjectStorage, this.pathTempDirectory + id);
-
 			return (EdrsSessionFile) xmlConverter.convertFromXMLToObject(tmpFile.getAbsolutePath());
-
 		} catch (IOException | JAXBException | IllegalArgumentException e) {
-			throw new EdrsSessionException(String.format("[key %s] %s", keyObjectStorage, channelId));
+			throw new InternalErrorException("Cannot convert file " + keyObjectStorage, e);
 		} finally {
 			if (tmpFile != null) {
 				tmpFile.delete();

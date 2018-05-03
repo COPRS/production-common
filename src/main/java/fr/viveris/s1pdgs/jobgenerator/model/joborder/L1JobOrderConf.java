@@ -52,6 +52,7 @@ public class L1JobOrderConf extends AbstractJobOrderConf {
 		if (!CollectionUtils.isEmpty(obj.getProcParams())) {
 			this.procParams.addAll(obj.getProcParams().stream().filter(item -> item != null)
 					.map(item -> new JobOrderProcParam(item)).collect(Collectors.toList()));
+			this.nbProcParams = obj.getProcParams().size();
 		}
 	}
 

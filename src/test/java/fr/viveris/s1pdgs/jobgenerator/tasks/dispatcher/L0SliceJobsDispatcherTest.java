@@ -25,9 +25,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
+import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobGenerationException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.l1routing.L1Routing;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
@@ -66,10 +65,10 @@ public class L0SliceJobsDispatcherTest {
 	@Mock
 	private XmlConverter xmlConverter;
 
-	private File taskTable1 = new File("./data_test/l1_config/task_tables/EN_RAW__0_GRDF_1.xml");
-	private File taskTable2 = new File("./data_test/l1_config/task_tables/EW_RAW__0_GRDH_1.xml");
-	private File taskTable3 = new File("./data_test/l1_config/task_tables/EW_RAW__0_GRDM_1.xml");
-	private File taskTable4 = new File("./data_test/l1_config/task_tables/IW_RAW__0_GRDH_1.xml");
+	private File taskTable1 = new File("./test/data/l1_config/task_tables/EN_RAW__0_GRDF_1.xml");
+	private File taskTable2 = new File("./test/data/l1_config/task_tables/EW_RAW__0_GRDH_1.xml");
+	private File taskTable3 = new File("./test/data/l1_config/task_tables/EW_RAW__0_GRDM_1.xml");
+	private File taskTable4 = new File("./test/data/l1_config/task_tables/IW_RAW__0_GRDH_1.xml");
 	private int nbTaskTables;
 
 	private L0SliceJobsDispatcher dispatcher;
@@ -95,7 +94,7 @@ public class L0SliceJobsDispatcherTest {
 
 		// Mock the job generator settings
 		doAnswer(i -> {
-			return "./data_test/l1_config/task_tables/";
+			return "./test/data/l1_config/task_tables/";
 		}).when(jobGeneratorSettings).getDirectoryoftasktables();
 		doAnswer(i -> {
 			return 25;
@@ -132,7 +131,7 @@ public class L0SliceJobsDispatcherTest {
 		}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(Mockito.any(), Mockito.any());
 
 		// Retrieve number of tasktables
-		File taskTableDirectory = new File("./data_test/l1_config/task_tables");
+		File taskTableDirectory = new File("./test/data/l1_config/task_tables");
 		if (taskTableDirectory.isDirectory()) {
 			String[] files = taskTableDirectory.list();
 			if (files != null) {
@@ -146,7 +145,7 @@ public class L0SliceJobsDispatcherTest {
 
 		// Return the dispatcher
 		this.dispatcher = new L0SliceJobsDispatcher(jobGeneratorSettings, jobsGeneratorFactory,
-				jobGenerationTaskScheduler, xmlConverter, "./data_test/l1_config/routing.xml");
+				jobGenerationTaskScheduler, xmlConverter, "./test/data/l1_config/routing.xml");
 	}
 
 	@Test
@@ -155,7 +154,7 @@ public class L0SliceJobsDispatcherTest {
 			this.dispatcher.createJobGenerator(taskTable1);
 			verify(jobsGeneratorFactory, times(1)).createJobGeneratorForL0Slice(any());
 			verify(jobsGeneratorFactory, times(1)).createJobGeneratorForL0Slice(eq(taskTable1));
-		} catch (BuildTaskTableException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 	}
@@ -193,7 +192,7 @@ public class L0SliceJobsDispatcherTest {
 						route.getTo().getTaskTables().size() == dispatcher.routingMap.get(key).size());
 			});
 
-		} catch (BuildTaskTableException | JobDispatcherException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 	}
@@ -212,7 +211,7 @@ public class L0SliceJobsDispatcherTest {
 			verify(mockGeneratorOther, never()).addJob(Mockito.any());
 			verify(mockGeneratorIW, times(5)).addJob(Mockito.eq(jobA));
 
-		} catch (BuildTaskTableException | JobDispatcherException | JobGenerationException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 	}
@@ -231,7 +230,7 @@ public class L0SliceJobsDispatcherTest {
 			verify(mockGeneratorOther, never()).addJob(Mockito.any());
 			verify(mockGeneratorIW, times(3)).addJob(Mockito.eq(jobA));
 
-		} catch (BuildTaskTableException | JobDispatcherException | JobGenerationException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 	}
@@ -250,14 +249,14 @@ public class L0SliceJobsDispatcherTest {
 			verify(mockGeneratorIW, never()).addJob(Mockito.any());
 			verify(mockGeneratorOther, times(5)).addJob(Mockito.eq(jobA));
 
-		} catch (BuildTaskTableException | JobDispatcherException | JobGenerationException e) {
+		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
 		}
 	}
 
-	@Test(expected = JobDispatcherException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testDispatchInvalid()
-			throws ParseException, BuildTaskTableException, JobDispatcherException, JobGenerationException {
+			throws ParseException, AbstractCodedException {
 		L0Slice sliceA = new L0Slice("ZZ");
 		L0SliceProduct productA = new L0SliceProduct(
 				"S1A_EW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",

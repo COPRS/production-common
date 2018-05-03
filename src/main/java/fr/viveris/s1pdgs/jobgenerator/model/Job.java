@@ -20,6 +20,8 @@ public class Job<T> {
 	private JobGenerationStatus status;
 	
 	private String workDirectory;
+	
+	private int workDirectoryInc;
 
 	public Job() {
 		this.metadataQueries = new HashMap<>();
@@ -119,6 +121,20 @@ public class Job<T> {
 	 */
 	public void setWorkDirectory(String workDirectory) {
 		this.workDirectory = workDirectory;
+	}
+
+	/**
+	 * @return the workDirectoryInc
+	 */
+	public int getWorkDirectoryInc() {
+		return workDirectoryInc;
+	}
+
+	/**
+	 * @param workDirectoryInc the workDirectoryInc to set
+	 */
+	public void setWorkDirectoryInc(int workDirectoryInc) {
+		this.workDirectoryInc = workDirectoryInc;
 	}
 
 	/* (non-Javadoc)

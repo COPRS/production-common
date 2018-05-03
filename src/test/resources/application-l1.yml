@@ -1,7 +1,3 @@
-# Logging
-logging:
-  file: ./s1pdgs-l1-jobgenerator.log
-
 kafka:
   group-id: l1-jobgenerators
   client-id: l1-job-generator
@@ -10,7 +6,7 @@ kafka:
     l0-slices: true
 
 job-generator:
-  directoryoftasktables: ./data_test/l1_config/task_tables/
+  directoryoftasktables: ./test/data/l1_config/task_tables/
   maxnumberoftasktables: 40
   
 process:
