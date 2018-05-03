@@ -118,13 +118,13 @@ public class EsServices {
 			sourceBuilder
 					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-							.must(QueryBuilders.termQuery("satelliteId", satelliteId))
+							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 							.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId)));
 		} else {
 			sourceBuilder
 					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-							.must(QueryBuilders.termQuery("satelliteId", satelliteId)));
+							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
 		}
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
