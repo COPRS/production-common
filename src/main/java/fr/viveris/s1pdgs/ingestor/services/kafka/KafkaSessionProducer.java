@@ -3,15 +3,12 @@ package fr.viveris.s1pdgs.ingestor.services.kafka;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.ingestor.model.exception.KafkaSessionPublicationException;
@@ -29,7 +26,7 @@ public class KafkaSessionProducer {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSessionProducer.class);
+	private static final Logger LOGGER = LogManager.getLogger(KafkaSessionProducer.class);
 
 	/**
 	 * KAFKA template for topic "session"
@@ -61,35 +58,4 @@ public class KafkaSessionProducer {
 			throw new KafkaSessionPublicationException(descriptor.getObjectStorageKey(), e);
 		}
 	}
-
-	/**
-	 * Send a message asynchronously to a topic
-	 * 
-	 * @param descriptor
-	 */
-	public void sendAsynchrone(KafkaEdrsSessionDto descriptor) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("[sendAsynchrone] Send ERDS session = {}", descriptor);
-		}
-
-		ListenableFuture<SendResult<String, KafkaEdrsSessionDto>> future = kafkaSessionTemplate.send(kafkaTopic,
-				descriptor.getObjectStorageKey(), descriptor);
-
-		// We register a callback to verify whether the messages are sent to the topic
-		// successfully or not
-		future.addCallback(new ListenableFutureCallback<SendResult<String, KafkaEdrsSessionDto>>() {
-			@Override
-			public void onSuccess(SendResult<String, KafkaEdrsSessionDto> result) {
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("[sendAsynchrone] Success ERDS session = {}", descriptor);
-				}
-			}
-
-			@Override
-			public void onFailure(Throwable e) {
-				LOGGER.error("[sendAsynchrone] Failed: {}", e.getMessage());
-			}
-		});
-	}
-
 }

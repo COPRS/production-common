@@ -2,17 +2,19 @@ package fr.viveris.s1pdgs.ingestor.tasks;
 
 import java.io.File;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import fr.viveris.s1pdgs.ingestor.model.exception.AbstractFileException.ErrorCode;
+
 @Component
 public class LocalDirectoryCleaning {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(LocalDirectoryCleaning.class);
+	private static final Logger LOGGER = LogManager.getLogger(LocalDirectoryCleaning.class);
 
 	private final String sessionLocalDirectory;
 
@@ -48,7 +50,8 @@ public class LocalDirectoryCleaning {
 				}
 			}
 		} catch (SecurityException e) {
-			LOGGER.error("Error during removing empty directories for config files", e.getMessage());
+			LOGGER.error("[code {}] [msg Error during removing empty directories for config files: {}]",
+					ErrorCode.INGESTOR_CLEAN.getCode(), e.getMessage());
 		}
 	}
 
@@ -64,7 +67,8 @@ public class LocalDirectoryCleaning {
 				}
 			}
 		} catch (SecurityException e) {
-			LOGGER.error("Error during removing empty directories for ERDS session files", e.getMessage());
+			LOGGER.error("[code {}] [msg Error during removing empty directories for ERDS session files: {}",
+					ErrorCode.INGESTOR_CLEAN.getCode(), e.getMessage());
 		}
 	}
 

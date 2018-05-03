@@ -1,15 +1,15 @@
 package fr.viveris.s1pdgs.ingestor.model.exception;
 
-public class FileTerminatedException extends AbstractFileException {
+public abstract class FileTerminatedException extends AbstractFileException {
 
 	private static final long serialVersionUID = -1107106717498506533L;
 
-	public FileTerminatedException(String msg, String productName) {
-		super(msg, productName);
+	public FileTerminatedException(ErrorCode code, String productName, String message) {
+		super(code, productName, message);
 	}
-	
-	public FileTerminatedException(String msg, String productName, Throwable cause) {
-		super(msg, productName, cause);
+
+	public FileTerminatedException(ErrorCode code, String productName, String message, Throwable e) {
+		super(code, productName, message, e);
 	}
 
 }

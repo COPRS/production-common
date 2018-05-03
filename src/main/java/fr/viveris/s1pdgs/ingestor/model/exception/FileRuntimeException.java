@@ -1,15 +1,15 @@
 package fr.viveris.s1pdgs.ingestor.model.exception;
 
-public class FileRuntimeException extends AbstractFileException {
+public abstract class FileRuntimeException extends AbstractFileException {
 
 	private static final long serialVersionUID = -4138493055116873488L;
 
-	public FileRuntimeException(String msg, String productName) {
-		super(msg, productName);
+	public FileRuntimeException(ErrorCode code, String productName, String message) {
+		super(code, productName, message);
 	}
-	
-	public FileRuntimeException(String msg, String productName, Throwable cause) {
-		super(msg, productName, cause);
+
+	public FileRuntimeException(ErrorCode code, String productName, String message, Throwable e) {
+		super(code, productName, message, e);
 	}
 
 }

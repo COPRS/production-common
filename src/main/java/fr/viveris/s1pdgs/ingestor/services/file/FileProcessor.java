@@ -3,8 +3,8 @@ package fr.viveris.s1pdgs.ingestor.services.file;
 import java.io.File;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import fr.viveris.s1pdgs.ingestor.model.FileDescriptor;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.ingestor.model.dto.KafkaEdrsSessionDto;
+import fr.viveris.s1pdgs.ingestor.model.exception.AbstractFileException.ErrorCode;
 import fr.viveris.s1pdgs.ingestor.model.exception.AlreadyExistObjectStorageException;
 import fr.viveris.s1pdgs.ingestor.model.exception.FileRuntimeException;
 import fr.viveris.s1pdgs.ingestor.model.exception.FileTerminatedException;
@@ -34,7 +35,7 @@ public class FileProcessor {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(FileProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(FileProcessor.class);
 
 	/**
 	 * Pattern for configuration files to extract data
@@ -106,47 +107,58 @@ public class FileProcessor {
 	public void processConfigFile(Message<File> message) {
 		File file = message.getPayload();
 		if (!file.isDirectory()) {
+			int step = 0;
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Start processing of configuration file {}", file.getPath());
+				LOGGER.info("[MONITOR] [step 0] Start processing of configuration file {}", file.getPath());
 			}
 
 			// Build model file
 			try {
+				String productName = file.getName();
 				try {
+					step ++;
 					FileDescriptor descriptor = fileDescriptorBuilder.buildConfigFileDescriptor(file);
+					productName = descriptor.getProductName();
 					// Store in object storage
+					LOGGER.info("[MONITOR] [step 1] [productName {}] Starting uploading file in OBS", productName);
 					if (!configFilesS3Services.exist(descriptor.getKeyObjectStorage())) {
 						configFilesS3Services.uploadFile(descriptor.getKeyObjectStorage(), file);
-						LOGGER.info("{} successfully published is object storage", descriptor.getRelativePath());
 					} else {
 						throw new AlreadyExistObjectStorageException(descriptor.getProductName(),
 								new Exception("File already exist in object storage"));
 					}
 					// Send metadata
+					step ++;
 					if (descriptor.isHasToBePublished()) {
+						LOGGER.info("[MONITOR] [step 2] [productName {}] Starting publishing file in topic",
+								productName);
 						KafkaConfigFileDto fileToIndex = new KafkaConfigFileDto(descriptor.getProductName(),
 								descriptor.getProductName());
 						senderMetadata.send(fileToIndex);
-						LOGGER.info("[processConfigFile] Metadata for {} successfully sended",
-								descriptor.getRelativePath());
 					}
 				} catch (IgnoredFileException ce) {
 					if (LOGGER.isDebugEnabled()) {
-						LOGGER.debug(ce.getMessage());
+						LOGGER.debug("[MONITOR] [step {}] [productName {}] [code {}] {}", step, ce.getProductName(),
+								ce.getCode().getCode(), ce.getLogMessage());
 					}
 				} catch (FileTerminatedException fte) {
-					LOGGER.error(fte.getMessage());
+					LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {}", step, fte.getProductName(),
+							fte.getCode().getCode(), fte.getLogMessage());
 				}
 				// Remove file
+				step ++;
+				LOGGER.info("[MONITOR] [step 3] [productName {}] Starting removing file", productName);
 				if (!file.delete()) {
-					LOGGER.error("[processConfigFile] File {} not removed from local storage", file.getPath());
+					LOGGER.error("[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage",
+							ErrorCode.INGESTOR_CLEAN.getCode(), file.getPath());
 				}
 
 			} catch (FileRuntimeException fre) {
-				LOGGER.error(fre.getMessage());
+				LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {}", step, fre.getProductName(), fre.getCode().getCode(),
+						fre.getLogMessage());
 			}
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("End processing of configuration file {}", file.getPath());
+				LOGGER.info("[MONITOR] [step 0] End processing of configuration file {}", file.getPath());
 			}
 		}
 	}
@@ -164,21 +176,28 @@ public class FileProcessor {
 	public void processSessionFile(Message<File> message) {
 		File file = message.getPayload();
 		if (!file.isDirectory()) {
+			int step = 0;
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Starting processing of EDRS session file {}", file.getPath());
+				LOGGER.info("[MONITOR] [step 0] Starting processing of EDRS session file {}", file.getPath());
 			}
 			// Build model file
 			try {
+				String productName = file.getName();
 				try {
+					step ++;
+					LOGGER.info("[MONITOR] [step 1] [productName {}] Starting uploading file in OBS", productName);
 					FileDescriptor descriptor = fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
 					// Store in object storage
 					if (!sessionFilesS3Services.exist(descriptor.getKeyObjectStorage())) {
 						sessionFilesS3Services.uploadFile(descriptor.getKeyObjectStorage(), file);
 					} else {
-						throw new IgnoredFileException(descriptor.getProductName(),
+						throw new AlreadyExistObjectStorageException(descriptor.getProductName(),
 								new Exception("File already exist in object storage"));
 					}
 					// Publish session or raw file
+					step ++;
+					LOGGER.info("[MONITOR] [step 2] [productName {}] Starting publishing file in topic",
+							productName);
 					KafkaEdrsSessionDto dtoSession = new KafkaEdrsSessionDto(descriptor.getKeyObjectStorage(),
 							descriptor.getChannel(), descriptor.getProductType(), descriptor.getMissionId(),
 							descriptor.getSatelliteId());
@@ -186,20 +205,26 @@ public class FileProcessor {
 
 				} catch (IgnoredFileException ce) {
 					if (LOGGER.isDebugEnabled()) {
-						LOGGER.debug(ce.getMessage());
+						LOGGER.debug("[MONITOR] [step {}] [productName {}] [code {}] {}", step, ce.getProductName(),
+								ce.getCode().getCode(), ce.getLogMessage());
 					}
 				} catch (FileTerminatedException fte) {
-					LOGGER.error(fte.getMessage());
+					LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {}", step, fte.getProductName(),
+							fte.getCode().getCode(), fte.getLogMessage());
 				}
 				// Remove file
+				step ++;
+				LOGGER.info("[MONITOR] [step 3] [productName {}] Starting removing file", productName);
 				if (!file.delete()) {
-					LOGGER.error("[processConfigFile] File {} not removed from local storage", file.getPath());
+					LOGGER.error("[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage",
+							ErrorCode.INGESTOR_CLEAN.getCode(), file.getPath());
 				}
 			} catch (FileRuntimeException fre) {
-				LOGGER.error(fre.getMessage());
+				LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {}", step, fre.getProductName(), fre.getCode().getCode(),
+						fre.getLogMessage());
 			}
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("End processing of EDRS session file {}", file.getPath());
+				LOGGER.info("[MONITOR] [step 0] End processing of EDRS session file {}", file.getPath());
 			}
 		}
 	}
