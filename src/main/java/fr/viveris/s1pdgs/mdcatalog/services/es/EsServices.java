@@ -118,13 +118,13 @@ public class EsServices {
 			sourceBuilder
 					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-							.must(QueryBuilders.termQuery("instrumentConfigurationId.keyword", instrumentConfId)));
+							.must(QueryBuilders.termQuery("satelliteId", satelliteId))
+							.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId)));
 		} else {
 			sourceBuilder
 					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
+							.must(QueryBuilders.termQuery("satelliteId", satelliteId)));
 		}
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
@@ -188,7 +188,7 @@ public class EsServices {
 
 	public L0AcnMetadata getL0Acn(String productType, String datatakeId) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("dataTakeId.keyword", datatakeId)));
+		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("dataTakeId", datatakeId)));
 
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
