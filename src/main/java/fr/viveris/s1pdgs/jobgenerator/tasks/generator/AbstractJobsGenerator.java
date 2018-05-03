@@ -577,32 +577,6 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		
 		try {
 
-			// For each input and output of the job order, prefix by the working directory
-			job.getJobOrder().getProcs().stream()
-					.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
-					.flatMap(proc -> proc.getInputs().stream()).forEach(input -> {
-						input.getFilenames().forEach(filename -> {
-							filename.setFilename(job.getWorkDirectory() + filename.getFilename());
-						});
-						input.getTimeIntervals().forEach(interval -> {
-							interval.setFileName(job.getWorkDirectory() + interval.getFileName());
-						});
-					});
-			job.getJobOrder().getProcs().stream()
-					.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
-					.flatMap(proc -> proc.getOutputs().stream()).forEach(output -> {
-						output.setFileName(job.getWorkDirectory() + output.getFileName());
-					});
-
-			// Apply implementation build job
-			SimpleDateFormat dateFormat = new SimpleDateFormat(JobOrderSensingTime.DATE_FORMAT);
-			job.getJobOrder().getConf()
-					.setSensingTime(new JobOrderSensingTime(dateFormat.format(job.getProduct().getStartTime()),
-							dateFormat.format(job.getProduct().getStopTime())));
-
-			// Custom Job order according implementation
-			this.customJobOrder(job);
-
 			// Add jobOrder inputs to the DTO
 			List<JobOrderInput> distinctInputJobOrder = job.getJobOrder().getProcs().stream()
 					.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
