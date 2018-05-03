@@ -119,14 +119,29 @@ public class Scaler {
 			// Monitor KAFKA
 			step++;
 			KafkaPerGroupPerTopicMonitor monitorKafka = null;
+			int nbPartitions = 0;
+			int counter = 0;
 			if (devProperties.getActivations().get("kafka-monitoring") == true) {
 				LOGGER.info("[MONITOR] [step 2] Starting monitoring KAFKA");
-				monitorKafka = this.kafkaMonitoring.monitorL1Jobs();
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("[MONITOR] [step 2] Monitored information {}", monitorKafka);
+				while (nbPartitions == 0 && counter < 2) {
+					monitorKafka = this.kafkaMonitoring.monitorL1Jobs();
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("[MONITOR] [step 2] Monitored information {}", monitorKafka);
+					}
+					if (monitorKafka.getNbPartitions() == 0) {
+						if (LOGGER.isDebugEnabled()) {
+							LOGGER.debug("[MONITOR] [step 2] Nb partitions null retry");
+						}
+						Thread.sleep(15000);
+					}
+					nbPartitions = monitorKafka.getNbPartitions();
+					counter ++;
 				}
 			} else {
 				LOGGER.info("[MONITOR] [step 2] Starting monitoring KAFKA bypassed");
+			}
+			if (nbPartitions == 0) {
+				throw new InternalErrorException("Cannot retrieve Kafka monitors");
 			}
 
 			// Monitor K8S
