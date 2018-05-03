@@ -35,7 +35,7 @@ public class ReportsConsumer {
 		LOGGER.info("[MONITOR] [Step 0] [Reports] [productName {}] Starting distribution of Report",
 				dto.getProductName());
 		try {
-			File report = new File(this.sharedVolume + "/" + dto.getFamilyName().toLowerCase() + dto.getProductName());
+			File report = new File(this.sharedVolume + "/" + dto.getFamilyName().toLowerCase() + "/" + dto.getProductName());
 			FileUtils.writeFile(report, dto.getContent());
 			LOGGER.info("[MONITOR] [Step 0] [Reports] [productName {}] Report distributed",	dto.getProductName());
 		} catch (IOException e) {
