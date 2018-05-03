@@ -60,7 +60,7 @@ public class EsServices {
 	 */
 	public boolean isMetadataExist(JSONObject product) throws Exception {
 		try {
-			String productType = product.getString("productType").toLowerCase();
+			String productType = product.get("productType").toString().toLowerCase();
 			String productName = product.getString("productName");
 
 			GetRequest getRequest = new GetRequest(productType, indexType, productName);
