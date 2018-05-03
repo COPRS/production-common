@@ -349,6 +349,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 								this.preSearch(v);
 								status.updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
 							} catch (InputsMissingException e) {
+								status.updateStatus(GenerationStatusEnum.NOT_READY);
 								LOGGER.warn("{} [productName {}] 1 - Pre-requirements not checked: {}",
 										this.prefixLogMonitor, v.getProduct().getIdentifier(), e.getLogMessage());
 							}
@@ -362,6 +363,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 								this.inputsSearch(v);
 								status.updateStatus(GenerationStatusEnum.READY);
 							} catch (InputsMissingException e) {
+								status.updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
 								LOGGER.warn("{} [productName {}] 2 - Inputs not found: {}", this.prefixLogMonitor,
 										v.getProduct().getIdentifier(), e.getLogMessage());
 							}
@@ -375,7 +377,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 								this.send(v);
 								this.cachedJobs.remove(k);
 							} catch (AbstractCodedException e) {
-								status.updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
+								status.updateStatus(GenerationStatusEnum.READY);
 								LOGGER.warn("{} [productName {}] 3 - Job not send: {}", this.prefixLogMonitor,
 										v.getProduct().getIdentifier(), e.getLogMessage());
 							}
