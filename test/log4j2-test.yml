@@ -1,0 +1,87 @@
+Configuration:
+  status: warn
+  name: YAMLConfigTest
+  thresholdFilter:
+    level: debug
+  appenders:
+    Console:
+      name: STDOUT
+      PatternLayout:
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-scaler:1.0.0 %-5level: %msg [%thread] %n"
+    RollingFile:
+      name: FILE
+      fileName: ${env:scaler_logging_file:-./s1pdgs-scaler.log}
+      filePattern: "${env:scaler_logging_file:-./s1pdgs-scaler.log}.%d{yyyy-MM-dd-hh-mm}.gz"
+      PatternLayout:
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-scaler:1.0.0 %-5level: %msg [%thread] %n"
+      Policies:
+        SizeBasedTriggeringPolicy:
+          size: 10 MB
+      DefaultRollOverStrategy:
+        max: 30
+    RollingRandomAccessFile:
+      name: RANDOM_ACCESS_FILE
+      fileName: ${env:scaler_logging_file:-./s1pdgs-scaler.log}
+      filePattern: "${env:scaler_logging_file:-./s1pdgs-scaler.log}.%d{yyyy-MM-dd-hh-mm}.gz"
+      PatternLayout:
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-scaler:1.0.0 %-5level: %msg [%thread] %n"
+      Policies:
+        SizeBasedTriggeringPolicy:
+          size: 10 MB
+      DefaultRollOverStrategy:
+        max: 30
+    Kafka:
+      name: KAFKA_ERROR
+      topic: t-pdgs-errors
+      PatternLayout:
+        Pattern: "[date %d{yyyy-MM-dd HH:mm:ss.SSS}] [podName ${env:HOSTNAME}] [app s1pdgs-scaler:1.0.0] [thread %thread] [level %-5level] [message %msg] %n"
+      Property:
+        name: bootstrap.servers
+        value: 172.17.50.7:9092
+      Filters:
+        ThresholdFilter:
+          level: error
+  Loggers:
+    AsyncLogger:
+      - name: fr.viveris.s1pdgs
+        level: ${env:scaler_logging_level_frviveriss1pdgs:-info}
+        additivity: false
+        includeLocation: true
+        AppenderRef:
+          - ref: STDOUT
+          - ref: RANDOM_ACCESS_FILE
+          - ref: KAFKA_ERROR
+      - name: org.springframework
+        level: ${env:scaler_logging_level_orgspringframework:-error}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: RANDOM_ACCESS_FILE
+      - name: kafka
+        level: ${env:scaler_logging_level_kafka:-warn}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: RANDOM_ACCESS_FILE
+      - name: org.apache
+        level: ${env:scaler_logging_level_orgapache:-warn}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: RANDOM_ACCESS_FILE
+      - name: io.fabric8
+        level: ${env:scaler_logging_level_k8s:-warn}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: RANDOM_ACCESS_FILE
+      - name: org.pacesys
+        level: ${env:scaler_logging_level_openstack:-warn}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: RANDOM_ACCESS_FILE
+    Root:
+      level: ${env:scaler_logging_level_root:-error}
+      AppenderRef:
+        ref: STDOUT

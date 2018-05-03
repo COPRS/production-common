@@ -11,20 +11,24 @@ import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
 import org.openstack4j.model.network.NetFloatingIP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import fr.viveris.s1pdgs.scaler.openstack.model.ServerDesc;
-import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsServerException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityInternaloErrorException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsFloatingIpNotActiveException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsServerNotActiveException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsServerNotDeletedException;
 
 @Service
 public class ServerService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ServerService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ServerService.class);
 	private final int serverMaxWaitMs;
 	private final int fipMaxLoop;
 	private final int fipTempoLoopMs;
@@ -38,7 +42,7 @@ public class ServerService {
 		this.serverMaxWaitMs = serverMaxWaitMs;
 	}
 
-	public String createAndBootServer(OSClientV3 osClient, ServerDesc desc) throws OsServerException {
+	public String createAndBootServer(OSClientV3 osClient, ServerDesc desc) throws OsServerNotActiveException {
 
 		ServerCreateBuilder builder = Builders.server().name(desc.getName()).flavor(desc.getFlavor())
 				.keypairName(desc.getKeySecurity()).networks(desc.getNetworks())
@@ -59,13 +63,14 @@ public class ServerService {
 		ServerCreate serverCreate = builder.build();
 		Server server = osClient.compute().servers().bootAndWaitActive(serverCreate, serverMaxWaitMs);
 		if (server.getStatus() != Server.Status.ACTIVE) {
-			throw new OsServerException(String.format("Server not created after %d ms", serverMaxWaitMs));
+			throw new OsServerNotActiveException(server.getId(),
+					String.format("Server not created after %d ms", serverMaxWaitMs));
 		}
 		return server.getId();
 	}
 
 	public void createFloatingIp(OSClientV3 osClient, String serverId, String floatingNetworkId)
-			throws OsServerException {
+			throws OsEntityException {
 		List<? extends InterfaceAttachment> nicID = osClient.compute().servers().interfaces().list(serverId);
 		String portid = nicID.get(0).getPortId();
 		NetFloatingIP fip = osClient.networking().floatingip()
@@ -83,13 +88,13 @@ public class ServerService {
 			try {
 				Thread.sleep(fipTempoLoopMs);
 			} catch (InterruptedException e) {
-				throw new OsServerException(String.format("[serverId %s] Cannot create floating IP for network %s: %s",
-						serverId, floatingNetworkId, e.getMessage()));
+				throw new OsEntityInternaloErrorException("serverId", serverId, String
+						.format("Cannot create floating IP for network %s: %s", floatingNetworkId, e.getMessage()), e);
 			}
 		}
 		if (!createFlat) {
-			throw new OsServerException(String.format("[serverId %s] Floating IP not active after for %d ms", serverId,
-					fipMaxLoop * fipTempoLoopMs));
+			throw new OsFloatingIpNotActiveException(serverId,
+					String.format("Floating IP not active after for %d ms", fipMaxLoop * fipTempoLoopMs));
 		}
 	}
 
@@ -97,13 +102,13 @@ public class ServerService {
 		osClient.networking().floatingip().delete(floatingIpId);
 	}
 
-	public void delete(OSClientV3 osClient, String serverId) {
+	public void delete(OSClientV3 osClient, String serverId) throws OsEntityException {
 		ActionResponse deleteRespone = osClient.compute().servers().delete(serverId);
-		if(deleteRespone.isSuccess()) {
+		if (deleteRespone.isSuccess()) {
 			LOGGER.debug("[serverId {}] Server is deleted", serverId);
 		}
 		boolean deleteServerStatus = false;
-		for(int i = 0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			if (osClient.compute().servers().get(serverId) == null) {
 				deleteServerStatus = true;
 				LOGGER.debug("[serverId {}] Server is deleted", serverId);
@@ -112,15 +117,16 @@ public class ServerService {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				LOGGER.error("[serverId {}] Fail to sleep : {}", serverId, e.getMessage());
+				throw new OsEntityInternaloErrorException("serverId", serverId,
+						String.format("Fail to sleep: %s", e.getMessage()), e);
 			}
-		} 
-		if (!deleteServerStatus) {
-			LOGGER.error("[serverId {}] Fail to delete server", serverId);
 		}
-		
+		if (!deleteServerStatus) {
+			throw new OsServerNotDeletedException(serverId, "Fail to delete server");
+		}
+
 	}
-	
+
 	public Server get(OSClientV3 osClient, String serverId) {
 		return osClient.compute().servers().get(serverId);
 	}

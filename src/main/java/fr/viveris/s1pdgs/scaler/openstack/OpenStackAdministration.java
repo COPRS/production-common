@@ -2,22 +2,21 @@ package fr.viveris.s1pdgs.scaler.openstack;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.compute.InterfaceAttachment;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.network.NetFloatingIP;
 import org.openstack4j.openstack.OSFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.scaler.openstack.model.ServerDesc;
 import fr.viveris.s1pdgs.scaler.openstack.model.ServerDesc.ServerDescBuilder;
 import fr.viveris.s1pdgs.scaler.openstack.model.VolumeDesc;
-import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsServerException;
-import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsVolumeException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityException;
 import fr.viveris.s1pdgs.scaler.openstack.services.ServerService;
 import fr.viveris.s1pdgs.scaler.openstack.services.VolumeService;
 
@@ -27,7 +26,7 @@ public class OpenStackAdministration {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackAdministration.class);
+	private static final Logger LOGGER = LogManager.getLogger(OpenStackAdministration.class);
 
 	private final OpenStackServerProperties osProperties;
 
@@ -51,7 +50,7 @@ public class OpenStackAdministration {
 		this.volumeService = volumeService;
 	}
 
-	public void deleteServer(String serverId) {
+	public void deleteServer(String serverId) throws OsEntityException {
 		OSClientV3 osClient = this.osClient();
 		Server s = this.serverService.get(osClient, serverId);
 		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
@@ -69,7 +68,7 @@ public class OpenStackAdministration {
 		}
 	}
 
-	public String createServerForL1Wrappers(String logPrefix) throws OsVolumeException, OsServerException {
+	public String createServerForL1Wrappers(String logPrefix) throws OsEntityException {
 		OSClientV3 osClient = this.osClient();
 		long currentTimestamp = System.currentTimeMillis();
 		OpenStackServerProperties.VolumeProperties volumeProperties = this.osProperties.getVolumeWrapper();
@@ -100,7 +99,6 @@ public class OpenStackAdministration {
 		String serverId = this.serverService.createAndBootServer(osClient, builderS.build());
 
 		// Create floating IP
-		// TODO boolean in conf
 		if (serverProperties.isFloatingActivation()) {
 			LOGGER.info("{} [serverName {}] [serverId {}] Starting creating floating ip", logPrefix, serverName,
 					serverId);

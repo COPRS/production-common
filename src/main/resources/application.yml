@@ -1,18 +1,10 @@
 spring:
   application:
-    name: ${scaler_spring_appname}
+    name: ${scaler_spring_appname:s2pdgs-scaler}
     
 # Logging
 logging:
-  config: ${scaler_logging_config:logback-spring.xml}
-  level:
-    ROOT: ${scaler_logging_level_root:ERROR}
-    org.springframework: ${scaler_logging_level_orgspringframework:ERROR}
-    fr.viveris.s1pdgs: ${scaler_logging_level_frviveriss1pdgs:DEBUG}
-    kafka: ${scaler_logging_level_kafka:WARN}
-    org.apache: ${scaler_logging_level_apache:WARN}
-    io.fabric8.kubernetes: ${scaler_logging_level_fabric8:INFO}
-  file: ${scaler_logging_file:./s1pdgs-scaler.log}
+  config: ${scaler_logging_config:log4j2.yml}
   
 # Kafka
 kafka:

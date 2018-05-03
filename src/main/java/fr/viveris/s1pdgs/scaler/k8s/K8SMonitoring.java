@@ -17,7 +17,7 @@ import fr.viveris.s1pdgs.scaler.k8s.model.PodStatus;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperDesc;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperNodeMonitor;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperPodMonitor;
-import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.WrapperException;
+import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.WrapperStatusException;
 import fr.viveris.s1pdgs.scaler.k8s.services.NodeService;
 import fr.viveris.s1pdgs.scaler.k8s.services.PodService;
 import fr.viveris.s1pdgs.scaler.k8s.services.WrapperService;
@@ -85,7 +85,7 @@ public class K8SMonitoring {
 				.collect(Collectors.toList());
 	}
 
-	public List<WrapperNodeMonitor> monitorL1Wrappers() throws WrapperException {
+	public List<WrapperNodeMonitor> monitorL1Wrappers() throws WrapperStatusException {
 		List<WrapperNodeMonitor> monitors = new ArrayList<>();
 
 		// Retrieve nodes dedicated to L1

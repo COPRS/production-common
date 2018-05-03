@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.scaler.openstack.model.VolumeDesc;
-import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsVolumeException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityInternaloErrorException;
+import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsVolumeNotAvailableException;
 
 @Service
 public class VolumeService {
@@ -17,14 +19,13 @@ public class VolumeService {
 	private final int volumeTempoLoopMs;
 
 	@Autowired
-	public VolumeService(
-			@Value("${openstack.service.volume.creation.max-loop}") final int volumeMaxLoop, 
+	public VolumeService(@Value("${openstack.service.volume.creation.max-loop}") final int volumeMaxLoop,
 			@Value("${openstack.service.volume.creation.tempo-loop-ms}") final int volumeTempoLoopMs) {
 		this.volumeMaxLoop = volumeMaxLoop;
 		this.volumeTempoLoopMs = volumeTempoLoopMs;
 	}
 
-	public String createVolumeAndBoot(OSClientV3 osClient, VolumeDesc desc) throws OsVolumeException {
+	public String createVolumeAndBoot(OSClientV3 osClient, VolumeDesc desc) throws OsEntityException {
 
 		// Create volume
 		Volume v = osClient.blockStorage().volumes()
@@ -43,18 +44,18 @@ public class VolumeService {
 			try {
 				Thread.sleep(volumeTempoLoopMs);
 			} catch (InterruptedException e) {
-				throw new OsVolumeException(
-						String.format("Creation of volume %s failed: %s", desc.getName(), e.getMessage()));
+				throw new OsEntityInternaloErrorException("volumeName", desc.getName(),
+						String.format("reation of volume failed: %s", e.getMessage()), e);
 			}
 			createVolumeCount++;
 		}
 		if (!createVolumeFlag) {
-			throw new OsVolumeException(String.format("Creation of volume %s not available after %d ms",
-					desc.getName(), volumeMaxLoop * volumeTempoLoopMs));
+			throw new OsVolumeNotAvailableException(desc.getName(),
+					String.format("Creation of volume not available after %d ms", volumeMaxLoop * volumeTempoLoopMs));
 		}
 		return v.getId();
 	}
-	
+
 	public void deleteVolume(OSClientV3 osClient, String volumeId) {
 		osClient.blockStorage().volumes().delete(volumeId);
 	}
