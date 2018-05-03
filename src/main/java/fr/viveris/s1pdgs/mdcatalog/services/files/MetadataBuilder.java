@@ -18,19 +18,20 @@ import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
  *
  */
 public class MetadataBuilder {
-	
+
 	/**
 	 * Metadata extractor
 	 */
 	private ExtractMetadata extractor;
-		
+
 	/**
 	 * Default constructor
 	 */
 	public MetadataBuilder(MetadataExtractorConfig extractorConfig) {
-		this(new ExtractMetadata(extractorConfig.getTypeOverlap(), extractorConfig.getTypeSliceLength()));
+		this(new ExtractMetadata(extractorConfig.getTypeOverlap(), extractorConfig.getTypeSliceLength(),
+				extractorConfig.getXsltDirectory()));
 	}
-	
+
 	/**
 	 * Constructor with an existing metadata extractor
 	 * 
@@ -98,7 +99,7 @@ public class MetadataBuilder {
 		}
 		return metadataToIndex;
 	}
-	
+
 	/**
 	 * Build metadata for L0 Slice
 	 * 
@@ -115,7 +116,7 @@ public class MetadataBuilder {
 		metadataToIndex = extractor.processL0SliceProd(descriptor, file);
 		return metadataToIndex;
 	}
-	
+
 	/**
 	 * Build metadata for L0 ACN
 	 * 
@@ -132,7 +133,7 @@ public class MetadataBuilder {
 		metadataToIndex = extractor.processL0AcnProd(descriptor, file);
 		return metadataToIndex;
 	}
-	
+
 	/**
 	 * Build metadata for L0 Slice
 	 * 
@@ -143,13 +144,13 @@ public class MetadataBuilder {
 	 * 
 	 * @throws MetadataExtractionException
 	 */
-	public JSONObject buildL1SliceOutputFileMetadata(L1OutputFileDescriptor descriptor, File file) 
+	public JSONObject buildL1SliceOutputFileMetadata(L1OutputFileDescriptor descriptor, File file)
 			throws MetadataExtractionException {
 		JSONObject metadataToIndex = new JSONObject();
 		metadataToIndex = extractor.processL1SliceProd(descriptor, file);
 		return metadataToIndex;
 	}
-	
+
 	/**
 	 * Build metadata for L0 Annotations
 	 * 

@@ -70,4 +70,5 @@ file:
 mdextractor:
   typeoverlapstr: "EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"
   typeslicelengthstr: "EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"
+  xslt-directory: ${catalog_xslt-directory:config/xsltDir/} # Must contains the last /
       

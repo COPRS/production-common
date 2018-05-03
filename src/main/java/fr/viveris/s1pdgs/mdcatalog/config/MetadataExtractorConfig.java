@@ -31,6 +31,8 @@ public class MetadataExtractorConfig {
 	 */
 	private Map<String, Float> typeSliceLength;
 	
+	private String xsltDirectory;
+	
 	public MetadataExtractorConfig() {
 		this.typeOverlap = new HashMap<>();
 		this.typeSliceLength = new HashMap<>();
@@ -131,4 +133,19 @@ public class MetadataExtractorConfig {
 	public void setTypeslicelengthstr(String typeslicelengthstr) {
 		this.typeslicelengthstr = typeslicelengthstr;
 	}
+
+	/**
+	 * @return the xsltDirectory
+	 */
+	public String getXsltDirectory() {
+		return xsltDirectory;
+	}
+
+	/**
+	 * @param xsltDirectory the xsltDirectory to set
+	 */
+	public void setXsltDirectory(String xsltDirectory) {
+		this.xsltDirectory = xsltDirectory;
+	}
+	
 }

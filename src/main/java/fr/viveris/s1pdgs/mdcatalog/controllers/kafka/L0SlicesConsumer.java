@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -29,7 +29,7 @@ public class L0SlicesConsumer {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(L0SlicesConsumer.class);
+	private static final Logger LOGGER = LogManager.getLogger(L0SlicesConsumer.class);
 
 	/**
 	 * Pattern for L0 output files

@@ -75,4 +75,5 @@ server:
 mdextractor:
   typeoverlapstr: ${products_overlap-per-acq}
   typeslicelengthstr: ${products_slice-length-per-acq}
+  xslt-directory: ${catalog_xslt-directory:xsltDir/} # Must contains the last /
   

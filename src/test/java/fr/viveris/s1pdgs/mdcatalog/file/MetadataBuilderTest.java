@@ -12,8 +12,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
@@ -28,7 +28,7 @@ public class MetadataBuilderTest {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(MetadataBuilderTest.class);
+	private static final Logger LOGGER = LogManager.getLogger(MetadataBuilderTest.class);
 
 	@Mock
 	private ExtractMetadata extractor;
