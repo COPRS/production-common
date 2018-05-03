@@ -1,5 +1,6 @@
 package fr.viveris.s1pdgs.jobgenerator.exception;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.CollectionUtils;
@@ -27,7 +28,12 @@ public class InputsMissingException extends AbstractCodedException {
 	 */
 	public InputsMissingException(Map<String, String> missingData) {
 		super(ErrorCode.MISSING_INPUT, "Missing inputs");
-		this.missingMetadata = missingData;
+		this.missingMetadata = new HashMap<>();
+		if (!CollectionUtils.isEmpty(missingData)) {
+			missingData.forEach((k,v) -> {
+				this.missingMetadata.put(k, v);
+			});
+		}
 	}
 
 	@Override
