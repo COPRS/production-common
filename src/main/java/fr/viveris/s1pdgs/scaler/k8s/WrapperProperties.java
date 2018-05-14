@@ -28,6 +28,7 @@ public class WrapperProperties {
 	private int nbMinServers;
 	private int nbMaxServers;
 	private int nbPodsPerServer;
+	private String podTemplateFile;
 
 	// -------------------------
 	// Pods configuration
@@ -161,6 +162,20 @@ public class WrapperProperties {
 	 */
 	public void setNbPodsPerServer(int nbPodsPerServer) {
 		this.nbPodsPerServer = nbPodsPerServer;
+	}
+
+	/**
+	 * @return the podTemplateFile
+	 */
+	public String getPodTemplateFile() {
+		return podTemplateFile;
+	}
+
+	/**
+	 * @param podTemplateFile the podTemplateFile to set
+	 */
+	public void setPodTemplateFile(String podTemplateFile) {
+		this.podTemplateFile = podTemplateFile;
 	}
 
 	/**

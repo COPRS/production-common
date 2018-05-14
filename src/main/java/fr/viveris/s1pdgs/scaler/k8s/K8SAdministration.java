@@ -49,7 +49,7 @@ public class K8SAdministration {
 	public void launchWrapperPodsPool(int nbPods)
 			throws PodResourceException, K8sUnknownResourceException {
 		for (int i = 0; i < nbPods; i++) {
-			this.podService.createPod();
+			this.podService.createPodFromTemplate(wrapperProperties.getPodTemplateFile());
 		}
 	}
 
@@ -70,7 +70,7 @@ public class K8SAdministration {
 			for (PodDesc pod : pods) {
 				String podName = pod.getName();
 				String suffixe = podName.substring(podName.lastIndexOf('-'));
-				Boolean ret = this.podService.deletePod(suffixe);
+				Boolean ret = this.podService.deletePodFromTemplate(wrapperProperties.getPodTemplateFile(), suffixe);
 				if (ret != null && ret) {
 					deletedPodsName.add(pod.getName());
 				} else {

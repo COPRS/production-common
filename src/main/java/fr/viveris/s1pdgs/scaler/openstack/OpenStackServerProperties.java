@@ -137,7 +137,6 @@ public class OpenStackServerProperties {
 	public static class VolumeProperties {
 		private String prefixName;
 		private String description;
-		private String imageRef;
 		private String volumeType;
 		private String zone;
 		private int size;
@@ -174,21 +173,6 @@ public class OpenStackServerProperties {
 		 */
 		public void setDescription(String description) {
 			this.description = description;
-		}
-
-		/**
-		 * @return the imageRef
-		 */
-		public String getImageRef() {
-			return imageRef;
-		}
-
-		/**
-		 * @param imageRef
-		 *            the imageRef to set
-		 */
-		public void setImageRef(String imageRef) {
-			this.imageRef = imageRef;
 		}
 
 		/**
@@ -249,6 +233,7 @@ public class OpenStackServerProperties {
 		private boolean floatingActivation;
 		private String floatingNetwork;
 		private boolean bootableOnVolume;
+		private String imageRef;
 
 		public ServerProperties() {
 
@@ -267,6 +252,21 @@ public class OpenStackServerProperties {
 		 */
 		public void setPrefixName(String prefixName) {
 			this.prefixName = prefixName;
+		}
+
+		/**
+		 * @return the imageRef
+		 */
+		public String getImageRef() {
+			return imageRef;
+		}
+
+		/**
+		 * @param imageRef
+		 *            the imageRef to set
+		 */
+		public void setImageRef(String imageRef) {
+			this.imageRef = imageRef;
 		}
 
 		/**

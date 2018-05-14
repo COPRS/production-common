@@ -57,6 +57,9 @@ public class ServerService {
 			BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping()
 					.uuid(desc.getBootVolume()).deviceName(desc.getBootDeviceName()).bootIndex(0);
 			builder = builder.blockDevice(blockDeviceMappingBuilder.build());
+		} else {
+			// Add image ref for server
+			builder.image(desc.getImageRef());
 		}
 
 		// Create server
