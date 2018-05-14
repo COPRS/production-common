@@ -77,11 +77,11 @@ public class OpenStackAdministration {
 		String volumeName = volumeProperties.getPrefixName() + currentTimestamp + "-volume";
 
 		// Create volume
-		LOGGER.info("{} [serverName {}] Starting creating volume {}", logPrefix, serverName, volumeName);
 		String volumeId = "";
 		if (serverProperties.isBootableOnVolume()) {
+			LOGGER.info("{} [serverName {}] Starting creating volume {}", logPrefix, serverName, volumeName);
 			VolumeDesc v = VolumeDesc.builder().name(volumeName).bootable(true)
-					.description(volumeProperties.getDescription()).imageRef(volumeProperties.getImageRef())
+					.description(volumeProperties.getDescription()).imageRef(serverProperties.getImageRef())
 					.size(volumeProperties.getSize()).volumeType(volumeProperties.getVolumeType())
 					.zone(volumeProperties.getZone()).build();
 			volumeId = this.volumeService.createVolumeAndBoot(osClient, v);
@@ -95,6 +95,8 @@ public class OpenStackAdministration {
 				.networks(serverProperties.getNetworks());
 		if (serverProperties.isBootableOnVolume()) {
 			builderS.bootOnVolumeInformation(volumeId, serverProperties.getBootDeviceName());
+		} else {
+			builderS.imageRef(serverProperties.getImageRef());
 		}
 		String serverId = this.serverService.createAndBootServer(osClient, builderS.build());
 

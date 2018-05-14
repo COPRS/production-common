@@ -7,6 +7,7 @@ public class ServerDesc {
 
 	private String id;
 	private String name;
+	private String imageRef;
 	private String flavor;
 	private String keySecurity;
 	private List<String> securityGroups;
@@ -49,6 +50,20 @@ public class ServerDesc {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the imageRef
+	 */
+	public String getImageRef() {
+		return imageRef;
+	}
+
+	/**
+	 * @param imageRef the imageRef to set
+	 */
+	public void setImageRef(String imageRef) {
+		this.imageRef = imageRef;
 	}
 
 	/**
@@ -205,6 +220,11 @@ public class ServerDesc {
 
 		public ServerDescBuilder availableZone(String availableZone) {
 			this.m.availableZone = availableZone;
+			return this;
+		}
+
+		public ServerDescBuilder imageRef(String imageRef) {
+			this.m.imageRef = imageRef;
 			return this;
 		}
 		

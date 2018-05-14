@@ -64,6 +64,7 @@ openstack:
     server-wrapper: 
       available-zone: ${scaler_os_server-wrapper_available-zone:eu-west-0b}
       prefix-name: ${scaler_os_server-wrapper_prefix-name:k8s-node-w-l1}
+      image-ref: ${scaler_os_server-wrapper_image-ref:79a60603-11be-4183-83ab-21197977253e}
       boot-device-name: ${scaler_os_server-wrapper_boot-device-name:/dev/vda}
       flavor: ${scaler_os_server-wrapper_flavor:h1.2xlarge.4}
       floating-activation: ${scaler_os_server-wrapper_floating-activation:true}
@@ -75,7 +76,6 @@ openstack:
     volume-wrapper:
       prefix-name: ${scaler_os_volume-wrapper_prefix-name:k8s-volume-l1}
       description: ${scaler_os_volume-wrapper_description:"Bootable volume for node for wrapper L1"}
-      image-ref: ${scaler_os_volume-wrapper_image-ref:79a60603-11be-4183-83ab-21197977253e}
       size: ${scaler_os_volume-wrapper_size:40}
       volume-type: ${scaler_os_volume-wrapper_volume-type:SSD}
       zone: ${scaler_os_volume-wrapper_zone:eu-west-0b}
