@@ -101,12 +101,12 @@ public class PodService {
 		return resources;
 	}
 
-	public void createPod() throws PodResourceException, K8sUnknownResourceException {
+	public void createPodFromTemplate(String templateFile) throws PodResourceException, K8sUnknownResourceException {
 		String namespace = "default";
 
 		// Load resources and update names
 		String suffixe = "-" + System.currentTimeMillis();
-		List<HasMetadata> resources = this.loadRessourcesFromFile("config/template_l1_wrapper_pod.yml", suffixe);
+		List<HasMetadata> resources = this.loadRessourcesFromFile(templateFile, suffixe);
 
 		// create resources
 		for (HasMetadata resource : resources) {
@@ -131,14 +131,14 @@ public class PodService {
 		}
 	}
 
-	public Boolean deletePod(String suffixe)
+	public Boolean deletePodFromTemplate(String templateFile, String suffixe)
 			throws PodResourceException, K8sUnknownResourceException {
 		String namespace = "default";
 		Boolean resultVolume = false;
 		Boolean resultPod = false;
 
 		// Load resources and update names
-		List<HasMetadata> resources = this.loadRessourcesFromFile("config/template_l1_wrapper_pod.yml", suffixe);
+		List<HasMetadata> resources = this.loadRessourcesFromFile(templateFile, suffixe);
 
 		// create resources
 		for (HasMetadata resource : resources) {

@@ -12,6 +12,5 @@ WORKDIR /app
 RUN mkdir /app/config
 COPY --from=build /app/target/s1pdgs-scaler-1.0.0.jar /app/s1pdgs-scaler.jar
 COPY /config/log/log4j2.yml /app/log4j2.yml
-COPY /config/template_l1_wrapper_pod.yml /app/config/template_l1_wrapper_pod.yml
 COPY /src/main/resources/application.yml application.yml
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app/s1pdgs-scaler.jar", "--spring.config.location=classpath:/application.yml"]

@@ -40,6 +40,7 @@ wrapper:
     value: ${scaler_wrapper_app-value:l1-wrapper}
   nb-pooling-pods: ${scaler_wrapper_nb-pooling-pods:3}
   nb-pods-per-server: ${scaler_wrapper_nb-pods-per-server:1}
+  pod-template-file: ${scaler_wrapper_pod-template-file:/data/config/template_l1_wrapper_pod.yml}
   nb-min-servers: ${scaler_wrapper_nb-min-servers:3}
   nb-max-servers: ${scaler_wrapper_nb-max-servers:30}
   execution-time:
