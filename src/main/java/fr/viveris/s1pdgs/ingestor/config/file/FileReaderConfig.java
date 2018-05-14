@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.ingestor.config.file;
 
 import java.io.File;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class FileReaderConfig {
 	 * Local directory for reading the ERDS session files
 	 */
 	private final String sessionDir;
-	
+
 	/**
 	 * Maximal number of session file name cached
 	 */
@@ -47,7 +48,7 @@ public class FileReaderConfig {
 	 * Local directory for reading the configuration files
 	 */
 	private final String configDir;
-	
+
 	/**
 	 * Maximal number of configuration file name cached
 	 */
@@ -56,10 +57,11 @@ public class FileReaderConfig {
 	/**
 	 * Pattern to exclusion temporary file (.writing here)
 	 */
-	private final static String PATTERN_EXCLUSION = "^\\..*"; //"^.*\\.writing$";
+	private final static String PATTERN_EXCLUSION = "^\\..*"; // "^.*\\.writing$";
 
 	/**
 	 * Constructor
+	 * 
 	 * @param sessionDir
 	 * @param configDir
 	 */
@@ -115,7 +117,8 @@ public class FileReaderConfig {
 	 */
 	@Bean
 	public IntegrationFlow processSessionFlow() {
-		return IntegrationFlows.from("sessionFileChannel").handle("fileProcessor", "processSessionFile").get();
+		return IntegrationFlows.from("sessionFileChannel").channel(c -> c.executor(Executors.newCachedThreadPool()))
+				.handle("fileProcessor", "processSessionFile").get();
 	}
 
 	/**
@@ -141,7 +144,7 @@ public class FileReaderConfig {
 		filter.addFilter(
 				new ExclusionRegexpPatternFileListFilter(Pattern.compile(PATTERN_EXCLUSION, Pattern.CASE_INSENSITIVE)));
 		filter.addFilter(new AcceptOnceFileListFilter<>(this.configCacheMaxCapacity));
-		
+
 		RecursiveDirectoryScanner scanner = new RecursiveDirectoryScanner();
 		scanner.setFilter(filter);
 
@@ -160,7 +163,7 @@ public class FileReaderConfig {
 	 */
 	@Bean
 	public IntegrationFlow processConfigFlow() {
-		return IntegrationFlows.from("configFileChannel").handle("fileProcessor", "processConfigFile").get();
+		return IntegrationFlows.from("configFileChannel").channel(c -> c.executor(Executors.newCachedThreadPool())).handle("fileProcessor", "processConfigFile").get();
 	}
 
 }
