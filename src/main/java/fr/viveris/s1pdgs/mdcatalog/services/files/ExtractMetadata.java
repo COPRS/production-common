@@ -294,7 +294,7 @@ public class ExtractMetadata {
 			JSONObject metadataJSONObject = new JSONObject();
 			metadataJSONObject.put("site", jsonFromXmlTmp.getJSONObject("site").getString("site"));
 			metadataJSONObject.put("instrumentConfigurationId",
-					jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").getString("content"));
+					jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").get("content"));
 			metadataJSONObject.put("creationTime", jsonFromXmlTmp.getJSONObject("creationTime").getString("content"));
 			metadataJSONObject.put("validityStartTime",
 					jsonFromXmlTmp.getJSONObject("validityStartTime").getString("content"));
