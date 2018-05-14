@@ -13,6 +13,7 @@ COPY config/ /app/config/
 RUN	mvn -B package
 
 FROM registry.geohub.space/wo7/${PROCESS_IMAGE}:${PROCESS_VERSION}
+ENV PROCESS_COMMAND=${PROCESS_COMMAND}
 RUN yum install -y java-1.8.0-openjdk && yum clean all
 WORKDIR /app
 COPY --from=build /app/target/s1pdgs-wrapper-1.0.0.jar s1pdgs-wrapper.jar
