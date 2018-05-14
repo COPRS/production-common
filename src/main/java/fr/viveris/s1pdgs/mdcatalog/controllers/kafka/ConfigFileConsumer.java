@@ -142,7 +142,7 @@ public class ConfigFileConsumer {
 				}
 			} else {
 				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(),
-						"No such L0 ACNs in object storage");
+						"No such Auxiliary files in object storage");
 			}
 		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {
 			LOGGER.error("[MONITOR] [productName {}] {}", dto.getProductName(), e1.getMessage());
