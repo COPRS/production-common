@@ -1,5 +1,6 @@
 ARG PROCESS_IMAGE=docker_l0
 ARG PROCESS_VERSION=dev
+ARG PROCESS_COMMAND=/var/tmp/conf.sh
 
 FROM maven:3.5.2-jdk-8-alpine as build
 WORKDIR /app
@@ -19,4 +20,4 @@ COPY /config/log/log4j2.yml log4j2.yml
 COPY /src/main/resources/application.yml application.yml
 #CMD /var/tmp/configure_pdgs_custom.sh pac1 8 ; ulimit -s unlimited ;
 #ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app/s1pdgs-wrapper.jar","--spring.config.location=classpath:/application.yml"]
-ENTRYPOINT ulimit -s unlimited; /var/tmp/configure_pdgs_custom.sh pac1 8; java -Djava.security.egd=file:/dev/./urandom -jar /app/s1pdgs-wrapper.jar --spring.config.location=classpath:/application.yml
+ENTRYPOINT ulimit -s unlimited; ${PROCESS_COMMAND}; java -Djava.security.egd=file:/dev/./urandom -jar /app/s1pdgs-wrapper.jar --spring.config.location=classpath:/application.yml
