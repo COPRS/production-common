@@ -12,8 +12,10 @@ build:
   tags:
   - docker
   script:
-  - docker build --build-arg PROCESS_IMAGE=docker_l0 --build-arg PROCESS_VERSION=dev -t $CI_PROJECT_NAME/l0:$CI_COMMIT_REF_NAME .
-  - docker build --build-arg PROCESS_IMAGE=docker_l1 --build-arg PROCESS_VERSION=dev -t $CI_PROJECT_NAME/l1:$CI_COMMIT_REF_NAME .
+  - cp Dockerfile_L0 Dockerfile
+  - docker build -t $CI_PROJECT_NAME/l0:$CI_COMMIT_REF_NAME .
+  - cp Dockerfile_L1 Dockerfile
+  - docker build -t $CI_PROJECT_NAME/l1:$CI_COMMIT_REF_NAME .
 
 push_dev:
   stage: push_dev
