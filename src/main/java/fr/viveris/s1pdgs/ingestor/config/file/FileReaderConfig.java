@@ -7,18 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.annotation.InboundChannelAdapter;
-import org.springframework.integration.annotation.Poller;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.core.MessageSource;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.Pollers;
 import org.springframework.integration.file.FileReadingMessageSource;
 import org.springframework.integration.file.RecursiveDirectoryScanner;
 import org.springframework.integration.file.filters.AcceptOnceFileListFilter;
 import org.springframework.integration.file.filters.ChainFileListFilter;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import fr.viveris.s1pdgs.ingestor.model.filter.ExclusionRegexpPatternFileListFilter;
 
@@ -37,41 +38,52 @@ public class FileReaderConfig {
 	 * Local directory for reading the ERDS session files
 	 */
 	private final String sessionDir;
-	
-	/**
-	 * Maximal number of session file name cached
-	 */
 	private final int sessionCacheMaxCapacity;
+	private final int sessionExecutorPoolSize;
+	private final int sessionPeriod;
+	private final int sessionMaxMessagesPerPoll;
 
 	/**
 	 * Local directory for reading the configuration files
 	 */
 	private final String configDir;
-	
-	/**
-	 * Maximal number of configuration file name cached
-	 */
 	private final int configCacheMaxCapacity;
+	private final int configExecutorPoolSize;
+	private final int configPeriod;
+	private final int configMaxMessagesPerPoll;
 
 	/**
 	 * Pattern to exclusion temporary file (.writing here)
 	 */
-	private final static String PATTERN_EXCLUSION = "^\\..*"; //"^.*\\.writing$";
+	private final static String PATTERN_EXCLUSION = "^\\..*"; // "^.*\\.writing$";
 
 	/**
 	 * Constructor
+	 * 
 	 * @param sessionDir
 	 * @param configDir
 	 */
 	@Autowired
 	public FileReaderConfig(@Value("${file.session-files.local-directory}") final String sessionDir,
 			@Value("${file.session-files.cache-max-capacity}") final int sessionCacheMaxCapacity,
+			@Value("${file.session-files.executor-pool-size}") final int sessionExecutorPoolSize,
+			@Value("${file.session-files.poll-fixed-delay}") final int sessionPeriod,
+			@Value("${file.session-files.max-msg-per-poll}") final int sessionMaxMessagesPerPoll,
 			@Value("${file.auxiliary-files.local-directory}") final String configDir,
-			@Value("${file.auxiliary-files.cache-max-capacity}") final int configCacheMaxCapacity) {
+			@Value("${file.auxiliary-files.cache-max-capacity}") final int configCacheMaxCapacity,
+			@Value("${file.auxiliary-files.executor-pool-size}") final int configExecutorPoolSize,
+			@Value("${file.auxiliary-files.poll-fixed-delay}") final int configPeriod,
+			@Value("${file.auxiliary-files.max-msg-per-poll}") final int configMaxMessagesPerPoll) {
 		this.sessionDir = sessionDir;
 		this.sessionCacheMaxCapacity = sessionCacheMaxCapacity;
+		this.sessionExecutorPoolSize = sessionExecutorPoolSize;
 		this.configDir = configDir;
 		this.configCacheMaxCapacity = configCacheMaxCapacity;
+		this.configExecutorPoolSize = configExecutorPoolSize;
+		this.sessionPeriod = sessionPeriod;
+		this.sessionMaxMessagesPerPoll = sessionMaxMessagesPerPoll;
+		this.configPeriod = configPeriod;
+		this.configMaxMessagesPerPoll = configMaxMessagesPerPoll;
 	}
 
 	/**
@@ -79,7 +91,7 @@ public class FileReaderConfig {
 	 * 
 	 * @return the sessionFileChannel
 	 */
-	@Bean
+	@Bean(name = "sessionFileChannel")
 	public MessageChannel sessionFileChannel() {
 		return new DirectChannel();
 	}
@@ -90,8 +102,9 @@ public class FileReaderConfig {
 	 * 
 	 * @return a message per file/directory
 	 */
-	@Bean
-	@InboundChannelAdapter(value = "sessionFileChannel", poller = @Poller(fixedRate = "${file.session-files.read-fixed-rate}"))
+	@Bean(name = "sessionFileReadingMessageSource")
+	// @InboundChannelAdapter(value = "sessionFileChannel", poller =
+	// @Poller(fixedRate = "${file.session-files.read-fixed-rate}"))
 	public MessageSource<File> sessionFileReadingMessageSource() {
 		ChainFileListFilter<File> filter = new ChainFileListFilter<File>();
 		filter.addFilter(
@@ -114,8 +127,20 @@ public class FileReaderConfig {
 	 * @return
 	 */
 	@Bean
-	public IntegrationFlow processSessionFlow() {
-		return IntegrationFlows.from("sessionFileChannel").handle("fileProcessor", "processSessionFile").get();
+	public IntegrationFlow processSessionFlow(TaskExecutor sessionTaskExecutor,
+			MessageSource<File> sessionFileReadingMessageSource) {
+		return IntegrationFlows
+				.from(sessionFileReadingMessageSource,
+						c -> c.poller(Pollers.fixedDelay(this.sessionPeriod).taskExecutor(sessionTaskExecutor)
+								.maxMessagesPerPoll(this.sessionMaxMessagesPerPoll)))
+				.handle("fileProcessor", "processSessionFile").get();
+	}
+
+	@Bean(name = "sessionTaskExecutor")
+	TaskExecutor sessionTaskExecutor() {
+		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+		taskExecutor.setCorePoolSize(this.sessionExecutorPoolSize);
+		return taskExecutor;
 	}
 
 	/**
@@ -123,7 +148,7 @@ public class FileReaderConfig {
 	 * 
 	 * @return the configFileChannel
 	 */
-	@Bean
+	@Bean(name = "configFileChannel")
 	public MessageChannel configFileChannel() {
 		return new DirectChannel();
 	}
@@ -134,14 +159,15 @@ public class FileReaderConfig {
 	 * 
 	 * @return a message per file/directory
 	 */
-	@Bean
-	@InboundChannelAdapter(value = "configFileChannel", poller = @Poller(fixedRate = "${file.auxiliary-files.read-fixed-rate}"))
+	@Bean(name = "configFileReadingMessageSource")
+	// @InboundChannelAdapter(value = "configFileChannel", poller =
+	// @Poller(fixedRate = "${file.auxiliary-files.read-fixed-rate}"))
 	public MessageSource<File> configFileReadingMessageSource() {
 		ChainFileListFilter<File> filter = new ChainFileListFilter<File>();
 		filter.addFilter(
 				new ExclusionRegexpPatternFileListFilter(Pattern.compile(PATTERN_EXCLUSION, Pattern.CASE_INSENSITIVE)));
 		filter.addFilter(new AcceptOnceFileListFilter<>(this.configCacheMaxCapacity));
-		
+
 		RecursiveDirectoryScanner scanner = new RecursiveDirectoryScanner();
 		scanner.setFilter(filter);
 
@@ -159,8 +185,20 @@ public class FileReaderConfig {
 	 * @return
 	 */
 	@Bean
-	public IntegrationFlow processConfigFlow() {
-		return IntegrationFlows.from("configFileChannel").handle("fileProcessor", "processConfigFile").get();
+	public IntegrationFlow processConfigFlow(TaskExecutor configTaskExecutor,
+			MessageSource<File> configFileReadingMessageSource) {
+		return IntegrationFlows
+				.from(configFileReadingMessageSource,
+						c -> c.poller(Pollers.fixedDelay(this.configPeriod).taskExecutor(configTaskExecutor)
+								.maxMessagesPerPoll(this.configMaxMessagesPerPoll)))
+				.handle("fileProcessor", "processConfigFile").get();
+	}
+
+	@Bean(name = "configTaskExecutor")
+	TaskExecutor configTaskExecutor() {
+		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+		taskExecutor.setCorePoolSize(this.configExecutorPoolSize);
+		return taskExecutor;
 	}
 
 }
