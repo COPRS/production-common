@@ -405,7 +405,7 @@ public class ExtractMetadata {
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("sliceCoordinates").has("content")) {
 	        	JSONObject coordinates = new JSONObject();
-	        	coordinates.put("type", "Polygon");
+	        	coordinates.put("type", "polygon");
 	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
 	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
 	        }
@@ -544,7 +544,7 @@ public class ExtractMetadata {
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("sliceCoordinates").has("content")) {
 	        	JSONObject coordinates = new JSONObject();
-	        	coordinates.put("type", "Polygon");
+	        	coordinates.put("type", "polygon");
 	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
 	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
 	        }
