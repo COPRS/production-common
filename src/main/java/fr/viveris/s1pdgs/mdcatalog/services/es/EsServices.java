@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataCreationException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataMalformedException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataNotPresentException;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0AcnMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0SliceMetadata;
@@ -258,10 +259,13 @@ public class EsServices {
 	}
 
 	private L0SliceMetadata extractInfoForL0Slice(Map<String, Object> source, String productType, String productName)
-			throws MetadataMalformedException {
+			throws MetadataMalformedException, MetadataNotPresentException {
 
 		L0SliceMetadata r = new L0SliceMetadata();
 		r.setProductType(productType);
+		if(source.isEmpty()) {
+			throw new MetadataNotPresentException(productName);
+		}
 		if (source.containsKey("productName")) {
 			r.setProductName(source.get("productName").toString());
 		}
