@@ -37,7 +37,7 @@ public class AbstractJobConsumer {
 	protected final OutputProcuderFactory outputProcuderFactory;
 
 	protected final DevProperties devProperties;
-	
+
 	protected final ApplicationProperties properties;
 
 	// KAFKA listener endpoint registry
@@ -57,9 +57,8 @@ public class AbstractJobConsumer {
 	 * @param sizeS3DownloadBatch
 	 */
 	public AbstractJobConsumer(final S3Factory s3Factory, final OutputProcuderFactory outputProcuderFactory,
-			final ApplicationProperties properties, final DevProperties devProperties,
-			final AppStatus appStatus, final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry,
-			final String listenerContainerId) {
+			final ApplicationProperties properties, final DevProperties devProperties, final AppStatus appStatus,
+			final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry, final String listenerContainerId) {
 		super();
 		this.s3Factory = s3Factory;
 		this.outputProcuderFactory = outputProcuderFactory;
@@ -85,27 +84,43 @@ public class AbstractJobConsumer {
 				job.getProductIdentifier(), job.getWorkDirectory());
 
 		LOGGER.info("{} Starting job generation", prefixLogStart);
+		String step = "";
 
 		if (!this.appStatus.isShallBeStopped()) {
 
-			this.appStatus.setProcessing();
+			try {
 
-			// Ack message
-			this.ackMessage(acknowledgment, String.format("%s [step 1a] [productName %s] [workDir %s]", prefixLog,
-					job.getProductIdentifier(), job.getWorkDirectory()));
+				this.appStatus.setProcessing();
 
-			// Remove the last executed future if needed, wait for task ending if necessary
-			if (this.nbCurrentTasks > 0) {
-				this.cleanPreviousExecution(String.format("%s [step 1b] [productName %s] [workDir %s]", prefixLog,
+				// Ack message
+				step = "1a";
+				this.ackMessage(acknowledgment, String.format("%s [step 1a] [productName %s] [workDir %s]", prefixLog,
 						job.getProductIdentifier(), job.getWorkDirectory()));
+
+				// Remove the last executed future if needed, wait for task ending if necessary
+				step = "1b";
+				if (this.nbCurrentTasks > 0) {
+					this.cleanPreviousExecution(String.format("%s [step 1b] [productName %s] [workDir %s]", prefixLog,
+							job.getProductIdentifier(), job.getWorkDirectory()));
+				}
+
+				// Launch job
+				step = "1c";
+				this.launchJob(job, outputListFile, String.format("%s [step 1c] [productName %s] [workDir %s]",
+						prefixLog, job.getProductIdentifier(), job.getWorkDirectory()));
+
+				// Set the consumer in pause
+				step = "1d";
+				this.pauseConsumer(String.format("%s [step 1d] [productName %s] [workDir %s]", prefixLog,
+						job.getProductIdentifier(), job.getWorkDirectory()));
+
+			} catch (Exception e) {
+				LOGGER.error(
+						"{} [step {}] [productName {}] [workDir {}] [code {}] Exception occurred during processing message: {}",
+						prefixLog, step, job.getProductIdentifier(), job.getWorkDirectory(),
+						ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage(), e);
+				this.appStatus.setError();
 			}
-
-			// Launch job
-			this.launchJob(job, outputListFile);
-
-			// Set the consumer in pause
-			this.pauseConsumer(String.format("%s [step 1c] [productName %s] [workDir %s]", prefixLog,
-					job.getProductIdentifier(), job.getWorkDirectory()));
 
 		} else {
 			LOGGER.info("{} End job generation: nothing done because the wrapper shall be stopped", prefixLogStart);
@@ -127,7 +142,8 @@ public class AbstractJobConsumer {
 	private void cleanPreviousExecution(String prefixLog) {
 		LOGGER.info("{} Resetting worker thread pool", prefixLog);
 		try {
-			Future<Boolean> future = this.jobWorkerService.poll(this.properties.getTimeoutProcessCheckStopS(), TimeUnit.SECONDS);
+			Future<Boolean> future = this.jobWorkerService.poll(this.properties.getTimeoutProcessCheckStopS(),
+					TimeUnit.SECONDS);
 			if (future == null) {
 				LOGGER.warn("{} Cannot retrieve last execution after {} seconds: force shutdown of previous job",
 						prefixLog, this.properties.getTimeoutProcessCheckStopS());
@@ -140,10 +156,11 @@ public class AbstractJobConsumer {
 		this.nbCurrentTasks = 0;
 	}
 
-	private void launchJob(JobDto job, String outputListFile) {
-		this.jobWorkerService.submit(new JobProcessor(job, this.appStatus, this.properties, this.devProperties, this.listenerContainerId,
-				kafkaListenerEndpointRegistry, s3Factory, outputProcuderFactory, 
-				outputListFile));
+	private void launchJob(JobDto job, String outputListFile, String prefixLog) {
+		LOGGER.info("{} Launching job in a thread", prefixLog);
+		this.jobWorkerService.submit(
+				new JobProcessor(job, this.appStatus, this.properties, this.devProperties, this.listenerContainerId,
+						kafkaListenerEndpointRegistry, s3Factory, outputProcuderFactory, outputListFile));
 		nbCurrentTasks++;
 	}
 
