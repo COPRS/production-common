@@ -118,7 +118,7 @@ public class AbstractJobConsumer {
 				LOGGER.error(
 						"{} [step {}] [productName {}] [workDir {}] [code {}] Exception occurred during processing message: {}",
 						prefixLog, step, job.getProductIdentifier(), job.getWorkDirectory(),
-						ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage(), e);
+						ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
 				this.appStatus.setError();
 			}
 
