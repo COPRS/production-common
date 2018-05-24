@@ -107,9 +107,9 @@ public class JobProcessor implements Callable<Boolean> {
 				job.getProductIdentifier(), job.getWorkDirectory());
 		this.prefixLogErasing = String.format("%s [step 5] [productName %s] [workDir %s]", this.prefixLog,
 				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogResuming = String.format("%s [step 6] [productName %s] [workDir %s]", this.prefixLog,
+		this.prefixLogResuming = String.format("%s [step 7] [productName %s] [workDir %s]", this.prefixLog,
 				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogStatus = String.format("%s [step 7] [productName %s] [workDir %s]", this.prefixLog,
+		this.prefixLogStatus = String.format("%s [step 6] [productName %s] [workDir %s]", this.prefixLog,
 				job.getProductIdentifier(), job.getWorkDirectory());
 		this.prefixLogEnd = String.format("%s [step 0] [productName %s] [workDir %s]", this.prefixLog,
 				job.getProductIdentifier(), job.getWorkDirectory());
@@ -189,10 +189,10 @@ public class JobProcessor implements Callable<Boolean> {
 			} else {
 				LOGGER.info("{} Erasing local working directory bypassed", this.prefixLogErasing);
 			}
-
-			this.resumeConsumer();
-
-			this.checkingStatus();
+			
+			if (this.checkingStatus()) {
+				this.resumeConsumer();
+			}
 		}
 
 		LOGGER.info("{} End L0 job generation", this.prefixLogEnd);
@@ -278,7 +278,7 @@ public class JobProcessor implements Callable<Boolean> {
 		}
 	}
 
-	private void checkingStatus() {
+	private boolean checkingStatus() {
 		LOGGER.info("{} Checking status consumer", this.prefixLogStatus);
 		if (this.appStatus.getStatus().isStopping()) {
 			System.exit(0);
@@ -286,6 +286,8 @@ public class JobProcessor implements Callable<Boolean> {
 			System.exit(-1);
 		} else {
 			this.appStatus.setWaiting();
+			return true;
 		}
+		return false;
 	}
 }

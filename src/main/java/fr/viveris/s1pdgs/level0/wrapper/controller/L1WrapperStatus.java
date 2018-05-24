@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.level0.wrapper.controller;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,11 @@ import fr.viveris.s1pdgs.level0.wrapper.controller.dto.WrapperStatusDto;
 @RequestMapping(path = "/wrapper")
 public class L1WrapperStatus {
 
+	/**
+	 * Logger
+	 */
+	protected static final Logger LOGGER = LogManager.getLogger(L1WrapperStatus.class);
+
 	@Autowired
 	private AppStatus appStatus;
 
@@ -37,6 +44,7 @@ public class L1WrapperStatus {
 
 	@RequestMapping(method = RequestMethod.POST, path = "/stop")
 	public ResponseEntity<String> postStop() {
+		LOGGER.info("[MONITOR] L1 Wrapper is scheduled to stop after the end of current process");
 		appStatus.setStopping();
 		return new ResponseEntity<String>("L1 Wrapper is scheduled to stop after the end of current process",
 				HttpStatus.OK);
