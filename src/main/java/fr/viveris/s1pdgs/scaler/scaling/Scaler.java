@@ -212,7 +212,7 @@ public class Scaler {
 			LOGGER.error("[MONITOR] [step {}] [code {}] {}", step, e.getCode().getCode(), e.getLogMessage());
 		} catch (Exception e) {
 			LOGGER.error("[MONITOR] [step {}] [code {}] [msg {}]", step, ErrorCode.INTERNAL_ERROR.getCode(),
-					e.getMessage());
+					e.getMessage(), e);
 		}
 		LOGGER.info("[MONITOR] [step 0] End");
 	}
