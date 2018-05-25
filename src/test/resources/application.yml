@@ -15,6 +15,7 @@ kafka:
   max-pool-records: ${wrapper_kafka_max-pool-records:1}
   session-timeout-ms: ${wrapper_kafka_session-timeout-ms:10000}
   heartbeat-interval-ms: ${wrapper_kafka_heartbeat-interval-ms:3000}
+  producer-retries: 10
   topic:
     l0-jobs: t-pdgs-l0-jobs
     l0-slices: t-pdgs-l0-slices
