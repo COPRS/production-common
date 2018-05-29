@@ -3,6 +3,9 @@ spring:
   application:
     name: ${archives_application_name:s1pdgs-archives}
     
+logging:
+  config: ${wrapper_logging_config:log4j2.yml}
+    
 # KAFKA
 kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
