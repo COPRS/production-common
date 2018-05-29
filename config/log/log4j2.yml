@@ -1,32 +1,19 @@
 Configuration:
   status: warn
   name: YAMLConfigTest
-  properties:
-    property:
-      name: appVersion
-      value: 1.0.0
-    property:
-      name: appName
-      value: ${env:archives_application_name:s1pdgs-archives}
-    property:
-      name: envHostname
-      value: ${env:HOSTNAME}
-    property:
-      name: envFilename
-      value: ${archives_logging_file:./s1pdgs-archives.log}
   thresholdFilter:
     level: debug
   appenders:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}-${appVersion} %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} ${env:archives_application_name}-1.0.0 %-5level: %msg [%thread] %n"
     RollingFile:
       name: FILE
-      fileName: ${envFilename}
-      filePattern: "${envFilename}.%d{yyyy-MM-dd-hh-mm}.gz"
+      fileName: ${env:archives_logging_file}
+      filePattern: "${env:archives_logging_file}.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
-        Pattern: "%d{dd-MM-yyyy HH:mm:ss.SSS} ${HOSTNAME} ${appName}-${appVersion} %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} ${env:archives_application_name}--1.0.0 %-5level: %msg [%thread] %n"
       Policies:
         SizeBasedTriggeringPolicy:
           size: 10 MB
@@ -36,10 +23,10 @@ Configuration:
       name: KAFKA_ERROR
       topic: ${env:kafka_topic_errors:-t-pdgs-errors}
       PatternLayout:
-        Pattern: "[date %d{dd-MM-yyyy HH:mm:ss.SSS}] [podName ${envHostname}] [app ${appName}-${appVersion}] [thread %thread] [level %-5level] [message %msg] %n"
+        Pattern: "[date %d{yyyy-MM-dd HH:mm:ss.SSS}] [podName ${env:HOSTNAME}] [app ${env:archives_application_name}--1.0.0] [thread %thread] [level %-5level] [message %msg] %n"
       Property:
         name: bootstrap.servers
-        value: ${env:kafka_bootstrap-servers:-kafka-svc:9093}
+        value: ${env:kafka_bootstrap-servers}
       Filters:
         ThresholdFilter:
           level: error
