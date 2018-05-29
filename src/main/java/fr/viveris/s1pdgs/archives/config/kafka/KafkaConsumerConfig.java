@@ -55,6 +55,12 @@ public class KafkaConsumerConfig {
 	 */
 	@Value("${kafka.poll-timeout}")
 	private long kafkaPooltimeout;
+	
+	@Value("${kafka.max-pool-records}")
+	protected int kafkaMaxPoolRecords;
+
+	@Value("${kafka.session-timeout-ms}")
+	protected int kafkaSessionTimeoutMs;
 
 	/**
 	 * Consumer configuration
@@ -66,6 +72,8 @@ public class KafkaConsumerConfig {
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+		props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, kafkaMaxPoolRecords);
+		props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, kafkaSessionTimeoutMs);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
 		try {
 			InetAddress myHost = InetAddress.getLocalHost();
