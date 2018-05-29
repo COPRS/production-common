@@ -4,7 +4,7 @@ spring:
     name: ${archives_application_name:s1pdgs-archives}
     
 logging:
-  config: ${wrapper_logging_config:log4j2.yml}
+  config: ${archives_logging_config:log4j2.yml}
     
 # KAFKA
 kafka:
