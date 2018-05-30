@@ -16,22 +16,43 @@ public class JobGenerationException extends AbstractCodedException {
 	/**
 	 * Task table XML filename
 	 */
-	protected String taskTable;
+	private final String taskTable;
 
-	public JobGenerationException(String taskTable, ErrorCode code, String message) {
+	/**
+	 * 
+	 * @param taskTable
+	 * @param code
+	 * @param message
+	 */
+	public JobGenerationException(final String taskTable, final ErrorCode code, final String message) {
 		super(code, message);
 		this.taskTable = taskTable;
 	}
 
-	public JobGenerationException(String taskTable, ErrorCode code, String message, Throwable e) {
+	/**
+	 * 
+	 * @param taskTable
+	 * @param code
+	 * @param message
+	 * @param e
+	 */
+	public JobGenerationException(final String taskTable, final ErrorCode code, final String message,
+			final Throwable e) {
 		super(code, message, e);
 		this.taskTable = taskTable;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String getTaskTable() {
 		return taskTable;
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public String getLogMessage() {
 		return String.format("[taskTable %s] [msg %s]", this.taskTable, this.getMessage());

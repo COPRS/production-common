@@ -3,12 +3,18 @@ package fr.viveris.s1pdgs.jobgenerator.exception;
 public class KafkaSendException extends AbstractCodedException {
 
 	private static final long serialVersionUID = 8248616873024871315L;
-	
-	private String topic;
-	
-	private String productName;
 
-	public KafkaSendException(String topic, String productName, String message, Throwable e) {
+	/**
+	 * Name of the topic
+	 */
+	private final String topic;
+
+	/**
+	 * Name of the product
+	 */
+	private final String productName;
+
+	public KafkaSendException(final String topic, final String productName, final String message, final Throwable e) {
 		super(ErrorCode.KAFKA_SEND_ERROR, message, e);
 		this.topic = topic;
 		this.productName = productName;
@@ -28,6 +34,10 @@ public class KafkaSendException extends AbstractCodedException {
 		return productName;
 	}
 
+	/**
+	 * 
+	 */
+	@Override
 	public String getLogMessage() {
 		return String.format("[topic %s] [productName %s] [msg %s]", this.topic, this.productName, getMessage());
 	}

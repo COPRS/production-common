@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
 import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
-import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.service.s3.SessionFilesS3Services;
 

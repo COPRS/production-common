@@ -24,7 +24,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;

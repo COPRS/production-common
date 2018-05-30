@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.exception;
 
 /**
  * Exception during task table building
+ * 
  * @author Cyrielle Gailliard
  *
  */
@@ -14,11 +15,12 @@ public class BuildTaskTableException extends JobGenerationException {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param message
 	 * @param cause
 	 * @param taskTable
 	 */
-	public BuildTaskTableException(String taskTable, String message, Throwable cause) {
+	public BuildTaskTableException(final String taskTable, final String message, final Throwable cause) {
 		super(taskTable, ErrorCode.JOB_GENERATOR_INIT_FAILED, message, cause);
 	}
 
