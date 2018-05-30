@@ -1,6 +1,7 @@
-package fr.viveris.s1pdgs.mdcatalog.file;
+package fr.viveris.s1pdgs.mdcatalog.services.file;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -19,6 +20,7 @@ import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.mdcatalog.model.FileExtension;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractFileException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
 import fr.viveris.s1pdgs.mdcatalog.services.files.ExtractMetadata;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
@@ -119,7 +121,7 @@ public class MetadataBuilderTest {
 		descriptor.setProductType("AUX_OBMEMC");
 		descriptor.setRelativePath("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
-		JSONObject expectedResult = new JSONObject("{'productName': S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml}");
+		JSONObject expectedResult = new JSONObject("{\"productName\": \"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\"}");
 
 		this.mockExtractorProcessEOFFIle(null);
 		this.mockExtractorprocessEOFFileWithoutNamespace(null);
@@ -128,18 +130,53 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessRAWFile(null);
 		this.mockExtractorprocessSESSIONFile(null);
 
-		//File file = new File("workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+		File file = new File("workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
-		/*try {
+		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			KafkaMetadataDto dto = new KafkaMetadataDto("CREATE",metadataBuilder.buildConfigFileMetadata(descriptor, file), "METADATA");
-					;
-			assertEquals("Action should be CREATE", "CREATE", dto.getAction());
-			assertNotNull("Metadata should not be null", dto.getMetadata());
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.getMetadata());
+			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
+
+			assertNotNull("Metadata should not be null", dto);
+			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
 		} catch (AbstractFileException fe) {
 			fail("Exception occurred: " + fe.getMessage());
-		}*/
+		}
+	}
+	
+	@Test
+	public void testBuildConfigFileMetadataEOF() throws JSONException, MetadataExtractionException {
+
+		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+		descriptor.setExtension(FileExtension.XML);
+		descriptor.setFilename("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
+		descriptor.setKeyObjectStorage("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
+		descriptor.setMissionId("S1");
+		descriptor.setSatelliteId("A");
+		descriptor.setProductClass("OPER");
+		descriptor.setProductName("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
+		descriptor.setProductType("MPL_ORBSCT");
+		descriptor.setRelativePath("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
+
+		JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-01-23T16:38:09\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-04-03T22:46:09\",\"version\":\"0020\",\"productName\":\"S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF\",\"productType\":\"MPL_ORBSCT\"}");
+
+		this.mockExtractorProcessEOFFIle(expectedResult);
+		this.mockExtractorprocessEOFFileWithoutNamespace(null);
+		this.mockExtractorprocessXMLFile(null);
+		this.mockExtractorprocessSAFEFile(null);
+		this.mockExtractorprocessRAWFile(null);
+		this.mockExtractorprocessSESSIONFile(null);
+
+		File file = new File("workDir/S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
+
+		try {
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
+
+			assertNotNull("Metadata should not be null", dto);
+			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+		} catch (AbstractFileException fe) {
+			fail("Exception occurred: " + fe.getMessage());
+		}
 	}
 
 	@Test
@@ -230,16 +267,15 @@ public class MetadataBuilderTest {
 		descriptor.setChannel(1);
 		descriptor.setSessionIdentifier("SESSION1");
 
-		/*try {
+		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			KafkaMetadataDto dto = metadataBuilder.buildErdsSessionFileMetadata(descriptor, null);
+			JSONObject dto = metadataBuilder.buildEdrsSessionFileMetadata(descriptor);
 
-			assertEquals("Action should be CREATE", "CREATE", dto.getAction());
-			assertNotNull("Metadata should not be null", dto.getMetadata());
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.getMetadata());
+			assertNotNull("Metadata should not be null", dto);
+			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
 		} catch (AbstractFileException fe) {
 			fail("Exception occurred: " + fe.getMessage());
-		}*/
+		}
 	}
 
 }

@@ -2,7 +2,6 @@ package fr.viveris.s1pdgs.mdcatalog.services.files;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -88,7 +87,7 @@ public class ExtractMetadata {
 	 * Function which transform the raw coordinates in the good format
 	 * 
 	 * @param rawCoordinates
-	 * @param descriptor
+	 * @param productName
 	 * 
 	 * @return the coordinates in good format
 	 * @throws MetadataExtractionException 
@@ -135,14 +134,12 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from MPL EOF file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the auxiliary file
+	 * @param file The file containing the metadata
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws TransformerException
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
@@ -183,14 +180,12 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from AUX EOF file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the auxiliary file
+	 * @param file The file containing the metadata
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws TransformerException
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processEOFFileWithoutNamespace(ConfigFileDescriptor descriptor, File file)
 			throws MetadataExtractionException {
@@ -225,14 +220,12 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from AUX XML file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the auxiliary file
+	 * @param file The file containing the metadata
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws TransformerException
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
@@ -272,14 +265,12 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from AUX MANIFEST file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the auxiliary file
+	 * @param file The file containing the metadata
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws TransformerException
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
@@ -314,11 +305,11 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from RAW file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the raw file
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processRAWFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
 		try {
@@ -339,11 +330,11 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from SESSION file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the session file
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processSESSIONFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
 		try {
