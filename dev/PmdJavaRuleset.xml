@@ -64,7 +64,7 @@
    <rule ref="rulesets/java/controversial.xml/AvoidUsingShortType"/>
    <rule ref="rulesets/java/controversial.xml/AvoidUsingVolatile"/>
    <rule ref="rulesets/java/design.xml/BadComparison"/>
-   <rule ref="rulesets/java/javabeans.xml/BeanMembersShouldSerialize"/>
+   <!-- <rule ref="rulesets/java/javabeans.xml/BeanMembersShouldSerialize"/> -->
    <rule ref="rulesets/java/basic.xml/BigIntegerInstantiation"/>
    <rule ref="rulesets/java/basic.xml/BooleanInstantiation"/>
    <rule ref="rulesets/java/basic.xml/BrokenNullCheck"/>

@@ -121,7 +121,7 @@ public class L0SlicesJobsGeneratorTest {
 		}).when(jobGeneratorSettings).getOutputfamilies();
 		Mockito.doAnswer(i -> {
 			return ProductFamily.CONFIG.name();
-		}).when(jobGeneratorSettings).getDefaultoutputfamily();
+		}).when(jobGeneratorSettings).getDefaultfamily();
 		Mockito.doAnswer(i -> {
 			return 2;
 		}).when(jobGeneratorSettings).getMaxnumberofjobs();

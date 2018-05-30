@@ -241,7 +241,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 					if (this.jobGeneratorSettings.getOutputfamilies().containsKey(output.getFileType())) {
 						output.setFamily(this.jobGeneratorSettings.getOutputfamilies().get(output.getFileType()));
 					} else {
-						output.setFamily(ProductFamily.fromValue(this.jobGeneratorSettings.getDefaultoutputfamily()));
+						output.setFamily(ProductFamily.fromValue(this.jobGeneratorSettings.getDefaultfamily()));
 					}
 				});
 	}
@@ -256,8 +256,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
 				.collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey)).forEach((k, v) -> {
 					String fileType = k.getFileType();
-					if (this.jobGeneratorSettings.getLinkProducttypeMetadataindex().containsKey(k.getFileType())) {
-						fileType = this.jobGeneratorSettings.getLinkProducttypeMetadataindex().get(k.getFileType());
+					if (this.jobGeneratorSettings.getMapTypeMeta().containsKey(k.getFileType())) {
+						fileType = this.jobGeneratorSettings.getMapTypeMeta().get(k.getFileType());
 					}
 					SearchMetadataQuery query = new SearchMetadataQuery(counter.incrementAndGet(), k.getRetrievalMode(),
 							k.getDeltaTime0(), k.getDeltaTime1(), fileType);
@@ -459,7 +459,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 
 										// Retrieve family
 										ProductFamily family = ProductFamily
-												.fromValue(this.jobGeneratorSettings.getDefaultoutputfamily());
+												.fromValue(this.jobGeneratorSettings.getDefaultfamily());
 										if (this.jobGeneratorSettings.getOutputfamilies()
 												.containsKey(alt.getFileType())) {
 											family = this.jobGeneratorSettings.getOutputfamilies()

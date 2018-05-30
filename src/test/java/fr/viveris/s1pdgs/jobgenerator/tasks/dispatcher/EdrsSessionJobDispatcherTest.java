@@ -88,13 +88,13 @@ public class EdrsSessionJobDispatcherTest {
 		// Mock the job generator settings
 		doAnswer(i -> {
 			return "./test/data/l0_config/task_tables/";
-		}).when(jobGeneratorSettings).getDirectoryoftasktables();
+		}).when(jobGeneratorSettings).getDiroftasktables();
 		doAnswer(i -> {
 			return 4;
-		}).when(jobGeneratorSettings).getMaxnumberoftasktables();
+		}).when(jobGeneratorSettings).getMaxnboftasktable();
 		doAnswer(i -> {
 			return 2000;
-		}).when(jobGeneratorSettings).getScheduledfixedrate();
+		}).when(jobGeneratorSettings).getJobgenfixedrate();
 	}
 
 	@Test

@@ -88,11 +88,11 @@ public class L0SlicesConsumer {
 				throw new InvalidFormatProduct(
 						"Don't match with regular expression " + this.l0SlicePatternSettings.getRegexp());
 			}
-			String satelliteId = m.group(this.l0SlicePatternSettings.getPlaceMatchSatelliteId());
-			String missionId = m.group(this.l0SlicePatternSettings.getPlaceMatchMissionId());
-			String acquisition = m.group(this.l0SlicePatternSettings.getPlaceMatchAcquisition());
-			String startTime = m.group(this.l0SlicePatternSettings.getPlaceMatchStartTime());
-			String stopTime = m.group(this.l0SlicePatternSettings.getPlaceMatchStopTime());
+			String satelliteId = m.group(this.l0SlicePatternSettings.getMGroupSatId());
+			String missionId = m.group(this.l0SlicePatternSettings.getMGroupMissionId());
+			String acquisition = m.group(this.l0SlicePatternSettings.getMGroupAcquisition());
+			String startTime = m.group(this.l0SlicePatternSettings.getMGroupStartTime());
+			String stopTime = m.group(this.l0SlicePatternSettings.getMGroupStopTime());
 			Date dateStart = this.convertDate(startTime);
 			Date dateStop = this.convertDate(stopTime);
 

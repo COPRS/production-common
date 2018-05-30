@@ -31,11 +31,11 @@ public class L0SlicePatternSettingsTest {
 
 	@Test
 	public void testSettings() {
-		assertEquals(2, l0SlicePatternSettings.getPlaceMatchSatelliteId());
-		assertEquals(1, l0SlicePatternSettings.getPlaceMatchMissionId());
-		assertEquals(4, l0SlicePatternSettings.getPlaceMatchAcquisition());
-		assertEquals(6, l0SlicePatternSettings.getPlaceMatchStartTime());
-		assertEquals(7, l0SlicePatternSettings.getPlaceMatchStopTime());
+		assertEquals(2, l0SlicePatternSettings.getMGroupSatId());
+		assertEquals(1, l0SlicePatternSettings.getMGroupMissionId());
+		assertEquals(4, l0SlicePatternSettings.getMGroupAcquisition());
+		assertEquals(6, l0SlicePatternSettings.getMGroupStartTime());
+		assertEquals(7, l0SlicePatternSettings.getMGroupStopTime());
 		assertEquals(
 				"^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$",
 				l0SlicePatternSettings.getRegexp());
@@ -47,11 +47,11 @@ public class L0SlicePatternSettingsTest {
 		Pattern p = Pattern.compile(l0SlicePatternSettings.getRegexp(), Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(file);
 		if (m.matches()) {
-			assertEquals("Satellite identifier does not match", "A", m.group(l0SlicePatternSettings.getPlaceMatchSatelliteId()));
-			assertEquals("Mission identifier does not match", "S1", m.group(l0SlicePatternSettings.getPlaceMatchMissionId()));
-			assertEquals("Acquisition does not match", "IW", m.group(l0SlicePatternSettings.getPlaceMatchAcquisition()));
-			assertEquals("Start time does not match", "20171213T121623", m.group(l0SlicePatternSettings.getPlaceMatchStartTime()));
-			assertEquals("Stop time does not match", "20171213T121656", m.group(l0SlicePatternSettings.getPlaceMatchStopTime()));
+			assertEquals("Satellite identifier does not match", "A", m.group(l0SlicePatternSettings.getMGroupSatId()));
+			assertEquals("Mission identifier does not match", "S1", m.group(l0SlicePatternSettings.getMGroupMissionId()));
+			assertEquals("Acquisition does not match", "IW", m.group(l0SlicePatternSettings.getMGroupAcquisition()));
+			assertEquals("Start time does not match", "20171213T121623", m.group(l0SlicePatternSettings.getMGroupStartTime()));
+			assertEquals("Stop time does not match", "20171213T121656", m.group(l0SlicePatternSettings.getMGroupStopTime()));
 		} else {
 			fail("The file shall match the regular expression");
 		}

@@ -119,7 +119,7 @@ public class EdrsSessionJobsGeneratorTest {
 		}).when(jobGeneratorSettings).getOutputfamilies();
 		Mockito.doAnswer(i -> {
 			return "L0_PRODUCT";
-		}).when(jobGeneratorSettings).getDefaultoutputfamily();
+		}).when(jobGeneratorSettings).getDefaultfamily();
 		Mockito.doAnswer(i -> {
 			return 2;
 		}).when(jobGeneratorSettings).getMaxnumberofjobs();

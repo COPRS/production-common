@@ -51,7 +51,7 @@ public abstract class AbstractJobsDispatcher<T> {
 			final JobsGeneratorFactory jobsGeneratorFactory, final ThreadPoolTaskScheduler jobGenerationTaskScheduler) {
 		this.jobsGeneratorFactory = jobsGeneratorFactory;
 		this.jobGeneratorSettings = taskTablesSettings;
-		this.generators = new HashMap<>(this.jobGeneratorSettings.getMaxnumberoftasktables());
+		this.generators = new HashMap<>(this.jobGeneratorSettings.getMaxnboftasktable());
 		this.jobGenerationTaskScheduler = jobGenerationTaskScheduler;
 	}
 
@@ -63,11 +63,11 @@ public abstract class AbstractJobsDispatcher<T> {
 	 */
 	protected void initTaskTables() throws AbstractCodedException {
 		// Retrieve list of XML files in the directory
-		File directoryXml = new File(this.jobGeneratorSettings.getDirectoryoftasktables());
+		File directoryXml = new File(this.jobGeneratorSettings.getDiroftasktables());
 		if (directoryXml != null && directoryXml.isDirectory()) {
 			File[] taskTableFiles = directoryXml.listFiles(parameter -> parameter.isFile());
 			if (taskTableFiles != null) {
-				if (taskTableFiles.length > this.jobGeneratorSettings.getMaxnumberoftasktables()) {
+				if (taskTableFiles.length > this.jobGeneratorSettings.getMaxnboftasktable()) {
 					throw new MaxNumberTaskTablesReachException(String.format(
 							"Too much task tables %d", taskTableFiles.length));
 				}
@@ -75,7 +75,7 @@ public abstract class AbstractJobsDispatcher<T> {
 					AbstractJobsGenerator<T> jobGenerator = this.createJobGenerator(taskTableFile);
 					generators.put(taskTableFile.getName(), jobGenerator);
 					this.jobGenerationTaskScheduler.scheduleAtFixedRate(jobGenerator,
-							jobGeneratorSettings.getScheduledfixedrate());
+							jobGeneratorSettings.getJobgenfixedrate());
 				}
 			}
 		}

@@ -43,34 +43,42 @@ public class KafkaConfig {
 	 * URI of KAFKA cluster
 	 */
 	@Value("${kafka.bootstrap-servers}")
-	protected String bootstrapServers;
+	private String bootstrapServers;
 
 	/**
 	 * Group identifier for KAFKA
 	 */
 	@Value("${kafka.group-id}")
-	protected String kafkaGroupId;
+	private String kafkaGroupId;
 
 	/**
 	 * Client identifier for KAFKA
 	 */
 	@Value("${kafka.client-id}")
-	protected String kafkaClientId;
+	private String kafkaClientId;
 
 	/**
-	 * Pool timeout for consumption
+	 * Poll timeout for consumption
 	 */
 	@Value("${kafka.poll-timeout}")
-	protected long kafkaPooltimeout;
-
-	// --------------------------------------------------------------------------------
-	// --------------------------------------------------------------------------------
-	// CONSUMERS CONFIGURATION
-	// --------------------------------------------------------------------------------
-	// --------------------------------------------------------------------------------
+	private long kafkaPolltimeout;
 
 	/**
-	 * Consumer configuration
+	 * Default constructor
+	 */
+	public KafkaConfig() {
+
+	}
+
+	/**
+	 * Consumer configuration:
+	 * <li>ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG = this.bootstrapServers</li>
+	 * <li>ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG =
+	 * StringDeserializer.class</li>
+	 * <li>ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG =
+	 * JsonDeserializer.class</li>
+	 * <li>ConsumerConfig.GROUP_ID_CONFIG = this.kafkaGroupId</li>
+	 * <li>ConsumerConfig.CLIENT_ID_CONFIG = hostname or this.kafkaClientId</li>
 	 * 
 	 * @return
 	 */
@@ -116,7 +124,7 @@ public class KafkaConfig {
 		ConcurrentKafkaListenerContainerFactory<String, EdrsSessionDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
 		factory.getContainerProperties();
-		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
+		factory.getContainerProperties().setPollTimeout(kafkaPolltimeout);
 		return factory;
 	}
 
@@ -146,7 +154,7 @@ public class KafkaConfig {
 		ConcurrentKafkaListenerContainerFactory<String, L0SliceDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(l0SlicesConsumerFactory());
 		factory.getContainerProperties();
-		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
+		factory.getContainerProperties().setPollTimeout(kafkaPolltimeout);
 		return factory;
 	}
 
@@ -158,6 +166,13 @@ public class KafkaConfig {
 
 	/**
 	 * Producer configuration
+	 * <li>ProducerConfig.BOOTSTRAP_SERVERS_CONFIG = this.bootstrapServers</li>
+	 * <li>ProducerConfig.KEY_DESERIALIZER_CLASS_CONFIG =
+	 * StringDeserializer.class</li>
+	 * <li>ProducerConfig.VALUE_DESERIALIZER_CLASS_CONFIG =
+	 * JsonDeserializer.class</li>
+	 * <li>ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG = 2000</li>
+	 * <li>JsonSerializer.ADD_TYPE_INFO_HEADERS = false (to be compatible with client < 1.0.0)</li>
 	 * 
 	 * @return
 	 */
@@ -166,8 +181,8 @@ public class KafkaConfig {
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+		// TODO set in configuration
 		props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 2000);
-		//JsonSerializer.ADD_TYPE_INFO_HEADERS
 		props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
 		return props;
 	}

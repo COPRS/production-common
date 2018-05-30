@@ -67,13 +67,13 @@ public class AbstractJobDispatcherTest {
 		// Mock the job generator settings
 		doAnswer(i -> {
 			return taskTablesDirectory;
-		}).when(jobGeneratorSettings).getDirectoryoftasktables();
+		}).when(jobGeneratorSettings).getDiroftasktables();
 		doAnswer(i -> {
 			return maxNbTasktable;
-		}).when(jobGeneratorSettings).getMaxnumberoftasktables();
+		}).when(jobGeneratorSettings).getMaxnboftasktable();
 		doAnswer(i -> {
 			return 2000;
-		}).when(jobGeneratorSettings).getScheduledfixedrate();
+		}).when(jobGeneratorSettings).getJobgenfixedrate();
 	}
 
 	/**

@@ -95,13 +95,13 @@ public class L0SliceJobsDispatcherTest {
 		// Mock the job generator settings
 		doAnswer(i -> {
 			return "./test/data/l1_config/task_tables/";
-		}).when(jobGeneratorSettings).getDirectoryoftasktables();
+		}).when(jobGeneratorSettings).getDiroftasktables();
 		doAnswer(i -> {
 			return 25;
-		}).when(jobGeneratorSettings).getMaxnumberoftasktables();
+		}).when(jobGeneratorSettings).getMaxnboftasktable();
 		doAnswer(i -> {
 			return 2000;
-		}).when(jobGeneratorSettings).getScheduledfixedrate();
+		}).when(jobGeneratorSettings).getJobgenfixedrate();
 
 		// Mock the job generators
 		doNothing().when(mockGeneratorIW).addJob(Mockito.any());

@@ -50,11 +50,11 @@ public class L0SlicesConsumerTest {
 		Mockito.doReturn(
 				"^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$")
 				.when(l0SlicePatternSettings).getRegexp();
-		Mockito.doReturn(2).when(l0SlicePatternSettings).getPlaceMatchSatelliteId();
-		Mockito.doReturn(1).when(l0SlicePatternSettings).getPlaceMatchMissionId();
-		Mockito.doReturn(4).when(l0SlicePatternSettings).getPlaceMatchAcquisition();
-		Mockito.doReturn(6).when(l0SlicePatternSettings).getPlaceMatchStartTime();
-		Mockito.doReturn(7).when(l0SlicePatternSettings).getPlaceMatchStopTime();
+		Mockito.doReturn(2).when(l0SlicePatternSettings).getMGroupSatId();
+		Mockito.doReturn(1).when(l0SlicePatternSettings).getMGroupMissionId();
+		Mockito.doReturn(4).when(l0SlicePatternSettings).getMGroupAcquisition();
+		Mockito.doReturn(6).when(l0SlicePatternSettings).getMGroupStartTime();
+		Mockito.doReturn(7).when(l0SlicePatternSettings).getMGroupStopTime();
 	}
 
 	@Test

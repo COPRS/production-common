@@ -15,7 +15,7 @@ public class ThreadPoolTaskSchedulerConfig {
 	/**
 	 * URI of KAFKA cluster
 	 */
-	@Value("${job-generator.maxnumberoftasktables}")
+	@Value("${job-generator.maxnboftasktable}")
 	protected int poolSize;
 
 	@Bean(name="jobGenerationTaskScheduler", destroyMethod = "shutdown")

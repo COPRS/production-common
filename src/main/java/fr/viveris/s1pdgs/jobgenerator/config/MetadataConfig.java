@@ -13,8 +13,13 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class MetadataConfig {
 	
+	/**
+	 * Template used for querying REST around metadata
+	 * @param builder
+	 * @return
+	 */
 	@Bean(name = "restMetadataTemplate")
-	public RestTemplate restMetadataTemplate(RestTemplateBuilder builder) {
+	public RestTemplate restMetadataTemplate(final RestTemplateBuilder builder) {
 		return builder.build();
 	}
 
