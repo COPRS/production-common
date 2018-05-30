@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.controller.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Exchanged object in the topic t-pdgs-l0-jobs.</br>
@@ -21,7 +22,10 @@ public class JobDto {
 	 * Local work directory for launching the job
 	 */
 	private String workDirectory;
-	
+
+	/**
+	 * Local path to the job order
+	 */
 	private String jobOrder;
 
 	/**
@@ -54,7 +58,7 @@ public class JobDto {
 	/**
 	 * Constructor from session identifier
 	 */
-	public JobDto(String productIdentifier, String workDirectory, String jobOrder) {
+	public JobDto(final String productIdentifier, final String workDirectory, final String jobOrder) {
 		this();
 		this.productIdentifier = productIdentifier;
 		this.workDirectory = workDirectory;
@@ -69,9 +73,10 @@ public class JobDto {
 	}
 
 	/**
-	 * @param productIdentifier the productIdentifier to set
+	 * @param productIdentifier
+	 *            the productIdentifier to set
 	 */
-	public void setProductIdentifier(String productIdentifier) {
+	public void setProductIdentifier(final String productIdentifier) {
 		this.productIdentifier = productIdentifier;
 	}
 
@@ -86,7 +91,7 @@ public class JobDto {
 	 * @param workDirectory
 	 *            the workDirectory to set
 	 */
-	public void setWorkDirectory(String workDirectory) {
+	public void setWorkDirectory(final String workDirectory) {
 		this.workDirectory = workDirectory;
 	}
 
@@ -98,9 +103,10 @@ public class JobDto {
 	}
 
 	/**
-	 * @param jobOrder the jobOrder to set
+	 * @param jobOrder
+	 *            the jobOrder to set
 	 */
-	public void setJobOrder(String jobOrder) {
+	public void setJobOrder(final String jobOrder) {
 		this.jobOrder = jobOrder;
 	}
 
@@ -115,7 +121,7 @@ public class JobDto {
 	 * @param inputs
 	 *            the inputs to set
 	 */
-	public void setInputs(List<JobInputDto> inputs) {
+	public void setInputs(final List<JobInputDto> inputs) {
 		this.inputs = inputs;
 	}
 
@@ -123,7 +129,7 @@ public class JobDto {
 	 * @param inputs
 	 *            the inputs to set
 	 */
-	public void addInputs(List<JobInputDto> inputs) {
+	public void addInputs(final List<JobInputDto> inputs) {
 		this.inputs.addAll(inputs);
 	}
 
@@ -131,7 +137,7 @@ public class JobDto {
 	 * @param inputs
 	 *            the inputs to set
 	 */
-	public void addInput(JobInputDto input) {
+	public void addInput(final JobInputDto input) {
 		this.inputs.add(input);
 	}
 
@@ -146,7 +152,7 @@ public class JobDto {
 	 * @param outputs
 	 *            the outputs to set
 	 */
-	public void setOutputs(List<JobOutputDto> outputs) {
+	public void setOutputs(final List<JobOutputDto> outputs) {
 		this.outputs = outputs;
 	}
 
@@ -154,7 +160,7 @@ public class JobDto {
 	 * @param outputs
 	 *            the outputs to set
 	 */
-	public void addOutputs(List<JobOutputDto> outputs) {
+	public void addOutputs(final List<JobOutputDto> outputs) {
 		this.outputs.addAll(outputs);
 	}
 
@@ -162,7 +168,7 @@ public class JobDto {
 	 * @param outputs
 	 *            the outputs to set
 	 */
-	public void addOutput(JobOutputDto output) {
+	public void addOutput(final JobOutputDto output) {
 		this.outputs.add(output);
 	}
 
@@ -177,7 +183,7 @@ public class JobDto {
 	 * @param pools
 	 *            the pools to set
 	 */
-	public void setPools(List<JobPoolDto> pools) {
+	public void setPools(final List<JobPoolDto> pools) {
 		this.pools = pools;
 	}
 
@@ -185,80 +191,47 @@ public class JobDto {
 	 * @param pools
 	 *            the pools to set
 	 */
-	public void addPools(List<JobPoolDto> pools) {
-		this.pools.addAll(pools);
-	}
-
-	/**
-	 * @param pools
-	 *            the pools to set
-	 */
-	public void addPool(JobPoolDto pool) {
+	public void addPool(final JobPoolDto pool) {
 		this.pools.add(pool);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * to string
 	 */
 	@Override
 	public String toString() {
-		return "{productIdentifier: " + productIdentifier + ", workDirectory: " + workDirectory + ", jobOrder: "
-				+ jobOrder + ", inputs: " + inputs + ", outputs: " + outputs + ", pools: " + pools + "}";
+		return String.format(
+				"{productIdentifier: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s}",
+				productIdentifier, workDirectory, jobOrder, inputs, outputs, pools);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * hash code
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((inputs == null) ? 0 : inputs.hashCode());
-		result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
-		result = prime * result + ((pools == null) ? 0 : pools.hashCode());
-		result = prime * result + ((productIdentifier == null) ? 0 : productIdentifier.hashCode());
-		result = prime * result + ((workDirectory == null) ? 0 : workDirectory.hashCode());
-		return result;
+		return Objects.hash(productIdentifier, workDirectory, jobOrder, inputs, outputs, pools);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * equals
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobDto other = (JobDto) obj;
-		if (inputs == null) {
-			if (other.inputs != null)
-				return false;
-		} else if (!inputs.equals(other.inputs))
-			return false;
-		if (outputs == null) {
-			if (other.outputs != null)
-				return false;
-		} else if (!outputs.equals(other.outputs))
-			return false;
-		if (pools == null) {
-			if (other.pools != null)
-				return false;
-		} else if (!pools.equals(other.pools))
-			return false;
-		if (productIdentifier == null) {
-			if (other.productIdentifier != null)
-				return false;
-		} else if (!productIdentifier.equals(other.productIdentifier))
-			return false;
-		if (workDirectory == null) {
-			if (other.workDirectory != null)
-				return false;
-		} else if (!workDirectory.equals(other.workDirectory))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobDto other = (JobDto) obj;
+			ret = Objects.equals(productIdentifier, other.productIdentifier)
+					&& Objects.equals(workDirectory, other.workDirectory) && Objects.equals(jobOrder, other.jobOrder)
+					&& Objects.equals(inputs, other.inputs) && Objects.equals(outputs, other.outputs)
+					&& Objects.equals(pools, other.pools);
+		}
+		return ret;
+
 	}
-	
+
 }

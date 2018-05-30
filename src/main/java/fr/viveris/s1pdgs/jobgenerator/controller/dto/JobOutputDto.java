@@ -1,18 +1,21 @@
 package fr.viveris.s1pdgs.jobgenerator.controller.dto;
 
+import java.util.Objects;
+
 /**
  * DTO object reprsenting an output of a job
+ * 
  * @author Cyrielle Gailliard
  * @see JobDto
  *
  */
 public class JobOutputDto {
-	
+
 	/**
 	 * Family of the output
 	 */
 	private String family;
-	
+
 	/**
 	 * The regular expression
 	 */
@@ -22,15 +25,16 @@ public class JobOutputDto {
 	 * Default constructor
 	 */
 	public JobOutputDto() {
-		
+		super();
 	}
 
 	/**
 	 * Constructor
+	 * 
 	 * @param family
 	 * @param regexp
 	 */
-	public JobOutputDto(String family, String regexp) {
+	public JobOutputDto(final String family, final String regexp) {
 		this();
 		this.family = family;
 		this.regexp = regexp;
@@ -44,9 +48,10 @@ public class JobOutputDto {
 	}
 
 	/**
-	 * @param family the family to set
+	 * @param family
+	 *            the family to set
 	 */
-	public void setFamily(String family) {
+	public void setFamily(final String family) {
 		this.family = family;
 	}
 
@@ -58,55 +63,44 @@ public class JobOutputDto {
 	}
 
 	/**
-	 * @param regexp the regexp to set
+	 * @param regexp
+	 *            the regexp to set
 	 */
-	public void setRegexp(String regexp) {
+	public void setRegexp(final String regexp) {
 		this.regexp = regexp;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * to string
 	 */
 	@Override
 	public String toString() {
-		return "JobOutputDto [family=" + family + ", regexp=" + regexp + "]";
+		return String.format("{family: %s, regexp: %s}", family, regexp);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * hash code
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((family == null) ? 0 : family.hashCode());
-		result = prime * result + ((regexp == null) ? 0 : regexp.hashCode());
-		return result;
+		return Objects.hash(family, regexp);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Equals
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOutputDto other = (JobOutputDto) obj;
-		if (family == null) {
-			if (other.family != null)
-				return false;
-		} else if (!family.equals(other.family))
-			return false;
-		if (regexp == null) {
-			if (other.regexp != null)
-				return false;
-		} else if (!regexp.equals(other.regexp))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobOutputDto other = (JobOutputDto) obj;
+			ret = Objects.equals(family, other.family) && Objects.equals(regexp, other.regexp);
+		}
+		return ret;
 	}
 
 }

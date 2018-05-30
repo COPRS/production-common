@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.controller.dto;
 
+import java.util.Objects;
+
 /**
  * DTO object representing a task to be executed for the job
  * @author Cyrielle Gailliard
@@ -17,14 +19,14 @@ public class JobTaskDto {
 	 * Default constructor
 	 */
 	public JobTaskDto() {
-		
+		super();
 	}
 
 	/**
 	 * Constructor using fields
 	 * @param binaryPath
 	 */
-	public JobTaskDto(String binaryPath) {
+	public JobTaskDto(final String binaryPath) {
 		this();
 		this.binaryPath = binaryPath;
 	}
@@ -39,47 +41,42 @@ public class JobTaskDto {
 	/**
 	 * @param binaryPath the binaryPath to set
 	 */
-	public void setBinaryPath(String binaryPath) {
+	public void setBinaryPath(final String binaryPath) {
 		this.binaryPath = binaryPath;
 	}
+	
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * to string
 	 */
 	@Override
 	public String toString() {
-		return "JobTaskDto [binaryPath=" + binaryPath + "]";
+		return String.format("{binaryPath: %s}", binaryPath);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * hash code
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((binaryPath == null) ? 0 : binaryPath.hashCode());
-		return result;
+		return Objects.hash(binaryPath);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * equals
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobTaskDto other = (JobTaskDto) obj;
-		if (binaryPath == null) {
-			if (other.binaryPath != null)
-				return false;
-		} else if (!binaryPath.equals(other.binaryPath))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobTaskDto other = (JobTaskDto) obj;
+			ret = Objects.equals(binaryPath, other.binaryPath);
+		}
+		return ret;
 	}
 
 }

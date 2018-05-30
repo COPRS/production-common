@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.controller.dto;
 
+import java.util.Objects;
+
 /**
  * Exchanged object in the topic t-pdgs-edrs-sessions
  * 
@@ -12,22 +14,22 @@ public class EdrsSessionDto {
 	 * Object storage key in the bucket of EDRS session files
 	 */
 	private String objectStorageKey;
-	
+
 	/**
 	 * AbstractProduct type: SESSION or RAW
 	 */
 	private String productType;
-	
+
 	/**
 	 * Channel identifier
 	 */
 	private int channelId;
-	
+
 	/**
 	 * Mission identifier
 	 */
 	private String missionId;
-	
+
 	/**
 	 * Satellite identifier
 	 */
@@ -37,13 +39,14 @@ public class EdrsSessionDto {
 	 * Default constructor
 	 */
 	public EdrsSessionDto() {
-
+		super();
 	}
 
 	/**
 	 * Default constructor
 	 */
-	public EdrsSessionDto(String objectStorageKey, int channelId, String productType, String missionId, String satelliteId) {
+	public EdrsSessionDto(final String objectStorageKey, final int channelId, final String productType,
+			final String missionId, final String satelliteId) {
 		this();
 		this.objectStorageKey = objectStorageKey;
 		this.channelId = channelId;
@@ -63,7 +66,7 @@ public class EdrsSessionDto {
 	 * @param objectStorageKey
 	 *            the objectStorageKey to set
 	 */
-	public void setObjectStorageKey(String objectStorageKey) {
+	public void setObjectStorageKey(final String objectStorageKey) {
 		this.objectStorageKey = objectStorageKey;
 	}
 
@@ -75,9 +78,10 @@ public class EdrsSessionDto {
 	}
 
 	/**
-	 * @param type the type to set
+	 * @param type
+	 *            the type to set
 	 */
-	public void setProductType(String productType) {
+	public void setProductType(final String productType) {
 		this.productType = productType;
 	}
 
@@ -89,9 +93,10 @@ public class EdrsSessionDto {
 	}
 
 	/**
-	 * @param channelId the channelId to set
+	 * @param channelId
+	 *            the channelId to set
 	 */
-	public void setChannelId(int channelId) {
+	public void setChannelId(final int channelId) {
 		this.channelId = channelId;
 	}
 
@@ -103,9 +108,10 @@ public class EdrsSessionDto {
 	}
 
 	/**
-	 * @param missionId the missionId to set
+	 * @param missionId
+	 *            the missionId to set
 	 */
-	public void setMissionId(String missionId) {
+	public void setMissionId(final String missionId) {
 		this.missionId = missionId;
 	}
 
@@ -117,71 +123,47 @@ public class EdrsSessionDto {
 	}
 
 	/**
-	 * @param satelliteId the satelliteId to set
+	 * @param satelliteId
+	 *            the satelliteId to set
 	 */
-	public void setSatelliteId(String satelliteId) {
+	public void setSatelliteId(final String satelliteId) {
 		this.satelliteId = satelliteId;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * To string
 	 */
 	@Override
 	public String toString() {
-		return "EdrsSessionDto [objectStorageKey=" + objectStorageKey + ", productType=" + productType + ", channelId="
-				+ channelId + ", missionId=" + missionId + ", satelliteId=" + satelliteId + "]";
+		return String.format("{objectStorageKey: %s, productType: %s, channelId: %s, missionId: %s, satelliteId: %s}",
+				objectStorageKey, productType, channelId, missionId, satelliteId);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * Hash code
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + channelId;
-		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
-		result = prime * result + ((objectStorageKey == null) ? 0 : objectStorageKey.hashCode());
-		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
-		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		return result;
+		return Objects.hash(channelId, missionId, objectStorageKey, productType, satelliteId);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Equals
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		EdrsSessionDto other = (EdrsSessionDto) obj;
-		if (channelId != other.channelId)
-			return false;
-		if (missionId == null) {
-			if (other.missionId != null)
-				return false;
-		} else if (!missionId.equals(other.missionId))
-			return false;
-		if (objectStorageKey == null) {
-			if (other.objectStorageKey != null)
-				return false;
-		} else if (!objectStorageKey.equals(other.objectStorageKey))
-			return false;
-		if (productType == null) {
-			if (other.productType != null)
-				return false;
-		} else if (!productType.equals(other.productType))
-			return false;
-		if (satelliteId == null) {
-			if (other.satelliteId != null)
-				return false;
-		} else if (!satelliteId.equals(other.satelliteId))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			EdrsSessionDto other = (EdrsSessionDto) obj;
+			ret = channelId == other.channelId && Objects.equals(missionId, other.missionId)
+					&& Objects.equals(objectStorageKey, other.objectStorageKey)
+					&& Objects.equals(productType, other.productType) && Objects.equals(satelliteId, other.satelliteId);
+		}
+		return ret;
 	}
 
 }

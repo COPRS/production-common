@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import fr.viveris.s1pdgs.jobgenerator.controller.EdrsSessionsConsumer;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.EdrsSessionDto;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
@@ -205,6 +204,20 @@ public class EdrsSessionConsumerTest {
 		Mockito.verify(edrsSessionFileService, times(2)).createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"));
 		assertTrue("One session shall be cached", s.size() == 1);
 		assertTrue("The cached session shall be L20171109175634707000125", s.containsKey("L20171109175634707000125"));
+	}
+
+	@Test
+	public void testReceivedInvalidProductChannel() throws Exception {
+		EdrsSessionsConsumer edrsSessionsConsumer = new EdrsSessionsConsumer(jobsDispatcher, edrsSessionFileService,
+				10000, 2);
+		EdrsSessionDto dto1 = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 3, "SESSION", "S1", "A");
+		
+		Map<String, EdrsSessionProduct> s = this.getCachedSessions(edrsSessionsConsumer);
+
+		edrsSessionsConsumer.receive(dto1);
+		Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
+		Mockito.verify(edrsSessionFileService, Mockito.never()).createSessionFile(Mockito.any());
+		assertTrue("No session should be cached", s.size() == 0);
 	}
 
 	@Test

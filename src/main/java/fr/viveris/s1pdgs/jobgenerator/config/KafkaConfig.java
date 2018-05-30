@@ -24,7 +24,6 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.EdrsSessionDto;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.L0SliceDto;
@@ -209,15 +208,5 @@ public class KafkaConfig {
 	@Bean(name = "kafkaJobsTemplate")
 	public KafkaTemplate<String, JobDto> kafkaTemplate() {
 		return new KafkaTemplate<>(producerFactory());
-	}
-
-	/**
-	 * KAFKA producer
-	 * 
-	 * @return
-	 */
-	@Bean(name = "kafkaJobsSender")
-	public JobsProducer sender() {
-		return new JobsProducer();
 	}
 }

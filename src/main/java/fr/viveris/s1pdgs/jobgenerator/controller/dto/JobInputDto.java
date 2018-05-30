@@ -1,9 +1,12 @@
 package fr.viveris.s1pdgs.jobgenerator.controller.dto;
 
+import java.util.Objects;
+
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 
 /**
  * DTO object used to describe a input in the job kafka topic
+ * 
  * @author Cyrielle Gailliard
  * @see JobDto
  *
@@ -29,7 +32,7 @@ public class JobInputDto {
 	private String contentRef;
 
 	public JobInputDto() {
-
+		super();
 	}
 
 	/**
@@ -37,7 +40,7 @@ public class JobInputDto {
 	 * @param localPath
 	 * @param contentRef
 	 */
-	public JobInputDto(String family, String localPath, String contentRef) {
+	public JobInputDto(final String family, final String localPath, final String contentRef) {
 		this();
 		this.family = family;
 		this.localPath = localPath;
@@ -55,7 +58,7 @@ public class JobInputDto {
 	 * @param family
 	 *            the family to set
 	 */
-	public void setFamily(String family) {
+	public void setFamily(final String family) {
 		this.family = family;
 	}
 
@@ -70,7 +73,7 @@ public class JobInputDto {
 	 * @param localPath
 	 *            the localPath to set
 	 */
-	public void setLocalPath(String localPath) {
+	public void setLocalPath(final String localPath) {
 		this.localPath = localPath;
 	}
 
@@ -85,65 +88,42 @@ public class JobInputDto {
 	 * @param contentRef
 	 *            the contentRef to set
 	 */
-	public void setContentRef(String contentRef) {
+	public void setContentRef(final String contentRef) {
 		this.contentRef = contentRef;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
+	/**
+	 * to string
 	 */
 	@Override
 	public String toString() {
-		return "JobInputDto [family=" + family + ", localPath=" + localPath + ", contentRef=" + contentRef + "]";
+		return String.format("{family: %s, localPath: %s, contentRef: %s}", family, localPath, contentRef);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * Hash code
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((contentRef == null) ? 0 : contentRef.hashCode());
-		result = prime * result + ((family == null) ? 0 : family.hashCode());
-		result = prime * result + ((localPath == null) ? 0 : localPath.hashCode());
-		return result;
+		return Objects.hash(contentRef, family, localPath);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Equals
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobInputDto other = (JobInputDto) obj;
-		if (contentRef == null) {
-			if (other.contentRef != null)
-				return false;
-		} else if (!contentRef.equals(other.contentRef))
-			return false;
-		if (family == null) {
-			if (other.family != null)
-				return false;
-		} else if (!family.equals(other.family))
-			return false;
-		if (localPath == null) {
-			if (other.localPath != null)
-				return false;
-		} else if (!localPath.equals(other.localPath))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobInputDto other = (JobInputDto) obj;
+			ret = Objects.equals(contentRef, other.contentRef) && Objects.equals(family, other.family)
+					&& Objects.equals(localPath, other.localPath);
+		}
+		return ret;
 	}
 
 }

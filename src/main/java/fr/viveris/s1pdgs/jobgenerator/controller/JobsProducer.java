@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
 
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
 import fr.viveris.s1pdgs.jobgenerator.exception.KafkaSendException;
@@ -18,6 +19,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.KafkaSendException;
  * @author Cyrielle Gailliard
  *
  */
+@Component
 public class JobsProducer {
 
 	/**
@@ -28,14 +30,24 @@ public class JobsProducer {
 	/**
 	 * KAFKA template producer
 	 */
-	@Autowired
-	private KafkaTemplate<String, JobDto> kafkaJobsTemplate;
+	private final KafkaTemplate<String, JobDto> kafkaJobsTemplate;
 
 	/**
 	 * Topic name used for L0 jobs
 	 */
-	@Value("${kafka.topics.lx-jobs}")
-	String kafkaTopic;
+	private final String kafkaTopic;
+
+	/**
+	 * Constructor
+	 * @param kafkaJobsTemplate
+	 * @param kafkaTopic
+	 */
+	@Autowired
+	public JobsProducer(final KafkaTemplate<String, JobDto> kafkaJobsTemplate, @Value("${kafka.topics.lx-jobs}") final String kafkaTopic) {
+		this.kafkaJobsTemplate = kafkaJobsTemplate;
+		this.kafkaTopic = kafkaTopic;
+		
+	}
 
 	/**
 	 * Send a message asynchronously to a topic
@@ -43,7 +55,7 @@ public class JobsProducer {
 	 * @param customer
 	 * @throws KafkaSendException 
 	 */
-	public void send(JobDto dto) throws KafkaSendException {
+	public void send(final JobDto dto) throws KafkaSendException {
 		try {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("[send] Send job = {}", dto);

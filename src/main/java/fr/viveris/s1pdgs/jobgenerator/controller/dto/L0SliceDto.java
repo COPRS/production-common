@@ -1,7 +1,10 @@
 package fr.viveris.s1pdgs.jobgenerator.controller.dto;
 
+import java.util.Objects;
+
 /**
  * DTO class for L0 slices
+ * 
  * @author Cyrielle Gailliard
  *
  */
@@ -10,7 +13,7 @@ public class L0SliceDto {
 	 * AbstractProduct name of the metadata to index
 	 */
 	private String productName;
-	
+
 	/**
 	 * ObjectkeyStorage of the metatdata to index
 	 */
@@ -20,14 +23,14 @@ public class L0SliceDto {
 	 * Default constructor
 	 */
 	public L0SliceDto() {
-		
+		super();
 	}
 
 	/**
 	 * @param productName
 	 * @param keyObjectStorage
 	 */
-	public L0SliceDto(String productName, String keyObjectStorage) {
+	public L0SliceDto(final String productName, final String keyObjectStorage) {
 		this();
 		this.productName = productName;
 		this.keyObjectStorage = keyObjectStorage;
@@ -41,9 +44,10 @@ public class L0SliceDto {
 	}
 
 	/**
-	 * @param productName the productName to set
+	 * @param productName
+	 *            the productName to set
 	 */
-	public void setProductName(String productName) {
+	public void setProductName(final String productName) {
 		this.productName = productName;
 	}
 
@@ -55,55 +59,45 @@ public class L0SliceDto {
 	}
 
 	/**
-	 * @param keyObjectStorage the keyObjectStorage to set
+	 * @param keyObjectStorage
+	 *            the keyObjectStorage to set
 	 */
-	public void setKeyObjectStorage(String keyObjectStorage) {
+	public void setKeyObjectStorage(final String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * To string
 	 */
 	@Override
 	public String toString() {
-		return "L0SliceDto [productName=" + productName + ", keyObjectStorage=" + keyObjectStorage + "]";
+		return String.format("{productName: %s, keyObjectStorage: %s}", productName, keyObjectStorage);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * Hash code
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		return result;
+		return Objects.hash(keyObjectStorage, productName);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Equals
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		L0SliceDto other = (L0SliceDto) obj;
-		if (keyObjectStorage == null) {
-			if (other.keyObjectStorage != null)
-				return false;
-		} else if (!keyObjectStorage.equals(other.keyObjectStorage))
-			return false;
-		if (productName == null) {
-			if (other.productName != null)
-				return false;
-		} else if (!productName.equals(other.productName))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			L0SliceDto other = (L0SliceDto) obj;
+			ret = Objects.equals(keyObjectStorage, other.keyObjectStorage)
+					&& Objects.equals(productName, other.productName);
+		}
+		return ret;
 	}
 
 }
