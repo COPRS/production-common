@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.model.metadata;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 /**
  * Class describing the metdata of a file
@@ -10,6 +11,9 @@ import java.time.format.DateTimeFormatter;
  */
 public abstract class AbstractMetadata {
 
+	/**
+	 * 
+	 */
 	public final static DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
 	/**
@@ -38,43 +42,20 @@ public abstract class AbstractMetadata {
 	protected String validityStop;
 
 	/**
-	 * Constrcutor using fields
-	 * 
 	 * @param productName
 	 * @param productType
 	 * @param keyObjectStorage
 	 * @param validityStart
 	 * @param validityStop
 	 */
-	public AbstractMetadata() {
-		super();
-	}
-
-	/**
-	 * @param productName
-	 * @param productType
-	 * @param keyObjectStorage
-	 * @param validityStart
-	 * @param validityStop
-	 */
-	public AbstractMetadata(String productName, String productType, String keyObjectStorage, String validityStart,
-			String validityStop) {
+	public AbstractMetadata(final String productName, final String productType, final String keyObjectStorage, final String validityStart,
+			final String validityStop) {
 		super();
 		this.productName = productName;
 		this.productType = productType;
 		this.keyObjectStorage = keyObjectStorage;
 		this.validityStart = validityStart;
 		this.validityStop = validityStop;
-	}
-
-	/**
-	 * Clone
-	 * 
-	 * @param obj
-	 */
-	public AbstractMetadata(AbstractMetadata obj) {
-		this(obj.getProductName(), obj.getProductType(), obj.getKeyObjectStorage(), obj.getValidityStart(),
-				obj.getValidityStop());
 	}
 
 	/**
@@ -88,7 +69,7 @@ public abstract class AbstractMetadata {
 	 * @param productName
 	 *            the productName to set
 	 */
-	public void setProductName(String productName) {
+	public void setProductName(final String productName) {
 		this.productName = productName;
 	}
 
@@ -103,7 +84,7 @@ public abstract class AbstractMetadata {
 	 * @param keyObjectStorage
 	 *            the keyObjectStorage to set
 	 */
-	public void setKeyObjectStorage(String keyObjectStorage) {
+	public void setKeyObjectStorage(final String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
@@ -118,7 +99,7 @@ public abstract class AbstractMetadata {
 	 * @param validityStart
 	 *            the validityStart to set
 	 */
-	public void setValidityStart(String validityStart) {
+	public void setValidityStart(final String validityStart) {
 		this.validityStart = validityStart;
 	}
 
@@ -133,7 +114,7 @@ public abstract class AbstractMetadata {
 	 * @param validityStop
 	 *            the validityStop to set
 	 */
-	public void setValidityStop(String validityStop) {
+	public void setValidityStop(final String validityStop) {
 		this.validityStop = validityStop;
 	}
 
@@ -148,76 +129,53 @@ public abstract class AbstractMetadata {
 	 * @param productType
 	 *            the productType to set
 	 */
-	public void setProductType(String productType) {
+	public void setProductType(final String productType) {
 		this.productType = productType;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "AbstractMetadata [productName=" + productName + ", productType=" + productType + ", keyObjectStorage="
-				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop=" + validityStop + "]";
+		return String.format(
+				"{productName: %s, productType: %s, keyObjectStorage: %s, validityStart: %s, validityStop: %s}",
+				productName, productType, keyObjectStorage, validityStart, validityStop);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
+	 *
+	 */
+	public String toAbstractString() {
+		return String.format(
+				"productName: %s, productType: %s, keyObjectStorage: %s, validityStart: %s, validityStop: %s",
+				productName, productType, keyObjectStorage, validityStart, validityStop);
+	}
+
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
-		result = prime * result + ((validityStart == null) ? 0 : validityStart.hashCode());
-		result = prime * result + ((validityStop == null) ? 0 : validityStop.hashCode());
-		return result;
+		return Objects.hash(productName, productType, keyObjectStorage, validityStart, validityStop);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractMetadata other = (AbstractMetadata) obj;
-		if (keyObjectStorage == null) {
-			if (other.keyObjectStorage != null)
-				return false;
-		} else if (!keyObjectStorage.equals(other.keyObjectStorage))
-			return false;
-		if (productName == null) {
-			if (other.productName != null)
-				return false;
-		} else if (!productName.equals(other.productName))
-			return false;
-		if (productType == null) {
-			if (other.productType != null)
-				return false;
-		} else if (!productType.equals(other.productType))
-			return false;
-		if (validityStart == null) {
-			if (other.validityStart != null)
-				return false;
-		} else if (!validityStart.equals(other.validityStart))
-			return false;
-		if (validityStop == null) {
-			if (other.validityStop != null)
-				return false;
-		} else if (!validityStop.equals(other.validityStop))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			AbstractMetadata other = (AbstractMetadata) obj;
+			ret = Objects.equals(productName, other.productName) && Objects.equals(productType, other.productType)
+					&& Objects.equals(keyObjectStorage, other.keyObjectStorage) && Objects.equals(validityStart, other.validityStart)
+					&& Objects.equals(validityStop, other.validityStop);
+		}
+		return ret;
 	}
-
 }

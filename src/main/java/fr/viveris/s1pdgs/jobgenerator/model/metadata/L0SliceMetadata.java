@@ -1,27 +1,38 @@
 package fr.viveris.s1pdgs.jobgenerator.model.metadata;
 
-public class L0SliceMetadata extends AbstractMetadata {
-	
-	private int instrumentConfigurationId;
-	
-	private int numberSlice;
-	
-	private String datatakeId;
+import java.util.Objects;
 
-	public L0SliceMetadata() {
-		super();
-		numberSlice = 0;
-		instrumentConfigurationId = -1;
-	}
+/**
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class L0SliceMetadata extends AbstractMetadata {
+
+	/**
+	 * Instrument configuration identifier
+	 */
+	private int insConfId;
+
+	/**
+	 * Slice number
+	 */
+	private int numberSlice;
+
+	/**
+	 * Data take identifier
+	 */
+	private String datatakeId;
 
 	/**
 	 * @param instrumentConfigurationId
 	 * @param numberSlice
 	 */
-	public L0SliceMetadata(String productName, String productType, String keyObjectStorage, String validityStart,
-			String validityStop, int instrumentConfigurationId, int numberSlice, String dataTakeId) {
+	public L0SliceMetadata(final String productName, final String productType, final String keyObjectStorage,
+			final String validityStart, final String validityStop, final int insConfId, final int numberSlice,
+			final String dataTakeId) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
-		this.instrumentConfigurationId = instrumentConfigurationId;
+		this.insConfId = insConfId;
 		this.numberSlice = numberSlice;
 		this.datatakeId = dataTakeId;
 	}
@@ -29,15 +40,16 @@ public class L0SliceMetadata extends AbstractMetadata {
 	/**
 	 * @return the instrumentConfigurationId
 	 */
-	public int getInstrumentConfigurationId() {
-		return instrumentConfigurationId;
+	public int getInsConfId() {
+		return insConfId;
 	}
 
 	/**
-	 * @param instrumentConfigurationId the instrumentConfigurationId to set
+	 * @param instrumentConfigurationId
+	 *            the instrumentConfigurationId to set
 	 */
-	public void setInstrumentConfigurationId(int instrumentConfigurationId) {
-		this.instrumentConfigurationId = instrumentConfigurationId;
+	public void setInsConfId(final int instrumentConfigurationId) {
+		this.insConfId = instrumentConfigurationId;
 	}
 
 	/**
@@ -48,9 +60,10 @@ public class L0SliceMetadata extends AbstractMetadata {
 	}
 
 	/**
-	 * @param numberSlice the numberSlice to set
+	 * @param numberSlice
+	 *            the numberSlice to set
 	 */
-	public void setNumberSlice(int numberSlice) {
+	public void setNumberSlice(final int numberSlice) {
 		this.numberSlice = numberSlice;
 	}
 
@@ -62,56 +75,47 @@ public class L0SliceMetadata extends AbstractMetadata {
 	}
 
 	/**
-	 * @param datatakeId the datatakeId to set
+	 * @param datatakeId
+	 *            the datatakeId to set
 	 */
-	public void setDatatakeId(String datatakeId) {
+	public void setDatatakeId(final String datatakeId) {
 		this.datatakeId = datatakeId;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "L0SliceMetadata [instrumentConfigurationId=" + instrumentConfigurationId + ", numberSlice="
-				+ numberSlice + ", datatakeId=" + datatakeId + "]";
+		String superToString = super.toAbstractString();
+		return String.format("{%s, insConfId: %s, numberSlice: %s, datatakeId: %s}", superToString,
+				insConfId, numberSlice, datatakeId);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((datatakeId == null) ? 0 : datatakeId.hashCode());
-		result = prime * result + instrumentConfigurationId;
-		result = prime * result + numberSlice;
-		return result;
+		int superHash = super.hashCode();
+		return Objects.hash(insConfId, numberSlice, datatakeId, superHash);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		L0SliceMetadata other = (L0SliceMetadata) obj;
-		if (datatakeId == null) {
-			if (other.datatakeId != null)
-				return false;
-		} else if (!datatakeId.equals(other.datatakeId))
-			return false;
-		if (instrumentConfigurationId != other.instrumentConfigurationId)
-			return false;
-		if (numberSlice != other.numberSlice)
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			L0SliceMetadata other = (L0SliceMetadata) obj;
+			ret = super.equals(other) && insConfId == other.insConfId && numberSlice == other.numberSlice
+					&& Objects.equals(datatakeId, other.datatakeId);
+		}
+		return ret;
 	}
-
 }

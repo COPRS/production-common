@@ -1,10 +1,11 @@
 package fr.viveris.s1pdgs.jobgenerator.model.metadata;
 
+/**
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 public class EdrsSessionMetadata extends AbstractMetadata {
-
-	public EdrsSessionMetadata() {
-		super();
-	}
 
 	/**
 	 * @param productName
@@ -13,8 +14,8 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	 * @param validityStart
 	 * @param validityStop
 	 */
-	public EdrsSessionMetadata(String productName, String productType, String keyObjectStorage, String validityStart,
-			String validityStop) {
+	public EdrsSessionMetadata(final String productName, final String productType, final String keyObjectStorage,
+			final String validityStart, final String validityStop) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
 	}
 

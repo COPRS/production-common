@@ -36,7 +36,7 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 		try {
 			L0SliceMetadata file = this.metadataService.getSlice("blank", job.getProduct().getIdentifier());
 			job.getProduct().setProductType(file.getProductType());
-			job.getProduct().setInsConfId(file.getInstrumentConfigurationId());
+			job.getProduct().setInsConfId(file.getInsConfId());
 			job.getProduct().getObject().setNumberSlice(file.getNumberSlice());
 			job.getProduct().getObject().setDataTakeId(file.getDatatakeId());
 		} catch (MetadataException e) {

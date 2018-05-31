@@ -146,7 +146,7 @@ public class MetadataServiceTest {
 			assertEquals(file, f.getKeyObjectStorage());
 			assertEquals("2017-12-13T12:16:23", f.getValidityStart());
 			assertEquals("2017-12-13T12:16:56", f.getValidityStop());
-			assertEquals(6, f.getInstrumentConfigurationId());
+			assertEquals(6, f.getInsConfId());
 			assertEquals(2, f.getNumberSlice());
 			assertEquals("021735", f.getDatatakeId());
 		} catch (MetadataException e) {
@@ -208,7 +208,7 @@ public class MetadataServiceTest {
 			assertEquals(fileA, f.getKeyObjectStorage());
 			assertEquals("2017-12-13T12:16:23", f.getValidityStart());
 			assertEquals("2017-12-13T12:16:56", f.getValidityStop());
-			assertEquals(6, f.getInstrumentConfigurationId());
+			assertEquals(6, f.getInsConfId());
 			assertEquals(2, f.getNumberOfSlices());
 			assertEquals("021735", f.getDatatakeId());
 		} catch (MetadataException e) {

@@ -7,13 +7,42 @@ import java.util.Date;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 
-public class DateUtils {
+/**
+ * Utilities around date
+ * 
+ * @author Cyrielle
+ *
+ */
+public final class DateUtils {
+	
+	/**
+	 * Default constructor
+	 */
+	private DateUtils() {
+		
+	}
 
-	public static Date convertDateIso(String dateStr) throws InternalErrorException {
+	/**
+	 * Convert a date in ISO format "yyyyMMdd'T'HHmmss"
+	 * 
+	 * @param dateStr
+	 * @return
+	 * @throws InternalErrorException
+	 */
+	public static Date convertDateIso(final String dateStr) throws InternalErrorException {
 		return convertWithSimpleDateFormat(dateStr, "yyyyMMdd'T'HHmmss");
 	}
 
-	public static Date convertWithSimpleDateFormat(String dateStr, String dateFormat) throws InternalErrorException {
+	/**
+	 * Convert a date from given format
+	 * 
+	 * @param dateStr
+	 * @param dateFormat
+	 * @return
+	 * @throws InternalErrorException
+	 */
+	public static Date convertWithSimpleDateFormat(final String dateStr, final String dateFormat)
+			throws InternalErrorException {
 		try {
 			DateFormat format = new SimpleDateFormat(dateFormat);
 			return format.parse(dateStr);

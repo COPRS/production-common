@@ -8,18 +8,21 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberTaskTablesReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
 
+/**
+ * 
+ * @param <T>
+ */
 public abstract class AbstractJobsDispatcher<T> {
 
 	/**
 	 * Job Generator settings
 	 */
-	protected final JobGeneratorSettings jobGeneratorSettings;
+	protected final JobGeneratorSettings settings;
 
 	/**
 	 * Available task table processors
@@ -29,58 +32,59 @@ public abstract class AbstractJobsDispatcher<T> {
 	/**
 	 * Scheduler containing the job generation processors
 	 */
-	protected final ThreadPoolTaskScheduler jobGenerationTaskScheduler;
+	protected final ThreadPoolTaskScheduler taskScheduler;
 
 	/**
 	 * Job generator factory
 	 */
-	protected final JobsGeneratorFactory jobsGeneratorFactory;
+	protected final JobsGeneratorFactory factory;
 
 	/**
 	 * Constructor
-	 * 
-	 * @param xmlConverter
-	 * @param s3Services
-	 * @param nbMaxSessions
-	 * @param nbMaxTaskTables
-	 * @throws BuildTaskTableException
-	 * @throws JobDispatcherException
+	 * @param settings
+	 * @param factory
+	 * @param taskScheduler
 	 */
-	public AbstractJobsDispatcher(final JobGeneratorSettings taskTablesSettings,
-			final JobsGeneratorFactory jobsGeneratorFactory, final ThreadPoolTaskScheduler jobGenerationTaskScheduler) {
-		this.jobsGeneratorFactory = jobsGeneratorFactory;
-		this.jobGeneratorSettings = taskTablesSettings;
-		this.generators = new HashMap<>(this.jobGeneratorSettings.getMaxnboftasktable());
-		this.jobGenerationTaskScheduler = jobGenerationTaskScheduler;
+	public AbstractJobsDispatcher(final JobGeneratorSettings settings, final JobsGeneratorFactory factory,
+			final ThreadPoolTaskScheduler taskScheduler) {
+		this.factory = factory;
+		this.settings = settings;
+		this.generators = new HashMap<>(this.settings.getMaxnboftasktable());
+		this.taskScheduler = taskScheduler;
 	}
 
 	/**
 	 * Initialize the task table processors
 	 * 
-	 * @throws BuildTaskTableException
-	 * @throws JobDispatcherException
+	 * @throws AbstractCodedException
 	 */
 	protected void initTaskTables() throws AbstractCodedException {
 		// Retrieve list of XML files in the directory
-		File directoryXml = new File(this.jobGeneratorSettings.getDiroftasktables());
+		File directoryXml = new File(this.settings.getDiroftasktables());
 		if (directoryXml != null && directoryXml.isDirectory()) {
 			File[] taskTableFiles = directoryXml.listFiles(parameter -> parameter.isFile());
 			if (taskTableFiles != null) {
-				if (taskTableFiles.length > this.jobGeneratorSettings.getMaxnboftasktable()) {
-					throw new MaxNumberTaskTablesReachException(String.format(
-							"Too much task tables %d", taskTableFiles.length));
+				if (taskTableFiles.length > this.settings.getMaxnboftasktable()) {
+					throw new MaxNumberTaskTablesReachException(
+							String.format("Too much task tables %d", taskTableFiles.length));
 				}
 				for (File taskTableFile : taskTableFiles) {
 					AbstractJobsGenerator<T> jobGenerator = this.createJobGenerator(taskTableFile);
 					generators.put(taskTableFile.getName(), jobGenerator);
-					this.jobGenerationTaskScheduler.scheduleAtFixedRate(jobGenerator,
-							jobGeneratorSettings.getJobgenfixedrate());
+					this.taskScheduler.scheduleAtFixedRate(jobGenerator, settings.getJobgenfixedrate());
 				}
 			}
 		}
 	}
 
-	protected abstract AbstractJobsGenerator<T> createJobGenerator(File xmlFile) throws AbstractCodedException;
+	/**
+	 * Create a job generator from the task table XML file
+	 * 
+	 * @param xmlFile
+	 * @return
+	 * @throws AbstractCodedException
+	 */
+	protected abstract AbstractJobsGenerator<T> createJobGenerator(final File xmlFile) throws AbstractCodedException;
 
 	/**
 	 * Dispatch an EDRS session file. <br/>
@@ -88,10 +92,8 @@ public abstract class AbstractJobsDispatcher<T> {
 	 * Else check all raws metadata exist and dispatch the session to the right task
 	 * table processor. <br/>
 	 * 
-	 * @param keyObjectStorage
-	 * @param channelId
-	 * @return
-	 * @throws JobDispatcherException
+	 * @param job
+	 * @throws AbstractCodedException
 	 */
-	public abstract void dispatch(Job<T> job) throws AbstractCodedException;
+	public abstract void dispatch(final Job<T> job) throws AbstractCodedException;
 }
