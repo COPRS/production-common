@@ -1,23 +1,26 @@
 package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
+import java.util.Objects;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Class of a dynamic parameter in the job order
+ * 
  * @author Cyrielle Gailliard
  *
  */
 @XmlAccessorType(XmlAccessType.NONE)
 public class JobOrderProcParam {
-	
+
 	/**
 	 * Parameter name
 	 */
 	@XmlElement(name = "Name")
 	private String name;
-	
+
 	/**
 	 * Parameter value
 	 */
@@ -33,10 +36,11 @@ public class JobOrderProcParam {
 
 	/**
 	 * Constructor using all fields
+	 * 
 	 * @param name
 	 * @param value
 	 */
-	public JobOrderProcParam(String name, String value) {
+	public JobOrderProcParam(final String name, final String value) {
 		this();
 		this.name = name;
 		this.value = value;
@@ -44,10 +48,11 @@ public class JobOrderProcParam {
 
 	/**
 	 * Clone
+	 * 
 	 * @param name
 	 * @param value
 	 */
-	public JobOrderProcParam(JobOrderProcParam obj) {
+	public JobOrderProcParam(final JobOrderProcParam obj) {
 		this(obj.getName(), obj.getValue());
 	}
 
@@ -59,9 +64,10 @@ public class JobOrderProcParam {
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param name
+	 *            the name to set
 	 */
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -73,55 +79,44 @@ public class JobOrderProcParam {
 	}
 
 	/**
-	 * @param value the value to set
+	 * @param value
+	 *            the value to set
 	 */
-	public void setValue(String value) {
+	public void setValue(final String value) {
 		this.value = value;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "JobOrderProcParam [name=" + name + ", value=" + value + "]";
+		return String.format("{name: %s, value: %s}", name, value);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		return result;
+		return Objects.hash(name, value);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOrderProcParam other = (JobOrderProcParam) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobOrderProcParam other = (JobOrderProcParam) obj;
+			ret = Objects.equals(name, other.name) && Objects.equals(value, other.value);
+		}
+		return ret;
 	}
-	
+
 }

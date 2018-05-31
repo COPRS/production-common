@@ -68,8 +68,8 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 			L1Routing routing = (L1Routing) xmlConverter.convertFromXMLToObject(this.pathRoutingXmlFile);
 			if (routing != null && routing.getRoutes() != null) {
 				routing.getRoutes().stream().forEach(route -> {
-					String key = route.getFrom().getAcquisition() + "_" + route.getFrom().getSatelliteId();
-					this.routingMap.put(key, route.getTo().getTaskTables());
+					String key = route.getRouteFrom().getAcquisition() + "_" + route.getRouteFrom().getSatelliteId();
+					this.routingMap.put(key, route.getRouteTo().getTaskTables());
 				});
 			}
 		} catch (IOException | JAXBException e) {

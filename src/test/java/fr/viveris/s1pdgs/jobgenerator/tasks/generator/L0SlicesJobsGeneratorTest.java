@@ -38,7 +38,7 @@ import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.TaskTable;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.service.metadata.MetadataService;
-import fr.viveris.s1pdgs.jobgenerator.utils.TestDateUtils;
+import fr.viveris.s1pdgs.jobgenerator.utils.DateUtils;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestGenericUtils;
 
 public class L0SlicesJobsGeneratorTest {
@@ -240,7 +240,7 @@ public class L0SlicesJobsGeneratorTest {
 			L0Slice sliceA = new L0Slice("IW");
 			L0SliceProduct productA = new L0SliceProduct(
 					"S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
-					TestDateUtils.convertDateIso("20171213T142312"), TestDateUtils.convertDateIso("20171213T142312"),
+					DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"),
 					sliceA);
 			Job<L0Slice> jobA = new Job<>(productA);
 

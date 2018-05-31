@@ -1,25 +1,49 @@
 package fr.viveris.s1pdgs.jobgenerator.model.l1routing;
 
+import java.util.Objects;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * Class used the from route<br/>
+ * Used for mapping the file routing.xml in java objects
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 @XmlRootElement(name = "l1_from")
 @XmlAccessorType(XmlAccessType.NONE)
 public class L1RouteFrom {
-	
+
+	/**
+	 * Acquisition (IW, EW, SM, EM)
+	 */
 	@XmlElement(name = "acquisition")
 	private String acquisition;
-	
+
+	/**
+	 * Satellite identifier (S1A, S1B)
+	 */
 	@XmlElement(name = "satellite_id")
 	private String satelliteId;
 
+	/**
+	 * Default constructor
+	 */
 	public L1RouteFrom() {
-		
+		super();
 	}
 
-	public L1RouteFrom(String acquisition, String satelliteId) {
+	/**
+	 * Constructor using field
+	 * 
+	 * @param acquisition
+	 * @param satelliteId
+	 */
+	public L1RouteFrom(final String acquisition, final String satelliteId) {
 		this();
 		this.acquisition = acquisition;
 		this.satelliteId = satelliteId;
@@ -33,9 +57,10 @@ public class L1RouteFrom {
 	}
 
 	/**
-	 * @param acquisition the acquisition to set
+	 * @param acquisition
+	 *            the acquisition to set
 	 */
-	public void setAcquisition(String acquisition) {
+	public void setAcquisition(final String acquisition) {
 		this.acquisition = acquisition;
 	}
 
@@ -47,55 +72,44 @@ public class L1RouteFrom {
 	}
 
 	/**
-	 * @param satelliteId the satelliteId to set
+	 * @param satelliteId
+	 *            the satelliteId to set
 	 */
-	public void setSatelliteId(String satelliteId) {
+	public void setSatelliteId(final String satelliteId) {
 		this.satelliteId = satelliteId;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "L1RouteFrom [acquisition=" + acquisition + ", satelliteId=" + satelliteId + "]";
+		return String.format("{acquisition: %s, satelliteId: %s}", acquisition, satelliteId);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((acquisition == null) ? 0 : acquisition.hashCode());
-		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		return result;
+		return Objects.hash(acquisition, satelliteId);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		L1RouteFrom other = (L1RouteFrom) obj;
-		if (acquisition == null) {
-			if (other.acquisition != null)
-				return false;
-		} else if (!acquisition.equals(other.acquisition))
-			return false;
-		if (satelliteId == null) {
-			if (other.satelliteId != null)
-				return false;
-		} else if (!satelliteId.equals(other.satelliteId))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			L1RouteFrom other = (L1RouteFrom) obj;
+			ret = Objects.equals(acquisition, other.acquisition) && Objects.equals(satelliteId, other.satelliteId);
+		}
+		return ret;
 	}
 
 }

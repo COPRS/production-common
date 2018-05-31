@@ -34,7 +34,7 @@ import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.L0SlicesJobsGenerator;
-import fr.viveris.s1pdgs.jobgenerator.utils.TestDateUtils;
+import fr.viveris.s1pdgs.jobgenerator.utils.DateUtils;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestL1Utils;
 
 public class L0SliceJobsDispatcherTest {
@@ -186,10 +186,10 @@ public class L0SliceJobsDispatcherTest {
 			L1Routing routing = TestL1Utils.buildL1Routing();
 			assertTrue("Invalid number of routes", routing.getRoutes().size() == dispatcher.routingMap.size());
 			routing.getRoutes().forEach(route -> {
-				String key = route.getFrom().getAcquisition() + "_" + route.getFrom().getSatelliteId();
+				String key = route.getRouteFrom().getAcquisition() + "_" + route.getRouteFrom().getSatelliteId();
 				assertTrue("The key does not exists " + key, dispatcher.routingMap.containsKey(key));
 				assertTrue("Invalid number of task tables for " + key,
-						route.getTo().getTaskTables().size() == dispatcher.routingMap.get(key).size());
+						route.getRouteTo().getTaskTables().size() == dispatcher.routingMap.get(key).size());
 			});
 
 		} catch (AbstractCodedException e) {
@@ -203,7 +203,7 @@ public class L0SliceJobsDispatcherTest {
 			L0Slice sliceA = new L0Slice("IW");
 			L0SliceProduct productA = new L0SliceProduct(
 					"S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
-					TestDateUtils.convertDateIso("20171213T142312"), TestDateUtils.convertDateIso("20171213T142312"),
+					DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"),
 					sliceA);
 			Job<L0Slice> jobA = new Job<>(productA);
 			this.dispatcher.initialize();
@@ -222,7 +222,7 @@ public class L0SliceJobsDispatcherTest {
 			L0Slice sliceA = new L0Slice("IW");
 			L0SliceProduct productA = new L0SliceProduct(
 					"S1B_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "B", "S1",
-					TestDateUtils.convertDateIso("20171213T142312"), TestDateUtils.convertDateIso("20171213T142312"),
+					DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"),
 					sliceA);
 			Job<L0Slice> jobA = new Job<>(productA);
 			this.dispatcher.initialize();
@@ -241,7 +241,7 @@ public class L0SliceJobsDispatcherTest {
 			L0Slice sliceA = new L0Slice("EW");
 			L0SliceProduct productA = new L0SliceProduct(
 					"S1A_EW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
-					TestDateUtils.convertDateIso("20171213T142312"), TestDateUtils.convertDateIso("20171213T142312"),
+					DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"),
 					sliceA);
 			Job<L0Slice> jobA = new Job<>(productA);
 			this.dispatcher.initialize();
@@ -260,7 +260,7 @@ public class L0SliceJobsDispatcherTest {
 		L0Slice sliceA = new L0Slice("ZZ");
 		L0SliceProduct productA = new L0SliceProduct(
 				"S1A_EW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
-				TestDateUtils.convertDateIso("20171213T142312"), TestDateUtils.convertDateIso("20171213T142312"),
+				DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"),
 				sliceA);
 		Job<L0Slice> jobA = new Job<>(productA);
 		this.dispatcher.initialize();

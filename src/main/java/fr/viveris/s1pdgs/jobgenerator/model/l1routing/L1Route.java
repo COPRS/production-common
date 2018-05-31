@@ -1,101 +1,115 @@
 package fr.viveris.s1pdgs.jobgenerator.model.l1routing;
 
+import java.util.Objects;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * Class used to route a L0 slice to one or several tasktables<br/>
+ * Used for mapping the file routing.xml in java objects
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 @XmlRootElement(name = "l1_route")
 @XmlAccessorType(XmlAccessType.NONE)
 public class L1Route {
-	
+
+	/**
+	 * Condition of the routing
+	 */
 	@XmlElement(name = "l1_from")
-	private L1RouteFrom from;
-	
+	private L1RouteFrom routeFrom;
+
+	/**
+	 * List of wanted task table
+	 */
 	@XmlElement(name = "l1_to")
-	private L1RouteTo to;
+	private L1RouteTo routeTo;
 
+	/**
+	 * Default constructor
+	 */
 	public L1Route() {
-		
+		super();
 	}
 
-	public L1Route(L1RouteFrom from, L1RouteTo to) {
+	/**
+	 * Constructor using fields
+	 * 
+	 * @param from
+	 * @param to
+	 */
+	public L1Route(final L1RouteFrom routeFrom, final L1RouteTo routeTo) {
 		this();
-		this.from = from;
-		this.to= to;
+		this.routeFrom = routeFrom;
+		this.routeTo = routeTo;
 	}
 
 	/**
-	 * @return the from
+	 * @return the routeFrom
 	 */
-	public L1RouteFrom getFrom() {
-		return from;
+	public L1RouteFrom getRouteFrom() {
+		return routeFrom;
 	}
 
 	/**
-	 * @param from the from to set
+	 * @param routeFrom
+	 *            the routeFrom to set
 	 */
-	public void setFrom(L1RouteFrom from) {
-		this.from = from;
+	public void setRouteFrom(final L1RouteFrom routeFrom) {
+		this.routeFrom = routeFrom;
 	}
 
 	/**
-	 * @return the to
+	 * @return the routeTo
 	 */
-	public L1RouteTo getTo() {
-		return to;
+	public L1RouteTo getRouteTo() {
+		return routeTo;
 	}
 
 	/**
-	 * @param to the to to set
+	 * @param routeTo
+	 *            the routeTo to set
 	 */
-	public void setTo(L1RouteTo to) {
-		this.to = to;
+	public void setRouteTo(final L1RouteTo routeTo) {
+		this.routeTo = routeTo;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "L1Route [from=" + from + ", to=" + to + "]";
+		return String.format("{routeFrom: %s, routeTo: %s}", routeFrom, routeTo);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((from == null) ? 0 : from.hashCode());
-		result = prime * result + ((to == null) ? 0 : to.hashCode());
-		return result;
+		return Objects.hash(routeFrom, routeTo);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		L1Route other = (L1Route) obj;
-		if (from == null) {
-			if (other.from != null)
-				return false;
-		} else if (!from.equals(other.from))
-			return false;
-		if (to == null) {
-			if (other.to != null)
-				return false;
-		} else if (!to.equals(other.to))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			L1Route other = (L1Route) obj;
+			ret = Objects.equals(routeFrom, other.routeFrom) && Objects.equals(routeTo, other.routeTo);
+		}
+		return ret;
 	}
 
 }

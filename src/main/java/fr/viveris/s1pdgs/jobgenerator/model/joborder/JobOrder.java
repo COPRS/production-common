@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -57,18 +58,9 @@ public class JobOrder {
 	 * 
 	 * @param obj
 	 */
-	public JobOrder(JobOrder obj, ProcessLevel level) {
+	public JobOrder(final JobOrder obj, final ProcessLevel level) {
 		this();
-		if (obj.getConf() != null) {
-			switch (level) {
-			case L0:
-				this.conf = new L0JobOrderConf(obj.getConf());
-				break;
-			case L1:
-				this.conf = new L1JobOrderConf(obj.getConf());
-				break;
-			}
-		}
+		this.conf = level == ProcessLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());
 		this.procs.addAll(obj.getProcs().stream().filter(item -> item != null).map(item -> new JobOrderProc(item))
 				.collect(Collectors.toList()));
 		this.nbProcs = this.procs.size();
@@ -85,7 +77,7 @@ public class JobOrder {
 	 * @param conf
 	 *            the conf to set
 	 */
-	public void setConf(AbstractJobOrderConf conf) {
+	public void setConf(final AbstractJobOrderConf conf) {
 		this.conf = conf;
 	}
 
@@ -96,70 +88,57 @@ public class JobOrder {
 		return procs;
 	}
 
-	public void addProc(JobOrderProc proc) {
+	/**
+	 * 
+	 * @param proc
+	 */
+	public void addProc(final JobOrderProc proc) {
 		this.procs.add(proc);
 		this.nbProcs++;
 	}
 
-	public void addProcs(List<JobOrderProc> procs) {
+	/**
+	 * 
+	 * @param procs
+	 */
+	public void addProcs(final List<JobOrderProc> procs) {
 		if (procs != null) {
 			this.procs.addAll(procs);
 			this.nbProcs += procs.size();
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "JobOrder [conf=" + conf + ", procs=" + procs + ", nbProcs=" + nbProcs + "]";
+		return String.format("{conf: %s, procs: %s, nbProcs: %s}", conf, procs, nbProcs);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((conf == null) ? 0 : conf.hashCode());
-		result = prime * result + nbProcs;
-		result = prime * result + ((procs == null) ? 0 : procs.hashCode());
-		return result;
+		return Objects.hash(conf, procs, nbProcs);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOrder other = (JobOrder) obj;
-		if (nbProcs != other.nbProcs)
-			return false;
-		if (conf == null) {
-			if (other.conf != null)
-				return false;
-		} else if (!conf.equals(other.conf))
-			return false;
-		if (procs == null) {
-			if (other.procs != null)
-				return false;
-		} else if (!procs.equals(other.procs))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobOrder other = (JobOrder) obj;
+			ret = Objects.equals(conf, other.conf) && Objects.equals(procs, other.procs) && nbProcs == other.nbProcs;
+		}
+		return ret;
 	}
 
 }

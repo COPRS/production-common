@@ -2,19 +2,33 @@ package fr.viveris.s1pdgs.jobgenerator.model.l1routing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * Routing<br/>
+ * Used for mapping the file routing.xml in java objects
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 @XmlRootElement(name = "l1_routing")
 @XmlAccessorType(XmlAccessType.NONE)
 public class L1Routing {
-	
+
+	/**
+	 * List of configured routes
+	 */
 	@XmlElement(name = "l1_route")
 	private List<L1Route> routes;
 
+	/**
+	 * Default constructor
+	 */
 	public L1Routing() {
 		this.routes = new ArrayList<>();
 	}
@@ -27,49 +41,52 @@ public class L1Routing {
 	}
 
 	/**
-	 * @param routes the routes to set
+	 * @param routes
+	 *            the routes to set
 	 */
-	public void addRoute(L1Route route) {
+	public void setRoutes(final List<L1Route> routes) {
+		this.routes = routes;
+	}
+
+	/**
+	 * @param routes
+	 *            the routes to set
+	 */
+	public void addRoute(final L1Route route) {
 		this.routes.add(route);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "L1Routing [routes=" + routes + "]";
+		return String.format("{routes: %s}", routes);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((routes == null) ? 0 : routes.hashCode());
-		return result;
+		return Objects.hash(routes);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		L1Routing other = (L1Routing) obj;
-		if (routes == null) {
-			if (other.routes != null)
-				return false;
-		} else if (!routes.equals(other.routes))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			L1Routing other = (L1Routing) obj;
+			ret = Objects.equals(routes, other.routes);
+		}
+		return ret;
 	}
 
 }

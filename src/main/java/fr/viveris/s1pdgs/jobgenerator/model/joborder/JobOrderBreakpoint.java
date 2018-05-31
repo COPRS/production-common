@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -56,7 +57,7 @@ public class JobOrderBreakpoint {
 	 * @param enable
 	 * @param files
 	 */
-	public JobOrderBreakpoint(String enable, List<String> files) {
+	public JobOrderBreakpoint(final String enable, final List<String> files) {
 		this();
 		this.enable = enable;
 		if (!CollectionUtils.isEmpty(files)) {
@@ -70,7 +71,7 @@ public class JobOrderBreakpoint {
 	 * 
 	 * @param obj
 	 */
-	public JobOrderBreakpoint(JobOrderBreakpoint obj) {
+	public JobOrderBreakpoint(final JobOrderBreakpoint obj) {
 		this(obj.getEnable(), obj.getFiles());
 	}
 
@@ -85,7 +86,7 @@ public class JobOrderBreakpoint {
 	 * @param enable
 	 *            the enable to set
 	 */
-	public void setEnable(String enable) {
+	public void setEnable(final String enable) {
 		this.enable = enable;
 	}
 
@@ -100,7 +101,7 @@ public class JobOrderBreakpoint {
 	 * @param files
 	 *            the files to set
 	 */
-	public void addFiles(List<String> files) {
+	public void addFiles(final List<String> files) {
 		this.files.addAll(files);
 		this.nbFiles = files.size();
 	}
@@ -112,58 +113,38 @@ public class JobOrderBreakpoint {
 		return nbFiles;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "JobOrderBreakpoint [enable=" + enable + ", files=" + files + ", nbFiles=" + nbFiles + "]";
+		return String.format("{enable: %s, files: %s, nbFiles: %s}", enable, files, nbFiles);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + nbFiles;
-		result = prime * result + ((enable == null) ? 0 : enable.hashCode());
-		result = prime * result + ((files == null) ? 0 : files.hashCode());
-		return result;
+		return Objects.hash(enable, files, nbFiles);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOrderBreakpoint other = (JobOrderBreakpoint) obj;
-		if (nbFiles != other.nbFiles)
-			return false;
-		if (enable == null) {
-			if (other.enable != null)
-				return false;
-		} else if (!enable.equals(other.enable))
-			return false;
-		if (files == null) {
-			if (other.files != null)
-				return false;
-		} else if (!files.equals(other.files))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobOrderBreakpoint other = (JobOrderBreakpoint) obj;
+			ret = Objects.equals(enable, other.enable) && Objects.equals(files, other.files)
+					&& nbFiles == other.nbFiles;
+		}
+		return ret;
 	}
 
 }

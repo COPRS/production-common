@@ -1,25 +1,58 @@
 package fr.viveris.s1pdgs.jobgenerator.model.product;
 
-public class L0Slice {
-	
-	private String acquisition;
-	
-	private String dataTakeId;
-	
-	private int numberSlice;
-	
-	private int totalNumberOfSlice;
-	
-	private String startDateFromMetadata;
-	
-	private String stopDateFromMetadata;
+import java.util.Objects;
 
+/**
+ * Describing a L0 slice
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class L0Slice {
+
+	/**
+	 * Acquisition
+	 */
+	private String acquisition;
+
+	/**
+	 * Data take identifier
+	 */
+	private String dataTakeId;
+
+	/**
+	 * Slice number
+	 */
+	private int numberSlice;
+
+	/**
+	 * Total number of slice for its segment
+	 */
+	private int totalNbOfSlice;
+
+	/**
+	 * Start date of the segment
+	 */
+	private String segmentStartDate;
+
+	/**
+	 * Stop date of the segment
+	 */
+	private String segmentStopDate;
+
+	/**
+	 * Default constructor
+	 */
 	public L0Slice() {
 		numberSlice = 0;
-		totalNumberOfSlice = 0;
+		totalNbOfSlice = 0;
 	}
 
-	public L0Slice(String acquisition) {
+	/**
+	 * 
+	 * @param acquisition
+	 */
+	public L0Slice(final String acquisition) {
 		this();
 		this.acquisition = acquisition;
 	}
@@ -32,6 +65,14 @@ public class L0Slice {
 	}
 
 	/**
+	 * @param acquisition
+	 *            the acquisition to set
+	 */
+	public void setAcquisition(final String acquisition) {
+		this.acquisition = acquisition;
+	}
+
+	/**
 	 * @return the dataTakeId
 	 */
 	public String getDataTakeId() {
@@ -39,17 +80,11 @@ public class L0Slice {
 	}
 
 	/**
-	 * @param dataTakeId the dataTakeId to set
+	 * @param dataTakeId
+	 *            the dataTakeId to set
 	 */
-	public void setDataTakeId(String dataTakeId) {
+	public void setDataTakeId(final String dataTakeId) {
 		this.dataTakeId = dataTakeId;
-	}
-
-	/**
-	 * @param acquisition the acquisition to set
-	 */
-	public void setAcquisition(String acquisition) {
-		this.acquisition = acquisition;
 	}
 
 	/**
@@ -60,104 +95,94 @@ public class L0Slice {
 	}
 
 	/**
-	 * @param numberSlice the numberSlice to set
+	 * @param numberSlice
+	 *            the numberSlice to set
 	 */
-	public void setNumberSlice(int numberSlice) {
+	public void setNumberSlice(final int numberSlice) {
 		this.numberSlice = numberSlice;
 	}
 
 	/**
-	 * @return the totalNumberOfSlice
+	 * @return the totalNbOfSlice
 	 */
-	public int getTotalNumberOfSlice() {
-		return totalNumberOfSlice;
+	public int getTotalNbOfSlice() {
+		return totalNbOfSlice;
 	}
 
 	/**
-	 * @param totalNumberOfSlice the totalNumberOfSlice to set
+	 * @param totalNbOfSlice
+	 *            the totalNbOfSlice to set
 	 */
-	public void setTotalNumberOfSlice(int totalNumberOfSlice) {
-		this.totalNumberOfSlice = totalNumberOfSlice;
+	public void setTotalNbOfSlice(final int totalNbOfSlice) {
+		this.totalNbOfSlice = totalNbOfSlice;
 	}
 
 	/**
-	 * @return the startDateFromMetadata
+	 * @return the segmentStartDate
 	 */
-	public String getStartDateFromMetadata() {
-		return startDateFromMetadata;
+	public String getSegmentStartDate() {
+		return segmentStartDate;
 	}
 
 	/**
-	 * @param startDateFromMetadata the startDateFromMetadata to set
+	 * @param segmentStartDate
+	 *            the segmentStartDate to set
 	 */
-	public void setStartDateFromMetadata(String startDateFromMetadata) {
-		this.startDateFromMetadata = startDateFromMetadata;
+	public void setSegmentStartDate(final String segmentStartDate) {
+		this.segmentStartDate = segmentStartDate;
 	}
 
 	/**
-	 * @return the stopDateFromMetadata
+	 * @return the segmentStopDate
 	 */
-	public String getStopDateFromMetadata() {
-		return stopDateFromMetadata;
+	public String getSegmentStopDate() {
+		return segmentStopDate;
 	}
 
 	/**
-	 * @param stopDateFromMetadata the stopDateFromMetadata to set
+	 * @param segmentStopDate
+	 *            the segmentStopDate to set
 	 */
-	public void setStopDateFromMetadata(String stopDateFromMetadata) {
-		this.stopDateFromMetadata = stopDateFromMetadata;
+	public void setSegmentStopDate(final String segmentStopDate) {
+		this.segmentStopDate = segmentStopDate;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "L0Slice [acquisition=" + acquisition + ", dataTakeId=" + dataTakeId + ", numberSlice=" + numberSlice
-				+ ", totalNumberOfSlice=" + totalNumberOfSlice + "]";
+		return String.format(
+				"{acquisition: %s, dataTakeId: %s, numberSlice: %s, totalNbOfSlice: %s, segmentStartDate: %s, segmentStopDate: %s}",
+				acquisition, dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate, segmentStopDate);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((acquisition == null) ? 0 : acquisition.hashCode());
-		result = prime * result + ((dataTakeId == null) ? 0 : dataTakeId.hashCode());
-		result = prime * result + numberSlice;
-		result = prime * result + totalNumberOfSlice;
-		return result;
+		return Objects.hash(acquisition, dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate, segmentStopDate);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		L0Slice other = (L0Slice) obj;
-		if (acquisition == null) {
-			if (other.acquisition != null)
-				return false;
-		} else if (!acquisition.equals(other.acquisition))
-			return false;
-		if (dataTakeId == null) {
-			if (other.dataTakeId != null)
-				return false;
-		} else if (!dataTakeId.equals(other.dataTakeId))
-			return false;
-		if (numberSlice != other.numberSlice)
-			return false;
-		if (totalNumberOfSlice != other.totalNumberOfSlice)
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			L0Slice other = (L0Slice) obj;
+			ret = Objects.equals(acquisition, other.acquisition) && Objects.equals(dataTakeId, other.dataTakeId)
+					&& numberSlice == other.numberSlice && totalNbOfSlice == other.totalNbOfSlice
+					&& Objects.equals(segmentStartDate, other.segmentStartDate)
+					&& Objects.equals(segmentStopDate, other.segmentStopDate);
+		}
+		return ret;
 	}
 
 }

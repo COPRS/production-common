@@ -36,7 +36,7 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 		try {
 			L0SliceMetadata file = this.metadataService.getSlice("blank", job.getProduct().getIdentifier());
 			job.getProduct().setProductType(file.getProductType());
-			job.getProduct().setInstrumentConfigurationId(file.getInstrumentConfigurationId());
+			job.getProduct().setInsConfId(file.getInstrumentConfigurationId());
 			job.getProduct().getObject().setNumberSlice(file.getNumberSlice());
 			job.getProduct().getObject().setDataTakeId(file.getDatatakeId());
 		} catch (MetadataException e) {
@@ -47,9 +47,9 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 		try {
 			L0AcnMetadata acn = this.metadataService.getFirstACN(job.getProduct().getProductType(),
 					job.getProduct().getIdentifier());
-			job.getProduct().getObject().setTotalNumberOfSlice(acn.getNumberOfSlices());
-			job.getProduct().getObject().setStartDateFromMetadata(acn.getValidityStart());
-			job.getProduct().getObject().setStopDateFromMetadata(acn.getValidityStop());
+			job.getProduct().getObject().setTotalNbOfSlice(acn.getNumberOfSlices());
+			job.getProduct().getObject().setSegmentStartDate(acn.getValidityStart());
+			job.getProduct().getObject().setSegmentStopDate(acn.getValidityStop());
 		} catch (MetadataException e) {
 			missingMetadata.put(job.getProduct().getIdentifier(), "No ACNs: " + e.getMessage());
 			throw new InputsMissingException(missingMetadata);
@@ -61,10 +61,10 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 		// Rewrite job order sensing time
 		DateTimeFormatter formatterJobOrder = DateTimeFormatter.ofPattern(JobOrderSensingTime.DATE_FORMAT);
 		DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;
-		LocalDateTime startDate = LocalDateTime.parse(job.getProduct().getObject().getStartDateFromMetadata(),
+		LocalDateTime startDate = LocalDateTime.parse(job.getProduct().getObject().getSegmentStartDate(),
 				formatterProduct);
 		String jobOrderStart = startDate.format(formatterJobOrder);
-		LocalDateTime stopDate = LocalDateTime.parse(job.getProduct().getObject().getStopDateFromMetadata(),
+		LocalDateTime stopDate = LocalDateTime.parse(job.getProduct().getObject().getSegmentStopDate(),
 				formatterProduct);
 		String jobOrderStop = stopDate.format(formatterJobOrder);
 		job.getJobOrder().getConf().setSensingTime(new JobOrderSensingTime(jobOrderStart, jobOrderStop));
@@ -73,7 +73,7 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 				job.getProduct().getMissionId() + job.getProduct().getSatelliteId());
 		this.updateProcParam(job.getJobOrder(), "Slice_Number", "" + job.getProduct().getObject().getNumberSlice());
 		this.updateProcParam(job.getJobOrder(), "Total_Number_Of_Slices",
-				"" + job.getProduct().getObject().getTotalNumberOfSlice());
+				"" + job.getProduct().getObject().getTotalNbOfSlice());
 		this.updateProcParam(job.getJobOrder(), "Slice_Overlap",
 				"" + jobGeneratorSettings.getTypeOverlap().get(job.getProduct().getObject().getAcquisition()));
 		this.updateProcParam(job.getJobOrder(), "Slice_Length",

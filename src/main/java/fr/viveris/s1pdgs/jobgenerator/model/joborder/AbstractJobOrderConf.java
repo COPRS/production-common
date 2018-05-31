@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -66,14 +67,13 @@ public abstract class AbstractJobOrderConf {
 	 */
 	@XmlElement(name = "Sensing_Time")
 	protected JobOrderSensingTime sensingTime;
-	
+
 	/**
 	 * Configuration files
 	 */
 	@XmlElementWrapper(name = "Config_Files")
 	@XmlElement(name = "Conf_File_Name")
 	protected List<String> configFiles;
-
 
 	/**
 	 * Default constructor
@@ -90,7 +90,7 @@ public abstract class AbstractJobOrderConf {
 	 * 
 	 * @param obj
 	 */
-	public AbstractJobOrderConf(AbstractJobOrderConf obj) {
+	public AbstractJobOrderConf(final AbstractJobOrderConf obj) {
 		this();
 		this.processorName = obj.getProcessorName();
 		this.version = obj.getVersion();
@@ -115,7 +115,7 @@ public abstract class AbstractJobOrderConf {
 	 * @param processorName
 	 *            the processorName to set
 	 */
-	public void setProcessorName(String processorName) {
+	public void setProcessorName(final String processorName) {
 		this.processorName = processorName;
 	}
 
@@ -130,7 +130,7 @@ public abstract class AbstractJobOrderConf {
 	 * @param version
 	 *            the version to set
 	 */
-	public void setVersion(String version) {
+	public void setVersion(final String version) {
 		this.version = version;
 	}
 
@@ -145,7 +145,7 @@ public abstract class AbstractJobOrderConf {
 	 * @param stdoutLogLevel
 	 *            the stdoutLogLevel to set
 	 */
-	public void setStdoutLogLevel(String stdoutLogLevel) {
+	public void setStdoutLogLevel(final String stdoutLogLevel) {
 		this.stdoutLogLevel = stdoutLogLevel;
 	}
 
@@ -160,7 +160,7 @@ public abstract class AbstractJobOrderConf {
 	 * @param stderrLogLevel
 	 *            the stderrLogLevel to set
 	 */
-	public void setStderrLogLevel(String stderrLogLevel) {
+	public void setStderrLogLevel(final String stderrLogLevel) {
 		this.stderrLogLevel = stderrLogLevel;
 	}
 
@@ -175,7 +175,7 @@ public abstract class AbstractJobOrderConf {
 	 * @param test
 	 *            the test to set
 	 */
-	public void setTest(boolean test) {
+	public void setTest(final boolean test) {
 		this.test = test;
 	}
 
@@ -190,7 +190,7 @@ public abstract class AbstractJobOrderConf {
 	 * @param breakPointEnable
 	 *            the breakPointEnable to set
 	 */
-	public void setBreakPointEnable(boolean breakPointEnable) {
+	public void setBreakPointEnable(final boolean breakPointEnable) {
 		this.breakPointEnable = breakPointEnable;
 	}
 
@@ -205,7 +205,7 @@ public abstract class AbstractJobOrderConf {
 	 * @param sensingTime
 	 *            the sensingTime to set
 	 */
-	public void setSensingTime(JobOrderSensingTime sensingTime) {
+	public void setSensingTime(final JobOrderSensingTime sensingTime) {
 		this.sensingTime = sensingTime;
 	}
 
@@ -220,7 +220,7 @@ public abstract class AbstractJobOrderConf {
 	 * @param processingStation
 	 *            the processingStation to set
 	 */
-	public void setProcessingStation(String processingStation) {
+	public void setProcessingStation(final String processingStation) {
 		this.processingStation = processingStation;
 	}
 
@@ -230,29 +230,30 @@ public abstract class AbstractJobOrderConf {
 	public List<String> getConfigFiles() {
 		return configFiles;
 	}
-	
+
 	/**
 	 * @param confFiles
 	 *            the confFiles to set
 	 */
-	public void addConfigFiles(List<String> confFiles) {
+	public void addConfigFiles(final List<String> confFiles) {
 		if (confFiles != null) {
 			this.configFiles.addAll(confFiles);
 		}
 	}
-	
+
 	/**
 	 * @param confFiles
 	 *            the confFiles to set
 	 */
-	public void addConfigFile(String configFile) {
+	public void addConfigFile(final String configFile) {
 		this.configFiles.add(configFile);
 	}
 
 	/**
-	 * @param configFiles the configFiles to set
+	 * @param configFiles
+	 *            the configFiles to set
 	 */
-	public void setConfigFiles(List<String> configFiles) {
+	public void setConfigFiles(final List<String> configFiles) {
 		this.configFiles = configFiles;
 	}
 
@@ -260,102 +261,74 @@ public abstract class AbstractJobOrderConf {
 	 * @return the procParams
 	 */
 	public abstract List<JobOrderProcParam> getProcParams();
-	
-
-	public abstract void addProcParam(JobOrderProcParam param);
 
 	/**
-	 * @param procParams the procParams to set
+	 * 
+	 * @param param
 	 */
-	public abstract void setProcParams(List<JobOrderProcParam> procParams);
+	public abstract void addProcParam(final JobOrderProcParam param);
+
+	/**
+	 * @param procParams
+	 *            the procParams to set
+	 */
+	public abstract void setProcParams(final List<JobOrderProcParam> procParams);
 
 	/**
 	 * @return the nbProcParams
 	 */
 	public abstract int getNbProcParams();
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "JobOrderConf [processorName=" + processorName + ", version=" + version + ", stdoutLogLevel="
-				+ stdoutLogLevel + ", stderrLogLevel=" + stderrLogLevel + ", test=" + test + ", breakPointEnable="
-				+ breakPointEnable + ", processingStation=" + processingStation + ", sensingTime=" + sensingTime
-				+ ", configFiles=" + configFiles + "]";
+		return String.format(
+				"{processorName: %s, version: %s, stdoutLogLevel: %s, stderrLogLevel: %s, test: %s, breakPointEnable: %s, processingStation: %s, sensingTime: %s, configFiles: %s}",
+				processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable, processingStation,
+				sensingTime, configFiles);
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	public String toAbstractString() {
+		return String.format(
+				"processorName: %s, version: %s, stdoutLogLevel: %s, stderrLogLevel: %s, test: %s, breakPointEnable: %s, processingStation: %s, sensingTime: %s, configFiles: %s",
+				processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable, processingStation,
+				sensingTime, configFiles);
+	}
+
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (breakPointEnable ? 1231 : 1237);
-		result = prime * result + ((configFiles == null) ? 0 : configFiles.hashCode());
-		result = prime * result + ((processingStation == null) ? 0 : processingStation.hashCode());
-		result = prime * result + ((processorName == null) ? 0 : processorName.hashCode());
-		result = prime * result + ((sensingTime == null) ? 0 : sensingTime.hashCode());
-		result = prime * result + ((stderrLogLevel == null) ? 0 : stderrLogLevel.hashCode());
-		result = prime * result + ((stdoutLogLevel == null) ? 0 : stdoutLogLevel.hashCode());
-		result = prime * result + (test ? 1231 : 1237);
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
-		return result;
+		return Objects.hash(processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable,
+				processingStation, sensingTime, configFiles);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractJobOrderConf other = (AbstractJobOrderConf) obj;
-		if (breakPointEnable != other.breakPointEnable)
-			return false;
-		if (configFiles == null) {
-			if (other.configFiles != null)
-				return false;
-		} else if (!configFiles.equals(other.configFiles))
-			return false;
-		if (processingStation == null) {
-			if (other.processingStation != null)
-				return false;
-		} else if (!processingStation.equals(other.processingStation))
-			return false;
-		if (processorName == null) {
-			if (other.processorName != null)
-				return false;
-		} else if (!processorName.equals(other.processorName))
-			return false;
-		if (sensingTime == null) {
-			if (other.sensingTime != null)
-				return false;
-		} else if (!sensingTime.equals(other.sensingTime))
-			return false;
-		if (stderrLogLevel == null) {
-			if (other.stderrLogLevel != null)
-				return false;
-		} else if (!stderrLogLevel.equals(other.stderrLogLevel))
-			return false;
-		if (stdoutLogLevel == null) {
-			if (other.stdoutLogLevel != null)
-				return false;
-		} else if (!stdoutLogLevel.equals(other.stdoutLogLevel))
-			return false;
-		if (test != other.test)
-			return false;
-		if (version == null) {
-			if (other.version != null)
-				return false;
-		} else if (!version.equals(other.version))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			AbstractJobOrderConf other = (AbstractJobOrderConf) obj;
+			ret = Objects.equals(processorName, other.processorName) && Objects.equals(version, other.version)
+					&& Objects.equals(stdoutLogLevel, other.stdoutLogLevel)
+					&& Objects.equals(stderrLogLevel, other.stderrLogLevel) && test == other.test
+					&& breakPointEnable == other.breakPointEnable
+					&& Objects.equals(processingStation, other.processingStation)
+					&& Objects.equals(sensingTime, other.sensingTime) && Objects.equals(configFiles, other.configFiles);
+		}
+		return ret;
 	}
 
 }

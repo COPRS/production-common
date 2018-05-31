@@ -1,37 +1,60 @@
 package fr.viveris.s1pdgs.jobgenerator.model;
 
+import java.util.Objects;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
+/**
+ * Class describing a raw of a session<br/>
+ * This class is used for the mapping of the XML EDRS session file and an
+ * internal use
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 @XmlRootElement(name = "dsdb_name")
 @XmlAccessorType(XmlAccessType.NONE)
 public class EdrsSessionFileRaw {
-	
+
+	/**
+	 * Filename of the raw
+	 */
 	@XmlValue
 	private String fileName;
-	
+
+	/**
+	 * Raw key in the object storage
+	 */
 	private String objectStorageKey;
 
+	/**
+	 * Default constructor
+	 */
 	public EdrsSessionFileRaw() {
-		
+		super();
 	}
 
 	/**
+	 * Constructor from filename
+	 * 
 	 * @param fileName
 	 * @param objectStorageKey
 	 */
-	public EdrsSessionFileRaw(String fileName) {
+	public EdrsSessionFileRaw(final String fileName) {
 		super();
 		this.fileName = fileName;
 	}
 
 	/**
+	 * Constructor using fields
+	 * 
 	 * @param fileName
 	 * @param objectStorageKey
 	 */
-	public EdrsSessionFileRaw(String fileName, String objectStorageKey) {
+	public EdrsSessionFileRaw(final String fileName, final String objectStorageKey) {
 		this(fileName);
 		this.objectStorageKey = objectStorageKey;
 	}
@@ -44,9 +67,10 @@ public class EdrsSessionFileRaw {
 	}
 
 	/**
-	 * @param fileName the fileName to set
+	 * @param fileName
+	 *            the fileName to set
 	 */
-	public void setFileName(String fileName) {
+	public void setFileName(final String fileName) {
 		this.fileName = fileName;
 	}
 
@@ -58,55 +82,44 @@ public class EdrsSessionFileRaw {
 	}
 
 	/**
-	 * @param objectStorageKey the objectStorageKey to set
+	 * @param objectStorageKey
+	 *            the objectStorageKey to set
 	 */
-	public void setObjectStorageKey(String objectStorageKey) {
+	public void setObjectStorageKey(final String objectStorageKey) {
 		this.objectStorageKey = objectStorageKey;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "EdrsSessionFileRaw [fileName=" + fileName + ", objectStorageKey=" + objectStorageKey + "]";
+		return String.format("{fileName: %s, objectStorageKey: %s}", fileName, objectStorageKey);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
-		result = prime * result + ((objectStorageKey == null) ? 0 : objectStorageKey.hashCode());
-		return result;
+		return Objects.hash(fileName, objectStorageKey);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		EdrsSessionFileRaw other = (EdrsSessionFileRaw) obj;
-		if (fileName == null) {
-			if (other.fileName != null)
-				return false;
-		} else if (!fileName.equals(other.fileName))
-			return false;
-		if (objectStorageKey == null) {
-			if (other.objectStorageKey != null)
-				return false;
-		} else if (!objectStorageKey.equals(other.objectStorageKey))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			EdrsSessionFileRaw other = (EdrsSessionFileRaw) obj;
+			ret = Objects.equals(fileName, other.fileName) && Objects.equals(objectStorageKey, other.objectStorageKey);
+		}
+		return ret;
 	}
 
 }

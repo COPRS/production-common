@@ -257,8 +257,7 @@ public class EdrsSessionJobsGeneratorTest {
 			}
 		});
 
-		EdrsSessionProduct sessionComplete1 = TestL0Utils.buildEdrsSessionProduct(false);
-		sessionComplete1.setMissionId("S2");
+		EdrsSessionProduct sessionComplete1 = TestL0Utils.buildEdrsSessionProduct(false, "S2");
 		Job<EdrsSession> job1 = new Job<EdrsSession>(sessionComplete1);
 		job1.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 		generator.customJobOrder(job1);

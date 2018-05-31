@@ -1,13 +1,32 @@
 package fr.viveris.s1pdgs.jobgenerator.model;
 
+import java.util.Objects;
+
+/**
+ * Object describing the progress of the job generation
+ * @author Cyrielle Gailliard
+ *
+ */
 public class JobGenerationStatus {
 	
+	/**
+	 * Last generation status
+	 */
 	private GenerationStatusEnum status;
 	
+	/**
+	 * Last update date of the status
+	 */
 	private long lastModifiedTime;
 	
+	/**
+	 * Number of time the status has been updated with the same value
+	 */
 	private int nbRetries;
 
+	/**
+	 * Default constructor
+	 */
 	public JobGenerationStatus() {
 		status = GenerationStatusEnum.NOT_READY;
 		lastModifiedTime = 0;
@@ -25,7 +44,7 @@ public class JobGenerationStatus {
 	 * If same status, consider it is an error
 	 * @param status
 	 */
-	public void updateStatus(GenerationStatusEnum status) {
+	public void updateStatus(final GenerationStatusEnum status) {
 		if (this.status == status) {
 			lastModifiedTime = System.currentTimeMillis();
 			nbRetries ++;
@@ -49,47 +68,38 @@ public class JobGenerationStatus {
 		return nbRetries;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * to string
 	 */
 	@Override
 	public String toString() {
-		return "JobGenerationStatus [status=" + status + ", lastModifiedTime=" + lastModifiedTime + ", nbRetries="
-				+ nbRetries + "]";
+		return String.format("{status: %s, lastModifiedTime: %s, nbRetries: %s}", status, lastModifiedTime, nbRetries);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * hashcode
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (lastModifiedTime ^ (lastModifiedTime >>> 32));
-		result = prime * result + nbRetries;
-		result = prime * result + ((status == null) ? 0 : status.hashCode());
-		return result;
+		return Objects.hash(status, lastModifiedTime, nbRetries);
 	}
 
-	/* (non-Javadoc)
+	/** 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobGenerationStatus other = (JobGenerationStatus) obj;
-		if (lastModifiedTime != other.lastModifiedTime)
-			return false;
-		if (nbRetries != other.nbRetries)
-			return false;
-		if (status != other.status)
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobGenerationStatus other = (JobGenerationStatus) obj;
+			ret = Objects.equals(status, other.status)
+					&& lastModifiedTime == other.lastModifiedTime
+					&& nbRetries == other.nbRetries;
+		}
+		return ret;
 	}
-
 }

@@ -28,33 +28,18 @@ public class XmlConverter {
 	 * Unmarshaller
 	 */
 	private Unmarshaller unmarshaller;
-	
-
-	/**
-	 * @return the marshaller
-	 */
-	public Marshaller getMarshaller() {
-		return marshaller;
-	}
 
 	/**
 	 * @param marshaller the marshaller to set
 	 */
-	public void setMarshaller(Marshaller marshaller) {
+	public void setMarshaller(final Marshaller marshaller) {
 		this.marshaller = marshaller;
-	}
-
-	/**
-	 * @return the unmarshaller
-	 */
-	public Unmarshaller getUnmarshaller() {
-		return unmarshaller;
 	}
 
 	/**
 	 * @param unmarshaller the unmarshaller to set
 	 */
-	public void setUnmarshaller(Unmarshaller unmarshaller) {
+	public void setUnmarshaller(final Unmarshaller unmarshaller) {
 		this.unmarshaller = unmarshaller;
 	}
 

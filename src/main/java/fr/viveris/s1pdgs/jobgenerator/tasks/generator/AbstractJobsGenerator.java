@@ -405,7 +405,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 				try {
 					SearchMetadata file = this.metadataService.search(v.getQuery(), job.getProduct().getStartTime(),
 							job.getProduct().getStopTime(), job.getProduct().getSatelliteId(),
-							job.getProduct().getInstrumentConfigurationId());
+							job.getProduct().getInsConfId());
 					if (file != null) {
 						v.setResult(file);
 					}

@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.model.tasktable;
 
+import java.util.Objects;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -7,19 +9,29 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Object representing Dyn_ProcParam in task table
+ * 
  * @author Cyrielle
  *
  */
 @XmlRootElement(name = "Dyn_ProcParam")
 @XmlAccessorType(XmlAccessType.NONE)
 public class TaskTableDynProcParam {
-	
+
+	/**
+	 * 
+	 */
 	@XmlElement(name = "Param_Name")
 	private String name;
-	
+
+	/**
+	 * 
+	 */
 	@XmlElement(name = "Param_Type")
 	private String type;
-	
+
+	/**
+	 * 
+	 */
 	@XmlElement(name = "Param_Default")
 	private String defaultValue;
 
@@ -35,7 +47,7 @@ public class TaskTableDynProcParam {
 	 * @param type
 	 * @param defaultValue
 	 */
-	public TaskTableDynProcParam(String name, String type, String defaultValue) {
+	public TaskTableDynProcParam(final String name, final String type, final String defaultValue) {
 		this();
 		this.name = name;
 		this.type = type;
@@ -50,9 +62,10 @@ public class TaskTableDynProcParam {
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param name
+	 *            the name to set
 	 */
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -64,9 +77,10 @@ public class TaskTableDynProcParam {
 	}
 
 	/**
-	 * @param type the type to set
+	 * @param type
+	 *            the type to set
 	 */
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -78,61 +92,37 @@ public class TaskTableDynProcParam {
 	}
 
 	/**
-	 * @param defaultValue the defaultValue to set
+	 * @param defaultValue
+	 *            the defaultValue to set
 	 */
-	public void setDefaultValue(String defaultValue) {
+	public void setDefaultValue(final String defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "TaskTableDynProcParam [name=" + name + ", type=" + type + ", defaultValue=" + defaultValue + "]";
-	}
-
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		return result;
+		return Objects.hash(name, type, defaultValue);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TaskTableDynProcParam other = (TaskTableDynProcParam) obj;
-		if (defaultValue == null) {
-			if (other.defaultValue != null)
-				return false;
-		} else if (!defaultValue.equals(other.defaultValue))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (type == null) {
-			if (other.type != null)
-				return false;
-		} else if (!type.equals(other.type))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			TaskTableDynProcParam other = (TaskTableDynProcParam) obj;
+			ret = Objects.equals(name, other.name) && Objects.equals(type, other.type)
+					&& Objects.equals(defaultValue, other.defaultValue);
+		}
+		return ret;
 	}
-	
+
 }

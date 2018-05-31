@@ -1,40 +1,36 @@
 package fr.viveris.s1pdgs.jobgenerator.model;
 
+import java.util.Objects;
+
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableInputMode;
 
+/**
+ * Product mode (available in task table)
+ * @author Cyrielle Gailliard
+ *
+ */
 public enum ProductMode {
 	ALWAYS, SLICING, NON_SLICING, BLANK;
 
-	public static boolean isCompatibleWithTaskTableMode(ProductMode m, TaskTableInputMode i) {
-		if (m == ProductMode.ALWAYS) {
-			return true;
-		} else if (i == TaskTableInputMode.ALWAYS) {
-			return true;
-		} else if (m.name().equals(i.name())) {
-			return true;
+	/**
+	 * Check if the mode in task table in compatible with the product mode
+	 * @param m
+	 * @param i
+	 * @return
+	 */
+	public static boolean isCompatibleWithTaskTableMode(final ProductMode pMode, final TaskTableInputMode tMode) {
+		boolean ret;
+		if (pMode == null || tMode == null) {
+			ret = false;
+		} else if (pMode == ProductMode.ALWAYS) {
+			ret = true;
+		} else if (tMode == TaskTableInputMode.ALWAYS) {
+			ret = true;
+		} else if (Objects.equals(pMode.name(), tMode.name())) {
+			ret = true;
+		} else {
+			ret = false;
 		}
-		return false;
-	}
-
-	public static ProductMode convertTaskTableMode(TaskTableInputMode i) {
-		switch (i) {
-		case ALWAYS:
-			return ProductMode.ALWAYS;
-		case SLICING:
-			return ProductMode.SLICING;
-		case NON_SLICING:
-			return ProductMode.NON_SLICING;
-		default:
-			return ProductMode.BLANK;
-		}
-	}
-
-	public static boolean isCompatible(ProductMode m, ProductMode i) {
-		if (m == ProductMode.ALWAYS) {
-			return true;
-		} else if (i == ProductMode.ALWAYS) {
-			return true;
-		} 
-		return m == i;
+		return ret;
 	}
 }

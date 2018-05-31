@@ -8,12 +8,6 @@ public class L0AcnMetadata extends AbstractMetadata {
 	
 	private String datatakeId;
 
-	public L0AcnMetadata() {
-		super();
-		numberOfSlices = 0;
-		instrumentConfigurationId = -1;
-	}
-
 	/**
 	 * @param instrumentConfigurationId
 	 * @param numberSlice

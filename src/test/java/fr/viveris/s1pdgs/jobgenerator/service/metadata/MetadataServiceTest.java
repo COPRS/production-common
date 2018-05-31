@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.jobgenerator.service;
+package fr.viveris.s1pdgs.jobgenerator.service.metadata;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

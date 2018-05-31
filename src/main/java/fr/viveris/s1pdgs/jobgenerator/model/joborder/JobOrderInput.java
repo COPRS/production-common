@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -64,7 +65,9 @@ public class JobOrderInput {
 	@XmlPath("List_of_Time_Intervals/@count")
 	private int nbTimeIntervals;
 
-	// TODO update when will be in tasktable
+	/**
+	 * Product family
+	 */
 	private ProductFamily family;
 
 	/**
@@ -86,8 +89,9 @@ public class JobOrderInput {
 	 * @param timeIntervals
 	 * @param family
 	 */
-	public JobOrderInput(String fileType, JobOrderFileNameType fileNameType, List<JobOrderInputFile> filenames,
-			List<JobOrderTimeInterval> timeIntervals, ProductFamily family) {
+	public JobOrderInput(final String fileType, final JobOrderFileNameType fileNameType,
+			final List<JobOrderInputFile> filenames, final List<JobOrderTimeInterval> timeIntervals,
+			final ProductFamily family) {
 		this();
 		this.fileType = fileType;
 		this.fileNameType = fileNameType;
@@ -111,7 +115,7 @@ public class JobOrderInput {
 	 * 
 	 * @param obj
 	 */
-	public JobOrderInput(JobOrderInput obj) {
+	public JobOrderInput(final JobOrderInput obj) {
 		this();
 		this.family = obj.getFamily();
 		this.fileType = obj.getFileType();
@@ -139,7 +143,7 @@ public class JobOrderInput {
 	 * @param fileType
 	 *            the fileType to set
 	 */
-	public void setFileType(String fileType) {
+	public void setFileType(final String fileType) {
 		this.fileType = fileType;
 	}
 
@@ -154,7 +158,7 @@ public class JobOrderInput {
 	 * @param fileNameType
 	 *            the fileNameType to set
 	 */
-	public void setFileNameType(JobOrderFileNameType fileNameType) {
+	public void setFileNameType(final JobOrderFileNameType fileNameType) {
 		this.fileNameType = fileNameType;
 	}
 
@@ -169,7 +173,7 @@ public class JobOrderInput {
 	 * @param filenames
 	 *            the filenames to set
 	 */
-	public void addFilename(String filename, String objectStorageKey) {
+	public void addFilename(final String filename, final String objectStorageKey) {
 		this.filenames.add(new JobOrderInputFile(filename, objectStorageKey));
 		this.nbFilenames++;
 	}
@@ -185,7 +189,7 @@ public class JobOrderInput {
 	 * @param timeIntervals
 	 *            the timeIntervals to set
 	 */
-	public void addTimeInterval(JobOrderTimeInterval timeInterval) {
+	public void addTimeInterval(final JobOrderTimeInterval timeInterval) {
 		this.timeIntervals.add(timeInterval);
 		this.nbTimeIntervals++;
 	}
@@ -215,79 +219,46 @@ public class JobOrderInput {
 	 * @param family
 	 *            the family to set
 	 */
-	public void setFamily(ProductFamily family) {
+	public void setFamily(final ProductFamily family) {
 		this.family = family;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "JobOrderInput [fileType=" + fileType + ", fileNameType=" + fileNameType + ", filenames=" + filenames
-				+ ", nbFilenames=" + nbFilenames + ", timeIntervals=" + timeIntervals + ", nbTimeIntervals="
-				+ nbTimeIntervals + ", family=" + family + "]";
+		return String.format(
+				"{fileType: %s, fileNameType: %s, filenames: %s, nbFilenames: %s, timeIntervals: %s, nbTimeIntervals: %s, family: %s}",
+				fileType, fileNameType, filenames, nbFilenames, timeIntervals, nbTimeIntervals, family);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((family == null) ? 0 : family.hashCode());
-		result = prime * result + ((fileNameType == null) ? 0 : fileNameType.hashCode());
-		result = prime * result + ((fileType == null) ? 0 : fileType.hashCode());
-		result = prime * result + ((filenames == null) ? 0 : filenames.hashCode());
-		result = prime * result + nbFilenames;
-		result = prime * result + nbTimeIntervals;
-		result = prime * result + ((timeIntervals == null) ? 0 : timeIntervals.hashCode());
-		return result;
+		return Objects.hash(fileType, fileNameType, filenames, nbFilenames, timeIntervals, nbTimeIntervals, family);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOrderInput other = (JobOrderInput) obj;
-		if (family != other.family)
-			return false;
-		if (fileNameType != other.fileNameType)
-			return false;
-		if (fileType == null) {
-			if (other.fileType != null)
-				return false;
-		} else if (!fileType.equals(other.fileType))
-			return false;
-		if (filenames == null) {
-			if (other.filenames != null)
-				return false;
-		} else if (!filenames.equals(other.filenames))
-			return false;
-		if (nbFilenames != other.nbFilenames)
-			return false;
-		if (nbTimeIntervals != other.nbTimeIntervals)
-			return false;
-		if (timeIntervals == null) {
-			if (other.timeIntervals != null)
-				return false;
-		} else if (!timeIntervals.equals(other.timeIntervals))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobOrderInput other = (JobOrderInput) obj;
+			ret = Objects.equals(fileType, other.fileType) && Objects.equals(fileNameType, other.fileNameType)
+					&& Objects.equals(filenames, other.filenames) && nbFilenames == other.nbFilenames
+					&& Objects.equals(timeIntervals, other.timeIntervals) && nbTimeIntervals == other.nbTimeIntervals
+					&& Objects.equals(family, other.family);
+		}
+		return ret;
 	}
 
 }

@@ -1,27 +1,43 @@
 package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
+import java.util.Objects;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
+/**
+ * 
+ *
+ */
 @XmlRootElement(name = "File_Name")
 @XmlAccessorType(XmlAccessType.NONE)
 public class JobOrderInputFile {
-	
+
+	/**
+	 * Filename
+	 */
 	@XmlValue
 	private String filename;
-	
+
+	/**
+	 * KEy in object storage
+	 */
 	private String keyObjectStorage;
 
+	/**
+	 * Default constructor
+	 */
 	public JobOrderInputFile() {
+		super();
 	}
 
 	/**
 	 * @param filename
 	 * @param keyObjectStorage
 	 */
-	public JobOrderInputFile(String filename, String keyObjectStorage) {
+	public JobOrderInputFile(final String filename, final String keyObjectStorage) {
 		this();
 		this.filename = filename;
 		this.keyObjectStorage = keyObjectStorage;
@@ -31,7 +47,7 @@ public class JobOrderInputFile {
 	 * @param filename
 	 * @param keyObjectStorage
 	 */
-	public JobOrderInputFile(JobOrderInputFile obj) {
+	public JobOrderInputFile(final JobOrderInputFile obj) {
 		this(obj.getFilename(), obj.getKeyObjectStorage());
 	}
 
@@ -43,9 +59,10 @@ public class JobOrderInputFile {
 	}
 
 	/**
-	 * @param filename the filename to set
+	 * @param filename
+	 *            the filename to set
 	 */
-	public void setFilename(String filename) {
+	public void setFilename(final String filename) {
 		this.filename = filename;
 	}
 
@@ -57,55 +74,44 @@ public class JobOrderInputFile {
 	}
 
 	/**
-	 * @param keyObjectStorage the keyObjectStorage to set
+	 * @param keyObjectStorage
+	 *            the keyObjectStorage to set
 	 */
-	public void setKeyObjectStorage(String keyObjectStorage) {
+	public void setKeyObjectStorage(final String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "JobOrderInputFile [filename=" + filename + ", keyObjectStorage=" + keyObjectStorage + "]";
+		return String.format("{filename: %s, keyObjectStorage: %s}", filename, keyObjectStorage);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((filename == null) ? 0 : filename.hashCode());
-		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
-		return result;
+		return Objects.hash(filename, keyObjectStorage);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOrderInputFile other = (JobOrderInputFile) obj;
-		if (filename == null) {
-			if (other.filename != null)
-				return false;
-		} else if (!filename.equals(other.filename))
-			return false;
-		if (keyObjectStorage == null) {
-			if (other.keyObjectStorage != null)
-				return false;
-		} else if (!keyObjectStorage.equals(other.keyObjectStorage))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobOrderInputFile other = (JobOrderInputFile) obj;
+			ret = Objects.equals(filename, other.filename) && Objects.equals(keyObjectStorage, other.keyObjectStorage);
+		}
+		return ret;
 	}
 
 }

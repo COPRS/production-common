@@ -108,7 +108,7 @@ public class EdrsSessionsConsumer {
 				LOGGER.info("[MONITOR] [step {}] Removing old sessions", step);
 				cachedSessions.entrySet().stream()
 						.filter(entry -> entry.getValue() != null && entry.getValue().getObject()
-								.getLastTimestampMessageReception() < System.currentTimeMillis() - this.maxAgeSession)
+								.getLastTsMsg() < System.currentTimeMillis() - this.maxAgeSession)
 						.forEach(entry -> {
 							EdrsSessionProduct removedSession = cachedSessions.remove(entry.getKey());
 							if (removedSession != null) {
@@ -145,7 +145,7 @@ public class EdrsSessionsConsumer {
 								file.getSessionId());
 						this.jobDispatcher.dispatch(new Job<EdrsSession>(session));
 					} else {
-						session.getObject().setLastTimestampMessageReception(System.currentTimeMillis());
+						session.getObject().setLastTsMsg(System.currentTimeMillis());
 					}
 				} else {
 					// Check mx nb session not reached

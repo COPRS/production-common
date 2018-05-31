@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.tasktable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -9,16 +10,28 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * 
+ */
 @XmlRootElement(name = "Pool")
 @XmlAccessorType(XmlAccessType.NONE)
 public class TaskTablePool {
-	
-	@XmlElement(name = "Detached")
-	private boolean detached = false;
-	
-	@XmlElement(name = "Killing_Signal")
-	private int killingSignal = 9;
 
+	/**
+	 * 
+	 */
+	@XmlElement(name = "Detached")
+	private boolean detached;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = "Killing_Signal")
+	private int killingSignal;
+
+	/**
+	 * 
+	 */
 	@XmlElementWrapper(name = "List_of_Tasks")
 	@XmlElement(name = "Task")
 	private List<TaskTableTask> tasks;
@@ -28,6 +41,8 @@ public class TaskTablePool {
 	 */
 	public TaskTablePool() {
 		super();
+		detached = false;
+		killingSignal = 9;
 		this.tasks = new ArrayList<>();
 	}
 
@@ -39,9 +54,10 @@ public class TaskTablePool {
 	}
 
 	/**
-	 * @param detached the detached to set
+	 * @param detached
+	 *            the detached to set
 	 */
-	public void setDetached(boolean detached) {
+	public void setDetached(final boolean detached) {
 		this.detached = detached;
 	}
 
@@ -53,9 +69,10 @@ public class TaskTablePool {
 	}
 
 	/**
-	 * @param killingSignal the killingSignal to set
+	 * @param killingSignal
+	 *            the killingSignal to set
 	 */
-	public void setKillingSignal(int killingSignal) {
+	public void setKillingSignal(final int killingSignal) {
 		this.killingSignal = killingSignal;
 	}
 
@@ -67,70 +84,52 @@ public class TaskTablePool {
 	}
 
 	/**
-	 * @param tasks the tasks to set
+	 * @param tasks
+	 *            the tasks to set
 	 */
-	public void setTasks(List<TaskTableTask> tasks) {
+	public void setTasks(final List<TaskTableTask> tasks) {
 		this.tasks = tasks;
 	}
 
 	/**
-	 * @param tasks the tasks to set
+	 * @param tasks
+	 *            the tasks to set
 	 */
-	public void addTask(TaskTableTask task) {
+	public void addTask(final TaskTableTask task) {
 		this.tasks.add(task);
 	}
 
 	/**
-	 * @param tasks the tasks to set
+	 * @param tasks
+	 *            the tasks to set
 	 */
-	public void addTasks(List<TaskTableTask> tasks) {
+	public void addTasks(final List<TaskTableTask> tasks) {
 		this.tasks.addAll(tasks);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "TaskTablePool [detached=" + detached + ", killingSignal=" + killingSignal + ", tasks=" + tasks + "]";
-	}
-
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (detached ? 1231 : 1237);
-		result = prime * result + killingSignal;
-		result = prime * result + ((tasks == null) ? 0 : tasks.hashCode());
-		return result;
+		return Objects.hash(detached, killingSignal, tasks);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TaskTablePool other = (TaskTablePool) obj;
-		if (detached != other.detached)
-			return false;
-		if (killingSignal != other.killingSignal)
-			return false;
-		if (tasks == null) {
-			if (other.tasks != null)
-				return false;
-		} else if (!tasks.equals(other.tasks))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			TaskTablePool other = (TaskTablePool) obj;
+			ret = detached == other.detached && killingSignal == other.killingSignal
+					&& Objects.equals(tasks, other.tasks);
+		}
+		return ret;
 	}
-	
-	
 }

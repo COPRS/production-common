@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
-import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
+import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.service.s3.SessionFilesS3Services;
 
 /**
@@ -64,7 +64,7 @@ public class EdrsSessionFileService {
 	 * @throws InvalidFormatProduct
 	 * @throws ObjectStorageException
 	 */
-	public EdrsSessionFile createSessionFile(String keyObjectStorage) throws AbstractCodedException {
+	public EdrsSessionFile createSessionFile(final String keyObjectStorage) throws AbstractCodedException {
 
 		// Extract filename from the key object storage
 		String id = keyObjectStorage;
@@ -79,7 +79,7 @@ public class EdrsSessionFileService {
 		// Convert it
 		try {
 			return (EdrsSessionFile) xmlConverter.convertFromXMLToObject(tmpFile.getAbsolutePath());
-		} catch (IOException | JAXBException | IllegalArgumentException e) {
+		} catch (IOException | JAXBException e) {
 			throw new InternalErrorException("Cannot convert file " + keyObjectStorage, e);
 		} finally {
 			if (tmpFile != null) {
