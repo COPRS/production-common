@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.StickyAssignor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -34,6 +33,8 @@ import org.springframework.kafka.listener.ConsumerAwareRebalanceListener;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.util.CollectionUtils;
+
+import com.github.grantneale.kafka.LagBasedPartitionAssignor;
 
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.L0AcnDto;
@@ -122,7 +123,7 @@ public class KafkaConfig {
 		props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, kafkaMaxPoolRecords);
 		props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, kafkaSessionTimeoutMs);
 		props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, kafkaHeartbeatIntervalMs);
-		props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, Collections.singletonList(StickyAssignor.class));
+		props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, Collections.singletonList(LagBasedPartitionAssignor.class));
 		try {
 			InetAddress myHost = InetAddress.getLocalHost();
 			String hostname = myHost.getHostName();
