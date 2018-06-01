@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.jobgenerator.utils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
@@ -16,18 +16,17 @@ public class DateUtilsTest {
 	@Test
 	public void testconvertWithSimpleDateFormat() throws InternalErrorException {
 		Date date1 = DateUtils.convertWithSimpleDateFormat("20180125T125633", "yyyyMMdd'T'HHmmss");
-		assertEquals(1516881393000L, date1.getTime());
+		assertTrue(date1.getTime() == 1516881393000L);
 	}
 
 	@Test(expected = InternalErrorException.class)
 	public void testconvertWithSimpleDateFormatInvalidFormat() throws InternalErrorException {
-		Date date1 = DateUtils.convertWithSimpleDateFormat("2018012512633", "yyyyMMdd'T'HHmmss");
-		assertEquals(1516881393000L, date1.getTime());
+		DateUtils.convertWithSimpleDateFormat("2018012512633", "yyyyMMdd'T'HHmmss");
 	}
 
 	@Test
 	public void testconvertIso() throws InternalErrorException {
 		Date date1 = DateUtils.convertDateIso("20180125T125633");
-		assertEquals(1516881393000L, date1.getTime());
+		assertTrue(date1.getTime() == 1516881393000L);
 	}
 }
