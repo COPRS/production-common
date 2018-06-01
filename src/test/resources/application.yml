@@ -12,6 +12,7 @@ kafka:
   client-id: ${scaler_kafka_client-id:spdgs-scaler}
   request-timeout-ms: ${scaler_kafka_request-timeout-ms:5000}
   session-timeout-ms: ${scaler_kafka_session-timeout-ms:5000}
+  cnx-max-idl-ms: ${scaler_kafka_cnx-max-idle-ms:660000}
   topics:
     l1-jobs: ${kafka_topic_l1_jobs:l1-jobs}
   group-id-per-topic:
@@ -71,7 +72,7 @@ openstack:
       floating-activation: ${scaler_os_server-wrapper_floating-activation:true}
       floating-network: ${scaler_os_server-wrapper_floating-network:0a2228f2-7f8a-45f1-8e09-9039e1d09975}
       key-security: ${scaler_os_server-wrapper_key-security:viv_k8s}
-      networks: ${scaler_os_server-wrapper_networks}
+      networks: ${scaler_os_server-wrapper_networks:01f954b1-0290-4bb4-9ee6-9ef46c2983fb}
       security-groups: ${scaler_os_server-wrapper_security-group:k8s_secgroup}
       bootable-on-volume: ${scaler_os_server-wrapper_bootable-on-volume:true}
     volume-wrapper:

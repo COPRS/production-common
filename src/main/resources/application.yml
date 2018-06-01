@@ -12,6 +12,7 @@ kafka:
   client-id: ${scaler_kafka_client-id:spdgs-scaler}
   request-timeout-ms: ${scaler_kafka_request-timeout-ms:5000}
   session-timeout-ms: ${scaler_kafka_session-timeout-ms:5000}
+  cnx-max-idl-ms: ${scaler_kafka_cnx-max-idle-ms:660000}
   topics:
     l1-jobs: ${kafka_topic_l1_jobs}
   group-id-per-topic:
