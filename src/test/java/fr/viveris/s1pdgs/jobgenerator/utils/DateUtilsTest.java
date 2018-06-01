@@ -16,7 +16,7 @@ public class DateUtilsTest {
 	@Test
 	public void testconvertWithSimpleDateFormat() throws InternalErrorException {
 		Date date1 = DateUtils.convertWithSimpleDateFormat("20180125T125633", "yyyyMMdd'T'HHmmss");
-		assertTrue(date1.getTime() == 1516881393000L);
+		assertTrue("Dates aren't close enough to each other!", Math.abs(date1.getTime() - 1516881393000L) < 1000);
 	}
 
 	@Test(expected = InternalErrorException.class)
@@ -27,6 +27,6 @@ public class DateUtilsTest {
 	@Test
 	public void testconvertIso() throws InternalErrorException {
 		Date date1 = DateUtils.convertDateIso("20180125T125633");
-		assertTrue(date1.getTime() == 1516881393000L);
+		assertTrue("Dates aren't close enough to each other!", Math.abs(date1.getTime() - 1516881393000L) < 1000);
 	}
 }
