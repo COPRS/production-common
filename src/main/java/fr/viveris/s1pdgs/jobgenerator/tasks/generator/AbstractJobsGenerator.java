@@ -651,7 +651,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 					LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
 							this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
 							ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for primary check since too long",
-							status.getNbRetries(), this.jobGeneratorSettings.getWaitmetadatainput().getRetries());
+							status.getNbRetries(), this.jobGeneratorSettings.getWaitprimarycheck().getRetries());
 					return true;
 				}
 				if (status.getStatus() == GenerationStatusEnum.PRIMARY_CHECK

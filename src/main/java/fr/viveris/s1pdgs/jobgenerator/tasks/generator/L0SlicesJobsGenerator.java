@@ -22,15 +22,33 @@ import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.service.metadata.MetadataService;
 
+/**
+ * Customization of the job generator for L0 slice products
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 
-	public L0SlicesJobsGenerator(XmlConverter xmlConverter, MetadataService metadataService,
-			ProcessSettings l0ProcessSettings, JobGeneratorSettings taskTablesSettings, JobsProducer kafkaJobsSender) {
+	/**
+	 * 
+	 * @param xmlConverter
+	 * @param metadataService
+	 * @param l0ProcessSettings
+	 * @param taskTablesSettings
+	 * @param kafkaJobsSender
+	 */
+	public L0SlicesJobsGenerator(final XmlConverter xmlConverter, final MetadataService metadataService,
+			final ProcessSettings l0ProcessSettings, final JobGeneratorSettings taskTablesSettings,
+			final JobsProducer kafkaJobsSender) {
 		super(xmlConverter, metadataService, l0ProcessSettings, taskTablesSettings, kafkaJobsSender);
 	}
 
+	/**
+	 * Check the product and retrieve usefull information before searching inputs
+	 */
 	@Override
-	protected void preSearch(Job<L0Slice> job) throws InputsMissingException {
+	protected void preSearch(final Job<L0Slice> job) throws InputsMissingException {
 		Map<String, String> missingMetadata = new HashMap<>();
 		// Retrieve instrument configuration id and slice number
 		try {
@@ -56,8 +74,11 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 		}
 	}
 
+	/**
+	 * Custom job order before building the job DTO
+	 */
 	@Override
-	protected void customJobOrder(Job<L0Slice> job) {
+	protected void customJobOrder(final Job<L0Slice> job) {
 		// Rewrite job order sensing time
 		DateTimeFormatter formatterJobOrder = DateTimeFormatter.ofPattern(JobOrderSensingTime.DATE_FORMAT);
 		DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;
@@ -81,7 +102,14 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 		this.updateProcParam(job.getJobOrder(), "Slicing_Flag", "TRUE");
 	}
 
-	private void updateProcParam(JobOrder jobOrder, String name, String newValue) {
+	/**
+	 * Update or create a proc param in the job order
+	 * 
+	 * @param jobOrder
+	 * @param name
+	 * @param newValue
+	 */
+	protected void updateProcParam(final JobOrder jobOrder, final String name, final String newValue) {
 		boolean update = false;
 		for (JobOrderProcParam param : jobOrder.getConf().getProcParams()) {
 			if (name.equals(param.getName())) {
@@ -94,8 +122,11 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 		}
 	}
 
+	/**
+	 * Customisation of the job DTO before sending it
+	 */
 	@Override
-	protected void customJobDto(Job<L0Slice> job, JobDto dto) {
+	protected void customJobDto(final Job<L0Slice> job, final JobDto dto) {
 		// NOTHING TO DO
 
 	}

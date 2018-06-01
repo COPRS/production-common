@@ -86,9 +86,7 @@ public class MetadataService {
 			throws MetadataException {
 		try {
 			String uri = this.uriEdrsSession + "/" + productType + "/" + productName;
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Call rest metadata on {}", uri);
-			}
+			LOGGER.debug("Call rest metadata on {}", uri);
 
 			ResponseEntity<EdrsSessionMetadata> response = this.restTemplate.exchange(uri, HttpMethod.GET, null,
 					EdrsSessionMetadata.class);
@@ -114,9 +112,7 @@ public class MetadataService {
 	public L0SliceMetadata getSlice(final String productType, final String productName) throws MetadataException {
 		try {
 			String uri = this.uriL0Slice + "/" + productType + "/" + productName;
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Call rest metadata on {}", uri);
-			}
+			LOGGER.debug("Call rest metadata on {}", uri);
 
 			ResponseEntity<L0SliceMetadata> response = this.restTemplate.exchange(uri, HttpMethod.GET, null,
 					L0SliceMetadata.class);
@@ -142,9 +138,7 @@ public class MetadataService {
 	public L0AcnMetadata getFirstACN(final String productType, final String productName) throws MetadataException {
 		try {
 			String uri = this.uriL0Slice + "/" + productType + "/" + productName + "/acns";
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Call rest metadata on {}", uri);
-			}
+			LOGGER.debug("Call rest metadata on {}", uri);
 
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("mode", "ONE");
 			ResponseEntity<L0AcnMetadata[]> response = this.restTemplate.exchange(builder.build().toUri(),
@@ -180,9 +174,8 @@ public class MetadataService {
 			if (instrumentConfigurationId != -1) {
 				builder.queryParam("insConfId", instrumentConfigurationId);
 			}
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Call rest metadata on [{}]", builder.build().toUri());
-			}
+			LOGGER.debug("Call rest metadata on [{}]", builder.build().toUri());
+			
 			ResponseEntity<SearchMetadata> response = this.restTemplate.exchange(builder.build().toUri(),
 					HttpMethod.GET, null, SearchMetadata.class);
 			if (response.getStatusCode() != HttpStatus.OK) {

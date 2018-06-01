@@ -1,7 +1,14 @@
 package fr.viveris.s1pdgs.jobgenerator.tasks.generator;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doThrow;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +18,9 @@ import java.util.Map;
 import javax.xml.bind.JAXBException;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -25,10 +34,15 @@ import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
+import fr.viveris.s1pdgs.jobgenerator.model.joborder.L0JobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.L0AcnMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.L0SliceMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
@@ -42,6 +56,12 @@ import fr.viveris.s1pdgs.jobgenerator.utils.DateUtils;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestGenericUtils;
 
 public class L0SlicesJobsGeneratorTest {
+
+	/**
+	 * For testing exceptions
+	 */
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Mock
 	private XmlConverter xmlConverter;
@@ -61,6 +81,8 @@ public class L0SlicesJobsGeneratorTest {
 	private TaskTable expectedTaskTable;
 
 	private L0SlicesJobsGenerator generator;
+
+	private Job<L0Slice> jobA;
 
 	/**
 	 * Test set up
@@ -85,6 +107,12 @@ public class L0SlicesJobsGeneratorTest {
 				metadataService, kafkaJobsSender);
 		generator = (L0SlicesJobsGenerator) factory
 				.createJobGeneratorForL0Slice(new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
+
+		L0Slice sliceA = new L0Slice("IW");
+		L0SliceProduct productA = new L0SliceProduct(
+				"S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
+				DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"), sliceA);
+		jobA = new Job<>(productA);
 	}
 
 	private void mockProcessSettings() {
@@ -235,14 +263,61 @@ public class L0SlicesJobsGeneratorTest {
 	}
 
 	@Test
+	public void testPresearchWhenSliceMissing() throws InputsMissingException, MetadataException {
+		doThrow(new MetadataException("test ex")).when(this.metadataService).getSlice(Mockito.anyString(),
+				Mockito.anyString());
+
+		thrown.expect(InputsMissingException.class);
+		thrown.expectMessage("Missing inputs");
+		thrown.expect(hasProperty("missingMetadata", hasKey(jobA.getProduct().getIdentifier())));
+		thrown.expect(hasProperty("missingMetadata", hasValue(containsString("lice: test ex"))));
+		generator.preSearch(jobA);
+	}
+
+	@Test
+	public void testPresearchWhenAcnMissing() throws InputsMissingException, MetadataException {
+		doThrow(new MetadataException("test ex")).when(this.metadataService).getFirstACN(Mockito.anyString(),
+				Mockito.anyString());
+
+		thrown.expect(InputsMissingException.class);
+		thrown.expectMessage("Missing inputs");
+		thrown.expect(hasProperty("missingMetadata", hasKey(jobA.getProduct().getIdentifier())));
+		thrown.expect(hasProperty("missingMetadata", hasValue(containsString("CNs: test ex"))));
+		generator.preSearch(jobA);
+	}
+
+	@Test
+	public void testUpdateProcParam() {
+		AbstractJobOrderConf conf = new L0JobOrderConf();
+		conf.setProcessorName("AIO_PROCESSOR");
+		JobOrderProcParam procParam1 = new JobOrderProcParam("Processing_Mode", "FAST24");
+		JobOrderProcParam procParam2 = new JobOrderProcParam("PT_Assembly", "no");
+		JobOrderProcParam procParam3 = new JobOrderProcParam("Timeout", "360");
+		conf.addProcParam(procParam1);
+		conf.addProcParam(procParam2);
+		conf.addProcParam(procParam3);
+
+		JobOrder jobOrder = new JobOrder();
+		jobOrder.setConf(conf);
+
+		generator.updateProcParam(jobOrder, "PT_Assembly", "yes");
+		assertTrue(jobOrder.getConf().getNbProcParams() == 3);
+		assertEquals("FAST24", jobOrder.getConf().getProcParams().get(0).getValue());
+		assertEquals("yes", jobOrder.getConf().getProcParams().get(1).getValue());
+		assertEquals("360", jobOrder.getConf().getProcParams().get(2).getValue());
+
+		generator.updateProcParam(jobOrder, "Mission_Id", "S1");
+		assertTrue(jobOrder.getConf().getNbProcParams() == 4);
+		assertEquals("FAST24", jobOrder.getConf().getProcParams().get(0).getValue());
+		assertEquals("yes", jobOrder.getConf().getProcParams().get(1).getValue());
+		assertEquals("360", jobOrder.getConf().getProcParams().get(2).getValue());
+		assertEquals("Mission_Id", jobOrder.getConf().getProcParams().get(3).getName());
+		assertEquals("S1", jobOrder.getConf().getProcParams().get(3).getValue());
+	}
+
+	@Test
 	public void testRun() {
 		try {
-			L0Slice sliceA = new L0Slice("IW");
-			L0SliceProduct productA = new L0SliceProduct(
-					"S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
-					DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"),
-					sliceA);
-			Job<L0Slice> jobA = new Job<>(productA);
 
 			generator.addJob(jobA);
 			generator.run();
