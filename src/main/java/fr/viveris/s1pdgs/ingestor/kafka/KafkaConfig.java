@@ -22,9 +22,14 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import fr.viveris.s1pdgs.ingestor.kafka.dto.KafkaConfigFileDto;
-import fr.viveris.s1pdgs.ingestor.kafka.dto.KafkaEdrsSessionDto;
+import fr.viveris.s1pdgs.ingestor.files.model.dto.KafkaConfigFileDto;
+import fr.viveris.s1pdgs.ingestor.files.model.dto.KafkaEdrsSessionDto;
 
+/**
+ * KAFKA configuration
+ * @author Cyrielle Gailliard
+ *
+ */
 @Configuration
 @EnableKafka
 public class KafkaConfig {
@@ -115,15 +120,6 @@ public class KafkaConfig {
 	}
 
 	/**
-	 * KAFKA producer
-	 * @return
-	 */
-	@Bean
-	public KafkaSessionProducer senderSession() {
-		return new KafkaSessionProducer();
-	}
-
-	/**
 	 * Producer factory
 	 * @return
 	 */
@@ -139,15 +135,6 @@ public class KafkaConfig {
 	@Bean(name="kafkaConfigFileTemplate")
 	public KafkaTemplate<String, KafkaConfigFileDto> kafkaConfigFileTemplate() {
 		return new KafkaTemplate<>(producerConfigFileFactory());
-	}
-
-	/**
-	 * KAFKA producer
-	 * @return
-	 */
-	@Bean
-	public KafkaConfigFileProducer senderConfigFiles() {
-		return new KafkaConfigFileProducer();
 	}
 
 }

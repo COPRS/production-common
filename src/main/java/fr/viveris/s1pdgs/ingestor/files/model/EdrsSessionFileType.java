@@ -14,15 +14,18 @@ public enum EdrsSessionFileType {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public static EdrsSessionFileType valueFromExtension(FileExtension extension) throws IllegalArgumentException {
+	public static EdrsSessionFileType valueFromExtension(final FileExtension extension) throws IllegalArgumentException {
+		EdrsSessionFileType ret;
 		switch (extension) {
 		case XML:
-			return SESSION;
+			ret = SESSION;
+			break;
 		case RAW:
-			return RAW;
+			ret = RAW;
+			break;
 		default:
-			// TODO custome exception
 			throw new IllegalArgumentException("Cannot retrieve ERDS session file type from extension " + extension);
 		}
+		return ret;
 	}
 }

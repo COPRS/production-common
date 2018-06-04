@@ -3,32 +3,34 @@
  */
 package fr.viveris.s1pdgs.ingestor.files.model;
 
+import java.util.Objects;
+
 /**
  * @author Olivier Bex-Chauvet
  *
  */
 public class FileDescriptor {
-	
+
 	/**
 	 * Filename with path from the session path
 	 */
 	private String relativePath;
-	
+
 	/**
 	 * Product name (here filename)
 	 */
 	private String productName;
-	
+
 	/**
 	 * Key in object storage
 	 */
 	private String keyObjectStorage;
-	
+
 	/**
 	 * True if metadata can be extracted from this file
 	 */
 	private boolean hasToBePublished;
-	
+
 	/**
 	 * Product type: RAW or SESSION here
 	 */
@@ -38,17 +40,17 @@ public class FileDescriptor {
 	 * Channel number
 	 */
 	private int channel;
-	
+
 	/**
 	 * File extension
 	 */
 	private FileExtension extension;
-	
+
 	/**
 	 * Mission identifier
 	 */
 	private String missionId;
-	
+
 	/**
 	 * Satellite identifier
 	 */
@@ -59,6 +61,9 @@ public class FileDescriptor {
 	 */
 	public FileDescriptor() {
 		super();
+		channel = -1;
+		hasToBePublished = true;
+		extension = FileExtension.UNKNOWN;
 	}
 
 	/**
@@ -69,9 +74,10 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param relativePath the relativePath to set
+	 * @param relativePath
+	 *            the relativePath to set
 	 */
-	public void setRelativePath(String relativePath) {
+	public void setRelativePath(final String relativePath) {
 		this.relativePath = relativePath;
 	}
 
@@ -83,9 +89,10 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param productName the productName to set
+	 * @param productName
+	 *            the productName to set
 	 */
-	public void setProductName(String productName) {
+	public void setProductName(final String productName) {
 		this.productName = productName;
 	}
 
@@ -97,9 +104,10 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param keyObjectStorage the keyObjectStorage to set
+	 * @param keyObjectStorage
+	 *            the keyObjectStorage to set
 	 */
-	public void setKeyObjectStorage(String keyObjectStorage) {
+	public void setKeyObjectStorage(final String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
@@ -111,9 +119,10 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param hasToExtractMetadata the hasToExtractMetadata to set
+	 * @param hasToExtractMetadata
+	 *            the hasToExtractMetadata to set
 	 */
-	public void setHasToBePublished(boolean hasToBePublished) {
+	public void setHasToBePublished(final boolean hasToBePublished) {
 		this.hasToBePublished = hasToBePublished;
 	}
 
@@ -125,9 +134,10 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param productType the productType to set
+	 * @param productType
+	 *            the productType to set
 	 */
-	public void setProductType(EdrsSessionFileType productType) {
+	public void setProductType(final EdrsSessionFileType productType) {
 		this.productType = productType;
 	}
 
@@ -139,12 +149,13 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param channel the channel to set
+	 * @param channel
+	 *            the channel to set
 	 */
-	public void setChannel(int channel) {
+	public void setChannel(final int channel) {
 		this.channel = channel;
 	}
-	
+
 	/**
 	 * @return the extension
 	 */
@@ -153,12 +164,12 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param extension the extension to set
+	 * @param extension
+	 *            the extension to set
 	 */
-	public void setExtension(FileExtension extension) {
+	public void setExtension(final FileExtension extension) {
 		this.extension = extension;
 	}
-	
 
 	/**
 	 * @return the missionId
@@ -168,9 +179,10 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param missionId the missionId to set
+	 * @param missionId
+	 *            the missionId to set
 	 */
-	public void setMissionId(String missionId) {
+	public void setMissionId(final String missionId) {
 		this.missionId = missionId;
 	}
 
@@ -182,60 +194,53 @@ public class FileDescriptor {
 	}
 
 	/**
-	 * @param satelliteId the satelliteId to set
+	 * @param satelliteId
+	 *            the satelliteId to set
 	 */
-	public void setSatelliteId(String satelliteId) {
+	public void setSatelliteId(final String satelliteId) {
 		this.satelliteId = satelliteId;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "FileDescriptor [relativePath=" + relativePath + ", productName=" + productName + ", keyObjectStorage="
-				+ keyObjectStorage + ", hasToBePublished=" + hasToBePublished + ", productType=" + productType
-				+ ", channel=" + channel + ", extension=" + extension + ", missionId=" + missionId + ", satelliteId="
-				+ satelliteId + "]";
+		return String.format(
+				"{relativePath: %s, productName: %s, keyObjectStorage: %s, hasToBePublished: %s, productType: %s, channel: %s, extension: %s, missionId: %s, satelliteId: %s}",
+				relativePath, productName, keyObjectStorage, hasToBePublished, productType, channel, extension,
+				missionId, satelliteId);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + channel;
-		result = prime * result + ((extension == null) ? 0 : extension.hashCode());
-		result = prime * result + (hasToBePublished ? 1231 : 1237);
-		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
-		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
-		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
-		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		return result;
+		return Objects.hash(relativePath, productName, keyObjectStorage, hasToBePublished, productType, channel,
+				extension, missionId, satelliteId);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * @see java.lang.Object#equals()
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FileDescriptor other = (FileDescriptor) obj;
-		if (keyObjectStorage == null) {
-			if (other.keyObjectStorage != null)
-				return false;
-		} else if (!keyObjectStorage.equals(other.keyObjectStorage))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			FileDescriptor other = (FileDescriptor) obj;
+			// field comparison
+			ret = Objects.equals(relativePath, other.relativePath) && Objects.equals(productName, other.productName)
+					&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+					&& hasToBePublished == other.hasToBePublished && Objects.equals(productType, other.productType)
+					&& channel == other.channel && Objects.equals(extension, other.extension)
+					&& Objects.equals(missionId, other.missionId) && Objects.equals(satelliteId, other.satelliteId);
+		}
+		return ret;
 	}
 
 }

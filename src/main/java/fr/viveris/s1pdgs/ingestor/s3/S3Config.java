@@ -14,19 +14,19 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 /**
  * Configuration for accessing to object storage with Amazon S3 API
+ * 
  * @author Cyrielle Gailliard
  *
  */
 @Configuration
 public class S3Config {
 
-	// FTP server configuration
-	// -------------------------------------
 	/**
 	 * Access key
 	 */
 	@Value("${storage.user.id}")
 	private String awsId;
+
 	/**
 	 * Access secret
 	 */
@@ -42,22 +42,20 @@ public class S3Config {
 	 */
 	@Value("${storage.region}")
 	private String region;
- 
+
 	/**
 	 * Amazon S3 client
+	 * 
 	 * @return
 	 */
 	@Bean
 	public AmazonS3 s3client() {
-		
+
 		BasicAWSCredentials awsCreds = new BasicAWSCredentials(awsId, awsKey);
-        ClientConfiguration clientConfig = new ClientConfiguration();
-        clientConfig.setProtocol(Protocol.HTTP);
-		AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                				.withClientConfiguration(clientConfig)
-                				.withEndpointConfiguration(new EndpointConfiguration(endpoint, region))
-		                        .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-		                        .build();
-		return s3Client;
+		ClientConfiguration clientConfig = new ClientConfiguration();
+		clientConfig.setProtocol(Protocol.HTTP);
+		return AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig)
+				.withEndpointConfiguration(new EndpointConfiguration(endpoint, region))
+				.withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
 	}
 }

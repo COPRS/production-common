@@ -5,31 +5,46 @@ import java.util.regex.Pattern;
 
 import org.springframework.integration.file.filters.AbstractRegexPatternFileListFilter;
 
+/**
+ * File filter to exclude file and directories respecting given pattern
+ */
 public class ExclusionRegexpPatternFileListFilter extends AbstractRegexPatternFileListFilter<File> {
 
-	
-
-	public ExclusionRegexpPatternFileListFilter(String pattern) {
-		super(pattern);
-	}
-	
-	public ExclusionRegexpPatternFileListFilter(Pattern pattern) {
+	/**
+	 * 
+	 */
+	public ExclusionRegexpPatternFileListFilter(final Pattern pattern) {
 		super(pattern);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
-	public boolean accept(File file) {
-		return alwaysAccept(file) || (!super.accept(file));
+	public boolean accept(final File file) {
+		boolean ret;
+		if (file == null) {
+			ret = false;
+		} else {
+			ret = alwaysAccept(file) || (!super.accept(file));
+		}
+		return ret;
 	}
 
 
+	/**
+	 * 
+	 */
 	@Override
-	protected String getFilename(File file) {
+	protected String getFilename(final File file) {
 		return (file != null) ? file.getName() : null;
 	}
 
+	/**
+	 * 
+	 */
 	@Override
-	protected boolean isDirectory(File file) {
+	protected boolean isDirectory(final File file) {
 		return file.isDirectory();
 	}
 

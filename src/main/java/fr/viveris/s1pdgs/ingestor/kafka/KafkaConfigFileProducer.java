@@ -1,17 +1,12 @@
 package fr.viveris.s1pdgs.ingestor.kafka;
 
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import fr.viveris.s1pdgs.ingestor.kafka.dto.KafkaConfigFileDto;
-import fr.viveris.s1pdgs.ingestor.kafka.exceptions.KafkaAuxFilesPublicationException;
+import fr.viveris.s1pdgs.ingestor.files.model.dto.KafkaConfigFileDto;
 
 /**
  * KAFKA producer for publishing metadata. </br>
@@ -21,43 +16,27 @@ import fr.viveris.s1pdgs.ingestor.kafka.exceptions.KafkaAuxFilesPublicationExcep
  *
  */
 @Service
-public class KafkaConfigFileProducer {
+public class KafkaConfigFileProducer extends AbstractKafkaService<KafkaConfigFileDto> {
 
 	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(KafkaConfigFileProducer.class);
-
-	/**
-	 * KAFKA template for topic "metadata"
+	 * Constructor
+	 * 
+	 * @param kafkaTemplate
+	 * @param kafkaTopic
 	 */
 	@Autowired
-	private KafkaTemplate<String, KafkaConfigFileDto> kafkaMetadataTemplate;
-	/**
-	 * Name of the topic "metadata"
-	 */
-	@Value("${kafka.topic.auxiliary-files}")
-	private String kafkaTopic;
+	public KafkaConfigFileProducer(
+			@Qualifier("kafkaConfigFileTemplate") final KafkaTemplate<String, KafkaConfigFileDto> kafkaTemplate,
+			@Value("${kafka.topic.auxiliary-files}") final String kafkaTopic) {
+		super(kafkaTemplate, kafkaTopic);
+	}
 
 	/**
-	 * Send a message to a topic and wait until one is published
 	 * 
-	 * @param customer
-	 * @throws ExecutionException
-	 * @throws InterruptedException
 	 */
-	public void send(KafkaConfigFileDto metadataCrud) throws KafkaAuxFilesPublicationException {
-		try {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("[send] Send metadata = {}", metadataCrud);
-			}
-			kafkaMetadataTemplate.send(kafkaTopic, metadataCrud).get();
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("[send] Success metadata = {}", metadataCrud);
-			}
-		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaAuxFilesPublicationException(metadataCrud.getProductName(), e);
-		}
+	@Override
+	protected String extractProductName(KafkaConfigFileDto obj) {
+		return obj.getProductName();
 	}
 
 }
