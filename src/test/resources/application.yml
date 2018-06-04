@@ -5,7 +5,7 @@ spring:
     
 # Logging
 logging:
-  config: ./test/log4j2.yml
+  config: ./test/log4j2-test.yml
 
 # KAFKA
 kafka:
