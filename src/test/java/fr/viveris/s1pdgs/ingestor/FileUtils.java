@@ -5,8 +5,6 @@ import java.io.File;
 import fr.viveris.s1pdgs.ingestor.files.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.ingestor.files.model.FileDescriptor;
 import fr.viveris.s1pdgs.ingestor.files.model.FileExtension;
-import fr.viveris.s1pdgs.ingestor.files.model.dto.KafkaConfigFileDto;
-import fr.viveris.s1pdgs.ingestor.files.model.dto.KafkaEdrsSessionDto;
 
 public class FileUtils {
 
@@ -86,34 +84,6 @@ public class FileUtils {
 	}
 
 	/**
-	 * Get the DTO according the relative path
-	 * 
-	 * @param str
-	 * @return
-	 */
-	public static KafkaConfigFileDto getDtoForAuxiliary(String str) {
-		KafkaConfigFileDto desc;
-		if (RPATH_AUX_INS_MANIFEST.equals(str)) {
-			desc = new KafkaConfigFileDto(RPATH_AUX_INS, RPATH_AUX_INS_MANIFEST);
-		} else if (RPATH_AUX_PP1_MANIFEST.equals(str)) {
-			desc = new KafkaConfigFileDto(RPATH_AUX_PP1, RPATH_AUX_PP1);
-		} else if (RPATH_AUX_CAL_MANIFEST.equals(str)) {
-			desc = new KafkaConfigFileDto(RPATH_AUX_CAL, RPATH_AUX_CAL);
-		} else if (RPATH_MPL_ORBPRE.equals(str)) {
-			desc = new KafkaConfigFileDto(RPATH_MPL_ORBPRE, RPATH_MPL_ORBPRE);
-		} else if (RPATH_MPL_ORBSCT.equals(str)) {
-			desc = new KafkaConfigFileDto(RPATH_MPL_ORBSCT, RPATH_MPL_ORBSCT);
-		} else if (RPATH_AUX_OBMEMC.equals(str)) {
-			desc = new KafkaConfigFileDto(RPATH_AUX_OBMEMC, RPATH_AUX_OBMEMC);
-		} else if (RPATH_AUX_RESORB.equals(str)) {
-			desc = new KafkaConfigFileDto(RPATH_AUX_RESORB, RPATH_AUX_RESORB);
-		} else {
-			throw new IllegalArgumentException("The relative path shall be a known file");
-		}
-		return desc;
-	}
-
-	/**
 	 * Get the file descriptor according the relative path
 	 * 
 	 * @param str
@@ -129,24 +99,6 @@ public class FileUtils {
 		} else if (RPATH_SESSION_XML.equals(str)) {
 			setFileDescriptorFromParams(desc, "DCS_02_L20171109175634707000180_ch2_DSIB.xml", true, "S1", "B",
 					FileExtension.XML, EdrsSessionFileType.SESSION, 2);
-		} else {
-			throw new IllegalArgumentException("The relative path shall be a known file");
-		}
-		return desc;
-	}
-
-	/**
-	 * Get the file descriptor according the relative path
-	 * 
-	 * @param str
-	 * @return
-	 */
-	public static KafkaEdrsSessionDto getDtoForEdrsSession(String str) {
-		KafkaEdrsSessionDto desc;
-		if (RPATH_SESSION_RAW.equals(str)) {
-			desc = new KafkaEdrsSessionDto(RPATH_SESSION_RAW, 1, EdrsSessionFileType.RAW, "S1", "A");
-		} else if (RPATH_SESSION_XML.equals(str)) {
-			desc = new KafkaEdrsSessionDto(RPATH_SESSION_XML, 2, EdrsSessionFileType.SESSION, "S1", "B");
 		} else {
 			throw new IllegalArgumentException("The relative path shall be a known file");
 		}
