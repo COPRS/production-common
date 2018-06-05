@@ -62,13 +62,10 @@ public abstract class AbstractS3Services implements S3Services {
 						bucketName, directoryPath);
 			}
 		} catch (AmazonServiceException ase) {
-			LOGGER.error(ase.getMessage(), ase);
 			throw new ObjectStorageException(prefixKey, prefixKey, bucketName, ase);
 		} catch (AmazonClientException sce) {
-			LOGGER.error(sce.getMessage(), sce);
 			throw new ObjectStorageException(prefixKey, prefixKey, bucketName, sce);
 		} catch (IOException e) {
-			LOGGER.error(e.getMessage(), e);
 			throw new ObjectStorageException(prefixKey, prefixKey, bucketName, e);
 		}
 		return nbObj;
