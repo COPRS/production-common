@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.ingestor.files.services;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,13 +30,18 @@ public class AuxiliaryFileDescriptorService extends AbstractFileDescriptorServic
 	private final static String PATTERN_STR = "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
 
 	/**
+	 * Pattern
+	 */
+	protected final Pattern pattern = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
+
+	/**
 	 * Constructor
 	 * 
 	 * @param directory
 	 */
 	@Autowired
 	public AuxiliaryFileDescriptorService(@Value("${file.auxiliary-files.local-directory}") final String directory) {
-		super(directory, PATTERN_STR, FAMILY_STR);
+		super(directory, FAMILY_STR);
 	}
 
 	/**
@@ -43,8 +49,9 @@ public class AuxiliaryFileDescriptorService extends AbstractFileDescriptorServic
 	 * 
 	 */
 	@Override
-	protected FileDescriptor buildFromMatcher(final Matcher matcher, final String relativePath)
-			throws FilePathException {
+	protected FileDescriptor buildDescriptor(final String relativePath) throws FilePathException {
+		Matcher matcher = pattern.matcher(relativePath);
+
 		if (!matcher.matches()) {
 			throw new FilePathException(relativePath, relativePath, family, "File does not match the pattern");
 		}
@@ -75,6 +82,13 @@ public class AuxiliaryFileDescriptorService extends AbstractFileDescriptorServic
 		configFile.setMissionId(matcher.group(1));
 		configFile.setSatelliteId(matcher.group(2));
 		return configFile;
+	}
+
+	/**
+	 * @return the pattern
+	 */
+	public Pattern getPattern() {
+		return pattern;
 	}
 
 }

@@ -58,10 +58,8 @@ public abstract class AbstractFileProcessor<T> {
 		File file = message.getPayload();
 		if (!file.isDirectory()) {
 			int step = 0;
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("[MONITOR] [step 0] Start processing of file {} for family {}", file.getPath(),
+			LOGGER.info("[MONITOR] [step 0] Start processing of file {} for family {}", file.getPath(),
 						extractor.getFamily());
-			}
 
 			// Build model file
 			try {
@@ -86,10 +84,8 @@ public abstract class AbstractFileProcessor<T> {
 						publisher.send(buildDto(descriptor));
 					}
 				} catch (IgnoredFileException ce) {
-					if (LOGGER.isDebugEnabled()) {
-						LOGGER.debug("[MONITOR] [step {}] [productName {}] [code {}] {}", step, ce.getProductName(),
+					LOGGER.debug("[MONITOR] [step {}] [productName {}] [code {}] {}", step, ce.getProductName(),
 								ce.getCode().getCode(), ce.getLogMessage());
-					}
 				} catch (FileTerminatedException fte) {
 					LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {}", step, fte.getProductName(),
 							fte.getCode().getCode(), fte.getLogMessage());
@@ -106,9 +102,7 @@ public abstract class AbstractFileProcessor<T> {
 				LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {}", step, fre.getProductName(),
 						fre.getCode().getCode(), fre.getLogMessage());
 			}
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("[MONITOR] [step 0] End processing of configuration file {}", file.getPath());
-			}
+			LOGGER.info("[MONITOR] [step 0] End processing of configuration file {}", file.getPath());
 		}
 	}
 

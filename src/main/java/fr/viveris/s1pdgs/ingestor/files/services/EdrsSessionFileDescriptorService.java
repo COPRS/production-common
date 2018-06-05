@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.ingestor.files.services;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,13 +32,18 @@ public class EdrsSessionFileDescriptorService extends AbstractFileDescriptorServ
 	private final static String PATTERN_STR = "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
 
 	/**
+	 * Pattern
+	 */
+	protected final Pattern pattern = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
+
+	/**
 	 * Constructor
 	 * 
 	 * @param directory
 	 */
 	@Autowired
 	public EdrsSessionFileDescriptorService(@Value("${file.session-files.local-directory}") final String directory) {
-		super(directory, PATTERN_STR, FAMILY_STR);
+		super(directory, FAMILY_STR);
 	}
 
 	/**
@@ -45,8 +51,10 @@ public class EdrsSessionFileDescriptorService extends AbstractFileDescriptorServ
 	 * 
 	 */
 	@Override
-	protected FileDescriptor buildFromMatcher(final Matcher matcher, final String relativePath)
+	protected FileDescriptor buildDescriptor(final String relativePath)
 			throws FilePathException {
+		Matcher matcher = pattern.matcher(relativePath);
+
 		if (!matcher.matches()) {
 			throw new FilePathException(relativePath, relativePath, family, "File does not match the pattern");
 		}
@@ -69,6 +77,13 @@ public class EdrsSessionFileDescriptorService extends AbstractFileDescriptorServ
 		descriptor.setHasToBePublished(true);
 
 		return descriptor;
+	}
+
+	/**
+	 * @return the pattern
+	 */
+	public Pattern getPattern() {
+		return pattern;
 	}
 
 }

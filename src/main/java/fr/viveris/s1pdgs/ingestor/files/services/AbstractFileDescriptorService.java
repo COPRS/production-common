@@ -1,8 +1,6 @@
 package fr.viveris.s1pdgs.ingestor.files.services;
 
 import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import fr.viveris.s1pdgs.ingestor.exceptions.FilePathException;
 import fr.viveris.s1pdgs.ingestor.exceptions.IgnoredFileException;
@@ -15,11 +13,6 @@ import fr.viveris.s1pdgs.ingestor.files.model.FileDescriptor;
  *
  */
 public abstract class AbstractFileDescriptorService {
-
-	/**
-	 * Pattern
-	 */
-	protected final Pattern pattern;
 
 	/**
 	 * Local directory
@@ -37,9 +30,8 @@ public abstract class AbstractFileDescriptorService {
 	 * @param directory
 	 * @param pattern
 	 */
-	protected AbstractFileDescriptorService(final String directory, final String patternStr, final String family) {
+	protected AbstractFileDescriptorService(final String directory, final String family) {
 		this.directory = directory;
-		this.pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
 		this.family = family;
 	}
 
@@ -51,11 +43,12 @@ public abstract class AbstractFileDescriptorService {
 	 * @throws FilePathException
 	 * @throws IgnoredFileException
 	 */
-	public FileDescriptor extractDescriptor(File file) throws FilePathException, IgnoredFileException {
-		// Extract object storage key
+	public FileDescriptor extractDescriptor(final File file) throws FilePathException, IgnoredFileException {
 		String absolutePath = file.getAbsolutePath();
-		if (absolutePath.length() <= directory.length()) {
-			throw new FilePathException(absolutePath, absolutePath, family, "Filename length is too short");
+		
+		// Extract object storage key
+		if (!absolutePath.contains(directory)) {
+			throw new FilePathException(file.getName(), absolutePath, family, "File is not in root directory");
 		}
 		String relativePath = absolutePath.substring(directory.length());
 		relativePath = relativePath.replace("\\", "/");
@@ -66,9 +59,8 @@ public abstract class AbstractFileDescriptorService {
 		}
 
 		// Check if key matches the pattern
-		Matcher m = pattern.matcher(relativePath);
 
-		return buildFromMatcher(m, relativePath);
+		return buildDescriptor(relativePath);
 	}
 
 	/**
@@ -77,15 +69,7 @@ public abstract class AbstractFileDescriptorService {
 	 * @param m
 	 * @return
 	 */
-	protected abstract FileDescriptor buildFromMatcher(final Matcher matcher, final String relativePath)
-			throws FilePathException;
-
-	/**
-	 * @return the pattern
-	 */
-	public Pattern getPattern() {
-		return pattern;
-	}
+	protected abstract FileDescriptor buildDescriptor(final String relativePath) throws FilePathException;
 
 	/**
 	 * @return the directory
