@@ -296,7 +296,7 @@ public class FileDescriptorBuilderTest {
 					"/S1A_OPER_AUX.xml", fe.getProductName());
 		}
 		//Edrs Session file
-		file = new File("/S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml");
+		file = new File("/S1A/SESSION1");
 		fileDescriptorBuilder = new FileDescriptorBuilder(Paths.get("").toAbsolutePath()+"/test/workDir/", 
 				Pattern.compile("^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$", 
 						Pattern.CASE_INSENSITIVE));
@@ -304,8 +304,8 @@ public class FileDescriptorBuilderTest {
 			fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
 			fail("An exception should occur");
 		} catch (AbstractFileException fe) {
-			assertEquals("Raised exception shall concern S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml",
-					"/S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml", fe.getProductName());
+			assertEquals("Raised exception shall concern S1A/SESSION1",
+					"/S1A/SESSION1", fe.getProductName());
 		}
 		//L0
 		file = new File("/S1A_IW_RAW__0SDV");
@@ -342,7 +342,7 @@ public class FileDescriptorBuilderTest {
 						Pattern.CASE_INSENSITIVE));
 		try {
 			fileDescriptorBuilder.buildConfigFileDescriptor(file);
-			fail("An exception should occur");
+			fail("An exception should occur" + file.getName() + "shall be a directory : " + file.isDirectory());
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
 					"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", fe.getProductName());
@@ -354,7 +354,7 @@ public class FileDescriptorBuilderTest {
 						Pattern.CASE_INSENSITIVE));
 		try {
 			fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
-			fail("An exception should occur");
+			fail("An exception should occur" + file.getName() + "shall be a directory : " + file.isDirectory());
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1/ch01",
 					"S1A/SESSION1/ch01", fe.getProductName());
@@ -366,7 +366,7 @@ public class FileDescriptorBuilderTest {
 						Pattern.CASE_INSENSITIVE));
 		try {
 			fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
-			fail("An exception should occur");
+			fail("An exception should occur" + file.getName() + "shall be a directory : " + file.isDirectory());
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 					"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", fe.getProductName());
@@ -378,7 +378,7 @@ public class FileDescriptorBuilderTest {
 						Pattern.CASE_INSENSITIVE));
 		try {
 			fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
-			fail("An exception should occur");
+			fail("An exception should occur" + file.getName() + "shall be a directory : " + file.isDirectory());
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE",
 					"S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE", fe.getProductName());
