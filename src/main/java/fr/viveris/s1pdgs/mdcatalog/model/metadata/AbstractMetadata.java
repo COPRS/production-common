@@ -11,27 +11,27 @@ public abstract class AbstractMetadata {
 	/**
 	 * Product name
 	 */
-	private String productName;
+	protected String productName;
 
 	/**
 	 * Product type
 	 */
-	private String productType;
+	protected String productType;
 
 	/**
 	 * Key in object storage
 	 */
-	private String keyObjectStorage;
+	protected String keyObjectStorage;
 
 	/**
 	 * Validity start time
 	 */
-	private String validityStart;
+	protected String validityStart;
 
 	/**
 	 * Validity stop time
 	 */
-	private String validityStop;
+	protected String validityStop;
 
 	/**
 	 * Constrcutor using fields
@@ -121,20 +121,16 @@ public abstract class AbstractMetadata {
 		this.productType = productType;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "SearchMetadataFile [productName=" + productName + ", productType=" + productType + ", keyObjectStorage="
-				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop=" + validityStop + "]";
+		return "AbstractMetadata [productName= " + productName + ", productType= " + productType + ", keyObjectStorage= "
+				+ keyObjectStorage + ", validityStart= " + validityStart + ", validityStop= " + validityStop + "]";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -149,9 +145,7 @@ public abstract class AbstractMetadata {
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override

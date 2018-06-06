@@ -10,7 +10,6 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -44,7 +43,7 @@ public class EsServices {
 	 * Elasticsearch client
 	 */
 	@Autowired
-	private RestHighLevelClient restHighLevelClient;
+	private ElasticsearchDAO elasticsearchDAO;
 
 	/**
 	 * Index type for elastic search
@@ -66,7 +65,7 @@ public class EsServices {
 
 			GetRequest getRequest = new GetRequest(productType, indexType, productName);
 
-			GetResponse response = restHighLevelClient.get(getRequest);
+			GetResponse response = elasticsearchDAO.get(getRequest);
 			return response.isExists();
 		} catch (JSONException je) {
 			throw new Exception(je.getMessage());
@@ -90,7 +89,8 @@ public class EsServices {
 			IndexRequest request = new IndexRequest(productType, indexType, productName).source(product.toString(),
 					XContentType.JSON);
 
-			IndexResponse response = restHighLevelClient.index(request);
+			IndexResponse response = elasticsearchDAO.index(request);
+			System.out.println(response.status());
 			if (response.status() != RestStatus.CREATED) {
 				throw new MetadataCreationException(productName, response.status().toString(),
 						response.getResult().toString());
@@ -134,7 +134,7 @@ public class EsServices {
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
 				Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
 				SearchMetadata r = new SearchMetadata();
@@ -198,7 +198,7 @@ public class EsServices {
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
 				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productType);
 			}
@@ -212,7 +212,7 @@ public class EsServices {
 		try {
 			GetRequest getRequest = new GetRequest(productType.toLowerCase(), indexType, productName);
 
-			GetResponse response = restHighLevelClient.get(getRequest);
+			GetResponse response = elasticsearchDAO.get(getRequest);
 
 			if (response.isExists()) {
 				return response.getSourceAsMap();

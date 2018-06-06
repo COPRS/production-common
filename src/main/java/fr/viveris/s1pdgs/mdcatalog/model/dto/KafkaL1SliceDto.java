@@ -68,7 +68,7 @@ public class KafkaL1SliceDto {
 	 */
 	@Override
 	public String toString() {
-		return "KafkaL1SliceDto [productName=" + productName + ", keyObjectStorage=" + keyObjectStorage + "]";
+		return "KafkaL1SliceDto [productName= " + productName + ", keyObjectStorage= " + keyObjectStorage + "]";
 	}
 
 	/* (non-Javadoc)

@@ -206,6 +206,7 @@ public class FileDescriptorBuilder {
 			l0Descriptor.setPolarisation(m.group(8));
 			l0Descriptor.setDataTakeId(m.group(12));
 			l0Descriptor.setKeyObjectStorage(productName);
+			l0Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));
 		
 		} else {
 			throw new FilePathException(relativePath, relativePath,
@@ -257,6 +258,7 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setPolarisation(m.group(7));
 			l1Descriptor.setDataTakeId(m.group(11));
 			l1Descriptor.setKeyObjectStorage(productName);
+			l1Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));
 						
 		} else {
 			throw new FilePathException(relativePath, relativePath,

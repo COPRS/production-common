@@ -64,7 +64,7 @@ public class KafkaConfigFileDto {
 	 */
 	@Override
 	public String toString() {
-		return "KafkaConfigFileDto [productName=" + productName + ", keyObjectStorage=" + keyObjectStorage + "]";
+		return "KafkaConfigFileDto [productName= " + productName + ", keyObjectStorage= " + keyObjectStorage + "]";
 	}
 
 	@Override

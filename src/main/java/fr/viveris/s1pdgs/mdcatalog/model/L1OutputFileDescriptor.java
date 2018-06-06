@@ -43,25 +43,6 @@ public class L1OutputFileDescriptor extends AbstractFileDescriptor {
 	}
 
 	/**
-	 * @param productType
-	 * @param productClass
-	 * @param resolution
-	 * @param swathtype
-	 * @param polarisation
-	 * @param dataTakeId
-	 */
-	public L1OutputFileDescriptor(String productType, String productClass, String resolution, String swathtype,
-			String polarisation, String dataTakeId) {
-		super();
-		this.productType = productType;
-		this.productClass = productClass;
-		this.resolution = resolution;
-		this.swathtype = swathtype;
-		this.polarisation = polarisation;
-		this.dataTakeId = dataTakeId;
-	}
-
-	/**
 	 * @return the productType
 	 */
 	public String getProductType() {
@@ -146,12 +127,24 @@ public class L1OutputFileDescriptor extends AbstractFileDescriptor {
 	}
 
 	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "L1OutputFileDescriptor [productType=" + productType + ", productClass=" + productClass + ", resolution="
+				+ resolution + ", swathtype=" + swathtype + ", polarisation=" + polarisation + ", dataTakeId="
+				+ dataTakeId + ", relativePath=" + relativePath + ", filename=" + filename + ", extension=" + extension
+				+ ", productName=" + productName + ", missionId=" + missionId + ", satelliteId=" + satelliteId
+				+ ", keyObjectStorage=" + keyObjectStorage + "]";
+	}
+
+	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((dataTakeId == null) ? 0 : dataTakeId.hashCode());
 		result = prime * result + ((polarisation == null) ? 0 : polarisation.hashCode());
 		result = prime * result + ((productClass == null) ? 0 : productClass.hashCode());
@@ -168,7 +161,7 @@ public class L1OutputFileDescriptor extends AbstractFileDescriptor {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

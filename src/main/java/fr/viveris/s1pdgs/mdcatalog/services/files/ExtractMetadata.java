@@ -514,18 +514,15 @@ public class ExtractMetadata {
 		try {
 			//XSLT Transformation
 			String xsltFilename = this.xsltDirectory + "XSLT_L1_MANIFEST.xslt";
-			Source xsltL0MANIFEST = new StreamSource(new File(xsltFilename));
-	        Transformer transformerL0 = transFactory.newTransformer(xsltL0MANIFEST);
-	        Source l0File = new StreamSource(file);
-	        transformerL0.transform(l0File, new StreamResult(new File(output)));
+			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
+	        Transformer transformerL1 = transFactory.newTransformer(xsltL1MANIFEST);
+	        Source l1File = new StreamSource(file);
+	        transformerL1.transform(l1File, new StreamResult(new File(output)));
 	        //JSON creation
 	        JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
 	        JSONObject metadataJSONObject = new JSONObject();
 	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
 	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").has("content")) {
-	        	metadataJSONObject.put("theoreticalSliceLength", jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").get("content"));
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("pass").has("content")) {
 	        	metadataJSONObject.put("pass", jsonFromXmlTmp.getJSONObject("pass").get("content"));
@@ -551,20 +548,11 @@ public class ExtractMetadata {
 	        if(jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").has("content")) {
 	        	metadataJSONObject.put("absoluteStopOrbit", jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").get("content"));
 	        }
-	        if(jsonFromXmlTmp.getJSONObject("circulationFlag").has("content")) {
-	        	metadataJSONObject.put("circulationFlag", jsonFromXmlTmp.getJSONObject("circulationFlag").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("productConsolidation").has("content")) {
-	        	metadataJSONObject.put("productConsolidation", jsonFromXmlTmp.getJSONObject("productConsolidation").get("content"));
-	        }
 	        if(jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").has("content")) {
 	        	metadataJSONObject.put("absoluteStartOrbit", jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").get("content"));
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").has("content")) {
 	        	metadataJSONObject.put("instrumentConfigurationId", jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceOverlap").has("content")) {
-	        	metadataJSONObject.put("sliceOverlap", jsonFromXmlTmp.getJSONObject("sliceOverlap").get("content"));
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("startTimeANX").has("content")) {
 	        	metadataJSONObject.put("startTimeANX", jsonFromXmlTmp.getJSONObject("startTimeANX").get("content"));

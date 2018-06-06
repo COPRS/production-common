@@ -1,7 +1,5 @@
 package fr.viveris.s1pdgs.mdcatalog.model.dto;
 
-import java.util.Objects;
-
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileType;
 
 /**
@@ -74,33 +72,50 @@ public class KafkaEdrsSessionDto {
 		this.productType = productType;
 	}
 
-	/**
-	 * String formatting (JSON format)
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
 	 */
-	public String toString() {
-		String info = String.format("{'objectStorageKey': %s, 'channelId': %d}", this.objectStorageKey, this.channelId);
-		return info;
-	}
-
 	@Override
-	public boolean equals(Object o) {
-		// self check
-		if (this == o)
-			return true;
-		// null check
-		if (o == null)
-			return false;
-		// type check and cast
-		if (getClass() != o.getClass())
-			return false;
-		KafkaEdrsSessionDto dto = (KafkaEdrsSessionDto) o;
-		// field comparison
-		return Objects.equals(this.objectStorageKey, dto.getObjectStorageKey());
+	public String toString() {
+		return "KafkaEdrsSessionDto [objectStorageKey= " + objectStorageKey + ", channelId= " + channelId
+				+ ", productType= " + productType + "]";
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		KafkaEdrsSessionDto other = (KafkaEdrsSessionDto) obj;
+		if (channelId != other.channelId)
+			return false;
+		if (objectStorageKey == null) {
+			if (other.objectStorageKey != null)
+				return false;
+		} else if (!objectStorageKey.equals(other.objectStorageKey))
+			return false;
+		if (productType != other.productType)
+			return false;
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.objectStorageKey);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + channelId;
+		result = prime * result + ((objectStorageKey == null) ? 0 : objectStorageKey.hashCode());
+		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		return result;
 	}
 
 }
