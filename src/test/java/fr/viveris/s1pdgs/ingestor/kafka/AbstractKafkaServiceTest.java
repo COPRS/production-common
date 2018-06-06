@@ -100,6 +100,7 @@ public class AbstractKafkaServiceTest {
 		thrown.expect(KafkaSendException.class);
 		thrown.expect(hasProperty("topic", is(TOPIC_NAME)));
 		thrown.expect(hasProperty("productName", is("string to send")));
+		thrown.expect(hasProperty("dto", is("string to send")));
 		thrown.expectMessage("cancel exception raised");
 		thrown.expectCause(isA(CancellationException.class));
 		service.send("string to send");
@@ -119,6 +120,7 @@ public class AbstractKafkaServiceTest {
 		thrown.expect(KafkaSendException.class);
 		thrown.expect(hasProperty("topic", is(TOPIC_NAME)));
 		thrown.expect(hasProperty("productName", is("string to send")));
+		thrown.expect(hasProperty("dto", is("string to send")));
 		thrown.expectMessage("cancel exception raised");
 		thrown.expectCause(isA(InterruptedException.class));
 		service.send("string to send");
@@ -138,6 +140,7 @@ public class AbstractKafkaServiceTest {
 		thrown.expect(KafkaSendException.class);
 		thrown.expect(hasProperty("topic", is(TOPIC_NAME)));
 		thrown.expect(hasProperty("productName", is("string to send")));
+		thrown.expect(hasProperty("dto", is("string to send")));
 		thrown.expectCause(isA(ExecutionException.class));
 		service.send("string to send");
 	}

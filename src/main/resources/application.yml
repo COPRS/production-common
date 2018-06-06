@@ -12,6 +12,7 @@ kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
   group-id: ${ingestor_kafka_group:ingestors}
   poll-timeout: ${ingestor_kafka_poll-timeout:500}
+  producer-retries: ${ingestor_kafka_producer-retries:10}
   topic:
     auxiliary-files: ${kafka_topic_auxiliary_files:t-pdgs-auxiliary-files}
     edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}

@@ -51,7 +51,7 @@ public abstract class AbstractKafkaService<T> implements PublicationServices<T> 
 			LOGGER.debug("[send] Send metadata = {}", obj);
 			kafkaTemplate.send(kafkaTopic, obj).get();
 		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaSendException(kafkaTopic, extractProductName(obj), e.getMessage(), e);
+			throw new KafkaSendException(kafkaTopic, obj, extractProductName(obj), e.getMessage(), e);
 		}
 	}
 

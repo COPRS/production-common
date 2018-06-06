@@ -50,6 +50,9 @@ public class KafkaConfig {
 	@Value("${kafka.poll-timeout}")
 	private long kafkaPooltimeout;
 
+	@Value("${kafka.producer-retries}")
+	protected int kafkaRetriesConfig;
+
 	/**
 	 * Consumer configuration
 	 * @return
@@ -97,6 +100,7 @@ public class KafkaConfig {
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+		props.put(ProducerConfig.RETRIES_CONFIG, kafkaRetriesConfig);
 		props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
 		return props;
 	}

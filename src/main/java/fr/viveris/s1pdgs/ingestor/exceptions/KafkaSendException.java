@@ -10,6 +10,11 @@ public class KafkaSendException extends FileTerminatedException {
 	private final String topic;
 
 	/**
+	 * DTO object
+	 */
+	private final Object dto;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param topic
@@ -17,9 +22,11 @@ public class KafkaSendException extends FileTerminatedException {
 	 * @param message
 	 * @param e
 	 */
-	public KafkaSendException(final String topic, final String productName, final String message, final Throwable e) {
-		super(ErrorCode.KAFKA_SEND_ERROR, productName, message, e);
+	public KafkaSendException(final String topic, final Object dto, final String productName, final String message,
+			final Throwable exc) {
+		super(ErrorCode.KAFKA_SEND_ERROR, productName, message, exc);
 		this.topic = topic;
+		this.dto = dto;
 	}
 
 	/**
@@ -30,11 +37,19 @@ public class KafkaSendException extends FileTerminatedException {
 	}
 
 	/**
+	 * @return the dto
+	 */
+	public Object getDto() {
+		return dto;
+	}
+
+	/**
 	 * 
 	 */
 	@Override
 	public String getLogMessage() {
-		return String.format("[topic %s] [productName %s] [msg %s]", this.topic, this.productName, getMessage());
+		return String.format("[topic %s] [dto %s] [productName %s] [msg %s]", this.topic, this.dto, this.productName,
+				getMessage());
 	}
 
 }
