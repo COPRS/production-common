@@ -342,7 +342,7 @@ public class FileDescriptorBuilderTest {
 						Pattern.CASE_INSENSITIVE));
 		try {
 			fileDescriptorBuilder.buildConfigFileDescriptor(file);
-			fail("An exception should occur" + file.getName() + "shall be a directory : " + file.isDirectory());
+			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
 					"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", fe.getProductName());
@@ -354,7 +354,7 @@ public class FileDescriptorBuilderTest {
 						Pattern.CASE_INSENSITIVE));
 		try {
 			fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
-			fail("An exception should occur" + file.getName() + "shall be a directory : " + file.isDirectory());
+			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1/ch01",
 					"S1A/SESSION1/ch01", fe.getProductName());
@@ -366,7 +366,7 @@ public class FileDescriptorBuilderTest {
 						Pattern.CASE_INSENSITIVE));
 		try {
 			fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
-			fail("An exception should occur" + file.getName() + "shall be a directory : " + file.isDirectory());
+			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 					"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", fe.getProductName());
@@ -378,7 +378,7 @@ public class FileDescriptorBuilderTest {
 						Pattern.CASE_INSENSITIVE));
 		try {
 			fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
-			fail("An exception should occur" + file.getName() + "shall be a directory : " + file.isDirectory());
+			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE",
 					"S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE", fe.getProductName());
