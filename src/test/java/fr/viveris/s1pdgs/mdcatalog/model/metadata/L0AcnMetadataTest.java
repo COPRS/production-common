@@ -28,7 +28,7 @@ public class L0AcnMetadataTest {
 		obj.setDatatakeId("14256");
 		
 		String str = obj.toString();
-		System.out.println(str);
+		
 		assertTrue(str.contains("productName= name"));
 		assertTrue(str.contains("productType= type"));
 		assertTrue(str.contains("keyObjectStorage= kobs"));

@@ -90,7 +90,7 @@ public class EsServices {
 					XContentType.JSON);
 
 			IndexResponse response = elasticsearchDAO.index(request);
-			System.out.println(response.status());
+			
 			if (response.status() != RestStatus.CREATED) {
 				throw new MetadataCreationException(productName, response.status().toString(),
 						response.getResult().toString());

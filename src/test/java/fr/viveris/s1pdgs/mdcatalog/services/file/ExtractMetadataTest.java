@@ -96,7 +96,7 @@ public class ExtractMetadataTest {
 		
 		try {
 			JSONObject result = extractor.processXMLFile(descriptor, file);
-			System.out.println(result);
+				
 			assertNotNull("JSON object should not be null", result);
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("validityStartTime").toString(),
