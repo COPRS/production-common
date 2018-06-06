@@ -105,26 +105,10 @@ public class TaskTableInput {
 	}
 
 	/**
-	 * @param reference
-	 *            the reference to set
-	 */
-	public void setReference(final String reference) {
-		this.reference = reference;
-	}
-
-	/**
 	 * @return the mode
 	 */
 	public TaskTableInputMode getMode() {
 		return mode;
-	}
-
-	/**
-	 * @param mode
-	 *            the mode to set
-	 */
-	public void setMode(final TaskTableInputMode mode) {
-		this.mode = mode;
 	}
 
 	/**
@@ -135,34 +119,10 @@ public class TaskTableInput {
 	}
 
 	/**
-	 * @param mandatory
-	 *            the mandatory to set
-	 */
-	public void setMandatory(final TaskTableMandatoryEnum mandatory) {
-		this.mandatory = mandatory;
-	}
-
-	/**
 	 * @return the alternatives
 	 */
 	public List<TaskTableInputAlternative> getAlternatives() {
 		return alternatives;
-	}
-
-	/**
-	 * @param alternatives
-	 *            the alternatives to set
-	 */
-	public void setAlternatives(final List<TaskTableInputAlternative> alternatives) {
-		this.alternatives = alternatives;
-	}
-
-	/**
-	 * @param alternatives
-	 *            the alternatives to set
-	 */
-	public void addAlternatives(final List<TaskTableInputAlternative> alternatives) {
-		this.alternatives.addAll(alternatives);
 	}
 
 	/**

@@ -125,9 +125,6 @@ public class EdrsSessionsConsumer {
 					throw new InvalidFormatProduct("Invalid channel identifier " + dto.getChannelId());
 				}
 				EdrsSessionFile file = edrsService.createSessionFile(dto.getObjectStorageKey());
-				if (file == null) {
-					throw new InvalidFormatProduct("Cannot build the EDRS session file");
-				}
 
 				// If session exist and raws of each channel are available => send the session
 				// to the job dispatcher

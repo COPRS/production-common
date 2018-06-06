@@ -14,6 +14,8 @@ kafka:
   group-id: ${job_kafka_group:jobgenerators}
   client-id: ${job_kafka_client:job-generator}
   poll-timeout: ${job_kafka_poll-timeout:500}
+  producer-retries: ${job_kafka_producer-retries:10}
+  producer-request-timeout-ms: ${job_kafka_producer-request-timeout-ms:2000}
   topics:
     edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
     l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}

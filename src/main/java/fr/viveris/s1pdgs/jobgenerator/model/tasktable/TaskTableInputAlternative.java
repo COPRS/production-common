@@ -107,26 +107,10 @@ public class TaskTableInputAlternative {
 	}
 
 	/**
-	 * @param order
-	 *            the order to set
-	 */
-	public void setOrder(final int order) {
-		this.order = order;
-	}
-
-	/**
 	 * @return the origin
 	 */
 	public TaskTableInputOrigin getOrigin() {
 		return origin;
-	}
-
-	/**
-	 * @param origin
-	 *            the origin to set
-	 */
-	public void setOrigin(final TaskTableInputOrigin origin) {
-		this.origin = origin;
 	}
 
 	/**
@@ -137,26 +121,10 @@ public class TaskTableInputAlternative {
 	}
 
 	/**
-	 * @param retrievalMode
-	 *            the retrievalMode to set
-	 */
-	public void setRetrievalMode(final String retrievalMode) {
-		this.retrievalMode = retrievalMode;
-	}
-
-	/**
 	 * @return the deltaTime0
 	 */
 	public double getDeltaTime0() {
 		return deltaTime0;
-	}
-
-	/**
-	 * @param deltaTime0
-	 *            the deltaTime0 to set
-	 */
-	public void setDeltaTime0(final int deltaTime0) {
-		this.deltaTime0 = deltaTime0;
 	}
 
 	/**
@@ -167,14 +135,6 @@ public class TaskTableInputAlternative {
 	}
 
 	/**
-	 * @param deltaTime1
-	 *            the deltaTime1 to set
-	 */
-	public void setDeltaTime1(final int deltaTime1) {
-		this.deltaTime1 = deltaTime1;
-	}
-
-	/**
 	 * @return the fileType
 	 */
 	public String getFileType() {
@@ -182,26 +142,10 @@ public class TaskTableInputAlternative {
 	}
 
 	/**
-	 * @param fileType
-	 *            the fileType to set
-	 */
-	public void setFileType(final String fileType) {
-		this.fileType = fileType;
-	}
-
-	/**
 	 * @return the fileNameType
 	 */
 	public TaskTableFileNameType getFileNameType() {
 		return fileNameType;
-	}
-
-	/**
-	 * @param fileNameType
-	 *            the fileNameType to set
-	 */
-	public void setFileNameType(final TaskTableFileNameType fileNameType) {
-		this.fileNameType = fileNameType;
 	}
 
 	/**

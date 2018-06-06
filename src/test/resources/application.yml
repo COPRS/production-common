@@ -16,6 +16,8 @@ kafka:
   group-id: level0-jobgenerators
   client-id: l0-job-generator
   poll-timeout: 500
+  producer-retries: 10
+  producer-request-timeout-ms: 2000
   topics:
     edrs-sessions: t-pdgs-edrs-sessions
     l0-slices: t-pdgs-l0-slices

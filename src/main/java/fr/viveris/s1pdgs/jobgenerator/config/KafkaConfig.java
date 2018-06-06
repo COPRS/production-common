@@ -62,6 +62,12 @@ public class KafkaConfig {
 	@Value("${kafka.poll-timeout}")
 	private long kafkaPolltimeout;
 
+	@Value("${kafka.producer-retries}")
+	protected int kafkaRetriesConfig;
+
+	@Value("${kafka.producer-request-timeout-ms}")
+	protected int prodRequestTimeoutMs;
+
 	/**
 	 * Default constructor
 	 */
@@ -181,7 +187,8 @@ public class KafkaConfig {
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 		// TODO set in configuration
-		props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 2000);
+		props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, this.prodRequestTimeoutMs);
+		props.put(ProducerConfig.RETRIES_CONFIG, this.kafkaRetriesConfig);
 		props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
 		return props;
 	}

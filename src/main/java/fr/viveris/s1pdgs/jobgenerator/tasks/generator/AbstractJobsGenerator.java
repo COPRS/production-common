@@ -268,7 +268,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 				});
 	}
 
-	private void buildTasks() {
+	protected void buildTasks() {
 		this.taskTable.getPools().forEach(pool -> {
 			this.tasks.add(pool.getTasks().stream().map(TaskTableTask::getFileName).collect(Collectors.toList()));
 		});
@@ -310,7 +310,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 			LOGGER.debug("{} Trying job generation for cached products", this.prefixLogMonitor);
 
 			keysJobs.forEach(k -> {
-				if (k != null && this.cachedJobs.containsKey(k)) {
+				if (this.cachedJobs.containsKey(k)) {
 					Job<T> v = this.cachedJobs.get(k);
 					JobGenerationStatus status = v.getStatus();
 					LOGGER.debug("{} [productName {}] [status {}] Trying job generation", this.prefixLogMonitor,
@@ -574,9 +574,9 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 
 		// Second, build the DTO
 		String jobOrder = "/data/localWD/" + job.getWorkDirectoryInc() + "/JobOrder." + job.getWorkDirectoryInc()
-		+ ".xml";
+				+ ".xml";
 		final JobDto r = new JobDto(job.getProduct().getIdentifier(), job.getWorkDirectory(), jobOrder);
-		
+
 		try {
 
 			// Add jobOrder inputs to the DTO
@@ -642,26 +642,22 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 
 	protected void removeNotReadyJobsForToolLong() {
 		cachedJobs.entrySet().removeIf(entry -> {
-			if (entry.getValue() == null) {
+			JobGenerationStatus status = entry.getValue().getStatus();
+			if (status.getStatus() == GenerationStatusEnum.NOT_READY
+					&& status.getNbRetries() >= this.jobGeneratorSettings.getWaitprimarycheck().getRetries()) {
+				LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
+						this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
+						ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for primary check since too long",
+						status.getNbRetries(), this.jobGeneratorSettings.getWaitprimarycheck().getRetries());
 				return true;
-			} else {
-				JobGenerationStatus status = entry.getValue().getStatus();
-				if (status.getStatus() == GenerationStatusEnum.NOT_READY
-						&& status.getNbRetries() >= this.jobGeneratorSettings.getWaitprimarycheck().getRetries()) {
-					LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
-							this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
-							ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for primary check since too long",
-							status.getNbRetries(), this.jobGeneratorSettings.getWaitprimarycheck().getRetries());
-					return true;
-				}
-				if (status.getStatus() == GenerationStatusEnum.PRIMARY_CHECK
-						&& status.getNbRetries() >= this.jobGeneratorSettings.getWaitmetadatainput().getRetries()) {
-					LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
-							this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
-							ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for input check since too long",
-							status.getNbRetries(), this.jobGeneratorSettings.getWaitmetadatainput().getRetries());
-					return true;
-				}
+			}
+			if (status.getStatus() == GenerationStatusEnum.PRIMARY_CHECK
+					&& status.getNbRetries() >= this.jobGeneratorSettings.getWaitmetadatainput().getRetries()) {
+				LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
+						this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
+						ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for input check since too long",
+						status.getNbRetries(), this.jobGeneratorSettings.getWaitmetadatainput().getRetries());
+				return true;
 			}
 			return false;
 		});
