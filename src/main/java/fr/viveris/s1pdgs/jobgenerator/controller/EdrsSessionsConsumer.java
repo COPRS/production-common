@@ -15,10 +15,13 @@ import fr.viveris.s1pdgs.jobgenerator.controller.dto.EdrsSessionDto;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException.ErrorCode;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedSessionsReachException;
+import fr.viveris.s1pdgs.jobgenerator.exception.ObsS3Exception;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.product.EdrsSessionProduct;
 import fr.viveris.s1pdgs.jobgenerator.service.EdrsSessionFileService;
 import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.EdrsSessionJobDispatcher;
@@ -65,6 +68,11 @@ public class EdrsSessionsConsumer {
 	private final int maxNbSessions;
 
 	/**
+	 * Name of the topic
+	 */
+	private final String topicName;
+
+	/**
 	 * 
 	 * @param jobsDispatcher
 	 * @param edrsSessionFileService
@@ -72,12 +80,14 @@ public class EdrsSessionsConsumer {
 	@Autowired
 	public EdrsSessionsConsumer(final EdrsSessionJobDispatcher jobDispatcher, final EdrsSessionFileService edrsService,
 			@Value("${level0.maxagesession}") final long maxAgeSession,
-			@Value("${level0.maxnumberofsessions}") final int maxNbSessions) {
+			@Value("${level0.maxnumberofsessions}") final int maxNbSessions,
+			@Value("${kafka.topics.edrs-sessions}") final String topicName) {
 		this.jobDispatcher = jobDispatcher;
 		this.edrsService = edrsService;
 		this.maxAgeSession = maxAgeSession;
 		this.maxNbSessions = maxNbSessions;
 		this.cachedSessions = new ConcurrentHashMap<>(this.maxNbSessions);
+		this.topicName = topicName;
 	}
 
 	/**
@@ -106,9 +116,8 @@ public class EdrsSessionsConsumer {
 				// TODO set in a scheduled function, warning about concurrency
 				step = 999;
 				LOGGER.info("[MONITOR] [step {}] Removing old sessions", step);
-				cachedSessions.entrySet().stream()
-						.filter(entry -> entry.getValue() != null && entry.getValue().getObject()
-								.getLastTsMsg() < System.currentTimeMillis() - this.maxAgeSession)
+				cachedSessions.entrySet().stream().filter(entry -> entry.getValue() != null && entry.getValue()
+						.getObject().getLastTsMsg() < System.currentTimeMillis() - this.maxAgeSession)
 						.forEach(entry -> {
 							EdrsSessionProduct removedSession = cachedSessions.remove(entry.getKey());
 							if (removedSession != null) {
@@ -140,7 +149,7 @@ public class EdrsSessionsConsumer {
 						this.cachedSessions.remove(file.getSessionId());
 						LOGGER.info("[MONITOR] [step {}] [productName {}] Dispatching session", step,
 								file.getSessionId());
-						this.jobDispatcher.dispatch(new Job<EdrsSession>(session));
+						this.jobDispatcher.dispatch(new Job<EdrsSession>(session, new ResumeDetails(topicName, dto)));
 					} else {
 						session.getObject().setLastTsMsg(System.currentTimeMillis());
 					}
@@ -156,6 +165,10 @@ public class EdrsSessionsConsumer {
 					}
 				}
 
+			} catch (MaxNumberCachedSessionsReachException | MaxNumberCachedJobsReachException | ObsS3Exception mnce) {
+				LOGGER.error("[MONITOR] [step {}] [productName {}] [resuming {}] [code {}] {} ", step,
+						dto.getObjectStorageKey(), new ResumeDetails(topicName, dto), mnce.getCode().getCode(),
+						mnce.getLogMessage());
 			} catch (AbstractCodedException e) {
 				LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step, dto.getObjectStorageKey(),
 						e.getCode().getCode(), e.getLogMessage());

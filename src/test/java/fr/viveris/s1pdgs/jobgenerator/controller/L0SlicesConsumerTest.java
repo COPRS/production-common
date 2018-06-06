@@ -18,11 +18,14 @@ import fr.viveris.s1pdgs.jobgenerator.config.L0SlicePatternSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.L0SliceDto;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
 import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.L0SliceJobsDispatcher;
 
 public class L0SlicesConsumerTest {
+	
+	private final static String TOPIC_NAME = "topic-l0-slices";
 
 	@Mock
 	private L0SliceJobsDispatcher l0SliceJobsDispatcher;
@@ -63,7 +66,7 @@ public class L0SlicesConsumerTest {
 		String fileNotMatch = "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 		L0SliceDto dto = new L0SliceDto(fileNotMatch, file);
 
-		L0SlicesConsumer consumer = new L0SlicesConsumer(l0SliceJobsDispatcher, l0SlicePatternSettings);
+		L0SlicesConsumer consumer = new L0SlicesConsumer(l0SliceJobsDispatcher, l0SlicePatternSettings, TOPIC_NAME);
 		consumer.receive(dto);
 
 		verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -74,14 +77,14 @@ public class L0SlicesConsumerTest {
 		String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 		L0SliceDto dto = new L0SliceDto(file, file);
 
-		L0SlicesConsumer consumer = new L0SlicesConsumer(l0SliceJobsDispatcher, l0SlicePatternSettings);
+		L0SlicesConsumer consumer = new L0SlicesConsumer(l0SliceJobsDispatcher, l0SlicePatternSettings, TOPIC_NAME);
 		consumer.receive(dto);
 
 		DateFormat format = new SimpleDateFormat(L0SlicesConsumer.DATE_FORMAT);
 		L0Slice slice = new L0Slice("IW");
 		L0SliceProduct product = new L0SliceProduct(file, "A", "S1", format.parse("20171213T121623"),
 				format.parse("20171213T121656"), slice);
-		Job<L0Slice> job = new Job<>(product);
+		Job<L0Slice> job = new Job<>(product, new ResumeDetails(TOPIC_NAME, dto));
 
 		verify(l0SliceJobsDispatcher, times(1)).dispatch(Mockito.eq(job));
 	}

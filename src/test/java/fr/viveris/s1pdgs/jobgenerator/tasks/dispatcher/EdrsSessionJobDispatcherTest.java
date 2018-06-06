@@ -27,6 +27,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.product.EdrsSessionProduct;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.EdrsSessionJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
@@ -163,7 +164,7 @@ public class EdrsSessionJobDispatcherTest {
 	public void testDispatch() {
 		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
-		Job<EdrsSession> job1 = new Job<EdrsSession>(p);
+		Job<EdrsSession> job1 = new Job<EdrsSession>(p, new ResumeDetails("topic", "dto"));
 
 		// Mocks
 		this.mockJobGeneratorSettings();
@@ -206,7 +207,7 @@ public class EdrsSessionJobDispatcherTest {
 	public void testDispatchThrow() throws AbstractCodedException {
 		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
-		Job<EdrsSession> job1 = new Job<EdrsSession>(p);
+		Job<EdrsSession> job1 = new Job<EdrsSession>(p, new ResumeDetails("topic", "dto"));
 
 		// Mocks
 		this.mockJobGeneratorSettings();

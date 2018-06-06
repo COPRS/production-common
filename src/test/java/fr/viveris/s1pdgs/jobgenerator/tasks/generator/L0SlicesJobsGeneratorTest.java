@@ -39,6 +39,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
@@ -112,7 +113,7 @@ public class L0SlicesJobsGeneratorTest {
 		L0SliceProduct productA = new L0SliceProduct(
 				"S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
 				DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"), sliceA);
-		jobA = new Job<>(productA);
+		jobA = new Job<>(productA, new ResumeDetails("topic", "dto"));
 	}
 
 	private void mockProcessSettings() {

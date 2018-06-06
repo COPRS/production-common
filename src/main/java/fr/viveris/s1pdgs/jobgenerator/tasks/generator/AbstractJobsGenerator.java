@@ -645,18 +645,20 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 			JobGenerationStatus status = entry.getValue().getStatus();
 			if (status.getStatus() == GenerationStatusEnum.NOT_READY
 					&& status.getNbRetries() >= this.jobGeneratorSettings.getWaitprimarycheck().getRetries()) {
-				LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
+				LOGGER.error("{} [step 4] [productName {}] [resuming {}] [code {}] [msg {}] [retries {}/{}]",
 						this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
-						ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for primary check since too long",
-						status.getNbRetries(), this.jobGeneratorSettings.getWaitprimarycheck().getRetries());
+						entry.getValue().getResumeDetails(), ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(),
+						"Waiting for primary check since too long", status.getNbRetries(),
+						this.jobGeneratorSettings.getWaitprimarycheck().getRetries());
 				return true;
 			}
 			if (status.getStatus() == GenerationStatusEnum.PRIMARY_CHECK
 					&& status.getNbRetries() >= this.jobGeneratorSettings.getWaitmetadatainput().getRetries()) {
-				LOGGER.error("{} [step 4] [productName {}] [code {}] [msg {}] [retries {}/{}]",
+				LOGGER.error("{} [step 4] [productName {}] [resuming {}] [code {}] [msg {}] [retries {}/{}]",
 						this.prefixLogMonitorRemove, entry.getValue().getProduct().getIdentifier(),
-						ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(), "Waiting for input check since too long",
-						status.getNbRetries(), this.jobGeneratorSettings.getWaitmetadatainput().getRetries());
+						entry.getValue().getResumeDetails(), ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(),
+						"Waiting for input check since too long", status.getNbRetries(),
+						this.jobGeneratorSettings.getWaitmetadatainput().getRetries());
 				return true;
 			}
 			return false;

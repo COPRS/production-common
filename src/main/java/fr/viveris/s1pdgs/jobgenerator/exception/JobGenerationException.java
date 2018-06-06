@@ -37,8 +37,8 @@ public class JobGenerationException extends AbstractCodedException {
 	 * @param e
 	 */
 	public JobGenerationException(final String taskTable, final ErrorCode code, final String message,
-			final Throwable e) {
-		super(code, message, e);
+			final Throwable exp) {
+		super(code, message, exp);
 		this.taskTable = taskTable;
 	}
 

@@ -30,6 +30,7 @@ import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadataQuery;
@@ -183,7 +184,7 @@ public class EdrsSessionJobsGeneratorTest {
 	public void testPreSearch() {
 		EdrsSessionProduct session = TestL0Utils.buildEdrsSessionProduct(true);
 		EdrsSessionProduct sessionComplete = TestL0Utils.buildEdrsSessionProduct(false);
-		Job<EdrsSession> job = new Job<EdrsSession>(session);
+		Job<EdrsSession> job = new Job<EdrsSession>(session, new ResumeDetails("topic", "dto"));
 
 		try {
 			generator.preSearch(job);
@@ -207,7 +208,7 @@ public class EdrsSessionJobsGeneratorTest {
 		}).when(this.metadataService).getEdrsSession(Mockito.anyString(), Mockito.anyString());
 
 		EdrsSessionProduct session = TestL0Utils.buildEdrsSessionProduct(true);
-		Job<EdrsSession> job = new Job<EdrsSession>(session);
+		Job<EdrsSession> job = new Job<EdrsSession>(session, new ResumeDetails("topic", "dto"));
 		try {
 			generator.preSearch(job);
 			fail("MetadataMissingException shall be raised");
@@ -220,7 +221,7 @@ public class EdrsSessionJobsGeneratorTest {
 	@Test
 	public void testCustomDto() {
 		EdrsSessionProduct sessionComplete = TestL0Utils.buildEdrsSessionProduct(false);
-		Job<EdrsSession> job = new Job<EdrsSession>(sessionComplete);
+		Job<EdrsSession> job = new Job<EdrsSession>(sessionComplete, new ResumeDetails("topic", "dto"));
 		job.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 		JobDto dto = new JobDto(sessionComplete.getIdentifier(), "/data/test/workdir/",
 				"/data/test/workdir/JobOrder.xml");
@@ -248,7 +249,7 @@ public class EdrsSessionJobsGeneratorTest {
 	@Test
 	public void testCustomJobOrder() {
 		EdrsSessionProduct sessionComplete = TestL0Utils.buildEdrsSessionProduct(false);
-		Job<EdrsSession> job = new Job<>(sessionComplete);
+		Job<EdrsSession> job = new Job<>(sessionComplete, new ResumeDetails("topic", "dto"));
 		job.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 		generator.customJobOrder(job);
 		job.getJobOrder().getConf().getProcParams().forEach(param -> {
@@ -258,7 +259,7 @@ public class EdrsSessionJobsGeneratorTest {
 		});
 
 		EdrsSessionProduct sessionComplete1 = TestL0Utils.buildEdrsSessionProduct(false, "S2");
-		Job<EdrsSession> job1 = new Job<EdrsSession>(sessionComplete1);
+		Job<EdrsSession> job1 = new Job<EdrsSession>(sessionComplete1, new ResumeDetails("topic", "dto"));
 		job1.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 		generator.customJobOrder(job1);
 		job1.getJobOrder().getConf().getProcParams().forEach(param -> {

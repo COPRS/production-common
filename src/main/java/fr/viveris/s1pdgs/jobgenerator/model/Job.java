@@ -58,6 +58,11 @@ public class Job<T> {
 	private int workDirectoryInc;
 
 	/**
+	 * Input topic name
+	 */
+	private final ResumeDetails resumeDetails;
+
+	/**
 	 * Constructor from product
 	 * 
 	 * @param identifier
@@ -65,10 +70,11 @@ public class Job<T> {
 	 * @param stopTime
 	 * @param product
 	 */
-	public Job(final AbstractProduct<T> product) {
+	public Job(final AbstractProduct<T> product, final ResumeDetails resumeDetails) {
 		this.metadataQueries = new HashMap<>();
 		this.status = new JobGenerationStatus();
 		this.product = product;
+		this.resumeDetails = resumeDetails;
 	}
 
 	/**
@@ -168,16 +174,22 @@ public class Job<T> {
 		this.workDirectoryInc = workDirectoryInc;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
+	 * @return the resumeDetails
+	 */
+	public ResumeDetails getResumeDetails() {
+		return resumeDetails;
+	}
+
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		return String.format(
-				"{taskTableName: %s, product: %s, jobOrder: %s, metadataQueries: %s, status: %s, workDirectory: %s, workDirectoryInc: %s}",
-				taskTableName, product, jobOrder, metadataQueries, status, workDirectory, workDirectoryInc);
+				"{taskTableName: %s, product: %s, jobOrder: %s, metadataQueries: %s, status: %s, workDirectory: %s, workDirectoryInc: %s, resumeDetails: %s}",
+				taskTableName, product, jobOrder, metadataQueries, status, workDirectory, workDirectoryInc,
+				resumeDetails);
 	}
 
 	/**
@@ -185,7 +197,8 @@ public class Job<T> {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(taskTableName, product, jobOrder, metadataQueries, status, workDirectory, workDirectoryInc);
+		return Objects.hash(taskTableName, product, jobOrder, metadataQueries, status, workDirectory, workDirectoryInc,
+				resumeDetails);
 	}
 
 	/**
@@ -203,7 +216,8 @@ public class Job<T> {
 			ret = Objects.equals(taskTableName, other.taskTableName) && Objects.equals(product, other.product)
 					&& Objects.equals(jobOrder, other.jobOrder)
 					&& Objects.equals(metadataQueries, other.metadataQueries) && Objects.equals(status, other.status)
-					&& Objects.equals(workDirectory, other.workDirectory) && workDirectoryInc == other.workDirectoryInc;
+					&& Objects.equals(workDirectory, other.workDirectory) && workDirectoryInc == other.workDirectoryInc
+					&& Objects.equals(resumeDetails, other.resumeDetails);
 		}
 		return ret;
 	}

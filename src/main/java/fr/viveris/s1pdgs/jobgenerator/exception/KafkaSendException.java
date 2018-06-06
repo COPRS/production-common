@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.exception;
 
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
+
 public class KafkaSendException extends AbstractCodedException {
 
 	private static final long serialVersionUID = 8248616873024871315L;
@@ -14,10 +16,24 @@ public class KafkaSendException extends AbstractCodedException {
 	 */
 	private final String productName;
 
-	public KafkaSendException(final String topic, final String productName, final String message, final Throwable e) {
+	/**
+	 * DTO to publish
+	 */
+	private final Object dto;
+
+	/**
+	 * 
+	 * @param topic
+	 * @param productName
+	 * @param message
+	 * @param e
+	 */
+	public KafkaSendException(final String topic, final Object dto, final String productName, final String message,
+			final Throwable e) {
 		super(ErrorCode.KAFKA_SEND_ERROR, message, e);
 		this.topic = topic;
 		this.productName = productName;
+		this.dto = dto;
 	}
 
 	/**
@@ -35,11 +51,19 @@ public class KafkaSendException extends AbstractCodedException {
 	}
 
 	/**
+	 * @return the dto
+	 */
+	public Object getDto() {
+		return dto;
+	}
+
+	/**
 	 * 
 	 */
 	@Override
 	public String getLogMessage() {
-		return String.format("[topic %s] [productName %s] [msg %s]", this.topic, this.productName, getMessage());
+		return String.format("[resuming %s] [productName %s] [msg %s]", new ResumeDetails(topic, dto), this.productName,
+				getMessage());
 	}
 
 }

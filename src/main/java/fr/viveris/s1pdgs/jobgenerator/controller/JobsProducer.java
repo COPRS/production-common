@@ -62,7 +62,7 @@ public class JobsProducer {
 			}
 			kafkaJobsTemplate.send(kafkaTopic, dto).get();
 		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaSendException(kafkaTopic, dto.getProductIdentifier(), e.getMessage(), e);
+			throw new KafkaSendException(kafkaTopic, dto, dto.getProductIdentifier(), e.getMessage(), e);
 		}
 	}
 

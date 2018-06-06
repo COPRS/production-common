@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,10 @@ import fr.viveris.s1pdgs.jobgenerator.config.L0SlicePatternSettings;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.L0SliceDto;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
+import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
+import fr.viveris.s1pdgs.jobgenerator.exception.MissingRoutingEntryException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
 import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.L0SliceJobsDispatcher;
@@ -58,16 +62,23 @@ public class L0SlicesConsumer {
 	private final Pattern l0SLicesPattern;
 
 	/**
+	 * Name of the topic
+	 */
+	private final String topicName;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param jobsDispatcher
 	 * @param edrsSessionFileService
 	 */
 	@Autowired
-	public L0SlicesConsumer(final L0SliceJobsDispatcher jobsDispatcher, final L0SlicePatternSettings patternSettings) {
+	public L0SlicesConsumer(final L0SliceJobsDispatcher jobsDispatcher, final L0SlicePatternSettings patternSettings,
+			@Value("${kafka.topics.l0-slices}") final String topicName) {
 		this.jobsDispatcher = jobsDispatcher;
 		this.patternSettings = patternSettings;
 		this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(), Pattern.CASE_INSENSITIVE);
+		this.topicName = topicName;
 	}
 
 	/**
@@ -109,13 +120,16 @@ public class L0SlicesConsumer {
 			L0Slice slice = new L0Slice(acquisition);
 			L0SliceProduct product = new L0SliceProduct(dto.getProductName(), satelliteId, missionId, dateStart,
 					dateStop, slice);
-			Job<L0Slice> job = new Job<>(product);
+			Job<L0Slice> job = new Job<>(product, new ResumeDetails(topicName, dto));
 
 			// Dispatch job
 			step++;
 			LOGGER.info("[MONITOR] [step 2] [productName {}] Dispatching product", dto.getProductName());
 			this.jobsDispatcher.dispatch(job);
 
+		} catch (MaxNumberCachedJobsReachException | MissingRoutingEntryException mnce) {
+			LOGGER.error("[MONITOR] [step {}] [productName {}] [resuming {}] [code {}] {} ", step,
+					dto.getKeyObjectStorage(), new ResumeDetails(topicName, dto), mnce.getCode().getCode(), mnce.getLogMessage());
 		} catch (AbstractCodedException e) {
 			LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step, dto.getProductName(),
 					e.getCode().getCode(), e.getLogMessage());

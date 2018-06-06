@@ -124,7 +124,7 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 					L0SliceProduct p = (L0SliceProduct) job.getProduct();
 					L0SliceProduct pClone = new L0SliceProduct(p.getIdentifier(), p.getSatelliteId(), p.getMissionId(),
 							p.getStartTime(), p.getStopTime(), new L0Slice(p.getObject().getAcquisition()));
-					Job<L0Slice> cloneJob = new Job<>(pClone);
+					Job<L0Slice> cloneJob = new Job<>(pClone, job.getResumeDetails());
 					LOGGER.info("[MONITOR] [Step 2] [productName {}] [taskTable {}] Caching job",
 							job.getProduct().getIdentifier(), taskTable);
 					this.generators.get(taskTable).addJob(cloneJob);

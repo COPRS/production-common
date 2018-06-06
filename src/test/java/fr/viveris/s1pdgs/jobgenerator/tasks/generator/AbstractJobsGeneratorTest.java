@@ -45,6 +45,7 @@ import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductMode;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadataQuery;
 import fr.viveris.s1pdgs.jobgenerator.model.product.AbstractProduct;
@@ -79,7 +80,6 @@ public class AbstractJobsGeneratorTest {
 	private int nbLoopMetadata;
 
 	private AbstractJobsGeneratorImpl generator;
-	
 
 	private TaskTable expectedTaskTable;
 
@@ -254,9 +254,9 @@ public class AbstractJobsGeneratorTest {
 	@Test
 	public void testAddJobs() {
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1);
+		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
 		AstractProductImpl p2 = new AstractProductImpl("SESSION_2", "A", "S1A", new Date(), new Date(), "product2");
-		Job<String> job2 = new Job<String>(p2);
+		Job<String> job2 = new Job<String>(p2, new ResumeDetails("topic", "dto"));
 
 		try {
 			generator.addJob(job1);
@@ -280,11 +280,11 @@ public class AbstractJobsGeneratorTest {
 	@Test(expected = MaxNumberCachedJobsReachException.class)
 	public void testAddJobsMaxNumber() throws MaxNumberCachedJobsReachException {
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1);
+		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
 		AstractProductImpl p2 = new AstractProductImpl("SESSION_2", "A", "S1A", new Date(), new Date(), "product2");
-		Job<String> job2 = new Job<String>(p2);
+		Job<String> job2 = new Job<String>(p2, new ResumeDetails("topic", "dto"));
 		AstractProductImpl p3 = new AstractProductImpl("SESSION_3", "A", "S1A", new Date(), new Date(), "product3");
-		Job<String> job3 = new Job<String>(p3);
+		Job<String> job3 = new Job<String>(p3, new ResumeDetails("topic", "dto"));
 
 		try {
 			generator.addJob(job1);
@@ -301,9 +301,9 @@ public class AbstractJobsGeneratorTest {
 	@Test
 	public void testAddSessionExist() {
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1);
+		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
 		AstractProductImpl p2 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product2");
-		Job<String> job2 = new Job<String>(p2);
+		Job<String> job2 = new Job<String>(p2, new ResumeDetails("topic", "dto"));
 
 		try {
 			generator.addJob(job1);
@@ -323,7 +323,7 @@ public class AbstractJobsGeneratorTest {
 	public void testRun() {
 		try {
 			AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-			Job<String> job1 = new Job<String>(p1);
+			Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
 
 			generator.addJob(job1);
 			generator.run();
@@ -342,28 +342,29 @@ public class AbstractJobsGeneratorTest {
 	// ---------------------------------------------------------
 	// Test initialize
 	// ---------------------------------------------------------
-	
+
 	@Test
 	public void testInitializeWhenTaskTableIOException() throws IOException, JAXBException, BuildTaskTableException {
 		doThrow(new IOException("IO exception raised")).when(xmlConverter).convertFromXMLToObject(Mockito.anyString());
-		AbstractJobsGeneratorImpl gen = new AbstractJobsGeneratorImpl(xmlConverter, metadataService, processSettings, jobGeneratorSettings,
-				kafkaJobsSender);
+		AbstractJobsGeneratorImpl gen = new AbstractJobsGeneratorImpl(xmlConverter, metadataService, processSettings,
+				jobGeneratorSettings, kafkaJobsSender);
 		generator.setMode(ProductMode.SLICING);
-		
+
 		thrown.expect(BuildTaskTableException.class);
 		thrown.expect(hasProperty("taskTable", is("IW_RAW__0_GRDH_1.xml")));
 		thrown.expectMessage("IO exception raised");
 		thrown.expectCause(isA(IOException.class));
 		gen.initialize(new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
 	}
-	
+
 	@Test
 	public void testInitializeWhenTaskTableJAXBException() throws IOException, JAXBException, BuildTaskTableException {
-		doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter).convertFromXMLToObject(Mockito.anyString());
-		AbstractJobsGeneratorImpl gen = new AbstractJobsGeneratorImpl(xmlConverter, metadataService, processSettings, jobGeneratorSettings,
-				kafkaJobsSender);
+		doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
+				.convertFromXMLToObject(Mockito.anyString());
+		AbstractJobsGeneratorImpl gen = new AbstractJobsGeneratorImpl(xmlConverter, metadataService, processSettings,
+				jobGeneratorSettings, kafkaJobsSender);
 		generator.setMode(ProductMode.SLICING);
-		
+
 		thrown.expect(BuildTaskTableException.class);
 		thrown.expect(hasProperty("taskTable", is("IW_RAW__0_GRDH_1.xml")));
 		thrown.expectMessage("JAXB exception raised");
@@ -374,53 +375,53 @@ public class AbstractJobsGeneratorTest {
 	// ---------------------------------------------------------
 	// Test remove entries
 	// ---------------------------------------------------------
-	
+
 	public void testRemoveJobNotReadyForTooLong() {
 		doReturn(new WaitTempo(100, 2)).when(jobGeneratorSettings).getWaitmetadatainput();
 		doReturn(new WaitTempo(100, 1)).when(jobGeneratorSettings).getWaitprimarycheck();
-		
+
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1);
+		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
 		generator.cachedJobs.put("test-job", job1);
-		
+
 		// here nbretries = 1
 		job1.getStatus().updateStatus(GenerationStatusEnum.NOT_READY);
 		generator.removeNotReadyJobsForToolLong();
 		assertTrue(job1.getStatus().getNbRetries() == 1);
 		assertTrue(generator.cachedJobs.size() == 1);
-		
+
 		// here nbretries = 2
 		job1.getStatus().updateStatus(GenerationStatusEnum.NOT_READY);
 		generator.removeNotReadyJobsForToolLong();
 		assertTrue(generator.cachedJobs.size() == 0);
-		
+
 	}
-	
+
 	public void testRemoveJobPrimaryCheckForTooLong() {
 		doReturn(new WaitTempo(100, 1)).when(jobGeneratorSettings).getWaitmetadatainput();
 		doReturn(new WaitTempo(100, 2)).when(jobGeneratorSettings).getWaitprimarycheck();
-		
+
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1);
+		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
 		generator.cachedJobs.put("test-job", job1);
-		
+
 		// here nbretries = 0
 		job1.getStatus().updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
 		generator.removeNotReadyJobsForToolLong();
 		assertTrue(job1.getStatus().getNbRetries() == 0);
 		assertTrue(generator.cachedJobs.size() == 1);
-		
+
 		// here nbretries = 1
 		job1.getStatus().updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
 		generator.removeNotReadyJobsForToolLong();
 		assertTrue(job1.getStatus().getNbRetries() == 1);
 		assertTrue(generator.cachedJobs.size() == 1);
-		
+
 		// here nbretries = 2
 		job1.getStatus().updateStatus(GenerationStatusEnum.PRIMARY_CHECK);
 		generator.removeNotReadyJobsForToolLong();
 		assertTrue(generator.cachedJobs.size() == 0);
-		
+
 	}
 }
 

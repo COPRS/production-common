@@ -11,6 +11,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException.ErrorCode;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 
 /**
  * Test the Exceptions
@@ -171,17 +172,18 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testKafkaSendException() {
-		KafkaSendException e1 = new KafkaSendException("topic-kafka", "product-name", "error message",
+		KafkaSendException e1 = new KafkaSendException("topic-kafka", "dto-object", "product-name", "error message",
 				new Throwable("throwable message"));
 
 		assertEquals("topic-kafka", e1.getTopic());
+		assertEquals("dto-object", e1.getDto());
 		assertEquals("product-name", e1.getProductName());
 		assertEquals(ErrorCode.KAFKA_SEND_ERROR, e1.getCode());
 		assertEquals("error message", e1.getMessage());
 		assertEquals("throwable message", e1.getCause().getMessage());
 
 		String str1 = e1.getLogMessage();
-		assertTrue(str1.contains("[topic topic-kafka]"));
+		assertTrue(str1.contains("[resuming " + (new ResumeDetails("topic-kafka", "dto-object")).toString() + "]"));
 		assertTrue(str1.contains("[productName product-name]"));
 		assertTrue(str1.contains("[msg error message]"));
 	}
