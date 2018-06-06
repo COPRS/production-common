@@ -284,7 +284,7 @@ public class FileDescriptorBuilderTest {
 	@Test
 	public void testBuildFileDescriptorFileNameFail() {
 		//Auxiliary file
-		File file = new File("/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+		File file = new File("/S1A_OPER_AUX.xml");
 		fileDescriptorBuilder = new FileDescriptorBuilder(Paths.get("").toAbsolutePath()+"/test/workDir/", 
 				Pattern.compile("^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$", 
 						Pattern.CASE_INSENSITIVE));
@@ -292,8 +292,8 @@ public class FileDescriptorBuilderTest {
 			fileDescriptorBuilder.buildConfigFileDescriptor(file);
 			fail("An exception should occur");
 		} catch (AbstractFileException fe) {
-			assertEquals("Raised exception shall concern S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-					"/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", fe.getProductName());
+			assertEquals("Raised exception shall concern S1A_OPER_AUX.xml",
+					"/S1A_OPER_AUX.xml", fe.getProductName());
 		}
 		//Edrs Session file
 		file = new File("/S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml");
@@ -348,7 +348,7 @@ public class FileDescriptorBuilderTest {
 					"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", fe.getProductName());
 		}
 		//Edrs Session file
-		file = new File("test/workDir/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE");
+		file = new File("test/workDir/S1A/SESSION1/ch01");
 		fileDescriptorBuilder = new FileDescriptorBuilder(Paths.get("").toAbsolutePath()+"/test/workDir/", 
 				Pattern.compile("^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$", 
 						Pattern.CASE_INSENSITIVE));
@@ -356,8 +356,8 @@ public class FileDescriptorBuilderTest {
 			fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
 			fail("An exception should occur");
 		} catch (AbstractFileException fe) {
-			assertEquals("Raised exception shall concern S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
-					"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", fe.getProductName());
+			assertEquals("Raised exception shall concern S1A/SESSION1/ch01",
+					"S1A/SESSION1/ch01", fe.getProductName());
 		}
 		//L0
 		file = new File("test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
