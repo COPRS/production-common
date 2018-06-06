@@ -133,7 +133,7 @@ public class FileReaderConfig {
 				.from(sessionFileReadingMessageSource,
 						c -> c.poller(Pollers.fixedDelay(this.sessionPeriod).taskExecutor(sessionTaskExecutor)
 								.maxMessagesPerPoll(this.sessionMaxMessagesPerPoll)))
-				.handle("fileProcessor", "processSessionFile").get();
+				.handle("sessionFilesProcessor", "processFile").get();
 	}
 
 	@Bean(name = "sessionTaskExecutor")
@@ -191,7 +191,7 @@ public class FileReaderConfig {
 				.from(configFileReadingMessageSource,
 						c -> c.poller(Pollers.fixedDelay(this.configPeriod).taskExecutor(configTaskExecutor)
 								.maxMessagesPerPoll(this.configMaxMessagesPerPoll)))
-				.handle("fileProcessor", "processConfigFile").get();
+				.handle("auxiliaryFilesProcessor", "processFile").get();
 	}
 
 	@Bean(name = "configTaskExecutor")
