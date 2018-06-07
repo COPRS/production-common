@@ -82,6 +82,16 @@ public class ConfigFileConsumer {
 	private final String fileWithManifestExt;
 	private final String topicName;
 
+	/**
+	 * 
+	 * @param esServices
+	 * @param configFilesS3Services
+	 * @param localDirectory
+	 * @param extractorConfig
+	 * @param manifestFilename
+	 * @param fileWithManifestExt
+	 * @param topicName
+	 */
 	@Autowired
 	public ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
 			@Value("${file.auxiliary-files.local-directory}") final String localDirectory,
@@ -94,6 +104,34 @@ public class ConfigFileConsumer {
 				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
+		this.esServices = esServices;
+		this.configFilesS3Services = configFilesS3Services;
+		this.manifestFilename = manifestFilename;
+		this.fileWithManifestExt = fileWithManifestExt;
+		this.topicName = topicName;
+	}
+
+	/**
+	 * Internal constructor
+	 * 
+	 * @param esServices
+	 * @param configFilesS3Services
+	 * @param localDirectory
+	 * @param extractorConfig
+	 * @param fileDescriptorBuilder
+	 * @param metadataBuilder
+	 * @param manifestFilename
+	 * @param fileWithManifestExt
+	 * @param topicName
+	 */
+	protected ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
+			final String localDirectory, final MetadataExtractorConfig extractorConfig,
+			final FileDescriptorBuilder fileDescriptorBuilder, final MetadataBuilder metadataBuilder,
+			final String manifestFilename, final String fileWithManifestExt, final String topicName) {
+		this.localDirectory = localDirectory;
+		this.fileDescriptorBuilder = fileDescriptorBuilder;
+		this.extractorConfig = extractorConfig;
+		this.mdBuilder = metadataBuilder;
 		this.esServices = esServices;
 		this.configFilesS3Services = configFilesS3Services;
 		this.manifestFilename = manifestFilename;
@@ -157,19 +195,22 @@ public class ConfigFileConsumer {
 					dto.getProductName(), ErrorCode.INTERNAL_ERROR.getCode(), new ResumeDetails(topicName, dto),
 					e.getMessage());
 		} finally {
-			// Remove file
-			if (metadataFile != null) {
-				LOGGER.info("[MONITOR] [step 5] [auxiliary] [productName {}] Removing downloaded file",
-						dto.getProductName());
-				File parent = metadataFile.getParentFile();
-				metadataFile.delete();
-				// Remove upper directory if needed
-				if (!this.localDirectory.endsWith(parent.getName() + "/")) {
-					parent.delete();
-				}
-			}
+			String log = "[MONITOR] [step 5] [auxiliary] [productName " + dto.getProductName() + "] Removing downloaded file";
+			this.deleteFile(metadataFile, log);
 		}
 		LOGGER.info("[MONITOR] [step 0] [auxiliary] [productName {}] End", dto.getProductName());
+	}
+
+	protected void deleteFile(File metadataFile, String log) {
+		if (metadataFile != null) {
+			LOGGER.info(log);
+			File parent = metadataFile.getParentFile();
+			metadataFile.delete();
+			// Remove upper directory if needed
+			if (!this.localDirectory.endsWith(parent.getName() + "/")) {
+				parent.delete();
+			}
+		}
 	}
 
 }

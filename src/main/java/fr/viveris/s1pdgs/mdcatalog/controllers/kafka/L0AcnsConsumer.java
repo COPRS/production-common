@@ -92,6 +92,33 @@ public class L0AcnsConsumer {
 		this.topicName = topicName;
 	}
 
+	/**
+	 * 
+	 * @param esServices
+	 * @param l0AcnsS3Services
+	 * @param localDirectory
+	 * @param extractorConfig
+	 * @param fileDescriptorBuilder
+	 * @param metadataBuilder
+	 * @param manifestFilename
+	 * @param fileWithManifestExt
+	 * @param topicName
+	 */
+	protected L0AcnsConsumer(final EsServices esServices, final L0AcnsS3Services l0AcnsS3Services,
+			final String localDirectory, final MetadataExtractorConfig extractorConfig,
+			final FileDescriptorBuilder fileDescriptorBuilder, final MetadataBuilder metadataBuilder,
+			final String manifestFilename, final String fileWithManifestExt, final String topicName) {
+		this.localDirectory = localDirectory;
+		this.fileDescriptorBuilder = fileDescriptorBuilder;
+		this.extractorConfig = extractorConfig;
+		this.mdBuilder = metadataBuilder;
+		this.esServices = esServices;
+		this.l0AcnsS3Services = l0AcnsS3Services;
+		this.manifestFilename = manifestFilename;
+		this.fileWithManifestExt = fileWithManifestExt;
+		this.topicName = topicName;
+	}
+
 	@KafkaListener(topics = "${kafka.topic.l0-acns}", groupId = "${kafka.group-id}", containerFactory = "l0AcnsKafkaListenerContainerFactory")
 	public void receive(KafkaL0AcnDto dto) {
 		int step = 0;
@@ -140,19 +167,22 @@ public class L0AcnsConsumer {
 					dto.getProductName(), ErrorCode.INTERNAL_ERROR.getCode(), new ResumeDetails(topicName, dto),
 					e.getMessage());
 		} finally {
-			// Remove file
-			if (metadataFile != null) {
-				LOGGER.info("[MONITOR] [step 5] [l0-acn] [productName {}] Removing downloaded file",
-						dto.getProductName());
-				File parent = metadataFile.getParentFile();
-				metadataFile.delete();
-				// Remove upper directory if needed
-				if (!this.localDirectory.endsWith(parent.getName() + "/")) {
-					parent.delete();
-				}
-			}
+			String log = "[MONITOR] [step 5] [l0-acn] [productName " + dto.getProductName() + "] Removing downloaded file";
+			this.deleteFile(metadataFile, log);
 		}
 		LOGGER.info("[MONITOR] [step 0] [l0-acn] [productName {}] End", dto.getProductName());
+	}
+
+	protected void deleteFile(File metadataFile, String log) {
+		if (metadataFile != null) {
+			LOGGER.info(log);
+			File parent = metadataFile.getParentFile();
+			metadataFile.delete();
+			// Remove upper directory if needed
+			if (!this.localDirectory.endsWith(parent.getName() + "/")) {
+				parent.delete();
+			}
+		}
 	}
 
 }
