@@ -47,18 +47,13 @@ public class L0SliceMetadataController {
 			}
 			L0SliceMetadata f = esServices.getL0Slice(l0sliceProductType, productName);
 
-			if (f != null) {
-				L0SliceMetadataDto response = new L0SliceMetadataDto(f.getProductName(), f.getProductType(),
-						f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
-				response.setNumberSlice(f.getNumberSlice());
-				response.setInstrumentConfigurationId(f.getInstrumentConfigurationId());
-				response.setDatatakeId(f.getDatatakeId());
-				return new ResponseEntity<L0SliceMetadataDto>(response, HttpStatus.OK);
-			} else {
-				LOGGER.warn("[productType {}] [productName {}] Not found", productType, productName);
-				return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.NOT_FOUND);
-			}
-
+			L0SliceMetadataDto response = new L0SliceMetadataDto(f.getProductName(), f.getProductType(),
+					f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
+			response.setNumberSlice(f.getNumberSlice());
+			response.setInstrumentConfigurationId(f.getInstrumentConfigurationId());
+			response.setDatatakeId(f.getDatatakeId());
+			return new ResponseEntity<L0SliceMetadataDto>(response, HttpStatus.OK);
+			
 		} catch (MetadataNotPresentException em) {
 			LOGGER.warn("[productType {}] [productName {}] [code {}] {}", productType, productName,
 					em.getCode().getCode(), em.getLogMessage());
@@ -142,6 +137,10 @@ public class L0SliceMetadataController {
 				}
 			}
 
+			if(l0a == null && l0c == null && l0c == null) {
+				return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
+			}
+			
 			return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 
 		} catch (MetadataNotPresentException em) {

@@ -176,6 +176,9 @@ public class EsServices {
 		EdrsSessionMetadata r = new EdrsSessionMetadata();
 		r.setProductType(productType);
 		r.setProductName(productName);
+		if(source.isEmpty()) {
+			throw new MetadataNotPresentException(productName);
+		}
 		r.setKeyObjectStorage(source.get("url").toString());
 		if (source.containsKey("validityStartTime")) {
 			r.setValidityStart(source.get("validityStartTime").toString());

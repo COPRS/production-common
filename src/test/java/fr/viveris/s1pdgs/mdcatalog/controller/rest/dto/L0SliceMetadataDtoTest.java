@@ -23,14 +23,14 @@ public class L0SliceMetadataDtoTest {
 		obj.setNumberSlice(8);
 		
 		String str = obj.toString();
-		assertTrue(str.contains("productName=name"));
-		assertTrue(str.contains("productType=type"));
-		assertTrue(str.contains("keyObjectStorage=kobs"));
-		assertTrue(str.contains("validityStart=startDate"));
-		assertTrue(str.contains("validityStop=stopDate"));
-		assertTrue(str.contains("instrumentConfigurationId=1"));
-		assertTrue(str.contains("datatakeId=dataTakeId"));
-		assertTrue(str.contains("numberSlice=8"));
+		assertTrue(str.contains("\"productName\":\"name\""));
+		assertTrue(str.contains("\"productType\":\"type\""));
+		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
+		assertTrue(str.contains("\"validityStart\":\"startDate\""));
+		assertTrue(str.contains("\"validityStop\":\"stopDate\""));
+		assertTrue(str.contains("\"instrumentConfigurationId\":1"));
+		assertTrue(str.contains("\"datatakeId\":\"dataTakeId\""));
+		assertTrue(str.contains("\"numberSlice\":8"));
 	}
 
 	/**

@@ -71,10 +71,9 @@ public class L0SliceMetadataDto extends MetadataDto {
 	 */
 	@Override
 	public String toString() {
-		return "L0SliceMetadataDto [instrumentConfigurationId=" + instrumentConfigurationId + ", numberSlice="
-				+ numberSlice + ", datatakeId=" + datatakeId + ", productName=" + productName + ", productType="
-				+ productType + ", keyObjectStorage=" + keyObjectStorage + ", validityStart=" + validityStart
-				+ ", validityStop=" + validityStop + "]";
+		String superToString = super.toMetadataString();
+		return String.format("{%s,\"instrumentConfigurationId\":%s,\"numberSlice\":%s,\"datatakeId\":\"%s\"}", superToString,
+				instrumentConfigurationId, numberSlice, datatakeId);
 	}
 
 	/* (non-Javadoc)

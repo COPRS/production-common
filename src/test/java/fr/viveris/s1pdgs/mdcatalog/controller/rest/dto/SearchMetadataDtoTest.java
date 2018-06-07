@@ -20,11 +20,11 @@ public class SearchMetadataDtoTest {
 		obj = new SearchMetadataDto(obj);
 		
 		String str = obj.toString();
-		assertTrue(str.contains("productName=name"));
-		assertTrue(str.contains("productType=type"));
-		assertTrue(str.contains("keyObjectStorage=kobs"));
-		assertTrue(str.contains("validityStart=startDate"));
-		assertTrue(str.contains("validityStop=stopDate"));
+		assertTrue(str.contains("\"productName\":\"name\""));
+		assertTrue(str.contains("\"productType\":\"type\""));
+		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
+		assertTrue(str.contains("\"validityStart\":\"startDate\""));
+		assertTrue(str.contains("\"validityStop\":\"stopDate\""));
 	}
 
 	/**
