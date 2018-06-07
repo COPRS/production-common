@@ -1,6 +1,12 @@
 package fr.viveris.s1pdgs.mdcatalog.model.exception;
 
-public class ObjectStorageException extends FileRuntimeException {
+/**
+ * Exception raised when error occurs when accessing to the object storage
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class ObjectStorageException extends AbstractCodedException {
 	
 	private static final long serialVersionUID = -3680895691846942569L;
 
@@ -15,7 +21,7 @@ public class ObjectStorageException extends FileRuntimeException {
 	protected final String key;
 
 	public ObjectStorageException(String productName, String key, String bucket, Throwable cause) {
-		super(cause.getMessage(), productName, cause);
+		super(ErrorCode.OBS_ERROR, productName, cause.getMessage(), cause);
 		this.key = key;
 		this.bucket = bucket;
 	}
@@ -32,5 +38,13 @@ public class ObjectStorageException extends FileRuntimeException {
 	 */
 	public String getKey() {
 		return key;
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public String getLogMessage() {
+		return String.format("[bucket %s] [key %s] [msg %s]", this.bucket, this.key, getMessage());
 	}
 }

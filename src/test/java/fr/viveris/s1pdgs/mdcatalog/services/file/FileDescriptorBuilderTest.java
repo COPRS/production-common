@@ -16,7 +16,7 @@ import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.mdcatalog.model.FileExtension;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.L1OutputFileDescriptor;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractFileException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.IllegalFileExtension;
@@ -77,7 +77,7 @@ public class FileDescriptorBuilderTest {
 			
 			assertNotNull("File descriptor should not be null", result);
 			assertEquals("File descriptor are not equals", expectedResult.toString(), result.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -105,7 +105,7 @@ public class FileDescriptorBuilderTest {
 			
 			assertNotNull("File descriptor should not be null", result);
 			assertEquals("File descriptor are not equals", expectedResult.toString(), result.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -134,7 +134,7 @@ public class FileDescriptorBuilderTest {
 			
 			assertNotNull("File descriptor should not be null", result);
 			assertEquals("File descriptor are not equals", expectedResult.toString(), result.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 		
@@ -160,7 +160,7 @@ public class FileDescriptorBuilderTest {
 			
 			assertNotNull("File descriptor should not be null", result);
 			assertEquals("File descriptor are not equals", expectedResult.toString(), result.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -192,7 +192,7 @@ public class FileDescriptorBuilderTest {
 			
 			assertNotNull("File descriptor should not be null", result);
 			assertEquals("File descriptor are not equals", expectedResult.toString(), result.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -224,7 +224,7 @@ public class FileDescriptorBuilderTest {
 			
 			assertNotNull("File descriptor should not be null", result);
 			assertEquals("File descriptor are not equals", expectedResult.toString(), result.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -239,7 +239,7 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildConfigFileDescriptor(file);
 			fail("An exception should occur");
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml",
 					"S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml", fe.getProductName());
 		}
@@ -251,7 +251,7 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
 			fail("An exception should occur");
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1/ch03/DCS_02_SESSION1_ch1_DSIB.xml",
 					"S1A/SESSION1/ch03/DCS_02_SESSION1_ch1_DSIB.xml", fe.getProductName());
 		}
@@ -263,7 +263,7 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
 			fail("An exception should occur");
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IR_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
 					"S1A_IR_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe", fe.getProductName());
 		}		
@@ -275,7 +275,7 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
 			fail("An exception should occur");
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1ZDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe",
 					"S1A_IW_GRDH_1ZDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe", fe.getProductName());
 		}
@@ -291,9 +291,9 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildConfigFileDescriptor(file);
 			fail("An exception should occur");
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_AUX.xml",
-					file.getAbsolutePath(), fe.getProductName());
+					"S1A_OPER_AUX.xml", fe.getProductName());
 		}
 		//Edrs Session file
 		file = new File("/S1A/SESSION1");
@@ -303,9 +303,9 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
 			fail("An exception should occur");
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1",
-					file.getAbsolutePath(), fe.getProductName());
+					"SESSION1", fe.getProductName());
 		}
 		//L0
 		file = new File("/S1A_IW_RAW__0SDV");
@@ -315,9 +315,9 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
 			fail("An exception should occur");
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
-					file.getAbsolutePath(), fe.getProductName());
+					"S1A_IW_RAW__0SDV", fe.getProductName());
 		}		
 		//L1
 		file = new File("/S1A_IW_GRDH_1SDV");
@@ -327,9 +327,9 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
 			fail("An exception should occur");
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe",
-					file.getAbsolutePath(), fe.getProductName());
+					"S1A_IW_GRDH_1SDV", fe.getProductName());
 		}
 	}
 	
@@ -343,7 +343,7 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildConfigFileDescriptor(file);
 			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
 					"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", fe.getProductName());
 		}
@@ -355,7 +355,7 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
 			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1/ch01",
 					"S1A/SESSION1/ch01", fe.getProductName());
 		}
@@ -367,7 +367,7 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
 			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 					"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", fe.getProductName());
 		}		
@@ -379,24 +379,13 @@ public class FileDescriptorBuilderTest {
 		try {
 			fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
 			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE",
 					"S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE", fe.getProductName());
 		}
 	}
 	
-	@Test(expected = AbstractFileException.class)
-	public void testBuildEdrsSessionFileDescriptorIIFFail() throws FilePathException, IgnoredFileException, IllegalFileExtension {
-		//Edrs Session file
-		File file = new File("test/workDir/S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_iif_DSIB.xml");
-		fileDescriptorBuilder = new FileDescriptorBuilder(Paths.get("").toAbsolutePath()+"/test/workDir/", 
-				Pattern.compile("^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$", 
-						Pattern.CASE_INSENSITIVE));
-		
-		fileDescriptorBuilder.buildEdrsSessionFileDescriptor(file);
-	}
-	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testBuildEdrsSessionFileDescriptorExtensionFail() throws FilePathException, IgnoredFileException, IllegalFileExtension {
 		//Edrs Session file
 		File file = new File("test/workDir/S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xmll");

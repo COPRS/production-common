@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.mdcatalog.model;
 
+import java.util.Locale;
+
 /**
  * Enumeration for file extension
  * @author Cyrielle
@@ -14,11 +16,14 @@ public enum FileExtension {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public static FileExtension valueOfIgnoreCase(String extension) throws IllegalArgumentException {
+	public static FileExtension valueOfIgnoreCase(final String extension) {
+		FileExtension ret;
 		try {
-			return valueOf(extension.toUpperCase());
+			String extensionUC = extension.toUpperCase(Locale.getDefault());
+			ret = valueOf(extensionUC);
 		} catch (IllegalArgumentException e) {
-			return UNKNOWN;
+			ret = UNKNOWN;
 		}
+		return ret;
 	}
 }

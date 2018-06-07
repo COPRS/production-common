@@ -20,8 +20,8 @@ public class KafkaL0SliceDtoTest {
 		obj.setKeyObjectStorage("kobs");
 		
 		String str = obj.toString();
-		assertTrue(str.contains("productName= name"));
-		assertTrue(str.contains("keyObjectStorage= kobs"));
+		assertTrue(str.contains("productName: name"));
+		assertTrue(str.contains("keyObjectStorage: kobs"));
 	}
 
 	/**

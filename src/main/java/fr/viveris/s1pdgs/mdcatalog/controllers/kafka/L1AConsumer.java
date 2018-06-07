@@ -3,9 +3,9 @@ package fr.viveris.s1pdgs.mdcatalog.controllers.kafka;
 import java.io.File;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.L1OutputFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.ResumeDetails;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaL1ADto;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
@@ -77,13 +77,15 @@ public class L1AConsumer {
 	 */
 	private final String manifestFilename;
 	private final String fileWithManifestExt;
+	private final String topicName;
 
 	@Autowired
 	public L1AConsumer(final EsServices esServices, final L1AcnsS3Services l1AS3Services,
 			@Value("${file.l1-acns.local-directory}") final String localDirectory,
 			final MetadataExtractorConfig extractorConfig,
 			@Value("${file.manifest-filename}") final String manifestFilename,
-			@Value("${file.file-with-manifest-ext}") final String fileWithManifestExt) {
+			@Value("${file.file-with-manifest-ext}") final String fileWithManifestExt,
+			@Value("${kafka.topic.l1-acns}") final String topicName) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
@@ -93,6 +95,7 @@ public class L1AConsumer {
 		this.l1AS3Services = l1AS3Services;
 		this.manifestFilename = manifestFilename;
 		this.fileWithManifestExt = fileWithManifestExt;
+		this.topicName = topicName;
 	}
 
 	/**
@@ -102,53 +105,55 @@ public class L1AConsumer {
 	 */
 	@KafkaListener(topics = "${kafka.topic.l1-acns}", groupId = "${kafka.group-id}", containerFactory = "l1AKafkaListenerContainerFactory")
 	public void receive(KafkaL1ADto dto) {
-		LOGGER.info("[MONITOR] [Step 0] [l1-acn] [productName {}] Starting metadata extraction", dto.getProductName());
+		int step = 0;
+		LOGGER.info("[MONITOR] [step 0] [l1-acn] [productName {}] Starting metadata extraction", dto.getProductName());
 
 		File metadataFile = null;
 		// Create metadata
 		try {
+			step++;
 			// Build key object storage
 			String keyObs = dto.getKeyObjectStorage();
 			if (dto.getKeyObjectStorage().toLowerCase().endsWith(this.fileWithManifestExt.toLowerCase())) {
 				keyObs += "/" + manifestFilename;
 			}
 			// Upload file
-			if (l1AS3Services.exist(keyObs)) {
-
-				// Upload file
-				LOGGER.info("[MONITOR] [Step 1] [l1-acn] [productName {}] Downloading file {}", dto.getProductName(),
-						keyObs);
-				metadataFile = l1AS3Services.getFile(keyObs, this.localDirectory + keyObs);
-
-				// Extract metadata from name
-				LOGGER.info("[MONITOR] [Step 2] [l1-acn] [productName {}] Building file descriptor",
-						dto.getProductName());
-				L1OutputFileDescriptor l1AFileDescriptor = fileDescriptorBuilder
-						.buildL1OutputFileDescriptor(metadataFile);
-
-				// Build metadata from file and extracted
-				LOGGER.info("[MONITOR] [Step 3] [l1-acn] [productName {}] Building metadata", dto.getProductName());
-				JSONObject metadata = mdBuilder.buildL1SliceOutputFileMetadata(l1AFileDescriptor, metadataFile);
-
-				// Publish metadata
-				LOGGER.info("[MONITOR] [Step 4] [l1-acn] [productName {}] Publishing metadata", dto.getProductName());
-				if (!esServices.isMetadataExist(metadata)) {
-					esServices.createMetadata(metadata);
-				}
-
-			} else {
-				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(),
-						"No such L1 As in object storage");
+			LOGGER.info("[MONITOR] [step 1] [l1-acn] [productName {}] Downloading file {}", dto.getProductName(),
+					keyObs);
+			if (!l1AS3Services.exist(keyObs)) {
+				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(), "CONFIG",
+						"No such Auxiliary files in object storage");
 			}
-		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {
-			LOGGER.error("[MONITOR] [l1-acn] [productName {}] {}", dto.getProductName(), e1.getMessage());
+			metadataFile = l1AS3Services.getFile(keyObs, this.localDirectory + keyObs);
+
+			// Extract metadata from name
+			step++;
+			LOGGER.info("[MONITOR] [step 2] [l1-acn] [productName {}] Building file descriptor", dto.getProductName());
+			L1OutputFileDescriptor l1AFileDescriptor = fileDescriptorBuilder.buildL1OutputFileDescriptor(metadataFile);
+
+			// Build metadata from file and extracted
+			step++;
+			LOGGER.info("[MONITOR] [step 3] [l1-acn] [productName {}] Building metadata", dto.getProductName());
+			JSONObject metadata = mdBuilder.buildL1SliceOutputFileMetadata(l1AFileDescriptor, metadataFile);
+
+			// Publish metadata
+			step++;
+			LOGGER.info("[MONITOR] [step 4] [l1-acn] [productName {}] Publishing metadata", dto.getProductName());
+			if (!esServices.isMetadataExist(metadata)) {
+				esServices.createMetadata(metadata);
+			}
+		} catch (AbstractCodedException e1) {
+			LOGGER.error("[MONITOR] [step {}] [l1-acn] [productName {}] [code {}] [resuming {}] {}", step,
+					dto.getProductName(), e1.getCode().getCode(), new ResumeDetails(topicName, dto),
+					e1.getLogMessage());
 		} catch (Exception e) {
-			LOGGER.error("[MONITOR] [l1-acn] [productName {}] Exception occurred: {}", dto.getProductName(),
+			LOGGER.error("[MONITOR] [step {}] [l1-acn] [productName {}] [code {}] [resuming {}] [msg {}]", step,
+					dto.getProductName(), ErrorCode.INTERNAL_ERROR.getCode(), new ResumeDetails(topicName, dto),
 					e.getMessage());
 		} finally {
 			// Remove file
 			if (metadataFile != null) {
-				LOGGER.info("[MONITOR] [Step 5] [l1-acn] [productName {}] Removing downloaded file",
+				LOGGER.info("[MONITOR] [step 5] [l1-acn] [productName {}] Removing downloaded file",
 						dto.getProductName());
 				File parent = metadataFile.getParentFile();
 				metadataFile.delete();
@@ -158,5 +163,6 @@ public class L1AConsumer {
 				}
 			}
 		}
+		LOGGER.info("[MONITOR] [step 0] [l1-acn] [productName {}] End", dto.getProductName());
 	}
 }

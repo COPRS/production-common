@@ -1,7 +1,7 @@
 package fr.viveris.s1pdgs.mdcatalog.controllers.rest;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.viveris.s1pdgs.mdcatalog.controllers.rest.dto.EdrsSessionMetadataDto;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataNotPresentException;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 
@@ -39,13 +42,21 @@ public class EdrsSessionMetadataController {
 						f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
 				return new ResponseEntity<EdrsSessionMetadataDto>(response, HttpStatus.OK);
 			} else {
-				LOGGER.error("[productType {}] [productName {}] Not found", productType, productName);
+				LOGGER.warn("[productType {}] [productName {}] Not found", productType, productName);
 				return new ResponseEntity<EdrsSessionMetadataDto>(HttpStatus.NOT_FOUND);
 			}
 
-		} catch (Exception e) {
-			LOGGER.error("[productType {}] [productName {}] Exception occured: {}", productType, productName,
-					e.getMessage());
+		} catch (MetadataNotPresentException em) {
+			LOGGER.warn("[productType {}] [productName {}] [code {}] {}", productType, productName, em.getCode().getCode(),
+					em.getLogMessage());
+			return new ResponseEntity<EdrsSessionMetadataDto>(HttpStatus.NOT_FOUND);
+		} catch (AbstractCodedException ace) {
+			LOGGER.error("[productType {}] [productName {}] [code {}] {}", productType, productName, ace.getCode().getCode(),
+					ace.getLogMessage());
+			return new ResponseEntity<EdrsSessionMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exc) {
+			LOGGER.error("[productType {}] [productName {}] [code {}] [msg {}]", productType, productName,
+					ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
 			return new ResponseEntity<EdrsSessionMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

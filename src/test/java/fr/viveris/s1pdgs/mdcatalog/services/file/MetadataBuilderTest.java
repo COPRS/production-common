@@ -22,7 +22,7 @@ import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.mdcatalog.model.FileExtension;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.L1OutputFileDescriptor;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractFileException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
 import fr.viveris.s1pdgs.mdcatalog.services.files.ExtractMetadata;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
@@ -179,7 +179,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -210,7 +210,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -241,7 +241,7 @@ public class MetadataBuilderTest {
 			
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -272,7 +272,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -360,7 +360,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -392,7 +392,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -429,7 +429,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -466,7 +466,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -503,7 +503,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -540,7 +540,7 @@ public class MetadataBuilderTest {
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}

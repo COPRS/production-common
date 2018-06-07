@@ -21,7 +21,7 @@ import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.mdcatalog.model.FileExtension;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.L1OutputFileDescriptor;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractFileException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
 import fr.viveris.s1pdgs.mdcatalog.services.files.ExtractMetadata;
 
@@ -75,7 +75,7 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("validityStartTime").toString(),
 					result.get("validityStartTime").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 		
@@ -101,12 +101,12 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("validityStartTime").toString(),
 					result.get("validityStartTime").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testProcessXMLMissingFileFail () throws MetadataExtractionException {
 		
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
@@ -150,12 +150,12 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("validityStartTime").toString(),
 					result.get("validityStartTime").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testProcessEOFMissingFileFail () throws MetadataExtractionException {
 		
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
@@ -199,12 +199,12 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("validityStartTime").toString(),
 					result.get("validityStartTime").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testProcessEOFFileWithoutMissingFileFail () throws MetadataExtractionException {
 		
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
@@ -248,12 +248,12 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("validityStartTime").toString(),
 					result.get("validityStartTime").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testProcessSAFEFileFail () throws MetadataExtractionException {
 		
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
@@ -297,7 +297,7 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("missionId").toString(),
 					result.get("missionId").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -325,7 +325,7 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("missionId").toString(),
 					result.get("missionId").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
@@ -360,13 +360,13 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("productConsolidation").toString(),
 					result.get("productConsolidation").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testProcessL0SlicesMissingFileFail () throws MetadataExtractionException {
 		
 		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
@@ -419,7 +419,7 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("missionId").toString(),
 					result.get("missionId").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 
@@ -450,13 +450,13 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("productConsolidation").toString(),
 					result.get("productConsolidation").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	
 	}
 	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testProcessL0ACNMissingFileFail () throws MetadataExtractionException {
 		
 		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
@@ -509,13 +509,13 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("absoluteStopOrbit").toString(),
 					result.get("absoluteStopOrbit").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testProcessL1SlicesMissingFileFail () throws MetadataExtractionException {
 		
 		L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();
@@ -567,12 +567,12 @@ public class ExtractMetadataTest {
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("missionId").toString(),
 					result.get("missionId").toString());
-		} catch (AbstractFileException fe) {
+		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
-	@Test(expected = AbstractFileException.class)
+	@Test(expected = AbstractCodedException.class)
 	public void testProcessL1AMissingFileFail () throws MetadataExtractionException {
 		
 		L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();

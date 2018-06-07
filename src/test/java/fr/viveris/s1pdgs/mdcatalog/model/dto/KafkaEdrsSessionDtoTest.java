@@ -22,9 +22,9 @@ public class KafkaEdrsSessionDtoTest {
 		obj.setObjectStorageKey("kobs");
 		
 		String str = obj.toString();
-		assertTrue(str.contains("channelId= 1"));
-		assertTrue(str.contains("objectStorageKey= kobs"));
-		assertTrue(str.contains("productType= RAW"));
+		assertTrue(str.contains("channelId: 1"));
+		assertTrue(str.contains("objectStorageKey: kobs"));
+		assertTrue(str.contains("productType: RAW"));
 		
 	}
 
