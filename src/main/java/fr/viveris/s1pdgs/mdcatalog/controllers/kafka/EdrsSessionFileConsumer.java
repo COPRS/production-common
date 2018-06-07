@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -69,6 +70,7 @@ public class EdrsSessionFileConsumer {
 
 	private final String topicName;
 
+	@Autowired
 	public EdrsSessionFileConsumer(final EsServices esServices,
 			@Value("${file.session-files.local-directory}") final String localDirectory,
 			final MetadataExtractorConfig extractorConfig,
@@ -78,6 +80,20 @@ public class EdrsSessionFileConsumer {
 				Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
+		this.esServices = esServices;
+		this.topicName = topicName;
+	}
+
+	protected EdrsSessionFileConsumer(final EsServices esServices,
+			final String localDirectory,
+			final MetadataExtractorConfig extractorConfig,
+			final String topicName,
+			final FileDescriptorBuilder fileDescriptorBuilder,
+			final MetadataBuilder mdBuilder) {
+		this.localDirectory = localDirectory;
+		this.fileDescriptorBuilder = fileDescriptorBuilder;
+		this.extractorConfig = extractorConfig;
+		this.mdBuilder = mdBuilder;
 		this.esServices = esServices;
 		this.topicName = topicName;
 	}
