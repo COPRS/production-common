@@ -8,8 +8,8 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,23 +62,15 @@ public class KafkaService {
 	 * @param limitTopic
 	 * @return
 	 */
-	public ConsumerGroupsDescription describeConsumerGroup(String groupId, String limitTopic) {
-
-		KafkaConsumer<String, String> consumer = null;
+	public ConsumerGroupsDescription describeConsumerGroup(final String groupId, final String limitTopic) {
+		
 		ConsumerGroupsDescription r = new ConsumerGroupsDescription(groupId);
+		KafkaConsumer<String, String> consumer = null;
 
 		try {
-
-			Properties consProps = new Properties();
-			consProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
-			consProps.put(ConsumerConfig.CLIENT_ID_CONFIG, properties.getClientId());
-			consProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-			consProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-			consProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, properties.getSessionTimeoutMs());
-			consProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-			consProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-			consumer = new KafkaConsumer<String, String>(consProps);
-
+			
+			consumer = createKafkaConsumer(groupId);
+			
 			List<ConsumerSummary> groupSummaries = scala.collection.JavaConversions.seqAsJavaList(kafkaAdminClient
 					.describeConsumerGroup(groupId, properties.getRequestTimeoutMs()).consumers().get());
 			for (ConsumerSummary summary : groupSummaries) {
@@ -97,7 +89,7 @@ public class KafkaService {
 						PartitionDescription pd = new PartitionDescription(tp.partition(), tp.topic(),
 								summary.consumerId(), currentOffset, logEndOffset, lag);
 						cd.addPartition(pd);
-						r.getDescriptionPerPartition().put("" + pd.getId(), pd);
+						r.getDescPerPartition().put("" + pd.getId(), pd);
 					} else {
 						if (LOGGER.isDebugEnabled()) {
 							LOGGER.debug("Kafka partition {} ignored because invalid topic {}", tp.partition(),
@@ -105,14 +97,46 @@ public class KafkaService {
 						}
 					}
 				}
-				r.getDescriptionPerConsumer().put(cd.getConsumerId(), cd);
+				r.getDescPerConsumer().put(cd.getConsumerId(), cd);
 			}
 		} finally {
-			if (consumer != null) {
-				consumer.close();
-			}
+			closeKafkaConsumer(consumer);
 		}
 
 		return r;
+	}
+	
+	/**
+	 * Build and get usefull Kafka client properties
+	 * @param groupId
+	 * @return
+	 */
+	private Properties kafkaConsumerProperties(String groupId) {
+		Properties consProps = new Properties();
+		consProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
+		consProps.put(ConsumerConfig.CLIENT_ID_CONFIG, properties.getClientId());
+		consProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+		consProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+		consProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, properties.getSessionTimeoutMs());
+		consProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		consProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		return consProps;
+	}
+	
+	/**
+	 * Open the KAFKA consumer for given group
+	 * @param groupId
+	 */
+	protected KafkaConsumer<String, String> createKafkaConsumer(final String groupId) {
+		return new KafkaConsumer<String, String>(kafkaConsumerProperties(groupId));
+	}
+	
+	/**
+	 * Close the kafka consumer
+	 */
+	private void closeKafkaConsumer(final KafkaConsumer<String, String> consumer) {
+		if (consumer != null) {
+			consumer.close();
+		}
 	}
 }

@@ -50,15 +50,15 @@ public class KafkaMonitoring {
 	private KafkaPerGroupPerTopicMonitor monitorGroupPerTopic(String groupId, String topicName) {
 		ConsumerGroupsDescription desc = this.kafkaService.describeConsumerGroup(groupId, topicName);
 		KafkaPerGroupPerTopicMonitor monitor = new KafkaPerGroupPerTopicMonitor(new Date(), groupId, topicName);
-		if (!CollectionUtils.isEmpty(desc.getDescriptionPerPartition())) {
-			monitor.setNbPartitions(desc.getDescriptionPerPartition().size());
-			desc.getDescriptionPerPartition().forEach((k, v) -> {
+		if (!CollectionUtils.isEmpty(desc.getDescPerPartition())) {
+			monitor.setNbPartitions(desc.getDescPerPartition().size());
+			desc.getDescPerPartition().forEach((k, v) -> {
 				monitor.getLagPerPartition().put(Integer.valueOf(v.getId()), Long.valueOf(v.getLag()));
 			});
 		}
-		if (!CollectionUtils.isEmpty(desc.getDescriptionPerConsumer())) {
-			monitor.setNbConsumers(desc.getDescriptionPerConsumer().size());
-			desc.getDescriptionPerConsumer().forEach((k, v) -> {
+		if (!CollectionUtils.isEmpty(desc.getDescPerConsumer())) {
+			monitor.setNbConsumers(desc.getDescPerConsumer().size());
+			desc.getDescPerConsumer().forEach((k, v) -> {
 				monitor.getLagPerConsumers().put(v.getConsumerId(), Long.valueOf(v.getTotalLag()));
 			});
 		}

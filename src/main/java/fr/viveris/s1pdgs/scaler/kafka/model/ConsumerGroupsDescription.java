@@ -2,19 +2,37 @@ package fr.viveris.s1pdgs.scaler.kafka.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ConsumerGroupsDescription {
-	
-	private String groupId;
-	
-	private Map<String, ConsumerDescription> descriptionPerConsumer;
-	
-	private Map<String, PartitionDescription> descriptionPerPartition;
 
-	public ConsumerGroupsDescription(String groupId) {
+	/**
+	 * Group identifier
+	 */
+	private String groupId;
+
+	/**
+	 * Description of consumers:
+	 * <li>key = consumer identifier</li>
+	 * <li>value = description</li>
+	 */
+	private final Map<String, ConsumerDescription> descPerConsumer;
+
+	/**
+	 * Description of partitions:
+	 * <li>key = consumer identifier</li>
+	 * <li>value = description</li>
+	 */
+	private final Map<String, PartitionDescription> descPerPartition;
+
+	/**
+	 * 
+	 * @param groupId
+	 */
+	public ConsumerGroupsDescription(final String groupId) {
 		this.groupId = groupId;
-		this.descriptionPerConsumer = new HashMap<>();
-		this.descriptionPerPartition = new HashMap<>();
+		this.descPerConsumer = new HashMap<>();
+		this.descPerPartition = new HashMap<>();
 	}
 
 	/**
@@ -25,64 +43,60 @@ public class ConsumerGroupsDescription {
 	}
 
 	/**
-	 * @param groupId the groupId to set
+	 * @param groupId
+	 *            the groupId to set
 	 */
-	public void setGroupId(String groupId) {
+	public void setGroupId(final String groupId) {
 		this.groupId = groupId;
 	}
 
 	/**
-	 * @return the descriptionPerConsumer
+	 * @return the descPerConsumer
 	 */
-	public Map<String, ConsumerDescription> getDescriptionPerConsumer() {
-		return descriptionPerConsumer;
+	public Map<String, ConsumerDescription> getDescPerConsumer() {
+		return descPerConsumer;
 	}
 
 	/**
-	 * @return the descriptionPerPartition
+	 * @return the descPerPartition
 	 */
-	public Map<String, PartitionDescription> getDescriptionPerPartition() {
-		return descriptionPerPartition;
+	public Map<String, PartitionDescription> getDescPerPartition() {
+		return descPerPartition;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "ConsumerGroupsDescription [groupId=" + groupId + ", descriptionPerConsumer=" + descriptionPerConsumer
-				+ ", descriptionPerPartition=" + descriptionPerPartition + "]";
+		return String.format("{groupId: %s, descPerConsumer: %s, descPerPartition: %s}", groupId, descPerConsumer,
+				descPerPartition);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-		return result;
+		return Objects.hash(groupId, descPerConsumer, descPerPartition);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ConsumerGroupsDescription other = (ConsumerGroupsDescription) obj;
-		if (groupId == null) {
-			if (other.groupId != null)
-				return false;
-		} else if (!groupId.equals(other.groupId))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			final ConsumerGroupsDescription other = (ConsumerGroupsDescription) obj;
+			ret = Objects.equals(groupId, other.groupId) && Objects.equals(descPerConsumer, other.descPerConsumer)
+					&& Objects.equals(descPerPartition, other.descPerPartition);
+		}
+		return ret;
 	}
 
 }

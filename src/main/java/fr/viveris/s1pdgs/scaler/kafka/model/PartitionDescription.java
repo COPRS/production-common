@@ -1,19 +1,44 @@
 package fr.viveris.s1pdgs.scaler.kafka.model;
 
+import java.util.Objects;
+
+/**
+ * Description of a partition for a given consumer
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 public class PartitionDescription {
-	
+
+	/**
+	 * Identifier
+	 */
 	private int id;
-	
+
+	/**
+	 * Topic name
+	 */
 	private String topicName;
-	
+
+	/**
+	 * Connected consumer identifier if link to a ConsumerDescription
+	 */
 	private String consumerId;
-	
+
+	/**
+	 * Current offset
+	 */
 	private long currentOffset;
-	
+
+	/**
+	 * Last offset published
+	 */
 	private long logEndOffset;
-	
+
+	/**
+	 * Lag = logEndOffset - currentOffset
+	 */
 	private long lag;
-	
 
 	/**
 	 * @param id
@@ -23,8 +48,8 @@ public class PartitionDescription {
 	 * @param logEndOffset
 	 * @param lag
 	 */
-	public PartitionDescription(int id, String topicName, String consumerId, long currentOffset, long logEndOffset,
-			long lag) {
+	public PartitionDescription(final int id, final String topicName, final String consumerId, final long currentOffset,
+			final long logEndOffset, final long lag) {
 		super();
 		this.id = id;
 		this.topicName = topicName;
@@ -42,9 +67,10 @@ public class PartitionDescription {
 	}
 
 	/**
-	 * @param id the id to set
+	 * @param id
+	 *            the id to set
 	 */
-	public void setId(int id) {
+	public void setId(final int id) {
 		this.id = id;
 	}
 
@@ -56,9 +82,10 @@ public class PartitionDescription {
 	}
 
 	/**
-	 * @param topicName the topicName to set
+	 * @param topicName
+	 *            the topicName to set
 	 */
-	public void setTopicName(String topicName) {
+	public void setTopicName(final String topicName) {
 		this.topicName = topicName;
 	}
 
@@ -70,9 +97,10 @@ public class PartitionDescription {
 	}
 
 	/**
-	 * @param consumerId the consumerId to set
+	 * @param consumerId
+	 *            the consumerId to set
 	 */
-	public void setConsumerId(String consumerId) {
+	public void setConsumerId(final String consumerId) {
 		this.consumerId = consumerId;
 	}
 
@@ -84,9 +112,10 @@ public class PartitionDescription {
 	}
 
 	/**
-	 * @param currentOffset the currentOffset to set
+	 * @param currentOffset
+	 *            the currentOffset to set
 	 */
-	public void setCurrentOffset(long currentOffset) {
+	public void setCurrentOffset(final long currentOffset) {
 		this.currentOffset = currentOffset;
 	}
 
@@ -98,9 +127,10 @@ public class PartitionDescription {
 	}
 
 	/**
-	 * @param logEndOffset the logEndOffset to set
+	 * @param logEndOffset
+	 *            the logEndOffset to set
 	 */
-	public void setLogEndOffset(long logEndOffset) {
+	public void setLogEndOffset(final long logEndOffset) {
 		this.logEndOffset = logEndOffset;
 	}
 
@@ -112,53 +142,47 @@ public class PartitionDescription {
 	}
 
 	/**
-	 * @param lag the lag to set
+	 * @param lag
+	 *            the lag to set
 	 */
-	public void setLag(long lag) {
+	public void setLag(final long lag) {
 		this.lag = lag;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "PartitionDescription [id=" + id + ", topicName=" + topicName + ", consumerId=" + consumerId
-				+ ", currentOffset=" + currentOffset + ", logEndOffset=" + logEndOffset + ", lag=" + lag + "]";
+		return String.format("{id: %s, topicName: %s, consumerId: %s, currentOffset: %s, logEndOffset: %s, lag: %s}",
+				id, topicName, consumerId, currentOffset, logEndOffset, lag);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + id;
-		result = prime * result + ((topicName == null) ? 0 : topicName.hashCode());
-		return result;
+		return Objects.hash(id, topicName, consumerId, currentOffset, logEndOffset, lag);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		PartitionDescription other = (PartitionDescription) obj;
-		if (id != other.id)
-			return false;
-		if (topicName == null) {
-			if (other.topicName != null)
-				return false;
-		} else if (!topicName.equals(other.topicName))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			final PartitionDescription other = (PartitionDescription) obj;
+			ret = id == other.id && Objects.equals(topicName, other.topicName)
+					&& Objects.equals(consumerId, other.consumerId) && currentOffset == other.currentOffset
+					&& logEndOffset == other.logEndOffset && lag == other.lag;
+		}
+		return ret;
 	}
 
 }
