@@ -42,15 +42,19 @@ public class EsServices {
 	/**
 	 * Elasticsearch client
 	 */
-	@Autowired
-	private ElasticsearchDAO elasticsearchDAO;
+	private final ElasticsearchDAO elasticsearchDAO;
 
 	/**
 	 * Index type for elastic search
 	 */
-	@Value("${elasticsearch.index-type}")
-	private String indexType;
+	private final String indexType;
 
+	@Autowired
+	public EsServices (final ElasticsearchDAO elasticsearchDAO, @Value("${elasticsearch.index-type}") final String indexType ) {
+		this.elasticsearchDAO = elasticsearchDAO;
+		this.indexType = indexType;
+	}
+	
 	/**
 	 * Check if a given metadata already exist
 	 * 
@@ -182,7 +186,7 @@ public class EsServices {
 		return r;
 	}
 
-	public L0SliceMetadata getL0Slice(String productType, String productName) throws Exception {
+	public L0SliceMetadata getL0Slice(String productType, String productName) throws Exception{
 		Map<String, Object> source = this.getRequest(productType, productName);
 		return this.extractInfoForL0Slice(source, productType, productName);
 	}
@@ -200,7 +204,7 @@ public class EsServices {
 		try {
 			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
-				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productType);
+				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productType, datatakeId);
 			}
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
@@ -223,12 +227,14 @@ public class EsServices {
 		return new HashMap<>();
 	}
 
-	private L0AcnMetadata extractInfoForL0ACN(Map<String, Object> source, String productType)
+	private L0AcnMetadata extractInfoForL0ACN(Map<String, Object> source, String productType, String dataTakeID)
 			throws MetadataMalformedException {
 		L0AcnMetadata r = new L0AcnMetadata();
 		r.setProductType(productType);
 		if (source.containsKey("productName")) {
 			r.setProductName(source.get("productName").toString());
+		} else {
+			throw new MetadataMalformedException(dataTakeID, "productName");
 		}
 		if (source.containsKey("url")) {
 			r.setKeyObjectStorage(source.get("url").toString());
@@ -254,6 +260,11 @@ public class EsServices {
 			r.setValidityStop(source.get("stopTime").toString());
 		} else {
 			throw new MetadataMalformedException(r.getProductName(), "stopTime");
+		}
+		if (source.containsKey("dataTakeId")) {
+			r.setDatatakeId(source.get("dataTakeId").toString());
+		} else {
+			throw new MetadataMalformedException(r.getProductName(), "dataTakeId");
 		}
 		return r;
 	}
