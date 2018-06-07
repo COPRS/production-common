@@ -23,7 +23,7 @@ public class L0AcnMetadataTest {
 		obj.setKeyObjectStorage("kobs");
 		obj.setValidityStart("start");
 		obj.setValidityStop("stop");
-		obj.setInsConfId(15);
+		obj.setInstrumentConfigurationId(15);
 		obj.setNumberOfSlices(11);
 		obj.setDatatakeId("14256");
 		
@@ -33,7 +33,7 @@ public class L0AcnMetadataTest {
 		assertTrue(str.contains("keyObjectStorage: kobs"));
 		assertTrue(str.contains("validityStart: start"));
 		assertTrue(str.contains("validityStop: stop"));
-		assertTrue(str.contains("insConfId: 15"));
+		assertTrue(str.contains("instrumentConfigurationId: 15"));
 		assertTrue(str.contains("numberOfSlices: 11"));
 		assertTrue(str.contains("datatakeId: 14256"));
 	}

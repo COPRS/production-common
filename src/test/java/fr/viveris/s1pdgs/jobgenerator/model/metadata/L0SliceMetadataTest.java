@@ -23,7 +23,7 @@ public class L0SliceMetadataTest {
 		obj.setKeyObjectStorage("kobs");
 		obj.setValidityStart("start");
 		obj.setValidityStop("stop");
-		obj.setInsConfId(15);
+		obj.setInstrumentConfigurationId(15);
 		obj.setNumberSlice(4);
 		obj.setDatatakeId("14256");
 		
@@ -33,7 +33,7 @@ public class L0SliceMetadataTest {
 		assertTrue(str.contains("keyObjectStorage: kobs"));
 		assertTrue(str.contains("validityStart: start"));
 		assertTrue(str.contains("validityStop: stop"));
-		assertTrue(str.contains("insConfId: 15"));
+		assertTrue(str.contains("instrumentConfigurationId: 15"));
 		assertTrue(str.contains("numberSlice: 4"));
 		assertTrue(str.contains("datatakeId: 14256"));
 	}

@@ -12,7 +12,7 @@ public class L0SliceMetadata extends AbstractMetadata {
 	/**
 	 * Instrument configuration identifier
 	 */
-	private int insConfId;
+	private int instrumentConfigurationId;
 
 	/**
 	 * Slice number
@@ -29,10 +29,10 @@ public class L0SliceMetadata extends AbstractMetadata {
 	 * @param numberSlice
 	 */
 	public L0SliceMetadata(final String productName, final String productType, final String keyObjectStorage,
-			final String validityStart, final String validityStop, final int insConfId, final int numberSlice,
-			final String dataTakeId) {
+			final String validityStart, final String validityStop, final int instrumentConfigurationId,
+			final int numberSlice, final String dataTakeId) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
-		this.insConfId = insConfId;
+		this.instrumentConfigurationId = instrumentConfigurationId;
 		this.numberSlice = numberSlice;
 		this.datatakeId = dataTakeId;
 	}
@@ -40,16 +40,16 @@ public class L0SliceMetadata extends AbstractMetadata {
 	/**
 	 * @return the instrumentConfigurationId
 	 */
-	public int getInsConfId() {
-		return insConfId;
+	public int getInstrumentConfigurationId() {
+		return instrumentConfigurationId;
 	}
 
 	/**
 	 * @param instrumentConfigurationId
 	 *            the instrumentConfigurationId to set
 	 */
-	public void setInsConfId(final int instrumentConfigurationId) {
-		this.insConfId = instrumentConfigurationId;
+	public void setInstrumentConfigurationId(final int instrumentConfigurationId) {
+		this.instrumentConfigurationId = instrumentConfigurationId;
 	}
 
 	/**
@@ -88,8 +88,8 @@ public class L0SliceMetadata extends AbstractMetadata {
 	@Override
 	public String toString() {
 		String superToString = super.toAbstractString();
-		return String.format("{%s, insConfId: %s, numberSlice: %s, datatakeId: %s}", superToString,
-				insConfId, numberSlice, datatakeId);
+		return String.format("{%s, instrumentConfigurationId: %s, numberSlice: %s, datatakeId: %s}", superToString,
+				instrumentConfigurationId, numberSlice, datatakeId);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class L0SliceMetadata extends AbstractMetadata {
 	@Override
 	public int hashCode() {
 		int superHash = super.hashCode();
-		return Objects.hash(insConfId, numberSlice, datatakeId, superHash);
+		return Objects.hash(instrumentConfigurationId, numberSlice, datatakeId, superHash);
 	}
 
 	/**
@@ -113,8 +113,8 @@ public class L0SliceMetadata extends AbstractMetadata {
 			ret = false;
 		} else {
 			L0SliceMetadata other = (L0SliceMetadata) obj;
-			ret = super.equals(other) && insConfId == other.insConfId && numberSlice == other.numberSlice
-					&& Objects.equals(datatakeId, other.datatakeId);
+			ret = super.equals(other) && instrumentConfigurationId == other.instrumentConfigurationId
+					&& numberSlice == other.numberSlice && Objects.equals(datatakeId, other.datatakeId);
 		}
 		return ret;
 	}

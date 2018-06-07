@@ -7,7 +7,7 @@ public class L0AcnMetadata extends AbstractMetadata {
 	/**
 	 * Instrument configuration id
 	 */
-	private int insConfId;
+	private int instrumentConfigurationId;
 
 	/**
 	 * Number of slices
@@ -27,7 +27,7 @@ public class L0AcnMetadata extends AbstractMetadata {
 			final String validityStart, final String validityStop, final int instrumentConfigurationId,
 			final int numberOfSlices, final String dataTakeId) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
-		this.insConfId = instrumentConfigurationId;
+		this.instrumentConfigurationId = instrumentConfigurationId;
 		this.numberOfSlices = numberOfSlices;
 		this.datatakeId = dataTakeId;
 	}
@@ -35,16 +35,16 @@ public class L0AcnMetadata extends AbstractMetadata {
 	/**
 	 * @return the instrumentConfigurationId
 	 */
-	public int getInsConfId() {
-		return insConfId;
+	public int getInstrumentConfigurationId() {
+		return instrumentConfigurationId;
 	}
 
 	/**
 	 * @param instrumentConfigurationId
 	 *            the instrumentConfigurationId to set
 	 */
-	public void setInsConfId(final int instrumentConfigurationId) {
-		this.insConfId = instrumentConfigurationId;
+	public void setInstrumentConfigurationId(final int instrumentConfigurationId) {
+		this.instrumentConfigurationId = instrumentConfigurationId;
 	}
 
 	/**
@@ -83,8 +83,8 @@ public class L0AcnMetadata extends AbstractMetadata {
 	@Override
 	public String toString() {
 		String superToString = super.toAbstractString();
-		return String.format("{%s, insConfId: %s, numberOfSlices: %s, datatakeId: %s}", superToString,
-				insConfId, numberOfSlices, datatakeId);
+		return String.format("{%s, instrumentConfigurationId: %s, numberOfSlices: %s, datatakeId: %s}", superToString,
+				instrumentConfigurationId, numberOfSlices, datatakeId);
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class L0AcnMetadata extends AbstractMetadata {
 	@Override
 	public int hashCode() {
 		int superHash = super.hashCode();
-		return Objects.hash(insConfId, numberOfSlices, datatakeId, superHash);
+		return Objects.hash(instrumentConfigurationId, numberOfSlices, datatakeId, superHash);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class L0AcnMetadata extends AbstractMetadata {
 			ret = false;
 		} else {
 			L0AcnMetadata other = (L0AcnMetadata) obj;
-			ret = super.equals(other) && insConfId == other.insConfId
+			ret = super.equals(other) && instrumentConfigurationId == other.instrumentConfigurationId
 					&& numberOfSlices == other.numberOfSlices && Objects.equals(datatakeId, other.datatakeId);
 		}
 		return ret;
