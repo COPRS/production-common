@@ -184,7 +184,6 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 		expectedResult.add(l0A);
 		expectedResult.add(l0A);
 		expectedResult.add(l0A);
-		System.out.println(expectedResult);
 							
 		this.mockGetL0Acn(l0AcnResponse);
 		this.mockGetL0Slice(l0SliceResponse);
@@ -276,7 +275,6 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 		//ExpectedResult
 		List<L0AcnMetadataDto> expectedResult = new ArrayList<L0AcnMetadataDto>();
 		expectedResult.add(l0A);
-		System.out.println(expectedResult);
 							
 		this.mockGetL0Acn3Responses(null, l0AcnResponse, null);
 		this.mockGetL0Slice(l0SliceResponse);
@@ -324,7 +322,6 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 		//ExpectedResult
 		List<L0AcnMetadataDto> expectedResult = new ArrayList<L0AcnMetadataDto>();
 		expectedResult.add(l0A);
-		System.out.println(expectedResult);
 							
 		this.mockGetL0Acn(l0AcnResponse);
 		this.mockGetL0Slice(l0SliceResponse);
@@ -372,7 +369,6 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 		//ExpectedResult
 		List<L0AcnMetadataDto> expectedResult = new ArrayList<L0AcnMetadataDto>();
 		expectedResult.add(l0A);
-		System.out.println(expectedResult);
 							
 		this.mockGetL0Acn3Responses(null, l0AcnResponse, null);
 		this.mockGetL0Slice(l0SliceResponse);
@@ -420,7 +416,6 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 		//ExpectedResult
 		List<L0AcnMetadataDto> expectedResult = new ArrayList<L0AcnMetadataDto>();
 		expectedResult.add(l0A);
-		System.out.println(expectedResult);
 							
 		this.mockGetL0Acn3Responses(null, null, l0AcnResponse);
 		this.mockGetL0Slice(l0SliceResponse);

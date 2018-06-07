@@ -79,7 +79,7 @@ public class L0SliceMetadataController {
 			if ("blank".equalsIgnoreCase(productType)) {
 				l0sliceProductType = productName.substring(4, 14);
 			}
-
+			
 			// Build product type for its ACN
 			String l0aProductType = l0sliceProductType.replaceAll("0S", "0A");
 			String l0cProductType = l0sliceProductType.replaceAll("0S", "0C");
@@ -137,7 +137,7 @@ public class L0SliceMetadataController {
 				}
 			}
 
-			if(l0a == null && l0c == null && l0c == null) {
+			if(l0a == null && l0c == null && l0n == null) {
 				return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
 			}
 			
