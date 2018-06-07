@@ -82,11 +82,11 @@ public class KafkaPerGroupPerTopicMonitorTest {
 	private void addLags(KafkaPerGroupPerTopicMonitor obj) {
 		obj.setNbConsumers(2);
 		obj.setNbPartitions(3);
-		obj.getLagPerConsumers().put("client1", new Long(3));
-		obj.getLagPerConsumers().put("client2", new Long(0));
-		obj.getLagPerPartition().put(new Integer(0), new Long(1));
-		obj.getLagPerPartition().put(new Integer(1), new Long(0));
-		obj.getLagPerPartition().put(new Integer(2), new Long(2));
+		obj.getLagPerConsumers().put("client1", Long.valueOf(3));
+		obj.getLagPerConsumers().put("client2", Long.valueOf(0));
+		obj.getLagPerPartition().put(Integer.valueOf(0), Long.valueOf(1));
+		obj.getLagPerPartition().put(Integer.valueOf(1), Long.valueOf(03));
+		obj.getLagPerPartition().put(Integer.valueOf(2), Long.valueOf(2));
 	}
 
 }
