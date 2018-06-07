@@ -293,7 +293,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_AUX.xml",
-					"/S1A_OPER_AUX.xml", fe.getProductName());
+					file.getAbsolutePath(), fe.getProductName());
 		}
 		//Edrs Session file
 		file = new File("/S1A/SESSION1");
@@ -305,7 +305,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1",
-					"/S1A/SESSION1", fe.getProductName());
+					file.getAbsolutePath(), fe.getProductName());
 		}
 		//L0
 		file = new File("/S1A_IW_RAW__0SDV");
@@ -317,7 +317,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
-					"/S1A_IW_RAW__0SDV", fe.getProductName());
+					file.getAbsolutePath(), fe.getProductName());
 		}		
 		//L1
 		file = new File("/S1A_IW_GRDH_1SDV");
@@ -329,7 +329,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractFileException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe",
-					"/S1A_IW_GRDH_1SDV", fe.getProductName());
+					file.getAbsolutePath(), fe.getProductName());
 		}
 	}
 	

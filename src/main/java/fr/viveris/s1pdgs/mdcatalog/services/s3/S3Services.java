@@ -7,12 +7,6 @@ import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
 public interface S3Services {
 
 	/**
-	 * Download a file from object storage
-	 * @param keyName
-	 */
-	public void downloadFile(String keyName, File destionationFile) throws ObjectStorageException;
-
-	/**
 	 * Get a file from object storage and save it in expectedFilePath
 	 * @param keyName
 	 */

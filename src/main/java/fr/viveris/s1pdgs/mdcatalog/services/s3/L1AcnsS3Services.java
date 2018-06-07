@@ -7,12 +7,13 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.s3.AmazonS3;
 
 /**
- * Implementation of OBS services for the EDRS session files
+ * Implementation of OBS services for the L1 ACNs files
+ * 
  * @author Cyrielle Gailliard
  *
  */
 @Service
-public class SessionFilesS3Services extends AbstractS3ObsServices {
+public class L1AcnsS3Services extends AbstractS3ObsServices {
 
 	/**
 	 * Constructor
@@ -21,8 +22,7 @@ public class SessionFilesS3Services extends AbstractS3ObsServices {
 	 * @param bucketName
 	 */
 	@Autowired
-	public SessionFilesS3Services(final AmazonS3 s3client,
-			@Value("${storage.buckets.session-files}") final String bucketName) {
+	public L1AcnsS3Services(final AmazonS3 s3client, @Value("${storage.buckets.l1-acns}") final String bucketName) {
 		super(s3client, bucketName);
 	}
 
