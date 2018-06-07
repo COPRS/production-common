@@ -30,14 +30,20 @@ public class ServerService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServerService.class);
 	private final int serverMaxWaitMs;
+	final int deletionMaxLoop;
+	final int deletionTempoLoopMs;
 	private final int fipMaxLoop;
 	private final int fipTempoLoopMs;
 
 	@Autowired
 	public ServerService(@Value("${openstack.service.floating-ip.creation.max-loop}") final int fipMaxLoop,
+			@Value("${openstack.service.server.deletion.max-loop}") final int deletionMaxLoop,
+			@Value("${openstack.service.server.deletion.tempo-loop-ms}") final int deletionTempoLoopMs,
 			@Value("${openstack.service.floating-ip.creation.tempo-loop-ms}") final int fipTempoLoopMs,
 			@Value("${openstack.service.server.creation.max-wait-ms}") final int serverMaxWaitMs) {
 		this.fipMaxLoop = fipMaxLoop;
+		this.deletionMaxLoop = deletionMaxLoop;
+		this.deletionTempoLoopMs = deletionTempoLoopMs;
 		this.fipTempoLoopMs = fipTempoLoopMs;
 		this.serverMaxWaitMs = serverMaxWaitMs;
 	}
@@ -111,14 +117,14 @@ public class ServerService {
 			LOGGER.debug("[serverId {}] Server is deleted", serverId);
 		}
 		boolean deleteServerStatus = false;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < deletionMaxLoop; i++) {
 			if (osClient.compute().servers().get(serverId) == null) {
 				deleteServerStatus = true;
 				LOGGER.debug("[serverId {}] Server is deleted", serverId);
 				break;
 			}
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(deletionTempoLoopMs);
 			} catch (InterruptedException e) {
 				throw new OsEntityInternaloErrorException("serverId", serverId,
 						String.format("Fail to sleep: %s", e.getMessage()), e);
