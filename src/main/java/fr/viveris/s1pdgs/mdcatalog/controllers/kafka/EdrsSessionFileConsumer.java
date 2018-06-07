@@ -6,9 +6,9 @@ package fr.viveris.s1pdgs.mdcatalog.controllers.kafka;
 import java.io.File;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,8 @@ import org.springframework.stereotype.Service;
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaEdrsSessionDto;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
@@ -86,29 +84,36 @@ public class EdrsSessionFileConsumer {
 	 */
 	@KafkaListener(topics = "${kafka.topic.edrs-sessions}", groupId = "${kafka.group-id}", containerFactory = "edrsSessionsKafkaListenerContainerFactory")
 	public void receive(KafkaEdrsSessionDto dto) {
-		LOGGER.info("[MONITOR] [Step 0] [session] [obs {}] Starting metadata extraction", dto.getObjectStorageKey());
+		int step = 0;
+		LOGGER.info("[MONITOR] [step 0] [session] [obs {}] Starting metadata extraction", dto.getObjectStorageKey());
 
 		try {
 			// Extract metadata from name
-			LOGGER.info("[MONITOR] [Step 2] [session] [obs {}] Extracting from filename", dto.getObjectStorageKey());
+			step++;
+			step++;
+			LOGGER.info("[MONITOR] [step 2] [session] [obs {}] Extracting from filename", dto.getObjectStorageKey());
 			EdrsSessionFileDescriptor edrsFileDescriptor = fileDescriptorBuilder
 					.buildEdrsSessionFileDescriptor(new File(this.localDirectory + dto.getObjectStorageKey()));
 
 			// Build metadata from file and extracted
-			LOGGER.info("[MONITOR] [Step 3] [session] [obs {}] Extracting from file", dto.getObjectStorageKey());
+			step++;
+			LOGGER.info("[MONITOR] [step 3] [session] [obs {}] Extracting from file", dto.getObjectStorageKey());
 			JSONObject metadata = mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor);
 
 			// Publish metadata
-			LOGGER.info("[MONITOR] [Step 4] [session] [obs {}] Publishing metadata", dto.getObjectStorageKey());
+			step++;
+			LOGGER.info("[MONITOR] [step 4] [session] [obs {}] Publishing metadata", dto.getObjectStorageKey());
 			if (!esServices.isMetadataExist(metadata)) {
 				esServices.createMetadata(metadata);
 			}
 
-		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {
-			LOGGER.error("[MONITOR] [session] [obs {}] {}", dto.getObjectStorageKey(), e1.getMessage());
+		} catch (AbstractCodedException e1) {
+			LOGGER.error("[MONITOR] [step {}] [session] [obs {}] [code {}] {}", step, dto.getObjectStorageKey(),
+					e1.getCode(), e1.getLogMessage());
 		} catch (Exception e) {
-			LOGGER.error("[MONITOR] [session] [obs {}] Exception occurred: {}", dto.getObjectStorageKey(),
-					e.getMessage());
+			LOGGER.error("[MONITOR] [step {}] [session] [obs {}] [code {}] [msg {}]", step, dto.getObjectStorageKey(),
+					ErrorCode.INTERNAL_ERROR, e.getMessage());
 		}
+		LOGGER.info("[MONITOR] [step 0] [session] [obs {}] End", dto.getObjectStorageKey());
 	}
 }

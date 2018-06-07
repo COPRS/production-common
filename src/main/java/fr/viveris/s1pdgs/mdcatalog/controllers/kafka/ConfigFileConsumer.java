@@ -6,9 +6,9 @@ package fr.viveris.s1pdgs.mdcatalog.controllers.kafka;
 import java.io.File;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,10 +17,9 @@ import org.springframework.stereotype.Service;
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaConfigFileDto;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
@@ -109,49 +108,52 @@ public class ConfigFileConsumer {
 				dto.getProductName());
 
 		File metadataFile = null;
+		int step = 0;
 		// Create metadata
 		try {
+			step++;
 			// Build key object storage
 			String keyObs = dto.getKeyObjectStorage();
 			if (dto.getKeyObjectStorage().toLowerCase().endsWith(this.fileWithManifestExt.toLowerCase())) {
 				keyObs += "/" + manifestFilename;
 			}
-			if (configFilesS3Services.exist(keyObs)) {
-
-				// Upload file
-				LOGGER.info("[MONITOR] [Step 1] [auxiliary] [productName {}] Downloading file {}", dto.getProductName(),
-						keyObs);
-				metadataFile = configFilesS3Services.getFile(keyObs, this.localDirectory + keyObs);
-
-				// Extract metadata from name
-				LOGGER.info("[MONITOR] [Step 2] [auxiliary] [productName {}] Extracting from filename",
-						dto.getProductName());
-				ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder
-						.buildConfigFileDescriptor(metadataFile);
-
-				// Build metadata from file and extracted
-				LOGGER.info("[MONITOR] [Step 3] [auxiliary] [productName {}] Extracting from file",
-						dto.getProductName());
-				JSONObject metadata = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
-
-				// Publish metadata
-				LOGGER.info("[MONITOR] [Step 4] [auxiliary] [productName {}] Publishing metadata",
-						dto.getProductName());
-				if (!esServices.isMetadataExist(metadata)) {
-					esServices.createMetadata(metadata);
-				}
-			} else {
-				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(),
+			// Upload file
+			LOGGER.info("[MONITOR] [step 1] [auxiliary] [productName {}] Downloading file {}", dto.getProductName(),
+					keyObs);
+			if (!configFilesS3Services.exist(keyObs)) {
+				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(), "CONFIG",
 						"No such Auxiliary files in object storage");
 			}
-		} catch (ObjectStorageException | FilePathException | MetadataExtractionException | IgnoredFileException e1) {
-			LOGGER.error("[MONITOR] [productName {}] {}", dto.getProductName(), e1.getMessage());
+			metadataFile = configFilesS3Services.getFile(keyObs, this.localDirectory + keyObs);
+
+			// Extract metadata from name
+			step++;
+			LOGGER.info("[MONITOR] [step 2] [auxiliary] [productName {}] Extracting from filename",
+					dto.getProductName());
+			ConfigFileDescriptor configFileDescriptor = fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile);
+
+			// Build metadata from file and extracted
+			step++;
+			LOGGER.info("[MONITOR] [step 3] [auxiliary] [productName {}] Extracting from file", dto.getProductName());
+			JSONObject metadata = mdBuilder.buildConfigFileMetadata(configFileDescriptor, metadataFile);
+
+			// Publish metadata
+			step++;
+			LOGGER.info("[MONITOR] [step 4] [auxiliary] [productName {}] Publishing metadata", dto.getProductName());
+			if (!esServices.isMetadataExist(metadata)) {
+				esServices.createMetadata(metadata);
+			}
+
+		} catch (AbstractCodedException e1) {
+			LOGGER.error("[MONITOR] [step {}] [auxiliary] [productName {}] [code {}] {}", step, dto.getProductName(),
+					e1.getCode(), e1.getLogMessage());
 		} catch (Exception e) {
-			LOGGER.error("[MONITOR] [productName {}] Exception occurred: {}", dto.getProductName(), e.getMessage());
+			LOGGER.error("[MONITOR] [step {}] [auxiliary] [productName {}] [code {}] [msg {}]", step,
+					dto.getProductName(), ErrorCode.INTERNAL_ERROR, e.getMessage());
 		} finally {
 			// Remove file
 			if (metadataFile != null) {
-				LOGGER.info("[MONITOR] [Step 5] [auxiliary] [productName {}] Removing downloaded file",
+				LOGGER.info("[MONITOR] [step 5] [auxiliary] [productName {}] Removing downloaded file",
 						dto.getProductName());
 				File parent = metadataFile.getParentFile();
 				metadataFile.delete();
@@ -161,7 +163,7 @@ public class ConfigFileConsumer {
 				}
 			}
 		}
-		LOGGER.info("[MONITOR] [Step 0] [auxiliary] [productName {}] End", dto.getProductName());
+		LOGGER.info("[MONITOR] [step 0] [auxiliary] [productName {}] End", dto.getProductName());
 	}
 
 }
