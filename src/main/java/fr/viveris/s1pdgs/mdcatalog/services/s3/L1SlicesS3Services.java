@@ -3,92 +3,30 @@
  */
 package fr.viveris.s1pdgs.mdcatalog.services.s3;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 
-import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
-
+/**
+ * Implementation of OBS services for the L1 slices files
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 @Service
-public class L1SlicesS3Services implements S3Services {
+public class L1SlicesS3Services extends AbstractS3ObsServices {
 
-	private static final Logger LOGGER = LogManager.getLogger(L1SlicesS3Services.class);
-
+	/**
+	 * Constructor
+	 * 
+	 * @param s3client
+	 * @param bucketName
+	 */
 	@Autowired
-	private AmazonS3 s3client;
-
-	@Value("${storage.buckets.l1-slices}")
-	private String bucketName;
-
-	@Override
-	public void downloadFile(String keyName, File destinationFile) throws ObjectStorageException {
-		try {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Downloading object {} from bucket {}", keyName, bucketName);
-			}
-			s3client.getObject(new GetObjectRequest(bucketName, keyName), destinationFile);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
-			}
-		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
-		}
-	}
-	
-	@Override
-	public File getFile(String keyName, String expectedFilePath) throws ObjectStorageException {
-		try {
-			File f = new File(expectedFilePath);
-			if (f.getParentFile()!=null) {
-				f.getParentFile().mkdirs();
-			}
-			f.createNewFile();
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Downloading object {} from bucket {}", keyName, bucketName);
-			}
-			s3client.getObject(new GetObjectRequest(bucketName, keyName), f);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
-			}
-			return f;
-		} catch (SdkClientException | IOException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
-		}
-	}
-
-	@Override
-	public void uploadFile(String keyName, File uploadFile) throws ObjectStorageException {
-		try {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Uploading object {} in bucket {}", keyName, bucketName);
-			}
-			s3client.putObject(new PutObjectRequest(bucketName, keyName, uploadFile));
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Upload object {} in bucket {} succeeded", keyName, bucketName);
-			}
-		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
-		}
-
-	}
-
-	@Override
-	public boolean exist(String keyName) throws ObjectStorageException {
-		try {
-			return s3client.doesObjectExist(bucketName, keyName);
-		} catch (SdkClientException sce) {
-			throw new ObjectStorageException(keyName, keyName, bucketName, sce);
-		}
+	public L1SlicesS3Services(final AmazonS3 s3client, @Value("${storage.buckets.l1-slices}") final String bucketName) {
+		super(s3client, bucketName);
 	}
 
 }

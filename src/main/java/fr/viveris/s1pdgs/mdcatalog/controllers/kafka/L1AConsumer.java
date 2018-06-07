@@ -21,7 +21,7 @@ import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
-import fr.viveris.s1pdgs.mdcatalog.services.s3.L1AS3Services;
+import fr.viveris.s1pdgs.mdcatalog.services.s3.L1AcnsS3Services;
 
 /**
  * KAFKA consumer. Consume on a topic defined in L1 Annotaions
@@ -50,7 +50,7 @@ public class L1AConsumer {
 	/**
 	 * Amazon S3 service for configuration files
 	 */
-	private final L1AS3Services l1AS3Services;
+	private final L1AcnsS3Services l1AS3Services;
 
 	/**
 	 * Metadata builder
@@ -79,7 +79,7 @@ public class L1AConsumer {
 	private final String fileWithManifestExt;
 
 	@Autowired
-	public L1AConsumer(final EsServices esServices, final L1AS3Services l1AS3Services,
+	public L1AConsumer(final EsServices esServices, final L1AcnsS3Services l1AS3Services,
 			@Value("${file.l1-acns.local-directory}") final String localDirectory,
 			final MetadataExtractorConfig extractorConfig,
 			@Value("${file.manifest-filename}") final String manifestFilename,
