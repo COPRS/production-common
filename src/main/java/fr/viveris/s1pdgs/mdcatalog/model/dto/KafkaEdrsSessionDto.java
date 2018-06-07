@@ -72,13 +72,13 @@ public class KafkaEdrsSessionDto {
 		this.productType = productType;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "KafkaEdrsSessionDto [objectStorageKey= " + objectStorageKey + ", channelId= " + channelId
-				+ ", productType= " + productType + "]";
+		return String.format("{objectStorageKey: %s, channelId: %s, productType: %s}", objectStorageKey, channelId,
+				productType);
 	}
 
 	/* (non-Javadoc)

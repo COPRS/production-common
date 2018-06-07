@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.EdrsSessionFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.ResumeDetails;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
@@ -66,15 +67,19 @@ public class EdrsSessionFileConsumer {
 	 */
 	private final FileDescriptorBuilder fileDescriptorBuilder;
 
+	private final String topicName;
+
 	public EdrsSessionFileConsumer(final EsServices esServices,
 			@Value("${file.session-files.local-directory}") final String localDirectory,
-			final MetadataExtractorConfig extractorConfig) {
+			final MetadataExtractorConfig extractorConfig,
+			@Value("${kafka.topic.edrs-sessions}") final String topicName) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_SESSION, Pattern.CASE_INSENSITIVE));
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
+		this.topicName = topicName;
 	}
 
 	/**
@@ -108,11 +113,13 @@ public class EdrsSessionFileConsumer {
 			}
 
 		} catch (AbstractCodedException e1) {
-			LOGGER.error("[MONITOR] [step {}] [session] [obs {}] [code {}] {}", step, dto.getObjectStorageKey(),
-					e1.getCode().getCode(), e1.getLogMessage());
+			LOGGER.error("[MONITOR] [step {}] [session] [obs {}] [code {}] [resuming {}] {}", step,
+					dto.getObjectStorageKey(), e1.getCode().getCode(), new ResumeDetails(topicName, dto),
+					e1.getLogMessage());
 		} catch (Exception e) {
-			LOGGER.error("[MONITOR] [step {}] [session] [obs {}] [code {}] [msg {}]", step, dto.getObjectStorageKey(),
-					ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
+			LOGGER.error("[MONITOR] [step {}] [session] [obs {}] [code {}] [resuming {}] [msg {}]", step,
+					dto.getObjectStorageKey(), ErrorCode.INTERNAL_ERROR.getCode(), new ResumeDetails(topicName, dto),
+					e.getMessage());
 		}
 		LOGGER.info("[MONITOR] [step 0] [session] [obs {}] End", dto.getObjectStorageKey());
 	}

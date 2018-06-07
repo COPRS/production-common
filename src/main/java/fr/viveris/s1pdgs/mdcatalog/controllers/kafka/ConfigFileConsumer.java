@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.ResumeDetails;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
@@ -79,13 +80,15 @@ public class ConfigFileConsumer {
 	 */
 	private final String manifestFilename;
 	private final String fileWithManifestExt;
+	private final String topicName;
 
 	@Autowired
 	public ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
 			@Value("${file.auxiliary-files.local-directory}") final String localDirectory,
 			final MetadataExtractorConfig extractorConfig,
 			@Value("${file.manifest-filename}") final String manifestFilename,
-			@Value("${file.file-with-manifest-ext}") final String fileWithManifestExt) {
+			@Value("${file.file-with-manifest-ext}") final String fileWithManifestExt,
+			@Value("${kafka.topic.auxiliary-files}") final String topicName) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = new FileDescriptorBuilder(this.localDirectory,
 				Pattern.compile(PATTERN_CONFIG, Pattern.CASE_INSENSITIVE));
@@ -95,6 +98,7 @@ public class ConfigFileConsumer {
 		this.configFilesS3Services = configFilesS3Services;
 		this.manifestFilename = manifestFilename;
 		this.fileWithManifestExt = fileWithManifestExt;
+		this.topicName = topicName;
 	}
 
 	/**
@@ -145,11 +149,13 @@ public class ConfigFileConsumer {
 			}
 
 		} catch (AbstractCodedException e1) {
-			LOGGER.error("[MONITOR] [step {}] [auxiliary] [productName {}] [code {}] {}", step, dto.getProductName(),
-					e1.getCode().getCode(), e1.getLogMessage());
+			LOGGER.error("[MONITOR] [step {}] [auxiliary] [productName {}] [code {}] [resuming {}] {}", step,
+					dto.getProductName(), e1.getCode().getCode(), new ResumeDetails(topicName, dto),
+					e1.getLogMessage());
 		} catch (Exception e) {
-			LOGGER.error("[MONITOR] [step {}] [auxiliary] [productName {}] [code {}] [msg {}]", step,
-					dto.getProductName(), ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
+			LOGGER.error("[MONITOR] [step {}] [auxiliary] [productName {}] [code {}] [resuming {}] [msg {}]", step,
+					dto.getProductName(), ErrorCode.INTERNAL_ERROR.getCode(), new ResumeDetails(topicName, dto),
+					e.getMessage());
 		} finally {
 			// Remove file
 			if (metadataFile != null) {
