@@ -140,10 +140,10 @@ public class L1AConsumer {
 			}
 		} catch (AbstractCodedException e1) {
 			LOGGER.error("[MONITOR] [step {}] [l1-acn] [productName {}] [code {}] {}", step, dto.getProductName(),
-					e1.getCode(), e1.getLogMessage());
+					e1.getCode().getCode(), e1.getLogMessage());
 		} catch (Exception e) {
 			LOGGER.error("[MONITOR] [step {}] [l1-acn] [productName {}] [code {}] [msg {}]", step, dto.getProductName(),
-					ErrorCode.INTERNAL_ERROR, e.getMessage());
+					ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
 		} finally {
 			// Remove file
 			if (metadataFile != null) {

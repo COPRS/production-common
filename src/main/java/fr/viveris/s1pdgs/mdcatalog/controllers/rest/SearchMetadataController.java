@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.viveris.s1pdgs.mdcatalog.controllers.rest.dto.SearchMetadataDto;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.SearchMetadata;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 
@@ -41,8 +43,12 @@ public class SearchMetadataController {
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
 		try {
 			if (mode.equals("LatestValCover")) {
-				SearchMetadata f = esServices.lastValCover(productType, convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
-						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")), satellite, insConfId);
+				SearchMetadata f = esServices.lastValCover(productType,
+						convertDateForSearch(startDate, -dt0,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
+						convertDateForSearch(stopDate, dt1,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")),
+						satellite, insConfId);
 				SearchMetadataDto response = null;
 				if (f != null) {
 					response = new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
@@ -50,21 +56,25 @@ public class SearchMetadataController {
 				}
 				return new ResponseEntity<SearchMetadataDto>(response, HttpStatus.OK);
 			} else {
-				LOGGER.error("[productType {}] [mode {}] Unknown mode", productType, mode);
+				LOGGER.error("[productType {}] [code {}] [mode {}] [msg Unknown mode]", productType,
+						ErrorCode.INVALID_SEARCH_MODE.getCode(), mode);
 				return new ResponseEntity<SearchMetadataDto>(HttpStatus.BAD_REQUEST);
 			}
-		} catch (ParseException e) {
-			LOGGER.error("[productType {}] [mode {}] Exception occured: {}", productType, mode, e.getMessage());
+		} catch (AbstractCodedException e) {
+			LOGGER.error("[productType {}] [code {}] [mode {}] {}", productType, e.getCode().getCode(), mode,
+					e.getLogMessage());
 			return new ResponseEntity<SearchMetadataDto>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
-			LOGGER.error("[productType {}] [mode {}] Exception occured: {}", productType, mode, e.getMessage());
+			LOGGER.error("[productType {}] [code {}] [mode {}] [msg {}]", productType,
+					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());
 			return new ResponseEntity<SearchMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}
 
-	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter) throws ParseException {
-		
+	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter)
+			throws ParseException {
+
 		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
 		return timePlus.format(outFormatter);

@@ -50,6 +50,7 @@ public abstract class AbstractCodedException extends Exception {
 		INTERNAL_ERROR(1), 
 		UNKNOWN_FAMILY(2), 
 		INVALID_PRODUCT_FORMAT(3), 
+		INVALID_SEARCH_MODE(4), 
 		OBS_UNKOWN_OBJ(50), 
 		OBS_ERROR(51), 
 		KAFKA_SEND_ERROR(70), 

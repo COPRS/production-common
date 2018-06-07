@@ -109,10 +109,10 @@ public class EdrsSessionFileConsumer {
 
 		} catch (AbstractCodedException e1) {
 			LOGGER.error("[MONITOR] [step {}] [session] [obs {}] [code {}] {}", step, dto.getObjectStorageKey(),
-					e1.getCode(), e1.getLogMessage());
+					e1.getCode().getCode(), e1.getLogMessage());
 		} catch (Exception e) {
 			LOGGER.error("[MONITOR] [step {}] [session] [obs {}] [code {}] [msg {}]", step, dto.getObjectStorageKey(),
-					ErrorCode.INTERNAL_ERROR, e.getMessage());
+					ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
 		}
 		LOGGER.info("[MONITOR] [step 0] [session] [obs {}] End", dto.getObjectStorageKey());
 	}
