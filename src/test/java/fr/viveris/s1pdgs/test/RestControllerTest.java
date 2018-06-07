@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class RestControllerTest {
 	@Resource
-	private WebApplicationContext wac;
+	public WebApplicationContext wac;
 
 	protected MockMvc mockMvc;
 

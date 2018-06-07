@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.viveris.s1pdgs.mdcatalog.controllers.rest.dto.L0AcnMetadataDto;
 import fr.viveris.s1pdgs.mdcatalog.controllers.rest.dto.L0SliceMetadataDto;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataNotPresentException;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0AcnMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0SliceMetadata;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
@@ -52,10 +53,14 @@ public class L0SliceMetadataController {
 				response.setDatatakeId(f.getDatatakeId());
 				return new ResponseEntity<L0SliceMetadataDto>(response, HttpStatus.OK);
 			} else {
-				LOGGER.error("[productType {}] [productName {}] Not found", productType, productName);
+				LOGGER.warn("[productType {}] [productName {}] Not found", productType, productName);
 				return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.NOT_FOUND);
 			}
 
+		} catch (MetadataNotPresentException em) {
+			LOGGER.warn("[productType {}] [productName {}] Exception occured: {}", productType, productName,
+					em.getMessage());
+			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
 			LOGGER.error("[productType {}] [productName {}] Exception occured: {}", productType, productName,
 					e.getMessage());
