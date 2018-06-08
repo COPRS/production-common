@@ -122,7 +122,7 @@ public class L1AConsumerTest {
 				desc.put("url", keyObs.getName());
 			}
 			return desc;
-		}).when(mdBuilder).buildL1SliceOutputFileMetadata(Mockito.any(), Mockito.any());
+		}).when(mdBuilder).buildL1AcnOutputFileMetadata(Mockito.any(), Mockito.any());
 		
 		doReturn(false).when(esServices).isMetadataExist(Mockito.any());
 		doNothing().when(esServices).createMetadata(Mockito.any());
@@ -240,7 +240,7 @@ public class L1AConsumerTest {
 	public void testReceiveWhenExtractionFailed()
 			throws ObjectStorageException, FilePathException, IgnoredFileException, MetadataExtractionException {
 		doThrow(new MetadataExtractionException("product-name", new Exception("erro"))).when(mdBuilder)
-				.buildL1SliceOutputFileMetadata(Mockito.any(), Mockito.any());
+				.buildL1AcnOutputFileMetadata(Mockito.any(), Mockito.any());
 		L1OutputFileDescriptor desc = new L1OutputFileDescriptor();
 		desc.setKeyObjectStorage("file_no_safe.xml");
 		desc.setProductName("file_no_safe.xml");
@@ -250,7 +250,7 @@ public class L1AConsumerTest {
 		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
 				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
 		verify(fileDescriptorBuilder, times(1)).buildL1OutputFileDescriptor(Mockito.eq(fileNoSafe));
-		verify(mdBuilder, times(1)).buildL1SliceOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
+		verify(mdBuilder, times(1)).buildL1AcnOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
 		verifyZeroInteractions(esServices);
 		assertFalse(fileNoSafe.exists());
 	}
@@ -275,7 +275,7 @@ public class L1AConsumerTest {
 		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
 				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
 		verify(fileDescriptorBuilder, times(1)).buildL1OutputFileDescriptor(Mockito.eq(fileNoSafe));
-		verify(mdBuilder, times(1)).buildL1SliceOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
+		verify(mdBuilder, times(1)).buildL1AcnOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
 		verify(esServices, times(1)).isMetadataExist(Mockito.any());
 		verify(esServices, never()).createMetadata(Mockito.any());
 		assertFalse(fileNoSafe.exists());
@@ -295,7 +295,7 @@ public class L1AConsumerTest {
 		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
 				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
 		verify(fileDescriptorBuilder, times(1)).buildL1OutputFileDescriptor(Mockito.eq(fileNoSafe));
-		verify(mdBuilder, times(1)).buildL1SliceOutputFileMetadata(Mockito.any(), Mockito.eq(fileNoSafe));
+		verify(mdBuilder, times(1)).buildL1AcnOutputFileMetadata(Mockito.any(), Mockito.eq(fileNoSafe));
 		verify(esServices, times(1)).isMetadataExist(Mockito.any());
 		verify(esServices, times(1)).createMetadata(Mockito.any());
 		assertFalse(fileNoSafe.exists());
@@ -321,7 +321,7 @@ public class L1AConsumerTest {
 		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
 				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
 		verify(fileDescriptorBuilder, times(1)).buildL1OutputFileDescriptor(Mockito.eq(fileNoSafe));
-		verify(mdBuilder, times(1)).buildL1SliceOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
+		verify(mdBuilder, times(1)).buildL1AcnOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
 		verify(esServices, times(1)).isMetadataExist(Mockito.any());
 		verify(esServices, times(1)).createMetadata(Mockito.any());
 		assertFalse(fileNoSafe.exists());
@@ -347,7 +347,7 @@ public class L1AConsumerTest {
 		verify(s3Services, times(1)).getFile(Mockito.eq("file_safe.safe/manifest.safe"),
 				Mockito.eq(LOCAL_DIRECTORY + "file_safe.safe/manifest.safe"));
 		verify(fileDescriptorBuilder, times(1)).buildL1OutputFileDescriptor(Mockito.eq(fileSafe));
-		verify(mdBuilder, times(1)).buildL1SliceOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileSafe));
+		verify(mdBuilder, times(1)).buildL1AcnOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileSafe));
 		verify(esServices, times(1)).isMetadataExist(Mockito.any());
 		verify(esServices, times(1)).createMetadata(Mockito.any());
 		assertFalse(fileSafe.exists());
