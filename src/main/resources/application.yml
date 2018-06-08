@@ -12,6 +12,7 @@ kafka:
   client-id: ${scaler_kafka_client-id:spdgs-scaler}
   request-timeout-ms: ${scaler_kafka_request-timeout-ms:5000}
   session-timeout-ms: ${scaler_kafka_session-timeout-ms:5000}
+  cnx-max-idl-ms: ${scaler_kafka_cnx-max-idle-ms:660000}
   topics:
     l1-jobs: ${kafka_topic_l1_jobs}
   group-id-per-topic:
@@ -88,6 +89,9 @@ openstack:
     server:
       creation:
         max-wait-ms: ${scaler_os_service_sv_creation_max-wait-ms:600000}
+      deletion:
+        max-loop: ${scaler_os_service_deletion_max-loop:180}
+        tempo-loop-ms: ${scaler_os_service_deletion_tempo-loop-ms:1000}
     volume:
       creation:
         max-loop: ${scaler_os_service_vol_creation_max-loop:120}

@@ -3,6 +3,7 @@ package fr.viveris.s1pdgs.scaler.kafka.model;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Consumer monitor for a given group and given topic
@@ -40,12 +41,12 @@ public class KafkaPerGroupPerTopicMonitor {
 	/**
 	 * Lag per consumers = sum of partition lag group by consumers
 	 */
-	private Map<String, Long> lagPerConsumers;
+	private final Map<String, Long> lagPerConsumers;
 
 	/**
 	 * Lag per partition
 	 */
-	private Map<Integer, Long> lagPerPartition;
+	private final Map<Integer, Long> lagPerPartition;
 
 	/**
 	 * Default constructor
@@ -61,7 +62,7 @@ public class KafkaPerGroupPerTopicMonitor {
 	 * @param nbConsumers
 	 * @param nbPartitions
 	 */
-	public KafkaPerGroupPerTopicMonitor(Date monitoringDate, String groupId, String topicName) {
+	public KafkaPerGroupPerTopicMonitor(final Date monitoringDate, final String groupId, final String topicName) {
 		this();
 		this.monitoringDate = monitoringDate;
 		this.groupId = groupId;
@@ -79,7 +80,7 @@ public class KafkaPerGroupPerTopicMonitor {
 	 * @param monitoringDate
 	 *            the monitoringDate to set
 	 */
-	public void setMonitoringDate(Date monitoringDate) {
+	public void setMonitoringDate(final Date monitoringDate) {
 		this.monitoringDate = monitoringDate;
 	}
 
@@ -94,7 +95,7 @@ public class KafkaPerGroupPerTopicMonitor {
 	 * @param groupId
 	 *            the groupId to set
 	 */
-	public void setGroupId(String groupId) {
+	public void setGroupId(final String groupId) {
 		this.groupId = groupId;
 	}
 
@@ -109,7 +110,7 @@ public class KafkaPerGroupPerTopicMonitor {
 	 * @param topicName
 	 *            the topicName to set
 	 */
-	public void setTopicName(String topicName) {
+	public void setTopicName(final String topicName) {
 		this.topicName = topicName;
 	}
 
@@ -124,7 +125,7 @@ public class KafkaPerGroupPerTopicMonitor {
 	 * @param nbConsumers
 	 *            the nbConsumers to set
 	 */
-	public void setNbConsumers(int nbConsumers) {
+	public void setNbConsumers(final int nbConsumers) {
 		this.nbConsumers = nbConsumers;
 	}
 
@@ -139,7 +140,7 @@ public class KafkaPerGroupPerTopicMonitor {
 	 * @param nbPartitions
 	 *            the nbPartitions to set
 	 */
-	public void setNbPartitions(int nbPartitions) {
+	public void setNbPartitions(final int nbPartitions) {
 		this.nbPartitions = nbPartitions;
 	}
 
@@ -157,76 +158,43 @@ public class KafkaPerGroupPerTopicMonitor {
 		return lagPerPartition;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "{monitoringDate: " + monitoringDate + ", groupId: " + groupId + ", topicName: " + topicName
-				+ ", nbConsumers: " + nbConsumers + ", nbPartitions: " + nbPartitions + ", lagPerConsumers: "
-				+ lagPerConsumers + ", lagPerPartition: " + lagPerPartition + "}";
+		return String.format(
+				"{monitoringDate: %s, groupId: %s, topicName: %s, nbConsumers: %s, nbPartitions: %s, lagPerConsumers: %s, lagPerPartition: %s}",
+				monitoringDate, groupId, topicName, nbConsumers, nbPartitions, lagPerConsumers, lagPerPartition);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-		result = prime * result + ((lagPerConsumers == null) ? 0 : lagPerConsumers.hashCode());
-		result = prime * result + ((lagPerPartition == null) ? 0 : lagPerPartition.hashCode());
-		result = prime * result + ((monitoringDate == null) ? 0 : monitoringDate.hashCode());
-		result = prime * result + nbConsumers;
-		result = prime * result + nbPartitions;
-		result = prime * result + ((topicName == null) ? 0 : topicName.hashCode());
-		return result;
+		return Objects.hash(monitoringDate, groupId, topicName, nbConsumers, nbPartitions, lagPerConsumers,
+				lagPerPartition);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		KafkaPerGroupPerTopicMonitor other = (KafkaPerGroupPerTopicMonitor) obj;
-		if (groupId == null) {
-			if (other.groupId != null)
-				return false;
-		} else if (!groupId.equals(other.groupId))
-			return false;
-		if (lagPerConsumers == null) {
-			if (other.lagPerConsumers != null)
-				return false;
-		} else if (!lagPerConsumers.equals(other.lagPerConsumers))
-			return false;
-		if (lagPerPartition == null) {
-			if (other.lagPerPartition != null)
-				return false;
-		} else if (!lagPerPartition.equals(other.lagPerPartition))
-			return false;
-		if (monitoringDate == null) {
-			if (other.monitoringDate != null)
-				return false;
-		} else if (!monitoringDate.equals(other.monitoringDate))
-			return false;
-		if (nbConsumers != other.nbConsumers)
-			return false;
-		if (nbPartitions != other.nbPartitions)
-			return false;
-		if (topicName == null) {
-			if (other.topicName != null)
-				return false;
-		} else if (!topicName.equals(other.topicName))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			final KafkaPerGroupPerTopicMonitor other = (KafkaPerGroupPerTopicMonitor) obj;
+			ret = Objects.equals(monitoringDate, other.monitoringDate) && Objects.equals(groupId, other.groupId)
+					&& Objects.equals(topicName, other.topicName) && nbConsumers == other.nbConsumers
+					&& nbPartitions == other.nbPartitions && Objects.equals(lagPerConsumers, other.lagPerConsumers)
+					&& Objects.equals(lagPerPartition, other.lagPerPartition);
+		}
+		return ret;
 	}
-	
 
 }

@@ -23,27 +23,32 @@ public class KafkaMonitoringProperties {
 	 * Client identifier
 	 */
 	private String clientId;
-	
+
 	/**
 	 * Bootstrap servers
 	 */
 	private String bootstrapServers;
-	
+
 	/**
 	 * Consumer session timeout in milliseconds
 	 */
 	private int sessionTimeoutMs;
-	
+
 	/**
 	 * Administration requests timeout in milliseconds
 	 */
 	private int requestTimeoutMs;
-	
+
+	/**
+	 * Client connection max idle
+	 */
+	private long cnxMaxIdlMs;
+
 	/**
 	 * Topic names
 	 */
 	private Map<SpdgsTopic, String> topics;
-	
+
 	/**
 	 * Groups identifier per topics
 	 */
@@ -57,9 +62,10 @@ public class KafkaMonitoringProperties {
 	}
 
 	/**
-	 * @param clientId the clientId to set
+	 * @param clientId
+	 *            the clientId to set
 	 */
-	public void setClientId(String clientId) {
+	public void setClientId(final String clientId) {
 		this.clientId = clientId;
 	}
 
@@ -71,9 +77,10 @@ public class KafkaMonitoringProperties {
 	}
 
 	/**
-	 * @param bootstrapServers the bootstrapServers to set
+	 * @param bootstrapServers
+	 *            the bootstrapServers to set
 	 */
-	public void setBootstrapServers(String bootstrapServers) {
+	public void setBootstrapServers(final String bootstrapServers) {
 		this.bootstrapServers = bootstrapServers;
 	}
 
@@ -85,9 +92,10 @@ public class KafkaMonitoringProperties {
 	}
 
 	/**
-	 * @param sessionTimeoutMs the sessionTimeoutMs to set
+	 * @param sessionTimeoutMs
+	 *            the sessionTimeoutMs to set
 	 */
-	public void setSessionTimeoutMs(int sessionTimeoutMs) {
+	public void setSessionTimeoutMs(final int sessionTimeoutMs) {
 		this.sessionTimeoutMs = sessionTimeoutMs;
 	}
 
@@ -99,10 +107,26 @@ public class KafkaMonitoringProperties {
 	}
 
 	/**
-	 * @param requestTimeoutMs the requestTimeoutMs to set
+	 * @param requestTimeoutMs
+	 *            the requestTimeoutMs to set
 	 */
-	public void setRequestTimeoutMs(int requestTimeoutMs) {
+	public void setRequestTimeoutMs(final int requestTimeoutMs) {
 		this.requestTimeoutMs = requestTimeoutMs;
+	}
+
+	/**
+	 * @return the cnxMaxIdlMs
+	 */
+	public long getCnxMaxIdlMs() {
+		return cnxMaxIdlMs;
+	}
+
+	/**
+	 * @param cnxMaxIdlMs
+	 *            the cnxMaxIdlMs to set
+	 */
+	public void setCnxMaxIdlMs(final long cnxMaxIdlMs) {
+		this.cnxMaxIdlMs = cnxMaxIdlMs;
 	}
 
 	/**
@@ -113,9 +137,10 @@ public class KafkaMonitoringProperties {
 	}
 
 	/**
-	 * @param topics the topics to set
+	 * @param topics
+	 *            the topics to set
 	 */
-	public void setTopics(Map<SpdgsTopic, String> topics) {
+	public void setTopics(final Map<SpdgsTopic, String> topics) {
 		this.topics = topics;
 	}
 
@@ -127,13 +152,16 @@ public class KafkaMonitoringProperties {
 	}
 
 	/**
-	 * @param groupIdPerTopic the groupIdPerTopic to set
+	 * @param groupIdPerTopic
+	 *            the groupIdPerTopic to set
 	 */
-	public void setGroupIdPerTopic(Map<SpdgsTopic, String> groupIdPerTopic) {
+	public void setGroupIdPerTopic(final Map<SpdgsTopic, String> groupIdPerTopic) {
 		this.groupIdPerTopic = groupIdPerTopic;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -142,5 +170,5 @@ public class KafkaMonitoringProperties {
 				+ ", sessionTimeoutMs=" + sessionTimeoutMs + ", requestTimeoutMs=" + requestTimeoutMs + ", topics="
 				+ topics + ", groupIdPerTopic=" + groupIdPerTopic + "]";
 	}
-	
+
 }

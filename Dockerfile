@@ -3,6 +3,7 @@ WORKDIR /app
 COPY pom.xml /app
 RUN mvn dependency:go-offline
 COPY dev/ /app/dev/
+COPY test/ /app/test/
 COPY src/ /app/src/
 COPY config/ /app/config/
 RUN mvn -B package

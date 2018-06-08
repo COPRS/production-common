@@ -2,28 +2,49 @@ package fr.viveris.s1pdgs.scaler.kafka.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+/**
+ * Description of a consumer
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 public class ConsumerDescription {
 
+	/**
+	 * Client identifier
+	 */
 	private String clientId;
 
+	/**
+	 * Consumer identifier
+	 */
 	private String consumerId;
 
+	/**
+	 * Sum of all its lags on partitions
+	 */
 	private long totalLag;
 
-	private List<PartitionDescription> partitions;
+	/**
+	 * List of assigned partitions
+	 */
+	private final List<PartitionDescription> partitions;
 
+	/**
+	 * Default constructor
+	 */
 	public ConsumerDescription() {
 		partitions = new ArrayList<>();
 	}
 
 	/**
+	 * 
 	 * @param clientId
 	 * @param consumerId
-	 * @param totalLag
-	 * @param partitions
 	 */
-	public ConsumerDescription(String clientId, String consumerId) {
+	public ConsumerDescription(final String clientId, final String consumerId) {
 		this();
 		this.clientId = clientId;
 		this.consumerId = consumerId;
@@ -40,7 +61,7 @@ public class ConsumerDescription {
 	 * @param clientId
 	 *            the clientId to set
 	 */
-	public void setClientId(String clientId) {
+	public void setClientId(final String clientId) {
 		this.clientId = clientId;
 	}
 
@@ -55,7 +76,7 @@ public class ConsumerDescription {
 	 * @param consumerId
 	 *            the consumerId to set
 	 */
-	public void setConsumerId(String consumerId) {
+	public void setConsumerId(final String consumerId) {
 		this.consumerId = consumerId;
 	}
 
@@ -64,14 +85,6 @@ public class ConsumerDescription {
 	 */
 	public long getTotalLag() {
 		return totalLag;
-	}
-
-	/**
-	 * @param totalLag
-	 *            the totalLag to set
-	 */
-	public void setTotalLag(long totalLag) {
-		this.totalLag = totalLag;
 	}
 
 	/**
@@ -85,7 +98,7 @@ public class ConsumerDescription {
 	 * @param partitions
 	 *            the partitions to set
 	 */
-	public void addPartition(PartitionDescription partition) {
+	public void addPartition(final PartitionDescription partition) {
 		if (partition != null) {
 			this.partitions.add(partition);
 			partition.setConsumerId(this.consumerId);
@@ -93,50 +106,39 @@ public class ConsumerDescription {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "ConsumerDescription [clientId=" + clientId + ", consumerId=" + consumerId + ", totalLag=" + totalLag
-				+ ", partitions=" + partitions + "]";
+		return String.format("{clientId: %s, consumerId: %s, totalLag: %s, partitions: %s}", clientId, consumerId,
+				totalLag, partitions);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((consumerId == null) ? 0 : consumerId.hashCode());
-		return result;
+		return Objects.hash(clientId, consumerId, totalLag, partitions);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ConsumerDescription other = (ConsumerDescription) obj;
-		if (consumerId == null) {
-			if (other.consumerId != null)
-				return false;
-		} else if (!consumerId.equals(other.consumerId))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			final ConsumerDescription other = (ConsumerDescription) obj;
+			ret = Objects.equals(clientId, other.clientId) && Objects.equals(consumerId, other.consumerId)
+					&& totalLag == other.totalLag && Objects.equals(partitions, other.partitions);
+		}
+		return ret;
 	}
 
 }

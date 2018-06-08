@@ -39,6 +39,7 @@ public class KafkaAdminConfiguration {
 	@Bean
 	public AdminClient kafkaAdminClient() {
 		Properties props = new Properties();
+		props.put(CommonClientConfigs.CONNECTIONS_MAX_IDLE_MS_CONFIG, "" + properties.getCnxMaxIdlMs());
 		props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
 		return AdminClient.create(props);
 	}
