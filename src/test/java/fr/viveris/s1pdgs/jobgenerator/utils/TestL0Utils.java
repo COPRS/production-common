@@ -95,6 +95,10 @@ public class TestL0Utils {
 	}
 
 	public static EdrsSessionProduct buildEdrsSessionProduct(boolean xmlOnlyForRaws) {
+		return buildEdrsSessionProduct(xmlOnlyForRaws, "S1");
+	}
+
+	public static EdrsSessionProduct buildEdrsSessionProduct(boolean xmlOnlyForRaws, String missionId) {
 		Calendar start1 = Calendar.getInstance();
 		start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
 		Calendar stop1 = Calendar.getInstance();
@@ -104,9 +108,9 @@ public class TestL0Utils {
 				getRawsChannel1(xmlOnlyForRaws)));
 		session.setChannel2(new EdrsSessionFile("L20171109175634707000125", start1.getTime(), stop1.getTime(),
 				getRawsChannel2(xmlOnlyForRaws)));
-		session.setLastTimestampMessageReception(0);
+		session.setLastTsMsg(0);
 		EdrsSessionProduct product = new EdrsSessionProduct("L20171109175634707000125", 
-				"A", "S1", start1.getTime(), stop1.getTime(), session);
+				"A", missionId, start1.getTime(), stop1.getTime(), session);
 		return product;
 	}
 

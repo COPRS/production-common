@@ -1,25 +1,31 @@
 package fr.viveris.s1pdgs.jobgenerator.model.metadata;
 
-public class L0AcnMetadata extends AbstractMetadata {
-	
-	private int instrumentConfigurationId;
-	
-	private int numberOfSlices;
-	
-	private String datatakeId;
+import java.util.Objects;
 
-	public L0AcnMetadata() {
-		super();
-		numberOfSlices = 0;
-		instrumentConfigurationId = -1;
-	}
+public class L0AcnMetadata extends AbstractMetadata {
+
+	/**
+	 * Instrument configuration id
+	 */
+	private int instrumentConfigurationId;
+
+	/**
+	 * Number of slices
+	 */
+	private int numberOfSlices;
+
+	/**
+	 * Data take identifier
+	 */
+	private String datatakeId;
 
 	/**
 	 * @param instrumentConfigurationId
 	 * @param numberSlice
 	 */
-	public L0AcnMetadata(String productName, String productType, String keyObjectStorage, String validityStart,
-			String validityStop, int instrumentConfigurationId, int numberOfSlices, String dataTakeId) {
+	public L0AcnMetadata(final String productName, final String productType, final String keyObjectStorage,
+			final String validityStart, final String validityStop, final int instrumentConfigurationId,
+			final int numberOfSlices, final String dataTakeId) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
 		this.instrumentConfigurationId = instrumentConfigurationId;
 		this.numberOfSlices = numberOfSlices;
@@ -34,12 +40,12 @@ public class L0AcnMetadata extends AbstractMetadata {
 	}
 
 	/**
-	 * @param instrumentConfigurationId the instrumentConfigurationId to set
+	 * @param instrumentConfigurationId
+	 *            the instrumentConfigurationId to set
 	 */
-	public void setInstrumentConfigurationId(int instrumentConfigurationId) {
+	public void setInstrumentConfigurationId(final int instrumentConfigurationId) {
 		this.instrumentConfigurationId = instrumentConfigurationId;
 	}
-	
 
 	/**
 	 * @return the numberOfSlices
@@ -49,9 +55,10 @@ public class L0AcnMetadata extends AbstractMetadata {
 	}
 
 	/**
-	 * @param numberOfSlices the numberOfSlices to set
+	 * @param numberOfSlices
+	 *            the numberOfSlices to set
 	 */
-	public void setNumberOfSlices(int numberOfSlices) {
+	public void setNumberOfSlices(final int numberOfSlices) {
 		this.numberOfSlices = numberOfSlices;
 	}
 
@@ -63,10 +70,47 @@ public class L0AcnMetadata extends AbstractMetadata {
 	}
 
 	/**
-	 * @param datatakeId the datatakeId to set
+	 * @param datatakeId
+	 *            the datatakeId to set
 	 */
-	public void setDatatakeId(String datatakeId) {
+	public void setDatatakeId(final String datatakeId) {
 		this.datatakeId = datatakeId;
 	}
 
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		String superToString = super.toAbstractString();
+		return String.format("{%s, instrumentConfigurationId: %s, numberOfSlices: %s, datatakeId: %s}", superToString,
+				instrumentConfigurationId, numberOfSlices, datatakeId);
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		int superHash = super.hashCode();
+		return Objects.hash(instrumentConfigurationId, numberOfSlices, datatakeId, superHash);
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			L0AcnMetadata other = (L0AcnMetadata) obj;
+			ret = super.equals(other) && instrumentConfigurationId == other.instrumentConfigurationId
+					&& numberOfSlices == other.numberOfSlices && Objects.equals(datatakeId, other.datatakeId);
+		}
+		return ret;
+	}
 }

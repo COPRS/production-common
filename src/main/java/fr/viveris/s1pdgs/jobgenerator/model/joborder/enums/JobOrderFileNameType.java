@@ -4,6 +4,11 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
+/**
+ * Available file name type in the job Order
+ * @author Cyrielle Gailliard
+ *
+ */
 @XmlType(name = "File_Name_Type")
 @XmlEnum
 public enum JobOrderFileNameType {
@@ -20,22 +25,20 @@ public enum JobOrderFileNameType {
 	@XmlEnumValue("")
 	BLANK("");
 
+	/**
+	 * Value in XML file
+	 */
 	private final String value;
 
-	JobOrderFileNameType(String v) {
-		value = v;
+	/**
+	 * 
+	 * @param v
+	 */
+	JobOrderFileNameType(final String val) {
+		value = val;
 	}
-
-	public String value() {
+	
+	String getValue() {
 		return value;
-	}
-
-	public static JobOrderFileNameType fromValue(String v) {
-		for (JobOrderFileNameType c : JobOrderFileNameType.values()) {
-			if (c.value.equals(v)) {
-				return c;
-			}
-		}
-		throw new IllegalArgumentException(v);
 	}
 }

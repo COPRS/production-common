@@ -18,6 +18,13 @@ import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
 
+/**
+ * Dispatcher of EdrsSession product<br/>
+ * Only one task table
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 @Service
 @ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "edrs-sessions")
 public class EdrsSessionJobDispatcher extends AbstractJobsDispatcher<EdrsSession> {
@@ -32,25 +39,43 @@ public class EdrsSessionJobDispatcher extends AbstractJobsDispatcher<EdrsSession
 	 */
 	private static final String TASK_TABLE_NAME = "TaskTable.AIOP.xml";
 
+	/**
+	 * Constructor
+	 * 
+	 * @param taskTablesSettings
+	 * @param jobsGeneratorFactory
+	 * @param jobGenerationTaskScheduler
+	 */
 	@Autowired
-	public EdrsSessionJobDispatcher(JobGeneratorSettings taskTablesSettings, JobsGeneratorFactory jobsGeneratorFactory,
-			ThreadPoolTaskScheduler jobGenerationTaskScheduler) {
-		super(taskTablesSettings, jobsGeneratorFactory, jobGenerationTaskScheduler);
+	public EdrsSessionJobDispatcher(final JobGeneratorSettings settings, final JobsGeneratorFactory factory,
+			final ThreadPoolTaskScheduler taskScheduler) {
+		super(settings, factory, taskScheduler);
 	}
 
+	/**
+	 * Initialization
+	 * 
+	 * @throws AbstractCodedException
+	 */
 	@PostConstruct
 	public void initialize() throws AbstractCodedException {
 		// Init job generators from task tables
 		super.initTaskTables();
 	}
 
+	/**
+	 * 
+	 */
 	@Override
-	protected AbstractJobsGenerator<EdrsSession> createJobGenerator(File xmlFile) throws AbstractCodedException {
-		return this.jobsGeneratorFactory.createJobGeneratorForEdrsSession(xmlFile);
+	protected AbstractJobsGenerator<EdrsSession> createJobGenerator(final File xmlFile) throws AbstractCodedException {
+		return this.factory.createJobGeneratorForEdrsSession(xmlFile);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
-	public void dispatch(Job<EdrsSession> job) throws AbstractCodedException {
+	public void dispatch(final Job<EdrsSession> job) throws AbstractCodedException {
 		LOGGER.info("[MONITOR] [Step 2] [productName {}] [taskTable {}] Caching job", job.getProduct().getIdentifier(),
 				TASK_TABLE_NAME);
 		this.generators.get(TASK_TABLE_NAME).addJob(job);

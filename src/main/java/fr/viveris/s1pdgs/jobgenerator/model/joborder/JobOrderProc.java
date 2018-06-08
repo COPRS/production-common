@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -82,7 +83,7 @@ public class JobOrderProc {
 	 * 
 	 * @param obj
 	 */
-	public JobOrderProc(JobOrderProc obj) {
+	public JobOrderProc(final JobOrderProc obj) {
 		this();
 		this.inputs.addAll(obj.getInputs().stream().filter(item -> item != null).map(item -> new JobOrderInput(item))
 				.collect(Collectors.toList()));
@@ -108,7 +109,7 @@ public class JobOrderProc {
 	 * @param taskName
 	 *            the taskName to set
 	 */
-	public void setTaskName(String taskName) {
+	public void setTaskName(final String taskName) {
 		this.taskName = taskName;
 	}
 
@@ -123,7 +124,7 @@ public class JobOrderProc {
 	 * @param taskVersion
 	 *            the taskVersion to set
 	 */
-	public void setTaskVersion(String taskVersion) {
+	public void setTaskVersion(final String taskVersion) {
 		this.taskVersion = taskVersion;
 	}
 
@@ -138,7 +139,7 @@ public class JobOrderProc {
 	 * @param breakpoint
 	 *            the breakpoint to set
 	 */
-	public void setBreakpoint(JobOrderBreakpoint breakpoint) {
+	public void setBreakpoint(final JobOrderBreakpoint breakpoint) {
 		this.breakpoint = breakpoint;
 	}
 
@@ -149,7 +150,7 @@ public class JobOrderProc {
 		return inputs;
 	}
 
-	public void addInput(JobOrderInput input) {
+	public void addInput(final JobOrderInput input) {
 		this.inputs.add(input);
 		this.nbInputs++;
 	}
@@ -158,18 +159,7 @@ public class JobOrderProc {
 	 * @param inputs
 	 *            the inputs to set
 	 */
-	public void addInputs(List<JobOrderInput> inputs) {
-		if (inputs != null) {
-			this.inputs.addAll(inputs);
-			this.nbInputs += inputs.size();
-		}
-	}
-
-	/**
-	 * @param inputs
-	 *            the inputs to set
-	 */
-	public void setInputs(List<JobOrderInput> inputs) {
+	public void setInputs(final List<JobOrderInput> inputs) {
 		if (inputs != null) {
 			this.inputs = inputs;
 			this.nbInputs = inputs.size();
@@ -190,7 +180,7 @@ public class JobOrderProc {
 	 * @param outputs
 	 *            the outputs to set
 	 */
-	public void addOutput(JobOrderOutput output) {
+	public void addOutput(final JobOrderOutput output) {
 		this.outputs.add(output);
 		this.nbOutputs++;
 	}
@@ -199,88 +189,63 @@ public class JobOrderProc {
 	 * @param outputs
 	 *            the outputs to set
 	 */
-	public void addOutputs(List<JobOrderOutput> outputs) {
+	public void addOutputs(final List<JobOrderOutput> outputs) {
 		if (outputs != null) {
 			this.outputs.addAll(outputs);
 			this.nbOutputs += outputs.size();
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
+	 * @param outputs
+	 *            the outputs to set
+	 */
+	public void setOutputs(final List<JobOrderOutput> outputs) {
+		if (outputs != null) {
+			this.outputs = outputs;
+			this.nbOutputs = outputs.size();
+		} else {
+			this.outputs = new ArrayList<>();
+			this.nbOutputs = 0;
+		}
+	}
+
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "JobOrderProc [taskName=" + taskName + ", taskVersion=" + taskVersion + ", breakpoint=" + breakpoint
-				+ ", inputs=" + inputs + ", nbInputs=" + nbInputs + ", outputs=" + outputs + ", nbOutputs=" + nbOutputs
-				+ "]";
+		return String.format(
+				"{taskName: %s, taskVersion: %s, breakpoint: %s, inputs: %s, nbInputs: %s, outputs: %s, nbOutputs: %s}",
+				taskName, taskVersion, breakpoint, inputs, nbInputs, outputs, nbOutputs);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((breakpoint == null) ? 0 : breakpoint.hashCode());
-		result = prime * result + ((inputs == null) ? 0 : inputs.hashCode());
-		result = prime * result + nbInputs;
-		result = prime * result + nbOutputs;
-		result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
-		result = prime * result + ((taskName == null) ? 0 : taskName.hashCode());
-		result = prime * result + ((taskVersion == null) ? 0 : taskVersion.hashCode());
-		return result;
+		return Objects.hash(taskName, taskVersion, breakpoint, inputs, nbInputs, outputs, nbOutputs);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOrderProc other = (JobOrderProc) obj;
-		if (taskName == null) {
-			if (other.taskName != null)
-				return false;
-		} else if (!taskName.equals(other.taskName))
-			return false;
-		if (taskVersion == null) {
-			if (other.taskVersion != null)
-				return false;
-		} else if (!taskVersion.equals(other.taskVersion))
-			return false;
-		if (breakpoint == null) {
-			if (other.breakpoint != null)
-				return false;
-		} else if (!breakpoint.equals(other.breakpoint))
-			return false;
-		if (nbInputs != other.nbInputs)
-			return false;
-		if (nbOutputs != other.nbOutputs)
-			return false;
-		if (inputs == null) {
-			if (other.inputs != null)
-				return false;
-		} else if (!inputs.equals(other.inputs))
-			return false;
-		if (outputs == null) {
-			if (other.outputs != null)
-				return false;
-		} else if (!outputs.equals(other.outputs))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobOrderProc other = (JobOrderProc) obj;
+			ret = Objects.equals(taskName, other.taskName) && Objects.equals(taskVersion, other.taskVersion)
+					&& Objects.equals(breakpoint, other.breakpoint) && Objects.equals(inputs, other.inputs)
+					&& nbInputs == other.nbInputs && Objects.equals(outputs, other.outputs)
+					&& nbOutputs == other.nbOutputs;
+		}
+		return ret;
 	}
 
 }

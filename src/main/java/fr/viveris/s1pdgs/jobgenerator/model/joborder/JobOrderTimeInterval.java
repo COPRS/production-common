@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.joborder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -10,27 +11,31 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Class of a job order time interval
+ * 
  * @author Cyrielle Gailliard
  *
  */
 @XmlRootElement(name = "Time_Interval")
 @XmlAccessorType(XmlAccessType.NONE)
 public class JobOrderTimeInterval {
-	
+
+	/**
+	 * 
+	 */
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSSSSS");
-	
+
 	/**
 	 * Validity start time (format YYYYMMDD_HHmmssSSSSSS)
 	 */
 	@XmlElement(name = "Start")
 	private String start;
-	
+
 	/**
 	 * Validity start time (format YYYYMMDD_HHmmssSSSSSS)
 	 */
 	@XmlElement(name = "Stop")
 	private String stop;
-	
+
 	/**
 	 * File name
 	 */
@@ -46,11 +51,12 @@ public class JobOrderTimeInterval {
 
 	/**
 	 * Constructor using fields
+	 * 
 	 * @param start
 	 * @param stop
 	 * @param fileName
 	 */
-	public JobOrderTimeInterval(String start, String stop, String fileName) {
+	public JobOrderTimeInterval(final String start, final String stop, final String fileName) {
 		this();
 		this.start = start;
 		this.stop = stop;
@@ -59,11 +65,13 @@ public class JobOrderTimeInterval {
 
 	/**
 	 * Constructor using fields
+	 * 
 	 * @param start
 	 * @param stop
 	 * @param fileName
 	 */
-	public JobOrderTimeInterval(String start, String stop, String fileName, DateTimeFormatter formatInputs) {
+	public JobOrderTimeInterval(final String start, final String stop, final String fileName,
+			final DateTimeFormatter formatInputs) {
 		this();
 		LocalDateTime startDate = LocalDateTime.parse(start, formatInputs);
 		this.start = startDate.format(DATE_FORMATTER);
@@ -74,9 +82,10 @@ public class JobOrderTimeInterval {
 
 	/**
 	 * Clone
+	 * 
 	 * @param obj
 	 */
-	public JobOrderTimeInterval(JobOrderTimeInterval obj) {
+	public JobOrderTimeInterval(final JobOrderTimeInterval obj) {
 		this(obj.getStart(), obj.getStop(), obj.getFileName());
 	}
 
@@ -88,9 +97,10 @@ public class JobOrderTimeInterval {
 	}
 
 	/**
-	 * @param start the start to set
+	 * @param start
+	 *            the start to set
 	 */
-	public void setStart(String start) {
+	public void setStart(final String start) {
 		this.start = start;
 	}
 
@@ -102,9 +112,10 @@ public class JobOrderTimeInterval {
 	}
 
 	/**
-	 * @param stop the stop to set
+	 * @param stop
+	 *            the stop to set
 	 */
-	public void setStop(String stop) {
+	public void setStop(final String stop) {
 		this.stop = stop;
 	}
 
@@ -116,61 +127,47 @@ public class JobOrderTimeInterval {
 	}
 
 	/**
-	 * @param fileName the fileName to set
+	 * @param fileName
+	 *            the fileName to set
 	 */
-	public void setFileName(String fileName) {
+	public void setFileName(final String fileName) {
 		this.fileName = fileName;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "JobOrderTimeInterval [start=" + start + ", stop=" + stop + ", fileName=" + fileName + "]";
+		return String.format("{start: %s, stop: %s, fileName: %s}", start, stop, fileName);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
-		result = prime * result + ((start == null) ? 0 : start.hashCode());
-		result = prime * result + ((stop == null) ? 0 : stop.hashCode());
-		return result;
+		return Objects.hash(start, stop, fileName);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOrderTimeInterval other = (JobOrderTimeInterval) obj;
-		if (fileName == null) {
-			if (other.fileName != null)
-				return false;
-		} else if (!fileName.equals(other.fileName))
-			return false;
-		if (start == null) {
-			if (other.start != null)
-				return false;
-		} else if (!start.equals(other.start))
-			return false;
-		if (stop == null) {
-			if (other.stop != null)
-				return false;
-		} else if (!stop.equals(other.stop))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobOrderTimeInterval other = (JobOrderTimeInterval) obj;
+			ret = Objects.equals(start, other.start) && Objects.equals(stop, other.stop)
+					&& Objects.equals(fileName, other.fileName);
+		}
+		return ret;
 	}
 
 }

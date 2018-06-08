@@ -4,11 +4,26 @@ import java.util.Date;
 
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 
-public class EdrsSessionProduct extends AbstractProduct<EdrsSession>{
+/**
+ * Product for level L0
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class EdrsSessionProduct extends AbstractProduct<EdrsSession> {
 
-	public EdrsSessionProduct(String identifier, String satelliteId, String missionId, Date startTime, Date stopTime,
-			EdrsSession object) {
+	/**
+	 * Constructor
+	 * 
+	 * @param identifier
+	 * @param satelliteId
+	 * @param missionId
+	 * @param startTime
+	 * @param stopTime
+	 * @param object
+	 */
+	public EdrsSessionProduct(final String identifier, final String satelliteId, final String missionId,
+			final Date startTime, final Date stopTime, final EdrsSession object) {
 		super(identifier, satelliteId, missionId, startTime, stopTime, object, "SESSION");
 	}
-	
 }

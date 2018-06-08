@@ -9,85 +9,65 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.ObsS3Exception;
 
+/**
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 @Service
 public class SessionFilesS3Services implements S3Services {
 
+	/**
+	 * Logger
+	 */
 	private static final Logger LOGGER = LogManager.getLogger(SessionFilesS3Services.class);
 
+	/**
+	 * Client to access to obs via S3 API
+	 */
+	private final AmazonS3 s3client;
+
+	/**
+	 * Name of the bucket
+	 */
+	private final String bucketName;
+
+	/**
+	 * 
+	 * @param s3client
+	 * @param bucketName
+	 */
 	@Autowired
-	private AmazonS3 s3client;
-
-	@Value("${storage.buckets.edrs-sessions}")
-	private String bucketName;
-
-	@Override
-	public void downloadFile(String keyName, File output) throws ObsS3Exception {
-		try {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Downloading object {} from bucket {}", keyName, bucketName);
-			}
-			s3client.getObject(new GetObjectRequest(bucketName, keyName), output);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
-			}
-		} catch (AmazonServiceException ase) {
-			throw new ObsS3Exception(keyName, bucketName, ase);
-		} catch (AmazonClientException sce) {
-			throw new ObsS3Exception(keyName, bucketName, sce);
-		}
+	public SessionFilesS3Services(final AmazonS3 s3client,
+			@Value("${storage.buckets.edrs-sessions}") final String bucketName) {
+		this.s3client = s3client;
+		this.bucketName = bucketName;
 	}
-	
+
+	/**
+	 * 
+	 */
 	@Override
-	public File getFile(String keyName, String expectedFilePath) throws ObsS3Exception {
+	public File getFile(final String keyName, final String expectedFilePath) throws ObsS3Exception {
 		try {
-			File f = new File(expectedFilePath);
-			f.createNewFile();
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Downloading object {} from bucket {}", keyName, bucketName);
-			}
-			s3client.getObject(new GetObjectRequest(bucketName, keyName), f);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
-			}
-			return f;
+			File file = new File(expectedFilePath);
+			file.createNewFile();
+
+			LOGGER.debug("Downloading object {} from bucket {}", keyName, bucketName);
+			s3client.getObject(new GetObjectRequest(bucketName, keyName), file);
+
+			LOGGER.debug("Download object {} from bucket {} succeeded", keyName, bucketName);
+			return file;
 		} catch (SdkClientException sce) {
 			throw new ObsS3Exception(keyName, bucketName, sce);
 		} catch (IOException e) {
 			throw new ObsS3Exception(keyName, bucketName, e);
-		}
-	}
-
-	@Override
-	public void uploadFile(String keyName, File uploadFile) throws ObsS3Exception {
-		try {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Uploading object {} in bucket {}", keyName, bucketName);
-			}
-			s3client.putObject(new PutObjectRequest(bucketName, keyName, uploadFile));
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Upload object {} in bucket {} succeeded", keyName, bucketName);
-			}
-		} catch (SdkClientException sce) {
-			throw new ObsS3Exception(keyName, bucketName, sce);
-		}
-
-	}
-
-	@Override
-	public boolean exist(String keyName) throws ObsS3Exception {
-		try {
-			return s3client.doesObjectExist(bucketName, keyName);
-		} catch (SdkClientException sce) {
-			throw new ObsS3Exception(keyName, bucketName, sce);
 		}
 	}
 

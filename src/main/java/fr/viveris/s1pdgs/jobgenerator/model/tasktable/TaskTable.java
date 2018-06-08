@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.model.tasktable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -14,19 +15,20 @@ import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableTestEnum;
 
 /**
  * Class describing the content of a file taskTable.xml
+ * 
  * @author Cyrielle
  *
  */
 @XmlRootElement(name = "Ipf_Task_Table")
 @XmlAccessorType(XmlAccessType.NONE)
 public class TaskTable {
-	
+
 	/**
 	 * Processor name
 	 */
 	@XmlElement(name = "Processor_Name")
 	private String processorName;
-	
+
 	/**
 	 * Version
 	 */
@@ -54,9 +56,15 @@ public class TaskTable {
 	@XmlElement(name = "Pool")
 	private List<TaskTablePool> pools;
 
+	/**
+	 * 
+	 */
 	@XmlElement(name = "Test")
 	private TaskTableTestEnum test;
-	
+
+	/**
+	 * 
+	 */
 	private ProcessLevel level;
 
 	/**
@@ -79,9 +87,10 @@ public class TaskTable {
 	}
 
 	/**
-	 * @param processorName the processorName to set
+	 * @param processorName
+	 *            the processorName to set
 	 */
-	public void setProcessorName(String processorName) {
+	public void setProcessorName(final String processorName) {
 		this.processorName = processorName;
 	}
 
@@ -93,9 +102,10 @@ public class TaskTable {
 	}
 
 	/**
-	 * @param version the version to set
+	 * @param version
+	 *            the version to set
 	 */
-	public void setVersion(String version) {
+	public void setVersion(final String version) {
 		this.version = version;
 	}
 
@@ -107,19 +117,21 @@ public class TaskTable {
 	}
 
 	/**
-	 * @param cfgFiles the cfgFiles to set
+	 * @param cfgFiles
+	 *            the cfgFiles to set
 	 */
-	public void setCfgFiles(List<TaskTableCfgFile> cfgFiles) {
+	public void setCfgFiles(final List<TaskTableCfgFile> cfgFiles) {
 		this.cfgFiles = cfgFiles;
 	}
 
 	/**
-	 * @param cfgFiles the cfgFiles to set
+	 * @param cfgFiles
+	 *            the cfgFiles to set
 	 */
-	public void addCfgFile(TaskTableCfgFile cfgFile) {
+	public void addCfgFile(final TaskTableCfgFile cfgFile) {
 		this.cfgFiles.add(cfgFile);
 	}
-	
+
 	/**
 	 * @return the dynProcParam
 	 */
@@ -128,9 +140,10 @@ public class TaskTable {
 	}
 
 	/**
-	 * @param dynProcParam the dynProcParam to set
+	 * @param dynProcParam
+	 *            the dynProcParam to set
 	 */
-	public void addDynProcParam(TaskTableDynProcParam dynProcParam) {
+	public void addDynProcParam(final TaskTableDynProcParam dynProcParam) {
 		this.dynProcParams.add(dynProcParam);
 	}
 
@@ -142,16 +155,18 @@ public class TaskTable {
 	}
 
 	/**
-	 * @param pools the pools to set
+	 * @param pools
+	 *            the pools to set
 	 */
-	public void setPools(List<TaskTablePool> pools) {
+	public void setPools(final List<TaskTablePool> pools) {
 		this.pools = pools;
 	}
 
 	/**
-	 * @param pools the pools to set
+	 * @param pools
+	 *            the pools to set
 	 */
-	public void addPool(TaskTablePool pool) {
+	public void addPool(final TaskTablePool pool) {
 		this.pools.add(pool);
 	}
 
@@ -163,9 +178,10 @@ public class TaskTable {
 	}
 
 	/**
-	 * @param test the test to set
+	 * @param test
+	 *            the test to set
 	 */
-	public void setTest(TaskTableTestEnum test) {
+	public void setTest(final TaskTableTestEnum test) {
 		this.test = test;
 	}
 
@@ -177,77 +193,38 @@ public class TaskTable {
 	}
 
 	/**
-	 * @param level the level to set
+	 * @param level
+	 *            the level to set
 	 */
-	public void setLevel(ProcessLevel level) {
+	public void setLevel(final ProcessLevel level) {
 		this.level = level;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "TaskTable [processorName=" + processorName + ", version=" + version + ", cfgFiles=" + cfgFiles
-				+ ", dynProcParams=" + dynProcParams + ", pools=" + pools + ", test=" + test + "]";
-	}
-
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((cfgFiles == null) ? 0 : cfgFiles.hashCode());
-		result = prime * result + ((dynProcParams == null) ? 0 : dynProcParams.hashCode());
-		result = prime * result + ((pools == null) ? 0 : pools.hashCode());
-		result = prime * result + ((processorName == null) ? 0 : processorName.hashCode());
-		result = prime * result + ((test == null) ? 0 : test.hashCode());
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
-		return result;
+		return Objects.hash(processorName, version, cfgFiles, dynProcParams, pools, test, level);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TaskTable other = (TaskTable) obj;
-		if (cfgFiles == null) {
-			if (other.cfgFiles != null)
-				return false;
-		} else if (!cfgFiles.equals(other.cfgFiles))
-			return false;
-		if (dynProcParams == null) {
-			if (other.dynProcParams != null)
-				return false;
-		} else if (!dynProcParams.equals(other.dynProcParams))
-			return false;
-		if (pools == null) {
-			if (other.pools != null)
-				return false;
-		} else if (!pools.equals(other.pools))
-			return false;
-		if (processorName == null) {
-			if (other.processorName != null)
-				return false;
-		} else if (!processorName.equals(other.processorName))
-			return false;
-		if (test != other.test)
-			return false;
-		if (version == null) {
-			if (other.version != null)
-				return false;
-		} else if (!version.equals(other.version))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			TaskTable other = (TaskTable) obj;
+			ret = Objects.equals(processorName, other.processorName) && Objects.equals(version, other.version)
+					&& Objects.equals(cfgFiles, other.cfgFiles) && Objects.equals(dynProcParams, other.dynProcParams)
+					&& Objects.equals(pools, other.pools) && Objects.equals(test, other.test)
+					&& Objects.equals(level, other.level);
+		}
+		return ret;
 	}
-	
 }

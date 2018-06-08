@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 
@@ -17,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.util.FileCopyUtils;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
 import fr.viveris.s1pdgs.jobgenerator.exception.ObsS3Exception;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
@@ -57,7 +59,7 @@ public class EdrsSessionFileServiceTest {
 
 		// Mcokito
 		MockitoAnnotations.initMocks(this);
-		
+
 		(new File("./tmp")).mkdirs();
 
 		service = new EdrsSessionFileService(s3Services, xmlConverter, "./tmp/");
@@ -114,6 +116,29 @@ public class EdrsSessionFileServiceTest {
 
 		} catch (ObsS3Exception | InvalidFormatProduct | IOException | JAXBException e) {
 			fail("Invalid exception raised " + e.getMessage());
+		}
+	}
+
+	@Test
+	public void testCreateSessionFileXMLConversionError() throws AbstractCodedException, IOException, JAXBException {
+		Mockito.doThrow(JAXBException.class).when(xmlConverter)
+				.convertFromXMLToObject(Mockito.eq(fileCh1.getAbsolutePath()));
+		try {
+			service.createSessionFile("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml");
+			fail("JAXBException should be raised");
+		} catch (InternalErrorException exc) {
+			Mockito.verify(xmlConverter, times(1)).convertFromXMLToObject(Mockito.eq(fileCh1.getAbsolutePath()));
+			assertTrue(exc.getMessage().startsWith("Cannot convert"));
+		}
+
+		Mockito.doThrow(IOException.class).when(xmlConverter)
+				.convertFromXMLToObject(Mockito.eq(fileCh1.getAbsolutePath()));
+		try {
+			service.createSessionFile("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml");
+			fail("JAXBException should be raised");
+		} catch (InternalErrorException exc) {
+			Mockito.verify(xmlConverter, times(2)).convertFromXMLToObject(Mockito.eq(fileCh1.getAbsolutePath()));
+			assertTrue(exc.getMessage().startsWith("Cannot convert"));
 		}
 	}
 }

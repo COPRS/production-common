@@ -33,7 +33,7 @@ Configuration:
   Loggers:
     logger:
       - name: fr.viveris.s1pdgs
-        level: info
+        level: debug
         additivity: false
         AppenderRef:
           - ref: STDOUT

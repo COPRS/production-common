@@ -1,7 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.config;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ public class AppConfig {
 	 * @return
 	 */
 	@Bean
-	XmlConverter xmlConverter() {
+	public XmlConverter xmlConverter() {
 		XmlConverter xmlConverter = new XmlConverter();
 		xmlConverter.setMarshaller(jaxb2Marshaller());
 		xmlConverter.setUnmarshaller(jaxb2Marshaller());
@@ -38,7 +38,7 @@ public class AppConfig {
 	public Jaxb2Marshaller jaxb2Marshaller() {
 		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
 		jaxb2Marshaller.setPackagesToScan("fr.viveris.s1pdgs.jobgenerator.model");
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new ConcurrentHashMap<String, Object>();
 		map.put("jaxb.formatted.output", true);
 		map.put("jaxb.encoding", "UTF-8");
 		jaxb2Marshaller.setMarshallerProperties(map);

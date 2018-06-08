@@ -19,14 +19,18 @@ public class InputsMissingException extends AbstractCodedException {
 	 */
 	private static final long serialVersionUID = 6588566901653710376L;
 
-	private Map<String, String> missingMetadata;
+	/**
+	 * Missing metadata:
+	 * <li>key = input description</li>
+	 * <li>value = "" or reason</li>
+	 */
+	private final Map<String, String> missingMetadata;
 
 	/**
 	 * Constructor
-	 * 
-	 * @param message
+	 * @param missingData
 	 */
-	public InputsMissingException(Map<String, String> missingData) {
+	public InputsMissingException(final Map<String, String> missingData) {
 		super(ErrorCode.MISSING_INPUT, "Missing inputs");
 		this.missingMetadata = new HashMap<>();
 		if (!CollectionUtils.isEmpty(missingData)) {
@@ -36,21 +40,24 @@ public class InputsMissingException extends AbstractCodedException {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public String getLogMessage() {
-		String r = "";
+		String ret = "";
 		if (!CollectionUtils.isEmpty(missingMetadata)) {
 			for (String input : this.missingMetadata.keySet()) {
 				String reason = this.missingMetadata.get(input);
 				if (StringUtils.isEmpty(reason)) {
-					r += "[input " + input + "]";
+					ret = ret + "[input " + input + "]";
 				} else {
-					r += "[input " + input + "] [reason " + reason + "]";
+					ret = ret + "[input " + input + "] [reason " + reason + "]";
 				}
 			}
 		}
-		r += "[msg " + getMessage() + "]";
-		return r;
+		ret = ret + "[msg " + getMessage() + "]";
+		return ret;
 	}
 
 	/**

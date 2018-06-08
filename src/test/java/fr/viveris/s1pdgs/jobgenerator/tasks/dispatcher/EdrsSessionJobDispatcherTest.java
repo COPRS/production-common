@@ -24,10 +24,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.JobDispatcherException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.product.EdrsSessionProduct;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.EdrsSessionJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
@@ -88,13 +88,13 @@ public class EdrsSessionJobDispatcherTest {
 		// Mock the job generator settings
 		doAnswer(i -> {
 			return "./test/data/l0_config/task_tables/";
-		}).when(jobGeneratorSettings).getDirectoryoftasktables();
+		}).when(jobGeneratorSettings).getDiroftasktables();
 		doAnswer(i -> {
 			return 4;
-		}).when(jobGeneratorSettings).getMaxnumberoftasktables();
+		}).when(jobGeneratorSettings).getMaxnboftasktable();
 		doAnswer(i -> {
 			return 2000;
-		}).when(jobGeneratorSettings).getScheduledfixedrate();
+		}).when(jobGeneratorSettings).getJobgenfixedrate();
 	}
 
 	@Test
@@ -164,7 +164,7 @@ public class EdrsSessionJobDispatcherTest {
 	public void testDispatch() {
 		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
-		Job<EdrsSession> job1 = new Job<EdrsSession>(p);
+		Job<EdrsSession> job1 = new Job<EdrsSession>(p, new ResumeDetails("topic", "dto"));
 
 		// Mocks
 		this.mockJobGeneratorSettings();
@@ -207,7 +207,7 @@ public class EdrsSessionJobDispatcherTest {
 	public void testDispatchThrow() throws AbstractCodedException {
 		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
-		Job<EdrsSession> job1 = new Job<EdrsSession>(p);
+		Job<EdrsSession> job1 = new Job<EdrsSession>(p, new ResumeDetails("topic", "dto"));
 
 		// Mocks
 		this.mockJobGeneratorSettings();

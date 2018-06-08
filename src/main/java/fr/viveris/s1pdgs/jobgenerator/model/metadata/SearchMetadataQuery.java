@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.model.metadata;
 
+import java.util.Objects;
+
 /**
  * Class describing a search query for metadata
  * 
@@ -37,7 +39,7 @@ public class SearchMetadataQuery {
 	 * Default constructor
 	 */
 	public SearchMetadataQuery() {
-
+		super();
 	}
 
 	/**
@@ -49,8 +51,8 @@ public class SearchMetadataQuery {
 	 * @param deltaTime1
 	 * @param fileType
 	 */
-	public SearchMetadataQuery(int identifier, String retrievalMode, double deltaTime0, double deltaTime1,
-			String productType) {
+	public SearchMetadataQuery(final int identifier, final String retrievalMode, final double deltaTime0,
+			final double deltaTime1, final String productType) {
 		this();
 		this.identifier = identifier;
 		this.retrievalMode = retrievalMode;
@@ -64,7 +66,7 @@ public class SearchMetadataQuery {
 	 * 
 	 * @param obj
 	 */
-	public SearchMetadataQuery(SearchMetadataQuery obj) {
+	public SearchMetadataQuery(final SearchMetadataQuery obj) {
 		this(obj.getIdentifier(), obj.getRetrievalMode(), obj.getDeltaTime0(), obj.getDeltaTime1(),
 				obj.getProductType());
 	}
@@ -80,7 +82,7 @@ public class SearchMetadataQuery {
 	 * @param identifier
 	 *            the identifier to set
 	 */
-	public void setIdentifier(int identifier) {
+	public void setIdentifier(final int identifier) {
 		this.identifier = identifier;
 	}
 
@@ -95,7 +97,7 @@ public class SearchMetadataQuery {
 	 * @param retrievalMode
 	 *            the retrievalMode to set
 	 */
-	public void setRetrievalMode(String retrievalMode) {
+	public void setRetrievalMode(final String retrievalMode) {
 		this.retrievalMode = retrievalMode;
 	}
 
@@ -110,7 +112,7 @@ public class SearchMetadataQuery {
 	 * @param deltaTime0
 	 *            the deltaTime0 to set
 	 */
-	public void setDeltaTime0(double deltaTime0) {
+	public void setDeltaTime0(final double deltaTime0) {
 		this.deltaTime0 = deltaTime0;
 	}
 
@@ -125,7 +127,7 @@ public class SearchMetadataQuery {
 	 * @param deltaTime1
 	 *            the deltaTime1 to set
 	 */
-	public void setDeltaTime1(double deltaTime1) {
+	public void setDeltaTime1(final double deltaTime1) {
 		this.deltaTime1 = deltaTime1;
 	}
 
@@ -140,71 +142,51 @@ public class SearchMetadataQuery {
 	 * @param productType
 	 *            the productType to set
 	 */
-	public void setProductType(String productType) {
+	public void setProductType(final String productType) {
 		this.productType = productType;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "SearchMetadataQuery [identifier=" + identifier + ", retrievalMode=" + retrievalMode + ", deltaTime0="
-				+ deltaTime0 + ", deltaTime1=" + deltaTime1 + ", productType=" + productType + "]";
+		return String.format("{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s}",
+				identifier, retrievalMode, deltaTime0, deltaTime1, productType);
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public String toLogMessage() {
 		return identifier + "|" + retrievalMode + "|" + deltaTime0 + "|" + deltaTime1 + "|" + productType;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + identifier;
-		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
-		result = prime * result + ((retrievalMode == null) ? 0 : retrievalMode.hashCode());
-		return result;
+		return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1, productType);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SearchMetadataQuery other = (SearchMetadataQuery) obj;
-		if (deltaTime0 != other.deltaTime0)
-			return false;
-		if (deltaTime1 != other.deltaTime1)
-			return false;
-		if (identifier != other.identifier)
-			return false;
-		if (productType == null) {
-			if (other.productType != null)
-				return false;
-		} else if (!productType.equals(other.productType))
-			return false;
-		if (retrievalMode == null) {
-			if (other.retrievalMode != null)
-				return false;
-		} else if (!retrievalMode.equals(other.retrievalMode))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			SearchMetadataQuery other = (SearchMetadataQuery) obj;
+			ret = identifier == other.identifier && Objects.equals(retrievalMode, other.retrievalMode)
+					&& Objects.equals(deltaTime0, other.deltaTime0) && Objects.equals(deltaTime1, other.deltaTime1)
+					&& Objects.equals(productType, other.productType);
+		}
+		return ret;
 	}
-
 }

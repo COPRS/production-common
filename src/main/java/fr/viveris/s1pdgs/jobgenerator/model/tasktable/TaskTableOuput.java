@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.model.tasktable;
 
+import java.util.Objects;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -9,19 +11,34 @@ import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableFileNameTyp
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableOutputDestination;
 
+/**
+ * 
+ */
 @XmlRootElement(name = "Output")
 @XmlAccessorType(XmlAccessType.NONE)
 public class TaskTableOuput {
-	
+
+	/**
+	 * 
+	 */
 	@XmlElement(name = "Destination")
 	private TaskTableOutputDestination destination;
-	
+
+	/**
+	 * 
+	 */
 	@XmlElement(name = "Mandatory")
 	private TaskTableMandatoryEnum mandatory;
-	
+
+	/**
+	 * 
+	 */
 	@XmlElement(name = "Type")
 	private String type;
-	
+
+	/**
+	 * 
+	 */
 	@XmlElement(name = "File_Name_Type")
 	private TaskTableFileNameType fileNameType;
 
@@ -41,8 +58,8 @@ public class TaskTableOuput {
 	 * @param type
 	 * @param fileNameType
 	 */
-	public TaskTableOuput(TaskTableOutputDestination destination, TaskTableMandatoryEnum mandatory, String type,
-			TaskTableFileNameType fileNameType) {
+	public TaskTableOuput(final TaskTableOutputDestination destination, final TaskTableMandatoryEnum mandatory,
+			final String type, final TaskTableFileNameType fileNameType) {
 		this();
 		this.destination = destination;
 		this.mandatory = mandatory;
@@ -58,9 +75,10 @@ public class TaskTableOuput {
 	}
 
 	/**
-	 * @param destination the destination to set
+	 * @param destination
+	 *            the destination to set
 	 */
-	public void setDestination(TaskTableOutputDestination destination) {
+	public void setDestination(final TaskTableOutputDestination destination) {
 		this.destination = destination;
 	}
 
@@ -72,9 +90,10 @@ public class TaskTableOuput {
 	}
 
 	/**
-	 * @param mandatory the mandatory to set
+	 * @param mandatory
+	 *            the mandatory to set
 	 */
-	public void setMandatory(TaskTableMandatoryEnum mandatory) {
+	public void setMandatory(final TaskTableMandatoryEnum mandatory) {
 		this.mandatory = mandatory;
 	}
 
@@ -86,9 +105,10 @@ public class TaskTableOuput {
 	}
 
 	/**
-	 * @param type the type to set
+	 * @param type
+	 *            the type to set
 	 */
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -100,67 +120,36 @@ public class TaskTableOuput {
 	}
 
 	/**
-	 * @param fileNameType the fileNameType to set
+	 * @param fileNameType
+	 *            the fileNameType to set
 	 */
-	public void setFileNameType(TaskTableFileNameType fileNameType) {
+	public void setFileNameType(final TaskTableFileNameType fileNameType) {
 		this.fileNameType = fileNameType;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "TaskTableOuput [destination=" + destination + ", mandatory=" + mandatory + ", type=" + type
-				+ ", fileNameType=" + fileNameType + "]";
-	}
-
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((destination == null) ? 0 : destination.hashCode());
-		result = prime * result + ((fileNameType == null) ? 0 : fileNameType.hashCode());
-		result = prime * result + ((mandatory == null) ? 0 : mandatory.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		return result;
+		return Objects.hash(destination, mandatory, type, fileNameType);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TaskTableOuput other = (TaskTableOuput) obj;
-		if (destination == null) {
-			if (other.destination != null)
-				return false;
-		} else if (!destination.equals(other.destination))
-			return false;
-		if (fileNameType == null) {
-			if (other.fileNameType != null)
-				return false;
-		} else if (!fileNameType.equals(other.fileNameType))
-			return false;
-		if (!mandatory.equals(other.mandatory))
-			return false;
-		if (type == null) {
-			if (other.type != null)
-				return false;
-		} else if (!type.equals(other.type))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			TaskTableOuput other = (TaskTableOuput) obj;
+			ret = Objects.equals(destination, other.destination) && Objects.equals(mandatory, other.mandatory)
+					&& Objects.equals(type, other.type) && Objects.equals(fileNameType, other.fileNameType);
+		}
+		return ret;
 	}
-	
-	
-
 }

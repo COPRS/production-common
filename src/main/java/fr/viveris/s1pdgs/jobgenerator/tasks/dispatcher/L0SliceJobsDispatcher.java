@@ -29,6 +29,14 @@ import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
 
+/**
+ * Dispatcher of L0 slice product<br/>
+ * 1 product to 1 or several task table<br/>
+ * The routing is given in a XML file and is done by mapping the acquisition and
+ * the mission and satellite identifier to a list of task tables
+ * 
+ * @author Cyrielle Gailliard
+ */
 @Service
 @ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "l0-slices")
 public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
@@ -38,6 +46,9 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(L0SliceJobsDispatcher.class);
 
+	/**
+	 * XML converter
+	 */
 	private final XmlConverter xmlConverter;
 
 	/**
@@ -46,18 +57,33 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 	 */
 	protected final Map<String, List<String>> routingMap;
 
+	/**
+	 * Path of the routinh XML file
+	 */
 	protected final String pathRoutingXmlFile;
 
+	/**
+	 * 
+	 * @param settings
+	 * @param factory
+	 * @param taskScheduler
+	 * @param xmlConverter
+	 * @param pathRoutingXmlFile
+	 */
 	@Autowired
-	public L0SliceJobsDispatcher(JobGeneratorSettings taskTablesSettings, JobsGeneratorFactory jobsGeneratorFactory,
-			ThreadPoolTaskScheduler jobGenerationTaskScheduler, final XmlConverter xmlConverter,
+	public L0SliceJobsDispatcher(final JobGeneratorSettings settings, final JobsGeneratorFactory factory,
+			final ThreadPoolTaskScheduler taskScheduler, final XmlConverter xmlConverter,
 			@Value("${level1.pathroutingxmlfile}") String pathRoutingXmlFile) {
-		super(taskTablesSettings, jobsGeneratorFactory, jobGenerationTaskScheduler);
+		super(settings, factory, taskScheduler);
 		this.xmlConverter = xmlConverter;
 		this.routingMap = new HashMap<String, List<String>>();
 		this.pathRoutingXmlFile = pathRoutingXmlFile;
 	}
 
+	/**
+	 * 
+	 * @throws AbstractCodedException
+	 */
 	@PostConstruct
 	public void initialize() throws AbstractCodedException {
 		// Init job generators from task tables
@@ -68,23 +94,29 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 			L1Routing routing = (L1Routing) xmlConverter.convertFromXMLToObject(this.pathRoutingXmlFile);
 			if (routing != null && routing.getRoutes() != null) {
 				routing.getRoutes().stream().forEach(route -> {
-					String key = route.getFrom().getAcquisition() + "_" + route.getFrom().getSatelliteId();
-					this.routingMap.put(key, route.getTo().getTaskTables());
+					String key = route.getRouteFrom().getAcquisition() + "_" + route.getRouteFrom().getSatelliteId();
+					this.routingMap.put(key, route.getRouteTo().getTaskTables());
 				});
 			}
 		} catch (IOException | JAXBException e) {
 			throw new InternalErrorException(
-					String.format("Cannot parse routing XML file located in %s", this.pathRoutingXmlFile));
+					String.format("Cannot parse routing XML file located in %s", this.pathRoutingXmlFile), e);
 		}
 	}
 
+	/**
+	 * 
+	 */
 	@Override
-	protected AbstractJobsGenerator<L0Slice> createJobGenerator(File xmlFile) throws AbstractCodedException {
-		return this.jobsGeneratorFactory.createJobGeneratorForL0Slice(xmlFile);
+	protected AbstractJobsGenerator<L0Slice> createJobGenerator(final File xmlFile) throws AbstractCodedException {
+		return this.factory.createJobGeneratorForL0Slice(xmlFile);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
-	public void dispatch(Job<L0Slice> job) throws AbstractCodedException {
+	public void dispatch(final Job<L0Slice> job) throws AbstractCodedException {
 		String key = job.getProduct().getObject().getAcquisition() + "_" + job.getProduct().getSatelliteId();
 		if (this.routingMap.containsKey(key)) {
 			for (String taskTable : this.routingMap.get(key)) {
@@ -92,7 +124,7 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 					L0SliceProduct p = (L0SliceProduct) job.getProduct();
 					L0SliceProduct pClone = new L0SliceProduct(p.getIdentifier(), p.getSatelliteId(), p.getMissionId(),
 							p.getStartTime(), p.getStopTime(), new L0Slice(p.getObject().getAcquisition()));
-					Job<L0Slice> cloneJob = new Job<>(pClone);
+					Job<L0Slice> cloneJob = new Job<>(pClone, job.getResumeDetails());
 					LOGGER.info("[MONITOR] [Step 2] [productName {}] [taskTable {}] Caching job",
 							job.getProduct().getIdentifier(), taskTable);
 					this.generators.get(taskTable).addJob(cloneJob);

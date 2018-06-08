@@ -1,5 +1,6 @@
 package fr.viveris.s1pdgs.jobgenerator.model.converter;
 
+import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderBreakpoint;
@@ -17,6 +18,7 @@ import fr.viveris.s1pdgs.jobgenerator.model.tasktable.TaskTableOuput;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.TaskTableTask;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableFileNameType;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum;
+import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableOutputDestination;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableTestEnum;
 
 /**
@@ -26,32 +28,28 @@ import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableTestEnum;
  *
  */
 public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, JobOrder> {
+
+	/**
+	 * Conversion function
+	 */
 	@Override
-	public JobOrder apply(TaskTable t) {
-		final TaskTableDynProcParamToJobOrderProcParamConverter procParamConverter = new TaskTableDynProcParamToJobOrderProcParamConverter();
-		final TaskTableCfgFilesToString confFilesConverter = new TaskTableCfgFilesToString();
-		final TaskTableTaskToJobOrderProc procConverter = new TaskTableTaskToJobOrderProc();
+	public JobOrder apply(final TaskTable tObj) {
+		final TaskTableDynProcParamToJobOrderProcParamConverter procParamConv = new TaskTableDynProcParamToJobOrderProcParamConverter();
+		final TaskTableCfgFilesToString confFilesConv = new TaskTableCfgFilesToString();
+		final TaskTableTaskToJobOrderProc procConv = new TaskTableTaskToJobOrderProc();
 
 		final JobOrder order = new JobOrder();
-		AbstractJobOrderConf conf = null;
-		switch (t.getLevel()) {
-		case L0:
-			conf = new L0JobOrderConf();
-			break;
-		default:
-			conf = new L1JobOrderConf();
-			break;
-		}
-		conf.setProcessorName(t.getProcessorName());
-		conf.setVersion(t.getVersion());
-		if (t.getTest() == TaskTableTestEnum.YES) {
+		AbstractJobOrderConf conf = tObj.getLevel() == ProcessLevel.L0 ? new L0JobOrderConf() : new L1JobOrderConf();
+		conf.setProcessorName(tObj.getProcessorName());
+		conf.setVersion(tObj.getVersion());
+		if (tObj.getTest() == TaskTableTestEnum.YES) {
 			conf.setTest(true);
 		}
-		conf.addConfigFiles(confFilesConverter.convertToList(t.getCfgFiles()));
-		conf.setProcParams(procParamConverter.convertToList(t.getDynProcParams()));
+		conf.addConfigFiles(confFilesConv.convertToList(tObj.getCfgFiles()));
+		conf.setProcParams(procParamConv.convertToList(tObj.getDynProcParams()));
 		order.setConf(conf);
-		t.getPools().forEach(pool -> {
-			order.addProcs(procConverter.convertToList(pool.getTasks()));
+		tObj.getPools().forEach(pool -> {
+			order.addProcs(procConv.convertToList(pool.getTasks()));
 		});
 
 		return order;
@@ -66,12 +64,16 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
  */
 class TaskTableDynProcParamToJobOrderProcParamConverter
 		implements SuperConverter<TaskTableDynProcParam, JobOrderProcParam> {
+	
+	/**
+	 * Conversion function
+	 */
 	@Override
-	public JobOrderProcParam apply(TaskTableDynProcParam t) {
-		JobOrderProcParam r = new JobOrderProcParam();
-		r.setName(t.getName());
-		r.setValue(t.getDefaultValue());
-		return r;
+	public JobOrderProcParam apply(final TaskTableDynProcParam tObj) {
+		JobOrderProcParam rObj = new JobOrderProcParam();
+		rObj.setName(tObj.getName());
+		rObj.setValue(tObj.getDefaultValue());
+		return rObj;
 	}
 }
 
@@ -82,9 +84,19 @@ class TaskTableDynProcParamToJobOrderProcParamConverter
  *
  */
 class TaskTableCfgFilesToString implements SuperConverter<TaskTableCfgFile, String> {
+	/**
+	 * Default constructor
+	 */
+	public TaskTableCfgFilesToString() {
+		super();
+	}
+
+	/**
+	 * Conversion function
+	 */
 	@Override
-	public String apply(TaskTableCfgFile t) {
-		return t.getFileName();
+	public String apply(final TaskTableCfgFile tObj) {
+		return tObj.getFileName();
 	}
 }
 
@@ -95,15 +107,19 @@ class TaskTableCfgFilesToString implements SuperConverter<TaskTableCfgFile, Stri
  *
  */
 class TaskTableTaskToJobOrderProc implements SuperConverter<TaskTableTask, JobOrderProc> {
+	
+	/**
+	 * Conversion function
+	 */
 	@Override
-	public JobOrderProc apply(TaskTableTask t) {
+	public JobOrderProc apply(final TaskTableTask tObj) {
 		final TaskTableOuputToJobOrderOutput outputConverter = new TaskTableOuputToJobOrderOutput();
-		JobOrderProc r = new JobOrderProc();
-		r.setTaskName(t.getName());
-		r.setTaskVersion(t.getVersion());
-		r.setBreakpoint(new JobOrderBreakpoint());
-		r.addOutputs(outputConverter.convertToList(t.getOutputs()));
-		return r;
+		JobOrderProc rObj = new JobOrderProc();
+		rObj.setTaskName(tObj.getName());
+		rObj.setTaskVersion(tObj.getVersion());
+		rObj.setBreakpoint(new JobOrderBreakpoint());
+		rObj.addOutputs(outputConverter.convertToList(tObj.getOutputs()));
+		return rObj;
 	}
 }
 
@@ -114,26 +130,27 @@ class TaskTableTaskToJobOrderProc implements SuperConverter<TaskTableTask, JobOr
  *
  */
 class TaskTableOuputToJobOrderOutput implements SuperConverter<TaskTableOuput, JobOrderOutput> {
+	
+	/**
+	 * Conversion function
+	 */
 	@Override
-	public JobOrderOutput apply(TaskTableOuput t) {
+	public JobOrderOutput apply(final TaskTableOuput tObj) {
 		final TaskTableFileNameTypeToJobOrderFileNameType fileNameTypeConverter = new TaskTableFileNameTypeToJobOrderFileNameType();
 
-		JobOrderOutput r = new JobOrderOutput();
-		if (t.getMandatory() == TaskTableMandatoryEnum.YES) {
-			r.setMandatory(true);
+		JobOrderOutput rObj = new JobOrderOutput();
+		if (tObj.getMandatory() == TaskTableMandatoryEnum.YES) {
+			rObj.setMandatory(true);
 		}
-		r.setFileType(t.getType());
-		r.setFileNameType(fileNameTypeConverter.apply(t.getFileNameType()));
-		switch (t.getDestination()) {
-		case DB:
-			r.setDestination(JobOrderDestination.DB);
-			break;
-		default:
-			r.setDestination(JobOrderDestination.PROC);
-			break;
+		rObj.setFileType(tObj.getType());
+		rObj.setFileNameType(fileNameTypeConverter.apply(tObj.getFileNameType()));
+		if (tObj.getDestination() == TaskTableOutputDestination.DB) {
+			rObj.setDestination(JobOrderDestination.DB);
+		} else {
+			rObj.setDestination(JobOrderDestination.PROC);
 		}
 
-		return r;
+		return rObj;
 	}
 }
 
@@ -145,23 +162,27 @@ class TaskTableOuputToJobOrderOutput implements SuperConverter<TaskTableOuput, J
  */
 class TaskTableFileNameTypeToJobOrderFileNameType
 		implements SuperConverter<TaskTableFileNameType, JobOrderFileNameType> {
+	
+	/**
+	 * Conversion function
+	 */
 	@Override
-	public JobOrderFileNameType apply(TaskTableFileNameType t) {
-		JobOrderFileNameType r = JobOrderFileNameType.BLANK;
-		switch (t) {
+	public JobOrderFileNameType apply(final TaskTableFileNameType tObj) {
+		JobOrderFileNameType rObj;
+		switch (tObj) {
 		case DIRECTORY:
-			r = JobOrderFileNameType.DIRECTORY;
+			rObj = JobOrderFileNameType.DIRECTORY;
 			break;
 		case REGEXP:
-			r = JobOrderFileNameType.REGEXP;
+			rObj = JobOrderFileNameType.REGEXP;
 			break;
 		case PHYSICAL:
-			r = JobOrderFileNameType.PHYSICAL;
+			rObj = JobOrderFileNameType.PHYSICAL;
 			break;
 		default:
-			r = JobOrderFileNameType.BLANK;
+			rObj = JobOrderFileNameType.BLANK;
 			break;
 		}
-		return r;
+		return rObj;
 	}
 }

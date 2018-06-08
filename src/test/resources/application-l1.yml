@@ -6,8 +6,8 @@ kafka:
     l0-slices: true
 
 job-generator:
-  directoryoftasktables: ./test/data/l1_config/task_tables/
-  maxnumberoftasktables: 40
+  diroftasktables: ./test/data/l1_config/task_tables/
+  maxnboftasktable: 40
   
 process:
   level: "L1"
@@ -19,8 +19,8 @@ process:
     
 pattern-l0-slices:
   regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
-  placeMatchSatelliteId: 2
-  placeMatchMissionId: 1
-  placeMatchAcquisition: 4
-  placeMatchStartTime: 6
-  placeMatchStopTime: 7
+  m-group-sat-id: 2
+  m-group-mission-id: 1
+  m-group-acquisition: 4
+  m-group-start-time: 6
+  m-group-stop-time: 7

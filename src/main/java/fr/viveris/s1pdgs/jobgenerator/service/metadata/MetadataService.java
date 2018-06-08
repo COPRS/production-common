@@ -38,19 +38,39 @@ public class MetadataService {
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(MetadataService.class);
 
+	/**
+	 * Client to request REST apis
+	 */
 	private final RestTemplate restTemplate;
 
-	private final String metadataUriEdrsSession;
-	private final String metadataUriSearch;
-	private final String metadataUriL0Slice;
+	/**
+	 * URI for querying EDRS session metadata
+	 */
+	private final String uriEdrsSession;
 
+	/**
+	 * URI for searching inputs in metadata
+	 */
+	private final String uriSearch;
+
+	/**
+	 * URI for querying L0 slices
+	 */
+	private final String uriL0Slice;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param restTemplate
+	 * @param metadataHostname
+	 */
 	@Autowired
 	public MetadataService(@Qualifier("restMetadataTemplate") final RestTemplate restTemplate,
 			@Value("${metadata.host}") final String metadataHostname) {
 		this.restTemplate = restTemplate;
-		this.metadataUriEdrsSession = "http://" + metadataHostname + "/edrsSession";
-		this.metadataUriSearch = "http://" + metadataHostname + "/metadata";
-		this.metadataUriL0Slice = "http://" + metadataHostname + "/l0Slice";
+		this.uriEdrsSession = "http://" + metadataHostname + "/edrsSession";
+		this.uriSearch = "http://" + metadataHostname + "/metadata";
+		this.uriL0Slice = "http://" + metadataHostname + "/l0Slice";
 	}
 
 	/**
@@ -62,12 +82,11 @@ public class MetadataService {
 	 * @return
 	 * @throws MetadataException
 	 */
-	public EdrsSessionMetadata getEdrsSession(String productType, String productName) throws MetadataException {
+	public EdrsSessionMetadata getEdrsSession(final String productType, final String productName)
+			throws MetadataException {
 		try {
-			String uri = this.metadataUriEdrsSession + "/" + productType + "/" + productName;
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Call rest metadata on {}", uri);
-			}
+			String uri = this.uriEdrsSession + "/" + productType + "/" + productName;
+			LOGGER.debug("Call rest metadata on {}", uri);
 
 			ResponseEntity<EdrsSessionMetadata> response = this.restTemplate.exchange(uri, HttpMethod.GET, null,
 					EdrsSessionMetadata.class);
@@ -90,12 +109,10 @@ public class MetadataService {
 	 * @return
 	 * @throws MetadataException
 	 */
-	public L0SliceMetadata getSlice(String productType, String productName) throws MetadataException {
+	public L0SliceMetadata getSlice(final String productType, final String productName) throws MetadataException {
 		try {
-			String uri = this.metadataUriL0Slice + "/" + productType + "/" + productName;
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Call rest metadata on {}", uri);
-			}
+			String uri = this.uriL0Slice + "/" + productType + "/" + productName;
+			LOGGER.debug("Call rest metadata on {}", uri);
 
 			ResponseEntity<L0SliceMetadata> response = this.restTemplate.exchange(uri, HttpMethod.GET, null,
 					L0SliceMetadata.class);
@@ -118,12 +135,10 @@ public class MetadataService {
 	 * @return
 	 * @throws MetadataException
 	 */
-	public L0AcnMetadata getFirstACN(String productType, String productName) throws MetadataException {
+	public L0AcnMetadata getFirstACN(final String productType, final String productName) throws MetadataException {
 		try {
-			String uri = this.metadataUriL0Slice + "/" + productType + "/" + productName + "/acns";
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Call rest metadata on {}", uri);
-			}
+			String uri = this.uriL0Slice + "/" + productType + "/" + productName + "/acns";
+			LOGGER.debug("Call rest metadata on {}", uri);
 
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("mode", "ONE");
 			ResponseEntity<L0AcnMetadata[]> response = this.restTemplate.exchange(builder.build().toUri(),
@@ -138,7 +153,7 @@ public class MetadataService {
 					return objects[0];
 				}
 			}
-			
+
 			throw new MetadataException(String.format("No retrieved ACNs for %s", productName));
 
 		} catch (RestClientException e) {
@@ -146,11 +161,11 @@ public class MetadataService {
 		}
 	}
 
-	public SearchMetadata search(SearchMetadataQuery query, Date t0, Date t1, String satelliteId,
-			int instrumentConfigurationId) throws MetadataException {
+	public SearchMetadata search(final SearchMetadataQuery query, final Date t0, final Date t1,
+			final String satelliteId, final int instrumentConfigurationId) throws MetadataException {
 		try {
 			DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-			String uri = this.metadataUriSearch + "/search";
+			String uri = this.uriSearch + "/search";
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 					.queryParam("productType", query.getProductType()).queryParam("mode", query.getRetrievalMode())
 					.queryParam("t0", format.format(t0)).queryParam("t1", format.format(t1))
@@ -159,9 +174,8 @@ public class MetadataService {
 			if (instrumentConfigurationId != -1) {
 				builder.queryParam("insConfId", instrumentConfigurationId);
 			}
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Call rest metadata on [{}]", builder.build().toUri());
-			}
+			LOGGER.debug("Call rest metadata on [{}]", builder.build().toUri());
+			
 			ResponseEntity<SearchMetadata> response = this.restTemplate.exchange(builder.build().toUri(),
 					HttpMethod.GET, null, SearchMetadata.class);
 			if (response.getStatusCode() != HttpStatus.OK) {

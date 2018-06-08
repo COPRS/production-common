@@ -14,95 +14,75 @@ import org.springframework.xml.transform.StringResult;
 
 /**
  * XML converter
+ * 
  * @author Cyrielle Gailliard
  *
  */
 public class XmlConverter {
-	
+
 	/**
 	 * Marshaller
 	 */
 	private Marshaller marshaller;
-	
+
 	/**
 	 * Unmarshaller
 	 */
 	private Unmarshaller unmarshaller;
-	
 
 	/**
-	 * @return the marshaller
+	 * @param marshaller
+	 *            the marshaller to set
 	 */
-	public Marshaller getMarshaller() {
-		return marshaller;
-	}
-
-	/**
-	 * @param marshaller the marshaller to set
-	 */
-	public void setMarshaller(Marshaller marshaller) {
+	public void setMarshaller(final Marshaller marshaller) {
 		this.marshaller = marshaller;
 	}
 
 	/**
-	 * @return the unmarshaller
+	 * @param unmarshaller
+	 *            the unmarshaller to set
 	 */
-	public Unmarshaller getUnmarshaller() {
-		return unmarshaller;
-	}
-
-	/**
-	 * @param unmarshaller the unmarshaller to set
-	 */
-	public void setUnmarshaller(Unmarshaller unmarshaller) {
+	public void setUnmarshaller(final Unmarshaller unmarshaller) {
 		this.unmarshaller = unmarshaller;
 	}
 
 	/**
 	 * Convert an object into an XML file
+	 * 
 	 * @param object
 	 * @param filepath
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public void convertFromObjectToXML(Object object, String filepath) throws IOException, JAXBException {
-		try (FileOutputStream os = new FileOutputStream(filepath)) {
-			marshaller.marshal(object, new StreamResult(os));
-		} catch (Exception e) {
-			throw e;
-		}
-
+	public void convertFromObjectToXML(final Object object, final String filepath) throws IOException, JAXBException {
+		FileOutputStream os = new FileOutputStream(filepath);
+		marshaller.marshal(object, new StreamResult(os));
 	}
 
 	/**
 	 * Convert an object into an string XML format
+	 * 
 	 * @param object
 	 * @param filepath
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public String convertFromObjectToXMLString(Object object) throws IOException, JAXBException {
-		try {
-			StringResult r = new StringResult();
-			marshaller.marshal(object, r);
-			return r.toString();
-		} catch (Exception e) {
-			throw e;
-		}
+	public String convertFromObjectToXMLString(final Object object) throws IOException, JAXBException {
+		StringResult ret = new StringResult();
+		marshaller.marshal(object, ret);
+		return ret.toString();
 	}
 
 	/**
 	 * Convert an XML file into an object
+	 * 
 	 * @param xmlfile
 	 * @return
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
 	public Object convertFromXMLToObject(String xmlfile) throws IOException, JAXBException {
-		try (FileInputStream is = new FileInputStream(xmlfile)) {
-			return unmarshaller.unmarshal(new StreamSource(is));
-		} catch (Exception e) {
-			throw e;
-		}
+		FileInputStream is = new FileInputStream(xmlfile);
+		return unmarshaller.unmarshal(new StreamSource(is));
 	}
 }

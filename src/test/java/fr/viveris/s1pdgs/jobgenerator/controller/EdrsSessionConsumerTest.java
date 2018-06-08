@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import fr.viveris.s1pdgs.jobgenerator.controller.EdrsSessionsConsumer;
 import fr.viveris.s1pdgs.jobgenerator.controller.dto.EdrsSessionDto;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
@@ -31,6 +30,8 @@ import fr.viveris.s1pdgs.jobgenerator.utils.TestL0Utils;
  *
  */
 public class EdrsSessionConsumerTest {
+	
+	private final static String TOPIC_NAME = "topic-edrs-session";
 
 	@Mock
 	private EdrsSessionJobDispatcher jobsDispatcher;
@@ -113,7 +114,7 @@ public class EdrsSessionConsumerTest {
 		EdrsSessionProduct session = TestL0Utils.buildEdrsSessionProduct(true);
 
 		EdrsSessionsConsumer edrsSessionsConsumer = new EdrsSessionsConsumer(jobsDispatcher, edrsSessionFileService,
-				10000, 2);
+				10000, 2, TOPIC_NAME);
 
 		Map<String, EdrsSessionProduct> s = this.getCachedSessions(edrsSessionsConsumer);
 		assertTrue("Cached session map shall be empty", s.isEmpty());
@@ -154,7 +155,7 @@ public class EdrsSessionConsumerTest {
 	@Test
 	public void testReceiveRaw() throws Exception {
 		EdrsSessionsConsumer edrsSessionsConsumer = new EdrsSessionsConsumer(jobsDispatcher, edrsSessionFileService,
-				10000, 2);
+				10000, 2, TOPIC_NAME);
 		EdrsSessionDto dto1 = new EdrsSessionDto("object storage key", 1, "RAW", "S1", "A");
 		edrsSessionsConsumer.receive(dto1);
 		Mockito.verify(edrsSessionFileService, never()).createSessionFile(Mockito.anyString());
@@ -166,7 +167,7 @@ public class EdrsSessionConsumerTest {
 	@Test
 	public void testMaxSessions() throws Exception {
 		EdrsSessionsConsumer edrsSessionsConsumer = new EdrsSessionsConsumer(jobsDispatcher, edrsSessionFileService,
-				10000, 1);
+				10000, 1, TOPIC_NAME);
 		EdrsSessionDto dto1 = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1, "SESSION", "S1", "A");
 		EdrsSessionDto dto3 = new EdrsSessionDto("KEY_OBS_SESSION_2_1", 1, "SESSION", "S1", "A");
 
@@ -189,7 +190,7 @@ public class EdrsSessionConsumerTest {
 	@Test
 	public void testReceivedSameMessageTwice() throws Exception {
 		EdrsSessionsConsumer edrsSessionsConsumer = new EdrsSessionsConsumer(jobsDispatcher, edrsSessionFileService,
-				10000, 2);
+				10000, 2, TOPIC_NAME);
 		EdrsSessionDto dto1 = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1, "SESSION", "S1", "A");
 
 		Map<String, EdrsSessionProduct> s = this.getCachedSessions(edrsSessionsConsumer);
@@ -208,12 +209,26 @@ public class EdrsSessionConsumerTest {
 	}
 
 	@Test
+	public void testReceivedInvalidProductChannel() throws Exception {
+		EdrsSessionsConsumer edrsSessionsConsumer = new EdrsSessionsConsumer(jobsDispatcher, edrsSessionFileService,
+				10000, 2, TOPIC_NAME);
+		EdrsSessionDto dto1 = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 3, "SESSION", "S1", "A");
+		
+		Map<String, EdrsSessionProduct> s = this.getCachedSessions(edrsSessionsConsumer);
+
+		edrsSessionsConsumer.receive(dto1);
+		Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
+		Mockito.verify(edrsSessionFileService, Mockito.never()).createSessionFile(Mockito.any());
+		assertTrue("No session should be cached", s.size() == 0);
+	}
+
+	@Test
 	public void testCleanCachedSession() throws Exception {
 		EdrsSessionDto dto1 = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1, "SESSION", "S1", "A");
 		EdrsSessionDto dto3 = new EdrsSessionDto("KEY_OBS_SESSION_2_1", 1, "SESSION", "S1", "A");
 
 		EdrsSessionsConsumer edrsSessionsConsumer = new EdrsSessionsConsumer(jobsDispatcher, edrsSessionFileService,
-				10000, 2);
+				10000, 2, TOPIC_NAME);
 
 		Map<String, EdrsSessionProduct> s = this.getCachedSessions(edrsSessionsConsumer);
 		assertTrue("Cached session map shall be empty", s.isEmpty());

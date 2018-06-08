@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 
 /**
- * Extraction class of "l0-process" configuration properties
+ * Extraction class of "process" configuration properties
  * 
  * @author Cyrielle Gailliard
  *
@@ -22,11 +22,25 @@ import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "process")
 public class ProcessSettings {
-	
+
+	/**
+	 * Separator use to seperate the elements of a map in a string format
+	 */
+	protected static final String MAP_ELM_SEP = "\\|\\|";
+
+	/**
+	 * Separator use to separate the key and the value of a map element in a string
+	 * format
+	 */
+	protected static final String MAP_KEY_VAL_SEP = ":";
+
+	/**
+	 * Process level
+	 */
 	private ProcessLevel level;
 
 	/**
-	 * Lof level for the sdtout
+	 * Log level for the sdtout
 	 */
 	private String loglevelstdout;
 
@@ -39,21 +53,29 @@ public class ProcessSettings {
 	 * Processing station
 	 */
 	private String processingstation;
-	
+
+	/**
+	 * Processing dynamic parameters<br/>
+	 * Format: {name_1}:{dftval_1}||...||{name_n}:{dftval_n}
+	 */
 	private String paramstr;
 
 	/**
 	 * Processing dynamic parameters: key = parameter name, value = parameter value
 	 */
-	private Map<String, String> params;
-	
+	private final Map<String, String> params;
+
+	/**
+	 * Regular expressions per product type
+	 */
 	private String outputregexpstr;
 
 	/**
 	 * Regular expression: key = output file type, value = regular expression to use
-	 * for file name
+	 * for file name.<br/>
+	 * This is used to customize the way to match the outputs in the job
 	 */
-	private Map<String, String> outputregexps;
+	private final Map<String, String> outputregexps;
 
 	/**
 	 * Default constructors
@@ -62,36 +84,52 @@ public class ProcessSettings {
 		this.params = new HashMap<>();
 		this.outputregexps = new HashMap<>();
 	}
-	
+
 	/**
-	 * 
+	 * Initialize the maps according their value in string format
 	 */
 	@PostConstruct
 	public void initMaps() {
-		// Params
-		if (!StringUtils.isEmpty(this.paramstr)) {
-			String[] paramsTmp = this.paramstr.split("\\|\\|");
-			for (int i=0; i<paramsTmp.length; i++) {
-				if (!StringUtils.isEmpty(paramsTmp[i])) {
-					String[] tmp = paramsTmp[i].split(":", 2);
-					if (tmp.length == 2) {
-						this.params.put(tmp[0], tmp[1]);
-					}
+		initMapParams();
+		initMapOutputRegexps();
+	}
+
+	/**
+	 * Init lmap of params
+	 */
+	private void initMapParams() {
+		if (StringUtils.isEmpty(paramstr)) {
+			return;
+		}
+		String[] paramsTmp = this.paramstr.split(MAP_ELM_SEP);
+		for (int i = 0; i < paramsTmp.length; i++) {
+			if (paramsTmp[i] != null) {
+				String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
+				if (tmp.length == 2) {
+					this.params.put(tmp[0], tmp[1]);
 				}
 			}
 		}
-		//Regexp
-		if (!StringUtils.isEmpty(this.outputregexpstr)) {
-			String[] paramsTmp = this.outputregexpstr.split("\\|\\|");
-			for (int i=0; i<paramsTmp.length; i++) {
-				if (!StringUtils.isEmpty(paramsTmp[i])) {
-					String[] tmp = paramsTmp[i].split(":", 2);
-					if (tmp.length == 2) {
-						this.outputregexps.put(tmp[0], tmp[1]);
-					}
+
+	}
+
+	/**
+	 * Init map of output regular expressions
+	 */
+	private void initMapOutputRegexps() {
+		if (StringUtils.isEmpty(outputregexpstr)) {
+			return;
+		}
+		String[] paramsTmp = this.outputregexpstr.split(MAP_ELM_SEP);
+		for (int i = 0; i < paramsTmp.length; i++) {
+			if (paramsTmp[i] != null) {
+				String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
+				if (tmp.length == 2) {
+					this.outputregexps.put(tmp[0], tmp[1]);
 				}
 			}
 		}
+
 	}
 
 	/**
@@ -102,9 +140,10 @@ public class ProcessSettings {
 	}
 
 	/**
-	 * @param level the level to set
+	 * @param level
+	 *            the level to set
 	 */
-	public void setLevel(ProcessLevel level) {
+	public void setLevel(final ProcessLevel level) {
 		this.level = level;
 	}
 
@@ -119,7 +158,7 @@ public class ProcessSettings {
 	 * @param loglevelstdout
 	 *            the loglevelstdout to set
 	 */
-	public void setLoglevelstdout(String loglevelstdout) {
+	public void setLoglevelstdout(final String loglevelstdout) {
 		this.loglevelstdout = loglevelstdout;
 	}
 
@@ -134,7 +173,7 @@ public class ProcessSettings {
 	 * @param loglevelstderr
 	 *            the loglevelstderr to set
 	 */
-	public void setLoglevelstderr(String loglevelstderr) {
+	public void setLoglevelstderr(final String loglevelstderr) {
 		this.loglevelstderr = loglevelstderr;
 	}
 
@@ -149,7 +188,7 @@ public class ProcessSettings {
 	 * @param processingstation
 	 *            the processingstation to set
 	 */
-	public void setProcessingstation(String processingstation) {
+	public void setProcessingstation(final String processingstation) {
 		this.processingstation = processingstation;
 	}
 
@@ -161,26 +200,10 @@ public class ProcessSettings {
 	}
 
 	/**
-	 * @param params
-	 *            the params to set
-	 */
-	public void setParams(Map<String, String> params) {
-		this.params = params;
-	}
-
-	/**
 	 * @return the outputregexps
 	 */
 	public Map<String, String> getOutputregexps() {
 		return outputregexps;
-	}
-
-	/**
-	 * @param outputregexps
-	 *            the outputregexps to set
-	 */
-	public void setOutputregexps(Map<String, String> outputregexps) {
-		this.outputregexps = outputregexps;
 	}
 
 	/**
@@ -191,9 +214,10 @@ public class ProcessSettings {
 	}
 
 	/**
-	 * @param paramstr the paramstr to set
+	 * @param paramstr
+	 *            the paramstr to set
 	 */
-	public void setParamstr(String paramstr) {
+	public void setParamstr(final String paramstr) {
 		this.paramstr = paramstr;
 	}
 
@@ -205,9 +229,10 @@ public class ProcessSettings {
 	}
 
 	/**
-	 * @param outputregexpstr the outputregexpstr to set
+	 * @param outputregexpstr
+	 *            the outputregexpstr to set
 	 */
-	public void setOutputregexpstr(String outputregexpstr) {
+	public void setOutputregexpstr(final String outputregexpstr) {
 		this.outputregexpstr = outputregexpstr;
 	}
 

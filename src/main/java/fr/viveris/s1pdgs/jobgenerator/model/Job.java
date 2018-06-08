@@ -2,41 +2,79 @@ package fr.viveris.s1pdgs.jobgenerator.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadataResult;
 import fr.viveris.s1pdgs.jobgenerator.model.product.AbstractProduct;
 
+/**
+ * Describe a job. Used during generation to keep a status of each in progress
+ * job.<br/>
+ * This class is generic and depends on the processing level.
+ * <li>L0: T is EdrsSession object</li>
+ * <li>L1: T is L0Slice object</li>
+ * 
+ * @author Cyrielle Gailliard
+ *
+ * @param <T>
+ */
 public class Job<T> {
-	
-	private String taskTableName;
-	
-	private AbstractProduct<T> product;
-	
-	private JobOrder jobOrder;
-	
-	private Map<Integer, SearchMetadataResult> metadataQueries;
-	
-	private JobGenerationStatus status;
-	
-	private String workDirectory;
-	
-	private int workDirectoryInc;
-
-	public Job() {
-		this.metadataQueries = new HashMap<>();
-		this.status = new JobGenerationStatus();
-	}
 
 	/**
+	 * Name of the task table used for this generation
+	 */
+	private String taskTableName;
+
+	/**
+	 * Input product
+	 */
+	private AbstractProduct<T> product;
+
+	/**
+	 * Job order to send to the wrapper (object used to map a job order in the XML
+	 * file)
+	 */
+	private JobOrder jobOrder;
+
+	/**
+	 * Distinct metadata queries needed for searching inputs of the task table
+	 */
+	private Map<Integer, SearchMetadataResult> metadataQueries;
+
+	/**
+	 * Job generation status
+	 */
+	private final JobGenerationStatus status;
+
+	/**
+	 * Working directory used by the wrapper
+	 */
+	private String workDirectory;
+
+	/**
+	 * Used increment value (in the working directory path name)
+	 */
+	private int workDirectoryInc;
+
+	/**
+	 * Input topic name
+	 */
+	private final ResumeDetails resumeDetails;
+
+	/**
+	 * Constructor from product
+	 * 
 	 * @param identifier
 	 * @param startTime
 	 * @param stopTime
 	 * @param product
 	 */
-	public Job(AbstractProduct<T> product) {
-		this();
-		this.product = product; 
+	public Job(final AbstractProduct<T> product, final ResumeDetails resumeDetails) {
+		this.metadataQueries = new HashMap<>();
+		this.status = new JobGenerationStatus();
+		this.product = product;
+		this.resumeDetails = resumeDetails;
 	}
 
 	/**
@@ -47,9 +85,10 @@ public class Job<T> {
 	}
 
 	/**
-	 * @param taskTableName the taskTableName to set
+	 * @param taskTableName
+	 *            the taskTableName to set
 	 */
-	public void setTaskTableName(String taskTableName) {
+	public void setTaskTableName(final String taskTableName) {
 		this.taskTableName = taskTableName;
 	}
 
@@ -61,9 +100,10 @@ public class Job<T> {
 	}
 
 	/**
-	 * @param session the session to set
+	 * @param session
+	 *            the session to set
 	 */
-	public void setProduct(AbstractProduct<T> product) {
+	public void setProduct(final AbstractProduct<T> product) {
 		this.product = product;
 	}
 
@@ -75,9 +115,10 @@ public class Job<T> {
 	}
 
 	/**
-	 * @param jobOrder the jobOrder to set
+	 * @param jobOrder
+	 *            the jobOrder to set
 	 */
-	public void setJobOrder(JobOrder jobOrder) {
+	public void setJobOrder(final JobOrder jobOrder) {
 		this.jobOrder = jobOrder;
 	}
 
@@ -89,17 +130,11 @@ public class Job<T> {
 	}
 
 	/**
-	 * @param metadataQueries the metadataQueries to set
+	 * @param metadataQueries
+	 *            the metadataQueries to set
 	 */
-	public void setMetadataQueries(Map<Integer, SearchMetadataResult> metadataQueries) {
+	public void setMetadataQueries(final Map<Integer, SearchMetadataResult> metadataQueries) {
 		this.metadataQueries = metadataQueries;
-	}
-
-	/**
-	 * @param metadataQueries the metadataQueries to set
-	 */
-	public void addMetadataQuery(SearchMetadataResult metadataQuery) {
-		this.metadataQueries.put(metadataQuery.getQuery().getIdentifier(), metadataQuery);
 	}
 
 	/**
@@ -117,9 +152,10 @@ public class Job<T> {
 	}
 
 	/**
-	 * @param workDirectory the workDirectory to set
+	 * @param workDirectory
+	 *            the workDirectory to set
 	 */
-	public void setWorkDirectory(String workDirectory) {
+	public void setWorkDirectory(final String workDirectory) {
 		this.workDirectory = workDirectory;
 	}
 
@@ -131,81 +167,58 @@ public class Job<T> {
 	}
 
 	/**
-	 * @param workDirectoryInc the workDirectoryInc to set
+	 * @param workDirectoryInc
+	 *            the workDirectoryInc to set
 	 */
-	public void setWorkDirectoryInc(int workDirectoryInc) {
+	public void setWorkDirectoryInc(final int workDirectoryInc) {
 		this.workDirectoryInc = workDirectoryInc;
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * @return the resumeDetails
+	 */
+	public ResumeDetails getResumeDetails() {
+		return resumeDetails;
+	}
+
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "Job [taskTableName=" + taskTableName + ", product=" + product + ", jobOrder=" + jobOrder
-				+ ", metadataQueries=" + metadataQueries + ", status=" + status + ", workDirectory=" + workDirectory
-				+ "]";
+		return String.format(
+				"{taskTableName: %s, product: %s, jobOrder: %s, metadataQueries: %s, status: %s, workDirectory: %s, workDirectoryInc: %s, resumeDetails: %s}",
+				taskTableName, product, jobOrder, metadataQueries, status, workDirectory, workDirectoryInc,
+				resumeDetails);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * hashcode
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((jobOrder == null) ? 0 : jobOrder.hashCode());
-		result = prime * result + ((metadataQueries == null) ? 0 : metadataQueries.hashCode());
-		result = prime * result + ((product == null) ? 0 : product.hashCode());
-		result = prime * result + ((status == null) ? 0 : status.hashCode());
-		result = prime * result + ((taskTableName == null) ? 0 : taskTableName.hashCode());
-		result = prime * result + ((workDirectory == null) ? 0 : workDirectory.hashCode());
-		return result;
+		return Objects.hash(taskTableName, product, jobOrder, metadataQueries, status, workDirectory, workDirectoryInc,
+				resumeDetails);
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Job<?> other = (Job<?>) obj;
-		if (jobOrder == null) {
-			if (other.jobOrder != null)
-				return false;
-		} else if (!jobOrder.equals(other.jobOrder))
-			return false;
-		if (metadataQueries == null) {
-			if (other.metadataQueries != null)
-				return false;
-		} else if (!metadataQueries.equals(other.metadataQueries))
-			return false;
-		if (product == null) {
-			if (other.product != null)
-				return false;
-		} else if (!product.equals(other.product))
-			return false;
-		if (status == null) {
-			if (other.status != null)
-				return false;
-		} else if (!status.equals(other.status))
-			return false;
-		if (taskTableName == null) {
-			if (other.taskTableName != null)
-				return false;
-		} else if (!taskTableName.equals(other.taskTableName))
-			return false;
-		if (workDirectory == null) {
-			if (other.workDirectory != null)
-				return false;
-		} else if (!workDirectory.equals(other.workDirectory))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			Job<?> other = (Job<?>) obj;
+			ret = Objects.equals(taskTableName, other.taskTableName) && Objects.equals(product, other.product)
+					&& Objects.equals(jobOrder, other.jobOrder)
+					&& Objects.equals(metadataQueries, other.metadataQueries) && Objects.equals(status, other.status)
+					&& Objects.equals(workDirectory, other.workDirectory) && workDirectoryInc == other.workDirectoryInc
+					&& Objects.equals(resumeDetails, other.resumeDetails);
+		}
+		return ret;
 	}
-	
 }

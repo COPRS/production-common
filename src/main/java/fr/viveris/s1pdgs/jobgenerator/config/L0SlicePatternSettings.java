@@ -4,25 +4,57 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Properties around the extraction of the L0 slices information
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "pattern-l0-slices")
 public class L0SlicePatternSettings {
-	
-	private String regexp;
-	
-	private int placeMatchSatelliteId;
-	
-	private int placeMatchMissionId;
-	
-	private int placeMatchAcquisition;
-	
-	private int placeMatchStartTime;
-	
-	private int placeMatchStopTime;
 
+	/**
+	 * The regular expression in Java format
+	 */
+	private String regexp;
+
+	/**
+	 * The id of the matcher.group for the satellite identifier according the
+	 * regexp.
+	 */
+	private int mGroupSatId;
+
+	/**
+	 * The id of the matcher.group for the mission identifier according the regexp.
+	 */
+	private int mGroupMissionId;
+
+	/**
+	 * The id of the matcher.group for the acquisition according the regexp.
+	 */
+	private int mGroupAcquisition;
+
+	/**
+	 * The id of the matcher.group for the start time according the regexp.
+	 */
+	private int mGroupStartTime;
+
+	/**
+	 * The id of the matcher.group for the stop time according the regexp.
+	 */
+	private int mGroupStopTime;
+
+	/**
+	 * Default constructor
+	 */
 	public L0SlicePatternSettings() {
-		
+		mGroupSatId = 0;
+		mGroupMissionId = 0;
+		mGroupAcquisition = 0;
+		mGroupStartTime = 0;
+		mGroupStopTime = 0;
 	}
 
 	/**
@@ -33,80 +65,86 @@ public class L0SlicePatternSettings {
 	}
 
 	/**
-	 * @param regexp the regexp to set
+	 * @param regexp
+	 *            the regexp to set
 	 */
-	public void setRegexp(String regexp) {
+	public void setRegexp(final String regexp) {
 		this.regexp = regexp;
 	}
 
 	/**
-	 * @return the placeMatchSatelliteId
+	 * @return the mGroupSatId
 	 */
-	public int getPlaceMatchSatelliteId() {
-		return placeMatchSatelliteId;
+	public int getMGroupSatId() {
+		return mGroupSatId;
 	}
 
 	/**
-	 * @param placeMatchSatelliteId the placeMatchSatelliteId to set
+	 * @param mGroupSatId
+	 *            the mGroupSatId to set
 	 */
-	public void setPlaceMatchSatelliteId(int placeMatchSatelliteId) {
-		this.placeMatchSatelliteId = placeMatchSatelliteId;
+	public void setMGroupSatId(final int mGroupSatId) {
+		this.mGroupSatId = mGroupSatId;
 	}
 
 	/**
-	 * @return the placeMatchMissionId
+	 * @return the mGroupMissionId
 	 */
-	public int getPlaceMatchMissionId() {
-		return placeMatchMissionId;
+	public int getMGroupMissionId() {
+		return mGroupMissionId;
 	}
 
 	/**
-	 * @param placeMatchMissionId the placeMatchMissionId to set
+	 * @param mGroupMissionId
+	 *            the mGroupMissionId to set
 	 */
-	public void setPlaceMatchMissionId(int placeMatchMissionId) {
-		this.placeMatchMissionId = placeMatchMissionId;
+	public void setMGroupMissionId(final int mGroupMissionId) {
+		this.mGroupMissionId = mGroupMissionId;
 	}
 
 	/**
-	 * @return the placeMatchAcquisition
+	 * @return the getMGroupAcquisition
 	 */
-	public int getPlaceMatchAcquisition() {
-		return placeMatchAcquisition;
+	public int getMGroupAcquisition() {
+		return mGroupAcquisition;
 	}
 
 	/**
-	 * @param placeMatchAcquisition the placeMatchAcquisition to set
+	 * @param mGroupAcquisition
+	 *            the mGroupAcquisition to set
 	 */
-	public void setPlaceMatchAcquisition(int placeMatchAcquisition) {
-		this.placeMatchAcquisition = placeMatchAcquisition;
+	public void setMGroupAcquisition(final int mGroupAcquisition) {
+		this.mGroupAcquisition = mGroupAcquisition;
 	}
 
 	/**
-	 * @return the placeMatchStartTime
+	 * @return the mGroupStartTime
 	 */
-	public int getPlaceMatchStartTime() {
-		return placeMatchStartTime;
+	public int getMGroupStartTime() {
+		return mGroupStartTime;
 	}
 
 	/**
-	 * @param placeMatchStartTime the placeMatchStartTime to set
+	 * @param mGroupStartTime
+	 *            the mGroupStartTime to set
 	 */
-	public void setPlaceMatchStartTime(int placeMatchStartTime) {
-		this.placeMatchStartTime = placeMatchStartTime;
+	public void setMGroupStartTime(final int mGroupStartTime) {
+		this.mGroupStartTime = mGroupStartTime;
 	}
 
 	/**
-	 * @return the placeMatchStopTime
+	 * @return the mGroupStopTime
 	 */
-	public int getPlaceMatchStopTime() {
-		return placeMatchStopTime;
+	public int getMGroupStopTime() {
+		return mGroupStopTime;
 	}
 
 	/**
-	 * @param placeMatchStopTime the placeMatchStopTime to set
+	 * @param mGroupStopTime
+	 *            the mGroupStopTime to set
 	 */
-	public void setPlaceMatchStopTime(int placeMatchStopTime) {
-		this.placeMatchStopTime = placeMatchStopTime;
+	public void setMGroupStopTime(final int mGroupStopTime) {
+		this.mGroupStopTime = mGroupStopTime;
 	}
 
 }

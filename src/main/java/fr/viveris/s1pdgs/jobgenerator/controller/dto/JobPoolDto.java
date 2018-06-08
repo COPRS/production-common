@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.controller.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * DTO object representing a pool of a job (a set of execution tasks to be
@@ -15,7 +16,7 @@ public class JobPoolDto {
 	/**
 	 * List of tasks
 	 */
-	List<JobTaskDto> tasks;
+	private List<JobTaskDto> tasks;
 
 	/**
 	 * Default constructor
@@ -32,8 +33,7 @@ public class JobPoolDto {
 	}
 
 	/**
-	 * @param tasks
-	 *            the tasks to set
+	 * @param tasks the tasks to set
 	 */
 	public void setTasks(List<JobTaskDto> tasks) {
 		this.tasks = tasks;
@@ -43,61 +43,41 @@ public class JobPoolDto {
 	 * @param tasks
 	 *            the tasks to set
 	 */
-	public void addTask(JobTaskDto task) {
+	public void addTask(final JobTaskDto task) {
 		this.tasks.add(task);
 	}
 
 	/**
-	 * @param tasks
-	 *            the tasks to set
-	 */
-	public void addTasks(List<JobTaskDto> tasks) {
-		this.tasks.addAll(tasks);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
+	 * To string
 	 */
 	@Override
 	public String toString() {
-		return "JobPoolDto [tasks=" + tasks + "]";
+		return String.format("{tasks: %s}", tasks);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * Hash code
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((tasks == null) ? 0 : tasks.hashCode());
-		return result;
+		return Objects.hash(tasks);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Equals
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobPoolDto other = (JobPoolDto) obj;
-		if (tasks == null) {
-			if (other.tasks != null)
-				return false;
-		} else if (!tasks.equals(other.tasks))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean ret;
+		if (this == obj) {
+			ret = true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			ret = false;
+		} else {
+			JobPoolDto other = (JobPoolDto) obj;
+			ret = Objects.equals(tasks, other.tasks);
+		}
+		return ret;
 	}
 
 }
