@@ -5,13 +5,14 @@ spring:
     
 # Logging
 logging:
-  config: ./test/log4j2.yml
+  config: ./test/log4j2-test.yml
 
 # KAFKA
 kafka:
   bootstrap-servers: ${spring.embedded.kafka.brokers}
   group-id: ingestors
   poll-timeout: 3000
+  producer-retries: 10
   topic:
     auxiliary-files: t-pdgs-auxiliary-files
     edrs-sessions: t-pdgs-edrs-sessions

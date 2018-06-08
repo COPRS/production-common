@@ -12,6 +12,7 @@
    <rule ref="rulesets/java/unusedcode.xml/UnusedLocalVariable"><priority>2</priority></rule>
    <rule ref="rulesets/java/naming.xml/BooleanGetMethodName"><priority>2</priority></rule>
    <rule ref="rulesets/java/naming.xml/PackageCase"><priority>2</priority></rule>
+   <rule ref="rulesets/java/coupling.xml/LawOfDemeter"><priority>4</priority></rule>
    
    <!-- Default rulesets -->
    <rule ref="rulesets/java/design.xml/AbstractClassWithoutAbstractMethod"/>
@@ -166,7 +167,6 @@
    <rule ref="rulesets/java/junit.xml/JUnitTestsShouldIncludeAssert"/>
    <rule ref="rulesets/java/migrating.xml/JUnitUseExpected"/>
    <rule ref="rulesets/java/basic.xml/JumbledIncrementer"/>
-   <rule ref="rulesets/java/coupling.xml/LawOfDemeter"/>
    <rule ref="rulesets/java/j2ee.xml/LocalHomeNamingConvention"/>
    <rule ref="rulesets/java/j2ee.xml/LocalInterfaceSessionNamingConvention"/>
    <!-- <rule ref="rulesets/java/optimizations.xml/LocalVariableCouldBeFinal"/> -->
