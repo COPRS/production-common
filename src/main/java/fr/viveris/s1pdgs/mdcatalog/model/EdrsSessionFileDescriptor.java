@@ -1,6 +1,5 @@
 package fr.viveris.s1pdgs.mdcatalog.model;
 
-import java.util.Objects;
 
 /**
  * Class describing a ERDS session file (RAW or SESSIONS)
@@ -85,26 +84,41 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 		return info;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
-	public boolean equals(Object o) {
-		// self check
-		if (this == o)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		// null check
-		if (o == null)
+		if (!super.equals(obj))
 			return false;
-		// type check and cast
-		if (getClass() != o.getClass())
+		if (getClass() != obj.getClass())
 			return false;
-		EdrsSessionFileDescriptor sessionFile = (EdrsSessionFileDescriptor) o;
-		// field comparison
-		return Objects.equals(keyObjectStorage, sessionFile.getKeyObjectStorage());
+		EdrsSessionFileDescriptor other = (EdrsSessionFileDescriptor) obj;
+		if (channel != other.channel)
+			return false;
+		if (productType != other.productType)
+			return false;
+		if (sessionIdentifier == null) {
+			if (other.sessionIdentifier != null)
+				return false;
+		} else if (!sessionIdentifier.equals(other.sessionIdentifier))
+			return false;
+		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(relativePath, filename, extension, productName, productType, channel, sessionIdentifier,
-				missionId, satelliteId, keyObjectStorage);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + channel;
+		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		result = prime * result + ((sessionIdentifier == null) ? 0 : sessionIdentifier.hashCode());
+		return result;
 	}
 
 }

@@ -1,13 +1,19 @@
 package fr.viveris.s1pdgs.mdcatalog.model.exception;
 
-public class MetadataExtractionException extends FileTerminatedException {
+public class MetadataExtractionException extends AbstractCodedException {
 
 	private static final long serialVersionUID = 2134771514034032034L;
-	
-	private static final String MESSAGE = "Metadata extraction failed for %s: %s";
 
 	public MetadataExtractionException(String productName, Throwable cause) {
-		super(String.format(MESSAGE, productName, cause.getMessage()), productName, cause);
+		super(ErrorCode.METADATA_EXTRACTION_ERROR, productName, cause.getMessage(), cause);
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public String getLogMessage() {
+		return String.format("[msg %s]", getMessage());
 	}
 
 }

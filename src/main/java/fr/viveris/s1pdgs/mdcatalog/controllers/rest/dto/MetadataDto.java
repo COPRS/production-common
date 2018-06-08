@@ -144,8 +144,15 @@ public abstract class MetadataDto {
 	 */
 	@Override
 	public String toString() {
-		return "SearchMetadataFile [productName=" + productName + ", productType=" + productType + ", keyObjectStorage="
-				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop=" + validityStop + "]";
+		return String.format(
+				"{\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\"}",
+				productName, productType, keyObjectStorage, validityStart, validityStop);
+	}
+	
+	public String toMetadataString() {
+		return String.format(
+				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\"",
+				productName, productType, keyObjectStorage, validityStart, validityStop);
 	}
 
 	/*

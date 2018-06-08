@@ -59,12 +59,12 @@ public class KafkaConfigFileDto {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "KafkaConfigFileDto [productName=" + productName + ", keyObjectStorage=" + keyObjectStorage + "]";
+		return String.format("{productName: %s, keyObjectStorage: %s}", productName, keyObjectStorage);
 	}
 
 	@Override

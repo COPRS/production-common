@@ -1,16 +1,31 @@
 package fr.viveris.s1pdgs.mdcatalog.model.exception;
 
-public class IgnoredFileException extends FileTerminatedException {
+/**
+ * 
+ */
+public class IgnoredFileException extends AbstractCodedException {
 
 	private static final long serialVersionUID = 6432844848252714971L;
 
-	private static final String MESSAGE = "Folder %s will be ignored";
+	/**
+	 * 
+	 */
+	private static final String MESSAGE = "File/folder %s will be ignored";
 
-	public IgnoredFileException(String productName) {
-		super(String.format(MESSAGE, productName), productName);
+	/**
+	 * 
+	 * @param productName
+	 * @param ignoredName
+	 */
+	public IgnoredFileException(final String productName, final String ignoredName) {
+		super(ErrorCode.METADATA_IGNORE_FILE, productName, String.format(MESSAGE, ignoredName));
 	}
 
-	public IgnoredFileException(String productName, Throwable cause) {
-		super(String.format(MESSAGE, productName) + ": " + cause.getMessage(), productName, cause);
+	/**
+	 * 
+	 */
+	@Override
+	public String getLogMessage() {
+		return String.format("[msg %s]", getMessage());
 	}
 }

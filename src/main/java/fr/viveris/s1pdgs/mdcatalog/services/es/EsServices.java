@@ -10,7 +10,6 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -25,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataCreationException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataMalformedException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataNotPresentException;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0AcnMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0SliceMetadata;
@@ -42,15 +42,19 @@ public class EsServices {
 	/**
 	 * Elasticsearch client
 	 */
-	@Autowired
-	private RestHighLevelClient restHighLevelClient;
+	private final ElasticsearchDAO elasticsearchDAO;
 
 	/**
 	 * Index type for elastic search
 	 */
-	@Value("${elasticsearch.index-type}")
-	private String indexType;
+	private final String indexType;
 
+	@Autowired
+	public EsServices (final ElasticsearchDAO elasticsearchDAO, @Value("${elasticsearch.index-type}") final String indexType ) {
+		this.elasticsearchDAO = elasticsearchDAO;
+		this.indexType = indexType;
+	}
+	
 	/**
 	 * Check if a given metadata already exist
 	 * 
@@ -65,7 +69,7 @@ public class EsServices {
 
 			GetRequest getRequest = new GetRequest(productType, indexType, productName);
 
-			GetResponse response = restHighLevelClient.get(getRequest);
+			GetResponse response = elasticsearchDAO.get(getRequest);
 			return response.isExists();
 		} catch (JSONException je) {
 			throw new Exception(je.getMessage());
@@ -89,7 +93,8 @@ public class EsServices {
 			IndexRequest request = new IndexRequest(productType, indexType, productName).source(product.toString(),
 					XContentType.JSON);
 
-			IndexResponse response = restHighLevelClient.index(request);
+			IndexResponse response = elasticsearchDAO.index(request);
+			
 			if (response.status() != RestStatus.CREATED) {
 				throw new MetadataCreationException(productName, response.status().toString(),
 						response.getResult().toString());
@@ -133,7 +138,7 @@ public class EsServices {
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
 				Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
 				SearchMetadata r = new SearchMetadata();
@@ -171,6 +176,9 @@ public class EsServices {
 		EdrsSessionMetadata r = new EdrsSessionMetadata();
 		r.setProductType(productType);
 		r.setProductName(productName);
+		if(source.isEmpty()) {
+			throw new MetadataNotPresentException(productName);
+		}
 		r.setKeyObjectStorage(source.get("url").toString());
 		if (source.containsKey("validityStartTime")) {
 			r.setValidityStart(source.get("validityStartTime").toString());
@@ -181,7 +189,7 @@ public class EsServices {
 		return r;
 	}
 
-	public L0SliceMetadata getL0Slice(String productType, String productName) throws Exception {
+	public L0SliceMetadata getL0Slice(String productType, String productName) throws Exception{
 		Map<String, Object> source = this.getRequest(productType, productName);
 		return this.extractInfoForL0Slice(source, productType, productName);
 	}
@@ -197,9 +205,9 @@ public class EsServices {
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
-				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productType);
+				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productType, datatakeId);
 			}
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
@@ -211,7 +219,7 @@ public class EsServices {
 		try {
 			GetRequest getRequest = new GetRequest(productType.toLowerCase(), indexType, productName);
 
-			GetResponse response = restHighLevelClient.get(getRequest);
+			GetResponse response = elasticsearchDAO.get(getRequest);
 
 			if (response.isExists()) {
 				return response.getSourceAsMap();
@@ -222,78 +230,88 @@ public class EsServices {
 		return new HashMap<>();
 	}
 
-	private L0AcnMetadata extractInfoForL0ACN(Map<String, Object> source, String productType)
+	private L0AcnMetadata extractInfoForL0ACN(Map<String, Object> source, String productType, String dataTakeID)
 			throws MetadataMalformedException {
 		L0AcnMetadata r = new L0AcnMetadata();
 		r.setProductType(productType);
 		if (source.containsKey("productName")) {
 			r.setProductName(source.get("productName").toString());
+		} else {
+			throw new MetadataMalformedException(dataTakeID, "productName");
 		}
 		if (source.containsKey("url")) {
 			r.setKeyObjectStorage(source.get("url").toString());
 		} else {
-			throw new MetadataMalformedException(r.getProductName());
+			throw new MetadataMalformedException(r.getProductName(), "url");
 		}
 		if (source.containsKey("instrumentConfigurationId")) {
 			r.setInstrumentConfigurationId(Integer.parseInt(source.get("instrumentConfigurationId").toString()));
 		} else {
-			throw new MetadataMalformedException(r.getProductName());
+			throw new MetadataMalformedException(r.getProductName(), "instrumentConfigurationId");
 		}
 		if (source.containsKey("totalNumberOfSlice")) {
 			r.setNumberOfSlices(Integer.parseInt(source.get("totalNumberOfSlice").toString()));
 		} else {
-			throw new MetadataMalformedException(r.getProductName());
+			throw new MetadataMalformedException(r.getProductName(), "totalNumberOfSlice");
 		}
 		if (source.containsKey("startTime")) {
 			r.setValidityStart(source.get("startTime").toString());
 		} else {
-			throw new MetadataMalformedException(r.getProductName());
+			throw new MetadataMalformedException(r.getProductName(), "startTime");
 		}
 		if (source.containsKey("stopTime")) {
 			r.setValidityStop(source.get("stopTime").toString());
 		} else {
-			throw new MetadataMalformedException(r.getProductName());
+			throw new MetadataMalformedException(r.getProductName(), "stopTime");
+		}
+		if (source.containsKey("dataTakeId")) {
+			r.setDatatakeId(source.get("dataTakeId").toString());
+		} else {
+			throw new MetadataMalformedException(r.getProductName(), "dataTakeId");
 		}
 		return r;
 	}
 
 	private L0SliceMetadata extractInfoForL0Slice(Map<String, Object> source, String productType, String productName)
-			throws MetadataMalformedException {
+			throws MetadataMalformedException, MetadataNotPresentException {
 
 		L0SliceMetadata r = new L0SliceMetadata();
 		r.setProductType(productType);
+		if(source.isEmpty()) {
+			throw new MetadataNotPresentException(productName);
+		}
 		if (source.containsKey("productName")) {
 			r.setProductName(source.get("productName").toString());
 		}
 		if (source.containsKey("url")) {
 			r.setKeyObjectStorage(source.get("url").toString());
 		} else {
-			throw new MetadataMalformedException(productName);
+			throw new MetadataMalformedException(productName, "url");
 		}
 		if (source.containsKey("instrumentConfigurationId")) {
 			r.setInstrumentConfigurationId(Integer.parseInt(source.get("instrumentConfigurationId").toString()));
 		} else {
-			throw new MetadataMalformedException(productName);
+			throw new MetadataMalformedException(productName, "instrumentConfigurationId");
 		}
 		if (source.containsKey("sliceNumber")) {
 			r.setNumberSlice(Integer.parseInt(source.get("sliceNumber").toString()));
 		} else {
-			throw new MetadataMalformedException(productName);
+			throw new MetadataMalformedException(productName, "sliceNumber");
 		}
 		if (source.containsKey("startTime")) {
 			r.setValidityStart(source.get("startTime").toString());
 		} else {
-			throw new MetadataMalformedException(productName);
+			throw new MetadataMalformedException(productName, "startTime");
 		}
 		if (source.containsKey("stopTime")) {
 			r.setValidityStop(source.get("stopTime").toString());
 		} else {
-			throw new MetadataMalformedException(productName);
+			throw new MetadataMalformedException(productName, "stopTime");
 		}
 		if (source.containsKey("dataTakeId")) {
 			r.setDatatakeId(source.get("dataTakeId").toString());
 		} else {
-			throw new MetadataMalformedException(productName);
+			throw new MetadataMalformedException(productName, "dataTakeId");
 		}
 		return r;
 	}

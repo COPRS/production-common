@@ -1,6 +1,5 @@
 package fr.viveris.s1pdgs.mdcatalog.model;
 
-import java.util.Objects;
 
 /**
  * Class describing a configuration file (AUX and MPL)
@@ -68,25 +67,40 @@ public class ConfigFileDescriptor extends AbstractFileDescriptor {
 		return info;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
-	public boolean equals(Object o) {
-		// self check
-		if (this == o)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		// null check
-		if (o == null)
+		if (!super.equals(obj))
 			return false;
-		// type check and cast
-		if (getClass() != o.getClass())
+		if (getClass() != obj.getClass())
 			return false;
-		ConfigFileDescriptor configFileDescriptor = (ConfigFileDescriptor) o;
-		// field comparison
-		return Objects.equals(keyObjectStorage, configFileDescriptor.getKeyObjectStorage());
+		ConfigFileDescriptor other = (ConfigFileDescriptor) obj;
+		if (productClass == null) {
+			if (other.productClass != null)
+				return false;
+		} else if (!productClass.equals(other.productClass))
+			return false;
+		if (productType == null) {
+			if (other.productType != null)
+				return false;
+		} else if (!productType.equals(other.productType))
+			return false;
+		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(relativePath, filename, extension, productName, productClass, productType, missionId,
-				satelliteId, keyObjectStorage);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((productClass == null) ? 0 : productClass.hashCode());
+		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		return result;
 	}
 }

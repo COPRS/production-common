@@ -1,16 +1,34 @@
 package fr.viveris.s1pdgs.mdcatalog.model.exception;
 
-public class FilePathException extends FileTerminatedException {
-	
-	private static final long serialVersionUID = 2694835373130815240L;
-	
-	private static final String MESSAGE = "Description extraction failed for %s: %s";
-	
-	private String path;
+public class FilePathException extends AbstractCodedException {
 
-	public FilePathException(String productName, String path, String msg) {
-		super(String.format(MESSAGE, path, msg), path);
+	private static final long serialVersionUID = 2694835373130815240L;
+
+	/**
+	 * Custom message
+	 */
+	private static final String MESSAGE = "Description extraction failed: %s";
+
+	/**
+	 * Path of the concerned file
+	 */
+	private final String path;
+
+	/**
+	 * Wanted type of the file
+	 */
+	private final String family;
+
+	/**
+	 * 
+	 * @param productName
+	 * @param path
+	 * @param msg
+	 */
+	public FilePathException(final String productName, final String path, final String family, final String msg) {
+		super(ErrorCode.METADATA_FILE_PATH, productName, String.format(MESSAGE, msg));
 		this.path = path;
+		this.family = family;
 	}
 
 	/**
@@ -21,10 +39,17 @@ public class FilePathException extends FileTerminatedException {
 	}
 
 	/**
-	 * @param path the path to set
+	 * @return the family
 	 */
-	public void setPath(String path) {
-		this.path = path;
+	public String getFamily() {
+		return family;
 	}
 
+	/**
+	 * 
+	 */
+	@Override
+	public String getLogMessage() {
+		return String.format("[path %s] [family %s] [msg %s]", this.path, this.family, getMessage());
+	}
 }

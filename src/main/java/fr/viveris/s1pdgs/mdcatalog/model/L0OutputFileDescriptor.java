@@ -3,7 +3,6 @@
  */
 package fr.viveris.s1pdgs.mdcatalog.model;
 
-import java.util.Objects;
 
 /**
  * Class describing a L0 output file
@@ -48,28 +47,6 @@ public class L0OutputFileDescriptor extends AbstractFileDescriptor {
 	 */
 	public L0OutputFileDescriptor() {
 	}
-
-	/**
-	 * Constructor 
-	 * 
-	 * @param productType
-	 * @param productClass
-	 * @param resolution
-	 * @param swathtype
-	 * @param polarisation
-	 * @param dataTakeId
-	 */
-	public L0OutputFileDescriptor(String productType, String productClass, String resolution, String swathtype,
-			String polarisation, String dataTakeId) {
-		super();
-		this.productType = productType;
-		this.productClass = productClass;
-		this.resolution = resolution;
-		this.swathtype = swathtype;
-		this.polarisation = polarisation;
-		this.dataTakeId = dataTakeId;
-	}
-
 
 
 	/**
@@ -156,25 +133,76 @@ public class L0OutputFileDescriptor extends AbstractFileDescriptor {
 		this.dataTakeId = dataTakeId;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
-	public boolean equals(Object o) {
-		// self check
-		if (this == o)
+	public String toString() {
+		return "L0OutputFileDescriptor [productType=" + productType + ", productClass=" + productClass + ", resolution="
+				+ resolution + ", swathtype=" + swathtype + ", polarisation=" + polarisation + ", dataTakeId="
+				+ dataTakeId + ", relativePath=" + relativePath + ", filename=" + filename + ", extension=" + extension
+				+ ", productName=" + productName + ", missionId=" + missionId + ", satelliteId=" + satelliteId
+				+ ", keyObjectStorage=" + keyObjectStorage + "]";
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		// null check
-		if (o == null)
+		if (!super.equals(obj))
 			return false;
-		// type check and cast
-		if (getClass() != o.getClass())
+		if (getClass() != obj.getClass())
 			return false;
-		L0OutputFileDescriptor l0OutputFileDescriptor = (L0OutputFileDescriptor) o;
-		// field comparison
-		return Objects.equals(keyObjectStorage, l0OutputFileDescriptor.getKeyObjectStorage());
+		L0OutputFileDescriptor other = (L0OutputFileDescriptor) obj;
+		if (dataTakeId == null) {
+			if (other.dataTakeId != null)
+				return false;
+		} else if (!dataTakeId.equals(other.dataTakeId))
+			return false;
+		if (polarisation == null) {
+			if (other.polarisation != null)
+				return false;
+		} else if (!polarisation.equals(other.polarisation))
+			return false;
+		if (productClass == null) {
+			if (other.productClass != null)
+				return false;
+		} else if (!productClass.equals(other.productClass))
+			return false;
+		if (productType == null) {
+			if (other.productType != null)
+				return false;
+		} else if (!productType.equals(other.productType))
+			return false;
+		if (resolution == null) {
+			if (other.resolution != null)
+				return false;
+		} else if (!resolution.equals(other.resolution))
+			return false;
+		if (swathtype == null) {
+			if (other.swathtype != null)
+				return false;
+		} else if (!swathtype.equals(other.swathtype))
+			return false;
+		return true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(relativePath, filename, extension, productName, productClass, productType, missionId,
-				satelliteId, keyObjectStorage, dataTakeId);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((dataTakeId == null) ? 0 : dataTakeId.hashCode());
+		result = prime * result + ((polarisation == null) ? 0 : polarisation.hashCode());
+		result = prime * result + ((productClass == null) ? 0 : productClass.hashCode());
+		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		result = prime * result + ((resolution == null) ? 0 : resolution.hashCode());
+		result = prime * result + ((swathtype == null) ? 0 : swathtype.hashCode());
+		return result;
 	}
 }

@@ -63,12 +63,12 @@ public class KafkaL1ADto {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "KafkaL1SliceDto [productName=" + productName + ", keyObjectStorage=" + keyObjectStorage + "]";
+		return String.format("{productName: %s, keyObjectStorage: %s}", productName, keyObjectStorage);
 	}
 
 	/* (non-Javadoc)

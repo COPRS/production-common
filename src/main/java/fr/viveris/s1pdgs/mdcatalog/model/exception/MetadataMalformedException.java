@@ -4,17 +4,35 @@ package fr.viveris.s1pdgs.mdcatalog.model.exception;
  * @author Olivier Bex-Chauvet
  *
  */
-public class MetadataMalformedException extends AbstractFileException {
+public class MetadataMalformedException extends AbstractCodedException {
 
 	private static final long serialVersionUID = 2939784030412076416L;
-	
-	private static final String MESSAGE = "Metadata malformed %s";
+
+	private static final String MESSAGE = "Metadata malformed";
+
+	private final String missingField;
 
 	/**
 	 * @param productName
 	 */
-	public MetadataMalformedException(String productName) {
-		super(String.format(MESSAGE, productName), productName);
+	public MetadataMalformedException(final String productName, final String missingField) {
+		super(ErrorCode.METADATA_MALFORMED_ERROR, productName, MESSAGE);
+		this.missingField = missingField;
+	}
+
+	/**
+	 * @return the missingField
+	 */
+	public String getMissingField() {
+		return missingField;
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public String getLogMessage() {
+		return String.format("[missingField %s] [msg %s]", missingField, getMessage());
 	}
 
 }

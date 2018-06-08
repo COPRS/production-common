@@ -3,8 +3,8 @@ package fr.viveris.s1pdgs.mdcatalog.controllers.rest;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.viveris.s1pdgs.mdcatalog.controllers.rest.dto.L0AcnMetadataDto;
 import fr.viveris.s1pdgs.mdcatalog.controllers.rest.dto.L0SliceMetadataDto;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataNotPresentException;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0AcnMetadata;
 import fr.viveris.s1pdgs.mdcatalog.model.metadata.L0SliceMetadata;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
@@ -44,21 +47,24 @@ public class L0SliceMetadataController {
 			}
 			L0SliceMetadata f = esServices.getL0Slice(l0sliceProductType, productName);
 
-			if (f != null) {
-				L0SliceMetadataDto response = new L0SliceMetadataDto(f.getProductName(), f.getProductType(),
-						f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
-				response.setNumberSlice(f.getNumberSlice());
-				response.setInstrumentConfigurationId(f.getInstrumentConfigurationId());
-				response.setDatatakeId(f.getDatatakeId());
-				return new ResponseEntity<L0SliceMetadataDto>(response, HttpStatus.OK);
-			} else {
-				LOGGER.error("[productType {}] [productName {}] Not found", productType, productName);
-				return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.NOT_FOUND);
-			}
-
-		} catch (Exception e) {
-			LOGGER.error("[productType {}] [productName {}] Exception occured: {}", productType, productName,
-					e.getMessage());
+			L0SliceMetadataDto response = new L0SliceMetadataDto(f.getProductName(), f.getProductType(),
+					f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
+			response.setNumberSlice(f.getNumberSlice());
+			response.setInstrumentConfigurationId(f.getInstrumentConfigurationId());
+			response.setDatatakeId(f.getDatatakeId());
+			return new ResponseEntity<L0SliceMetadataDto>(response, HttpStatus.OK);
+			
+		} catch (MetadataNotPresentException em) {
+			LOGGER.warn("[productType {}] [productName {}] [code {}] {}", productType, productName,
+					em.getCode().getCode(), em.getLogMessage());
+			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.NOT_FOUND);
+		} catch (AbstractCodedException ace) {
+			LOGGER.error("[productType {}] [productName {}] [code {}] {}", productType, productName,
+					ace.getCode().getCode(), ace.getLogMessage());
+			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exc) {
+			LOGGER.error("[productType {}] [productName {}] [code {}] [msg {}]", productType, productName,
+					ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
 			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -73,24 +79,24 @@ public class L0SliceMetadataController {
 			if ("blank".equalsIgnoreCase(productType)) {
 				l0sliceProductType = productName.substring(4, 14);
 			}
-
+			
 			// Build product type for its ACN
 			String l0aProductType = l0sliceProductType.replaceAll("0S", "0A");
 			String l0cProductType = l0sliceProductType.replaceAll("0S", "0C");
 			String l0nProductType = l0sliceProductType.replaceAll("0S", "0N");
-			
+
 			LOGGER.info("A {} C {} N {}", l0aProductType, l0cProductType, l0nProductType);
 
 			// Retrieve slice
 			L0SliceMetadata f = esServices.getL0Slice(l0sliceProductType, productName);
 			if (f == null) {
-				LOGGER.error("[productType {}] [productName {}] Not found", l0sliceProductType, productName);
+				LOGGER.warn("[productType {}] [productName {}] Not found", l0sliceProductType, productName);
 				return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
 			}
 
 			// Retrieve ACN
 			List<L0AcnMetadataDto> r = new ArrayList<>();
-			
+
 			LOGGER.info("Call getACN for {} {}", l0aProductType, f.getDatatakeId());
 			L0AcnMetadata l0a = esServices.getL0Acn(l0aProductType, f.getDatatakeId());
 			if (l0a != null) {
@@ -130,12 +136,24 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
+
+			if(l0a == null && l0c == null && l0n == null) {
+				return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
+			}
 			
 			return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 
+		} catch (MetadataNotPresentException em) {
+			LOGGER.warn("[productType {}] [productName {}] [code {}] {}", productType, productName,
+					em.getCode().getCode(), em.getLogMessage());
+			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
+		} catch (AbstractCodedException ace) {
+			LOGGER.error("[productType {}] [productName {}] [code {}] {}", productType, productName,
+					ace.getCode().getCode(), ace.getLogMessage());
+			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
-			LOGGER.error("[productType {}] [productName {}] Exception occured: {}", productType, productName,
-					e.getMessage());
+			LOGGER.error("[productType {}] [productName {}] [code {}] [msg {}]", productType, productName,
+					ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
 			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

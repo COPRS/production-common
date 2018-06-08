@@ -2,7 +2,6 @@ package fr.viveris.s1pdgs.mdcatalog.services.files;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -88,7 +87,7 @@ public class ExtractMetadata {
 	 * Function which transform the raw coordinates in the good format
 	 * 
 	 * @param rawCoordinates
-	 * @param descriptor
+	 * @param productName
 	 * 
 	 * @return the coordinates in good format
 	 * @throws MetadataExtractionException 
@@ -135,14 +134,12 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from MPL EOF file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the auxiliary file
+	 * @param file The file containing the metadata
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws TransformerException
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
@@ -183,14 +180,12 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from AUX EOF file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the auxiliary file
+	 * @param file The file containing the metadata
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws TransformerException
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processEOFFileWithoutNamespace(ConfigFileDescriptor descriptor, File file)
 			throws MetadataExtractionException {
@@ -225,14 +220,12 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from AUX XML file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the auxiliary file
+	 * @param file The file containing the metadata
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws TransformerException
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
@@ -272,14 +265,12 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from AUX MANIFEST file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the auxiliary file
+	 * @param file The file containing the metadata
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws TransformerException
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
@@ -314,11 +305,11 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from RAW file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the raw file
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processRAWFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
 		try {
@@ -339,11 +330,11 @@ public class ExtractMetadata {
 	/**
 	 * Function which extracts metadata from SESSION file
 	 * 
-	 * @param MD_FileName
+	 * @param descriptor The file descriptor of the session file
 	 * 
 	 * @return the json object with extracted metadata
 	 * 
-	 * @throws JSONException
+	 * @throws MetadataExtractionException
 	 */
 	public JSONObject processSESSIONFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
 		try {
@@ -405,7 +396,7 @@ public class ExtractMetadata {
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("sliceCoordinates").has("content")) {
 	        	JSONObject coordinates = new JSONObject();
-	        	coordinates.put("type", "Polygon");
+	        	coordinates.put("type", "polygon");
 	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
 	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
 	        }
@@ -523,18 +514,15 @@ public class ExtractMetadata {
 		try {
 			//XSLT Transformation
 			String xsltFilename = this.xsltDirectory + "XSLT_L1_MANIFEST.xslt";
-			Source xsltL0MANIFEST = new StreamSource(new File(xsltFilename));
-	        Transformer transformerL0 = transFactory.newTransformer(xsltL0MANIFEST);
-	        Source l0File = new StreamSource(file);
-	        transformerL0.transform(l0File, new StreamResult(new File(output)));
+			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
+	        Transformer transformerL1 = transFactory.newTransformer(xsltL1MANIFEST);
+	        Source l1File = new StreamSource(file);
+	        transformerL1.transform(l1File, new StreamResult(new File(output)));
 	        //JSON creation
 	        JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
 	        JSONObject metadataJSONObject = new JSONObject();
 	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
 	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").has("content")) {
-	        	metadataJSONObject.put("theoreticalSliceLength", jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").get("content"));
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("pass").has("content")) {
 	        	metadataJSONObject.put("pass", jsonFromXmlTmp.getJSONObject("pass").get("content"));
@@ -544,7 +532,7 @@ public class ExtractMetadata {
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("sliceCoordinates").has("content")) {
 	        	JSONObject coordinates = new JSONObject();
-	        	coordinates.put("type", "Polygon");
+	        	coordinates.put("type", "polygon");
 	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
 	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
 	        }
@@ -560,20 +548,11 @@ public class ExtractMetadata {
 	        if(jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").has("content")) {
 	        	metadataJSONObject.put("absoluteStopOrbit", jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").get("content"));
 	        }
-	        if(jsonFromXmlTmp.getJSONObject("circulationFlag").has("content")) {
-	        	metadataJSONObject.put("circulationFlag", jsonFromXmlTmp.getJSONObject("circulationFlag").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("productConsolidation").has("content")) {
-	        	metadataJSONObject.put("productConsolidation", jsonFromXmlTmp.getJSONObject("productConsolidation").get("content"));
-	        }
 	        if(jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").has("content")) {
 	        	metadataJSONObject.put("absoluteStartOrbit", jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").get("content"));
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").has("content")) {
 	        	metadataJSONObject.put("instrumentConfigurationId", jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceOverlap").has("content")) {
-	        	metadataJSONObject.put("sliceOverlap", jsonFromXmlTmp.getJSONObject("sliceOverlap").get("content"));
 	        }
 	        if(jsonFromXmlTmp.getJSONObject("startTimeANX").has("content")) {
 	        	metadataJSONObject.put("startTimeANX", jsonFromXmlTmp.getJSONObject("startTimeANX").get("content"));
