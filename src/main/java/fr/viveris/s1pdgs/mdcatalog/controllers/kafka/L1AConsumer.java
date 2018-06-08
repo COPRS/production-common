@@ -174,7 +174,7 @@ public class L1AConsumer {
 			// Build metadata from file and extracted
 			step++;
 			LOGGER.info("[MONITOR] [step 3] [l1-acn] [productName {}] Building metadata", dto.getProductName());
-			JSONObject metadata = mdBuilder.buildL1SliceOutputFileMetadata(l1AFileDescriptor, metadataFile);
+			JSONObject metadata = mdBuilder.buildL1AcnOutputFileMetadata(l1AFileDescriptor, metadataFile);
 
 			// Publish metadata
 			step++;
