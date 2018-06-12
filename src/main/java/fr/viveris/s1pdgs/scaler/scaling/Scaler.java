@@ -4,6 +4,11 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +36,7 @@ import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoring;
 import fr.viveris.s1pdgs.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
 import fr.viveris.s1pdgs.scaler.openstack.OpenStackAdministration;
 import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityException;
+import fr.viveris.s1pdgs.scaler.task.CreateResources;
 
 /**
  * L1 resources scaler
@@ -269,7 +275,7 @@ public class Scaler {
 	}
 
 	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors)
-			throws K8sEntityException, OsEntityException {
+			throws K8sEntityException, OsEntityException, InterruptedException, ExecutionException {
 		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
 		int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
 		int maxNbServers = this.wrapperProperties.getNbMaxServers();
@@ -296,6 +302,7 @@ public class Scaler {
 				String nodeName = reusableNodes.get(i).getDescription().getName();
 				LOGGER.info("[MONITOR] [step 5] 1 - Starting setting reusable for node {}", nodeName);
 				this.k8SAdministration.setWrapperNodeUsable(nodeName);
+				this.k8SAdministration.launchWrapperPodsPool(1);
 				nbAllocatedServer++;
 			}
 		} else {
@@ -313,8 +320,21 @@ public class Scaler {
 			} else {
 				while ((nbNeededServer > nbAllocatedServer + nbCreatedServer)
 						&& (nbServers + nbCreatedServer < maxNbServers)) {
-					this.osAdministration.createServerForL1Wrappers("[MONITOR] [Step 4] 2 - ");
+					//this.osAdministration.createServerForL1Wrappers("[MONITOR] [Step 4] 2 - ");
 					nbCreatedServer++;
+				}
+				ExecutorService createResoucesExecutorService = Executors.newFixedThreadPool(nbCreatedServer);
+				CompletionService<String> createResoucesCompletionServices = new ExecutorCompletionService<>(createResoucesExecutorService);
+				for(int i = 0; i < nbCreatedServer; i++) {
+					createResoucesCompletionServices.submit(new CreateResources(k8SAdministration, osAdministration));
+				}
+				for(int i = 0; i < nbCreatedServer; i++) {
+					String result = createResoucesCompletionServices.take().get();
+					if(result != null) {
+						LOGGER.info("[MONITOR] [step 5] 3 - Volume, server and pod {} launched", result);
+					} else {
+						LOGGER.error("[MONITOR] [step 5] 3 - Volume, server and pod {} fail to create", result);
+					}
 				}
 			}
 
@@ -325,13 +345,13 @@ public class Scaler {
 		}
 
 		// Launchs pods
-		int nbPodToLaunch = (nbAllocatedServer + nbCreatedServer) * nbPodsPerServer;
+		/*int nbPodToLaunch = (nbAllocatedServer + nbCreatedServer) * nbPodsPerServer;
 		LOGGER.info("[MONITOR] [step 5] 3 - Starting launching pods {} on {} reused nodes and {} new nodes",
 				nbPodToLaunch, nbAllocatedServer, nbCreatedServer);
 		if (nbPodToLaunch > 0) {
 			this.k8SAdministration.launchWrapperPodsPool(nbPodToLaunch);
 		}
-		LOGGER.info("[MONITOR] [step 5] 3 - All pods launched");
+		LOGGER.info("[MONITOR] [step 5] 3 - All pods launched");*/
 	}
 
 	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) throws WrapperStopException {
