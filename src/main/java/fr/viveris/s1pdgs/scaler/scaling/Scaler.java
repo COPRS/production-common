@@ -311,7 +311,7 @@ public class Scaler {
 			}
 		}
 
-		// Create VM
+		// Create VM and POD
 		LOGGER.info("[MONITOR] [step 5] 2 - Starting creating servers");
 		int nbCreatedServer = 0;
 		if (nbNeededServer > nbAllocatedServer) {
@@ -320,13 +320,13 @@ public class Scaler {
 			} else {
 				while ((nbNeededServer > nbAllocatedServer + nbCreatedServer)
 						&& (nbServers + nbCreatedServer < maxNbServers)) {
-					//this.osAdministration.createServerForL1Wrappers("[MONITOR] [Step 4] 2 - ");
 					nbCreatedServer++;
 				}
 				ExecutorService createResoucesExecutorService = Executors.newFixedThreadPool(nbCreatedServer);
 				CompletionService<String> createResoucesCompletionServices = new ExecutorCompletionService<>(createResoucesExecutorService);
 				for(int i = 0; i < nbCreatedServer; i++) {
 					createResoucesCompletionServices.submit(new CreateResources(k8SAdministration, osAdministration));
+					Thread.sleep(100);
 				}
 				for(int i = 0; i < nbCreatedServer; i++) {
 					String result = createResoucesCompletionServices.take().get();
@@ -343,15 +343,6 @@ public class Scaler {
 				LOGGER.debug("[MONITOR] [step 5] 2 - No need to create new servers");
 			}
 		}
-
-		// Launchs pods
-		/*int nbPodToLaunch = (nbAllocatedServer + nbCreatedServer) * nbPodsPerServer;
-		LOGGER.info("[MONITOR] [step 5] 3 - Starting launching pods {} on {} reused nodes and {} new nodes",
-				nbPodToLaunch, nbAllocatedServer, nbCreatedServer);
-		if (nbPodToLaunch > 0) {
-			this.k8SAdministration.launchWrapperPodsPool(nbPodToLaunch);
-		}
-		LOGGER.info("[MONITOR] [step 5] 3 - All pods launched");*/
 	}
 
 	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) throws WrapperStopException {
