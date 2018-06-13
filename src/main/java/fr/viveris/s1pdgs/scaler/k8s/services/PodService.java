@@ -101,11 +101,11 @@ public class PodService {
 		return resources;
 	}
 
-	public void createPodFromTemplate(String templateFile) throws PodResourceException, K8sUnknownResourceException {
+	public void createPodFromTemplate(String templateFile, int uniquePODID) throws PodResourceException, K8sUnknownResourceException {
 		String namespace = "default";
 
 		// Load resources and update names
-		String suffixe = "-" + System.currentTimeMillis();
+		String suffixe = "-" + uniquePODID;
 		List<HasMetadata> resources = this.loadRessourcesFromFile(templateFile, suffixe);
 
 		// create resources

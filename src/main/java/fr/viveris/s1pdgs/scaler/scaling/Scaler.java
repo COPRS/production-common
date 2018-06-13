@@ -71,6 +71,7 @@ public class Scaler {
 	private long lastScalingTimestamp = 0;
 	private long lastDeletingResourcesTimestamp = 0;
 	private AtomicInteger uniqueVMID = new AtomicInteger(0);
+	private AtomicInteger uniquePODID = new AtomicInteger(0);
 
 	public enum ScalingAction {
 		ALLOC, FREE, NOTHING, ERROR
@@ -304,7 +305,7 @@ public class Scaler {
 				String nodeName = reusableNodes.get(i).getDescription().getName();
 				LOGGER.info("[MONITOR] [step 5] 1 - Starting setting reusable for node {}", nodeName);
 				this.k8SAdministration.setWrapperNodeUsable(nodeName);
-				this.k8SAdministration.launchWrapperPodsPool(1);
+				this.k8SAdministration.launchWrapperPodsPool(1, uniquePODID);
 				nbAllocatedServer++;
 			}
 		} else {
@@ -327,7 +328,7 @@ public class Scaler {
 				ExecutorService createResoucesExecutorService = Executors.newFixedThreadPool(nbCreatedServer);
 				CompletionService<String> createResoucesCompletionServices = new ExecutorCompletionService<>(createResoucesExecutorService);
 				for(int i = 0; i < nbCreatedServer; i++) {
-					createResoucesCompletionServices.submit(new CreateResources(k8SAdministration, osAdministration, uniqueVMID));
+					createResoucesCompletionServices.submit(new CreateResources(k8SAdministration, osAdministration, uniqueVMID, uniquePODID));
 				}
 				for(int i = 0; i < nbCreatedServer; i++) {
 					String result = createResoucesCompletionServices.take().get();
