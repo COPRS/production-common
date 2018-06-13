@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -69,6 +70,7 @@ public class Scaler {
 
 	private long lastScalingTimestamp = 0;
 	private long lastDeletingResourcesTimestamp = 0;
+	private AtomicInteger uniqueVMID = new AtomicInteger(0);
 
 	public enum ScalingAction {
 		ALLOC, FREE, NOTHING, ERROR
@@ -325,8 +327,7 @@ public class Scaler {
 				ExecutorService createResoucesExecutorService = Executors.newFixedThreadPool(nbCreatedServer);
 				CompletionService<String> createResoucesCompletionServices = new ExecutorCompletionService<>(createResoucesExecutorService);
 				for(int i = 0; i < nbCreatedServer; i++) {
-					createResoucesCompletionServices.submit(new CreateResources(k8SAdministration, osAdministration));
-					Thread.sleep(100);
+					createResoucesCompletionServices.submit(new CreateResources(k8SAdministration, osAdministration, uniqueVMID));
 				}
 				for(int i = 0; i < nbCreatedServer; i++) {
 					String result = createResoucesCompletionServices.take().get();
