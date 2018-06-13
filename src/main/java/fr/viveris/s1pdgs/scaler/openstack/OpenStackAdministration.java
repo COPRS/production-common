@@ -1,6 +1,7 @@
 package fr.viveris.s1pdgs.scaler.openstack;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
@@ -71,11 +72,11 @@ public class OpenStackAdministration {
 
 	public String createServerForL1Wrappers(String logPrefix, AtomicInteger uniqueVMID) throws OsEntityException {
 		OSClientV3 osClient = this.osClient();
-		int vmID = uniqueVMID.getAndIncrement();
+		String vmID = uniqueVMID.getAndIncrement()+"-"+UUID.randomUUID().toString().substring(0, 4);
 		OpenStackServerProperties.VolumeProperties volumeProperties = this.osProperties.getVolumeWrapper();
 		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
-		String serverName = serverProperties.getPrefixName() + vmID;
-		String volumeName = volumeProperties.getPrefixName() + vmID + "-volume";
+		String serverName = serverProperties.getPrefixName() +"-" + vmID;
+		String volumeName = volumeProperties.getPrefixName() +"-" + vmID + "-volume";
 
 		// Create volume
 		String volumeId = "";
