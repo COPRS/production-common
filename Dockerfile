@@ -4,8 +4,8 @@ COPY pom.xml /app
 RUN mvn dependency:go-offline
 COPY src/ /app/src/
 COPY dev/ /app/dev/
-MKDIR /app/test
-RUN mvn -B package
+RUN mkdir /app/test && \ 
+    mvn -B package
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
