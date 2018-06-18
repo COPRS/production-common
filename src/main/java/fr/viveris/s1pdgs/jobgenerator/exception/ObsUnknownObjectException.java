@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.jobgenerator.exception;
 
+import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+
 /**
  * Exception concerning the object storage
  * 
@@ -21,7 +23,7 @@ public class ObsUnknownObjectException extends AbstractCodedException {
 	/**
 	 * Bucket in object storage
 	 */
-	private final String bucket;
+	private final ProductFamily family;
 
 	/**
 	 * 
@@ -29,10 +31,10 @@ public class ObsUnknownObjectException extends AbstractCodedException {
 	 * @param bucket
 	 * @param message
 	 */
-	public ObsUnknownObjectException(final String key, final String bucket, final String message) {
-		super(ErrorCode.OBS_UNKOWN_OBJ, message);
+	public ObsUnknownObjectException(final ProductFamily family, final String key) {
+		super(ErrorCode.OBS_UNKOWN_OBJ, "Object not found");
 		this.key = key;
-		this.bucket = bucket;
+		this.family = family;
 	}
 
 	/**
@@ -43,10 +45,10 @@ public class ObsUnknownObjectException extends AbstractCodedException {
 	}
 
 	/**
-	 * @return the bucket
+	 * @return the family
 	 */
-	public String getBucket() {
-		return bucket;
+	public ProductFamily getFamily() {
+		return family;
 	}
 
 	/**
@@ -54,7 +56,7 @@ public class ObsUnknownObjectException extends AbstractCodedException {
 	 */
 	@Override
 	public String getLogMessage() {
-		return String.format("[bucket %s] [key %s] [msg %s]", this.bucket, this.key, getMessage());
+		return String.format("[family %s] [key %s] [msg %s]", this.family, this.key, getMessage());
 	}
 
 }

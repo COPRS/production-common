@@ -11,6 +11,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException.ErrorCode;
+import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 
 /**
@@ -72,17 +73,17 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testObsS3Exception() {
-		ObsS3Exception e1 = new ObsS3Exception("key1", "bucket1", new Throwable("throwable message"));
+		ObjectStorageException e1 = new ObjectStorageException(ProductFamily.L0_PRODUCT, "key1", new Throwable("throwable message"));
 
 		assertEquals("key1", e1.getKey());
-		assertEquals("bucket1", e1.getBucket());
+		assertEquals(ProductFamily.L0_PRODUCT, e1.getFamily());
 		assertEquals(ErrorCode.OBS_ERROR, e1.getCode());
 		assertEquals("throwable message", e1.getMessage());
 		assertEquals("throwable message", e1.getCause().getMessage());
 
 		String str1 = e1.getLogMessage();
-		assertTrue(str1.contains("[bucket bucket1]"));
 		assertTrue(str1.contains("[key key1]"));
+		assertTrue(str1.contains("[family L0_PRODUCT]"));
 		assertTrue(str1.contains("[msg throwable message]"));
 	}
 
@@ -91,18 +92,16 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testObsUnknownObjectException() {
-		ObsUnknownObjectException e1 = new ObsUnknownObjectException("key1", "bucket1", "erreur message");
+		ObsUnknownObjectException e1 = new ObsUnknownObjectException(ProductFamily.RAW, "key1");
 
 		assertEquals("key1", e1.getKey());
-		assertEquals("bucket1", e1.getBucket());
+		assertEquals(ProductFamily.RAW, e1.getFamily());
 		assertEquals(ErrorCode.OBS_UNKOWN_OBJ, e1.getCode());
-		assertEquals("erreur message", e1.getMessage());
 		assertNull(e1.getCause());
 
 		String str1 = e1.getLogMessage();
-		assertTrue(str1.contains("[bucket bucket1]"));
+		assertTrue(str1.contains("[family RAW]"));
 		assertTrue(str1.contains("[key key1]"));
-		assertTrue(str1.contains("[msg erreur message]"));
 	}
 
 	/**

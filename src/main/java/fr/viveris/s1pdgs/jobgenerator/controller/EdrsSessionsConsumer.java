@@ -17,7 +17,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException.ErrorCode
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
 import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedSessionsReachException;
-import fr.viveris.s1pdgs.jobgenerator.exception.ObsS3Exception;
+import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
@@ -165,7 +165,7 @@ public class EdrsSessionsConsumer {
 					}
 				}
 
-			} catch (MaxNumberCachedSessionsReachException | MaxNumberCachedJobsReachException | ObsS3Exception mnce) {
+			} catch (MaxNumberCachedSessionsReachException | MaxNumberCachedJobsReachException | ObjectStorageException mnce) {
 				LOGGER.error("[MONITOR] [step {}] [productName {}] [resuming {}] [code {}] {} ", step,
 						dto.getObjectStorageKey(), new ResumeDetails(topicName, dto), mnce.getCode().getCode(),
 						mnce.getLogMessage());

@@ -20,9 +20,10 @@ import org.springframework.util.FileCopyUtils;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
-import fr.viveris.s1pdgs.jobgenerator.exception.ObsS3Exception;
+import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
-import fr.viveris.s1pdgs.jobgenerator.service.s3.SessionFilesS3Services;
+import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.jobgenerator.service.s3.ObsService;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestL0Utils;
 
 public class EdrsSessionFileServiceTest {
@@ -31,7 +32,7 @@ public class EdrsSessionFileServiceTest {
 	 * S3 service
 	 */
 	@Mock
-	private SessionFilesS3Services s3Services;
+	private ObsService obsService;
 
 	/**
 	 * XML converter
@@ -62,7 +63,7 @@ public class EdrsSessionFileServiceTest {
 
 		(new File("./tmp")).mkdirs();
 
-		service = new EdrsSessionFileService(s3Services, xmlConverter, "./tmp/");
+		service = new EdrsSessionFileService(obsService, xmlConverter, "./tmp/");
 		fileCh1 = new File("./tmp/DCS_02_L20171109175634707000125_ch1_DSIB.xml");
 		fileCh1.createNewFile();
 		fileCh2 = new File("./tmp/DCS_02_L20171109175634707000125_ch2_DSIB.xml");
@@ -75,13 +76,15 @@ public class EdrsSessionFileServiceTest {
 		// Mock the dispatcher
 		Mockito.doAnswer(i -> {
 			return fileCh1;
-		}).when(s3Services).getFile(Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"), Mockito.any());
+		}).when(obsService).downloadFile(Mockito.any(), Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"),
+				Mockito.anyString());
 		Mockito.doAnswer(i -> {
 			return fileCh2;
-		}).when(s3Services).getFile(Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"), Mockito.any());
+		}).when(obsService).downloadFile(Mockito.any(), Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"),
+				Mockito.anyString());
 		Mockito.doAnswer(i -> {
 			return fileCh2;
-		}).when(s3Services).getFile(Mockito.eq("KEY_OBS_SESSION_1_2.xml"), Mockito.any());
+		}).when(obsService).downloadFile(Mockito.any(), Mockito.eq("KEY_OBS_SESSION_1_2.xml"), Mockito.anyString());
 
 		// Mock the XML converter
 		Mockito.doAnswer(i -> {
@@ -97,24 +100,30 @@ public class EdrsSessionFileServiceTest {
 	public void testCreateSessionFile() throws AbstractCodedException {
 		try {
 			EdrsSessionFile r1 = service.createSessionFile("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml");
-			Mockito.verify(s3Services, times(1)).getFile(Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"),
-					Mockito.eq("./tmp/KEY_OBS_SESSION_1_1.xml"));
+			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.RAW),
+					Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"),
+
+					Mockito.eq("./tmp/"));
 			Mockito.verify(xmlConverter, times(1)).convertFromXMLToObject(Mockito.eq(fileCh1.getAbsolutePath()));
 			assertEquals(session1, r1);
 
 			EdrsSessionFile r2 = service.createSessionFile("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml");
-			Mockito.verify(s3Services, times(1)).getFile(Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"),
-					Mockito.eq("./tmp/KEY_OBS_SESSION_1_2.xml"));
+			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.RAW),
+					Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"),
+
+					Mockito.eq("./tmp/"));
 			Mockito.verify(xmlConverter, times(1)).convertFromXMLToObject(Mockito.eq(fileCh2.getAbsolutePath()));
 			assertEquals(session2, r2);
 
 			EdrsSessionFile r3 = service.createSessionFile("KEY_OBS_SESSION_1_2.xml");
-			Mockito.verify(s3Services, times(1)).getFile(Mockito.eq("KEY_OBS_SESSION_1_2.xml"),
-					Mockito.eq("./tmp/KEY_OBS_SESSION_1_2.xml"));
+			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.RAW),
+					Mockito.eq("KEY_OBS_SESSION_1_2.xml"),
+
+					Mockito.eq("./tmp/"));
 			Mockito.verify(xmlConverter, times(2)).convertFromXMLToObject(Mockito.eq(fileCh2.getAbsolutePath()));
 			assertEquals(session2, r3);
 
-		} catch (ObsS3Exception | InvalidFormatProduct | IOException | JAXBException e) {
+		} catch (ObjectStorageException | InvalidFormatProduct | IOException | JAXBException e) {
 			fail("Invalid exception raised " + e.getMessage());
 		}
 	}
