@@ -12,7 +12,7 @@ build:
   tags:
   - docker
   script:
-  - docker build -t $CI_PROJECT_NAME:$CI_COMMIT_REF_NAME .
+  - docker build -v /tmp/docker-m2cache:/root/.m2:rw -t $CI_PROJECT_NAME:$CI_COMMIT_REF_NAME .
 
 push_dev:
   stage: push_dev

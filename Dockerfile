@@ -5,7 +5,7 @@ RUN mvn dependency:go-offline
 COPY src/ /app/src/
 COPY dev/ /app/dev/
 RUN mkdir /app/test && \ 
-    mvn -B package
+    mvn -B package install
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
