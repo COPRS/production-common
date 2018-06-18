@@ -26,21 +26,6 @@ elasticsearch:
   host: ${elastic_host:es-svc}
   port: ${elastic_port:25000}
   index-type: ${elastic_index-type:metadata}
-
-#Object Storage
-storage:
-  user:
-    id: ${storage_user_id}
-    secret: ${storage_user_secret}
-  endpoint: ${storage_endpoint}
-  region: ${storage_region}
-  buckets:
-    auxiliary-files: ${storage_buckets_auxiliary-files:auxiliary-files}
-    session-files: ${storage_buckets_session-files:session-files}
-    l0-acns: ${storage_buckets_l0-acns:acns}
-    l0-slices: ${storage_buckets_l0-slices:l0-slices}
-    l1-acns: ${storage_buckets_l1-acns:l1-acns}
-    l1-slices: ${storage_buckets_l1-slices:l1-slices}
     
 # File
 file:

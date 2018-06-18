@@ -14,21 +14,6 @@ logging:
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
   file: ./s1pdgs-metadata-catalog-test.log
 
-#Object Storage
-storage:
-  user:
-    id: MEF5PCBPTXHKOUTCKW3G
-    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
-  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
-  region: eu-west-0
-  buckets:
-    auxiliary-files: auxiliary-files
-    session-files: session-files
-    l0-acns: acns
-    l0-slices: l0-slices
-    l1-acns: l1-acns
-    l1-slices: l1-slices
-
 # KAFKA
 kafka:
   bootstrap-servers: 172.17.50.10:9200

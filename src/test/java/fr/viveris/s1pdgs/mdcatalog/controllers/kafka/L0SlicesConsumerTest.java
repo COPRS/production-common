@@ -23,15 +23,17 @@ import org.mockito.MockitoAnnotations;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.ProductFamily;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaL0SliceDto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.IgnoredFileException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.MetadataExtractionException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.mdcatalog.model.exception.ObsUnknownObjectException;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
-import fr.viveris.s1pdgs.mdcatalog.services.s3.L0SlicesS3Services;
+import fr.viveris.s1pdgs.mdcatalog.services.s3.ObsService;
 
 public class L0SlicesConsumerTest {
 
@@ -55,7 +57,7 @@ public class L0SlicesConsumerTest {
 	 * Amazon S3 service for configuration files
 	 */
 	@Mock
-	private L0SlicesS3Services s3Services;
+	private ObsService s3Services;
 
 	/**
 	 * Metadata builder
@@ -90,14 +92,13 @@ public class L0SlicesConsumerTest {
 	public void init() throws Exception {
 		MockitoAnnotations.initMocks(this);
 
-		doReturn(true).when(s3Services).exist(Mockito.anyString());
 		doAnswer(i -> {
-			String keyObs = i.getArgument(0);
+			String keyObs = i.getArgument(1);
 			if ("file_safe.safe/manifest.safe".equals(keyObs)) {
 				return fileSafe;
 			}
 			return fileNoSafe;
-		}).when(s3Services).getFile(Mockito.anyString(), Mockito.anyString());
+		}).when(s3Services).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		doAnswer(i -> {
 			L0OutputFileDescriptor desc = new L0OutputFileDescriptor();
@@ -159,30 +160,16 @@ public class L0SlicesConsumerTest {
 	 * Test when object does not exist in obs
 	 * 
 	 * @throws ObjectStorageException
+	 * @throws ObsUnknownObjectException 
 	 */
 	@Test
-	public void testReceiveWhenNotExistInOBSWithExc() throws ObjectStorageException {
-		doThrow(new ObjectStorageException("product-name", "key-obs", "bucket", new Exception())).when(s3Services)
-				.exist(Mockito.anyString());
+	public void testReceiveWhenNotExistInOBS() throws ObjectStorageException, ObsUnknownObjectException {
+		doThrow(new ObsUnknownObjectException(ProductFamily.L0_PRODUCT, "key-obs")).when(s3Services)
+				.downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		controller.receive(new KafkaL0SliceDto("product-name", "key-obs"));
-		verify(s3Services, never()).getFile(Mockito.anyString(), Mockito.anyString());
-		verifyZeroInteractions(esServices);
-		verifyZeroInteractions(mdBuilder);
-		verifyZeroInteractions(fileDescriptorBuilder);
-	}
-
-	/**
-	 * Test when object does not exist in obs
-	 * 
-	 * @throws ObjectStorageException
-	 */
-	@Test
-	public void testReceiveWhenNotExistInOBS() throws ObjectStorageException {
-		doReturn(false).when(s3Services).exist(Mockito.anyString());
-
-		controller.receive(new KafkaL0SliceDto("product-name", "key-obs"));
-		verify(s3Services, never()).getFile(Mockito.anyString(), Mockito.anyString());
+		verify(s3Services, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("key-obs"),
+				Mockito.eq(LOCAL_DIRECTORY));
 		verifyZeroInteractions(esServices);
 		verifyZeroInteractions(mdBuilder);
 		verifyZeroInteractions(fileDescriptorBuilder);
@@ -192,15 +179,16 @@ public class L0SlicesConsumerTest {
 	 * Test when object cannot be retrieved from OBS
 	 * 
 	 * @throws ObjectStorageException
+	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testReceiveWhenGetFromObsFailed() throws ObjectStorageException {
-		doThrow(new ObjectStorageException("product-name", "key-obs", "bucket", new Exception())).when(s3Services)
-				.getFile(Mockito.anyString(), Mockito.anyString());
+	public void testReceiveWhenGetFromObsFailed() throws ObjectStorageException, ObsUnknownObjectException {
+		doThrow(new ObjectStorageException(ProductFamily.L0_PRODUCT, "key-obs", new Exception())).when(s3Services)
+				.downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		controller.receive(new KafkaL0SliceDto("product-name", "key-obs"));
-		verify(s3Services, times(1)).exist(Mockito.eq("key-obs"));
-		verify(s3Services, times(1)).getFile(Mockito.eq("key-obs"), Mockito.eq(LOCAL_DIRECTORY + "key-obs"));
+		verify(s3Services, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("key-obs"),
+				Mockito.eq(LOCAL_DIRECTORY));
 		verifyZeroInteractions(esServices);
 		verifyZeroInteractions(mdBuilder);
 		verifyZeroInteractions(fileDescriptorBuilder);
@@ -212,17 +200,17 @@ public class L0SlicesConsumerTest {
 	 * @throws ObjectStorageException
 	 * @throws IgnoredFileException
 	 * @throws FilePathException
+	 * @throws ObsUnknownObjectException
 	 */
 	@Test
 	public void testReceiveWhenBuildDescriptorFailed()
-			throws ObjectStorageException, FilePathException, IgnoredFileException {
+			throws ObjectStorageException, FilePathException, IgnoredFileException, ObsUnknownObjectException {
 		doThrow(new IgnoredFileException("product-name", "ignored-name")).when(fileDescriptorBuilder)
 				.buildL0OutputFileDescriptor(Mockito.any());
 
 		controller.receive(new KafkaL0SliceDto("product-name", "file_no_safe.xml"));
-		verify(s3Services, times(1)).exist(Mockito.eq("file_no_safe.xml"));
-		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
-				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
+		verify(s3Services, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("file_no_safe.xml"),
+				Mockito.eq(LOCAL_DIRECTORY));
 		verify(fileDescriptorBuilder, times(1)).buildL0OutputFileDescriptor(Mockito.eq(fileNoSafe));
 		verifyZeroInteractions(esServices);
 		verifyZeroInteractions(mdBuilder);
@@ -236,10 +224,11 @@ public class L0SlicesConsumerTest {
 	 * @throws IgnoredFileException
 	 * @throws FilePathException
 	 * @throws MetadataExtractionException
+	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testReceiveWhenExtractionFailed()
-			throws ObjectStorageException, FilePathException, IgnoredFileException, MetadataExtractionException {
+	public void testReceiveWhenExtractionFailed() throws ObjectStorageException, FilePathException,
+			IgnoredFileException, MetadataExtractionException, ObsUnknownObjectException {
 		doThrow(new MetadataExtractionException("product-name", new Exception("erro"))).when(mdBuilder)
 				.buildL0SliceOutputFileMetadata(Mockito.any(), Mockito.any());
 		L0OutputFileDescriptor desc = new L0OutputFileDescriptor();
@@ -247,9 +236,8 @@ public class L0SlicesConsumerTest {
 		desc.setProductName("file_no_safe.xml");
 
 		controller.receive(new KafkaL0SliceDto("product-name", "file_no_safe.xml"));
-		verify(s3Services, times(1)).exist(Mockito.eq("file_no_safe.xml"));
-		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
-				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
+		verify(s3Services, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("file_no_safe.xml"),
+				Mockito.eq(LOCAL_DIRECTORY));
 		verify(fileDescriptorBuilder, times(1)).buildL0OutputFileDescriptor(Mockito.eq(fileNoSafe));
 		verify(mdBuilder, times(1)).buildL0SliceOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
 		verifyZeroInteractions(esServices);
@@ -272,9 +260,8 @@ public class L0SlicesConsumerTest {
 		metadata.put("url", "file_no_safe.xml");
 
 		controller.receive(new KafkaL0SliceDto("product-name", "file_no_safe.xml"));
-		verify(s3Services, times(1)).exist(Mockito.eq("file_no_safe.xml"));
-		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
-				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
+		verify(s3Services, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("file_no_safe.xml"),
+				Mockito.eq(LOCAL_DIRECTORY));
 		verify(fileDescriptorBuilder, times(1)).buildL0OutputFileDescriptor(Mockito.eq(fileNoSafe));
 		verify(mdBuilder, times(1)).buildL0SliceOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
 		verify(esServices, times(1)).isMetadataExist(Mockito.any());
@@ -292,9 +279,8 @@ public class L0SlicesConsumerTest {
 		doThrow(new Exception("error")).when(esServices).createMetadata(Mockito.any());
 
 		controller.receive(new KafkaL0SliceDto("product-name", "file_no_safe.xml"));
-		verify(s3Services, times(1)).exist(Mockito.eq("file_no_safe.xml"));
-		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
-				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
+		verify(s3Services, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("file_no_safe.xml"),
+				Mockito.eq(LOCAL_DIRECTORY));
 		verify(fileDescriptorBuilder, times(1)).buildL0OutputFileDescriptor(Mockito.eq(fileNoSafe));
 		verify(mdBuilder, times(1)).buildL0SliceOutputFileMetadata(Mockito.any(), Mockito.eq(fileNoSafe));
 		verify(esServices, times(1)).isMetadataExist(Mockito.any());
@@ -318,9 +304,8 @@ public class L0SlicesConsumerTest {
 		assertTrue(fileNoSafe.exists());
 
 		controller.receive(new KafkaL0SliceDto("product-name", "file_no_safe.xml"));
-		verify(s3Services, times(1)).exist(Mockito.eq("file_no_safe.xml"));
-		verify(s3Services, times(1)).getFile(Mockito.eq("file_no_safe.xml"),
-				Mockito.eq(LOCAL_DIRECTORY + "file_no_safe.xml"));
+		verify(s3Services, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("file_no_safe.xml"),
+				Mockito.eq(LOCAL_DIRECTORY));
 		verify(fileDescriptorBuilder, times(1)).buildL0OutputFileDescriptor(Mockito.eq(fileNoSafe));
 		verify(mdBuilder, times(1)).buildL0SliceOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileNoSafe));
 		verify(esServices, times(1)).isMetadataExist(Mockito.any());
@@ -344,9 +329,8 @@ public class L0SlicesConsumerTest {
 		assertTrue(fileSafe.exists());
 
 		controller.receive(new KafkaL0SliceDto("product-name", "file_safe.safe"));
-		verify(s3Services, times(1)).exist(Mockito.eq("file_safe.safe/manifest.safe"));
-		verify(s3Services, times(1)).getFile(Mockito.eq("file_safe.safe/manifest.safe"),
-				Mockito.eq(LOCAL_DIRECTORY + "file_safe.safe/manifest.safe"));
+		verify(s3Services, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_PRODUCT),
+				Mockito.eq("file_safe.safe/manifest.safe"), Mockito.eq(LOCAL_DIRECTORY));
 		verify(fileDescriptorBuilder, times(1)).buildL0OutputFileDescriptor(Mockito.eq(fileSafe));
 		verify(mdBuilder, times(1)).buildL0SliceOutputFileMetadata(Mockito.eq(desc), Mockito.eq(fileSafe));
 		verify(esServices, times(1)).isMetadataExist(Mockito.any());

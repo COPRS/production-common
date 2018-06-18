@@ -11,23 +11,20 @@ import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorC
 /**
  * Test the exception ObjectStorageException
  */
-public class ObjectStorageExceptionTest {
+public class ObsUnknownObjectExceptionTest {
 
 	/**
 	 * Test getters and constructors
 	 */
 	@Test
 	public void testGettersConstructors() {
-		Throwable cause = new Exception("cause exception");
-		ObjectStorageException exception = new ObjectStorageException(ProductFamily.L0_ACN,
-				"key-obs", cause);
+		ObsUnknownObjectException exception = new ObsUnknownObjectException(ProductFamily.L0_ACN,
+				"key-obs");
 		
-		assertEquals(ErrorCode.OBS_ERROR, exception.getCode());
+		assertEquals(ErrorCode.OBS_UNKOWN_OBJ, exception.getCode());
 		assertEquals("key-obs", exception.getProductName());
 		assertEquals("key-obs", exception.getKey());
 		assertEquals(ProductFamily.L0_ACN, exception.getFamily());
-		assertEquals(cause, exception.getCause());
-		assertTrue(exception.getMessage().contains("cause exception"));
 	}
 
 	/**
@@ -35,15 +32,12 @@ public class ObjectStorageExceptionTest {
 	 */
 	@Test
 	public void testLogMessage() {
-		Throwable cause = new Exception("cause exception");
-		ObjectStorageException exception = new ObjectStorageException(ProductFamily.EDRS_SESSION,
-				"key-obs", cause);
+		ObsUnknownObjectException exception = new ObsUnknownObjectException(ProductFamily.EDRS_SESSION,
+				"key-obs");
 		
 		String log = exception.getLogMessage();
 		assertTrue(log.contains("[family EDRS_SESSION]"));
 		assertTrue(log.contains("[key key-obs]"));
-		assertTrue(log.contains("[msg "));
-		assertTrue(log.contains("cause exception]"));
 	}
 
 }
