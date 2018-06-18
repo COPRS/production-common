@@ -137,7 +137,10 @@ public class S3ObsServices {
                 for (S3ObjectSummary objectSummary : objectListing
                         .getObjectSummaries()) {
                     String key = objectSummary.getKey();
-                    String localFileName = directoryPath + File.separator;
+                    String localFileName = directoryPath;
+                    if (!localFileName.endsWith(File.separator)) {
+                        localFileName += File.separator;
+                    }
                     if (ignoreFolders) {
                         localFileName =
                                 localFileName + (new File(key)).getName();

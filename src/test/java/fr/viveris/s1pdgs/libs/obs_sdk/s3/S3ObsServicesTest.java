@@ -316,7 +316,7 @@ public class S3ObsServicesTest {
     public void testNominaldownloadObjectsWithPrefixIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
         int nbObjects = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
-                "test", true);
+                "test/", true);
         assertEquals(3, nbObjects);
         verify(s3client, times(3)).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
