@@ -1,6 +1,6 @@
 FROM obs-sdk:SPDGS-210 as build_lib_obs
 WORKDIR /app
-COPY libs/ /app/libs
+COPY /app/libs/ /app/libs/
 
 FROM maven:3.5.2-jdk-8-alpine as build
 WORKDIR /app
