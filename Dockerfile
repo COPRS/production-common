@@ -12,6 +12,6 @@ WORKDIR /app
 RUN mkdir libs && \ 
     mkdir libs/spdgs-sdk && \ 
     mkdir libs/spdgs-sdk/obs-clients && \ 
-    mkdir libs/spdgs-sdk/obs-clients/1.0.0 && \ 
+    mkdir libs/spdgs-sdk/obs-clients/1.0.0
 COPY --from=build /app/pom.xml libs/spdgs-sdk/obs-clients/1.0.0/obs-clients-1.0.0.pom
 COPY --from=build /app/target/obs-clients-1.0.0.jar libs/spdgs-sdk/obs-clients/1.0.0/obs-clients-1.0.0.jar
