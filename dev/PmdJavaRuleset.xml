@@ -65,7 +65,7 @@
    <rule ref="rulesets/java/controversial.xml/AvoidUsingShortType"/>
    <rule ref="rulesets/java/controversial.xml/AvoidUsingVolatile"/>
    <rule ref="rulesets/java/design.xml/BadComparison"/>
-   <rule ref="rulesets/java/javabeans.xml/BeanMembersShouldSerialize"/>
+   <!-- <rule ref="rulesets/java/javabeans.xml/BeanMembersShouldSerialize"/> -->
    <rule ref="rulesets/java/basic.xml/BigIntegerInstantiation"/>
    <rule ref="rulesets/java/basic.xml/BooleanInstantiation"/>
    <rule ref="rulesets/java/basic.xml/BrokenNullCheck"/>
@@ -167,6 +167,7 @@
    <rule ref="rulesets/java/junit.xml/JUnitTestsShouldIncludeAssert"/>
    <rule ref="rulesets/java/migrating.xml/JUnitUseExpected"/>
    <rule ref="rulesets/java/basic.xml/JumbledIncrementer"/>
+   <rule ref="rulesets/java/coupling.xml/LawOfDemeter"/>
    <rule ref="rulesets/java/j2ee.xml/LocalHomeNamingConvention"/>
    <rule ref="rulesets/java/j2ee.xml/LocalInterfaceSessionNamingConvention"/>
    <!-- <rule ref="rulesets/java/optimizations.xml/LocalVariableCouldBeFinal"/> -->

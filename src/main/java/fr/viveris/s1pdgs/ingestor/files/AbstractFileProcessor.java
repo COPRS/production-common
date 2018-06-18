@@ -12,9 +12,10 @@ import fr.viveris.s1pdgs.ingestor.exceptions.FileRuntimeException;
 import fr.viveris.s1pdgs.ingestor.exceptions.FileTerminatedException;
 import fr.viveris.s1pdgs.ingestor.exceptions.IgnoredFileException;
 import fr.viveris.s1pdgs.ingestor.files.model.FileDescriptor;
+import fr.viveris.s1pdgs.ingestor.files.model.ProductFamily;
 import fr.viveris.s1pdgs.ingestor.files.services.AbstractFileDescriptorService;
-import fr.viveris.s1pdgs.ingestor.files.services.ObsServices;
 import fr.viveris.s1pdgs.ingestor.kafka.PublicationServices;
+import fr.viveris.s1pdgs.ingestor.obs.ObsService;
 
 public abstract class AbstractFileProcessor<T> {
 
@@ -26,7 +27,7 @@ public abstract class AbstractFileProcessor<T> {
 	/**
 	 * Amazon S3 service for configuration files
 	 */
-	private final ObsServices obsService;
+	private final ObsService obsService;
 
 	/**
 	 * KAFKA producer on the topic "metadata"
@@ -37,12 +38,18 @@ public abstract class AbstractFileProcessor<T> {
 	 * Builder of file descriptors
 	 */
 	private final AbstractFileDescriptorService extractor;
+	
+	/**
+	 * Product family processed
+	 */
+	private final ProductFamily family;
 
-	public AbstractFileProcessor(final ObsServices obsService, final PublicationServices<T> publisher,
-			final AbstractFileDescriptorService extractor) {
+	public AbstractFileProcessor(final ObsService obsService, final PublicationServices<T> publisher,
+			final AbstractFileDescriptorService extractor, final ProductFamily family) {
 		this.obsService = obsService;
 		this.publisher = publisher;
 		this.extractor = extractor;
+		this.family = family;
 	}
 
 	/**
@@ -70,8 +77,8 @@ public abstract class AbstractFileProcessor<T> {
 					productName = descriptor.getProductName();
 					// Store in object storage
 					LOGGER.info("[MONITOR] [step 1] [productName {}] Starting uploading file in OBS", productName);
-					if (!obsService.exist(descriptor.getKeyObjectStorage())) {
-						obsService.uploadFile(descriptor.getKeyObjectStorage(), file);
+					if (!obsService.exist(family, descriptor.getKeyObjectStorage())) {
+						obsService.uploadFile(family, descriptor.getKeyObjectStorage(), file);
 					} else {
 						throw new AlreadyExistObjectStorageException(descriptor.getProductName(),
 								new Exception("File already exist in object storage"));

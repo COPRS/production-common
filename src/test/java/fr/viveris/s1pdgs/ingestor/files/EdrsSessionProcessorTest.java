@@ -11,8 +11,8 @@ import fr.viveris.s1pdgs.ingestor.files.model.EdrsSessionFileType;
 import fr.viveris.s1pdgs.ingestor.files.model.FileDescriptor;
 import fr.viveris.s1pdgs.ingestor.files.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.ingestor.files.services.EdrsSessionFileDescriptorService;
-import fr.viveris.s1pdgs.ingestor.files.services.ObsServices;
 import fr.viveris.s1pdgs.ingestor.kafka.KafkaSessionProducer;
+import fr.viveris.s1pdgs.ingestor.obs.ObsService;
 
 public class EdrsSessionProcessorTest {
 
@@ -20,7 +20,7 @@ public class EdrsSessionProcessorTest {
 	 * Amazon S3 service for configuration files
 	 */
 	@Mock
-	private ObsServices obsService;
+	private ObsService obsService;
 
 	/**
 	 * KAFKA producer on the topic "metadata"

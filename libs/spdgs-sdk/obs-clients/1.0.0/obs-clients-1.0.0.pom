@@ -1,13 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>spdgs</groupId>
-	<artifactId>s1pdgs-ingestor</artifactId>
-	<version>0.1.0</version>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>spdgs-sdk</groupId>
+	<artifactId>obs-clients</artifactId>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<name>Spring Boot Docker For Template App</name>
+	<name>Object Storage Client</name>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<version.commons.logging>1.2</version.commons.logging>
+		<version.commons.configuration>1.10</version.commons.configuration>
+		<version.aws-java-sdk>1.11.271</version.aws-java-sdk>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jacoco.version>0.7.5.201505241946</jacoco.version>
+	</properties>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -16,101 +24,58 @@
 		<relativePath />
 	</parent>
 
-	<properties>
-		<java.version>1.8</java.version>
-		<aws-java-sdk.version>1.11.271</aws-java-sdk.version>
-		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-ingestor-app</project.build.finalName>
-		<project.artifactId>s1pdgs-ingestor-app</project.artifactId>
-		<jacoco.version>0.7.5.201505241946</jacoco.version>
-	</properties>
-
-	<repositories>
-		<repository>
-			<id>in-project</id>
-			<name>In Project Repo</name>
-			<url>file://${project.basedir}/libs</url>
-		</repository>
-	</repositories>
-    
 	<dependencies>
-
+		<!-- Parsing properties -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-integration</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.integration</groupId>
-			<artifactId>spring-integration-ftp</artifactId>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>${version.commons.configuration}</version>
 		</dependency>
 
+		<!-- Logging -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.vaadin.external.google</groupId>
-					<artifactId>android-json</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.dataformat</groupId>
-			<artifactId>jackson-dataformat-yaml</artifactId>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>${version.commons.logging}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka-test</artifactId>
-			<scope>test</scope>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
 
+		<!-- Amazon S3 -->
 		<dependency>
-			<groupId>spdgs-sdk</groupId>
-			<artifactId>obs-clients</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-
-		<!-- <dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>${aws-java-sdk.version}</version>
-		</dependency> -->
-
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20171018</version>
+			<version>${version.aws-java-sdk}</version>
 		</dependency>
 
+		<!-- Spring utils -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+
+		<!-- Tests -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
@@ -122,21 +87,8 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-surefire-plugin</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -146,7 +98,7 @@
 					<effort>Max</effort>
 					<threshold>Low</threshold>
 					<maxRank>15</maxRank>
-					<includeTests>false</includeTests>
+					<includeTests>true</includeTests>
 				</configuration>
 				<executions>
 					<execution>
@@ -229,6 +181,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<description>Template java application with Spring Boot and Docker</description>
 </project>
