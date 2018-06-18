@@ -36,17 +36,6 @@ ftp:
     upload-fixed-rate: 5000
     cache-max-capacity: 70
  
-#Object Storage
-storage:
-  user:
-    id: MEF5PCBPTXHKOUTCKW3G
-    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
-  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
-  region: eu-west-0
-  buckets:
-    auxiliary-files: auxiliary-files
-    session-files: session-files
- 
 # File
 file:
   auxiliary-files:
