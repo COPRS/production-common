@@ -10,11 +10,14 @@ import com.amazonaws.Protocol;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.retry.PredefinedBackoffStrategies;
+import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import fr.viveris.s1pdgs.libs.obs_sdk.ObsFamily;
 import fr.viveris.s1pdgs.libs.obs_sdk.ObsServiceException;
+import fr.viveris.s1pdgs.libs.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 
 /**
  * The amazon S3 keys
@@ -180,11 +183,22 @@ public class S3Configuration {
      * @return
      */
     public AmazonS3 defaultS3Client() {
+        // Credentials
         BasicAWSCredentials awsCreds =
                 new BasicAWSCredentials(configuration.getString(USER_ID),
                         configuration.getString(USER_SECRET));
+        
+        // Client configuration (protocol and retry policy)
         ClientConfiguration clientConfig = new ClientConfiguration();
         clientConfig.setProtocol(Protocol.HTTP);
+        RetryPolicy retryPolicy = new RetryPolicy(
+                new SDKCustomDefaultRetryCondition(10),
+                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(100,
+                        500, 20000),
+                3, true);
+        clientConfig.setRetryPolicy(retryPolicy);
+        
+        // Amazon s3 client
         return AmazonS3ClientBuilder.standard()
                 .withClientConfiguration(clientConfig)
                 .withEndpointConfiguration(new EndpointConfiguration(
