@@ -1,5 +1,10 @@
+FROM obs-sdk:SPDGS-210 as build_lib_obs
+WORKDIR /app
+COPY libs/ /app/libs
+
 FROM maven:3.5.2-jdk-8-alpine as build
 WORKDIR /app
+COPY --from=build /app/libs/ /app/libs/
 COPY pom.xml /app
 RUN mvn dependency:go-offline
 COPY dev/ /app/dev/
