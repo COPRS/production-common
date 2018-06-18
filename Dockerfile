@@ -3,7 +3,7 @@ WORKDIR /app
 
 FROM maven:3.5.2-jdk-8-alpine as build
 WORKDIR /app
-COPY --from=build /app/libs/ /app/libs/
+COPY --from=build_lib_obs /app/libs/ /app/libs/
 COPY pom.xml /app
 RUN mvn dependency:go-offline
 COPY dev/ /app/dev/
