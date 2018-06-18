@@ -9,4 +9,9 @@ RUN mkdir /app/test && \
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/spgds-obs-client-sdk-1.0.0.jar spgds-obs-client-sdk-1.0.0.jar
+RUN mkdir libs && \ 
+    mkdir libs/spdgs-sdk && \ 
+    mkdir libs/spdgs-sdk/obs-clients && \ 
+    mkdir libs/spdgs-sdk/obs-clients/1.0.0 && \ 
+COPY --from=build /app/pom.xml libs/spdgs-sdk/obs-clients/1.0.0/spgds-obs-client-sdk-1.0.0.pom
+COPY --from=build /app/target/spgds-obs-client-sdk-1.0.0.jar libs/spdgs-sdk/obs-clients/1.0.0/spgds-obs-client-sdk-1.0.0.jar
