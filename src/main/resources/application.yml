@@ -20,17 +20,6 @@ kafka:
   enable-consumer:
     slice: ${archives_kafka_enable-consumer_slices:true}
     report: ${archives_kafka_enable-consumer_reports:false}
-
-#Object Storage
-storage:
-  user:
-    id: ${storage_user_id}
-    secret: ${storage_user_secret}
-  endpoint: ${storage_endpoint}
-  region: ${storage_region}
-  buckets:
-    l0-slices: ${storage_buckets_l0-slices:l0-slices}
-    l1-slices: ${storage_buckets_l1-slices:l1-slices}
     
 # File
 file:

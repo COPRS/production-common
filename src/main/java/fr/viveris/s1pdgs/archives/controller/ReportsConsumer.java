@@ -20,7 +20,7 @@ public class ReportsConsumer {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LogManager.getLogger(SlicesConsumer.class);
+	private static final Logger LOGGER = LogManager.getLogger(ReportsConsumer.class);
 	/**
 	 * Path to the shared volume
 	 */
