@@ -9,6 +9,7 @@ RUN mvn dependency:go-offline
 COPY dev/ /app/dev/
 COPY src/ /app/src/
 COPY config/ /app/config/
+COPY test /app/test/
 RUN mvn -B package
 
 FROM openjdk:8-jre-alpine
