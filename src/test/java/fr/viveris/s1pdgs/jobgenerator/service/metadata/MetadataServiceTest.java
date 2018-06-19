@@ -45,6 +45,9 @@ public class MetadataServiceTest {
 	private final static String METADATA_HOST = "localhost:8082";
 
 	private MetadataService service;
+	
+	private int nbRetry = 3; 
+	private int tempoRetry = 3; 
 
 	/**
 	 * Test set up
@@ -56,7 +59,7 @@ public class MetadataServiceTest {
 		// Mcokito
 		MockitoAnnotations.initMocks(this);
 
-		service = new MetadataService(restTemplate, METADATA_HOST);
+		service = new MetadataService(restTemplate, METADATA_HOST, nbRetry, tempoRetry);
 	}
 
 	// --------------------------------------------------

@@ -8,6 +8,8 @@ logging:
  
 metadata:
   host: ${catalog_rest_host:metadata-catalog-svc:8080}
+  rest-api_nb-retry: ${job_rest-api_nb-retry:3}
+  rest-api_tempo-retry-ms: ${job_rest-api_tempo-retry-ms:1000}
   
 kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
