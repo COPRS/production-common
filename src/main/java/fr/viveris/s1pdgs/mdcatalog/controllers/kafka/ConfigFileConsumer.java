@@ -16,15 +16,15 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.ConfigFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.ProductFamily;
 import fr.viveris.s1pdgs.mdcatalog.model.ResumeDetails;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaConfigFileDto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
-import fr.viveris.s1pdgs.mdcatalog.services.s3.ConfigFilesS3Services;
+import fr.viveris.s1pdgs.mdcatalog.services.s3.ObsService;
 
 /**
  * KAFKA consumer. Consume on a topic defined in configuration file
@@ -53,7 +53,7 @@ public class ConfigFileConsumer {
 	/**
 	 * Amazon S3 service for configuration files
 	 */
-	private final ConfigFilesS3Services configFilesS3Services;
+	private final ObsService obsService;
 
 	/**
 	 * Metadata builder
@@ -93,7 +93,7 @@ public class ConfigFileConsumer {
 	 * @param topicName
 	 */
 	@Autowired
-	public ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
+	public ConfigFileConsumer(final EsServices esServices, final ObsService obsService,
 			@Value("${file.auxiliary-files.local-directory}") final String localDirectory,
 			final MetadataExtractorConfig extractorConfig,
 			@Value("${file.manifest-filename}") final String manifestFilename,
@@ -105,7 +105,7 @@ public class ConfigFileConsumer {
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
-		this.configFilesS3Services = configFilesS3Services;
+		this.obsService = obsService;
 		this.manifestFilename = manifestFilename;
 		this.fileWithManifestExt = fileWithManifestExt;
 		this.topicName = topicName;
@@ -124,16 +124,16 @@ public class ConfigFileConsumer {
 	 * @param fileWithManifestExt
 	 * @param topicName
 	 */
-	protected ConfigFileConsumer(final EsServices esServices, final ConfigFilesS3Services configFilesS3Services,
-			final String localDirectory, final MetadataExtractorConfig extractorConfig,
-			final FileDescriptorBuilder fileDescriptorBuilder, final MetadataBuilder metadataBuilder,
-			final String manifestFilename, final String fileWithManifestExt, final String topicName) {
+	protected ConfigFileConsumer(final EsServices esServices, final ObsService obsService, final String localDirectory,
+			final MetadataExtractorConfig extractorConfig, final FileDescriptorBuilder fileDescriptorBuilder,
+			final MetadataBuilder metadataBuilder, final String manifestFilename, final String fileWithManifestExt,
+			final String topicName) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = fileDescriptorBuilder;
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = metadataBuilder;
 		this.esServices = esServices;
-		this.configFilesS3Services = configFilesS3Services;
+		this.obsService = obsService;
 		this.manifestFilename = manifestFilename;
 		this.fileWithManifestExt = fileWithManifestExt;
 		this.topicName = topicName;
@@ -162,11 +162,7 @@ public class ConfigFileConsumer {
 			// Upload file
 			LOGGER.info("[MONITOR] [step 1] [auxiliary] [productName {}] Downloading file {}", dto.getProductName(),
 					keyObs);
-			if (!configFilesS3Services.exist(keyObs)) {
-				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(), "CONFIG",
-						"No such Auxiliary files in object storage");
-			}
-			metadataFile = configFilesS3Services.getFile(keyObs, this.localDirectory + keyObs);
+			metadataFile = obsService.downloadFile(ProductFamily.AUXILIARY_FILE, keyObs, this.localDirectory);
 
 			// Extract metadata from name
 			step++;
@@ -195,7 +191,8 @@ public class ConfigFileConsumer {
 					dto.getProductName(), ErrorCode.INTERNAL_ERROR.getCode(), new ResumeDetails(topicName, dto),
 					e.getMessage());
 		} finally {
-			String log = "[MONITOR] [step 5] [auxiliary] [productName " + dto.getProductName() + "] Removing downloaded file";
+			String log = "[MONITOR] [step 5] [auxiliary] [productName " + dto.getProductName()
+					+ "] Removing downloaded file";
 			this.deleteFile(metadataFile, log);
 		}
 		LOGGER.info("[MONITOR] [step 0] [auxiliary] [productName {}] End", dto.getProductName());

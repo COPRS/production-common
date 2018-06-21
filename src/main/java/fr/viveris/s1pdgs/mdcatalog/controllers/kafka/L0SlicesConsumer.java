@@ -13,15 +13,15 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.L0OutputFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.ProductFamily;
 import fr.viveris.s1pdgs.mdcatalog.model.ResumeDetails;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaL0SliceDto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
-import fr.viveris.s1pdgs.mdcatalog.services.s3.L0SlicesS3Services;
+import fr.viveris.s1pdgs.mdcatalog.services.s3.ObsService;
 
 @Service
 public class L0SlicesConsumer {
@@ -39,7 +39,7 @@ public class L0SlicesConsumer {
 	/**
 	 * Amazon S3 service for configuration files
 	 */
-	private final L0SlicesS3Services l0SlicesS3Services;
+	private final ObsService obsService;
 
 	/**
 	 * Elasticsearch services
@@ -84,7 +84,7 @@ public class L0SlicesConsumer {
 	 * @param topicName
 	 */
 	@Autowired
-	public L0SlicesConsumer(final EsServices esServices, final L0SlicesS3Services l0SlicesS3Services,
+	public L0SlicesConsumer(final EsServices esServices, final ObsService obsService,
 			@Value("${file.l0-slices.local-directory}") final String localDirectory,
 			final MetadataExtractorConfig extractorConfig,
 			@Value("${file.manifest-filename}") final String manifestFilename,
@@ -96,7 +96,7 @@ public class L0SlicesConsumer {
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
-		this.l0SlicesS3Services = l0SlicesS3Services;
+		this.obsService = obsService;
 		this.manifestFilename = manifestFilename;
 		this.fileWithManifestExt = fileWithManifestExt;
 		this.topicName = topicName;
@@ -114,16 +114,16 @@ public class L0SlicesConsumer {
 	 * @param fileWithManifestExt
 	 * @param topicName
 	 */
-	protected L0SlicesConsumer(final EsServices esServices, final L0SlicesS3Services l0SlicesS3Services,
-			final String localDirectory, final MetadataExtractorConfig extractorConfig,
-			final FileDescriptorBuilder fileDescriptorBuilder, final MetadataBuilder metadataBuilder,
-			final String manifestFilename, final String fileWithManifestExt, final String topicName) {
+	protected L0SlicesConsumer(final EsServices esServices, final ObsService obsService, final String localDirectory,
+			final MetadataExtractorConfig extractorConfig, final FileDescriptorBuilder fileDescriptorBuilder,
+			final MetadataBuilder metadataBuilder, final String manifestFilename, final String fileWithManifestExt,
+			final String topicName) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = fileDescriptorBuilder;
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = metadataBuilder;
 		this.esServices = esServices;
-		this.l0SlicesS3Services = l0SlicesS3Services;
+		this.obsService = obsService;
 		this.manifestFilename = manifestFilename;
 		this.fileWithManifestExt = fileWithManifestExt;
 		this.topicName = topicName;
@@ -146,11 +146,7 @@ public class L0SlicesConsumer {
 			// Upload file
 			LOGGER.info("[MONITOR] [step 1] [l0-slice] [productName {}] Downloading file {}", dto.getProductName(),
 					keyObs);
-			if (!l0SlicesS3Services.exist(keyObs)) {
-				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(), "CONFIG",
-						"No such Auxiliary files in object storage");
-			}
-			metadataFile = this.l0SlicesS3Services.getFile(keyObs, this.localDirectory + keyObs);
+			metadataFile = this.obsService.downloadFile(ProductFamily.L0_PRODUCT, keyObs, this.localDirectory);
 
 			// Extract metadata from name
 			step++;

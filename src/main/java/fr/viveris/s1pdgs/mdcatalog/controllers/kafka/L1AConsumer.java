@@ -13,15 +13,15 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.mdcatalog.config.MetadataExtractorConfig;
 import fr.viveris.s1pdgs.mdcatalog.model.L1OutputFileDescriptor;
+import fr.viveris.s1pdgs.mdcatalog.model.ProductFamily;
 import fr.viveris.s1pdgs.mdcatalog.model.ResumeDetails;
 import fr.viveris.s1pdgs.mdcatalog.model.dto.KafkaL1ADto;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
-import fr.viveris.s1pdgs.mdcatalog.model.exception.FilePathException;
 import fr.viveris.s1pdgs.mdcatalog.services.es.EsServices;
 import fr.viveris.s1pdgs.mdcatalog.services.files.FileDescriptorBuilder;
 import fr.viveris.s1pdgs.mdcatalog.services.files.MetadataBuilder;
-import fr.viveris.s1pdgs.mdcatalog.services.s3.L1AcnsS3Services;
+import fr.viveris.s1pdgs.mdcatalog.services.s3.ObsService;
 
 /**
  * KAFKA consumer. Consume on a topic defined in L1 Annotaions
@@ -50,7 +50,7 @@ public class L1AConsumer {
 	/**
 	 * Amazon S3 service for configuration files
 	 */
-	private final L1AcnsS3Services l1AS3Services;
+	private final ObsService obsService;
 
 	/**
 	 * Metadata builder
@@ -90,7 +90,7 @@ public class L1AConsumer {
 	 * @param topicName
 	 */
 	@Autowired
-	public L1AConsumer(final EsServices esServices, final L1AcnsS3Services l1AS3Services,
+	public L1AConsumer(final EsServices esServices, final ObsService obsService,
 			@Value("${file.l1-acns.local-directory}") final String localDirectory,
 			final MetadataExtractorConfig extractorConfig,
 			@Value("${file.manifest-filename}") final String manifestFilename,
@@ -102,12 +102,12 @@ public class L1AConsumer {
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = new MetadataBuilder(this.extractorConfig);
 		this.esServices = esServices;
-		this.l1AS3Services = l1AS3Services;
+		this.obsService = obsService;
 		this.manifestFilename = manifestFilename;
 		this.fileWithManifestExt = fileWithManifestExt;
 		this.topicName = topicName;
 	}
-	
+
 	/**
 	 * 
 	 * @param esServices
@@ -120,19 +120,16 @@ public class L1AConsumer {
 	 * @param fileWithManifestExt
 	 * @param topicName
 	 */
-	protected L1AConsumer(final EsServices esServices, final L1AcnsS3Services l1AS3Services,
-			final String localDirectory,
-			final MetadataExtractorConfig extractorConfig,
-			final FileDescriptorBuilder fileDescriptorBuilder, final MetadataBuilder metadataBuilder,
-			final String manifestFilename,
-			final String fileWithManifestExt,
+	protected L1AConsumer(final EsServices esServices, final ObsService obsService, final String localDirectory,
+			final MetadataExtractorConfig extractorConfig, final FileDescriptorBuilder fileDescriptorBuilder,
+			final MetadataBuilder metadataBuilder, final String manifestFilename, final String fileWithManifestExt,
 			final String topicName) {
 		this.localDirectory = localDirectory;
 		this.fileDescriptorBuilder = fileDescriptorBuilder;
 		this.extractorConfig = extractorConfig;
 		this.mdBuilder = metadataBuilder;
 		this.esServices = esServices;
-		this.l1AS3Services = l1AS3Services;
+		this.obsService = obsService;
 		this.manifestFilename = manifestFilename;
 		this.fileWithManifestExt = fileWithManifestExt;
 		this.topicName = topicName;
@@ -160,11 +157,7 @@ public class L1AConsumer {
 			// Upload file
 			LOGGER.info("[MONITOR] [step 1] [l1-acn] [productName {}] Downloading file {}", dto.getProductName(),
 					keyObs);
-			if (!l1AS3Services.exist(keyObs)) {
-				throw new FilePathException(dto.getProductName(), dto.getKeyObjectStorage(), "CONFIG",
-						"No such Auxiliary files in object storage");
-			}
-			metadataFile = l1AS3Services.getFile(keyObs, this.localDirectory + keyObs);
+			metadataFile = obsService.downloadFile(ProductFamily.L1_ACN, keyObs, this.localDirectory);
 
 			// Extract metadata from name
 			step++;
@@ -191,7 +184,8 @@ public class L1AConsumer {
 					dto.getProductName(), ErrorCode.INTERNAL_ERROR.getCode(), new ResumeDetails(topicName, dto),
 					e.getMessage());
 		} finally {
-			String log = "[MONITOR] [step 5] [l1-acn] [productName " + dto.getProductName() + "] Removing downloaded file";
+			String log = "[MONITOR] [step 5] [l1-acn] [productName " + dto.getProductName()
+					+ "] Removing downloaded file";
 			this.deleteFile(metadataFile, log);
 		}
 		LOGGER.info("[MONITOR] [step 0] [l1-acn] [productName {}] End", dto.getProductName());
