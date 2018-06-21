@@ -25,6 +25,14 @@
 		<jacoco.version>0.7.5.201505241946</jacoco.version>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>in-project</id>
+			<name>In Project Repo</name>
+			<url>file://${project.basedir}/libs</url>
+		</repository>
+	</repositories>
+    
 	<dependencies>
 
 		<dependency>
@@ -49,7 +57,7 @@
 			<groupId>org.springframework.integration</groupId>
 			<artifactId>spring-integration-ftp</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -61,20 +69,20 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
-	    <dependency>
-	        <groupId>org.springframework.boot</groupId>
-	        <artifactId>spring-boot-starter-log4j2</artifactId>
-	    </dependency>
-	    <dependency>
-		   <groupId>com.fasterxml.jackson.dataformat</groupId>
-		   <artifactId>jackson-dataformat-yaml</artifactId>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
 		</dependency>
 		<dependency>
-		   <groupId>com.fasterxml.jackson.core</groupId>
-		   <artifactId>jackson-databind</artifactId>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
@@ -84,19 +92,25 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
+			<groupId>spdgs-sdk</groupId>
+			<artifactId>obs-clients</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<!-- <dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>${aws-java-sdk.version}</version>
-		</dependency>
-		
+		</dependency> -->
+
 		<dependency>
-		    <groupId>org.json</groupId>
-		    <artifactId>json</artifactId>
-		    <version>20171018</version>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20171018</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
@@ -132,7 +146,7 @@
 					<effort>Max</effort>
 					<threshold>Low</threshold>
 					<maxRank>15</maxRank>
-					<includeTests>true</includeTests>
+					<includeTests>false</includeTests>
 				</configuration>
 				<executions>
 					<execution>

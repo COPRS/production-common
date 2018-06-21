@@ -1,14 +1,14 @@
 package fr.viveris.s1pdgs.ingestor.files;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.viveris.s1pdgs.ingestor.files.model.FileDescriptor;
+import fr.viveris.s1pdgs.ingestor.files.model.ProductFamily;
 import fr.viveris.s1pdgs.ingestor.files.model.dto.KafkaEdrsSessionDto;
 import fr.viveris.s1pdgs.ingestor.files.services.EdrsSessionFileDescriptorService;
-import fr.viveris.s1pdgs.ingestor.files.services.ObsServices;
 import fr.viveris.s1pdgs.ingestor.kafka.KafkaSessionProducer;
+import fr.viveris.s1pdgs.ingestor.obs.ObsService;
 
 /**
  * 
@@ -23,9 +23,9 @@ public class SessionFilesProcessor extends AbstractFileProcessor<KafkaEdrsSessio
 	 * @param extractor
 	 */
 	@Autowired
-	public SessionFilesProcessor(@Qualifier("sessionFilesS3Services") final ObsServices obsService,
-			final KafkaSessionProducer publisher, final EdrsSessionFileDescriptorService extractor) {
-		super(obsService, publisher, extractor);
+	public SessionFilesProcessor(final ObsService obsService, final KafkaSessionProducer publisher,
+			final EdrsSessionFileDescriptorService extractor) {
+		super(obsService, publisher, extractor, ProductFamily.EDRS_SESSION);
 	}
 
 	/**

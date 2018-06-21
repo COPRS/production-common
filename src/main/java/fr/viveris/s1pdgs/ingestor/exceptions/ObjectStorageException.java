@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.ingestor.exceptions;
 
+import fr.viveris.s1pdgs.ingestor.files.model.ProductFamily;
+
 /**
  * Exception raised when error occurs when accessing to the object storage
  * 
@@ -13,7 +15,7 @@ public class ObjectStorageException extends FileRuntimeException {
 	/**
 	 * Bucket name
 	 */
-	protected final String bucket;
+	protected final ProductFamily family;
 
 	/**
 	 * Key in object storage
@@ -22,16 +24,17 @@ public class ObjectStorageException extends FileRuntimeException {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param productName
 	 * @param key
 	 * @param bucket
 	 * @param cause
 	 */
-	public ObjectStorageException(final String productName, final String key, final String bucket,
+	public ObjectStorageException(final String productName, final String key, final ProductFamily family,
 			final Throwable cause) {
 		super(ErrorCode.OBS_ERROR, productName, cause.getMessage(), cause);
 		this.key = key;
-		this.bucket = bucket;
+		this.family = family;
 	}
 
 	/**
@@ -39,14 +42,14 @@ public class ObjectStorageException extends FileRuntimeException {
 	 */
 	@Override
 	public String getLogMessage() {
-		return String.format("[bucket %s] [key %s] [msg %s]", this.bucket, this.key, getMessage());
+		return String.format("[family %s] [key %s] [msg %s]", this.family, this.key, getMessage());
 	}
 
 	/**
 	 * @return the bucket
 	 */
-	public String getBucket() {
-		return bucket;
+	public ProductFamily getFamily() {
+		return family;
 	}
 
 	/**

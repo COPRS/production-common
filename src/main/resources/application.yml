@@ -16,18 +16,6 @@ kafka:
   topic:
     auxiliary-files: ${kafka_topic_auxiliary_files:t-pdgs-auxiliary-files}
     edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
-
-#Object Storage
-storage:
-  user:
-    id: ${storage_user_id}
-    secret: ${storage_user_secret}
-  endpoint: ${storage_endpoint}
-  region: ${storage_region}
-  buckets:
-    auxiliary-files: ${storage_buckets_auxiliary-files:auxiliary-files}
-    session-files: ${storage_buckets_session-files:session-files}
- 
  
 # File
 file:

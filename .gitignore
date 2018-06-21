@@ -6,6 +6,7 @@
 /target/
 /reports/
 /bin/
+/libs/
 .project
 .classpath
 .jdk8
