@@ -9,6 +9,8 @@ logging:
  
 metadata:
   host: localhost:8080
+  rest-api_nb-retry: 3
+  rest-api_tempo-retry-ms: 1000
 
 # KAFKA
 kafka:
