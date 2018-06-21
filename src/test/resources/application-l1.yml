@@ -7,13 +7,11 @@ kafka:
     
 process:
   level: L1
-  timeout-process-one-task-s: 480
-  timeout-process-all-tasks-s: 900
-  timeout-process-stop-s: 300
-  timeout-process-check-stop-s: 60
-  timeout-batch-s3-upload-s: 120
-  size-batch-s3-upload:  5
-  timeout-batch-s3-download-s: 120
-  size-batch-s3-download: 5
-  wait-active-process-nb-max-loop: 60
-  wait-active-process-tempo-s: 10
+  tm-proc-one-task-s: 480
+  tm-proc-all-tasks-s: 900
+  tm-proc-stop-s: 300
+  tm-proc-check-stop-s: 60
+  size-batch-upload:  5
+  size-batch-download: 5
+  wap-nb-max-loop: 60
+  wap-tempo-s: 10

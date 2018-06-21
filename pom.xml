@@ -20,8 +20,17 @@
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-wrapper-app</project.build.finalName>
 		<project.artifactId>s1pdgs-wrapper-app</project.artifactId>
-		<jacoco.version>0.7.5.201505241946</jacoco.version>
+		<jacoco.version>0.8.1</jacoco.version>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>in-project</id>
+			<name>In Project Repo</name>
+			<url>file://${project.basedir}/libs</url>
+		</repository>
+	</repositories>
+	
 	<dependencies>
 
 		<dependency>
@@ -81,11 +90,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>${aws-java-sdk.version}</version>
+			<groupId>spdgs-sdk</groupId>
+			<artifactId>obs-clients</artifactId>
+			<version>1.0.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
@@ -118,6 +129,14 @@
 			<groupId>com.github.grantneale</groupId>
 			<artifactId>kafka-lag-based-assignor</artifactId>
 			<version>1.1.0</version>
+		</dependency>
+		
+		
+        <dependency>
+			<groupId>nl.jqno.equalsverifier</groupId>
+			<artifactId>equalsverifier</artifactId>
+			<version>2.4.6</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -169,7 +188,7 @@
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
-					<includeTests>true</includeTests>
+					<includeTests>false</includeTests>
 				</configuration>
 				<executions>
 					<execution>

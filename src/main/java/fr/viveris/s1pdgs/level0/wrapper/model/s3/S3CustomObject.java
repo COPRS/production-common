@@ -1,93 +1,87 @@
 package fr.viveris.s1pdgs.level0.wrapper.model.s3;
 
+import java.util.Objects;
+
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
 
+/**
+ * @author Viveris technlogies
+ */
 public class S3CustomObject {
-	
-	private ProductFamily family;
-	
-	private String key;
 
-	/**
-	 * @param family
-	 * @param key
-	 */
-	public S3CustomObject(ProductFamily family, String key) {
-		this.family = family;
-		this.key = key;
-	}
+    /**
+     * Product family
+     */
+    private final ProductFamily family;
 
-	/**
-	 * @return the family
-	 */
-	public ProductFamily getFamily() {
-		return family;
-	}
+    /**
+     * Key object storage
+     */
+    private final String key;
 
-	/**
-	 * @param family the family to set
-	 */
-	public void setFamily(ProductFamily family) {
-		this.family = family;
-	}
+    /**
+     * @param family
+     * @param key
+     */
+    public S3CustomObject(final ProductFamily family, final String key) {
+        this.family = family;
+        this.key = key;
+    }
 
-	/**
-	 * @return the key
-	 */
-	public String getKey() {
-		return key;
-	}
+    /**
+     * @return the family
+     */
+    public ProductFamily getFamily() {
+        return family;
+    }
 
-	/**
-	 * @param key the key to set
-	 */
-	public void setKey(String key) {
-		this.key = key;
-	}
+    /**
+     * @return the key
+     */
+    public String getKey() {
+        return key;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "S3CustomObject [family=" + family + ", key=" + key + "]";
-	}
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return String.format("{family: %s, key: %s}", family, key);
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((family == null) ? 0 : family.hashCode());
-		result = prime * result + ((key == null) ? 0 : key.hashCode());
-		return result;
-	}
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toStringForExtendedClasses() {
+        return String.format("family: %s, key: %s", family, key);
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		S3CustomObject other = (S3CustomObject) obj;
-		if (family == null) {
-			if (other.family != null)
-				return false;
-		} else if (!family.equals(other.family))
-			return false;
-		if (key == null) {
-			if (other.key != null)
-				return false;
-		} else if (!key.equals(other.key))
-			return false;
-		return true;
-	}
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(family, key);
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            S3CustomObject other = (S3CustomObject) obj;
+            // field comparison
+            ret = Objects.equals(key, other.key)
+                    && Objects.equals(family, other.family);
+        }
+        return ret;
+    }
 
 }

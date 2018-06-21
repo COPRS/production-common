@@ -1,43 +1,64 @@
 package fr.viveris.s1pdgs.level0.wrapper.model.exception;
 
+import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
+
 /**
  * Exception concerning the object storage
- * @author Cyrielle Gailliard
- *
+ * 
+ * @author Viveris Technologies
  */
-public class ObsUnknownObjectException extends CodedException {
+public class ObsUnknownObjectException extends AbstractCodedException {
 
-	/**
-	 * Serial UID
-	 */
-	private static final long serialVersionUID = -3680895691846942569L;
-	
-	private String key;
-	
-	private String bucket;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6993780109942662268L;
 
-	public ObsUnknownObjectException(String key, String bucket, String message) {
-		super(ErrorCode.OBS_UNKOWN_OBJ, message);
-		this.key = key;
-		this.bucket = bucket;
-	}
+    /**
+     * Key in object storage
+     */
+    private final String key;
 
-	/**
-	 * @return the key
-	 */
-	public String getKey() {
-		return key;
-	}
+    /**
+     * Bucket in object storage
+     */
+    private final ProductFamily family;
 
-	/**
-	 * @return the bucket
-	 */
-	public String getBucket() {
-		return bucket;
-	}
+    /**
+     * Constructor
+     * 
+     * @param key
+     * @param bucket
+     * @param message
+     */
+    public ObsUnknownObjectException(final ProductFamily family,
+            final String key) {
+        super(ErrorCode.OBS_UNKOWN_OBJ, "Object not found");
+        this.key = key;
+        this.family = family;
+    }
 
-	public String getLogMessage() {
-		return String.format("[bucket %s] [key %s] [msg %s]", this.bucket, this.key, getMessage());
-	}
+    /**
+     * @return the key
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * @return the family
+     */
+    public ProductFamily getFamily() {
+        return family;
+    }
+
+    /**
+     * @see AbstractCodedException#getLogMessage()
+     */
+    @Override
+    public String getLogMessage() {
+        return String.format("[family %s] [key %s] [msg %s]", family, key,
+                getMessage());
+    }
 
 }

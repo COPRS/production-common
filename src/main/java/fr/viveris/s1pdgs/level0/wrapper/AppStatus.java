@@ -1,162 +1,257 @@
 package fr.viveris.s1pdgs.level0.wrapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * Application status
+ * 
+ * @author Viveris Technologies
+ */
 @Component
 public class AppStatus {
 
-	private final WrapperStatus status;
-	
-	private boolean shallBeStopped;
-	
-	@Value("${status.max-error-counter}")
-	private int maxErrorCounter;
+    /**
+     * Status
+     */
+    private final WrapperStatus status;
 
-	public AppStatus() {
-		this.status = new WrapperStatus();
-		shallBeStopped = false;
-	}
+    /**
+     * Maximal number of consecutive errors
+     */
+    private final int maxErrorCounter;
 
-	/**
-	 * @return the status
-	 */
-	public synchronized WrapperStatus getStatus() {
-		return status;
-	}
+    /**
+     * Indicate if the application shall be stopped
+     */
+    private boolean shallBeStopped;
 
-	public synchronized void setWaiting() {
-		this.status.setWaiting();
-	}
+    /**
+     * Constructor
+     * 
+     * @param maxErrorCounter
+     */
+    @Autowired
+    public AppStatus(
+            @Value("${status.max-error-counter}") final int maxErrorCounter) {
+        this.status = new WrapperStatus();
+        this.shallBeStopped = false;
+        this.maxErrorCounter = maxErrorCounter;
+    }
 
-	public synchronized void setProcessing() {
-		this.status.setProcessing();
-	}
+    /**
+     * @return the status
+     */
+    public synchronized WrapperStatus getStatus() {
+        return status;
+    }
 
-	public synchronized void setStopping() {
-		if (!this.status.isProcessing()) {
-			this.setShallBeStopped(true);
-		}
-		this.status.setStopping();
-	}
+    /**
+     * Set application as waiting
+     */
+    public synchronized void setWaiting() {
+        this.status.setWaiting();
+    }
 
-	public synchronized void setError() {
-		this.status.setError(maxErrorCounter);
-	}
+    /**
+     * Set application as processing
+     */
+    public synchronized void setProcessing() {
+        this.status.setProcessing();
+    }
 
-	/**
-	 * @return the shallBeStopped
-	 */
-	public synchronized boolean isShallBeStopped() {
-		return shallBeStopped;
-	}
+    /**
+     * Set application as stopping
+     */
+    public synchronized void setStopping() {
+        if (!this.status.isProcessing()) {
+            this.setShallBeStopped(true);
+        }
+        this.status.setStopping();
+    }
 
-	/**
-	 * @param shallBeStopped the shallBeStopped to set
-	 */
-	public synchronized void setShallBeStopped(boolean shallBeStopped) {
-		this.shallBeStopped = shallBeStopped;
-	}
+    /**
+     * Set application as error
+     */
+    public synchronized void setError() {
+        this.status.setError(maxErrorCounter);
+    }
 
-	public class WrapperStatus {
+    /**
+     * @return the shallBeStopped
+     */
+    public synchronized boolean isShallBeStopped() {
+        return shallBeStopped;
+    }
 
-		private AppState state;
+    /**
+     * @param shallBeStopped
+     *            the shallBeStopped to set
+     */
+    public synchronized void setShallBeStopped(final boolean shallBeStopped) {
+        this.shallBeStopped = shallBeStopped;
+    }
 
-		private long dateLastChangeMs;
+    /**
+     * Internal status
+     * 
+     * @author Viveris Technologies
+     */
+    public class WrapperStatus {
 
-		private int errorCounter;
+        /**
+         * State
+         */
+        private AppState state;
 
-		public WrapperStatus() {
-			this.state = AppState.WAITING;
-			errorCounter = 0;
-			dateLastChangeMs = System.currentTimeMillis();
-		}
+        /**
+         * Date of the last change of the status (old status != new status)
+         */
+        private long dateLastChangeMs;
 
-		/**
-		 * @return the status
-		 */
-		public AppState getState() {
-			return state;
-		}
+        /**
+         * Number of consecutive errors
+         */
+        private int errorCounter;
 
-		/**
-		 * @return the timeSinceLastChange
-		 */
-		public long getDateLastChangeMs() {
-			return dateLastChangeMs;
-		}
+        /**
+         * Constrcutor
+         */
+        public WrapperStatus() {
+            this.state = AppState.WAITING;
+            errorCounter = 0;
+            dateLastChangeMs = System.currentTimeMillis();
+        }
 
-		/**
-		 * @return the errorCounter
-		 */
-		public int getErrorCounter() {
-			return errorCounter;
-		}
+        /**
+         * @return the status
+         */
+        public AppState getState() {
+            return state;
+        }
 
-		public void setWaiting() {
-			if (!isStopping() && !isFatalError()) {
-				state = AppState.WAITING;
-				dateLastChangeMs = System.currentTimeMillis();
-			}
-		}
+        /**
+         * @return the timeSinceLastChange
+         */
+        public long getDateLastChangeMs() {
+            return dateLastChangeMs;
+        }
 
-		public void setProcessing() {
-			if (!isStopping() && !isFatalError()) {
-				state = AppState.PROCESSING;
-				dateLastChangeMs = System.currentTimeMillis();
-				errorCounter = 0;
-			}
-		}
+        /**
+         * @return the errorCounter
+         */
+        public int getErrorCounter() {
+            return errorCounter;
+        }
 
-		public void setStopping() {
-			state = AppState.STOPPING;
-			dateLastChangeMs = System.currentTimeMillis();
-			errorCounter = 0;
-		}
+        /**
+         * Set status WAITING
+         */
+        public void setWaiting() {
+            if (!isStopping() && !isFatalError()) {
+                state = AppState.WAITING;
+                dateLastChangeMs = System.currentTimeMillis();
+            }
+        }
 
-		public void setError(int maxErrorCounter) {
-			if (!isStopping()) {
-				state = AppState.ERROR;
-				dateLastChangeMs = System.currentTimeMillis();
-				errorCounter++;
-				if (errorCounter >= maxErrorCounter) {
-					setFatalError();
-				}
-			}
-		}
+        /**
+         * Set status PROCESSING
+         */
+        public void setProcessing() {
+            if (!isStopping() && !isFatalError()) {
+                state = AppState.PROCESSING;
+                dateLastChangeMs = System.currentTimeMillis();
+                errorCounter = 0;
+            }
+        }
 
-		public void setFatalError() {
-			state = AppState.FATALERROR;
-			dateLastChangeMs = System.currentTimeMillis();
-		}
+        /**
+         * Set status STOPPING
+         */
+        public void setStopping() {
+            state = AppState.STOPPING;
+            dateLastChangeMs = System.currentTimeMillis();
+            errorCounter = 0;
+        }
 
-		public boolean isWaiting() {
-			return state == AppState.WAITING;
-		}
+        /**
+         * Set status ERROR
+         */
+        public void setError(final int maxErrorCounter) {
+            if (!isStopping()) {
+                state = AppState.ERROR;
+                dateLastChangeMs = System.currentTimeMillis();
+                errorCounter++;
+                if (errorCounter >= maxErrorCounter) {
+                    setFatalError();
+                }
+            }
+        }
 
-		public boolean isProcessing() {
-			return state == AppState.PROCESSING;
-		}
+        /**
+         * Set status FATALERROR
+         */
+        public void setFatalError() {
+            state = AppState.FATALERROR;
+            dateLastChangeMs = System.currentTimeMillis();
+        }
 
-		public boolean isStopping() {
-			return state == AppState.STOPPING;
-		}
+        /**
+         * Indicate if state is waiting
+         * 
+         * @return
+         */
+        public boolean isWaiting() {
+            return state == AppState.WAITING;
+        }
 
-		public boolean isError() {
-			return state == AppState.ERROR;
-		}
+        /**
+         * Indicate if state is PROCESSING
+         * 
+         * @return
+         */
+        public boolean isProcessing() {
+            return state == AppState.PROCESSING;
+        }
 
-		public boolean isFatalError() {
-			return state == AppState.FATALERROR;
-		}
+        /**
+         * Indicate if state is STOPPING
+         * 
+         * @return
+         */
+        public boolean isStopping() {
+            return state == AppState.STOPPING;
+        }
 
-	}
-	
-	@Scheduled(fixedDelayString="${status.delete-fixed-delay-ms}")
-	public void forceStopping() {
-		if (this.isShallBeStopped()) {
-			System.exit(0);
-		}
-	}
+        /**
+         * Indicate if state is ERROR
+         * 
+         * @return
+         */
+        public boolean isError() {
+            return state == AppState.ERROR;
+        }
+
+        /**
+         * Indicate if state is FATALERROR
+         * 
+         * @return
+         */
+        public boolean isFatalError() {
+            return state == AppState.FATALERROR;
+        }
+
+    }
+
+    /**
+     * Stop the application if someone asks for forcing stop
+     */
+    @Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms}")
+    public void forceStopping() {
+        if (this.isShallBeStopped()) {
+            System.exit(0);
+        }
+    }
 }

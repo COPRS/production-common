@@ -10,87 +10,139 @@ import org.apache.logging.log4j.LogManager;
 import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobPoolDto;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.ProcessTimeoutException;
 
+/**
+ * Executor of all process: - pool one after the other - all tasks of the same
+ * pool in parallel
+ * 
+ * @author Viveris Technologies
+ */
 public class PoolExecutorCallable implements Callable<Boolean> {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(PoolExecutorCallable.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOGGER =
+            LogManager.getLogger(PoolExecutorCallable.class);
 
-	private boolean active = false;
+    /**
+     * Indicate if the working directory is ready and the processes can be
+     * launched
+     */
+    private boolean active;
 
-	private final List<PoolProcessor> processors;
+    /**
+     * List of processor (one per pool)
+     */
+    protected final List<PoolProcessor> processors;
 
-	private String prefixMonitorLogs;
+    /**
+     * Prefix for monitor logs
+     */
+    private final String prefixMonitorLogs;
 
-	private final ApplicationProperties properties;
+    /**
+     * Application properties
+     */
+    private final ApplicationProperties properties;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param numberOfPoolSize
-	 * @param pools
-	 */
-	public PoolExecutorCallable(final ApplicationProperties properties, JobDto job, String prefixMonitorLogs) {
-		this.properties = properties;
-		this.prefixMonitorLogs = prefixMonitorLogs;
-		int counter = 0;
-		this.processors = new ArrayList<>(job.getPools().size());
-		for (JobPoolDto pool : job.getPools()) {
-			counter++;
-			this.processors.add(new PoolProcessor(pool, job.getJobOrder(), job.getWorkDirectory(),
-					String.format("%s [pool %d]", prefixMonitorLogs, counter),
-					this.properties.getTimeoutProcessOneTaskS()));
-		}
-	}
+    /**
+     * Will create one PoolProcessor per pool
+     * 
+     * @param properties
+     * @param job
+     * @param prefixMonitorLogs
+     */
+    public PoolExecutorCallable(final ApplicationProperties properties,
+            final JobDto job, final String prefixLogs) {
+        this.active = false;
+        this.properties = properties;
+        this.prefixMonitorLogs = prefixLogs;
+        int counter = 0;
+        this.processors = new ArrayList<>(job.getPools().size());
+        for (JobPoolDto pool : job.getPools()) {
+            counter++;
+            this.processors.add(new PoolProcessor(pool, job.getJobOrder(),
+                    job.getWorkDirectory(),
+                    String.format("%s [pool %d]", prefixMonitorLogs, counter),
+                    properties.getTmProcOneTaskS()));
+        }
+    }
 
-	public Boolean call() throws CodedException {
-		int counter = 0;
-		try {
-			// Wait for being active (i.e. wait for download of at least one input)
-			while (counter < properties.getWaitActiveProcessNbMaxLoop() && !isActive()
-					&& !Thread.currentThread().isInterrupted()) {
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("Wait for processor executor being active");
-				}
-				Thread.sleep(properties.getWaitActiveProcessTempoS() * 1000);
-				counter++;
-			}
-		} catch (InterruptedException ie) {
-			throw new InternalErrorException(ie.getMessage(), ie);
-		}
+    /**
+     * Process execution: <br/>
+     * - Wait for being active (see {@link ApplicationProperties} wap fields)
+     * <br/>
+     * - For each pool, launch in parallel the tasks executions
+     */
+    public Boolean call() throws AbstractCodedException {
+        int counter = 0;
+        try {
+            // Wait for being active (i.e. wait for download of at least one
+            // input)
+            while (counter < properties.getWapNbMaxLoop() && !isActive()
+                    && !isInterrupted()) {
+                Thread.sleep(properties.getWapTempoS() * 1000);
+                counter++;
+            }
+        } catch (InterruptedException ie) {
+            throw new InternalErrorException(ie.getMessage(), ie);
+        }
 
-		if (Thread.currentThread().isInterrupted()) {
-			return false;
-		}
+        if (!isInterrupted()) {
+            LOGGER.debug(
+                    "counter {} isActive {} isInterrupted {} getWaitActiveProcessNbMaxLoop {}",
+                    counter, isActive(), isInterrupted(),
+                    properties.getWapNbMaxLoop());
 
-		LOGGER.debug("counter {} isActive {} isInterrupted {} getWaitActiveProcessNbMaxLoop {}", counter, isActive(),
-				Thread.currentThread().isInterrupted(), properties.getWaitActiveProcessNbMaxLoop());
+            if (!isActive()) {
+                throw new ProcessTimeoutException(
+                        "Process executor not set as active after "
+                                + counter * properties.getWapTempoS()
+                                + " seconds");
+            }
 
-		if (!isActive()) {
-			throw new ProcessTimeoutException("Process executor not set as active after "
-					+ counter * properties.getWaitActiveProcessTempoS() + " seconds");
-		}
+            LOGGER.info("{} Start launching processes", prefixMonitorLogs);
+            for (PoolProcessor poolProcessor : processors) {
+                if (isInterrupted()) {
+                    throw new InternalErrorException(
+                            "Current thread has been interrupted");
+                }
+                poolProcessor.process();
+            }
+            return true;
+        }
+        return false;
 
-		LOGGER.info("{} Start launching processes", this.prefixMonitorLogs);
-		for (PoolProcessor poolProcessor : processors) {
-			if (Thread.currentThread().isInterrupted()) {
-				throw new InternalErrorException("Current thread has been interrupted");
-			}
-			poolProcessor.process();
-		}
-		return true;
-	}
+    }
 
-	public synchronized boolean isActive() {
-		return this.active;
-	}
+    /**
+     * chekc if thread is interrupted
+     * 
+     * @return
+     */
+    private boolean isInterrupted() {
+        return Thread.currentThread().isInterrupted();
+    }
 
-	public synchronized void setActive(boolean active) {
-		this.active = active;
-	}
+    /**
+     * Check if executor is active or not
+     * 
+     * @return
+     */
+    public synchronized boolean isActive() {
+        return this.active;
+    }
+
+    /**
+     * Set the executor as active or not
+     * 
+     * @param active
+     */
+    public synchronized void setActive(final boolean active) {
+        this.active = active;
+    }
 }

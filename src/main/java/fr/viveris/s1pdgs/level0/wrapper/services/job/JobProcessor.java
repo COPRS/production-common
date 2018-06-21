@@ -24,270 +24,486 @@ import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
 import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.config.DevProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.CodedException.ErrorCode;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.AbstractCodedException.ErrorCode;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
 import fr.viveris.s1pdgs.level0.wrapper.services.file.InputDownloader;
 import fr.viveris.s1pdgs.level0.wrapper.services.file.OutputProcessor;
 import fr.viveris.s1pdgs.level0.wrapper.services.kafka.OutputProcuderFactory;
-import fr.viveris.s1pdgs.level0.wrapper.services.s3.S3Factory;
+import fr.viveris.s1pdgs.level0.wrapper.services.s3.ObsService;
 import fr.viveris.s1pdgs.level0.wrapper.services.task.PoolExecutorCallable;
 
+/**
+ * Process a jobs
+ * <li>Launch in a thread the processes execution which will wait for being
+ * active once the minimal inputs are download</li>
+ * <li>Create necessary directories and files, download inputs and inform
+ * process executor when it can start</li>
+ * <li>Wait for processes execution end</li>
+ * <li>Process outputs</li>
+ * 
+ * @author Viveris Technologies
+ */
 public class JobProcessor implements Callable<Boolean> {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(JobProcessor.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOGGER =
+            LogManager.getLogger(JobProcessor.class);
 
-	private final JobDto job;
+    /**
+     * Identifier for default monitor logs
+     */
+    protected static final String LOG_DFT = "default";
+    /**
+     * Identifier for processes execution monitor logs
+     */
+    protected static final String LOG_PROCESS = "process";
+    /**
+     * Identifier for input download monitor logs
+     */
+    protected static final String LOG_INPUT = "input";
+    /**
+     * Identifier for output processing monitor logs
+     */
+    protected static final String LOG_OUTPUT = "output";
+    /**
+     * Identifier for erasing monitor logs
+     */
+    protected static final String LOG_ERASE = "erase";
+    /**
+     * Identifier for resuming monitor logs
+     */
+    protected static final String LOG_RESUME = "resume";
+    /**
+     * Identifier for status monitor logs
+     */
+    protected static final String LOG_STATUS = "status";
+    /**
+     * Identifier for end monitor logs
+     */
+    protected static final String LOG_END = "end";
+    /**
+     * Identifier for error monitor logs
+     */
+    protected static final String LOG_ERROR = "error";
 
-	private final AppStatus appStatus;
+    /**
+     * Processed job
+     */
+    private final JobDto job;
 
-	private final InputDownloader inputDownloader;
+    /**
+     * Application status
+     */
+    private final AppStatus appStatus;
 
-	private final OutputProcessor outputProcessor;
+    /**
+     * Input downloader
+     */
+    private final InputDownloader inputDownloader;
 
-	private final DevProperties devProperties;
+    /**
+     * Output processsor
+     */
+    private final OutputProcessor outputProcessor;
 
-	private final ApplicationProperties properties;
+    /**
+     * Development properties
+     */
+    private final DevProperties devProperties;
 
-	private final ExecutorService poolProcessExecutorService;
-	private final CompletionService<Boolean> poolProcessCompletionService;
-	private final PoolExecutorCallable poolProcessorExecutor;
+    /**
+     * Application properties
+     */
+    private final ApplicationProperties properties;
 
-	// KAFKA listener endpoint registry
-	private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
-	private final String kafkaListenerContainerId;
+    /**
+     * Level processes executor service
+     */
+    private final ExecutorService procExecutorSrv;
 
-	private final String prefixLog;
-	private final String prefixLogPoolProcessor;
-	private final String prefixLogInputDownloader;
-	private final String prefixLogPoolOutputProcessor;
-	private final String prefixLogErasing;
-	private final String prefixLogResuming;
-	private final String prefixLogStatus;
-	private final String prefixLogEnd;
-	private final String prefixLogError;
+    /**
+     * Level processes completion service
+     */
+    private final CompletionService<Boolean> procCompletionSrv;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param job
-	 * @param appStatus
-	 * @param devProperties
-	 * @param kafkaListenerContainerId
-	 * @param kafkaListenerEndpointRegistry
-	 * @param s3Factory
-	 * @param outputProcuderFactory
-	 * @param sizeS3UploadBatch
-	 * @param sizeS3DownloadBatch
-	 * @param outputListFile
-	 */
-	public JobProcessor(final JobDto job, final AppStatus appStatus, final ApplicationProperties properties,
-			final DevProperties devProperties, final String kafkaListenerContainerId,
-			final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry, final S3Factory s3Factory,
-			final OutputProcuderFactory outputProcuderFactory, final String outputListFile) {
-		super();
+    /**
+     * Level processes executor
+     */
+    private final PoolExecutorCallable procExecutor;
 
-		this.job = job;
-		this.appStatus = appStatus;
-		this.devProperties = devProperties;
-		this.properties = properties;
-		this.kafkaListenerEndpointRegistry = kafkaListenerEndpointRegistry;
-		this.kafkaListenerContainerId = kafkaListenerContainerId;
+    /**
+     * Registry of kafka consumers
+     */
+    private final KafkaListenerEndpointRegistry kafkaRegistry;
 
-		// initalize logs
-		this.prefixLog = "[MONITOR]";
-		this.prefixLogPoolProcessor = String.format("%s [step 3] [productName %s] [workDir %s]", this.prefixLog,
-				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogInputDownloader = String.format("%s [step 2] [productName %s] [workDir %s]", this.prefixLog,
-				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogPoolOutputProcessor = String.format("%s [step 4] [productName %s] [workDir %s]", this.prefixLog,
-				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogErasing = String.format("%s [step 5] [productName %s] [workDir %s]", this.prefixLog,
-				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogResuming = String.format("%s [step 7] [productName %s] [workDir %s]", this.prefixLog,
-				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogStatus = String.format("%s [step 6] [productName %s] [workDir %s]", this.prefixLog,
-				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogEnd = String.format("%s [step 0] [productName %s] [workDir %s]", this.prefixLog,
-				job.getProductIdentifier(), job.getWorkDirectory());
-		this.prefixLogError = String.format("[productName %s] [workDir %s]", job.getProductIdentifier(),
-				job.getWorkDirectory());
+    /**
+     * Id of the consumer
+     */
+    private final String kafkaContainerId;
 
-		// Initialize the pool processor executor
-		this.poolProcessorExecutor = new PoolExecutorCallable(this.properties, this.job, this.prefixLogPoolProcessor);
-		this.poolProcessExecutorService = Executors.newSingleThreadExecutor();
-		this.poolProcessCompletionService = new ExecutorCompletionService<>(poolProcessExecutorService);
+    /**
+     * @param job
+     * @param appStatus
+     * @param properties
+     * @param devProperties
+     * @param kafkaContainerId
+     * @param kafkaRegistry
+     * @param obsService
+     * @param procuderFactory
+     * @param outputListFile
+     */
+    public JobProcessor(final JobDto job, final AppStatus appStatus,
+            final ApplicationProperties properties,
+            final DevProperties devProperties, final String kafkaContainerId,
+            final KafkaListenerEndpointRegistry kafkaRegistry,
+            final ObsService obsService,
+            final OutputProcuderFactory procuderFactory,
+            final String outputListFile) {
+        this.job = job;
+        this.appStatus = appStatus;
+        this.devProperties = devProperties;
+        this.properties = properties;
+        this.kafkaRegistry = kafkaRegistry;
+        this.kafkaContainerId = kafkaContainerId;
 
-		// Initialize the input downloader
-		inputDownloader = new InputDownloader(s3Factory, this.job.getWorkDirectory(), this.job.getInputs(),
-				this.properties.getSizeBatchS3Download(), this.prefixLogInputDownloader, poolProcessorExecutor,
-				this.properties.getLevel());
+        // Initialize the pool processor executor
+        this.procExecutor = new PoolExecutorCallable(this.properties, this.job,
+                getPrefixMonitorLog(LOG_PROCESS, this.job));
+        this.procExecutorSrv = Executors.newSingleThreadExecutor();
+        this.procCompletionSrv =
+                new ExecutorCompletionService<>(procExecutorSrv);
 
-		// Initiliaze the outpt processor
-		outputProcessor = new OutputProcessor(s3Factory, outputProcuderFactory, this.job.getWorkDirectory(),
-				this.job.getOutputs(), outputListFile, this.properties.getSizeBatchS3Upload(),
-				this.prefixLogPoolOutputProcessor);
+        // Initialize the input downloader
+        inputDownloader = new InputDownloader(obsService,
+                this.job.getWorkDirectory(), this.job.getInputs(),
+                this.properties.getSizeBatchDownload(),
+                getPrefixMonitorLog(LOG_INPUT, this.job), procExecutor,
+                this.properties.getLevel());
 
-	}
+        // Initiliaze the outpt processor
+        outputProcessor = new OutputProcessor(obsService, procuderFactory,
+                this.job.getWorkDirectory(), this.job.getOutputs(),
+                outputListFile, this.properties.getSizeBatchUpload(),
+                getPrefixMonitorLog(LOG_OUTPUT, this.job));
 
-	/**
-	 * Execute a job
-	 */
-	@Override
-	public Boolean call() throws Exception {
-		int step = 2;
-		boolean poolProcessorInProgress = false;
+    }
 
-		try {
-			step = 3;
-			if (devProperties.getStepsActivation().get("execution")) {
-				this.processPoolProcesses();
-				poolProcessorInProgress = true;
-			} else {
-				LOGGER.info("{} Executing processes bypassed", this.prefixLogPoolProcessor);
-			}
+    /**
+     * Constructor used for tests
+     * 
+     * @param job
+     * @param appStatus
+     * @param properties
+     * @param devProperties
+     * @param kafkaContainerId
+     * @param kafkaRegistry
+     * @param inputDownloader
+     * @param outputProcessor
+     * @param procExecutor
+     */
+    protected JobProcessor(final JobDto job, final AppStatus appStatus,
+            final ApplicationProperties properties,
+            final DevProperties devProperties, final String kafkaContainerId,
+            final KafkaListenerEndpointRegistry kafkaRegistry,
+            final InputDownloader inputDownloader,
+            final OutputProcessor outputProcessor,
+            final PoolExecutorCallable procExecutor) {
+        super();
 
-			step = 2;
-			if (devProperties.getStepsActivation().get("download")) {
-				this.processInputs();
-			} else {
-				LOGGER.info("{} Preparing local working directory bypassed", this.prefixLogInputDownloader);
-			}
+        this.job = job;
+        this.appStatus = appStatus;
+        this.devProperties = devProperties;
+        this.properties = properties;
+        this.kafkaRegistry = kafkaRegistry;
+        this.kafkaContainerId = kafkaContainerId;
+        this.procExecutor = procExecutor;
+        this.inputDownloader = inputDownloader;
+        this.outputProcessor = outputProcessor;
+        this.procExecutorSrv = Executors.newSingleThreadExecutor();
+        this.procCompletionSrv =
+                new ExecutorCompletionService<>(procExecutorSrv);
+    }
 
-			step++;
-			if (devProperties.getStepsActivation().get("execution")) {
-				this.waitForPoolProcessesEnding();
-				poolProcessorInProgress = false;
-			} else {
-				LOGGER.info("{} Executing processes bypassed", this.prefixLogPoolProcessor);
-			}
+    /**
+     * Get the prefix for monitor logs according the step
+     * 
+     * @param step
+     * @return
+     */
+    private static String getPrefixMonitorLog(final String step,
+            final JobDto job) {
+        String ret;
+        switch (step) {
+            case LOG_ERROR:
+                ret = String.format("[productName %s] [workDir %s]",
+                        job.getProductIdentifier(), job.getWorkDirectory());
+                break;
+            case LOG_PROCESS:
+                ret = String.format(
+                        "[MONITOR] [step 3] [productName %s] [workDir %s]",
+                        job.getProductIdentifier(), job.getWorkDirectory());
+                break;
+            case LOG_INPUT:
+                ret = String.format(
+                        "[MONITOR] [step 2] [productName %s] [workDir %s]",
+                        job.getProductIdentifier(), job.getWorkDirectory());
+                break;
+            case LOG_OUTPUT:
+                ret = String.format(
+                        "[MONITOR] [step 4] [productName %s] [workDir %s]",
+                        job.getProductIdentifier(), job.getWorkDirectory());
+                break;
+            case LOG_ERASE:
+                ret = String.format(
+                        "[MONITOR] [step 5] [productName %s] [workDir %s]",
+                        job.getProductIdentifier(), job.getWorkDirectory());
+                break;
+            case LOG_RESUME:
+                ret = String.format(
+                        "[MONITOR] [step 7] [productName %s] [workDir %s]",
+                        job.getProductIdentifier(), job.getWorkDirectory());
+                break;
+            case LOG_STATUS:
+                ret = String.format(
+                        "[MONITOR] [step 6] [productName %s] [workDir %s]",
+                        job.getProductIdentifier(), job.getWorkDirectory());
+                break;
+            case LOG_END:
+                ret = String.format(
+                        "[MONITOR] [step 0] [productName %s] [workDir %s]",
+                        job.getProductIdentifier(), job.getWorkDirectory());
+                break;
+            default:
+                ret = "[MONITOR]";
+                break;
+        }
+        return ret;
+    }
 
-			step++;
-			if (devProperties.getStepsActivation().get("upload")) {
-				this.processOutputs();
-			} else {
-				LOGGER.info("{} Processing l0 outputs bypasssed", prefixLogPoolOutputProcessor);
-			}
+    /**
+     * Get the prefix for monitor logs according the step for this class
+     * instance
+     * 
+     * @param step
+     * @return
+     */
+    protected String getPrefixMonitorLog(final String step) {
+        return getPrefixMonitorLog(step, job);
+    }
 
-		} catch (CodedException e) {
-			// Log occurred error
-			LOGGER.error("{} [step {}] {} [code {}] {}", this.prefixLog, step, this.prefixLogError,
-					e.getCode().getCode(), e.getLogMessage());
-			this.appStatus.setError();
+    /**
+     * Execute a job
+     */
+    @Override
+    public Boolean call() throws Exception {
+        int step = 2;
+        boolean poolProcessorInProgress = false;
 
-		} finally {
+        try {
+            step = 3;
+            if (devProperties.getStepsActivation().get("execution")) {
+                this.processPoolProcesses();
+                poolProcessorInProgress = true;
+            } else {
+                LOGGER.info("{} Executing processes bypassed",
+                        getPrefixMonitorLog(LOG_PROCESS));
+            }
 
-			if (poolProcessorInProgress) {
-				this.terminateProcessesExecution();
-			}
+            step = 2;
+            if (devProperties.getStepsActivation().get("download")) {
+                this.processInputs();
+            } else {
+                LOGGER.info("{} Preparing local working directory bypassed",
+                        getPrefixMonitorLog(LOG_INPUT));
+            }
 
-			if (devProperties.getStepsActivation().get("erasing")) {
-				this.eraseLocalDirectory();
-			} else {
-				LOGGER.info("{} Erasing local working directory bypassed", this.prefixLogErasing);
-			}
-			
-			if (this.checkingStatus()) {
-				this.resumeConsumer();
-			}
-		}
+            step++;
+            if (devProperties.getStepsActivation().get("execution")) {
+                this.waitForPoolProcessesEnding();
+                poolProcessorInProgress = false;
+            } else {
+                LOGGER.info("{} Executing processes bypassed",
+                        getPrefixMonitorLog(LOG_PROCESS));
+            }
 
-		LOGGER.info("{} End L0 job generation", this.prefixLogEnd);
+            step++;
+            if (devProperties.getStepsActivation().get("upload")) {
+                this.processOutputs();
+            } else {
+                LOGGER.info("{} Processing l0 outputs bypasssed",
+                        getPrefixMonitorLog(LOG_OUTPUT));
+            }
 
-		return true;
-	}
+        } catch (AbstractCodedException e) {
+            // Log occurred error
+            LOGGER.error("{} [step {}] {} [code {}] {}",
+                    getPrefixMonitorLog(LOG_DFT), step,
+                    getPrefixMonitorLog(LOG_ERROR), e.getCode().getCode(),
+                    e.getLogMessage());
+            this.appStatus.setError();
 
-	private void processPoolProcesses() {
-		LOGGER.info("{} Starting process executor", this.prefixLogPoolProcessor);
-		this.poolProcessCompletionService.submit(this.poolProcessorExecutor);
-	}
+        } finally {
 
-	private void waitForPoolProcessesEnding() throws InterruptedException, CodedException {
-		if (!Thread.currentThread().isInterrupted()) {
-			try {
-				this.poolProcessCompletionService.take().get(this.properties.getTimeoutProcessAllTasksS(),
-						TimeUnit.SECONDS);
-			} catch (ExecutionException e) {
-				if (e.getCause() instanceof CodedException) {
-					throw (CodedException) e.getCause();
-				} else {
-					throw new InternalErrorException(e.getMessage(), e);
-				}
-			} catch (TimeoutException e) {
-				throw new InternalErrorException(e.getMessage(), e);
-			}
-		} else {
-			throw new InterruptedException("Current thread is interrupted");
-		}
-	}
+            if (poolProcessorInProgress) {
+                this.terminateProcessesExecution();
+            }
 
-	private void terminateProcessesExecution() {
-		this.poolProcessExecutorService.shutdownNow();
-		try {
-			if (!this.poolProcessExecutorService.awaitTermination(this.properties.getTimeoutProcessStopS(),
-					TimeUnit.SECONDS)) {
-				// TODO send kill
-			}
-		} catch (InterruptedException e) {
-			// Conserves the interruption
-			Thread.currentThread().interrupt();
-		}
-	}
+            if (devProperties.getStepsActivation().get("erasing")) {
+                this.eraseLocalDirectory();
+            } else {
+                LOGGER.info("{} Erasing local working directory bypassed",
+                        getPrefixMonitorLog(LOG_ERASE));
+            }
 
-	private void processInputs() throws CodedException, InterruptedException {
-		if (!Thread.currentThread().isInterrupted()) {
-			LOGGER.info("{} Preparing local working directory", this.prefixLogInputDownloader);
-			inputDownloader.processInputs();
-		} else {
-			throw new InterruptedException("Current thread is interrupted");
-		}
-	}
+            if (this.checkingStatus()) {
+                this.resumeConsumer();
+            }
+        }
 
-	private void processOutputs() throws InterruptedException, CodedException {
-		if (!Thread.currentThread().isInterrupted()) {
-			LOGGER.info("{} Processing l0 outputs", prefixLogPoolOutputProcessor);
-			outputProcessor.processOutput();
-		} else {
-			throw new InterruptedException("Current thread is interrupted");
-		}
-	}
+        LOGGER.info("{} End L0 job generation", getPrefixMonitorLog(LOG_END));
 
-	private void eraseLocalDirectory() {
-		try {
-			LOGGER.info("{} Erasing local working directory", this.prefixLogErasing);
-			Path p = Paths.get(job.getWorkDirectory());
-			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
-					.peek(System.out::println).forEach(File::delete);
-		} catch (IOException e) {
-			LOGGER.error("{} [code {}] Failed to erase local working directory", this.prefixLogErasing,
-					ErrorCode.INTERNAL_ERROR.getCode());
-			this.appStatus.setError();
-		}
-	}
+        return true;
+    }
 
-	private void resumeConsumer() {
-		LOGGER.info("{} Resuming consumer", this.prefixLogResuming);
-		if (this.kafkaListenerEndpointRegistry.getListenerContainer(this.kafkaListenerContainerId) != null) {
-			this.kafkaListenerEndpointRegistry.getListenerContainer(this.kafkaListenerContainerId).resume();
-		} else {
-			LOGGER.info("{} [code {}] Cannot resume consumer because no listener {}", this.prefixLogResuming,
-					ErrorCode.KAFKA_RESUMING_ERROR.getCode(), this.kafkaListenerContainerId);
-		}
-	}
+    /**
+     * Check if thread interrupted
+     * 
+     * @throws InterruptedException
+     */
+    private void checkThreadInterrupted() throws InterruptedException {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new InterruptedException("Current thread is interrupted");
+        }
+    }
 
-	private boolean checkingStatus() {
-		LOGGER.info("{} Checking status consumer", this.prefixLogStatus);
-		if (this.appStatus.getStatus().isStopping()) {
-			System.exit(0);
-		} else if (this.appStatus.getStatus().isFatalError()) {
-			System.exit(-1);
-		} else {
-			this.appStatus.setWaiting();
-			return true;
-		}
-		return false;
-	}
+    /**
+     * Launch the processes execution
+     */
+    protected void processPoolProcesses() {
+        LOGGER.info("{} Starting process executor",
+                getPrefixMonitorLog(LOG_PROCESS));
+        procCompletionSrv.submit(procExecutor);
+    }
+
+    /**
+     * Wait for the processes execution completion
+     * 
+     * @throws InterruptedException
+     * @throws AbstractCodedException
+     */
+    protected void waitForPoolProcessesEnding()
+            throws InterruptedException, AbstractCodedException {
+        checkThreadInterrupted();
+        try {
+            procCompletionSrv.take().get(properties.getTmProcAllTasksS(),
+                    TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof AbstractCodedException) {
+                throw (AbstractCodedException) e.getCause();
+            } else {
+                throw new InternalErrorException(e.getMessage(), e);
+            }
+        } catch (TimeoutException e) {
+            throw new InternalErrorException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Shutdown the processes execution
+     */
+    protected void terminateProcessesExecution() {
+        procExecutorSrv.shutdownNow();
+        try {
+            procExecutorSrv.awaitTermination(properties.getTmProcStopS(),
+                    TimeUnit.SECONDS);
+            // TODO send kill if fails
+        } catch (InterruptedException e) {
+            // Conserves the interruption
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Download inputs
+     * 
+     * @throws AbstractCodedException
+     * @throws InterruptedException
+     */
+    protected void processInputs()
+            throws AbstractCodedException, InterruptedException {
+        checkThreadInterrupted();
+        LOGGER.info("{} Preparing local working directory",
+                getPrefixMonitorLog(LOG_INPUT));
+        inputDownloader.processInputs();
+    }
+
+    /**
+     * Process outputs
+     * 
+     * @throws InterruptedException
+     * @throws AbstractCodedException
+     */
+    protected void processOutputs()
+            throws InterruptedException, AbstractCodedException {
+        checkThreadInterrupted();
+        LOGGER.info("{} Processing l0 outputs",
+                getPrefixMonitorLog(LOG_OUTPUT));
+        outputProcessor.processOutput();
+    }
+
+    /**
+     * Erase the working directory
+     */
+    protected void eraseLocalDirectory() {
+        try {
+            LOGGER.info("{} Erasing local working directory",
+                    getPrefixMonitorLog(LOG_ERASE));
+            Path p = Paths.get(job.getWorkDirectory());
+            Files.walk(p, FileVisitOption.FOLLOW_LINKS)
+                    .sorted(Comparator.reverseOrder()).map(Path::toFile)
+                    .peek(System.out::println).forEach(File::delete);
+        } catch (IOException e) {
+            LOGGER.error("{} [code {}] Failed to erase local working directory",
+                    getPrefixMonitorLog(LOG_ERASE),
+                    ErrorCode.INTERNAL_ERROR.getCode());
+            this.appStatus.setError();
+        }
+    }
+
+    /**
+     * Resume the consumer
+     */
+    protected void resumeConsumer() {
+        LOGGER.info("{} Resuming consumer", getPrefixMonitorLog(LOG_RESUME));
+        if (kafkaRegistry.getListenerContainer(kafkaContainerId) != null) {
+            kafkaRegistry.getListenerContainer(kafkaContainerId).resume();
+        } else {
+            LOGGER.info(
+                    "{} [code {}] Cannot resume consumer because no listener {}",
+                    getPrefixMonitorLog(LOG_RESUME),
+                    ErrorCode.KAFKA_RESUMING_ERROR.getCode(), kafkaContainerId);
+        }
+    }
+
+    /**
+     * Check status and stop if needed
+     * 
+     * @return
+     */
+    protected boolean checkingStatus() {
+        LOGGER.info("{} Checking status consumer",
+                getPrefixMonitorLog(LOG_STATUS));
+        if (appStatus.getStatus().isStopping()) {
+            System.exit(0);
+        } else if (appStatus.getStatus().isFatalError()) {
+            System.exit(-1);
+        } else {
+            appStatus.setWaiting();
+            return true;
+        }
+        return false;
+    }
 }

@@ -1,112 +1,105 @@
 package fr.viveris.s1pdgs.level0.wrapper.controller.dto;
 
+import java.util.Objects;
+
 /**
  * DTO object reprsenting an output of a job
- * @author Cyrielle Gailliard
- * @see JobDto
- *
+ * 
+ * @author Viveris Technologies
  */
 public class JobOutputDto {
-	
-	/**
-	 * Family of the output
-	 */
-	private String family;
-	
-	/**
-	 * The regular expression
-	 */
-	private String regexp;
 
-	/**
-	 * Default constructor
-	 */
-	public JobOutputDto() {
-		
-	}
+    /**
+     * Family of the output
+     */
+    private String family;
 
-	/**
-	 * Constructor
-	 * @param family
-	 * @param regexp
-	 */
-	public JobOutputDto(String family, String regexp) {
-		this();
-		this.family = family;
-		this.regexp = regexp;
-	}
+    /**
+     * The regular expression
+     */
+    private String regexp;
 
-	/**
-	 * @return the family
-	 */
-	public String getFamily() {
-		return family;
-	}
+    /**
+     * Default constructor
+     */
+    public JobOutputDto() {
+        super();
+    }
 
-	/**
-	 * @param family the family to set
-	 */
-	public void setFamily(String family) {
-		this.family = family;
-	}
+    /**
+     * Constructor
+     * 
+     * @param family
+     * @param regexp
+     */
+    public JobOutputDto(final String family, final String regexp) {
+        this();
+        this.family = family;
+        this.regexp = regexp;
+    }
 
-	/**
-	 * @return the regexp
-	 */
-	public String getRegexp() {
-		return regexp;
-	}
+    /**
+     * @return the family
+     */
+    public String getFamily() {
+        return family;
+    }
 
-	/**
-	 * @param regexp the regexp to set
-	 */
-	public void setRegexp(String regexp) {
-		this.regexp = regexp;
-	}
+    /**
+     * @param family
+     *            the family to set
+     */
+    public void setFamily(final String family) {
+        this.family = family;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "JobOutputDto [family=" + family + ", regexp=" + regexp + "]";
-	}
+    /**
+     * @return the regexp
+     */
+    public String getRegexp() {
+        return regexp;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((family == null) ? 0 : family.hashCode());
-		result = prime * result + ((regexp == null) ? 0 : regexp.hashCode());
-		return result;
-	}
+    /**
+     * @param regexp
+     *            the regexp to set
+     */
+    public void setRegexp(final String regexp) {
+        this.regexp = regexp;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobOutputDto other = (JobOutputDto) obj;
-		if (family == null) {
-			if (other.family != null)
-				return false;
-		} else if (!family.equals(other.family))
-			return false;
-		if (regexp == null) {
-			if (other.regexp != null)
-				return false;
-		} else if (!regexp.equals(other.regexp))
-			return false;
-		return true;
-	}
+    /**
+     * to string
+     */
+    @Override
+    public String toString() {
+        return String.format("{family: %s, regexp: %s}", family, regexp);
+    }
+
+    /**
+     * hash code
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(family, regexp);
+    }
+
+    /**
+     * Equals
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            JobOutputDto other = (JobOutputDto) obj;
+            ret = Objects.equals(family, other.family)
+                    && Objects.equals(regexp, other.regexp);
+        }
+        return ret;
+    }
 
 }

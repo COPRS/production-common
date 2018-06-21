@@ -1,44 +1,89 @@
 package fr.viveris.s1pdgs.level0.wrapper.services.task;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.junit.After;
+import org.junit.Test;
+
+import fr.viveris.s1pdgs.level0.wrapper.test.SystemUtils;
+
 public class TaskCallableTest {
-	
-	/*@Test
-	public void testRun() throws InterruptedException, ExecutionException {
-		assertTrue(!(new File("./titi")).exists());
-		ExecutorService service = Executors.newSingleThreadExecutor();
-		CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
-		completionService.submit(new TaskCallable("mkdir", "titi", "./"));
-		Future<TaskResult> future = completionService.take();
-		TaskResult r = future.get();
-		assertEquals("mkdir", r.getBinary());
-		assertEquals(0, r.getExitCode());
-		assertTrue((new File("./titi")).isDirectory());
-		
-		completionService.submit(new TaskCallable("rmdir", "titi", "./"));
-		completionService.take();
-		assertTrue(!(new File("./titi")).exists());
-	}
+    
+    private File testDir = new File("./3");
+    
+    @After
+    public void clean() {
+        if (testDir.exists()) {
+            testDir.delete();
+        }
+    }
 	
 	@Test
+	public void testRun() throws InterruptedException, ExecutionException {
+        // Command dir/ls
+        String command = SystemUtils.getCmdMkdir();
+        
+		assertTrue(!(new File("./3")).exists());
+		ExecutorService service = Executors.newSingleThreadExecutor();
+		CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
+		completionService.submit(new TaskCallable(command, "3", "./"));
+		Future<TaskResult> future = completionService.take();
+		TaskResult r = future.get();
+		assertEquals(command, r.getBinary());
+		assertEquals(0, r.getExitCode());
+		assertTrue((new File("./3")).isDirectory());
+		
+		command = SystemUtils.getCmdRmdir();
+		completionService.submit(new TaskCallable(command, "3", "./"));
+		completionService.take();
+		assertTrue(!(new File("./3")).exists());
+	}
+
+    @Test
 	public void testExitCode() throws InterruptedException, ExecutionException {
 		// Command dir/ls
-		boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
-		String command = "ls";
-		if (isWindows) {
-			command = "dir";
-		}
+		String command = SystemUtils.getCmdLs();
+		
 		// Test when folder do not exist
 		ExecutorService service = Executors.newSingleThreadExecutor();
 		CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
 		completionService.submit(new TaskCallable(command, "not_exist", "./src/main/"));
 		Future<TaskResult> future = completionService.take();
 		TaskResult r = future.get();
-		assertEquals(1, r.getExitCode());
+		assertNotEquals(0, r.getExitCode());
 		// Test when folder exist
 		completionService.submit(new TaskCallable(command, "resources", "./src/main/"));
 		Future<TaskResult> future2 = completionService.take();
 		TaskResult r2 = future2.get();
 		assertEquals(0, r2.getExitCode());
-	}*/
+	}
+    
+    @Test
+    public void testRunWithInterrupted() throws InterruptedException, ExecutionException {
+        // Command dir/ls
+        String command = SystemUtils.getCmdSleep();
+        
+        assertTrue(!(new File("./3")).exists());
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
+        completionService.submit(new TaskCallable(command, "3", "./"));
+        
+        // Interrupt
+        service.shutdownNow();
+        Future<TaskResult> future = completionService.take();
+        TaskResult r = future.get();
+        assertEquals(command, r.getBinary());
+        assertEquals(-1, r.getExitCode());
+    }
 
 }

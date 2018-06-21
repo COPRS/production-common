@@ -1,61 +1,75 @@
 package fr.viveris.s1pdgs.level0.wrapper.model.kafka;
 
 import java.io.File;
+import java.util.Objects;
 
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
 
-public class FileQueueMessage extends AbstractQueueMessage {
-	
-	private File file;
+/**
+ * @author Viveris Technologies
+ */
+public class FileQueueMessage extends QueueMessage {
 
-	public FileQueueMessage(ProductFamily family, String productName, File file) {
-		super(family, productName);
-		this.file = file;
-	}
+    /**
+     * File to upload
+     */
+    private final File file;
 
-	/**
-	 * @return the file
-	 */
-	public File getFile() {
-		return file;
-	}
+    /**
+     * 
+     * @param family
+     * @param productName
+     * @param file
+     */
+    public FileQueueMessage(final ProductFamily family,
+            final String productName, final File file) {
+        super(family, productName);
+        this.file = file;
+    }
 
-	/**
-	 * @param file the file to set
-	 */
-	public void setFile(File file) {
-		this.file = file;
-	}
+    /**
+     * @return the file
+     */
+    public File getFile() {
+        return file;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((file == null) ? 0 : file.hashCode());
-		return result;
-	}
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        String superStr = super.toStringForExtendedClasses();
+        return String.format("{%s, file: %s}", superStr,
+                file);
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FileQueueMessage other = (FileQueueMessage) obj;
-		if (file == null) {
-			if (other.file != null)
-				return false;
-		} else if (!file.equals(other.file))
-			return false;
-		return super.equals(obj);
-	}
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        int superHash = super.hashCode();
+        return Objects.hash(superHash, file);
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            FileQueueMessage other = (FileQueueMessage) obj;
+            // field comparison
+            ret = super.equals(other)
+                    && Objects.equals(file, other.file);
+        }
+        return ret;
+    }
 
 }

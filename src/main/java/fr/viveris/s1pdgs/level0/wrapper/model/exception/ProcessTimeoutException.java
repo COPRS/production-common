@@ -5,10 +5,10 @@ package fr.viveris.s1pdgs.level0.wrapper.model.exception;
 
 /**
  * Exception occurred during job generation
- * @author Cyrielle Gailliard
+ * @author Viveris Technologies
  *
  */
-public class ProcessTimeoutException extends CodedException {
+public class ProcessTimeoutException extends AbstractCodedException {
 
 	/**
 	 * Serial UID
@@ -19,10 +19,14 @@ public class ProcessTimeoutException extends CodedException {
 	 * Constructor
 	 * @param message
 	 */
-	public ProcessTimeoutException(String message) {
+	public ProcessTimeoutException(final String message) {
 		super(ErrorCode.PROCESS_TIMEOUT, message);
 	}
 
+	/**
+	 * @see AbstractCodedException#getLogMessage()
+	 */
+	@Override
 	public String getLogMessage() {
 		return String.format("[msg %s]", getMessage());
 	}

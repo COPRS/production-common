@@ -7,29 +7,41 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * List the properties only used for developments
+ * 
+ * @author Viveris Technologies
+ */
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "dev")
 public class DevProperties {
 
-	private Map<String, Boolean> stepsActivation;
-	
-	public DevProperties() {
-		stepsActivation = new HashMap<>();
-	}
+    /**
+     * Activation of each step of job processing
+     */
+    private Map<String, Boolean> stepsActivation;
 
-	/**
-	 * @return the devStepsActivation
-	 */
-	public Map<String, Boolean> getStepsActivation() {
-		return stepsActivation;
-	}
+    /**
+     * Constructors
+     */
+    public DevProperties() {
+        stepsActivation = new HashMap<>();
+    }
 
-	/**
-	 * @param devStepsActivation the devStepsActivation to set
-	 */
-	public void setStepsActivation(Map<String, Boolean> stepsActivation) {
-		this.stepsActivation = stepsActivation;
-	}
+    /**
+     * @return the devStepsActivation
+     */
+    public Map<String, Boolean> getStepsActivation() {
+        return stepsActivation;
+    }
+
+    /**
+     * @param devStepsActivation
+     *            the devStepsActivation to set
+     */
+    public void setStepsActivation(final Map<String, Boolean> stepsActivation) {
+        this.stepsActivation = stepsActivation;
+    }
 
 }

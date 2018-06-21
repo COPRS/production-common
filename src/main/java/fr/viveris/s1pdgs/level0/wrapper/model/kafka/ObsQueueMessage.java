@@ -1,59 +1,70 @@
 package fr.viveris.s1pdgs.level0.wrapper.model.kafka;
 
+import java.util.Objects;
+
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
 
-public class ObsQueueMessage extends AbstractQueueMessage {
-	
-	private String keyObs;
+/**
+ * @author Viveris Technologies
+ */
+public class ObsQueueMessage extends QueueMessage {
 
-	public ObsQueueMessage(ProductFamily family, String productName, String keyObs) {
-		super(family, productName);
-		this.keyObs = keyObs;
-	}
+    /**
+     * Key in OBS
+     */
+    private final String keyObs;
 
-	/**
-	 * @return the keyObs
-	 */
-	public String getKeyObs() {
-		return keyObs;
-	}
+    /**
+     * @param family
+     * @param productName
+     * @param keyObs
+     */
+    public ObsQueueMessage(final ProductFamily family, final String productName,
+            final String keyObs) {
+        super(family, productName);
+        this.keyObs = keyObs;
+    }
 
-	/**
-	 * @param keyObs the keyObs to set
-	 */
-	public void setKeyObs(String keyObs) {
-		this.keyObs = keyObs;
-	}
+    /**
+     * @return the keyObs
+     */
+    public String getKeyObs() {
+        return keyObs;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((keyObs == null) ? 0 : keyObs.hashCode());
-		return result;
-	}
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        String superStr = super.toStringForExtendedClasses();
+        return String.format("{%s, keyObs: %s}", superStr, keyObs);
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ObsQueueMessage other = (ObsQueueMessage) obj;
-		if (keyObs == null) {
-			if (other.keyObs != null)
-				return false;
-		} else if (!keyObs.equals(other.keyObs))
-			return false;
-		return super.equals(obj);
-	}
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        int superHash = super.hashCode();
+        return Objects.hash(superHash, keyObs);
+    }
 
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            ObsQueueMessage other = (ObsQueueMessage) obj;
+            // field comparison
+            ret = super.equals(other) && Objects.equals(keyObs, other.keyObs);
+        }
+        return ret;
+    }
 }
