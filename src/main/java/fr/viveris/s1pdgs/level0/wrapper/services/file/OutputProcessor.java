@@ -17,6 +17,7 @@ import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobOutputDto;
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.KafkaSendException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.UnknownFamilyException;
 import fr.viveris.s1pdgs.level0.wrapper.model.kafka.FileQueueMessage;
@@ -328,7 +329,12 @@ public class OutputProcessor {
                 } else {
                     LOGGER.info("{} 3 - Publishing KAFKA message for output {}",
                             prefixMonitorLogs, msg.getProductName());
-                    procuderFactory.sendOutput(msg);
+                    try {
+                        procuderFactory.sendOutput(msg);
+                    } catch (KafkaSendException ace) {
+                        LOGGER.error("{} [code {}] {}", prefixMonitorLogs,
+                                ace.getCode().getCode(), ace.getLogMessage());
+                    }
                     iter.remove();
                 }
             }
@@ -355,7 +361,13 @@ public class OutputProcessor {
                 } else {
                     LOGGER.info("{} 4 - Publishing KAFKA message for output {}",
                             prefixMonitorLogs, msg.getProductName());
-                    this.procuderFactory.sendOutput(msg);
+                    try {
+                        this.procuderFactory.sendOutput(msg);
+                    } catch (KafkaSendException ace) {
+                        LOGGER.error("{} [code {}] {}", prefixMonitorLogs,
+                                ace.getCode().getCode(), ace.getLogMessage());
+                    }
+
                 }
             }
         }
