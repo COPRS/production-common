@@ -54,6 +54,8 @@ wrapper:
   wait-pod-deletion-ms: ${scaler_wrapper_wait-pod-deletion-ms:10000}
   rest-api:
     port: ${scaler_wrapper_rest-api_port:8080}
+    nb-retry: ${scaler_wrapper_rest-api_nb-retry:3}
+    tempo-retry-ms : ${scaler_wrapper_rest-api_tempo-retry-ms:1000}
 
 # Openstack
 openstack:
