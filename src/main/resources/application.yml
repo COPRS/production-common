@@ -103,6 +103,7 @@ dev:
   activations: 
     pod-deletion: ${scaler_dev_pod-deletion:true}
     kafka-monitoring: ${scaler_dev_kafka-monitoring:true}
+    init-scaling: ${scaler_dev_init-scaling:true}
     k8s-monitoring: ${scaler_dev_k8s-monitoring:true}
     value-monitored: ${scaler_dev_value-monitored:true}
     scaling: ${scaler_dev_scaling:false}
