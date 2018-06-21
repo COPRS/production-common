@@ -24,6 +24,7 @@ import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
 import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.config.DevProperties;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
+import fr.viveris.s1pdgs.level0.wrapper.model.ResumeDetails;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.AbstractCodedException.ErrorCode;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
@@ -145,6 +146,11 @@ public class JobProcessor implements Callable<Boolean> {
     private final String kafkaContainerId;
 
     /**
+     * Id of the topic
+     */
+    private final String topicName;
+
+    /**
      * @param job
      * @param appStatus
      * @param properties
@@ -158,6 +164,7 @@ public class JobProcessor implements Callable<Boolean> {
     public JobProcessor(final JobDto job, final AppStatus appStatus,
             final ApplicationProperties properties,
             final DevProperties devProperties, final String kafkaContainerId,
+            final String topicName,
             final KafkaListenerEndpointRegistry kafkaRegistry,
             final ObsService obsService,
             final OutputProcuderFactory procuderFactory,
@@ -168,6 +175,7 @@ public class JobProcessor implements Callable<Boolean> {
         this.properties = properties;
         this.kafkaRegistry = kafkaRegistry;
         this.kafkaContainerId = kafkaContainerId;
+        this.topicName = topicName;
 
         // Initialize the pool processor executor
         this.procExecutor = new PoolExecutorCallable(this.properties, this.job,
@@ -207,6 +215,7 @@ public class JobProcessor implements Callable<Boolean> {
     protected JobProcessor(final JobDto job, final AppStatus appStatus,
             final ApplicationProperties properties,
             final DevProperties devProperties, final String kafkaContainerId,
+            final String topicName,
             final KafkaListenerEndpointRegistry kafkaRegistry,
             final InputDownloader inputDownloader,
             final OutputProcessor outputProcessor,
@@ -219,6 +228,7 @@ public class JobProcessor implements Callable<Boolean> {
         this.properties = properties;
         this.kafkaRegistry = kafkaRegistry;
         this.kafkaContainerId = kafkaContainerId;
+        this.topicName = topicName;
         this.procExecutor = procExecutor;
         this.inputDownloader = inputDownloader;
         this.outputProcessor = outputProcessor;
@@ -339,8 +349,9 @@ public class JobProcessor implements Callable<Boolean> {
 
         } catch (AbstractCodedException e) {
             // Log occurred error
-            LOGGER.error("{} [step {}] {} [code {}] {}",
+            LOGGER.error("{} [step {}] {} [resuming {}] [code {}] {}",
                     getPrefixMonitorLog(LOG_DFT), step,
+                    new ResumeDetails(topicName, job),
                     getPrefixMonitorLog(LOG_ERROR), e.getCode().getCode(),
                     e.getLogMessage());
             this.appStatus.setError();

@@ -108,8 +108,8 @@ public class JobProcessorTest extends MockPropertiesTest {
             workingDir.mkdir();
         }
         processor = new JobProcessor(job, appStatus, properties, devProperties,
-                "kafka-id", kafkaRegistry, inputDownloader, outputProcessor,
-                procExecutor);
+                "kafka-id", "topic", kafkaRegistry, inputDownloader,
+                outputProcessor, procExecutor);
     }
 
     /**

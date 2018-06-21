@@ -188,7 +188,8 @@ public abstract class AbstractJobConsumer {
                 LOGGER.error(
                         "{} [step {}] [productName {}] [workDir {}] [resuming {}] [code {}] Exception occurred during processing message: {}",
                         prefixLog, step, job.getProductIdentifier(),
-                        job.getWorkDirectory(), new ResumeDetails(getTopic(), job),
+                        job.getWorkDirectory(),
+                        new ResumeDetails(getTopic(), job),
                         ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
                 this.appStatus.setError();
             }
@@ -248,8 +249,8 @@ public abstract class AbstractJobConsumer {
     protected void launchJob(final JobDto job, final String outputListFile,
             final String prefixLog) {
         LOGGER.info("{} Launching job in a thread", prefixLog);
-        this.jobWorkerService.submit(new JobProcessor(job, this.appStatus,
-                this.properties, this.devProperties, this.springConsumerId,
+        this.jobWorkerService.submit(new JobProcessor(job, appStatus,
+                properties, devProperties, springConsumerId, topic,
                 consumersRegistry, obsService, outputProcuder, outputListFile));
         nbCurrentTasks++;
     }
