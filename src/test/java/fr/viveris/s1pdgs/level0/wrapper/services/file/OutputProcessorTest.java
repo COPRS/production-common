@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -23,6 +24,7 @@ import fr.viveris.s1pdgs.level0.wrapper.TestUtils;
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobOutputDto;
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.AbstractCodedException;
+import fr.viveris.s1pdgs.level0.wrapper.model.exception.KafkaSendException;
 import fr.viveris.s1pdgs.level0.wrapper.model.exception.UnknownFamilyException;
 import fr.viveris.s1pdgs.level0.wrapper.model.kafka.FileQueueMessage;
 import fr.viveris.s1pdgs.level0.wrapper.model.kafka.ObsQueueMessage;
@@ -366,6 +368,30 @@ public class OutputProcessorTest {
                 .sendOutput(Mockito.eq(reportToPublish.get(2)));
     }
 
+    /**
+     * Test the publication of the reports
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testProcessReportsWhenKAfkaException()
+            throws AbstractCodedException {
+        doThrow(new KafkaSendException("topic", "dto", "name", "message",
+                new IllegalArgumentException("cause"))).when(procuderFactory)
+                        .sendOutput(Mockito.eq(reportToPublish.get(0)));
+
+        processor.processReports(reportToPublish);
+
+        verify(procuderFactory, times(3))
+                .sendOutput(Mockito.any(FileQueueMessage.class));
+        verify(procuderFactory, times(1))
+                .sendOutput(Mockito.eq(reportToPublish.get(0)));
+        verify(procuderFactory, times(1))
+                .sendOutput(Mockito.eq(reportToPublish.get(1)));
+        verify(procuderFactory, times(1))
+                .sendOutput(Mockito.eq(reportToPublish.get(2)));
+    }
+
     @Test
     public void testPublishAccordingUploadFiles1() throws Exception {
         Method method = getMethodForPublishAccodingUpload();
@@ -384,6 +410,25 @@ public class OutputProcessorTest {
 
     @Test
     public void testPublishAccordingUploadFiles2() throws Exception {
+        Method method = getMethodForPublishAccodingUpload();
+
+        method.invoke(processor, 2, "", new ArrayList<>());
+        verify(procuderFactory, times(0))
+                .sendOutput(Mockito.any(ObsQueueMessage.class));
+
+        method.invoke(processor, 2, OutputProcessor.NOT_KEY_OBS,
+                outputToPublish);
+        verify(procuderFactory, times(3))
+                .sendOutput(Mockito.any(ObsQueueMessage.class));
+        assertEquals(0, outputToPublish.size());
+    }
+
+    @Test
+    public void testPublishAccordingUploadFilesWhenKafkaError() throws Exception {
+        doThrow(new KafkaSendException("topic", "dto", "name", "message",
+                new IllegalArgumentException("cause"))).when(procuderFactory)
+                        .sendOutput(Mockito.eq(outputToPublish.get(0)));
+        
         Method method = getMethodForPublishAccodingUpload();
 
         method.invoke(processor, 2, "", new ArrayList<>());
