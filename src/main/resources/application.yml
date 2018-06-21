@@ -25,15 +25,6 @@ kafka:
   enable-consumer:
     edrs-sessions: ${job_kafka_enable-consumer_edrs-sessions:true}
     l0-slices: ${job_kafka_enable-consumer_l0-slices:false}
-    
-storage:
-  user:
-    id: ${storage_user_id}
-    secret: ${storage_user_secret}
-  endpoint: ${storage_endpoint}
-  region: ${storage_region}
-  buckets:
-    edrs-sessions: ${storage_buckets_session-files:session-files}
   
 job-generator:
   diroftasktables: ${job_directoryoftasktables}

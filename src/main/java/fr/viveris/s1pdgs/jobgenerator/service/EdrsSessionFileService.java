@@ -10,10 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
-import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
-import fr.viveris.s1pdgs.jobgenerator.service.s3.SessionFilesS3Services;
+import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
+import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
+import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
+import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.jobgenerator.service.s3.ObsService;
 
 /**
  * Class for managing EDRS session files
@@ -27,7 +29,7 @@ public class EdrsSessionFileService {
 	/**
 	 * S3 service
 	 */
-	private final SessionFilesS3Services s3Services;
+	private final ObsService obsService;
 
 	/**
 	 * XML converter
@@ -47,9 +49,9 @@ public class EdrsSessionFileService {
 	 * @param pathTempDirectory
 	 */
 	@Autowired
-	public EdrsSessionFileService(final SessionFilesS3Services s3Services, final XmlConverter xmlConverter,
+	public EdrsSessionFileService(final ObsService obsService, final XmlConverter xmlConverter,
 			@Value("${level0.dir-extractor-sessions}") final String pathTempDirectory) {
-		this.s3Services = s3Services;
+		this.obsService = obsService;
 		this.xmlConverter = xmlConverter;
 		this.pathTempDirectory = pathTempDirectory;
 	}
@@ -66,15 +68,8 @@ public class EdrsSessionFileService {
 	 */
 	public EdrsSessionFile createSessionFile(final String keyObjectStorage) throws AbstractCodedException {
 
-		// Extract filename from the key object storage
-		String id = keyObjectStorage;
-		int lastIndex = keyObjectStorage.lastIndexOf('/');
-		if (lastIndex != -1 && lastIndex < keyObjectStorage.length() - 1) {
-			id = keyObjectStorage.substring(lastIndex + 1);
-		}
-
 		// Download file
-		File tmpFile = s3Services.getFile(keyObjectStorage, this.pathTempDirectory + id);
+		File tmpFile = obsService.downloadFile(ProductFamily.RAW, keyObjectStorage, this.pathTempDirectory);
 
 		// Convert it
 		try {

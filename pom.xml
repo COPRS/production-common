@@ -25,6 +25,14 @@
 		<jacoco.version>0.7.5.201505241946</jacoco.version>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>in-project</id>
+			<name>In Project Repo</name>
+			<url>file://${project.basedir}/libs</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 
 		<dependency>
@@ -76,11 +84,13 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>${aws-java-sdk.version}</version>
+			<groupId>spdgs-sdk</groupId>
+			<artifactId>obs-clients</artifactId>
+			<version>1.0.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>

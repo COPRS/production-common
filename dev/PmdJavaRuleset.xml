@@ -12,6 +12,7 @@
    <rule ref="rulesets/java/unusedcode.xml/UnusedLocalVariable"><priority>2</priority></rule>
    <rule ref="rulesets/java/naming.xml/BooleanGetMethodName"><priority>2</priority></rule>
    <rule ref="rulesets/java/naming.xml/PackageCase"><priority>2</priority></rule>
+   <rule ref="rulesets/java/coupling.xml/LawOfDemeter"><priority>4</priority></rule>
    
    <!-- Default rulesets -->
    <rule ref="rulesets/java/design.xml/AbstractClassWithoutAbstractMethod"/>

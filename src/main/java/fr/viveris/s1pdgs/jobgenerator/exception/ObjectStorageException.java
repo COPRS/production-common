@@ -1,12 +1,14 @@
 package fr.viveris.s1pdgs.jobgenerator.exception;
 
+import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+
 /**
  * Exception concerning the object storage
  * 
  * @author Cyrielle Gailliard
  *
  */
-public class ObsS3Exception extends AbstractCodedException {
+public class ObjectStorageException extends AbstractCodedException {
 
 	/**
 	 * Serial UID
@@ -19,9 +21,9 @@ public class ObsS3Exception extends AbstractCodedException {
 	private final String key;
 
 	/**
-	 * Bucket used in object storage
+	 * Family
 	 */
-	private final String bucket;
+	private final ProductFamily family;
 
 	/**
 	 * 
@@ -29,10 +31,10 @@ public class ObsS3Exception extends AbstractCodedException {
 	 * @param bucket
 	 * @param e
 	 */
-	public ObsS3Exception(final String key, final String bucket, final Throwable e) {
+	public ObjectStorageException(final ProductFamily family, final String key, final Throwable e) {
 		super(ErrorCode.OBS_ERROR, e.getMessage(), e);
 		this.key = key;
-		this.bucket = bucket;
+		this.family = family;
 	}
 
 	/**
@@ -43,10 +45,10 @@ public class ObsS3Exception extends AbstractCodedException {
 	}
 
 	/**
-	 * @return the bucket
+	 * @return the family
 	 */
-	public String getBucket() {
-		return bucket;
+	public ProductFamily getFamily() {
+		return family;
 	}
 
 	/**
@@ -54,6 +56,6 @@ public class ObsS3Exception extends AbstractCodedException {
 	 */
 	@Override
 	public String getLogMessage() {
-		return String.format("[bucket %s] [key %s] [msg %s]", this.bucket, this.key, getMessage());
+		return String.format("[family %s] [key %s] [msg %s]", this.family, this.key, getMessage());
 	}
 }
