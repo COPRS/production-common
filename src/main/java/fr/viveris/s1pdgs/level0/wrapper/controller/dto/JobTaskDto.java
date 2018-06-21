@@ -1,85 +1,83 @@
 package fr.viveris.s1pdgs.level0.wrapper.controller.dto;
 
+import java.util.Objects;
+
 /**
  * DTO object representing a task to be executed for the job
- * @author Cyrielle Gailliard
+ * 
+ * @author Viveris Technologies
  * @see JobDto
- *
  */
 public class JobTaskDto {
-	
-	/**
-	 * Absolute path of the binary
-	 */
-	private String binaryPath;
 
-	/**
-	 * Default constructor
-	 */
-	public JobTaskDto() {
-		
-	}
+    /**
+     * Absolute path of the binary
+     */
+    private String binaryPath;
 
-	/**
-	 * Constructor using fields
-	 * @param binaryPath
-	 */
-	public JobTaskDto(String binaryPath) {
-		this();
-		this.binaryPath = binaryPath;
-	}
+    /**
+     * Default constructor
+     */
+    public JobTaskDto() {
+        super();
+    }
 
-	/**
-	 * @return the binaryPath
-	 */
-	public String getBinaryPath() {
-		return binaryPath;
-	}
+    /**
+     * Constructor using fields
+     * 
+     * @param binaryPath
+     */
+    public JobTaskDto(final String binaryPath) {
+        this();
+        this.binaryPath = binaryPath;
+    }
 
-	/**
-	 * @param binaryPath the binaryPath to set
-	 */
-	public void setBinaryPath(String binaryPath) {
-		this.binaryPath = binaryPath;
-	}
+    /**
+     * @return the binaryPath
+     */
+    public String getBinaryPath() {
+        return binaryPath;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "JobTaskDto [binaryPath=" + binaryPath + "]";
-	}
+    /**
+     * @param binaryPath
+     *            the binaryPath to set
+     */
+    public void setBinaryPath(final String binaryPath) {
+        this.binaryPath = binaryPath;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((binaryPath == null) ? 0 : binaryPath.hashCode());
-		return result;
-	}
+    /**
+     * to string
+     */
+    @Override
+    public String toString() {
+        return String.format("{binaryPath: %s}", binaryPath);
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JobTaskDto other = (JobTaskDto) obj;
-		if (binaryPath == null) {
-			if (other.binaryPath != null)
-				return false;
-		} else if (!binaryPath.equals(other.binaryPath))
-			return false;
-		return true;
-	}
+    /**
+     * hash code
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(binaryPath);
+    }
+
+    /**
+     * equals
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            JobTaskDto other = (JobTaskDto) obj;
+            ret = Objects.equals(binaryPath, other.binaryPath);
+        }
+        return ret;
+    }
 
 }

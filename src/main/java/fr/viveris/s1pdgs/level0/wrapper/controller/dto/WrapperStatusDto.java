@@ -1,71 +1,131 @@
 package fr.viveris.s1pdgs.level0.wrapper.controller.dto;
 
+import java.util.Objects;
+
 import fr.viveris.s1pdgs.level0.wrapper.AppState;
 
 /**
- * @author Olivier Bex-Chauvet
- *
+ * @author Viveris Technologies
  */
 public class WrapperStatusDto {
 
-	private AppState status;
-	
-	private long timeSinceLastChange;
-	
-	private int errorCounter;
-	
-	/**
-	 * @param state
-	 * @param lastChange
-	 * @param errorCounter
-	 */
-	public WrapperStatusDto(AppState state, long timeSinceLastChange, int errorCounter) {
-		super();
-		this.status = state;
-		this.timeSinceLastChange = timeSinceLastChange;
-		this.errorCounter = errorCounter;
-	}
+    /**
+     * Status
+     */
+    private AppState status;
 
-	/**
-	 * @return the status
-	 */
-	public AppState getStatus() {
-		return status;
-	}
+    /**
+     * Number of milliseconds passed for the last modification
+     */
+    private long timeSinceLastChange;
 
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(AppState status) {
-		this.status = status;
-	}
+    /**
+     * Number of error for the last modification of status
+     */
+    private int errorCounter;
+    
+    /**
+     * Constrcutor
+     */
+    public WrapperStatusDto() {
+        timeSinceLastChange = 0;
+        errorCounter = 0;
+    }
 
-	/**
-	 * @return the timeSinceLastChange
-	 */
-	public long getTimeSinceLastChange() {
-		return timeSinceLastChange;
-	}
+    /**
+     * @param state
+     * @param lastChange
+     * @param errorCounter
+     */
+    public WrapperStatusDto(final AppState state, final long timeLastChange,
+            final int errorCounter) {
+        super();
+        this.status = state;
+        this.timeSinceLastChange = timeLastChange;
+        this.errorCounter = errorCounter;
+    }
 
-	/**
-	 * @param timeSinceLastChange the timeSinceLastChange to set
-	 */
-	public void setTimeSinceLastChange(long timeSinceLastChange) {
-		this.timeSinceLastChange = timeSinceLastChange;
-	}
+    /**
+     * @return the status
+     */
+    public AppState getStatus() {
+        return status;
+    }
 
-	/**
-	 * @return the errorCounter
-	 */
-	public int getErrorCounter() {
-		return errorCounter;
-	}
+    /**
+     * @param status
+     *            the status to set
+     */
+    public void setStatus(final AppState status) {
+        this.status = status;
+    }
 
-	/**
-	 * @param errorCounter the errorCounter to set
-	 */
-	public void setErrorCounter(int errorCounter) {
-		this.errorCounter = errorCounter;
-	}
+    /**
+     * @return the timeSinceLastChange
+     */
+    public long getTimeSinceLastChange() {
+        return timeSinceLastChange;
+    }
+
+    /**
+     * @param timeLastChange
+     *            the timeLastChange to set
+     */
+    public void setTimeSinceLastChange(final long timeLastChange) {
+        this.timeSinceLastChange = timeLastChange;
+    }
+
+    /**
+     * @return the errorCounter
+     */
+    public int getErrorCounter() {
+        return errorCounter;
+    }
+
+    /**
+     * @param errorCounter
+     *            the errorCounter to set
+     */
+    public void setErrorCounter(final int errorCounter) {
+        this.errorCounter = errorCounter;
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return String.format(
+                "{status: %s, timeSinceLastChange: %d, errorCounter: %d}",
+                status, timeSinceLastChange, errorCounter);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(status, timeSinceLastChange, errorCounter);
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            WrapperStatusDto other = (WrapperStatusDto) obj;
+            // field comparison
+            ret = Objects.equals(status, other.status)
+                    && timeSinceLastChange == other.timeSinceLastChange
+                    && errorCounter == other.errorCounter;
+        }
+        return ret;
+    }
 
 }

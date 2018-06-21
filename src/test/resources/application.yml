@@ -30,36 +30,19 @@ kafka:
     l0-jobs: true
     l1-jobs: false
     
-#Object Storage
-storage:
-  user:
-    id: MEF5PCBPTXHKOUTCKW3G
-    secret: 4YiRYBN6HulfbA6uP7eZdhlm9Jb5JVYm18byMGJo
-  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/
-  region: eu-west-0
-  buckets:
-    auxiliary-files: ${storage_buckets_auxiliary-files:auxiliary-files}
-    edrs-sessions: ${storage_buckets_session-files:session-files}
-    l0-slices: ${storage_buckets_l0-slices:l0-slices}
-    l0-acns: ${storage_buckets_l0-acns:acns}
-    l1-slices: ${storage_buckets_l1-slices:l1-slices}
-    l1-acns: ${storage_buckets_l1-acns:l1-acns}
-    
 server:
   port: ${wrapper_rest_server_port:8080}
   
 process:
   level: L0
-  timeout-process-one-task-s: 600
-  timeout-process-all-tasks-s: 1800
-  timeout-process-stop-s: 300
-  timeout-process-check-stop-s: 60
-  timeout-batch-s3-upload-s: 120
-  size-batch-s3-upload:  20
-  timeout-batch-s3-download-s: 120
-  size-batch-s3-download: 5
-  wait-active-process-nb-max-loop: 12
-  wait-active-process-tempo-s: 10
+  tm-proc-one-task-s: 600
+  tm-proc-all-tasks-s: 1800
+  tm-proc-stop-s: 300
+  tm-proc-check-stop-s: 60
+  size-batch-upload:  20
+  size-batch-download: 5
+  wap-nb-max-loop: 12
+  wap-tempo-s: 10
 
 status:
   delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}

@@ -1,67 +1,72 @@
 package fr.viveris.s1pdgs.level0.wrapper.model.s3;
 
+import java.util.Objects;
+
 import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
 
+/**
+ * @author Viveris Technologies
+ */
 public class S3DownloadFile extends S3CustomObject {
-	
-	private String localPath;
 
-	public S3DownloadFile(ProductFamily family, String key, String localPath) {
-		super(family, key);
-		this.localPath = localPath;
-	}
+    /**
+     * Target directory
+     */
+    private final String targetDir;
 
-	/**
-	 * @return the localPath
-	 */
-	public String getLocalPath() {
-		return localPath;
-	}
+    /**
+     * @param family
+     * @param key
+     * @param targetDir
+     */
+    public S3DownloadFile(final ProductFamily family, final String key,
+            final String targetDir) {
+        super(family, key);
+        this.targetDir = targetDir;
+    }
 
-	/**
-	 * @param localPath the localPath to set
-	 */
-	public void setLocalPath(String localPath) {
-		this.localPath = localPath;
-	}
+    /**
+     * @return the targetDir
+     */
+    public String getTargetDir() {
+        return targetDir;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "S3DownloadFile [localPath=" + localPath + "]";
-	}
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        String superStr = super.toStringForExtendedClasses();
+        return String.format("{%s, targetDir: %s}", superStr, targetDir);
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((localPath == null) ? 0 : localPath.hashCode());
-		return result;
-	}
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        int superHash = super.hashCode();
+        return Objects.hash(superHash, targetDir);
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		S3DownloadFile other = (S3DownloadFile) obj;
-		if (localPath == null) {
-			if (other.localPath != null)
-				return false;
-		} else if (!localPath.equals(other.localPath))
-			return false;
-		return true;
-	}
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            S3DownloadFile other = (S3DownloadFile) obj;
+            // field comparison
+            ret = super.equals(other)
+                    && Objects.equals(targetDir, other.targetDir);
+        }
+        return ret;
+    }
 
 }

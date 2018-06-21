@@ -6,181 +6,201 @@ import org.springframework.context.annotation.Configuration;
 
 import fr.viveris.s1pdgs.level0.wrapper.model.ApplicationLevel;
 
+/**
+ * Application properties
+ * 
+ * @author Viveris Technologies
+ */
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "process")
 public class ApplicationProperties {
 
-	private ApplicationLevel level;
-	
-	private long timeoutProcessAllTasksS;
-	private long timeoutProcessOneTaskS;
-	private long timeoutProcessStopS;
-	private long timeoutProcessCheckStopS;
-	private long timeoutBatchS3UploadS;
-	private long timeoutBatchS3DownloadS;
-	private int sizeBatchS3Upload;
-	private int sizeBatchS3Download;
-	
-	private int waitActiveProcessNbMaxLoop;
-	private long waitActiveProcessTempoS;
-	
-	public ApplicationProperties() {
-	}
+    /**
+     * Application level
+     */
+    private ApplicationLevel level;
 
-	/**
-	 * @return the level
-	 */
-	public ApplicationLevel getLevel() {
-		return level;
-	}
+    /**
+     * Timeout (in seconds) for waiting end of several tasks
+     */
+    private long tmProcAllTasksS;
 
-	/**
-	 * @param level the level to set
-	 */
-	public void setLevel(ApplicationLevel level) {
-		this.level = level;
-	}
-	
+    /**
+     * Timeout (in seconds) for waiting end of one task
+     */
+    private long tmProcOneTaskS;
 
-	/**
-	 * @return the timeoutProcessAllTasksS
-	 */
-	public long getTimeoutProcessAllTasksS() {
-		return timeoutProcessAllTasksS;
-	}
+    /**
+     * Timeout (in seconds) for waiting ending processing in case of forced stop
+     */
+    private long tmProcStopS;
 
-	/**
-	 * @param timeoutProcessAllTasksS the timeoutProcessAllTasksS to set
-	 */
-	public void setTimeoutProcessAllTasksS(long timeoutProcessAllTasksS) {
-		this.timeoutProcessAllTasksS = timeoutProcessAllTasksS;
-	}
+    /**
+     * Timeout (in seconds) for waiting stop ok
+     */
+    private long tmProcCheckStopS;
 
-	/**
-	 * @return the timeoutProcessOneTaskS
-	 */
-	public long getTimeoutProcessOneTaskS() {
-		return timeoutProcessOneTaskS;
-	}
+    /**
+     * Batch size for upload
+     */
+    private int sizeBatchUpload;
 
-	/**
-	 * @param timeoutProcessOneTaskS the timeoutProcessOneTaskS to set
-	 */
-	public void setTimeoutProcessOneTaskS(long timeoutProcessOneTaskS) {
-		this.timeoutProcessOneTaskS = timeoutProcessOneTaskS;
-	}
+    /**
+     * Batch size for download
+     */
+    private int sizeBatchDownload;
 
-	/**
-	 * @return the timeoutProcessStopS
-	 */
-	public long getTimeoutProcessStopS() {
-		return timeoutProcessStopS;
-	}
+    /**
+     * Maximal number of loop when waiting for inputs downloading
+     */
+    private int wapNbMaxLoop;
 
-	/**
-	 * @param timeoutProcessStopS the timeoutProcessStopS to set
-	 */
-	public void setTimeoutProcessStopS(long timeoutProcessStopS) {
-		this.timeoutProcessStopS = timeoutProcessStopS;
-	}
+    /**
+     * Tempo between two loops when waiting for inputs downloading
+     */
+    private long wapTempoS;
 
-	/**
-	 * @return the timeoutProcessCheckStopS
-	 */
-	public long getTimeoutProcessCheckStopS() {
-		return timeoutProcessCheckStopS;
-	}
+    /**
+     * Default constructor
+     */
+    public ApplicationProperties() {
+        super();
+    }
 
-	/**
-	 * @param timeoutProcessCheckStopS the timeoutProcessCheckStopS to set
-	 */
-	public void setTimeoutProcessCheckStopS(long timeoutProcessCheckStopS) {
-		this.timeoutProcessCheckStopS = timeoutProcessCheckStopS;
-	}
+    /**
+     * @return the level
+     */
+    public ApplicationLevel getLevel() {
+        return level;
+    }
 
-	/**
-	 * @return the timeoutBatchS3UploadS
-	 */
-	public long getTimeoutBatchS3UploadS() {
-		return timeoutBatchS3UploadS;
-	}
+    /**
+     * @param level
+     *            the level to set
+     */
+    public void setLevel(final ApplicationLevel level) {
+        this.level = level;
+    }
 
-	/**
-	 * @param timeoutBatchS3UploadS the timeoutBatchS3UploadS to set
-	 */
-	public void setTimeoutBatchS3UploadS(long timeoutBatchS3UploadS) {
-		this.timeoutBatchS3UploadS = timeoutBatchS3UploadS;
-	}
+    /**
+     * @return the tmProcAllTasksS
+     */
+    public long getTmProcAllTasksS() {
+        return tmProcAllTasksS;
+    }
 
-	/**
-	 * @return the timeoutBatchS3DownloadS
-	 */
-	public long getTimeoutBatchS3DownloadS() {
-		return timeoutBatchS3DownloadS;
-	}
+    /**
+     * @param tmProcAllTasksS
+     *            the tmProcAllTasksS to set
+     */
+    public void setTmProcAllTasksS(final long tmProcAllTasksS) {
+        this.tmProcAllTasksS = tmProcAllTasksS;
+    }
 
-	/**
-	 * @param timeoutBatchS3DownloadS the timeoutBatchS3DownloadS to set
-	 */
-	public void setTimeoutBatchS3DownloadS(long timeoutBatchS3DownloadS) {
-		this.timeoutBatchS3DownloadS = timeoutBatchS3DownloadS;
-	}
+    /**
+     * @return the tmProcOneTaskS
+     */
+    public long getTmProcOneTaskS() {
+        return tmProcOneTaskS;
+    }
 
-	/**
-	 * @return the sizeBatchS3Upload
-	 */
-	public int getSizeBatchS3Upload() {
-		return sizeBatchS3Upload;
-	}
+    /**
+     * @param tmProcOneTaskS
+     *            the tmProcOneTaskS to set
+     */
+    public void setTmProcOneTaskS(final long tmProcOneTaskS) {
+        this.tmProcOneTaskS = tmProcOneTaskS;
+    }
 
-	/**
-	 * @param sizeBatchS3Upload the sizeBatchS3Upload to set
-	 */
-	public void setSizeBatchS3Upload(int sizeBatchS3Upload) {
-		this.sizeBatchS3Upload = sizeBatchS3Upload;
-	}
+    /**
+     * @return the tmProcStopS
+     */
+    public long getTmProcStopS() {
+        return tmProcStopS;
+    }
 
-	/**
-	 * @return the sizeBatchS3Download
-	 */
-	public int getSizeBatchS3Download() {
-		return sizeBatchS3Download;
-	}
+    /**
+     * @param tmProcStopS
+     *            the tmProcStopS to set
+     */
+    public void setTmProcStopS(final long tmProcStopS) {
+        this.tmProcStopS = tmProcStopS;
+    }
 
-	/**
-	 * @param sizeBatchS3Download the sizeBatchS3Download to set
-	 */
-	public void setSizeBatchS3Download(int sizeBatchS3Download) {
-		this.sizeBatchS3Download = sizeBatchS3Download;
-	}
+    /**
+     * @return the tmProcCheckStopS
+     */
+    public long getTmProcCheckStopS() {
+        return tmProcCheckStopS;
+    }
 
-	/**
-	 * @return the waitActiveProcessNbMaxLoop
-	 */
-	public int getWaitActiveProcessNbMaxLoop() {
-		return waitActiveProcessNbMaxLoop;
-	}
+    /**
+     * @param tmProcCheckStopS
+     *            the tmProcCheckStopS to set
+     */
+    public void setTmProcCheckStopS(final long tmProcCheckStopS) {
+        this.tmProcCheckStopS = tmProcCheckStopS;
+    }
 
-	/**
-	 * @param waitActiveProcessNbMaxLoop the waitActiveProcessNbMaxLoop to set
-	 */
-	public void setWaitActiveProcessNbMaxLoop(int waitActiveProcessNbMaxLoop) {
-		this.waitActiveProcessNbMaxLoop = waitActiveProcessNbMaxLoop;
-	}
+    /**
+     * @return the sizeBatchS3Upload
+     */
+    public int getSizeBatchUpload() {
+        return sizeBatchUpload;
+    }
 
-	/**
-	 * @return the waitActiveProcessTempoS
-	 */
-	public long getWaitActiveProcessTempoS() {
-		return waitActiveProcessTempoS;
-	}
+    /**
+     * @param sizeBatchS3Upload
+     *            the sizeBatchS3Upload to set
+     */
+    public void setSizeBatchUpload(final int sizeBatchS3Upload) {
+        this.sizeBatchUpload = sizeBatchS3Upload;
+    }
 
-	/**
-	 * @param waitActiveProcessTempoS the waitActiveProcessTempoS to set
-	 */
-	public void setWaitActiveProcessTempoS(long waitActiveProcessTempoS) {
-		this.waitActiveProcessTempoS = waitActiveProcessTempoS;
-	}
+    /**
+     * @return the sizeBatchS3Download
+     */
+    public int getSizeBatchDownload() {
+        return sizeBatchDownload;
+    }
+
+    /**
+     * @param sizeBatchS3Download
+     *            the sizeBatchS3Download to set
+     */
+    public void setSizeBatchDownload(final int sizeBatchS3Download) {
+        this.sizeBatchDownload = sizeBatchS3Download;
+    }
+
+    /**
+     * @return the waitActiveProcessNbMaxLoop
+     */
+    public int getWapNbMaxLoop() {
+        return wapNbMaxLoop;
+    }
+
+    /**
+     * @param waitActiveProcessNbMaxLoop
+     *            the waitActiveProcessNbMaxLoop to set
+     */
+    public void setWapNbMaxLoop(final int waitActiveProcessNbMaxLoop) {
+        this.wapNbMaxLoop = waitActiveProcessNbMaxLoop;
+    }
+
+    /**
+     * @return the waitActiveProcessTempoS
+     */
+    public long getWapTempoS() {
+        return wapTempoS;
+    }
+
+    /**
+     * @param waitActiveProcessTempoS
+     *            the waitActiveProcessTempoS to set
+     */
+    public void setWapTempoS(final long waitActiveProcessTempoS) {
+        this.wapTempoS = waitActiveProcessTempoS;
+    }
 
 }

@@ -1,94 +1,94 @@
 package fr.viveris.s1pdgs.level0.wrapper.services.task;
 
+import java.util.Objects;
+
 /**
- * 
- * @author Cyrielle Gailliard
- *
+ * @author Viveris Technologies
  */
 public class TaskResult {
-	
-	private String binary;
-	
-	private int exitCode;
 
-	/**
-	 * @param binary
-	 * @param exitCode
-	 */
-	public TaskResult(String binary, int exitCode) {
-		super();
-		this.binary = binary;
-		this.exitCode = exitCode;
-	}
+    /**
+     * Binary
+     */
+    private String binary;
 
-	/**
-	 * @return the binary
-	 */
-	public String getBinary() {
-		return binary;
-	}
+    /**
+     * Exit code of the binary execution
+     */
+    private int exitCode;
 
-	/**
-	 * @param binary the binary to set
-	 */
-	public void setBinary(String binary) {
-		this.binary = binary;
-	}
+    /**
+     * @param binary
+     * @param exitCode
+     */
+    public TaskResult(final String binary, final int exitCode) {
+        super();
+        this.binary = binary;
+        this.exitCode = exitCode;
+    }
 
-	/**
-	 * @return the exitCode
-	 */
-	public int getExitCode() {
-		return exitCode;
-	}
+    /**
+     * @return the binary
+     */
+    public String getBinary() {
+        return binary;
+    }
 
-	/**
-	 * @param exitCode the exitCode to set
-	 */
-	public void setExitCode(int exitCode) {
-		this.exitCode = exitCode;
-	}
+    /**
+     * @param binary
+     *            the binary to set
+     */
+    public void setBinary(final String binary) {
+        this.binary = binary;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "TaskResult [binary=" + binary + ", exitCode=" + exitCode + "]";
-	}
+    /**
+     * @return the exitCode
+     */
+    public int getExitCode() {
+        return exitCode;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((binary == null) ? 0 : binary.hashCode());
-		result = prime * result + exitCode;
-		return result;
-	}
+    /**
+     * @param exitCode
+     *            the exitCode to set
+     */
+    public void setExitCode(final int exitCode) {
+        this.exitCode = exitCode;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TaskResult other = (TaskResult) obj;
-		if (binary == null) {
-			if (other.binary != null)
-				return false;
-		} else if (!binary.equals(other.binary))
-			return false;
-		if (exitCode != other.exitCode)
-			return false;
-		return true;
-	}
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return String.format("{binary: %s, exitCode: %s}", binary, exitCode);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(binary, exitCode);
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            TaskResult other = (TaskResult) obj;
+            ret = Objects.equals(binary, other.binary)
+                    && Objects.equals(exitCode, other.exitCode);
+        }
+        return ret;
+    }
 
 }

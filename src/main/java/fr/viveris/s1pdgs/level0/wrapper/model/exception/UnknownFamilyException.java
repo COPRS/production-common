@@ -1,25 +1,42 @@
 package fr.viveris.s1pdgs.level0.wrapper.model.exception;
 
-public class UnknownFamilyException extends CodedException {
-	
-	private static final long serialVersionUID = 9140236445794096614L;
-	
-	private String family;
+/**
+ * @author Viveris Technologies
+ */
+public class UnknownFamilyException extends AbstractCodedException {
 
-	public UnknownFamilyException(String message, String family) {
-		super(ErrorCode.UNKNOWN_FAMILY, message);
-		this.family = family;
-	}
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 9140236445794096614L;
 
-	/**
-	 * @return the family
-	 */
-	public String getFamily() {
-		return family;
-	}
+    /**
+     * Invalid family
+     */
+    private final String family;
 
-	public String getLogMessage() {
-		return String.format("[msg %s]", getMessage());
-	}
+    /**
+     * @param message
+     * @param family
+     */
+    public UnknownFamilyException(final String family, final String message) {
+        super(ErrorCode.UNKNOWN_FAMILY, message);
+        this.family = family;
+    }
+
+    /**
+     * @return the family
+     */
+    public String getFamily() {
+        return family;
+    }
+
+    /**
+     * @see AbstractCodedException#getLogMessage()
+     */
+    @Override
+    public String getLogMessage() {
+        return String.format("[family %s] [msg %s]", family, getMessage());
+    }
 
 }

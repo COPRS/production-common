@@ -30,37 +30,20 @@ kafka:
     l0-jobs: ${wrapper_kafka_enable-consumer_l0-jobs:true}
     l1-jobs: ${wrapper_kafka_enable-consumer_l1-jobs:false}
     
-#Object Storage
-storage:
-  user:
-    id: ${storage_user_id}
-    secret: ${storage_user_secret}
-  endpoint: ${storage_endpoint}
-  region: ${storage_region}
-  buckets:
-    auxiliary-files: ${storage_buckets_auxiliary-files:auxiliary-files}
-    edrs-sessions: ${storage_buckets_session-files:session-files}
-    l0-slices: ${storage_buckets_l0-slices:l0-slices}
-    l0-acns: ${storage_buckets_l0-acns:acns}
-    l1-slices: ${storage_buckets_l1-slices:l1-slices}
-    l1-acns: ${storage_buckets_l1-acns:l1-acns}
-    
 # REST controller
 server:
   port: ${wrapper_rest_server_port:8080}
     
 process:
   level: ${wrapper_process_level}
-  timeout-process-one-task-s: ${wrapper_process_timeout-process-one-task-s}
-  timeout-process-all-tasks-s: ${wrapper_process_timeout-process-all-tasks-s}
-  timeout-process-stop-s: ${wrapper_process_timeout-process-stop-s}
-  timeout-process-check-stop-s: ${wrapper_process_timeout-process-check-stop-s}
-  timeout-batch-s3-upload-s: ${wrapper_process_timeout-batch-s3-upload-s}
-  size-batch-s3-upload:  ${wrapper_process_size-batch-s3-upload:20}
-  timeout-batch-s3-download-s: ${wrapper_process_timeout-batch-s3-download-s}
-  size-batch-s3-download: ${wrapper_process_size-batch-s3-download:5}
-  wait-active-process-nb-max-loop: ${wrapper_process_wait-active-process-nb-max-loop:12}
-  wait-active-process-tempo-s: ${wrapper_process_wait-active-process-tempo-s:10}
+  tm-proc-one-task-s: ${wrapper_process_timeout-process-one-task-s}
+  tm-proc-all-tasks-s: ${wrapper_process_timeout-process-all-tasks-s}
+  tm-proc-stop-s: ${wrapper_process_timeout-process-stop-s}
+  tm-proc-check-stop-s: ${wrapper_process_timeout-process-check-stop-s}
+  size-batch-upload:  ${wrapper_process_size-batch-s3-upload:20}
+  size-batch-download: ${wrapper_process_size-batch-s3-download:5}
+  wap-nb-max-loop: ${wrapper_process_wait-active-process-nb-max-loop:12}
+  wap-tempo-s: ${wrapper_process_wait-active-process-tempo-s:10}
 
 status:
   delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}

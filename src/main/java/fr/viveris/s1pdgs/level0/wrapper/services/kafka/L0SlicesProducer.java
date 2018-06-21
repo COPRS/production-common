@@ -1,56 +1,38 @@
 package fr.viveris.s1pdgs.level0.wrapper.services.kafka;
 
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.level0.wrapper.controller.dto.L0SliceDto;
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.KafkaSendException;
 
 /**
- * 
- * @author Olivier Bex-Chauvet
- *
+ * @author Viveris Technologies
  */
 @Service
-public class L0SlicesProducer {
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(L0SlicesProducer.class);
+public class L0SlicesProducer extends AbstractGenericProducer<L0SliceDto> {
 
-	/**
-	 * KAFKA template for topic "session"
-	 */
-	@Autowired
-	private KafkaTemplate<String, L0SliceDto> kafkaProductTemplate;
+    /**
+     * Constructor
+     * 
+     * @param kafkaTemplate
+     * @param topic
+     */
+    @Autowired
+    public L0SlicesProducer(
+            @Qualifier("kafkaProductTemplate") final KafkaTemplate<String, L0SliceDto> kafkaTemplate,
+            @Value("${kafka.topic.l0-slices}") final String topic) {
+        super(kafkaTemplate, topic);
+    }
 
-	/**
-	 * Name of the topic "session"
-	 */
-	@Value("${kafka.topic.l0-slices}")
-	private String kafkaTopic;
+    /**
+     * @see AbstractGenericProducer#extractProductName(Object)
+     */
+    @Override
+    protected String extractProductName(final L0SliceDto obj) {
+        return obj.getProductName();
+    }
 
-	/**
-	 * Send a message to a topic and wait until one is published
-	 * 
-	 * @param descriptor
-	 */
-	public void send(L0SliceDto descriptor) throws KafkaSendException {
-		try {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("[send] Send slice = {}", descriptor);
-			}
-			kafkaProductTemplate.send(kafkaTopic, descriptor).get();
-		} catch (CancellationException | InterruptedException | ExecutionException e) {
-
-			throw new KafkaSendException(kafkaTopic, descriptor.getProductName(), e.getMessage(), e);
-		}
-	}
 }
