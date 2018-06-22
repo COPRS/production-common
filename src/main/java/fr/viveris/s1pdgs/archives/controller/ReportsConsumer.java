@@ -3,43 +3,72 @@ package fr.viveris.s1pdgs.archives.controller;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import fr.viveris.s1pdgs.archives.controller.dto.ReportDto;
+import fr.viveris.s1pdgs.archives.model.ResumeDetails;
 import fr.viveris.s1pdgs.archives.utils.FileUtils;
 
+/**
+ * Consumer of reports
+ * 
+ * @author Viveris Technologies
+ */
 @Component
 @ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "report")
 public class ReportsConsumer {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(ReportsConsumer.class);
-	/**
-	 * Path to the shared volume
-	 */
-	private final String sharedVolume;
-	
-	public ReportsConsumer(@Value("${file.reports.local-directory}") final String sharedVolume) {
-		this.sharedVolume = sharedVolume;
-	}
+    /**
+     * Logger
+     */
+    private static final Logger LOGGER =
+            LogManager.getLogger(ReportsConsumer.class);
+    /**
+     * Path to the shared volume
+     */
+    private final String sharedVolume;
 
-	@KafkaListener(topics = "#{'${kafka.topics.reports}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "reportKafkaListenerContainerFactory")
-	public void receive(ReportDto dto) {
-		LOGGER.info("[MONITOR] [Step 0] [Reports] [productName {}] Starting distribution of Report",
-				dto.getProductName());
-		try {
-			File report = new File(this.sharedVolume + "/" + dto.getFamily().toString().toLowerCase() + "/" + dto.getProductName());
-			FileUtils.writeFile(report, dto.getContent());
-			LOGGER.info("[MONITOR] [Step 0] [Reports] [productName {}] Report distributed",	dto.getProductName());
-		} catch (IOException e) {
-			LOGGER.error("[MONITOR] [Reports] [productName {}] {}", dto.getProductName(), e.getMessage());
-		}
-	}
+    /**
+     * Constructor
+     * 
+     * @param sharedVolume
+     */
+    public ReportsConsumer(
+            @Value("${file.reports.local-directory}") final String sharedVolume) {
+        this.sharedVolume = sharedVolume;
+    }
+
+    /**
+     * Consume message
+     * 
+     * @param dto
+     * @param topic
+     */
+    @KafkaListener(topics = "#{'${kafka.topics.reports}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "reportKafkaListenerContainerFactory")
+    public void receive(final ReportDto dto,
+            @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
+        LOGGER.info(
+                "[MONITOR] [step 0] [family {}] [productName {}] Starting distribution",
+                dto.getFamily(), dto.getProductName());
+        try {
+            File report = new File(sharedVolume + File.separator
+                    + dto.getFamily().name().toLowerCase() + File.separator
+                    + dto.getProductName());
+            FileUtils.writeFile(report, dto.getContent());
+        } catch (IOException e) {
+            LOGGER.error(
+                    "[MONITOR] [step 0] [family {}] [productName {}] [resuming {}] {}",
+                    dto.getFamily(), dto.getProductName(),
+                    new ResumeDetails(topic, dto), e.getMessage());
+        }
+        LOGGER.info("[MONITOR] [step 0] [family {}] [productName {}] End",
+                dto.getFamily(), dto.getProductName());
+    }
 }

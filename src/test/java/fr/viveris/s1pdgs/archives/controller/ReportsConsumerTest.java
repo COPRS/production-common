@@ -36,7 +36,7 @@ public class ReportsConsumerTest {
 	@Test
 	public void testReceive() {
 		ReportsConsumer consumer = new ReportsConsumer("test/data/reports");
-		consumer.receive(new ReportDto("productName",  "content", ProductFamily.L0_REPORT));
+		consumer.receive(new ReportDto("productName",  "content", ProductFamily.L0_REPORT), "topic");
 		assertTrue("File exist", resultExists.exists());
 
 	}
@@ -44,7 +44,7 @@ public class ReportsConsumerTest {
 	@Test
 	public void testReceiveNoDirectory() {
 		ReportsConsumer consumer = new ReportsConsumer("test/data/reports");
-		consumer.receive(new ReportDto("productName",  "content", ProductFamily.BLANK));
+		consumer.receive(new ReportDto("productName",  "content", ProductFamily.BLANK), "topic");
 		assertFalse("File exist", resultNotExists.exists());
 	}
 
