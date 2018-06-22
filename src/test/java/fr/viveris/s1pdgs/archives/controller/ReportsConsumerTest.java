@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fr.viveris.s1pdgs.archives.controller.dto.ReportDto;
+import fr.viveris.s1pdgs.archives.model.ProductFamily;
 
 public class ReportsConsumerTest {
 
@@ -35,7 +36,7 @@ public class ReportsConsumerTest {
 	@Test
 	public void testReceive() {
 		ReportsConsumer consumer = new ReportsConsumer("test/data/reports");
-		consumer.receive(new ReportDto("productName",  "content", "L0_REPORT"));
+		consumer.receive(new ReportDto("productName",  "content", ProductFamily.L0_REPORT));
 		assertTrue("File exist", resultExists.exists());
 
 	}
@@ -43,7 +44,7 @@ public class ReportsConsumerTest {
 	@Test
 	public void testReceiveNoDirectory() {
 		ReportsConsumer consumer = new ReportsConsumer("test/data/reports");
-		consumer.receive(new ReportDto("productName",  "content", "L0_REPORTS"));
+		consumer.receive(new ReportDto("productName",  "content", ProductFamily.BLANK));
 		assertFalse("File exist", resultNotExists.exists());
 	}
 

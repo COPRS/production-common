@@ -51,14 +51,14 @@ public class SlicesConsumerTest {
 		this.mockSliceExists(true);
 		File expectedResult = new File("test/data/slices/l0_product/productName");
 		this.mockSliceDownloadFiles(expectedResult);
-		consumer.receive(new SliceDto("productName", "kobs", "L0_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT));
 	}
 	
 	@Test
 	public void testReceiveL0SliceNotPresentInOBS() throws ObjectStorageException, ObsUnknownObjectException {
 		SlicesConsumer consumer = new SlicesConsumer(obsService, "test/data/slices");
 		this.mockSliceExists(false);
-		consumer.receive(new SliceDto("productName", "kobs", "L0_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT));
 		verify(obsService, never()).downloadFile(Mockito.any(ProductFamily.class), Mockito.anyString(), Mockito.anyString());
 	}
 	
@@ -66,7 +66,7 @@ public class SlicesConsumerTest {
 	public void testReceiveL0SliceObjectStorageException() throws ObjectStorageException, ObsUnknownObjectException {
 		SlicesConsumer consumer = new SlicesConsumer(obsService, "test/data/slices");
 		this.mockSliceObjectStorageException();
-		consumer.receive(new SliceDto("productName", "kobs", "L0_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT));
 		verify(obsService, never()).downloadFile(Mockito.any(ProductFamily.class), Mockito.anyString(), Mockito.anyString());
 	}
 	
@@ -74,7 +74,7 @@ public class SlicesConsumerTest {
 	public void testReceiveL0SliceObsUnknownObjectException() throws ObjectStorageException, ObsUnknownObjectException {
 		SlicesConsumer consumer = new SlicesConsumer(obsService, "test/data/slices");
 		this.mockSliceObsUnknownObjectException();
-		consumer.receive(new SliceDto("productName", "kobs", "L0_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT));
 		verify(obsService, never()).downloadFile(Mockito.any(ProductFamily.class), Mockito.anyString(), Mockito.anyString());
 	}
 	
@@ -84,14 +84,14 @@ public class SlicesConsumerTest {
 		this.mockSliceExists(true);
 		File expectedResult = new File("test/data/slices/l1_product/productName");
 		this.mockSliceDownloadFiles(expectedResult);
-		consumer.receive(new SliceDto("productName", "kobs", "L1_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT));
 	}
 	
 	@Test
 	public void testReceiveL1SliceNotPresentInOBS() throws ObjectStorageException, ObsUnknownObjectException {
 		SlicesConsumer consumer = new SlicesConsumer(obsService, "test/data/slices");
 		this.mockSliceExists(false);
-		consumer.receive(new SliceDto("productName", "kobs", "L1_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT));
 		verify(obsService, never()).downloadFile(Mockito.any(ProductFamily.class), Mockito.anyString(), Mockito.anyString());
 	}
 	
@@ -99,7 +99,7 @@ public class SlicesConsumerTest {
 	public void testReceiveL1SliceObjectStorageException() throws ObjectStorageException, ObsUnknownObjectException {
 		SlicesConsumer consumer = new SlicesConsumer(obsService, "test/data/slices");
 		this.mockSliceObjectStorageException();
-		consumer.receive(new SliceDto("productName", "kobs", "L1_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT));
 		verify(obsService, never()).downloadFile(Mockito.any(ProductFamily.class), Mockito.anyString(), Mockito.anyString());
 	}
 	
@@ -107,14 +107,14 @@ public class SlicesConsumerTest {
 	public void testReceiveL1SliceObsUnknownObjectException() throws ObjectStorageException, ObsUnknownObjectException {
 		SlicesConsumer consumer = new SlicesConsumer(obsService, "test/data/slices");
 		this.mockSliceObsUnknownObjectException();
-		consumer.receive(new SliceDto("productName", "kobs", "L1_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT));
 		verify(obsService, never()).downloadFile(Mockito.any(ProductFamily.class), Mockito.anyString(), Mockito.anyString());
 	}
 	
 	@Test
 	public void testReceiveUnknownSlice() throws ObjectStorageException {
 		SlicesConsumer consumer = new SlicesConsumer(obsService, "test/data/slices");
-		consumer.receive(new SliceDto("productName", "kobs", "L2_PRODUCT"));
+		consumer.receive(new SliceDto("productName", "kobs", ProductFamily.BLANK));
 	}
 
 }

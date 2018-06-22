@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import fr.viveris.s1pdgs.archives.model.ProductFamily;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -15,12 +16,12 @@ public class SliceDtoTest {
 	 */
 	@Test
 	public void testToString() {
-		SliceDto obj = new SliceDto("name", "kobs", "family");
+		SliceDto obj = new SliceDto("name", "kobs", ProductFamily.BLANK);
 		
 		String str = obj.toString();
 		assertTrue(str.contains("productName=name"));
 		assertTrue(str.contains("keyObjectStorage=kobs"));
-		assertTrue(str.contains("familyName=family"));
+		assertTrue(str.contains("familyName=BLANK"));
 	}
 	
 	
