@@ -12,6 +12,7 @@
    <rule ref="rulesets/java/unusedcode.xml/UnusedLocalVariable"><priority>2</priority></rule>
    <rule ref="rulesets/java/naming.xml/BooleanGetMethodName"><priority>2</priority></rule>
    <rule ref="rulesets/java/naming.xml/PackageCase"><priority>2</priority></rule>
+   <rule ref="rulesets/java/coupling.xml/LawOfDemeter"><priority>4</priority></rule>
    
    <!-- Default rulesets -->
    <rule ref="rulesets/java/design.xml/AbstractClassWithoutAbstractMethod"/>
@@ -64,7 +65,7 @@
    <rule ref="rulesets/java/controversial.xml/AvoidUsingShortType"/>
    <rule ref="rulesets/java/controversial.xml/AvoidUsingVolatile"/>
    <rule ref="rulesets/java/design.xml/BadComparison"/>
-   <rule ref="rulesets/java/javabeans.xml/BeanMembersShouldSerialize"/>
+   <!-- <rule ref="rulesets/java/javabeans.xml/BeanMembersShouldSerialize"/> -->
    <rule ref="rulesets/java/basic.xml/BigIntegerInstantiation"/>
    <rule ref="rulesets/java/basic.xml/BooleanInstantiation"/>
    <rule ref="rulesets/java/basic.xml/BrokenNullCheck"/>
@@ -169,7 +170,7 @@
    <rule ref="rulesets/java/coupling.xml/LawOfDemeter"/>
    <rule ref="rulesets/java/j2ee.xml/LocalHomeNamingConvention"/>
    <rule ref="rulesets/java/j2ee.xml/LocalInterfaceSessionNamingConvention"/>
-   <rule ref="rulesets/java/optimizations.xml/LocalVariableCouldBeFinal"/>
+   <!-- <rule ref="rulesets/java/optimizations.xml/LocalVariableCouldBeFinal"/> -->
    <rule ref="rulesets/java/logging-java.xml/LoggerIsNotStaticFinal"/>
    <rule ref="rulesets/java/design.xml/LogicInversion"/>
    <rule ref="rulesets/java/migrating.xml/LongInstantiation"/>

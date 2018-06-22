@@ -1,137 +1,122 @@
 package fr.viveris.s1pdgs.archives.controller.dto;
 
+import java.util.Objects;
+
 import fr.viveris.s1pdgs.archives.model.ProductFamily;
 
 /**
  * DTO class for L0 reports
- * @author Cyrielle Gailliard
- *
+ * 
+ * @author Viveris Technologies
  */
 public class ReportDto {
-	/**
-	 * Product name of the reports
-	 */
-	private String productName;
-	
-	/**
-	 * Content of the report
-	 */
-	private String content;
-	/**
-	 * Family name of the reports (l0 or l1)
-	 */
-	private ProductFamily family;
-	
 
-	/**
-	 * Default constructor
-	 */
-	public ReportDto() {
-		
-	}
+    /**
+     * Product name of the reports
+     */
+    private String productName;
 
-	/**
-	 * @param productName
-	 * @param content
-	 */
-	public ReportDto(String productName, String content, ProductFamily family) {
-		this();
-		this.productName = productName;
-		this.content = content;
-		this.family = family;
-	}
+    /**
+     * Content of the report
+     */
+    private String content;
 
-	/**
-	 * @return the productName
-	 */
-	public String getProductName() {
-		return productName;
-	}
+    /**
+     * Family name of the reports (l0 or l1)
+     */
+    private ProductFamily family;
 
-	/**
-	 * @param productName the productName to set
-	 */
-	public void setProductName(String productName) {
-		this.productName = productName;
-	}
+    /**
+     * @param productName
+     * @param content
+     */
+    public ReportDto(final String productName, final String content,
+            final ProductFamily family) {
+        this.productName = productName;
+        this.content = content;
+        this.family = family;
+    }
 
-	/**
-	 * @return the content
-	 */
-	public String getContent() {
-		return content;
-	}
+    /**
+     * @return the productName
+     */
+    public String getProductName() {
+        return productName;
+    }
 
-	/**
-	 * @param content the content to set
-	 */
-	public void setContent(String content) {
-		this.content = content;
-	}
+    /**
+     * @param productName
+     *            the productName to set
+     */
+    public void setProductName(final String productName) {
+        this.productName = productName;
+    }
 
-	/**
-	 * @return the familyName
-	 */
-	public ProductFamily getFamily() {
-		return family;
-	}
+    /**
+     * @return the content
+     */
+    public String getContent() {
+        return content;
+    }
 
-	/**
-	 * @param familyName the familyName to set
-	 */
-	public void setFamily(ProductFamily family) {
-		this.family = family;
-	}
+    /**
+     * @param content
+     *            the content to set
+     */
+    public void setContent(final String content) {
+        this.content = content;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "ReportDto [productName=" + productName + ", content=" + content + ", familyName=" + family + "]";
-	}
+    /**
+     * @return the familyName
+     */
+    public ProductFamily getFamily() {
+        return family;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((content == null) ? 0 : content.hashCode());
-		result = prime * result + ((family == null) ? 0 : family.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		return result;
-	}
+    /**
+     * @param familyName
+     *            the familyName to set
+     */
+    public void setFamily(final ProductFamily family) {
+        this.family = family;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ReportDto other = (ReportDto) obj;
-		if (content == null) {
-			if (other.content != null)
-				return false;
-		} else if (!content.equals(other.content))
-			return false;
-		if (family == null) {
-			if (other.family != null)
-				return false;
-		} else if (!family.equals(other.family))
-			return false;
-		if (productName == null) {
-			if (other.productName != null)
-				return false;
-		} else if (!productName.equals(other.productName))
-			return false;
-		return true;
-	}
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return String.format("{productName: %s, content: %s, family: %s}",
+                productName, content, family);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(productName, content, family);
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            final ReportDto other = (ReportDto) obj;
+            // field comparison
+            ret = Objects.equals(productName, other.productName)
+                    && Objects.equals(content, other.content)
+                    && Objects.equals(family, other.family);
+        }
+        return ret;
+    }
 
 }
