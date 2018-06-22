@@ -68,11 +68,11 @@ public class ObsServiceTest {
 		MockitoAnnotations.initMocks(this);
 
 		doThrow(new ObsServiceException("error 1 message")).when(client)
-				.doesObjectExist(Mockito.eq(new ObsObject("error-key", ObsFamily.AUXILIARY_FILE)));
+				.doesPrefixExist(Mockito.eq(new ObsObject("error-key", ObsFamily.AUXILIARY_FILE)));
 		doThrow(new SdkClientException("error 2 message")).when(client)
-				.doesObjectExist(Mockito.eq(new ObsObject("error-key", ObsFamily.EDRS_SESSION)));
-		doReturn(true).when(client).doesObjectExist(Mockito.eq(new ObsObject("test-key", ObsFamily.AUXILIARY_FILE)));
-		doReturn(false).when(client).doesObjectExist(Mockito.eq(new ObsObject("test-key", ObsFamily.EDRS_SESSION)));
+				.doesPrefixExist(Mockito.eq(new ObsObject("error-key", ObsFamily.EDRS_SESSION)));
+		doReturn(true).when(client).doesPrefixExist(Mockito.eq(new ObsObject("test-key", ObsFamily.AUXILIARY_FILE)));
+		doReturn(false).when(client).doesPrefixExist(Mockito.eq(new ObsObject("test-key", ObsFamily.EDRS_SESSION)));
 
 		doThrow(new ObsServiceException("error 1 message")).when(client).uploadObject(
 				Mockito.eq(new ObsUploadObject("error-key", ObsFamily.AUXILIARY_FILE, new File("pom.xml"))));
@@ -157,11 +157,11 @@ public class ObsServiceTest {
 	public void testNominalExist() throws ObjectStorageException, ObsServiceException, SdkClientException {
 		boolean ret = service.exist(ProductFamily.CONFIG, "test-key");
 		assertTrue(ret);
-		verify(client, times(1)).doesObjectExist(Mockito.eq(new ObsObject("test-key", ObsFamily.AUXILIARY_FILE)));
+		verify(client, times(1)).doesPrefixExist(Mockito.eq(new ObsObject("test-key", ObsFamily.AUXILIARY_FILE)));
 
 		ret = service.exist(ProductFamily.RAW, "test-key");
 		assertFalse(ret);
-		verify(client, times(1)).doesObjectExist(Mockito.eq(new ObsObject("test-key", ObsFamily.EDRS_SESSION)));
+		verify(client, times(1)).doesPrefixExist(Mockito.eq(new ObsObject("test-key", ObsFamily.EDRS_SESSION)));
 	}
 
 	/**
