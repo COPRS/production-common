@@ -8,7 +8,7 @@ import fr.viveris.s1pdgs.archives.model.ProductFamily;
  * @author Cyrielle Gailliard
  *
  */
-public class ObjectStorageException extends AbstractCodedException {
+public class ObsUnknownObjectException extends AbstractCodedException {
 
 	/**
 	 * Serial UID
@@ -21,7 +21,7 @@ public class ObjectStorageException extends AbstractCodedException {
 	private final String key;
 
 	/**
-	 * Family
+	 * Bucket in object storage
 	 */
 	private final ProductFamily family;
 
@@ -29,10 +29,10 @@ public class ObjectStorageException extends AbstractCodedException {
 	 * 
 	 * @param key
 	 * @param bucket
-	 * @param e
+	 * @param message
 	 */
-	public ObjectStorageException(final ProductFamily family, final String key, final Throwable e) {
-		super(ErrorCode.OBS_ERROR, e.getMessage(), e);
+	public ObsUnknownObjectException(final ProductFamily family, final String key) {
+		super(ErrorCode.OBS_UNKOWN_OBJ, "Object not found");
 		this.key = key;
 		this.family = family;
 	}
@@ -58,4 +58,5 @@ public class ObjectStorageException extends AbstractCodedException {
 	public String getLogMessage() {
 		return String.format("[family %s] [key %s] [msg %s]", this.family, this.key, getMessage());
 	}
+
 }

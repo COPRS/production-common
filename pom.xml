@@ -7,7 +7,7 @@
 	<artifactId>s1pdgs-archives</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<name>Spring Boot Docker For Template App</name>
+	<name>Spring Boot Docker For S1-PDGS Archives</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -24,6 +24,14 @@
 		<project.artifactId>s1pdgs-archives-app</project.artifactId>
 		<jacoco.version>0.7.5.201505241946</jacoco.version>
 	</properties>
+	
+	<repositories>
+	    <repository>
+		    <id>in-project</id>
+		    <name>In Project Repo</name>
+		    <url>file://${project.basedir}/libs</url>
+	    </repository>
+	</repositories>
 
 	<dependencies>
 
@@ -76,11 +84,22 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-log4j-appender</artifactId>
+			<version>1.1.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>${aws-java-sdk.version}</version>
+	        <groupId>spdgs-sdk</groupId>
+	        <artifactId>obs-clients</artifactId>
+	        <version>1.0.0</version>
 		</dependency>
 
 		<!-- spring oxm -->
@@ -98,6 +117,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>nl.jqno.equalsverifier</groupId>
+			<artifactId>equalsverifier</artifactId>
+			<version>2.4.6</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
