@@ -112,12 +112,29 @@ public class ObsService {
                 .map(file -> new ObsDownloadObject(file.getKey(),
                         getObsFamily(file.getFamily()), file.getTargetDir()))
                 .collect(Collectors.toList());
+        objects.forEach(obj -> {
+            obj.setIgnoreFolders(false);
+        });
         // Download
         try {
             client.downloadObjects(objects, true);
         } catch (SdkClientException exc) {
             throw new ObsParallelAccessException(exc);
         }
+        // Mv files in case of EDRS session
+        objects.forEach(obj -> {
+            String key = obj.getKey();
+            String filename = obj.getKey();
+            int lastIndex = key.lastIndexOf('/');
+            if (lastIndex != -1) {
+                filename = key.substring(lastIndex + 1);
+            }
+            if (!obj.getKey().equals(filename)) {
+                File fFrom = new File(obj.getTargetDir() + key);
+                File fTo = new File(obj.getTargetDir() + filename);
+                fFrom.renameTo(fTo);
+            }
+        });
     }
 
     /**
