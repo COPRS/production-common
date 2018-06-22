@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,11 @@ import fr.viveris.s1pdgs.libs.obs_sdk.SdkClientException;
  */
 @Service
 public class ObsService {
+
+    /**
+     * Logger
+     */
+    private static final Logger LOGGER = LogManager.getLogger(ObsService.class);
 
     /**
      * OBS client
@@ -124,12 +131,15 @@ public class ObsService {
         // Mv files in case of EDRS session
         objects.forEach(obj -> {
             String key = obj.getKey();
-            String filename = obj.getKey();
+            String filename = key;
             int lastIndex = key.lastIndexOf('/');
             if (lastIndex != -1) {
                 filename = key.substring(lastIndex + 1);
             }
-            if (!obj.getKey().equals(filename)) {
+            LOGGER.info("CYRIELLE targetdir=[{}] filename=[{}] key=[{}]",
+                    obj.getTargetDir(), filename, key);
+
+            if (!key.equals(filename)) {
                 File fFrom = new File(obj.getTargetDir() + key);
                 File fTo = new File(obj.getTargetDir() + filename);
                 fFrom.renameTo(fTo);
