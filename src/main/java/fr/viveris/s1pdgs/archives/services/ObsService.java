@@ -50,7 +50,7 @@ public class ObsService {
 	public boolean exist(ProductFamily family, String key) throws ObjectStorageException {
 		ObsObject object = new ObsObject(key, getObsFamily(family));
 		try {
-			return client.doesObjectExist(object);
+			return client.doesPrefixExist(object);
 		} catch (SdkClientException exc) {
 			throw new ObjectStorageException(family, key, exc);
 		}
