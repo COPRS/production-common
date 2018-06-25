@@ -54,6 +54,8 @@ wrapper:
   wait-pod-deletion-ms: ${scaler_wrapper_wait-pod-deletion-ms:10000}
   rest-api:
     port: ${scaler_wrapper_rest-api_port:8080}
+    nb-retry: ${scaler_wrapper_rest-api_nb-retry:3}
+    tempo-retry-ms : ${scaler_wrapper_rest-api_tempo-retry-ms:1000}
 
 # Openstack
 openstack:
@@ -101,6 +103,7 @@ dev:
   activations: 
     pod-deletion: ${scaler_dev_pod-deletion:true}
     kafka-monitoring: ${scaler_dev_kafka-monitoring:true}
+    init-scaling: ${scaler_dev_init-scaling:true}
     k8s-monitoring: ${scaler_dev_k8s-monitoring:true}
     value-monitored: ${scaler_dev_value-monitored:true}
     scaling: ${scaler_dev_scaling:false}

@@ -12,6 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +97,52 @@ public class Scaler {
 		this.devProperties = devProperties;
 	}
 
+	
+	@PostConstruct
+	public void initscale() {
+		try {
+			// Listing all the L1 wrappers pods
+			List<WrapperNodeMonitor> wrapperNodeMonitors = new ArrayList<>();
+			int initpoolpod;
+			int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
+			if (devProperties.getActivations().get("init-scaling") == true) {
+				LOGGER.info("[INIT] Starting monitoring K8S");
+				wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("[INIT] Monitored information {}", wrapperNodeMonitors);
+				}
+				List<WrapperPodMonitor> activeWrapperPods = wrapperNodeMonitors.stream()
+						.filter(nodeMonitor -> nodeMonitor != null && !CollectionUtils.isEmpty(nodeMonitor.getWrapperPods()))
+						.flatMap(nodeMonitor -> nodeMonitor.getActivesPods().stream()).collect(Collectors.toList());
+				
+				long numberWrappers = activeWrapperPods.stream().count();
+				if(numberWrappers < this.wrapperProperties.getNbMinServers() * nbPodsPerServer)
+				{
+					initpoolpod = (int) (this.wrapperProperties.getNbMinServers() - numberWrappers);
+					LOGGER.info("[INIT] Create {} missing pods", initpoolpod);
+					this.addRessources(wrapperNodeMonitors, initpoolpod);
+				}
+				if(numberWrappers > this.wrapperProperties.getNbMaxServers() * nbPodsPerServer)
+				{
+					initpoolpod = (int) (numberWrappers - this.wrapperProperties.getNbMinServers());
+					LOGGER.info("[INIT] Delete {} pods", initpoolpod);
+					this.freeRessources(wrapperNodeMonitors, initpoolpod);
+				}
+			} else {
+				LOGGER.info("[INIT] Starting monitoring K8S bypassed");
+			}
+			
+		}
+		catch (AbstractCodedException e) {
+			LOGGER.error("[INIT] [code {}] {}", e.getCode().getCode(), e.getLogMessage());
+		} catch (Exception e) {
+			LOGGER.error("[INTIT] [code {}] [msg {}]", ErrorCode.INTERNAL_ERROR.getCode(),
+					e.getMessage(), e);
+		}
+		
+	}
+	
+	
 	/**
 	 * <ul>
 	 * Scaling:
@@ -104,7 +152,7 @@ public class Scaler {
 	 * <li>4: Scales the L1 resources</li>
 	 * <ul>
 	 */
-	@Scheduled(fixedRateString = "${wrapper.tempo-pooling-ms}")
+	@Scheduled(fixedRateString = "${wrapper.tempo-pooling-ms}", initialDelayString = "${wrapper.tempo-pooling-ms}")
 	public void scale() {
 		LOGGER.info("[MONITOR] [step 0] Starting scaling");
 		int step = 0;
@@ -188,11 +236,11 @@ public class Scaler {
 				LOGGER.info("[MONITOR] [step 5] Starting applying scaling action {}", scalingAction.name());
 				switch (scalingAction) {
 				case ALLOC:
-					this.addRessources(wrapperNodeMonitors);
+					this.addRessources(wrapperNodeMonitors, this.wrapperProperties.getNbPoolingPods());
 					this.lastScalingTimestamp = currentTimestamp;
 					break;
 				case FREE:
-					this.freeRessources(wrapperNodeMonitors);
+					this.freeRessources(wrapperNodeMonitors, this.wrapperProperties.getNbPoolingPods());
 					this.lastScalingTimestamp = currentTimestamp;
 					break;
 				default:
@@ -277,9 +325,8 @@ public class Scaler {
 		return ScalingAction.NOTHING;
 	}
 
-	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors)
+	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors, int nbPoolingPods)
 			throws K8sEntityException, OsEntityException, InterruptedException, ExecutionException {
-		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
 		int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
 		int maxNbServers = this.wrapperProperties.getNbMaxServers();
 		int nbServers = wrapperNodeMonitors.size();
@@ -347,8 +394,7 @@ public class Scaler {
 		}
 	}
 
-	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) throws WrapperStopException {
-		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
+	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors, int nbPoolingPods) throws WrapperStopException {
 		int minNbServers = this.wrapperProperties.getNbMinServers();
 		List<WrapperNodeMonitor> localWrapperNodeMonitors = wrapperNodeMonitors.stream()
 				.filter(node -> hasLabels(node.getDescription().getLabels())).collect(Collectors.toList());
