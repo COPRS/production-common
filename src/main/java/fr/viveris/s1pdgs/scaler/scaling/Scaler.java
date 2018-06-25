@@ -326,7 +326,7 @@ public class Scaler {
 	}
 
 	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors, int nbPoolingPods)
-			throws K8sEntityException, OsEntityException {
+			throws K8sEntityException, OsEntityException, InterruptedException, ExecutionException {
 		int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
 		int maxNbServers = this.wrapperProperties.getNbMaxServers();
 		int nbServers = wrapperNodeMonitors.size();
