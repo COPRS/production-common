@@ -2,6 +2,7 @@ package fr.viveris.s1pdgs.scaler.k8s;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,10 +47,10 @@ public class K8SAdministration {
 				wrapperProperties.getLabelWrapperStateUnused().getValue());
 	}
 
-	public void launchWrapperPodsPool(int nbPods)
+	public void launchWrapperPodsPool(int nbPods, AtomicInteger uniquePODID)
 			throws PodResourceException, K8sUnknownResourceException {
 		for (int i = 0; i < nbPods; i++) {
-			this.podService.createPodFromTemplate(wrapperProperties.getPodTemplateFile());
+			this.podService.createPodFromTemplate(wrapperProperties.getPodTemplateFile(), uniquePODID.getAndIncrement());
 		}
 	}
 
