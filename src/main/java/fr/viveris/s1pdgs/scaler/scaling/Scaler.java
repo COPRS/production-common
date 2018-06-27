@@ -136,12 +136,26 @@ public class Scaler {
 		catch (AbstractCodedException e) {
 			LOGGER.error("[INIT] [code {}] {}", e.getCode().getCode(), e.getLogMessage());
 		} catch (Exception e) {
-			LOGGER.error("[INTIT] [code {}] [msg {}]", ErrorCode.INTERNAL_ERROR.getCode(),
+			LOGGER.error("[INIT] [code {}] [msg {}]", ErrorCode.INTERNAL_ERROR.getCode(),
 					e.getMessage(), e);
 		}
 		
 	}
 	
+	@Scheduled(fixedRateString = "${wrapper.tempo-integrity-volumeserver-ms}")
+	public void deleteinvalidressources() {
+		LOGGER.debug("[INTEGRITY] Check for invalid server or volumes");
+		try {
+			this.osAdministration.deleteInvalidServers();
+		} catch (OsEntityException e) {
+			LOGGER.error("[INTEGRITY] [code {}] {}", e.getCode().getCode(), e.getLogMessage());
+		}
+		try {
+			this.osAdministration.deleteInvalidVolumes();
+		} catch (OsEntityException e2) {
+			LOGGER.error("[INTEGRITY] [code {}] {}", e2.getCode().getCode(), e2.getLogMessage());
+		}
+	}
 	
 	/**
 	 * <ul>
