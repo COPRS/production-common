@@ -2,6 +2,9 @@ package fr.viveris.s1pdgs.scaler.openstack;
 
 import java.util.List;
 
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openstack4j.api.OSClient.OSClientV3;
@@ -9,6 +12,7 @@ import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.compute.InterfaceAttachment;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.network.NetFloatingIP;
+import org.openstack4j.model.storage.block.Volume;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,8 @@ import fr.viveris.s1pdgs.scaler.openstack.model.VolumeDesc;
 import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityException;
 import fr.viveris.s1pdgs.scaler.openstack.services.ServerService;
 import fr.viveris.s1pdgs.scaler.openstack.services.VolumeService;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class OpenStackAdministration {
@@ -68,13 +74,13 @@ public class OpenStackAdministration {
 		}
 	}
 
-	public String createServerForL1Wrappers(String logPrefix) throws OsEntityException {
+	public String createServerForL1Wrappers(String logPrefix, AtomicInteger uniqueVMID) throws OsEntityException {
 		OSClientV3 osClient = this.osClient();
-		long currentTimestamp = System.currentTimeMillis();
+		String vmID = uniqueVMID.getAndIncrement()+"-"+UUID.randomUUID().toString().substring(0, 4);
 		OpenStackServerProperties.VolumeProperties volumeProperties = this.osProperties.getVolumeWrapper();
 		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
-		String serverName = serverProperties.getPrefixName() + currentTimestamp;
-		String volumeName = volumeProperties.getPrefixName() + currentTimestamp + "-volume";
+		String serverName = serverProperties.getPrefixName() +"-" + vmID;
+		String volumeName = volumeProperties.getPrefixName() +"-" + vmID + "-volume";
 
 		// Create volume
 		String volumeId = "";
@@ -120,5 +126,30 @@ public class OpenStackAdministration {
                }
         }
         return "";
-  }
+	}
+	public void deleteInvalidServers() throws OsEntityException{
+		OSClientV3 osClient = this.osClient();
+		Map<String, String> filter = new HashMap<String, String>();
+		filter.put("status", "ERROR");
+		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
+		filter.put("name",  "^" + serverProperties.getPrefixName() + "*");
+		for (Server server : osClient.compute().servers().list(filter)) {
+			LOGGER.info("Deletion of invalid server {}", server.getName());
+			this.deleteServer(server.getId());
+		}
+
+	}
+	public void deleteInvalidVolumes() throws OsEntityException{
+		OSClientV3 osClient = this.osClient();
+		Map<String, String> filter = new HashMap<String, String>();
+		filter.put("status", "ERROR");
+		OpenStackServerProperties.VolumeProperties volumeProperties = this.osProperties.getVolumeWrapper();
+		filter.put("name",  "^" + volumeProperties.getPrefixName() + "*");
+		for (Volume volume : osClient.blockStorage().volumes().list(filter)) {
+			LOGGER.info("Deletion of invalid volume {}", volume.getName());
+			osClient.blockStorage().volumes().delete("volume.getName()");
+		}
+
+	}
+	
 }

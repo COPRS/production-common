@@ -4,7 +4,15 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +39,7 @@ import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoring;
 import fr.viveris.s1pdgs.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
 import fr.viveris.s1pdgs.scaler.openstack.OpenStackAdministration;
 import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityException;
+import fr.viveris.s1pdgs.scaler.task.CreateResources;
 
 /**
  * L1 resources scaler
@@ -63,6 +72,8 @@ public class Scaler {
 
 	private long lastScalingTimestamp = 0;
 	private long lastDeletingResourcesTimestamp = 0;
+	private AtomicInteger uniqueVMID = new AtomicInteger(0);
+	private AtomicInteger uniquePODID = new AtomicInteger(0);
 
 	public enum ScalingAction {
 		ALLOC, FREE, NOTHING, ERROR
@@ -86,6 +97,66 @@ public class Scaler {
 		this.devProperties = devProperties;
 	}
 
+	
+	@PostConstruct
+	public void initscale() {
+		try {
+			// Listing all the L1 wrappers pods
+			List<WrapperNodeMonitor> wrapperNodeMonitors = new ArrayList<>();
+			int initpoolpod;
+			int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
+			if (devProperties.getActivations().get("init-scaling") == true) {
+				LOGGER.info("[INIT] Starting monitoring K8S");
+				wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("[INIT] Monitored information {}", wrapperNodeMonitors);
+				}
+				List<WrapperPodMonitor> activeWrapperPods = wrapperNodeMonitors.stream()
+						.filter(nodeMonitor -> nodeMonitor != null && !CollectionUtils.isEmpty(nodeMonitor.getWrapperPods()))
+						.flatMap(nodeMonitor -> nodeMonitor.getActivesPods().stream()).collect(Collectors.toList());
+				
+				long numberWrappers = activeWrapperPods.stream().count();
+				if(numberWrappers < this.wrapperProperties.getNbMinServers() * nbPodsPerServer)
+				{
+					initpoolpod = (int) (this.wrapperProperties.getNbMinServers() - numberWrappers);
+					LOGGER.info("[INIT] Create {} missing pods", initpoolpod);
+					this.addRessources(wrapperNodeMonitors, initpoolpod);
+				}
+				if(numberWrappers > this.wrapperProperties.getNbMaxServers() * nbPodsPerServer)
+				{
+					initpoolpod = (int) (numberWrappers - this.wrapperProperties.getNbMinServers());
+					LOGGER.info("[INIT] Delete {} pods", initpoolpod);
+					this.freeRessources(wrapperNodeMonitors, initpoolpod);
+				}
+			} else {
+				LOGGER.info("[INIT] Starting monitoring K8S bypassed");
+			}
+			
+		}
+		catch (AbstractCodedException e) {
+			LOGGER.error("[INIT] [code {}] {}", e.getCode().getCode(), e.getLogMessage());
+		} catch (Exception e) {
+			LOGGER.error("[INIT] [code {}] [msg {}]", ErrorCode.INTERNAL_ERROR.getCode(),
+					e.getMessage(), e);
+		}
+		
+	}
+	
+	@Scheduled(fixedRateString = "${wrapper.tempo-integrity-volumeserver-ms}")
+	public void deleteinvalidressources() {
+		LOGGER.debug("[INTEGRITY] Check for invalid server or volumes");
+		try {
+			this.osAdministration.deleteInvalidServers();
+		} catch (OsEntityException e) {
+			LOGGER.error("[INTEGRITY] [code {}] {}", e.getCode().getCode(), e.getLogMessage());
+		}
+		try {
+			this.osAdministration.deleteInvalidVolumes();
+		} catch (OsEntityException e2) {
+			LOGGER.error("[INTEGRITY] [code {}] {}", e2.getCode().getCode(), e2.getLogMessage());
+		}
+	}
+	
 	/**
 	 * <ul>
 	 * Scaling:
@@ -95,7 +166,7 @@ public class Scaler {
 	 * <li>4: Scales the L1 resources</li>
 	 * <ul>
 	 */
-	@Scheduled(fixedRateString = "${wrapper.tempo-pooling-ms}")
+	@Scheduled(fixedRateString = "${wrapper.tempo-pooling-ms}", initialDelayString = "${wrapper.tempo-initial-delay-ms}")
 	public void scale() {
 		LOGGER.info("[MONITOR] [step 0] Starting scaling");
 		int step = 0;
@@ -179,11 +250,11 @@ public class Scaler {
 				LOGGER.info("[MONITOR] [step 5] Starting applying scaling action {}", scalingAction.name());
 				switch (scalingAction) {
 				case ALLOC:
-					this.addRessources(wrapperNodeMonitors);
+					this.addRessources(wrapperNodeMonitors, this.wrapperProperties.getNbPoolingPods());
 					this.lastScalingTimestamp = currentTimestamp;
 					break;
 				case FREE:
-					this.freeRessources(wrapperNodeMonitors);
+					this.freeRessources(wrapperNodeMonitors, this.wrapperProperties.getNbPoolingPods());
 					this.lastScalingTimestamp = currentTimestamp;
 					break;
 				default:
@@ -268,9 +339,8 @@ public class Scaler {
 		return ScalingAction.NOTHING;
 	}
 
-	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors)
-			throws K8sEntityException, OsEntityException {
-		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
+	private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors, int nbPoolingPods)
+			throws K8sEntityException, OsEntityException, InterruptedException, ExecutionException {
 		int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
 		int maxNbServers = this.wrapperProperties.getNbMaxServers();
 		int nbServers = wrapperNodeMonitors.size();
@@ -296,6 +366,7 @@ public class Scaler {
 				String nodeName = reusableNodes.get(i).getDescription().getName();
 				LOGGER.info("[MONITOR] [step 5] 1 - Starting setting reusable for node {}", nodeName);
 				this.k8SAdministration.setWrapperNodeUsable(nodeName);
+				this.k8SAdministration.launchWrapperPodsPool(1, uniquePODID);
 				nbAllocatedServer++;
 			}
 		} else {
@@ -304,7 +375,7 @@ public class Scaler {
 			}
 		}
 
-		// Create VM
+		// Create VM and POD
 		LOGGER.info("[MONITOR] [step 5] 2 - Starting creating servers");
 		int nbCreatedServer = 0;
 		if (nbNeededServer > nbAllocatedServer) {
@@ -313,8 +384,20 @@ public class Scaler {
 			} else {
 				while ((nbNeededServer > nbAllocatedServer + nbCreatedServer)
 						&& (nbServers + nbCreatedServer < maxNbServers)) {
-					this.osAdministration.createServerForL1Wrappers("[MONITOR] [Step 4] 2 - ");
 					nbCreatedServer++;
+				}
+				ExecutorService createResoucesExecutorService = Executors.newFixedThreadPool(nbCreatedServer);
+				CompletionService<String> createResoucesCompletionServices = new ExecutorCompletionService<>(createResoucesExecutorService);
+				for(int i = 0; i < nbCreatedServer; i++) {
+					createResoucesCompletionServices.submit(new CreateResources(k8SAdministration, osAdministration, uniqueVMID, uniquePODID));
+				}
+				for(int i = 0; i < nbCreatedServer; i++) {
+					String result = createResoucesCompletionServices.take().get();
+					if(result != null) {
+						LOGGER.info("[MONITOR] [step 5] 3 - Volume, server and pod {} launched", result);
+					} else {
+						LOGGER.error("[MONITOR] [step 5] 3 - Volume, server and pod {} fail to create", result);
+					}
 				}
 			}
 
@@ -323,19 +406,9 @@ public class Scaler {
 				LOGGER.debug("[MONITOR] [step 5] 2 - No need to create new servers");
 			}
 		}
-
-		// Launchs pods
-		int nbPodToLaunch = (nbAllocatedServer + nbCreatedServer) * nbPodsPerServer;
-		LOGGER.info("[MONITOR] [step 5] 3 - Starting launching pods {} on {} reused nodes and {} new nodes",
-				nbPodToLaunch, nbAllocatedServer, nbCreatedServer);
-		if (nbPodToLaunch > 0) {
-			this.k8SAdministration.launchWrapperPodsPool(nbPodToLaunch);
-		}
-		LOGGER.info("[MONITOR] [step 5] 3 - All pods launched");
 	}
 
-	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors) throws WrapperStopException {
-		int nbPoolingPods = this.wrapperProperties.getNbPoolingPods();
+	private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors, int nbPoolingPods) throws WrapperStopException {
 		int minNbServers = this.wrapperProperties.getNbMinServers();
 		List<WrapperNodeMonitor> localWrapperNodeMonitors = wrapperNodeMonitors.stream()
 				.filter(node -> hasLabels(node.getDescription().getLabels())).collect(Collectors.toList());

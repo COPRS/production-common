@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -101,11 +102,11 @@ public class PodService {
 		return resources;
 	}
 
-	public void createPodFromTemplate(String templateFile) throws PodResourceException, K8sUnknownResourceException {
+	public void createPodFromTemplate(String templateFile, int uniquePODID) throws PodResourceException, K8sUnknownResourceException {
 		String namespace = "default";
 
 		// Load resources and update names
-		String suffixe = "-" + System.currentTimeMillis();
+		String suffixe = "-" + uniquePODID + "-" + UUID.randomUUID().toString().substring(0, 4);
 		List<HasMetadata> resources = this.loadRessourcesFromFile(templateFile, suffixe);
 
 		// create resources
