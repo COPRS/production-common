@@ -23,6 +23,7 @@ import fr.viveris.s1pdgs.scaler.k8s.model.NodeDesc;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodDesc;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodStatus;
 import fr.viveris.s1pdgs.scaler.k8s.model.VolumeDesc;
+import fr.viveris.s1pdgs.scaler.k8s.model.WrapperDesc;
 import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.WrapperStatusException;
 
 public class K8SMonitoringTest {
@@ -43,13 +44,15 @@ public class K8SMonitoringTest {
 	private K8SMonitoring k8SMonitoring;
 	
 	@Before
-	public void init() {
+	public void init() throws WrapperStatusException {
 		MockitoAnnotations.initMocks(this);
 		when(wrapperProperties.getLabelWrapperConfig().getLabel()).thenReturn("wrapperconfig");
 		when(wrapperProperties.getLabelWrapperConfig().getValue()).thenReturn("l1");
 		when(wrapperProperties.getLabelWrapperStateUnused().getLabel()).thenReturn("wrapperstate");
 		when(wrapperProperties.getLabelWrapperStateUnused().getValue()).thenReturn("unused");
 		when(wrapperProperties.getLabelWrapperApp().getLabel()).thenReturn("app");
+		when(wrapperService.getWrapperStatus(Mockito.anyString(),Mockito.anyString())).thenReturn(new WrapperDesc("wrapperName"));
+		
 		when(wrapperProperties.getLabelWrapperApp().getValue()).thenReturn("l1-wrapper");
 		
 		NodeDesc nodeDesc1 = new NodeDesc("nodeName");
@@ -84,12 +87,12 @@ public class K8SMonitoringTest {
 	}
 
 	@Test
-	public void TestMonitorNodesToDelete() {
-		System.out.println(k8SMonitoring.monitorNodesToDelete());
+	public void testMonitorNodesToDelete() {
+		k8SMonitoring.monitorNodesToDelete();
 	}
 	
 	@Test
-	public void TestMonitorL1Wrappers() throws WrapperStatusException {
+	public void testMonitorL1Wrappers() throws WrapperStatusException {
 		k8SMonitoring.monitorL1Wrappers();
 	}
 }
