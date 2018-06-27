@@ -49,7 +49,6 @@ Configuration:
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
-          - ref: KAFKA_ERROR
       - name: org.springframework
         level: error
         additivity: false

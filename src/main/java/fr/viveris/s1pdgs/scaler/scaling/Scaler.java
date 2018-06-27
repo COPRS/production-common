@@ -166,7 +166,7 @@ public class Scaler {
 	 * <li>4: Scales the L1 resources</li>
 	 * <ul>
 	 */
-	@Scheduled(fixedRateString = "${wrapper.tempo-pooling-ms}", initialDelayString = "${wrapper.tempo-pooling-ms}")
+	@Scheduled(fixedRateString = "${wrapper.tempo-pooling-ms}", initialDelayString = "${wrapper.tempo-initial-delay-ms}")
 	public void scale() {
 		LOGGER.info("[MONITOR] [step 0] Starting scaling");
 		int step = 0;

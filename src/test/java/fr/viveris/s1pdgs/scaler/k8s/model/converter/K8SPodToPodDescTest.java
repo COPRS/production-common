@@ -31,14 +31,14 @@ public class K8SPodToPodDescTest {
 		podSpec.setNodeName("nodeName");
 		podSpec.setHostname("hostname");
 		
-		//NodeStatus
+		//PodStatus
 		PodStatus podStatus = new PodStatus();
 		podStatus.setHostIP("hostIP");
 		podStatus.setPodIP("podIP");
 		podStatus.setPhase("Running");
 		
-		//Node to convert
-		Pod nodeToConvert = new Pod("apiVersion", "kind", objectMeta, podSpec, podStatus);
+		//Pod to convert
+		Pod podToConvert = new Pod("apiVersion", "kind", objectMeta, podSpec, podStatus);
 				
 		//ExpectedResult
 		PodDesc expectedResult = new PodDesc("podName");
@@ -51,7 +51,7 @@ public class K8SPodToPodDescTest {
 		
 		//Test the apply function
 		K8SPodToPodDesc convertor = new K8SPodToPodDesc();
-		PodDesc result = convertor.apply(nodeToConvert);
+		PodDesc result = convertor.apply(podToConvert);
 		
 		assertEquals("Result is different from the expected result", expectedResult, result);
 	}
