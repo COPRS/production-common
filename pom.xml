@@ -190,7 +190,7 @@
 					<effort>Max</effort>
 					<threshold>Low</threshold>
 					<maxRank>15</maxRank>
-					<includeTests>true</includeTests>
+					<includeTests>false</includeTests>
 				</configuration>
 				<executions>
 					<execution>
@@ -211,7 +211,7 @@
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
-					<includeTests>true</includeTests>
+					<includeTests>false</includeTests>
 				</configuration>
 				<executions>
 					<execution>

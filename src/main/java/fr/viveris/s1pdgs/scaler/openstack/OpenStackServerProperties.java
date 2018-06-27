@@ -1,405 +1,495 @@
 package fr.viveris.s1pdgs.scaler.openstack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * OpenStack configuration
+ * 
+ * @author Viveris Technologies
+ */
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "openstack.server")
 public class OpenStackServerProperties {
 
-	// -------------------------
-	// Authentication
-	// -------------------------
-	private String endpoint;
-	private String domainId;
-	private String projectId;
-	private String credentialUsername;
-	private String credentialPassword;
+    // -------------------------
+    // Authentication
+    // -------------------------
+    private String endpoint;
+    private String domainId;
+    private String projectId;
+    private String credentialUsername;
+    private String credentialPassword;
 
-	// -------------------------
-	// Volumes
-	// -------------------------
-	private VolumeProperties volumeWrapper;
-	private ServerProperties serverWrapper;
+    // -------------------------
+    // Volumes
+    // -------------------------
+    private VolumeProperties volumeWrapper;
+    private ServerProperties serverWrapper;
 
-	public OpenStackServerProperties() {
+    /**
+     * 
+     */
+    public OpenStackServerProperties() {
+        super();
+    }
 
-	}
+    /**
+     * @return the endpoint
+     */
+    public String getEndpoint() {
+        return endpoint;
+    }
 
-	/**
-	 * @return the endpoint
-	 */
-	public String getEndpoint() {
-		return endpoint;
-	}
+    /**
+     * @param endpoint
+     *            the endpoint to set
+     */
+    public void setEndpoint(final String endpoint) {
+        this.endpoint = endpoint;
+    }
 
-	/**
-	 * @param endpoint
-	 *            the endpoint to set
-	 */
-	public void setEndpoint(String endpoint) {
-		this.endpoint = endpoint;
-	}
+    /**
+     * @return the domainId
+     */
+    public String getDomainId() {
+        return domainId;
+    }
 
-	/**
-	 * @return the domainId
-	 */
-	public String getDomainId() {
-		return domainId;
-	}
+    /**
+     * @param domainId
+     *            the domainId to set
+     */
+    public void setDomainId(final String domainId) {
+        this.domainId = domainId;
+    }
 
-	/**
-	 * @param domainId
-	 *            the domainId to set
-	 */
-	public void setDomainId(String domainId) {
-		this.domainId = domainId;
-	}
+    /**
+     * @return the projectId
+     */
+    public String getProjectId() {
+        return projectId;
+    }
 
-	/**
-	 * @return the projectId
-	 */
-	public String getProjectId() {
-		return projectId;
-	}
+    /**
+     * @param projectId
+     *            the projectId to set
+     */
+    public void setProjectId(final String projectId) {
+        this.projectId = projectId;
+    }
 
-	/**
-	 * @param projectId
-	 *            the projectId to set
-	 */
-	public void setProjectId(String projectId) {
-		this.projectId = projectId;
-	}
+    /**
+     * @return the credentialUsername
+     */
+    public String getCredentialUsername() {
+        return credentialUsername;
+    }
 
-	/**
-	 * @return the credentialUsername
-	 */
-	public String getCredentialUsername() {
-		return credentialUsername;
-	}
+    /**
+     * @param credentialUsername
+     *            the credentialUsername to set
+     */
+    public void setCredentialUsername(final String credentialUsername) {
+        this.credentialUsername = credentialUsername;
+    }
 
-	/**
-	 * @param credentialUsername
-	 *            the credentialUsername to set
-	 */
-	public void setCredentialUsername(String credentialUsername) {
-		this.credentialUsername = credentialUsername;
-	}
+    /**
+     * @return the credentialPassword
+     */
+    public String getCredentialPassword() {
+        return credentialPassword;
+    }
 
-	/**
-	 * @return the credentialPassword
-	 */
-	public String getCredentialPassword() {
-		return credentialPassword;
-	}
+    /**
+     * @param credentialPassword
+     *            the credentialPassword to set
+     */
+    public void setCredentialPassword(final String credentialPassword) {
+        this.credentialPassword = credentialPassword;
+    }
 
-	/**
-	 * @param credentialPassword
-	 *            the credentialPassword to set
-	 */
-	public void setCredentialPassword(String credentialPassword) {
-		this.credentialPassword = credentialPassword;
-	}
+    /**
+     * @return the volumeWrapper
+     */
+    public VolumeProperties getVolumeWrapper() {
+        return volumeWrapper;
+    }
 
-	/**
-	 * @return the volumeWrapper
-	 */
-	public VolumeProperties getVolumeWrapper() {
-		return volumeWrapper;
-	}
+    /**
+     * @param volumeWrapper
+     *            the volumeWrapper to set
+     */
+    public void setVolumeWrapper(final VolumeProperties volumeWrapper) {
+        this.volumeWrapper = volumeWrapper;
+    }
 
-	/**
-	 * @param volumeWrapper
-	 *            the volumeWrapper to set
-	 */
-	public void setVolumeWrapper(VolumeProperties volumeWrapper) {
-		this.volumeWrapper = volumeWrapper;
-	}
+    /**
+     * @return the serverWrapper
+     */
+    public ServerProperties getServerWrapper() {
+        return serverWrapper;
+    }
 
-	/**
-	 * @return the serverWrapper
-	 */
-	public ServerProperties getServerWrapper() {
-		return serverWrapper;
-	}
+    /**
+     * @param serverWrapper
+     *            the serverWrapper to set
+     */
+    public void setServerWrapper(final ServerProperties serverWrapper) {
+        this.serverWrapper = serverWrapper;
+    }
 
-	/**
-	 * @param serverWrapper the serverWrapper to set
-	 */
-	public void setServerWrapper(ServerProperties serverWrapper) {
-		this.serverWrapper = serverWrapper;
-	}
+    /**
+     * 
+     */
+    public static class VolumeProperties {
 
-	public static class VolumeProperties {
-		private String prefixName;
-		private String description;
-		private String volumeType;
-		private String zone;
-		private int size;
+        /**
+         * 
+         */
+        private String prefixName;
 
-		public VolumeProperties() {
+        /**
+         * 
+         */
+        private String description;
 
-		}
+        /**
+         * 
+         */
+        private String volumeType;
 
-		/**
-		 * @return the prefixName
-		 */
-		public String getPrefixName() {
-			return prefixName;
-		}
+        /**
+         * 
+         */
+        private String zone;
 
-		/**
-		 * @param prefixName
-		 *            the prefixName to set
-		 */
-		public void setPrefixName(String prefixName) {
-			this.prefixName = prefixName;
-		}
+        /**
+         * 
+         */
+        private int size;
 
-		/**
-		 * @return the description
-		 */
-		public String getDescription() {
-			return description;
-		}
+        /**
+         * 
+         */
+        public VolumeProperties() {
+            super();
+        }
 
-		/**
-		 * @param description
-		 *            the description to set
-		 */
-		public void setDescription(String description) {
-			this.description = description;
-		}
+        /**
+         * @return the prefixName
+         */
+        public String getPrefixName() {
+            return prefixName;
+        }
 
-		/**
-		 * @return the volumeType
-		 */
-		public String getVolumeType() {
-			return volumeType;
-		}
+        /**
+         * @param prefixName
+         *            the prefixName to set
+         */
+        public void setPrefixName(final String prefixName) {
+            this.prefixName = prefixName;
+        }
 
-		/**
-		 * @param volumeType
-		 *            the volumeType to set
-		 */
-		public void setVolumeType(String volumeType) {
-			this.volumeType = volumeType;
-		}
+        /**
+         * @return the description
+         */
+        public String getDescription() {
+            return description;
+        }
 
-		/**
-		 * @return the zone
-		 */
-		public String getZone() {
-			return zone;
-		}
+        /**
+         * @param description
+         *            the description to set
+         */
+        public void setDescription(final String description) {
+            this.description = description;
+        }
 
-		/**
-		 * @param zone
-		 *            the zone to set
-		 */
-		public void setZone(String zone) {
-			this.zone = zone;
-		}
+        /**
+         * @return the volumeType
+         */
+        public String getVolumeType() {
+            return volumeType;
+        }
 
-		/**
-		 * @return the size
-		 */
-		public int getSize() {
-			return size;
-		}
+        /**
+         * @param volumeType
+         *            the volumeType to set
+         */
+        public void setVolumeType(final String volumeType) {
+            this.volumeType = volumeType;
+        }
 
-		/**
-		 * @param size
-		 *            the size to set
-		 */
-		public void setSize(int size) {
-			this.size = size;
-		}
+        /**
+         * @return the zone
+         */
+        public String getZone() {
+            return zone;
+        }
 
-	}
+        /**
+         * @param zone
+         *            the zone to set
+         */
+        public void setZone(final String zone) {
+            this.zone = zone;
+        }
 
-	public static class ServerProperties {
-		private String prefixName;
-		private String bootDeviceName;
-		private String flavor;
-		private String keySecurity;
-		private List<String> securityGroups;
-		private List<String> networks;
-		private String availableZone;
-		private boolean floatingActivation;
-		private String floatingNetwork;
-		private boolean bootableOnVolume;
-		private String imageRef;
+        /**
+         * @return the size
+         */
+        public int getSize() {
+            return size;
+        }
 
-		public ServerProperties() {
+        /**
+         * @param size
+         *            the size to set
+         */
+        public void setSize(final int size) {
+            this.size = size;
+        }
 
-		}
+    }
 
-		/**
-		 * @return the prefixName
-		 */
-		public String getPrefixName() {
-			return prefixName;
-		}
+    /**
+     * 
+     */
+    public static class ServerProperties {
 
-		/**
-		 * @param prefixName
-		 *            the prefixName to set
-		 */
-		public void setPrefixName(String prefixName) {
-			this.prefixName = prefixName;
-		}
+        /**
+         * 
+         */
+        private String prefixName;
 
-		/**
-		 * @return the imageRef
-		 */
-		public String getImageRef() {
-			return imageRef;
-		}
+        /**
+         * 
+         */
+        private String bootDeviceName;
 
-		/**
-		 * @param imageRef
-		 *            the imageRef to set
-		 */
-		public void setImageRef(String imageRef) {
-			this.imageRef = imageRef;
-		}
+        /**
+         * 
+         */
+        private String flavor;
 
-		/**
-		 * @return the bootDeviceName
-		 */
-		public String getBootDeviceName() {
-			return bootDeviceName;
-		}
+        /**
+         * 
+         */
+        private String keySecurity;
 
-		/**
-		 * @param bootDeviceName
-		 *            the bootDeviceName to set
-		 */
-		public void setBootDeviceName(String bootDeviceName) {
-			this.bootDeviceName = bootDeviceName;
-		}
+        /**
+         * 
+         */
+        private List<String> securityGroups;
 
-		/**
-		 * @return the flavor
-		 */
-		public String getFlavor() {
-			return flavor;
-		}
+        /**
+         * 
+         */
+        private List<String> networks;
 
-		/**
-		 * @param flavor
-		 *            the flavor to set
-		 */
-		public void setFlavor(String flavor) {
-			this.flavor = flavor;
-		}
+        /**
+         * 
+         */
+        private String availableZone;
 
-		/**
-		 * @return the keySecurity
-		 */
-		public String getKeySecurity() {
-			return keySecurity;
-		}
+        /**
+         * 
+         */
+        private boolean floatActivation;
 
-		/**
-		 * @param keySecurity
-		 *            the keySecurity to set
-		 */
-		public void setKeySecurity(String keySecurity) {
-			this.keySecurity = keySecurity;
-		}
+        /**
+         * 
+         */
+        private String floatingNetwork;
 
-		/**
-		 * @return the securityGroup
-		 */
-		public List<String> getSecurityGroups() {
-			return securityGroups;
-		}
+        /**
+         * 
+         */
+        private boolean bootableOnVolume;
 
-		/**
-		 * @param securityGroup
-		 *            the securityGroup to set
-		 */
-		public void setSecurityGroups(List<String> securityGroups) {
-			this.securityGroups = securityGroups;
-		}
+        /**
+         * 
+         */
+        private String imageRef;
 
-		/**
-		 * @return the networks
-		 */
-		public List<String> getNetworks() {
-			return networks;
-		}
+        /**
+         * 
+         */
+        public ServerProperties() {
+            networks = new ArrayList<>();
+            securityGroups = new ArrayList<>();
+        }
 
-		/**
-		 * @param networks
-		 *            the networks to set
-		 */
-		public void setNetworks(List<String> networks) {
-			this.networks = networks;
-		}
+        /**
+         * @return the prefixName
+         */
+        public String getPrefixName() {
+            return prefixName;
+        }
 
-		/**
-		 * @return the availableZone
-		 */
-		public String getAvailableZone() {
-			return availableZone;
-		}
+        /**
+         * @param prefixName
+         *            the prefixName to set
+         */
+        public void setPrefixName(final String prefixName) {
+            this.prefixName = prefixName;
+        }
 
-		/**
-		 * @param availableZone
-		 *            the availableZone to set
-		 */
-		public void setAvailableZone(String availableZone) {
-			this.availableZone = availableZone;
-		}
+        /**
+         * @return the imageRef
+         */
+        public String getImageRef() {
+            return imageRef;
+        }
 
-		/**
-		 * @return the floatingActivation
-		 */
-		public boolean isFloatingActivation() {
-			return floatingActivation;
-		}
+        /**
+         * @param imageRef
+         *            the imageRef to set
+         */
+        public void setImageRef(final String imageRef) {
+            this.imageRef = imageRef;
+        }
 
-		/**
-		 * @param floatingActivation the floatingActivation to set
-		 */
-		public void setFloatingActivation(boolean floatingActivation) {
-			this.floatingActivation = floatingActivation;
-		}
+        /**
+         * @return the bootDeviceName
+         */
+        public String getBootDeviceName() {
+            return bootDeviceName;
+        }
 
-		/**
-		 * @return the floatingNetwork
-		 */
-		public String getFloatingNetwork() {
-			return floatingNetwork;
-		}
+        /**
+         * @param bootDeviceName
+         *            the bootDeviceName to set
+         */
+        public void setBootDeviceName(final String bootDeviceName) {
+            this.bootDeviceName = bootDeviceName;
+        }
 
-		/**
-		 * @param floatingNetwork the floatingNetwork to set
-		 */
-		public void setFloatingNetwork(String floatingNetwork) {
-			this.floatingNetwork = floatingNetwork;
-		}
+        /**
+         * @return the flavor
+         */
+        public String getFlavor() {
+            return flavor;
+        }
 
-		/**
-		 * @return the bootableOnVolume
-		 */
-		public boolean isBootableOnVolume() {
-			return bootableOnVolume;
-		}
+        /**
+         * @param flavor
+         *            the flavor to set
+         */
+        public void setFlavor(final String flavor) {
+            this.flavor = flavor;
+        }
 
-		/**
-		 * @param bootableOnVolume the bootableOnVolume to set
-		 */
-		public void setBootableOnVolume(boolean bootableOnVolume) {
-			this.bootableOnVolume = bootableOnVolume;
-		}
+        /**
+         * @return the keySecurity
+         */
+        public String getKeySecurity() {
+            return keySecurity;
+        }
 
-	}
+        /**
+         * @param keySecurity
+         *            the keySecurity to set
+         */
+        public void setKeySecurity(final String keySecurity) {
+            this.keySecurity = keySecurity;
+        }
+
+        /**
+         * @return the securityGroup
+         */
+        public List<String> getSecurityGroups() {
+            return securityGroups;
+        }
+
+        /**
+         * @param securityGroup
+         *            the securityGroup to set
+         */
+        public void setSecurityGroups(final List<String> securityGroups) {
+            this.securityGroups = securityGroups;
+        }
+
+        /**
+         * @return the networks
+         */
+        public List<String> getNetworks() {
+            return networks;
+        }
+
+        /**
+         * @param networks
+         *            the networks to set
+         */
+        public void setNetworks(final List<String> networks) {
+            this.networks = networks;
+        }
+
+        /**
+         * @return the availableZone
+         */
+        public String getAvailableZone() {
+            return availableZone;
+        }
+
+        /**
+         * @param availableZone
+         *            the availableZone to set
+         */
+        public void setAvailableZone(final String availableZone) {
+            this.availableZone = availableZone;
+        }
+
+        /**
+         * @return the floatingActivation
+         */
+        public boolean isFloatActivation() {
+            return floatActivation;
+        }
+
+        /**
+         * @param floatActivation
+         *            the floatActivation to set
+         */
+        public void setFloatActivation(final boolean floatActivation) {
+            this.floatActivation = floatActivation;
+        }
+
+        /**
+         * @return the floatingNetwork
+         */
+        public String getFloatingNetwork() {
+            return floatingNetwork;
+        }
+
+        /**
+         * @param floatingNetwork
+         *            the floatingNetwork to set
+         */
+        public void setFloatingNetwork(final String floatingNetwork) {
+            this.floatingNetwork = floatingNetwork;
+        }
+
+        /**
+         * @return the bootableOnVolume
+         */
+        public boolean isBootableOnVolume() {
+            return bootableOnVolume;
+        }
+
+        /**
+         * @param bootableOnVolume
+         *            the bootableOnVolume to set
+         */
+        public void setBootableOnVolume(final boolean bootableOnVolume) {
+            this.bootableOnVolume = bootableOnVolume;
+        }
+
+    }
 }

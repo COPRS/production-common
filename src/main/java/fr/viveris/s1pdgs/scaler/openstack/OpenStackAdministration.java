@@ -1,19 +1,13 @@
 package fr.viveris.s1pdgs.scaler.openstack;
 
-import java.util.List;
-
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openstack4j.api.OSClient.OSClientV3;
-import org.openstack4j.model.common.Identifier;
-import org.openstack4j.model.compute.InterfaceAttachment;
 import org.openstack4j.model.compute.Server;
-import org.openstack4j.model.network.NetFloatingIP;
-import org.openstack4j.model.storage.block.Volume;
-import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,133 +17,205 @@ import fr.viveris.s1pdgs.scaler.openstack.model.VolumeDesc;
 import fr.viveris.s1pdgs.scaler.openstack.model.exceptions.OsEntityException;
 import fr.viveris.s1pdgs.scaler.openstack.services.ServerService;
 import fr.viveris.s1pdgs.scaler.openstack.services.VolumeService;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * @author Viveris Technologies
+ */
 @Service
 public class OpenStackAdministration {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(OpenStackAdministration.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOGGER =
+            LogManager.getLogger(OpenStackAdministration.class);
 
-	private final OpenStackServerProperties osProperties;
+    /**
+     * OS client factory
+     */
+    private final OpenStackClientFactory osClientFactory;
 
-	private final ServerService serverService;
+    /**
+     * Openstack properties
+     */
+    private final OpenStackServerProperties osProperties;
 
-	private final VolumeService volumeService;
+    /**
+     * Service for managing servers
+     */
+    private final ServerService serverService;
 
-	private OSClientV3 osClient() {
-		OSClientV3 os = OSFactory.builderV3().endpoint(osProperties.getEndpoint())
-				.credentials(osProperties.getCredentialUsername(), osProperties.getCredentialPassword(),
-						Identifier.byId(osProperties.getDomainId()))
-				.scopeToProject(Identifier.byId(osProperties.getProjectId())).authenticate();
-		return os;
-	}
+    /**
+     * Service for managing volumes
+     */
+    private final VolumeService volumeService;
 
-	@Autowired
-	public OpenStackAdministration(final OpenStackServerProperties osProperties, final ServerService serverService,
-			final VolumeService volumeService) {
-		this.osProperties = osProperties;
-		this.serverService = serverService;
-		this.volumeService = volumeService;
-	}
+    /**
+     * Build the open stack client
+     * 
+     * @return
+     */
+    private OSClientV3 osClient() {
+        return osClientFactory.osClient(osProperties);
+    }
 
-	public void deleteServer(String serverId) throws OsEntityException {
-		OSClientV3 osClient = this.osClient();
-		Server s = this.serverService.get(osClient, serverId);
-		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
-		if (serverProperties.isFloatingActivation()) {
-			String floatingIPID = getFloatingIpIdForServer(osClient, serverId);
-			LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId, floatingIPID);
-			this.serverService.deleteFloatingIp(osClient, serverId, floatingIPID);
-		}
-		this.serverService.delete(osClient, serverId);
-		if (serverProperties.isBootableOnVolume()) {
-			for (String v : s.getOsExtendedVolumesAttached()) {
-				LOGGER.debug("[serverId {}] Deleting volume {}", serverId, v);
-				this.volumeService.deleteVolume(osClient, v);
-			}
-		}
-	}
+    /**
+     * @param osProperties
+     * @param serverService
+     * @param volumeService
+     */
+    @Autowired
+    public OpenStackAdministration(final OpenStackClientFactory osClientFactory,
+            final OpenStackServerProperties osProperties,
+            final ServerService serverService,
+            final VolumeService volumeService) {
+        this.osClientFactory = osClientFactory;
+        this.osProperties = osProperties;
+        this.serverService = serverService;
+        this.volumeService = volumeService;
+    }
 
-	public String createServerForL1Wrappers(String logPrefix, AtomicInteger uniqueVMID) throws OsEntityException {
-		OSClientV3 osClient = this.osClient();
-		String vmID = uniqueVMID.getAndIncrement()+"-"+UUID.randomUUID().toString().substring(0, 4);
-		OpenStackServerProperties.VolumeProperties volumeProperties = this.osProperties.getVolumeWrapper();
-		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
-		String serverName = serverProperties.getPrefixName() +"-" + vmID;
-		String volumeName = volumeProperties.getPrefixName() +"-" + vmID + "-volume";
-
-		// Create volume
-		String volumeId = "";
-		if (serverProperties.isBootableOnVolume()) {
-			LOGGER.info("{} [serverName {}] Starting creating volume {}", logPrefix, serverName, volumeName);
-			VolumeDesc v = VolumeDesc.builder().name(volumeName).bootable(true)
-					.description(volumeProperties.getDescription()).imageRef(serverProperties.getImageRef())
-					.size(volumeProperties.getSize()).volumeType(volumeProperties.getVolumeType())
-					.zone(volumeProperties.getZone()).build();
-			volumeId = this.volumeService.createVolumeAndBoot(osClient, v);
-		}
-
-		// Create server and boot on given volume
-		LOGGER.info("{} [serverName {}] Starting creating server and booting", logPrefix, serverName);
-		ServerDescBuilder builderS = ServerDesc.builder().name(serverName)
-				.keySecurity(serverProperties.getKeySecurity()).securityGroups(serverProperties.getSecurityGroups())
-				.flavor(serverProperties.getFlavor()).availableZone(serverProperties.getAvailableZone())
-				.networks(serverProperties.getNetworks());
-		if (serverProperties.isBootableOnVolume()) {
-			builderS.bootOnVolumeInformation(volumeId, serverProperties.getBootDeviceName());
-		} else {
-			builderS.imageRef(serverProperties.getImageRef());
-		}
-		String serverId = this.serverService.createAndBootServer(osClient, builderS.build());
-
-		// Create floating IP
-		if (serverProperties.isFloatingActivation()) {
-			LOGGER.info("{} [serverName {}] [serverId {}] Starting creating floating ip", logPrefix, serverName,
-					serverId);
-			this.serverService.createFloatingIp(osClient, serverId, serverProperties.getFloatingNetwork());
-		}
-
-		return serverId;
-	}
-	
-	public String getFloatingIpIdForServer(OSClientV3 osClient, String serverId) {
-        List<? extends InterfaceAttachment> nicID = osClient.compute().servers().interfaces().list(serverId);
-        String portid = nicID.get(0).getPortId();
-        List<? extends NetFloatingIP> fips = osClient.networking().floatingip().list();
-        for (NetFloatingIP netFloatingIP : fips) {
-               if (netFloatingIP.getPortId() != null && netFloatingIP.getPortId().equals(portid)) {
-                     return netFloatingIP.getId();
-               }
+    /**
+     * Remove the server with given identifier
+     * 
+     * @param serverId
+     * @throws OsEntityException
+     */
+    public void deleteServer(final String serverId) throws OsEntityException {
+        final OSClientV3 osClient = osClient();
+        final Server s = serverService.get(osClient, serverId);
+        final OpenStackServerProperties.ServerProperties serverProperties =
+                osProperties.getServerWrapper();
+        if (serverProperties.isFloatActivation()) {
+            String floatingIPID =
+                    serverService.getFloatingIpIdForServer(osClient, serverId);
+            LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId,
+                    floatingIPID);
+            serverService.deleteFloatingIp(osClient, serverId, floatingIPID);
         }
-        return "";
-	}
-	public void deleteInvalidServers() throws OsEntityException{
-		OSClientV3 osClient = this.osClient();
-		Map<String, String> filter = new HashMap<String, String>();
-		filter.put("status", "ERROR");
-		OpenStackServerProperties.ServerProperties serverProperties = this.osProperties.getServerWrapper();
-		filter.put("name",  "^" + serverProperties.getPrefixName() + "*");
-		for (Server server : osClient.compute().servers().list(filter)) {
-			LOGGER.info("Deletion of invalid server {}", server.getName());
-			this.deleteServer(server.getId());
-		}
+        serverService.delete(osClient, serverId);
+        if (serverProperties.isBootableOnVolume()) {
+            for (String v : s.getOsExtendedVolumesAttached()) {
+                LOGGER.debug("[serverId {}] Deleting volume {}", serverId, v);
+                volumeService.deleteVolume(osClient, v);
+            }
+        }
+    }
 
-	}
-	public void deleteInvalidVolumes() throws OsEntityException{
-		OSClientV3 osClient = this.osClient();
-		Map<String, String> filter = new HashMap<String, String>();
-		filter.put("status", "ERROR");
-		OpenStackServerProperties.VolumeProperties volumeProperties = this.osProperties.getVolumeWrapper();
-		filter.put("name",  "^" + volumeProperties.getPrefixName() + "*");
-		for (Volume volume : osClient.blockStorage().volumes().list(filter)) {
-			LOGGER.info("Deletion of invalid volume {}", volume.getName());
-			osClient.blockStorage().volumes().delete("volume.getName()");
-		}
+    /**
+     * Create a server named with given prefix
+     * 
+     * @param logPrefix
+     * @param uniqueVMID
+     * @return
+     * @throws OsEntityException
+     */
+    public String createServerForL1Wrappers(final String logPrefix,
+            final AtomicInteger uniqueVMID) throws OsEntityException {
+        String vmID = uniqueVMID.getAndIncrement() + "-"
+                + UUID.randomUUID().toString().substring(0, 4);
+        return createServerForL1Wrappers(logPrefix, vmID);
+    }
 
-	}
-	
+    /**
+     * Create a server named with given prefix
+     * 
+     * @param logPrefix
+     * @param uniqueVMID
+     * @return
+     * @throws OsEntityException
+     */
+    protected String createServerForL1Wrappers(final String logPrefix,
+            String vmID) throws OsEntityException {
+        OSClientV3 osClient = osClient();
+        OpenStackServerProperties.VolumeProperties volumeProperties =
+                osProperties.getVolumeWrapper();
+        OpenStackServerProperties.ServerProperties serverProperties =
+                osProperties.getServerWrapper();
+        String serverName = serverProperties.getPrefixName() + "-" + vmID;
+        String volumeName =
+                volumeProperties.getPrefixName() + "-" + vmID + "-volume";
+
+        // Create volume
+        String volumeId = "";
+        if (serverProperties.isBootableOnVolume()) {
+            LOGGER.info("{} [serverName {}] Starting creating volume {}",
+                    logPrefix, serverName, volumeName);
+            VolumeDesc v = VolumeDesc.builder().name(volumeName).bootable(true)
+                    .description(volumeProperties.getDescription())
+                    .imageRef(serverProperties.getImageRef())
+                    .size(volumeProperties.getSize())
+                    .volumeType(volumeProperties.getVolumeType())
+                    .zone(volumeProperties.getZone()).build();
+            volumeId = volumeService.createVolumeAndBoot(osClient, v);
+        }
+
+        // Create server and boot on given volume
+        LOGGER.info("{} [serverName {}] Starting creating server and booting",
+                logPrefix, serverName);
+        ServerDescBuilder builderS = ServerDesc.builder().name(serverName)
+                .keySecurity(serverProperties.getKeySecurity())
+                .securityGroups(serverProperties.getSecurityGroups())
+                .flavor(serverProperties.getFlavor())
+                .availableZone(serverProperties.getAvailableZone())
+                .networks(serverProperties.getNetworks());
+        if (serverProperties.isBootableOnVolume()) {
+            builderS.bootOnVolumeInformation(volumeId,
+                    serverProperties.getBootDeviceName());
+        } else {
+            builderS.imageRef(serverProperties.getImageRef());
+        }
+        String serverId =
+                serverService.createAndBootServer(osClient, builderS.build());
+
+        // Create floating IP
+        if (serverProperties.isFloatActivation()) {
+            LOGGER.info(
+                    "{} [serverName {}] [serverId {}] Starting creating floating ip",
+                    logPrefix, serverName, serverId);
+            serverService.createFloatingIp(osClient, serverId,
+                    serverProperties.getFloatingNetwork());
+        }
+
+        return serverId;
+    }
+
+    /**
+     * Delete the invalid servers
+     * 
+     * @throws OsEntityException
+     */
+    public void deleteInvalidServers() throws OsEntityException {
+        OSClientV3 osClient = this.osClient();
+        OpenStackServerProperties.ServerProperties serverProperties =
+                osProperties.getServerWrapper();
+        Map<String, String> invalidServers = serverService.getServerIds(
+                osClient, serverProperties.getPrefixName(), "ERROR");
+        for (String serverId : invalidServers.keySet()) {
+            LOGGER.info("Deletion of invalid server {}",
+                    invalidServers.get(serverId));
+            deleteServer(serverId);
+        }
+
+    }
+
+    /**
+     * delete the invalid volumes
+     * 
+     * @throws OsEntityException
+     */
+    public void deleteInvalidVolumes() throws OsEntityException {
+        OSClientV3 osClient = this.osClient();
+        OpenStackServerProperties.VolumeProperties volumeProperties =
+                osProperties.getVolumeWrapper();
+        Map<String, String> invalidVolumes = volumeService.getVolumeIds(
+                osClient, volumeProperties.getPrefixName(), "ERROR");
+        for (String volumeId : invalidVolumes.keySet()) {
+            LOGGER.info("Deletion of invalid server {}",
+                    invalidVolumes.get(volumeId));
+            volumeService.deleteVolume(osClient, volumeId);
+        }
+
+    }
+
 }

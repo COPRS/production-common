@@ -1,206 +1,253 @@
 package fr.viveris.s1pdgs.scaler.openstack.model;
 
+import java.util.Objects;
+
 public class VolumeDesc {
 
-	private String id;
+    private String id;
 
-	private String name;
+    private String name;
 
-	private String imageRef;
+    private String imageRef;
 
-	private String volumeType;
+    private String volumeType;
 
-	private String zone;
+    private String zone;
 
-	private int size;
+    private int size;
 
-	private boolean bootable;
-	
-	private String description;
+    private boolean bootable;
 
-	public VolumeDesc() {
-		// TODO Auto-generated constructor stub
-	}
+    private String description;
 
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
+    public VolumeDesc() {
+        // TODO Auto-generated constructor stub
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the imageRef
-	 */
-	public String getImageRef() {
-		return imageRef;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @param imageRef
-	 *            the imageRef to set
-	 */
-	public void setImageRef(String imageRef) {
-		this.imageRef = imageRef;
-	}
+    /**
+     * @return the imageRef
+     */
+    public String getImageRef() {
+        return imageRef;
+    }
 
-	/**
-	 * @return the volumeType
-	 */
-	public String getVolumeType() {
-		return volumeType;
-	}
+    /**
+     * @param imageRef
+     *            the imageRef to set
+     */
+    public void setImageRef(String imageRef) {
+        this.imageRef = imageRef;
+    }
 
-	/**
-	 * @param volumeType
-	 *            the volumeType to set
-	 */
-	public void setVolumeType(String volumeType) {
-		this.volumeType = volumeType;
-	}
+    /**
+     * @return the volumeType
+     */
+    public String getVolumeType() {
+        return volumeType;
+    }
 
-	/**
-	 * @return the zone
-	 */
-	public String getZone() {
-		return zone;
-	}
+    /**
+     * @param volumeType
+     *            the volumeType to set
+     */
+    public void setVolumeType(String volumeType) {
+        this.volumeType = volumeType;
+    }
 
-	/**
-	 * @param zone
-	 *            the zone to set
-	 */
-	public void setZone(String zone) {
-		this.zone = zone;
-	}
+    /**
+     * @return the zone
+     */
+    public String getZone() {
+        return zone;
+    }
 
-	/**
-	 * @return the size
-	 */
-	public int getSize() {
-		return size;
-	}
+    /**
+     * @param zone
+     *            the zone to set
+     */
+    public void setZone(String zone) {
+        this.zone = zone;
+    }
 
-	/**
-	 * @param size
-	 *            the size to set
-	 */
-	public void setSize(int size) {
-		this.size = size;
-	}
+    /**
+     * @return the size
+     */
+    public int getSize() {
+        return size;
+    }
 
-	/**
-	 * @return the bootable
-	 */
-	public boolean isBootable() {
-		return bootable;
-	}
+    /**
+     * @param size
+     *            the size to set
+     */
+    public void setSize(int size) {
+        this.size = size;
+    }
 
-	/**
-	 * @return the description
-	 */
-	public String getDescription() {
-		return description;
-	}
+    /**
+     * @return the bootable
+     */
+    public boolean isBootable() {
+        return bootable;
+    }
 
-	/**
-	 * @param description the description to set
-	 */
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
 
-	/**
-	 * @param bootable
-	 *            the bootable to set
-	 */
-	public void setBootable(boolean bootable) {
-		this.bootable = bootable;
-	}
+    /**
+     * @param description
+     *            the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	/**
-	 * @return the Volume Builder
-	 */
-	public static VolumeDescBuilder builder() {
-		return new VolumeDescBuilder();
-	}
+    /**
+     * @param bootable
+     *            the bootable to set
+     */
+    public void setBootable(boolean bootable) {
+        this.bootable = bootable;
+    }
 
-	public static class VolumeDescBuilder {
-		private VolumeDesc m;
+    /**
+     * hashcode
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, imageRef, volumeType, zone, size,
+                bootable, description);
+    }
 
-		VolumeDescBuilder() {
-			this(new VolumeDesc());
-		}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return String.format(
+                "{id: %s, name: %s, imageRef: %s, volumeType: %s, zone: %s, size: %s, bootable: %s, description: %s}",
+                id, name, imageRef, volumeType, zone, size, bootable,
+                description);
+    }
 
-		VolumeDescBuilder(VolumeDesc m) {
-			this.m = m;
-		}
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            VolumeDesc other = (VolumeDesc) obj;
+            ret = Objects.equals(id, other.id)
+                    && Objects.equals(name, other.name)
+                    && Objects.equals(imageRef, other.imageRef)
+                    && Objects.equals(volumeType, other.volumeType)
+                    && Objects.equals(zone, other.zone) && size == other.size
+                    && bootable == other.bootable
+                    && Objects.equals(description, other.description);
+        }
+        return ret;
+    }
 
-		public VolumeDescBuilder id(String id) {
-			this.m.id = id;
-			return this;
-		}
+    /**
+     * @return the Volume Builder
+     */
+    public static VolumeDescBuilder builder() {
+        return new VolumeDescBuilder();
+    }
 
-		public VolumeDescBuilder name(String name) {
-			this.m.name = name;
-			return this;
-		}
+    public static class VolumeDescBuilder {
+        private VolumeDesc m;
 
-		public VolumeDescBuilder imageRef(String imageRef) {
-			this.m.imageRef = imageRef;
-			return this;
-		}
+        VolumeDescBuilder() {
+            this(new VolumeDesc());
+        }
 
-		public VolumeDescBuilder volumeType(String volumeType) {
-			this.m.volumeType = volumeType;
-			return this;
-		}
+        VolumeDescBuilder(VolumeDesc m) {
+            this.m = m;
+        }
 
-		public VolumeDescBuilder description(String description) {
-			this.m.description = description;
-			return this;
-		}
+        public VolumeDescBuilder id(String id) {
+            this.m.setId(id);
+            return this;
+        }
 
-		public VolumeDescBuilder zone(String zone) {
-			this.m.zone = zone;
-			return this;
-		}
+        public VolumeDescBuilder name(String name) {
+            this.m.setName(name);
+            return this;
+        }
 
-		public VolumeDescBuilder size(int size) {
-			this.m.size = size;
-			return this;
-		}
+        public VolumeDescBuilder imageRef(String imageRef) {
+            this.m.setImageRef(imageRef);
+            return this;
+        }
 
-		public VolumeDescBuilder bootable(boolean bootable) {
-			this.m.bootable = bootable;
-			return this;
-		}
-		
-		public VolumeDesc build() {
-			return m;
-		}
-	}
+        public VolumeDescBuilder volumeType(String volumeType) {
+            this.m.setVolumeType(volumeType);
+            return this;
+        }
+
+        public VolumeDescBuilder description(String description) {
+            this.m.setDescription(description);
+            return this;
+        }
+
+        public VolumeDescBuilder zone(String zone) {
+            this.m.setZone(zone);
+            return this;
+        }
+
+        public VolumeDescBuilder size(int size) {
+            this.m.setSize(size);
+            return this;
+        }
+
+        public VolumeDescBuilder bootable(boolean bootable) {
+            this.m.setBootable(bootable);
+            return this;
+        }
+
+        public VolumeDesc build() {
+            return m;
+        }
+    }
 }

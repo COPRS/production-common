@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.scaler.task;
+package fr.viveris.s1pdgs.scaler.scaling;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,9 +27,6 @@ public class CreateResources implements Callable<String> {
 	public String call() throws Exception {
 		String result = this.osAdministration.createServerForL1Wrappers("[MONITOR] [Step 4] 2 - ", uniqueVMID);
 		this.k8SAdministration.launchWrapperPodsPool(1, uniquePODID);
-		if (Thread.currentThread().isInterrupted()) {
-			return null;
-		}
 		return result;
 	}
 
