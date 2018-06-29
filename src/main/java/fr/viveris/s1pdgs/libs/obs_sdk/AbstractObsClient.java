@@ -1,5 +1,6 @@
 package fr.viveris.s1pdgs.libs.obs_sdk;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -53,6 +54,26 @@ public abstract class AbstractObsClient implements ObsClient {
                 this.downloadObject(object);
             }
         }
+        // Mv files in case of EDRS session
+        objects.forEach(obj -> { 
+        	if(!obj.isIgnoreFolders()) {
+	            String key = obj.getKey();
+	            String filename = key;
+	            String targetDir = obj.getTargetDir();
+	            if (!targetDir.endsWith(File.separator)) {
+	                targetDir += File.separator;
+	            }
+	            int lastIndex = key.lastIndexOf('/');
+	            if (lastIndex != -1) {
+	                filename = key.substring(lastIndex + 1);
+	            }
+	            if (!key.equals(filename)) {
+	                File fFrom = new File(targetDir + key);
+	                File fTo = new File(targetDir + filename);
+	                fFrom.renameTo(fTo);
+	            }
+        	}
+        });
     }
 
     /**
