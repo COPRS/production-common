@@ -31,7 +31,6 @@ import fr.viveris.s1pdgs.scaler.k8s.WrapperProperties;
 import fr.viveris.s1pdgs.scaler.k8s.model.AddressType;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperNodeMonitor;
 import fr.viveris.s1pdgs.scaler.k8s.model.WrapperPodMonitor;
-import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.K8sEntityException;
 import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.K8sUnknownResourceException;
 import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.PodResourceException;
 import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.WrapperStopException;
@@ -103,7 +102,7 @@ public class Scaler {
             List<WrapperNodeMonitor> wrapperNodeMonitors = new ArrayList<>();
             int initpoolpod;
             int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
-            if (devProperties.getActivations().get("init-scaling") == true) {
+            if (devProperties.getActivations().get("init-scaling")) {
                 LOGGER.info("[INIT] Starting monitoring K8S");
                 wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();
                 LOGGER.debug("[INIT] Monitored information {}",
@@ -129,7 +128,7 @@ public class Scaler {
                 if (numberWrappers > this.wrapperProperties.getNbMaxServers()
                         * nbPodsPerServer) {
                     initpoolpod = (int) (numberWrappers
-                            - this.wrapperProperties.getNbMinServers());
+                            - this.wrapperProperties.getNbMaxServers());
                     LOGGER.info("[INIT] Delete {} pods", initpoolpod);
                     this.freeRessources(wrapperNodeMonitors, initpoolpod);
                 }
@@ -182,7 +181,7 @@ public class Scaler {
 
             // Delete pod in succeeded state
             step++;
-            if (devProperties.getActivations().get("pod-deletion") == true) {
+            if (devProperties.getActivations().get("pod-deletion")) {
                 LOGGER.info(
                         "[MONITOR] [step 1] Deleting L1 wrapper pods in K8S succeeded phase");
                 List<String> deletedPods = this.removeSucceededPods();
@@ -197,8 +196,7 @@ public class Scaler {
             KafkaPerGroupPerTopicMonitor monitorKafka = null;
             int nbPartitions = 0;
             int counter = 0;
-            if (devProperties.getActivations()
-                    .get("kafka-monitoring") == true) {
+            if (devProperties.getActivations().get("kafka-monitoring")) {
                 LOGGER.info("[MONITOR] [step 2] Starting monitoring KAFKA");
                 while (nbPartitions == 0 && counter < 2) {
                     monitorKafka = this.kafkaMonitoring.monitorL1Jobs();
@@ -225,7 +223,7 @@ public class Scaler {
             // Listing all the L1 wrappers pods
             step++;
             List<WrapperNodeMonitor> wrapperNodeMonitors = new ArrayList<>();
-            if (devProperties.getActivations().get("k8s-monitoring") == true) {
+            if (devProperties.getActivations().get("k8s-monitoring")) {
                 LOGGER.info("[MONITOR] [step 3] Starting monitoring K8S");
                 wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();
                 LOGGER.debug("[MONITOR] [step 3] Monitored information {}",
@@ -238,7 +236,7 @@ public class Scaler {
             // Calculate value for scaling
             step++;
             double monitoredValue = -1;
-            if (devProperties.getActivations().get("value-monitored") == true) {
+            if (devProperties.getActivations().get("value-monitored")) {
                 LOGGER.info(
                         "[MONITOR] [step 4] Starting determinating scaling action");
                 monitoredValue = this.calculateMonitoredValue(monitorKafka,
@@ -252,7 +250,7 @@ public class Scaler {
 
             // Scale
             step++;
-            if (devProperties.getActivations().get("scaling") == true) {
+            if (devProperties.getActivations().get("scaling")) {
                 ScalingAction scalingAction = this.needScaling(monitoredValue);
                 LOGGER.info(
                         "[MONITOR] [step 5] Starting applying scaling action {}",
@@ -279,13 +277,10 @@ public class Scaler {
             // Delete unused resources
             step++;
             if (devProperties.getActivations()
-                    .get("unused-ressources-deletion") == true) {
+                    .get("unused-ressources-deletion")) {
                 LOGGER.info(
                         "[MONITOR] [step 6] Starting removing unused resources");
-                if (!this.deleteUnusedResources()) {
-                    LOGGER.debug(
-                            "[MONITOR] [step 6] Removing unused resources bypassed this loop");
-                }
+                this.deleteUnusedResources();
             } else {
                 LOGGER.info(
                         "[MONITOR] [step 6] Starting removing unused resources bypassed");
@@ -360,9 +355,8 @@ public class Scaler {
         return ScalingAction.NOTHING;
     }
 
-    private void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors,
-            int nbPoolingPods) throws K8sEntityException, OsEntityException,
-            InterruptedException, ExecutionException {
+    protected void addRessources(List<WrapperNodeMonitor> wrapperNodeMonitors,
+            int nbPoolingPods) throws AbstractCodedException {
         int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();
         int maxNbServers = this.wrapperProperties.getNbMaxServers();
         int nbServers = wrapperNodeMonitors.size();
@@ -424,28 +418,43 @@ public class Scaler {
                             .submit(new CreateResources(k8SAdministration,
                                     osAdministration, uniqueVMID, uniquePODID));
                 }
-                for (int i = 0; i < nbCreatedServer; i++) {
-                    String result =
-                            createResoucesCompletionServices.take().get();
-                    if (result != null) {
-                        LOGGER.info(
-                                "[MONITOR] [step 5] 3 - Volume, server and pod {} launched",
-                                result);
-                    } else {
-                        LOGGER.error(
-                                "[MONITOR] [step 5] 3 - Volume, server and pod {} fail to create",
-                                result);
-                    }
-                }
+                waitForServerCreationcompletion(createResoucesCompletionServices, nbCreatedServer);
             }
 
         } else {
             LOGGER.debug(
-                        "[MONITOR] [step 5] 2 - No need to create new servers");
-       }
+                    "[MONITOR] [step 5] 2 - No need to create new servers");
+        }
     }
 
-    private void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors,
+    private void waitForServerCreationcompletion(
+            CompletionService<String> completionService, int nbCreatedServer)
+            throws AbstractCodedException {
+        try {
+            for (int i = 0; i < nbCreatedServer; i++) {
+                String result = completionService.take().get();
+                if (result != null) {
+                    LOGGER.info(
+                            "[MONITOR] [step 5] 3 - Volume, server and pod {} launched",
+                            result);
+                } else {
+                    LOGGER.error(
+                            "[MONITOR] [step 5] 3 - Volume, server and pod {} fail to create",
+                            result);
+                }
+            }
+        } catch (ExecutionException execE) {
+            if (execE.getCause() instanceof AbstractCodedException) {
+                throw (AbstractCodedException) execE.getCause();
+            } else {
+                throw new InternalErrorException(execE.getMessage(), execE);
+            }
+        } catch (InterruptedException intE) {
+            throw new InternalErrorException(intE.getMessage(), intE);
+        }
+    }
+
+    protected void freeRessources(List<WrapperNodeMonitor> wrapperNodeMonitors,
             int nbPoolingPods) throws WrapperStopException {
         int minNbServers = this.wrapperProperties.getNbMinServers();
         List<WrapperNodeMonitor> localWrapperNodeMonitors = wrapperNodeMonitors
@@ -521,7 +530,7 @@ public class Scaler {
                         .getLabelWrapperStateUsed().getValue());
     }
 
-    protected boolean deleteUnusedResources()
+    protected void deleteUnusedResources()
             throws InternalErrorException, FileNotFoundException,
             PodResourceException, K8sUnknownResourceException {
         // Remove pods in succeeded state if necessary
@@ -544,13 +553,11 @@ public class Scaler {
                 try {
                     this.osAdministration.deleteServer(
                             node.getDescription().getExternalId());
-                } catch (AbstractCodedException e) {
+                } catch (OsEntityException e) {
                     LOGGER.error("[MONITOR] [step 6] [code {}] {}",
                             e.getCode().getCode(), e.getLogMessage());
                 }
             });
         }
-
-        return true;
     }
 }

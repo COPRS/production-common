@@ -91,7 +91,7 @@ public class OpenStackAdministration {
                     serverService.getFloatingIpIdForServer(osClient, serverId);
             LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId,
                     floatingIPID);
-            serverService.deleteFloatingIp(osClient, serverId, floatingIPID);
+            serverService.deleteFloatingIp(osClient, floatingIPID);
         }
         serverService.delete(osClient, serverId);
         if (serverProperties.isBootableOnVolume()) {

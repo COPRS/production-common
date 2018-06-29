@@ -114,7 +114,7 @@ public class OpenStackAdministrationTest extends MockPropertiesTest {
         verify(serverService, times(1)).getFloatingIpIdForServer(Mockito.any(),
                 Mockito.eq("server-id"));
         verify(serverService, times(1)).deleteFloatingIp(Mockito.any(),
-                Mockito.eq("server-id"), Mockito.eq("float-ip"));
+                Mockito.eq("float-ip"));
         verify(serverService, times(1)).delete(Mockito.any(),
                 Mockito.eq("server-id"));
         verify(volumeService, times(1)).deleteVolume(Mockito.any(),
@@ -136,7 +136,7 @@ public class OpenStackAdministrationTest extends MockPropertiesTest {
         verify(serverService, times(1)).getFloatingIpIdForServer(Mockito.any(),
                 Mockito.eq("server-id"));
         verify(serverService, times(1)).deleteFloatingIp(Mockito.any(),
-                Mockito.eq("server-id"), Mockito.eq("float-ip"));
+                Mockito.eq("float-ip"));
         verify(serverService, times(1)).delete(Mockito.any(),
                 Mockito.eq("server-id"));
         verify(volumeService, never()).deleteVolume(Mockito.any(),
@@ -156,7 +156,7 @@ public class OpenStackAdministrationTest extends MockPropertiesTest {
         verify(serverService, never()).getFloatingIpIdForServer(Mockito.any(),
                 Mockito.anyString());
         verify(serverService, never()).deleteFloatingIp(Mockito.any(),
-                Mockito.anyString(), Mockito.anyString());
+                Mockito.anyString());
         verify(serverService, times(1)).delete(Mockito.any(),
                 Mockito.eq("server-id"));
         verify(volumeService, times(1)).deleteVolume(Mockito.any(),

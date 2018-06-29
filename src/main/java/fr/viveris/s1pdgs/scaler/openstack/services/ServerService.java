@@ -123,7 +123,7 @@ public class ServerService {
         }
     }
 
-    public void deleteFloatingIp(OSClientV3 osClient, String serverId,
+    public void deleteFloatingIp(OSClientV3 osClient, 
             String floatingIpId) {
         osClient.networking().floatingip().delete(floatingIpId);
     }
