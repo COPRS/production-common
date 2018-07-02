@@ -136,21 +136,18 @@ public class S3ObsServices {
                 // Download each object
                 for (S3ObjectSummary objectSummary : objectListing
                         .getObjectSummaries()) {
+                    // Build temporarly filename
                     String key = objectSummary.getKey();
-                    String localFileName = directoryPath;
-                    if (!localFileName.endsWith(File.separator)) {
-                        localFileName += File.separator;
+                    String targetDir = directoryPath;
+                    if (!targetDir.endsWith(File.separator)) {
+                        targetDir += File.separator;
                     }
-                    if (ignoreFolders) {
-                        localFileName =
-                                localFileName + (new File(key)).getName();
-                    } else {
-                        localFileName = localFileName + key;
-                    }
+                    String localFilePath = targetDir + key;
+                    // Download object
                     log(String.format(
                             "Downloading object %s from bucket %s in %s", key,
-                            bucketName, localFileName));
-                    File localFile = new File(localFileName);
+                            bucketName, localFilePath));
+                    File localFile = new File(localFilePath);
                     if (localFile.getParentFile() != null) {
                         localFile.getParentFile().mkdirs();
                     }
@@ -158,11 +155,23 @@ public class S3ObsServices {
                         localFile.createNewFile();
                     } catch (IOException ioe) {
                         throw new S3ObsServiceException(bucketName, key,
-                                "Directory creation fails for " + localFileName,
+                                "Directory creation fails for " + localFilePath,
                                 ioe);
                     }
                     s3client.getObject(new GetObjectRequest(bucketName, key),
                             localFile);
+                    // If needed move in the target directory
+                    if (ignoreFolders) {
+                        String filename = key;
+                        int lastIndex = key.lastIndexOf('/');
+                        if (lastIndex != -1) {
+                            filename = key.substring(lastIndex + 1);
+                        }
+                        if (!key.equals(filename)) {
+                            File fTo = new File(targetDir + filename);
+                            localFile.renameTo(fTo);
+                        }
+                    }
                     nbObj++;
                 }
             }
