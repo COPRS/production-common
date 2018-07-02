@@ -1,4 +1,4 @@
-FROM obs-sdk:SPDGS-210 as build_lib_obs
+FROM obs-sdk:1.0.0 as build_lib_obs
 WORKDIR /app
 
 FROM maven:3.5.2-jdk-8-alpine as build
