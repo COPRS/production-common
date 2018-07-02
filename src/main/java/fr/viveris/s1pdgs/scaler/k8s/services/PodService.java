@@ -66,7 +66,7 @@ public class PodService {
 		return r;
 	}
 
-	private List<HasMetadata> loadRessourcesFromFile(String fileName, String suffixe)
+	protected List<HasMetadata> loadRessourcesFromFile(String fileName, String suffixe)
 			throws PodResourceException, K8sUnknownResourceException {
 
 		List<HasMetadata> resources = null;
@@ -126,8 +126,6 @@ public class PodService {
 				Pod resultPod = pods.create(pod);
 				LOGGER.info("[MONITOR] [step 4] Pod created : {}", resultPod.getMetadata().getName());
 				break;
-			default:
-				throw new K8sUnknownResourceException("Unknown kind " + resource.getKind());
 			}
 		}
 	}
@@ -158,8 +156,6 @@ public class PodService {
 				resultPod = pods.delete(pod);
 				LOGGER.info("[MONITOR] [step 4] Pod deleted : {} {}", pod.getMetadata().getName(), resultPod);
 				break;
-			default:
-				throw new K8sUnknownResourceException("Unknown kind " + resource.getKind());
 			}
 		}
 

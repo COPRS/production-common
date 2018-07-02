@@ -92,7 +92,6 @@
                     <groupId>org.apache.kafka</groupId>
                     <artifactId>kafka_2.11</artifactId>
                     <version>1.1.0</version>
-                    <scope>compile</scope>
              </dependency>
              <dependency>
                     <groupId>org.apache.kafka</groupId>
@@ -105,7 +104,6 @@
                     <groupId>org.apache.kafka</groupId>
                     <artifactId>kafka-clients</artifactId>
                     <version>1.1.0</version>
-                    <scope>compile</scope>
              </dependency>
 
     	     <dependency>
@@ -149,6 +147,19 @@
 			<version>2.4.6</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>fabric8-arquillian</artifactId>
+            <version>2.2.184</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-assertions</artifactId>
+            <version>2.2.184</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -177,7 +188,7 @@
 					<effort>Max</effort>
 					<threshold>Low</threshold>
 					<maxRank>15</maxRank>
-					<includeTests>true</includeTests>
+					<includeTests>false</includeTests>
 				</configuration>
 				<executions>
 					<execution>
@@ -198,7 +209,7 @@
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
-					<includeTests>true</includeTests>
+					<includeTests>false</includeTests>
 				</configuration>
 				<executions>
 					<execution>

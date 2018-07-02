@@ -8,6 +8,11 @@ import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+/**
+ * Test the properties of development
+ * 
+ * @author Viveris Technologies
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext

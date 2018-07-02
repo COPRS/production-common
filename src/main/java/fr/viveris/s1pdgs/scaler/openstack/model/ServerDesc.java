@@ -2,234 +2,415 @@ package fr.viveris.s1pdgs.scaler.openstack.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+/**
+ * Description of a server
+ * 
+ * @author Viveris Technologies
+ */
 public class ServerDesc {
 
-	private String id;
-	private String name;
-	private String imageRef;
-	private String flavor;
-	private String keySecurity;
-	private List<String> securityGroups;
-	private List<String> networks;
-	private String availableZone;
-	
-	private boolean bootableOnVolume;
-	private String bootVolume;
-	private String bootDeviceName;
+    /**
+     * 
+     */
+    private String identifier;
 
-	public ServerDesc() {
-		this.networks = new ArrayList<>();
-		this.securityGroups = new ArrayList<>();
-		this.bootableOnVolume = false;
-	}
+    /**
+     * 
+     */
+    private String name;
 
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
+    /**
+     * 
+     */
+    private String imageRef;
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+    /**
+     * 
+     */
+    private String flavor;
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * 
+     */
+    private String keySecurity;
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * 
+     */
+    private List<String> securityGroups;
 
-	/**
-	 * @return the imageRef
-	 */
-	public String getImageRef() {
-		return imageRef;
-	}
+    /**
+     * 
+     */
+    private List<String> networks;
 
-	/**
-	 * @param imageRef the imageRef to set
-	 */
-	public void setImageRef(String imageRef) {
-		this.imageRef = imageRef;
-	}
+    /**
+     * 
+     */
+    private String availableZone;
 
-	/**
-	 * @return the bootableOnVolume
-	 */
-	public boolean isBootableOnVolume() {
-		return bootableOnVolume;
-	}
+    /**
+     * 
+     */
+    private boolean bootableOnVolume;
 
-	/**
-	 * @return the bootVolume
-	 */
-	public String getBootVolume() {
-		return bootVolume;
-	}
+    /**
+     * 
+     */
+    private String bootVolume;
 
-	/**
-	 * @return the bootDeviceName
-	 */
-	public String getBootDeviceName() {
-		return bootDeviceName;
-	}
-	
-	public void setBootableOnVolumeInformation(String bootVolume, String bootDeviceName) {
-		this.bootableOnVolume = true;
-		this.bootDeviceName = bootDeviceName;
-		this.bootVolume = bootVolume;
-	}
+    /**
+     * 
+     */
+    private String bootDeviceName;
 
-	/**
-	 * @return the flavor
-	 */
-	public String getFlavor() {
-		return flavor;
-	}
+    /**
+     * 
+     */
+    public ServerDesc() {
+        this.networks = new ArrayList<>();
+        this.securityGroups = new ArrayList<>();
+        this.bootableOnVolume = false;
+    }
 
-	/**
-	 * @param flavor the flavor to set
-	 */
-	public void setFlavor(String flavor) {
-		this.flavor = flavor;
-	}
+    /**
+     * @return the id
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	/**
-	 * @return the keySecurity
-	 */
-	public String getKeySecurity() {
-		return keySecurity;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setIdentifier(final String identifier) {
+        this.identifier = identifier;
+    }
 
-	/**
-	 * @param keySecurity the keySecurity to set
-	 */
-	public void setKeySecurity(String keySecurity) {
-		this.keySecurity = keySecurity;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the securityGroup
-	 */
-	public List<String> getSecurityGroups() {
-		return securityGroups;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @param securityGroup the securityGroup to set
-	 */
-	public void addSecurityGroups(List<String> securityGroups) {
-		this.securityGroups.addAll(securityGroups);
-	}
+    /**
+     * @return the imageRef
+     */
+    public String getImageRef() {
+        return imageRef;
+    }
 
-	/**
-	 * @return the networks
-	 */
-	public List<String> getNetworks() {
-		return networks;
-	}
+    /**
+     * @param imageRef
+     *            the imageRef to set
+     */
+    public void setImageRef(final String imageRef) {
+        this.imageRef = imageRef;
+    }
 
-	/**
-	 * @param networks the networks to set
-	 */
-	public void setNetworks(List<String> networks) {
-		this.networks = networks;
-	}
+    /**
+     * @return the bootableOnVolume
+     */
+    public boolean isBootableOnVolume() {
+        return bootableOnVolume;
+    }
 
-	/**
-	 * @return the availableZone
-	 */
-	public String getAvailableZone() {
-		return availableZone;
-	}
+    /**
+     * @return the bootVolume
+     */
+    public String getBootVolume() {
+        return bootVolume;
+    }
 
-	/**
-	 * @param availableZone the availableZone to set
-	 */
-	public void setAvailableZone(String availableZone) {
-		this.availableZone = availableZone;
-	}
+    /**
+     * @return the bootDeviceName
+     */
+    public String getBootDeviceName() {
+        return bootDeviceName;
+    }
 
-	public static ServerDescBuilder builder() {
-		return new ServerDescBuilder();
-	}
-	
-	public static class ServerDescBuilder {
-		private ServerDesc m;
+    public void setBootableOnVolumeInformation(final String bootVolume,
+            final String bootDeviceName) {
+        this.bootableOnVolume = true;
+        this.bootDeviceName = bootDeviceName;
+        this.bootVolume = bootVolume;
+    }
 
-		ServerDescBuilder() {
-			this(new ServerDesc());
-		}
+    /**
+     * @return the flavor
+     */
+    public String getFlavor() {
+        return flavor;
+    }
 
-		ServerDescBuilder(ServerDesc m) {
-			this.m = m;
-		}
+    /**
+     * @param flavor
+     *            the flavor to set
+     */
+    public void setFlavor(final String flavor) {
+        this.flavor = flavor;
+    }
 
-		public ServerDescBuilder id(String id) {
-			this.m.id = id;
-			return this;
-		}
+    /**
+     * @return the keySecurity
+     */
+    public String getKeySecurity() {
+        return keySecurity;
+    }
 
-		public ServerDescBuilder name(String name) {
-			this.m.name = name;
-			return this;
-		}
+    /**
+     * @param keySecurity
+     *            the keySecurity to set
+     */
+    public void setKeySecurity(final String keySecurity) {
+        this.keySecurity = keySecurity;
+    }
 
-		public ServerDescBuilder bootOnVolumeInformation(String bootVolume, String bootDeviceName) {
-			this.m.setBootableOnVolumeInformation(bootVolume, bootDeviceName);
-			return this;
-		}
+    /**
+     * @return the securityGroup
+     */
+    public List<String> getSecurityGroups() {
+        return securityGroups;
+    }
 
-		public ServerDescBuilder flavor(String flavor) {
-			this.m.flavor = flavor;
-			return this;
-		}
+    /**
+     * @param securityGroup
+     *            the securityGroup to set
+     */
+    public void addSecurityGroups(final List<String> securityGroups) {
+        this.securityGroups.addAll(securityGroups);
+    }
 
-		public ServerDescBuilder keySecurity(String keySecurity) {
-			this.m.keySecurity = keySecurity;
-			return this;
-		}
+    /**
+     * @return the networks
+     */
+    public List<String> getNetworks() {
+        return networks;
+    }
 
-		public ServerDescBuilder securityGroups(List<String> securityGroups) {
-			this.m.securityGroups.addAll(securityGroups);
-			return this;
-		}
+    /**
+     * @param networks
+     *            the networks to set
+     */
+    public void addNetwork(String network) {
+        this.networks.add(network);
+    }
 
-		public ServerDescBuilder network(String network) {
-			this.m.networks.add(network);
-			return this;
-		}
+    /**
+     * @param networks
+     *            the networks to set
+     */
+    public void addNetworks(List<String> networks) {
+        this.networks.addAll(networks);
+    }
 
-		public ServerDescBuilder networks(List<String> networks) {
-			this.m.networks.addAll(networks);
-			return this;
-		}
+    /**
+     * @return the availableZone
+     */
+    public String getAvailableZone() {
+        return availableZone;
+    }
 
-		public ServerDescBuilder availableZone(String availableZone) {
-			this.m.availableZone = availableZone;
-			return this;
-		}
+    /**
+     * @param availableZone
+     *            the availableZone to set
+     */
+    public void setAvailableZone(final String availableZone) {
+        this.availableZone = availableZone;
+    }
 
-		public ServerDescBuilder imageRef(String imageRef) {
-			this.m.imageRef = imageRef;
-			return this;
-		}
-		
-		public ServerDesc build() {
-			return this.m;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return String.format(
+                "{identifier: %s, name: %s, imageRef: %s, flavor: %s, keySecurity: %s, securityGroups: %s, networks: %s, availableZone: %s, bootableOnVolume: %s, bootVolume: %s, bootDeviceName: %s}",
+                identifier, name, imageRef, flavor, keySecurity, securityGroups,
+                networks, availableZone, bootableOnVolume, bootVolume,
+                bootDeviceName);
+    }
+
+    /**
+     * hashcode
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier, name, imageRef, flavor, keySecurity,
+                securityGroups, networks, availableZone, bootableOnVolume,
+                bootVolume, bootDeviceName);
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+            ServerDesc other = (ServerDesc) obj;
+            ret = Objects.equals(identifier, other.identifier)
+                    && Objects.equals(name, other.name)
+                    && Objects.equals(imageRef, other.imageRef)
+                    && Objects.equals(flavor, other.flavor)
+                    && Objects.equals(keySecurity, other.keySecurity)
+                    && Objects.equals(securityGroups, other.securityGroups)
+                    && Objects.equals(networks, other.networks)
+                    && Objects.equals(availableZone, other.availableZone)
+                    && bootableOnVolume == other.bootableOnVolume
+                    && Objects.equals(bootVolume, other.bootVolume)
+                    && Objects.equals(bootDeviceName, other.bootDeviceName);
+        }
+        return ret;
+    }
+
+    /**
+     * @return
+     */
+    public static ServerDescBuilder builder() {
+        return new ServerDescBuilder();
+    }
+
+    /**
+     * @author Viveris Technologies
+     */
+    public static class ServerDescBuilder {
+
+        /**
+         * 
+         */
+        private ServerDesc server;
+
+        /**
+         * 
+         */
+        ServerDescBuilder() {
+            this(new ServerDesc());
+        }
+
+        /**
+         * @param m
+         */
+        ServerDescBuilder(final ServerDesc server) {
+            this.server = server;
+        }
+
+        /**
+         * @param id
+         * @return
+         */
+        public ServerDescBuilder identifier(final String identifier) {
+            this.server.setIdentifier(identifier);
+            return this;
+        }
+
+        /**
+         * @param name
+         * @return
+         */
+        public ServerDescBuilder name(final String name) {
+            this.server.setName(name);
+            return this;
+        }
+
+        /**
+         * @param bootVolume
+         * @param bootDeviceName
+         * @return
+         */
+        public ServerDescBuilder bootOnVolumeInformation(
+                final String bootVolume, final String bootDeviceName) {
+            this.server.setBootableOnVolumeInformation(bootVolume,
+                    bootDeviceName);
+            return this;
+        }
+
+        /**
+         * @param flavor
+         * @return
+         */
+        public ServerDescBuilder flavor(final String flavor) {
+            this.server.setFlavor(flavor);
+            return this;
+        }
+
+        /**
+         * @param keySecurity
+         * @return
+         */
+        public ServerDescBuilder keySecurity(final String keySecurity) {
+            this.server.setKeySecurity(keySecurity);
+            return this;
+        }
+
+        /**
+         * @param securityGroups
+         * @return
+         */
+        public ServerDescBuilder securityGroups(
+                final List<String> securityGroups) {
+            this.server.addSecurityGroups(securityGroups);
+            return this;
+        }
+
+        /**
+         * @param network
+         * @return
+         */
+        public ServerDescBuilder network(final String network) {
+            this.server.addNetwork(network);
+            return this;
+        }
+
+        /**
+         * @param networks
+         * @return
+         */
+        public ServerDescBuilder networks(final List<String> networks) {
+            this.server.addNetworks(networks);
+            return this;
+        }
+
+        /**
+         * @param availableZone
+         * @return
+         */
+        public ServerDescBuilder availableZone(final String availableZone) {
+            this.server.setAvailableZone(availableZone);
+            return this;
+        }
+
+        /**
+         * @param imageRef
+         * @return
+         */
+        public ServerDescBuilder imageRef(final String imageRef) {
+            this.server.setImageRef(imageRef);
+            return this;
+        }
+
+        /**
+         * @return
+         */
+        public ServerDesc build() {
+            return this.server;
+        }
+    }
 }

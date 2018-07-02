@@ -13,8 +13,12 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 @Configuration
 public class K8SAdminConfiguration {
 	
+	private final K8SProperties properties;
+	
 	@Autowired
-	private K8SProperties properties;
+    public K8SAdminConfiguration(final K8SProperties properties) {
+        this.properties = properties;
+    }
 
 	@Bean
 	public Config k8sConfig() {
@@ -24,7 +28,7 @@ public class K8SAdminConfiguration {
 		          //.withPassword(properties.getClientKey())
 		          .withClientKeyData(properties.getClientKey())
 		          .withClientCertData(properties.getClientCertData())
-		          .withNamespace("default")
+		          .withNamespace(properties.getNamespace())
 		          .build();
 		return config;
 	}

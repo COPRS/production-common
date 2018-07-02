@@ -73,7 +73,7 @@ openstack:
       image-ref: ${scaler_os_server-wrapper_image-ref:79a60603-11be-4183-83ab-21197977253e}
       boot-device-name: ${scaler_os_server-wrapper_boot-device-name:/dev/vda}
       flavor: ${scaler_os_server-wrapper_flavor:h1.2xlarge.4}
-      floating-activation: ${scaler_os_server-wrapper_floating-activation:true}
+      float-activation: ${scaler_os_server-wrapper_floating-activation:true}
       floating-network: ${scaler_os_server-wrapper_floating-network:0a2228f2-7f8a-45f1-8e09-9039e1d09975}
       key-security: ${scaler_os_server-wrapper_key-security:viv_k8s}
       networks: ${scaler_os_server-wrapper_networks:01f954b1-0290-4bb4-9ee6-9ef46c2983fb}
@@ -108,5 +108,5 @@ dev:
     init-scaling: ${scaler_dev_init-scaling:true}
     k8s-monitoring: ${scaler_dev_k8s-monitoring:true}
     value-monitored: ${scaler_dev_value-monitored:true}
-    scaling: ${scaler_dev_scaling:false}
-    unused-ressources-deletion: ${scaler_dev_unused-ressources-deletion:false}
+    scaling: ${scaler_dev_scaling:true}
+    unused-ressources-deletion: ${scaler_dev_unused-ressources-deletion:true}

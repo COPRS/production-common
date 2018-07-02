@@ -1,5 +1,8 @@
 package fr.viveris.s1pdgs.scaler.openstack.services;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.storage.block.Volume;
@@ -59,5 +62,17 @@ public class VolumeService {
 	public void deleteVolume(OSClientV3 osClient, String volumeId) {
 		osClient.blockStorage().volumes().delete(volumeId);
 	}
+
+    public Map<String, String> getVolumeIds(final OSClientV3 osClient,
+            final String prefix, final String status) {
+        Map<String, String> ret = new HashMap<String, String>();
+        Map<String, String> filter = new HashMap<String, String>();
+        filter.put("status", status);
+        filter.put("name", "^" + prefix + "*");
+        for (Volume volume : osClient.blockStorage().volumes().list(filter)) {
+            ret.put(volume.getId(), volume.getName());
+        }
+        return ret;
+    }
 
 }

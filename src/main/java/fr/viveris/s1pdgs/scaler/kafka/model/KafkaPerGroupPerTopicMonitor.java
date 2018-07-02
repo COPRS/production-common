@@ -54,6 +54,8 @@ public class KafkaPerGroupPerTopicMonitor {
 	public KafkaPerGroupPerTopicMonitor() {
 		this.lagPerConsumers = new HashMap<String, Long>();
 		this.lagPerPartition = new HashMap<Integer, Long>();
+		this.nbPartitions = 0;
+        this.nbConsumers = 0;
 	}
 
 	/**

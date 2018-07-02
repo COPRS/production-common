@@ -159,16 +159,4 @@ public class KafkaMonitoringProperties {
 		this.groupIdPerTopic = groupIdPerTopic;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "KafkaMonitoringProperties [clientId=" + clientId + ", bootstrapServers=" + bootstrapServers
-				+ ", sessionTimeoutMs=" + sessionTimeoutMs + ", requestTimeoutMs=" + requestTimeoutMs + ", topics="
-				+ topics + ", groupIdPerTopic=" + groupIdPerTopic + "]";
-	}
-
 }
