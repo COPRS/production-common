@@ -99,7 +99,7 @@
 					<effort>Max</effort>
 					<threshold>Low</threshold>
 					<maxRank>15</maxRank>
-					<includeTests>true</includeTests>
+					<includeTests>false</includeTests>
 				</configuration>
 				<executions>
 					<execution>

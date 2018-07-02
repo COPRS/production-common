@@ -55,8 +55,9 @@ public abstract class AbstractObsClient implements ObsClient {
             }
         }
         // Mv files in case of EDRS session
+        // TODO move into downloadObject
         objects.forEach(obj -> { 
-        	if(!obj.isIgnoreFolders()) {
+        	if(obj.isIgnoreFolders()) {
 	            String key = obj.getKey();
 	            String filename = key;
 	            String targetDir = obj.getTargetDir();
