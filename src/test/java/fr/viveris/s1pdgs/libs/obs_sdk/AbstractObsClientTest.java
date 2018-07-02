@@ -37,13 +37,16 @@ public class AbstractObsClientTest {
                 "target-dir"));
         objects.add(new ObsDownloadObject("key3", ObsFamily.AUXILIARY_FILE,
                 "target-dir"));
+        objects.add(new ObsDownloadObject("key/key4", ObsFamily.EDRS_SESSION,
+                "target-dir"));
         client.downloadObjects(objects);
 
-        assertEquals(3, client.getCounterDownload().get());
+        assertEquals(4, client.getCounterDownload().get());
         assertEquals(0, client.getCounterUpload().get());
         assertEquals(0, client.getCounterGetShutdownTm().get());
         assertEquals(0, client.getCounterGetDownloadTm().get());
         assertEquals(0, client.getCounterGetUploadTm().get());
+        //TODO check file creation
     }
 
     /**

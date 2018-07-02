@@ -101,6 +101,27 @@ public class S3Configuration {
      * Timeout in second of a upload execution
      */
     public static final String TM_S_UP_EXEC = "timeout-s.up-exec";
+    
+    /**
+     * Number of max retries
+     */
+    public static final String RETRY_POLICY_MAX_RETRIES = "retry-policy.condition.max-retries";
+    
+    /**
+     * Time in millisecond of the delay
+     */
+    public static final String RETRY_POLICY_BASE_DELAY_MS = "retry-policy.backoff.base-delay-ms";
+    
+    /**
+     * Time in millisecond of the throttled delay
+     */
+    public static final String RETRY_POLICY_THROTTLED_BASE_DELAY_MS = "retry-policy.backoff.throttled-base-delay-ms";
+    
+    /**
+     * Time in millisecond of max backoff
+     */
+    public static final String RETRY_POLICY_MAX_BACKOFF_MS = "retry-policy.backoff.max-backoff-ms";
+
 
     /**
      * @throws ConfigurationException
@@ -192,9 +213,10 @@ public class S3Configuration {
         ClientConfiguration clientConfig = new ClientConfiguration();
         clientConfig.setProtocol(Protocol.HTTP);
         RetryPolicy retryPolicy = new RetryPolicy(
-                new SDKCustomDefaultRetryCondition(10),
-                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(100,
-                        500, 20000),
+                new SDKCustomDefaultRetryCondition(configuration.getInt(RETRY_POLICY_MAX_RETRIES)),
+                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(configuration.getInt(RETRY_POLICY_BASE_DELAY_MS),
+                        configuration.getInt(RETRY_POLICY_THROTTLED_BASE_DELAY_MS), 
+                        configuration.getInt(RETRY_POLICY_MAX_BACKOFF_MS)),
                 3, true);
         clientConfig.setRetryPolicy(retryPolicy);
         

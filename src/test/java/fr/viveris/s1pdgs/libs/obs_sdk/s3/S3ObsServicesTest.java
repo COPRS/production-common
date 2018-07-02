@@ -328,7 +328,9 @@ public class S3ObsServicesTest {
                 Mockito.eq(new File("test/key2")));
         verify(s3client, times(1)).getObject(
                 Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File("test/key3")));
+                Mockito.eq(new File("test/root/key3")));
+        assertTrue((new File("test/key3")).exists());
+        assertFalse((new File("test/root/key3")).exists());
     }
 
     /**
@@ -354,6 +356,8 @@ public class S3ObsServicesTest {
         verify(s3client, times(1)).getObject(
                 Mockito.any(GetObjectRequest.class),
                 Mockito.eq(new File("test/root/key3")));
+        assertFalse((new File("test/key3")).exists());
+        assertTrue((new File("test/root/key3")).exists());
     }
 
     /**

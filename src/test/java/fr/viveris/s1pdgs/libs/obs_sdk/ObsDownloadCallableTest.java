@@ -86,6 +86,20 @@ public class ObsDownloadCallableTest {
     }
 
     /**
+     * Test when no downloaded object
+     * 
+     * @throws ObsServiceException
+     * @throws SdkClientException
+     */
+    @Test(expected = ObsServiceException.class)
+    public void testWhenNoObj() throws ObsServiceException, SdkClientException {
+        doReturn(Integer.valueOf(0)).when(obsClient)
+                .downloadObject(Mockito.eq(object));
+        callable = new ObsDownloadCallable(obsClient, object);
+        callable.call();
+    }
+
+    /**
      * Test when osbclient raise SdkClientException exception
      * 
      * @throws ObsServiceException
