@@ -25,6 +25,11 @@ public class SliceDto {
      * Family name of the slice (l0 or l1)
      */
     private ProductFamily family;
+    
+    /**
+	 * Default constructor
+	 */
+	public SliceDto() {}
 
     /**
      * @param productName
