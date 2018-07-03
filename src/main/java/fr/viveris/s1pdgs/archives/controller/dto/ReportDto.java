@@ -25,6 +25,11 @@ public class ReportDto {
      * Family name of the reports (l0 or l1)
      */
     private ProductFamily family;
+    
+    /**
+	 * Default constructor
+	 */
+	public ReportDto() {}
 
     /**
      * @param productName
