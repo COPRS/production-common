@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import fr.viveris.s1pdgs.archives.model.ResumeDetails;
 import fr.viveris.s1pdgs.archives.model.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.archives.model.exception.ObsUnknownObjectException;
 import fr.viveris.s1pdgs.archives.services.ObsService;
+import fr.viveris.s1pdgs.archives.model.exception.AbstractCodedException.ErrorCode;
 
 /**
  * @author Viveris Technologies
@@ -49,6 +51,7 @@ public class SlicesConsumer {
 
     @KafkaListener(topics = "#{'${kafka.topics.slices}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "kafkaListenerContainerFactory")
     public void receive(final SliceDto dto,
+    		final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
         LOGGER.info(
                 "[MONITOR] [step 0] [family {}] [productName {}] Starting distribution",
@@ -57,12 +60,18 @@ public class SlicesConsumer {
             this.obsService.downloadFile(dto.getFamily(),
                     dto.getKeyObjectStorage(), this.sharedVolume + "/"
                             + dto.getFamily().name().toLowerCase());
+            acknowledgment.acknowledge();
         } catch (ObjectStorageException | ObsUnknownObjectException e) {
             LOGGER.error(
                     "[MONITOR] [step 0] [family {}] [productName {}] [resuming {}] {}",
                     dto.getFamily(), dto.getProductName(),
                     new ResumeDetails(topic, dto), e.getMessage());
-        }
+        } catch (Exception exc) {
+            LOGGER.error(
+                    "[MONITOR] [step 0] [family {}] [productName {}] [code {}] Exception occurred during acknowledgment {}",
+                    dto.getFamily(), dto.getProductName(), ErrorCode.KAFKA_COMMIT_ERROR.getCode(),
+                    exc.getMessage());
+		}
         LOGGER.info("[MONITOR] [step 0] [family {}] [productName {}] End",
                 dto.getFamily(), dto.getProductName());
     }
