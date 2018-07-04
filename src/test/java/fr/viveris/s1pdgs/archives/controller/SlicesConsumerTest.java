@@ -1,7 +1,11 @@
 package fr.viveris.s1pdgs.archives.controller;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 
@@ -10,6 +14,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.kafka.support.Acknowledgment;
 
 import fr.viveris.s1pdgs.archives.controller.dto.SliceDto;
 import fr.viveris.s1pdgs.archives.model.ProductFamily;
@@ -21,6 +26,12 @@ public class SlicesConsumerTest {
 
     @Mock
     private ObsService obsService;
+    
+    /**
+     * Acknowledgement
+     */
+    @Mock
+    private Acknowledgment ack;
 
     @Before
     public void init() throws Exception {
@@ -57,9 +68,11 @@ public class SlicesConsumerTest {
         File expectedResult =
                 new File("test/data/slices/l0_product/productName");
         this.mockSliceDownloadFiles(expectedResult);
+        doNothing().when(ack).acknowledge();
         consumer.receive(
                 new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT),
-                "topic");
+                ack, "topic");
+        verify(ack, times(1)).acknowledge();
     }
 
     @Test
@@ -70,7 +83,8 @@ public class SlicesConsumerTest {
         this.mockSliceObjectStorageException();
         consumer.receive(
                 new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT),
-                "topic");
+                ack, "topic");
+        verify(ack, never()).acknowledge();
     }
 
     @Test
@@ -81,7 +95,24 @@ public class SlicesConsumerTest {
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
                 new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT),
-                "topic");
+                ack, "topic");
+        verify(ack, never()).acknowledge();
+    }
+    
+    @Test
+    public void testReceiveL0SliceAckException()
+            throws ObjectStorageException, ObsUnknownObjectException {
+        SlicesConsumer consumer =
+                new SlicesConsumer(obsService, "test/data/slices");
+        File expectedResult =
+                new File("test/data/slices/l0_product/productName");
+        this.mockSliceDownloadFiles(expectedResult);
+        doThrow(new IllegalArgumentException("error message")).when(ack)
+        .acknowledge();
+        consumer.receive(
+                new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                ack, "topic");
+        verify(ack, times(1)).acknowledge();
     }
 
     @Test
@@ -92,9 +123,11 @@ public class SlicesConsumerTest {
         File expectedResult =
                 new File("test/data/slices/l1_product/productName");
         this.mockSliceDownloadFiles(expectedResult);
+        doNothing().when(ack).acknowledge();
         consumer.receive(
                 new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT),
-                "topic");
+                ack, "topic");
+        verify(ack, times(1)).acknowledge();
     }
 
     @Test
@@ -105,7 +138,8 @@ public class SlicesConsumerTest {
         this.mockSliceObjectStorageException();
         consumer.receive(
                 new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT),
-                "topic");
+                ack, "topic");
+        verify(ack, never()).acknowledge();
     }
 
     @Test
@@ -116,7 +150,24 @@ public class SlicesConsumerTest {
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
                 new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT),
-                "topic");
+                ack, "topic");
+        verify(ack, never()).acknowledge();
+    }
+    
+    @Test
+    public void testReceiveL1SliceAckException()
+            throws ObjectStorageException, ObsUnknownObjectException {
+        SlicesConsumer consumer =
+                new SlicesConsumer(obsService, "test/data/slices");
+        File expectedResult =
+                new File("test/data/slices/l1_product/productName");
+        this.mockSliceDownloadFiles(expectedResult);
+        doThrow(new IllegalArgumentException("error message")).when(ack)
+        .acknowledge();
+        consumer.receive(
+                new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                ack, "topic");
+        verify(ack, times(1)).acknowledge();
     }
 
     @Test
@@ -125,7 +176,7 @@ public class SlicesConsumerTest {
                 new SlicesConsumer(obsService, "test/data/slices");
         consumer.receive(
                 new SliceDto("productName", "kobs", ProductFamily.BLANK),
-                "topic");
+                ack, "topic");
     }
 
 }
