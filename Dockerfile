@@ -1,7 +1,7 @@
-FROM maven:3.5.2-jdk-8-alpine as build
+FROM local-repo-maven/custom:master as build
 WORKDIR /app
 COPY pom.xml /app
-RUN mvn dependency:go-offline
+RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY src/ /app/src/
 COPY dev/ /app/dev/
 RUN mkdir /app/test && \ 
