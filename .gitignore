@@ -1,0 +1,12 @@
+/.mvn/                                                                                                                                                                                                                                                   
+.factorypath                                                                                                                         
+.jdk8                                                                                                                                
+.springBeans                                                                                                                         
+.eclipse-pmd    
+.pmd
+.pmdruleset.xml                                                                                                                    
+/target/                                                                                                                             
+/reports/                                                                                                                            
+/bin/                                                                                                                             
+*.log        
+*.gz
