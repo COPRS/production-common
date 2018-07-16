@@ -31,6 +31,10 @@ public enum ProductCategory {
             case EDRS_SESSION:
                 ret = ProductCategory.EDRS_SESSIONS;
                 break;
+            case L0_JOB:
+            case L1_JOB:
+                ret = ProductCategory.LEVEL_JOBS;
+                break;
             case L0_REPORT:
             case L1_REPORT:
                 ret = ProductCategory.LEVEL_REPORTS;

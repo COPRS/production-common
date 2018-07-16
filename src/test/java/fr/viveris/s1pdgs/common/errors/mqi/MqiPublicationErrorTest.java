@@ -13,21 +13,21 @@ import fr.viveris.s1pdgs.common.errors.AbstractCodedException.ErrorCode;
  * 
  * @author Viveris Technologies
  */
-public class KafkaSendExceptionTest {
+public class MqiPublicationErrorTest {
 
     /**
      * Test the KafkaSendException
      */
     @Test
     public void testKafkaSendException() {
-        KafkaSendException e1 = new KafkaSendException("topic-kafka",
+        MqiPublicationError e1 = new MqiPublicationError("topic-kafka",
                 "dto-object", "product-name", "error message",
                 new Throwable("throwable message"));
 
         assertEquals("topic-kafka", e1.getTopic());
         assertEquals("dto-object", e1.getDto());
         assertEquals("product-name", e1.getProductName());
-        assertEquals(ErrorCode.KAFKA_SEND_ERROR, e1.getCode());
+        assertEquals(ErrorCode.MQI_PUBLICATION_ERROR, e1.getCode());
         assertEquals("error message", e1.getMessage());
         assertEquals("throwable message", e1.getCause().getMessage());
 

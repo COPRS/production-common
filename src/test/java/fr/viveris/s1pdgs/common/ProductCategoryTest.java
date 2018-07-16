@@ -56,6 +56,10 @@ public class ProductCategoryTest {
                 ProductCategory.fromProductFamily(ProductFamily.L1_ACN));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
                 ProductCategory.fromProductFamily(ProductFamily.L1_PRODUCT));
+        assertEquals(ProductCategory.LEVEL_JOBS,
+                ProductCategory.fromProductFamily(ProductFamily.L0_JOB));
+        assertEquals(ProductCategory.LEVEL_JOBS,
+                ProductCategory.fromProductFamily(ProductFamily.L1_JOB));
 
         try {
             ProductCategory.fromProductFamily(null);
@@ -72,7 +76,7 @@ public class ProductCategoryTest {
         }
 
         try {
-            ProductCategory.fromProductFamily(ProductFamily.JOB);
+            ProductCategory.fromProductFamily(ProductFamily.JOB_ORDER);
             fail("an InternalErrorException shall be raised");
         } catch (InternalErrorException iee) {
             assertTrue(iee.getMessage().contains("JOB"));

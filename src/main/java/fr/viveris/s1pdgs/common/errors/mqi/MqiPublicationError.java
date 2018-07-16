@@ -6,7 +6,7 @@ import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
 /**
  * @author Viveris Technologies
  */
-public class KafkaSendException extends AbstractCodedException {
+public class MqiPublicationError extends AbstractCodedException {
 
     /**
      * 
@@ -34,10 +34,10 @@ public class KafkaSendException extends AbstractCodedException {
      * @param message
      * @param e
      */
-    public KafkaSendException(final String topic, final Object dto,
+    public MqiPublicationError(final String topic, final Object dto,
             final String productName, final String message,
             final Throwable cause) {
-        super(ErrorCode.KAFKA_SEND_ERROR, message, cause);
+        super(ErrorCode.MQI_PUBLICATION_ERROR, message, cause);
         this.topic = topic;
         this.productName = productName;
         this.dto = dto;
