@@ -217,7 +217,7 @@ public class S3Configuration {
                 new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(configuration.getInt(RETRY_POLICY_BASE_DELAY_MS),
                         configuration.getInt(RETRY_POLICY_THROTTLED_BASE_DELAY_MS), 
                         configuration.getInt(RETRY_POLICY_MAX_BACKOFF_MS)),
-                3, true);
+                configuration.getInt(RETRY_POLICY_MAX_RETRIES), true);
         clientConfig.setRetryPolicy(retryPolicy);
         
         // Amazon s3 client

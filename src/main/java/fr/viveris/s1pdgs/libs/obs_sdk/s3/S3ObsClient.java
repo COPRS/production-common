@@ -36,7 +36,9 @@ public class S3ObsClient extends AbstractObsClient {
     public S3ObsClient() throws ObsServiceException {
         super();
         configuration = new S3Configuration();
-        s3Services = new S3ObsServices(configuration.defaultS3Client());
+        s3Services = new S3ObsServices(configuration.defaultS3Client(), 
+                configuration.getConfiguration().getInt("retry-policy.condition.max-retries"),
+                configuration.getConfiguration().getInt("retry-policy.backoff.throttled-base-delay-ms"));
     }
 
     /**

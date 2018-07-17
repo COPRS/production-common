@@ -89,7 +89,7 @@ public class S3ObsServicesTest {
         listObjects.getObjectSummaries().add(obj3);
 
         // Build service
-        service = new S3ObsServices(s3client);
+        service = new S3ObsServices(s3client, 3, 500);
         mockAmazonS3Client();
     }
 
