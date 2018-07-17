@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.mqi.server.publication.kafka.producer;
 
-import fr.viveris.s1pdgs.mqi.model.AuxiliaryFileDto;
+import fr.viveris.s1pdgs.mqi.model.queue.AuxiliaryFileDto;
 import fr.viveris.s1pdgs.mqi.server.KafkaProperties;
 
 /**

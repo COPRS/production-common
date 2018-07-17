@@ -22,10 +22,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import fr.viveris.s1pdgs.common.ProductCategory;
 import fr.viveris.s1pdgs.common.ProductFamily;
 import fr.viveris.s1pdgs.common.errors.mqi.MqiCategoryNotAvailable;
-import fr.viveris.s1pdgs.mqi.model.Ack;
-import fr.viveris.s1pdgs.mqi.model.GenericMessageDto;
-import fr.viveris.s1pdgs.mqi.model.GenericPublicationMessageDto;
-import fr.viveris.s1pdgs.mqi.model.LevelReportDto;
+import fr.viveris.s1pdgs.mqi.model.queue.LevelReportDto;
+import fr.viveris.s1pdgs.mqi.model.rest.Ack;
+import fr.viveris.s1pdgs.mqi.model.rest.AckMessageDto;
+import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
+import fr.viveris.s1pdgs.mqi.model.rest.GenericPublicationMessageDto;
 import fr.viveris.s1pdgs.mqi.server.ApplicationProperties;
 import fr.viveris.s1pdgs.mqi.server.GenericKafkaUtils;
 import fr.viveris.s1pdgs.mqi.server.consumption.MessageConsumptionController;
@@ -125,16 +126,21 @@ public class LevelReportDistributionControllerTest extends RestControllerTest {
                 Mockito.eq(312L), Mockito.any());
         doNothing().when(publication).publishError(Mockito.any());
 
-        request(post("/messages/level_reports/ack").param("identifier", "123")
-                .param("ack", Ack.OK.name()))
+        String dto1 = GenericKafkaUtils.convertObjectToJsonString(
+                new AckMessageDto(123, Ack.OK, null));
+        String dto2 = GenericKafkaUtils.convertObjectToJsonString(
+                new AckMessageDto(321, Ack.ERROR, "Error log"));
+
+        request(post("/messages/level_reports/ack")
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(dto1))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().string("true"));
         verify(messages, times(1)).ackMessage(
                 Mockito.eq(ProductCategory.LEVEL_REPORTS), Mockito.eq(123L),
                 Mockito.eq(Ack.OK));
 
-        request(post("/messages/level_reports/ack").param("identifier", "321")
-                .param("message", "Error log").param("ack", Ack.ERROR.name()))
+        request(post("/messages/level_reports/ack")
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(dto2))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().string("false"));
         verify(messages, times(1)).ackMessage(

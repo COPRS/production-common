@@ -18,8 +18,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import fr.viveris.s1pdgs.mqi.model.AuxiliaryFileDto;
-import fr.viveris.s1pdgs.mqi.model.GenericMessageDto;
+import fr.viveris.s1pdgs.mqi.model.queue.AuxiliaryFileDto;
+import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
 import fr.viveris.s1pdgs.mqi.server.GenericKafkaUtils;
 import fr.viveris.s1pdgs.mqi.server.KafkaProperties;
 import fr.viveris.s1pdgs.mqi.server.consumption.kafka.consumer.GenericConsumer;
