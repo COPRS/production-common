@@ -4,30 +4,30 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobDto;
-import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobInputDto;
-import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobOutputDto;
-import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobPoolDto;
-import fr.viveris.s1pdgs.level0.wrapper.controller.dto.JobTaskDto;
-import fr.viveris.s1pdgs.level0.wrapper.model.ProductFamily;
-import fr.viveris.s1pdgs.level0.wrapper.model.s3.S3DownloadFile;
+import fr.viveris.s1pdgs.common.ProductFamily;
+import fr.viveris.s1pdgs.level0.wrapper.job.model.obs.S3DownloadFile;
+import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
+import fr.viveris.s1pdgs.mqi.model.queue.LevelJobInputDto;
+import fr.viveris.s1pdgs.mqi.model.queue.LevelJobOutputDto;
+import fr.viveris.s1pdgs.mqi.model.queue.LevelJobPoolDto;
+import fr.viveris.s1pdgs.mqi.model.queue.LevelJobTaskDto;
 
 public class TestUtils {
 
     public final static String WORKDIR = "./test_work_dir/";
 
-    public static JobDto buildL0JobDto() {
-        JobDto dto = new JobDto("SESSIONID", WORKDIR, WORKDIR + "JobOrder.xml");
+    public static LevelJobDto buildL0LevelJobDto() {
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "SESSIONID", WORKDIR, WORKDIR + "JobOrder.xml");
 
         dto.addInput(buildAuxiliaryInputDto("AUX_OBMEMC.xml"));
         dto.addInput(buildAuxiliaryInputDto("MPL_OBRP.xml"));
         dto.addInput(buildAuxiliaryInputDto("MPL_DLF.xml"));
-        dto.addInput(buildJobInputDto());
+        dto.addInput(buildLevelJobInputDto());
         dto.addInput(buildRawInputDto("SESSIONID_ch1_001.raw", 1));
         dto.addInput(buildRawInputDto("SESSIONID_ch2_001.raw", 2));
         dto.addInput(buildRawInputDto("SESSIONID_ch1_002.raw", 1));
         dto.addInput(buildRawInputDto("SESSIONID_ch2_002.raw", 2));
-        dto.addInput(new JobInputDto("RAW", WORKDIR + "ch01/testrename.raw",
+        dto.addInput(new LevelJobInputDto("EDRS_SESSION", WORKDIR + "ch01/testrename.raw",
                 "SESSIONID_ch1_003.raw"));
 
         dto.addPool(buildPoolDto1());
@@ -46,10 +46,10 @@ public class TestUtils {
     }
 
     public static List<S3DownloadFile> getL0DownloadFile() {
-        return getL0DownloadFile(buildL0JobDto());
+        return getL0DownloadFile(buildL0LevelJobDto());
     }
 
-    public static List<S3DownloadFile> getL0DownloadFile(JobDto l0Job) {
+    public static List<S3DownloadFile> getL0DownloadFile(LevelJobDto l0Job) {
 
         List<S3DownloadFile> downloadToBatch = new ArrayList<>();
         downloadToBatch.add(new S3DownloadFile(
@@ -95,70 +95,70 @@ public class TestUtils {
         return downloadToBatch;
     }
 
-    public static JobInputDto buildRawInputDto(String filename, int channelId) {
+    public static LevelJobInputDto buildRawInputDto(String filename, int channelId) {
         String localPath = WORKDIR + "ch0" + channelId + "/" + filename;
         String keyObjectStorage = filename;
-        return new JobInputDto("RAW", localPath, keyObjectStorage);
+        return new LevelJobInputDto("EDRS_SESSION", localPath, keyObjectStorage);
     }
 
-    public static JobInputDto buildAuxiliaryInputDto(String filename) {
+    public static LevelJobInputDto buildAuxiliaryInputDto(String filename) {
         String localPath = WORKDIR + filename;
         String keyObjectStorage = filename;
-        return new JobInputDto("CONFIG", localPath, keyObjectStorage);
+        return new LevelJobInputDto("AUXILIARY_FILE", localPath, keyObjectStorage);
     }
 
-    public static JobInputDto buildJobInputDto() {
+    public static LevelJobInputDto buildLevelJobInputDto() {
         String localPath = WORKDIR + "JobOrder.xml";
         String keyObjectStorage = "<xml>\n<balise1></balise1>";
-        return new JobInputDto("JOB", localPath, keyObjectStorage);
+        return new LevelJobInputDto("JOB_ORDER", localPath, keyObjectStorage);
     }
 
-    public static JobInputDto buildBlankInputDto() {
+    public static LevelJobInputDto buildBlankInputDto() {
         String localPath = WORKDIR + "blank_file.xml";
         String keyObjectStorage = "blank.xml";
-        return new JobInputDto("BLANK", localPath, keyObjectStorage);
+        return new LevelJobInputDto("BLANK", localPath, keyObjectStorage);
     }
 
-    public static JobInputDto buildInvalidInputDto() {
+    public static LevelJobInputDto buildInvalidInputDto() {
         String localPath = WORKDIR + "invalid.safe";
         String keyObjectStorage = "invalid.safe";
-        return new JobInputDto("TGKLH", localPath, keyObjectStorage);
+        return new LevelJobInputDto("TGKLH", localPath, keyObjectStorage);
     }
 
-    public static JobPoolDto buildPoolDto1() {
-        JobPoolDto r = new JobPoolDto();
-        r.addTask(new JobTaskDto("echo task 1 1"));
+    public static LevelJobPoolDto buildPoolDto1() {
+        LevelJobPoolDto r = new LevelJobPoolDto();
+        r.addTask(new LevelJobTaskDto("echo task 1 1"));
         return r;
     }
 
-    public static JobPoolDto buildPoolDto2() {
-        JobPoolDto r = new JobPoolDto();
-        r.addTask(new JobTaskDto("echo task 2 1"));
-        r.addTask(new JobTaskDto("echo task 2 2"));
-        r.addTask(new JobTaskDto("echo task 2 3"));
+    public static LevelJobPoolDto buildPoolDto2() {
+        LevelJobPoolDto r = new LevelJobPoolDto();
+        r.addTask(new LevelJobTaskDto("echo task 2 1"));
+        r.addTask(new LevelJobTaskDto("echo task 2 2"));
+        r.addTask(new LevelJobTaskDto("echo task 2 3"));
         return r;
     }
 
-    public static JobPoolDto buildPoolDto3() {
-        JobPoolDto r = new JobPoolDto();
-        r.addTask(new JobTaskDto("echo task 3 1"));
+    public static LevelJobPoolDto buildPoolDto3() {
+        LevelJobPoolDto r = new LevelJobPoolDto();
+        r.addTask(new LevelJobTaskDto("echo task 3 1"));
         return r;
     }
 
-    public static JobOutputDto buildReportOutputDto(String regexp) {
-        return new JobOutputDto("L0_REPORT", regexp);
+    public static LevelJobOutputDto buildReportOutputDto(String regexp) {
+        return new LevelJobOutputDto("L0_REPORT", regexp);
     }
 
-    public static JobOutputDto buildProductOutputDto(String regexp) {
-        return new JobOutputDto("L0_PRODUCT", regexp);
+    public static LevelJobOutputDto buildProductOutputDto(String regexp) {
+        return new LevelJobOutputDto("L0_PRODUCT", regexp);
     }
 
-    public static JobOutputDto buildAcnOutputDto(String regexp) {
-        return new JobOutputDto("L0_ACN", regexp);
+    public static LevelJobOutputDto buildAcnOutputDto(String regexp) {
+        return new LevelJobOutputDto("L0_ACN", regexp);
     }
 
-    public static JobOutputDto buildBlankOutputDto(String regexp) {
-        return new JobOutputDto("BLANK", regexp);
+    public static LevelJobOutputDto buildBlankOutputDto(String regexp) {
+        return new LevelJobOutputDto("BLANK", regexp);
     }
 
     public static String getAbsolutePath(String file) {

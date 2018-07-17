@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import fr.viveris.s1pdgs.level0.wrapper.model.ApplicationLevel;
+import fr.viveris.s1pdgs.common.ApplicationLevel;
 
 /**
  * Application properties

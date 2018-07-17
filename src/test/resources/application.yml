@@ -4,37 +4,14 @@ spring:
     
 logging:
   config: ${wrapper_logging_config:./test/log4j2-test.yml}
-  
-# Kafka
-kafka:
-  bootstrap-servers: ${spring.embedded.kafka.brokers}
-  group-id: l0-wrappers
-  client-id: l0-wrapper
-  poll-timeout: 500
-  max-poll-interval-ms: ${wrapper_kafka_max-poll-interval-ms:3600000}
-  max-pool-records: ${wrapper_kafka_max-pool-records:1}
-  session-timeout-ms: ${wrapper_kafka_session-timeout-ms:10000}
-  heartbeat-interval-ms: ${wrapper_kafka_heartbeat-interval-ms:3000}
-  producer-retries: 10
-  topic:
-    l0-jobs: t-pdgs-l0-jobs
-    l0-slices: t-pdgs-l0-slices
-    l0-acns: t-pdgs-l0-acns
-    l0-reports: t-pdgs-l0-reports
-    l1-jobs: t-pdgs-l1-jobs
-    l1-slices: t-pdgs-l1-slices
-    l1-acns: t-pdgs-l1-acns
-    l1-reports: t-pdgs-l1-reports
-    errors: t-pdgs-errors
-  enable-consumer:
-    l0-jobs: true
-    l1-jobs: false
     
 server:
   port: ${wrapper_rest_server_port:8080}
   
 process:
   level: L0
+  fixed-delay-ms: 500
+  init-delay-poll-ms: 1000
   tm-proc-one-task-s: 600
   tm-proc-all-tasks-s: 1800
   tm-proc-stop-s: 300
@@ -43,6 +20,10 @@ process:
   size-batch-download: 5
   wap-nb-max-loop: 12
   wap-tempo-s: 10
+  mqi:
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempto-retry-ms: 1000
 
 status:
   delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}
@@ -51,6 +32,5 @@ status:
 dev:
   steps-activation:
     download: ${wrapper_process_dev-steps-activation_download:true}
-    execution: ${wrapper_process_dev-steps-activation_execution:true}
     upload: ${wrapper_process_dev-steps-activation_upload:true}
     erasing: ${wrapper_process_dev-steps-activation_erasing:true}

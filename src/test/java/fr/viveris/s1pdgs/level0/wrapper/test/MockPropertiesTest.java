@@ -9,10 +9,10 @@ import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import fr.viveris.s1pdgs.level0.wrapper.AppStatus;
-import fr.viveris.s1pdgs.level0.wrapper.AppStatus.WrapperStatus;
 import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
 import fr.viveris.s1pdgs.level0.wrapper.config.DevProperties;
+import fr.viveris.s1pdgs.level0.wrapper.status.AppStatus;
+import fr.viveris.s1pdgs.level0.wrapper.status.AppStatus.WrapperStatus;
 
 /**
  * Test class with properties mocked

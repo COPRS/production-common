@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
-import fr.viveris.s1pdgs.level0.wrapper.model.exception.InternalErrorException;
+import fr.viveris.s1pdgs.common.errors.InternalErrorException;
 
 /**
  * Class for managing files (read / write / delete)
