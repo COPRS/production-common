@@ -1,0 +1,199 @@
+package fr.viveris.s1pdgs.mqi.client;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import fr.viveris.s1pdgs.common.ProductCategory;
+import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
+import fr.viveris.s1pdgs.common.errors.mqi.MqiAckApiError;
+import fr.viveris.s1pdgs.common.errors.mqi.MqiNextApiError;
+import fr.viveris.s1pdgs.common.errors.mqi.MqiPublishApiError;
+import fr.viveris.s1pdgs.mqi.model.rest.AckMessageDto;
+import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
+import fr.viveris.s1pdgs.mqi.model.rest.GenericPublicationMessageDto;
+
+/**
+ * 
+ * @author Viveris Technologies
+ *
+ * @param <T>
+ */
+public class GenericMqiService<T> {
+
+    /**
+     * Rest template
+     */
+    private final RestTemplate restTemplate;
+
+    /**
+     * Product category
+     */
+    private final ProductCategory category;
+
+    /**
+     * Host URI. Example: http://localhost:8081
+     */
+    private final String hostUri;
+
+    /**
+     * Maximal number of retries
+     */
+    private final int maxRetries;
+
+    /**
+     * Temporisation in ms betwenn 2 retries
+     */
+    private final int tempoRetryMs;
+
+    /**
+     * Constructor
+     * @param restTemplate
+     * @param category
+     * @param hostUri
+     * @param maxRetries
+     * @param tempoRetryMs
+     */
+    public GenericMqiService(final RestTemplate restTemplate,
+            final ProductCategory category, final String hostUri,
+            final int maxRetries, final int tempoRetryMs) {
+        this.restTemplate = restTemplate;
+        this.category = category;
+        this.hostUri = hostUri;
+        this.maxRetries = maxRetries;
+        this.tempoRetryMs = tempoRetryMs;
+    }
+
+    /**
+     * Wait or throw an error according the number of retries
+     * 
+     * @param retries
+     * @param cause
+     * @throws AbstractCodedException
+     */
+    private void waitOrThrow(final int retries,
+            final AbstractCodedException cause) throws AbstractCodedException {
+        if (retries < maxRetries) {
+            try {
+                Thread.sleep(tempoRetryMs);
+            } catch (InterruptedException e) {
+                throw cause;
+            }
+        } else {
+            throw cause;
+        }
+    }
+
+    /**
+     * Get the next message to proceed
+     * 
+     * @return
+     * @throws AbstractCodedException
+     */
+    public GenericMessageDto<T> next() throws AbstractCodedException {
+        int retries = -1;
+        while (retries < maxRetries) {
+            retries++;
+            String uri =
+                    hostUri + "/" + category.name().toLowerCase() + "/next";
+            try {
+                ResponseEntity<GenericMessageDto<T>> response =
+                        restTemplate.exchange(uri, HttpMethod.GET, null,
+                                new ParameterizedTypeReference<GenericMessageDto<T>>() {
+                                });
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    return response.getBody();
+                } else {
+                    waitOrThrow(retries, new MqiNextApiError(category,
+                            "HTTP status code " + response.getStatusCode()));
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new MqiNextApiError(category,
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce));
+            }
+        }
+        throw new MqiNextApiError(category, "Timeout on query execution");
+    }
+
+    /**
+     * Ack a message
+     * 
+     * @param identifier
+     * @param ack
+     * @param message
+     * @return
+     * @throws AbstractCodedException
+     */
+    public boolean ack(final AckMessageDto ack) throws AbstractCodedException {
+        int retries = -1;
+        while (retries < maxRetries) {
+            retries++;
+            String uri = hostUri + "/" + category.name().toLowerCase() + "/ack";
+            try {
+                ResponseEntity<Boolean> response = restTemplate.exchange(uri,
+                        HttpMethod.POST, new HttpEntity<AckMessageDto>(ack),
+                        Boolean.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    Boolean ret = response.getBody();
+                    if (ret == null) {
+                        return false;
+                    } else {
+                        return ret.booleanValue();
+                    }
+                } else {
+                    waitOrThrow(retries, new MqiAckApiError(category,
+                            ack.getMessageId(),
+                            ack.getAck().name() + " " + ack.getMessage(),
+                            "HTTP status code " + response.getStatusCode()));
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new MqiAckApiError(category,
+                        ack.getMessageId(),
+                        ack.getAck().name() + " " + ack.getMessage(),
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce));
+            }
+        }
+        throw new MqiAckApiError(category, ack.getMessageId(),
+                ack.getAck().name() + " " + ack.getMessage(),
+                "Timeout on query execution");
+    }
+
+    /**
+     * Publish a message
+     * 
+     * @param message
+     * @throws AbstractCodedException
+     */
+    public void publish(final GenericPublicationMessageDto<T> message)
+            throws AbstractCodedException {
+        int retries = -1;
+        while (retries < maxRetries) {
+            retries++;
+            String uri = hostUri + "/" + category.name().toLowerCase() + "/ack";
+            try {
+                ResponseEntity<Void> response = restTemplate.exchange(uri,
+                        HttpMethod.POST, new HttpEntity<GenericPublicationMessageDto<T>>(message),
+                        Void.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    return;
+                } else {
+                    waitOrThrow(retries, new MqiPublishApiError(category,
+                            message,
+                            "HTTP status code " + response.getStatusCode()));
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new MqiPublishApiError(category, message,
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce));
+            }
+        }
+        throw new MqiPublishApiError(category, message,
+                "Timeout on query execution");
+    }
+}
