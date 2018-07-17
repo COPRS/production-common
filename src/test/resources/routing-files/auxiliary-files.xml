@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routing description="routing for publishing product of category AUXILIARY_FILES">
+	<default_route description="default route of product family AUXILIARY_FILES">
+		<family>AUXILIARY_FILE</family>
+		<route_to>
+			<topic>t-pdgs-auxiliary-files</topic>
+		</route_to>
+	</default_route>
+</routing>

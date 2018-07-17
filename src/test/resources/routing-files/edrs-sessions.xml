@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routing description="routing for publishing product of category EDRS_SESSIONS">
+	<default_route description="default route of product family EDRS_SESSION">
+		<family>EDRS_SESSION</family>
+		<route_to>
+			<topic>t-pdgs-edrs-sessions</topic>
+		</route_to>
+	</default_route>
+</routing>

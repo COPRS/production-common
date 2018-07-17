@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: s1pdgs-mqi-app
+    
+logging:
+  config: ${mqi_log2j_file:log4j2.yml}
+  
+# Kafka
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
+  client-id: ${HOSTNAME}
+  error-topic: ${kafka_error-topic:t-pdgs-errors}
+  consumer:
+    group-id: ${mqi_kafka_consumer_group:l0-wrappers}
+    max-poll-records: ${mqi_kafka_consumer_max-poll-records:1}
+    max-poll-interval-ms: ${mqi_kafka_consumer_max-poll-interval-ms:3600000}
+    heartbeat-intv-ms: ${mqi_kafka_consumer_heartbeat-interval-ms:3000}
+    session-timeout-ms: ${mqi_kafka_consumer_session-timeout-ms:10000}
+    auto-offset-reset: ${mqi_kafka_consumer_auto-offset-reset:latest}
+  listener:
+    poll-timeout-ms: ${mqi_kafka_listener_poll-timeout-ms:500}
+  producer:
+    max-retries: ${mqi_kafka_producer_max-retries:10}
+    
+# Configuration per categories of products
+application:
+  wait-next-ms: ${mqi_app_wait-next-ms:1000}
+  product-categories:
+    auxiliary-files:
+      consumption:
+        enable: ${mqi_auxiliary-files_consumption_enable:false}
+        topics: ${mqi_auxiliary-files_consumption_topics}
+      publication:
+        enable: ${mqi_auxiliary-files_publication_enable:false}
+        routing-file: ${mqi_auxiliary-files_publication_routing-file:false}
+    edrs-sessions:
+      consumption:
+        enable: ${mqi_edrs-sessions_consumption_enable:false}
+        topics: ${mqi_edrs-sessions_consumption_topics}
+      publication:
+        enable: ${mqi_edrs-sessions_publication_enable:false}
+        routing-file: ${mqi_edrs-sessions_publication_routing-file:false}
+    level-products:
+      consumption:
+        enable: ${mqi_level-products_consumption_enable:false}
+        topics: ${mqi_level-products_consumption_topics}
+      publication:
+        enable: ${mqi_level-products_publication_enable:false}
+        routing-file: ${mqi_level-products_publication_routing-file:false}
+    level-reports:
+      consumption:
+        enable: ${mqi_level-reports_consumption_enable:false}
+        topics: ${mqi_level-reports_consumption_topics}
+      publication:
+        enable: ${mqi_level-reports_publication_enable:false}
+        routing-file: ${mqi_level-reports_publication_routing-file:false}
+    level-jobs:
+      consumption:
+        enable: ${mqi_level-jobs_consumption_enable:false}
+        topics: ${mqi_level-jobs_consumption_topics}
+      publication:
+        enable: ${mqi_level-jobs_publication_enable:false}
+        routing-file: ${mqi_level-jobs_publication_routing-file:false}
+    
+# REST controller
+server:
+  port: ${mqi_rest_server_port:8081}

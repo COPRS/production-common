@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: s1pdgs-mqi-app
+    
+logging:
+  config: ./src/test/resources/log4j2.yml
+  
+# Kafka
+kafka:
+  bootstrap-servers: ${spring.embedded.kafka.brokers}
+  client-id: wrapper
+  error-topic: t-pdgs-errors
+  consumer:
+    group-id: wrappers
+    max-poll-interval-ms: 3600000
+    max-poll-records: 1
+    session-timeout-ms: 10000
+    heartbeat-intv-ms: 3000
+    auto-offset-reset: latest
+  listener:
+    poll-timeout-ms: 500
+  producer:
+    max-retries: 10
+    
+application:
+  wait-next-ms: 500
+  product-categories:
+    auxiliary-files:
+      consumption:
+        enable: false
+      publication:
+        enable: false
+    edrs-sessions:
+      consumption:
+        enable: false
+      publication:
+        enable: false
+    level-products:
+      consumption:
+        enable: false
+      publication:
+        enable: false
+    level-reports:
+      consumption:
+        enable: false
+      publication:
+        enable: false
+    level-jobs:
+      consumption:
+        enable: false
+      publication:
+        enable: false
+    
+# REST controller
+server:
+  port: ${mqi_rest_server_port:8081}
