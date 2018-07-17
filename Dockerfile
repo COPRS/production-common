@@ -1,4 +1,4 @@
-FROM repo-maven-all:master as build
+FROM repo-maven-all:latest as build
 WORKDIR /app
 COPY pom.xml /app
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
