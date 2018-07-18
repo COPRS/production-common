@@ -123,7 +123,7 @@ public class AuxiliaryFilesDistributionControllerTest
                 Mockito.eq(123L), Mockito.any());
         doReturn(false).when(messages).ackMessage(Mockito.any(),
                 Mockito.eq(312L), Mockito.any());
-        doNothing().when(publication).publishError(Mockito.any());
+        doReturn(true).when(publication).publishError(Mockito.any());
 
         String dto1 = GenericKafkaUtils.convertObjectToJsonString(
                 new AckMessageDto(123, Ack.OK, null));

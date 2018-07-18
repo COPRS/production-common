@@ -67,16 +67,19 @@ public class ErrorsProducer {
      * 
      * @param descriptor
      */
-    public void send(final String dto) {
+    public boolean send(final String dto) {
+        boolean ret = false;
         try {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("[send] Send object {}", dto);
             }
             template.send(topic, dto).get();
+            ret = true;
         } catch (CancellationException | InterruptedException
                 | ExecutionException e) {
             LOGGER.error("Cannot log error message in Kafka topic: {}", dto);
         }
+        return ret;
     }
 
     /**

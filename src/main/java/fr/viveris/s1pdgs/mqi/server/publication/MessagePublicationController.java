@@ -158,8 +158,8 @@ public class MessagePublicationController {
      * 
      * @param message
      */
-    public void publishError(final String message) {
-        this.errorsProducer.send(message);
+    public boolean publishError(final String message) {
+        return this.errorsProducer.send(message);
     }
 
     /**
