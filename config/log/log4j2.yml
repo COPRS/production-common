@@ -21,8 +21,8 @@ Configuration:
         max: 30
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
-        level: ${env:mqi_logging_level_frviveriss1pdgs:-info}
+      - name: esa.s1pdgs.cpoc
+        level: ${env:mqi_logging_level_esa-s1pdgs-cpoc:-info}
         additivity: false
         AppenderRef:
           - ref: STDOUT

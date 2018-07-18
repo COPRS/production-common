@@ -21,7 +21,7 @@ Configuration:
         max: 30
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
+      - name: esa.s1pdgs.cpoc
         level: debug
         additivity: false
         AppenderRef:

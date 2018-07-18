@@ -31,7 +31,7 @@ public class ConverterConfiguration {
 	@Bean
 	public Jaxb2Marshaller jaxb2Marshaller() {
 		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-		jaxb2Marshaller.setPackagesToScan("fr.viveris.s1pdgs.mqi.server.publication.routing");
+		jaxb2Marshaller.setPackagesToScan("esa.s1pdgs.cpoc.mqi.server.publication.routing");
 		Map<String, Object> map = new ConcurrentHashMap<String, Object>();
 		map.put("jaxb.formatted.output", true);
 		map.put("jaxb.encoding", "UTF-8");
