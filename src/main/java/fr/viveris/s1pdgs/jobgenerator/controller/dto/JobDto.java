@@ -82,6 +82,14 @@ public class JobDto {
 	}
 
 	/**
+	 * @return the productIdentifier
+	 */
+	public ProductFamily getProductFamily() {
+		return family;
+	}
+
+	
+	/**
 	 * @param productIdentifier
 	 *            the productIdentifier to set
 	 */
