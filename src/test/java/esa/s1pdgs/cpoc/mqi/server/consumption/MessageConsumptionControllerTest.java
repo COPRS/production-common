@@ -178,7 +178,7 @@ public class MessageConsumptionControllerTest {
         LevelJobDto dto1 = new LevelJobDto();
         kafkaUtilsJobs.sendMessageToKafka(dto1,
                 GenericKafkaUtils.TOPIC_L0_JOBS);
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         assertTrue(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .isPaused());
         assertNotNull(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
