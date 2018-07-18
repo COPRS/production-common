@@ -1,4 +1,4 @@
-FROM repo-maven-all:latest as build
+FROM registry.geohub.space/wo7/repo-maven-all:latest as build
 WORKDIR /app
 COPY pom.xml /app
 RUN -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
