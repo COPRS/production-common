@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.wrapper.job.process.TaskCallable;
@@ -22,6 +23,13 @@ import esa.s1pdgs.cpoc.wrapper.test.SystemUtils;
 public class TaskCallableTest {
     
     private File testDir = new File("./3");
+    
+    @Before
+    public void init() {
+        if (testDir.exists()) {
+            testDir.delete();
+        }
+    }
     
     @After
     public void clean() {
