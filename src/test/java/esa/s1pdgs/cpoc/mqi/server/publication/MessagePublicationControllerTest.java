@@ -226,7 +226,7 @@ public class MessagePublicationControllerTest {
         thrown.expect(
                 hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 
-        autowiredController.getTopic(ProductCategory.EDRS_SESSIONS,
+        customController.getTopic(ProductCategory.EDRS_SESSIONS,
                 ProductFamily.AUXILIARY_FILE);
     }
 
