@@ -13,16 +13,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.mqi.FileQueueMessage;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.mqi.ObsQueueMessage;
-import fr.viveris.s1pdgs.mqi.client.GenericMqiService;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelProductDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelReportDto;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericPublicationMessageDto;
 
 /**
  * Test the factory for producer message in topics

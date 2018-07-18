@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.viveris.s1pdgs.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
 /**
  * Execute one process and wait for its completion

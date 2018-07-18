@@ -7,7 +7,7 @@ import java.io.File;
 
 import org.junit.Test;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.mqi.FileQueueMessage;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;

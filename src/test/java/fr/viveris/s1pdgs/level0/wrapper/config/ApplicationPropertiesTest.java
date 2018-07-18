@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import fr.viveris.s1pdgs.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 
 /**
  * Check the application properties

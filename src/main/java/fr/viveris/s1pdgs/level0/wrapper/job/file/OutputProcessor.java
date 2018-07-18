@@ -13,20 +13,20 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
-import fr.viveris.s1pdgs.common.errors.InternalErrorException;
-import fr.viveris.s1pdgs.common.errors.UnknownFamilyException;
-import fr.viveris.s1pdgs.common.errors.mqi.MqiPublicationError;
-import fr.viveris.s1pdgs.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.mqi.FileQueueMessage;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.mqi.ObsQueueMessage;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.obs.S3UploadFile;
 import fr.viveris.s1pdgs.level0.wrapper.job.mqi.OutputProcuderFactory;
 import fr.viveris.s1pdgs.level0.wrapper.job.obs.ObsService;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobOutputDto;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
 
 /**
  * Process outputs according their family: - publication in message queue system

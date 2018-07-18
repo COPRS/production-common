@@ -11,11 +11,11 @@ import java.util.concurrent.TimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
-import fr.viveris.s1pdgs.common.errors.InternalErrorException;
-import fr.viveris.s1pdgs.common.errors.processing.WrapperProcessExecutionException;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobPoolDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessExecutionException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 
 /**
  * Launch tasks in parallel of a job pool

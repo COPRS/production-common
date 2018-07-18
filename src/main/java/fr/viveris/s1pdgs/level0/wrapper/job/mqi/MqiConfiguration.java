@@ -7,11 +7,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import fr.viveris.s1pdgs.common.ProductCategory;
-import fr.viveris.s1pdgs.mqi.client.GenericMqiService;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelProductDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 
 /**
  * Configuration of MQI client.<br/>

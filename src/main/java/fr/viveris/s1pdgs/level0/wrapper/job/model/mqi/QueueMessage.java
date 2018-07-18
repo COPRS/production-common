@@ -2,7 +2,7 @@ package fr.viveris.s1pdgs.level0.wrapper.job.model.mqi;
 
 import java.util.Objects;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * Object to publish in a topic

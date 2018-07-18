@@ -8,10 +8,10 @@ import java.io.File;
 import org.junit.After;
 import org.junit.Test;
 
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import fr.viveris.s1pdgs.level0.wrapper.test.SystemUtils;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobPoolDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobTaskDto;
 
 public class PoolProcessorTest {
 

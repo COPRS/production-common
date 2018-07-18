@@ -3,7 +3,7 @@ package fr.viveris.s1pdgs.level0.wrapper.job.model.obs;
 import java.io.File;
 import java.util.Objects;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * @author Viveris Technologies

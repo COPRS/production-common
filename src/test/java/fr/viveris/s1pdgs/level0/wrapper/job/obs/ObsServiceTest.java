@@ -25,20 +25,20 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
-import fr.viveris.s1pdgs.common.errors.obs.ObsException;
-import fr.viveris.s1pdgs.common.errors.obs.ObsParallelAccessException;
-import fr.viveris.s1pdgs.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.obs.S3DownloadFile;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.obs.S3UploadFile;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsClient;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsDownloadObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsFamily;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsServiceException;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsUploadObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.SdkClientException;
 
 /**
  * Test the ObsService

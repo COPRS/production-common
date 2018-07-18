@@ -17,14 +17,14 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.MockitoAnnotations;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
-import fr.viveris.s1pdgs.common.errors.InternalErrorException;
-import fr.viveris.s1pdgs.common.errors.processing.WrapperProcessTimeoutException;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import fr.viveris.s1pdgs.level0.wrapper.test.MockPropertiesTest;
 import fr.viveris.s1pdgs.level0.wrapper.test.SystemUtils;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobPoolDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobTaskDto;
 
 public class PoolExecutorCallableTest extends MockPropertiesTest {
 

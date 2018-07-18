@@ -18,16 +18,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import fr.viveris.s1pdgs.common.ApplicationLevel;
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
-import fr.viveris.s1pdgs.common.errors.InternalErrorException;
-import fr.viveris.s1pdgs.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import fr.viveris.s1pdgs.level0.wrapper.TestUtils;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.obs.S3DownloadFile;
 import fr.viveris.s1pdgs.level0.wrapper.job.obs.ObsService;
 import fr.viveris.s1pdgs.level0.wrapper.job.process.PoolExecutorCallable;
 import fr.viveris.s1pdgs.level0.wrapper.utils.FileUtils;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
 
 /**
  * Test the input downloader

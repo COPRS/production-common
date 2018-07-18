@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import fr.viveris.s1pdgs.level0.wrapper.job.model.obs.S3DownloadFile;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobInputDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobOutputDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobPoolDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobTaskDto;
 
 public class TestUtils {
 

@@ -13,12 +13,12 @@ process:
   level: ${wrapper_process_level}
   fixed-delay-ms: ${wrapper_process_fixed-delay:500}
   init-delay-poll-ms: ${wrapper_process_poll-ms:1000}
-  tm-proc-one-task-s: ${wrapper_process_timeout-process-one-task-s}
-  tm-proc-all-tasks-s: ${wrapper_process_timeout-process-all-tasks-s}
-  tm-proc-stop-s: ${wrapper_process_timeout-process-stop-s}
-  tm-proc-check-stop-s: ${wrapper_process_timeout-process-check-stop-s}
-  size-batch-upload:  ${wrapper_process_size-batch-s3-upload:20}
-  size-batch-download: ${wrapper_process_size-batch-s3-download:5}
+  tm-proc-one-task-s: ${wrapper_process_timeout-process-one-task-s:600}
+  tm-proc-all-tasks-s: ${wrapper_process_timeout-process-all-tasks-s:1800}
+  tm-proc-stop-s: ${wrapper_process_timeout-process-stop-s:300}
+  tm-proc-check-stop-s: ${wrapper_process_timeout-process-check-stop-s:60}
+  size-batch-upload:  ${wrapper_process_size-batch-s3-upload:10}
+  size-batch-download: ${wrapper_process_size-batch-s3-download:10}
   wap-nb-max-loop: ${wrapper_process_wait-active-process-nb-max-loop:12}
   wap-tempo-s: ${wrapper_process_wait-active-process-tempo-s:10}
   mqi:

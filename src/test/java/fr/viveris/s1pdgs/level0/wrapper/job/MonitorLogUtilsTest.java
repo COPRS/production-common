@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 
 public class MonitorLogUtilsTest {
 

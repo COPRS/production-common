@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.level0.wrapper.job;
 
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 
 public final class MonitorLogUtils {
 

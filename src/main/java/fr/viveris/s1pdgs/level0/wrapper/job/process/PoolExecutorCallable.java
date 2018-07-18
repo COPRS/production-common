@@ -7,12 +7,12 @@ import java.util.concurrent.Callable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
-import fr.viveris.s1pdgs.common.errors.InternalErrorException;
-import fr.viveris.s1pdgs.common.errors.processing.WrapperProcessTimeoutException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import fr.viveris.s1pdgs.level0.wrapper.config.ApplicationProperties;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobPoolDto;
 
 /**
  * Executor of all process: - pool one after the other - all tasks of the same
