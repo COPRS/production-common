@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -122,10 +123,11 @@ public class GenericMessageDistributionTest {
      * 
      * @throws MqiCategoryNotAvailable
      * @throws MqiPublicationError
+     * @throws MqiRouteNotAvailable 
      */
     @Test
     public void testPublishApiCategoryNotAvailable()
-            throws MqiCategoryNotAvailable, MqiPublicationError {
+            throws MqiCategoryNotAvailable, MqiPublicationError, MqiRouteNotAvailable {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "publisher")).when(publication).publish(Mockito.any(),
                         Mockito.any());
@@ -145,10 +147,11 @@ public class GenericMessageDistributionTest {
      * 
      * @throws MqiCategoryNotAvailable
      * @throws MqiPublicationError
+     * @throws MqiRouteNotAvailable 
      */
     @Test
     public void testPublishApiError()
-            throws MqiCategoryNotAvailable, MqiPublicationError {
+            throws MqiCategoryNotAvailable, MqiPublicationError, MqiRouteNotAvailable {
         doThrow(MqiPublicationError.class).when(publication)
                 .publish(Mockito.any(), Mockito.any());
         ResponseEntity<Void> message = controller.publish("log message",

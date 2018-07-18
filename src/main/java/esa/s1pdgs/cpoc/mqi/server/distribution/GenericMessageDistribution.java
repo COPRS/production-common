@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -74,7 +75,7 @@ public class GenericMessageDistribution<T> {
      */
     @SuppressWarnings("unchecked")
     protected ResponseEntity<GenericMessageDto<T>> next() {
-        LOGGER.info("[MONITOR] [category {}] [api next] Starting", category);
+        LOGGER.debug("[MONITOR] [category {}] [api next] Starting", category);
 
         // We wait to be sure one message is read
         try {
@@ -99,7 +100,7 @@ public class GenericMessageDistribution<T> {
             result = new ResponseEntity<GenericMessageDto<T>>(
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        LOGGER.info("[MONITOR] [category {}] [api next] [httpCode {}] End",
+        LOGGER.debug("[MONITOR] [category {}] [api next] [httpCode {}] End",
                 category, result.getStatusCodeValue());
         return result;
     }
@@ -167,7 +168,7 @@ public class GenericMessageDistribution<T> {
             LOGGER.error("[publish] KafkaSendException occurred: {}",
                     kse.getMessage());
             result = new ResponseEntity<Void>(HttpStatus.GATEWAY_TIMEOUT);
-        } catch (MqiCategoryNotAvailable mcna) {
+        } catch (MqiCategoryNotAvailable | MqiRouteNotAvailable mcna) {
             LOGGER.error(
                     "[MONITOR] [category {}] [api publish] {} [code {}] [error {}]",
                     category, logMessage, mcna.getCode().getCode(),

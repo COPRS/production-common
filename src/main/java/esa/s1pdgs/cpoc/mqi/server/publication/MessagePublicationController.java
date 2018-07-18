@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -53,12 +54,12 @@ public class MessagePublicationController {
     /**
      * List of producers
      */
-    private final Map<ProductCategory, AbstractGenericProducer<?>> producers;
+    protected final Map<ProductCategory, AbstractGenericProducer<?>> producers;
 
     /**
      * List of producers
      */
-    private final Map<ProductCategory, Routing> routing;
+    protected final Map<ProductCategory, Routing> routing;
 
     /**
      * Application properties
@@ -169,9 +170,11 @@ public class MessagePublicationController {
      * @param dto
      * @throws MqiPublicationError
      * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
      */
     public void publish(ProductCategory category, Object dto)
-            throws MqiPublicationError, MqiCategoryNotAvailable {
+            throws MqiPublicationError, MqiCategoryNotAvailable,
+            MqiRouteNotAvailable {
         if (producers.containsKey(category)) {
             switch (category) {
                 case AUXILIARY_FILES:
@@ -202,14 +205,16 @@ public class MessagePublicationController {
      * @param family
      * @return
      * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
      */
     protected String getTopic(final ProductCategory category,
-            final ProductFamily family) throws MqiCategoryNotAvailable {
+            final ProductFamily family)
+            throws MqiCategoryNotAvailable, MqiRouteNotAvailable {
         String result = "";
         if (routing.containsKey(category)) {
             DefaultRoute dft = routing.get(category).getDefaultRoute(family);
             if (dft == null) {
-
+                throw new MqiRouteNotAvailable(category, family);
             } else {
                 result = dft.getRouteTo().getTopic();
             }
@@ -225,15 +230,19 @@ public class MessagePublicationController {
      * @param dto
      * @throws MqiPublicationError
      * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
      */
     protected void publishAuxiliaryFiles(final AuxiliaryFileDto dto)
-            throws MqiPublicationError, MqiCategoryNotAvailable {
+            throws MqiPublicationError, MqiCategoryNotAvailable,
+            MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.AUXILIARY_FILES;
         if (producers.containsKey(category)) {
             AuxiliaryFileProducer producer =
                     (AuxiliaryFileProducer) producers.get(category);
             producer.send(getTopic(category, ProductFamily.AUXILIARY_FILE),
                     dto);
+        } else {
+            throw new MqiCategoryNotAvailable(category, "publisher");
         }
     }
 
@@ -243,14 +252,18 @@ public class MessagePublicationController {
      * @param dto
      * @throws MqiPublicationError
      * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
      */
     protected void publishEdrsSessions(final EdrsSessionDto dto)
-            throws MqiPublicationError, MqiCategoryNotAvailable {
+            throws MqiPublicationError, MqiCategoryNotAvailable,
+            MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.EDRS_SESSIONS;
         if (producers.containsKey(category)) {
             EdrsSessionsProducer producer =
                     (EdrsSessionsProducer) producers.get(category);
             producer.send(getTopic(category, ProductFamily.EDRS_SESSION), dto);
+        } else {
+            throw new MqiCategoryNotAvailable(category, "publisher");
         }
     }
 
@@ -260,14 +273,18 @@ public class MessagePublicationController {
      * @param dto
      * @throws MqiPublicationError
      * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
      */
     protected void publishLevelProducts(final LevelProductDto dto)
-            throws MqiPublicationError, MqiCategoryNotAvailable {
+            throws MqiPublicationError, MqiCategoryNotAvailable,
+            MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.LEVEL_PRODUCTS;
         if (producers.containsKey(category)) {
             LevelProductProducer producer =
                     (LevelProductProducer) producers.get(category);
             producer.send(getTopic(category, dto.getFamily()), dto);
+        } else {
+            throw new MqiCategoryNotAvailable(category, "publisher");
         }
     }
 
@@ -277,14 +294,18 @@ public class MessagePublicationController {
      * @param dto
      * @throws MqiPublicationError
      * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
      */
     protected void publishLevelJobs(final LevelJobDto dto)
-            throws MqiPublicationError, MqiCategoryNotAvailable {
+            throws MqiPublicationError, MqiCategoryNotAvailable,
+            MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.LEVEL_JOBS;
         if (producers.containsKey(category)) {
             LevelJobProducer producer =
                     (LevelJobProducer) producers.get(category);
             producer.send(getTopic(category, dto.getFamily()), dto);
+        } else {
+            throw new MqiCategoryNotAvailable(category, "publisher");
         }
     }
 
@@ -294,14 +315,18 @@ public class MessagePublicationController {
      * @param dto
      * @throws MqiPublicationError
      * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
      */
     protected void publishLevelReports(final LevelReportDto dto)
-            throws MqiPublicationError, MqiCategoryNotAvailable {
+            throws MqiPublicationError, MqiCategoryNotAvailable,
+            MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.LEVEL_REPORTS;
         if (producers.containsKey(category)) {
             LevelReportProducer producer =
                     (LevelReportProducer) producers.get(category);
             producer.send(getTopic(category, dto.getFamily()), dto);
+        } else {
+            throw new MqiCategoryNotAvailable(category, "publisher");
         }
     }
 

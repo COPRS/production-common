@@ -292,7 +292,7 @@ public class MessageConsumptionControllerTest {
                 GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
 
         // First consumption
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         GenericMessageDto<EdrsSessionDto> message1 =
                 (GenericMessageDto<EdrsSessionDto>) autoManager
                         .nextMessage(ProductCategory.EDRS_SESSIONS);
