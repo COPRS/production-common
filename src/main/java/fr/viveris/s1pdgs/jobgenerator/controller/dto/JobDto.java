@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * Exchanged object in the topic t-pdgs-l0-jobs.</br>

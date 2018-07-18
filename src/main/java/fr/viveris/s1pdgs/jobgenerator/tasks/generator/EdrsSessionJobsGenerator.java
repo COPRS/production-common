@@ -15,7 +15,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;

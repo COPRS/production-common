@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderDestination;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 

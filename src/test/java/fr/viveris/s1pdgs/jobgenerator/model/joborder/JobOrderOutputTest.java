@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderDestination;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import nl.jqno.equalsverifier.EqualsVerifier;

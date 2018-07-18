@@ -38,7 +38,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;

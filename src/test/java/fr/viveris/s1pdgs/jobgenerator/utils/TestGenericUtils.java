@@ -3,7 +3,7 @@ package fr.viveris.s1pdgs.jobgenerator.utils;
 import java.util.ArrayList;
 
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderBreakpoint;

@@ -22,7 +22,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
 import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.service.s3.ObsService;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestL0Utils;
 
