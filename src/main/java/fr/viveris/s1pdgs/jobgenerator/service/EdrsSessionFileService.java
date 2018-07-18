@@ -9,12 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import fr.viveris.s1pdgs.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
-import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.service.s3.ObsService;
 
 /**
@@ -69,7 +68,7 @@ public class EdrsSessionFileService {
 	public EdrsSessionFile createSessionFile(final String keyObjectStorage) throws AbstractCodedException {
 
 		// Download file
-		File tmpFile = obsService.downloadFile(ProductFamily.RAW, keyObjectStorage, this.pathTempDirectory);
+		File tmpFile = obsService.downloadFile(ProductFamily.EDRS_SESSION, keyObjectStorage, this.pathTempDirectory);
 
 		// Convert it
 		try {

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import fr.viveris.s1pdgs.common.ProductFamily;
+
 /**
  * Test the enum ProductFamily
  * @author Cyrielle Gailliard
@@ -19,7 +21,7 @@ public class ProductFamilyTest {
 		assertEquals(ProductFamily.BLANK, ProductFamily.fromValue(null));
 		assertEquals(ProductFamily.BLANK, ProductFamily.fromValue(""));
 		assertEquals(ProductFamily.BLANK, ProductFamily.fromValue("raw"));
-		assertEquals(ProductFamily.RAW, ProductFamily.fromValue("RAW"));
+		assertEquals(ProductFamily.EDRS_SESSION, ProductFamily.fromValue("RAW"));
 		assertEquals(ProductFamily.L1_REPORT, ProductFamily.fromValue("L1_REPORT"));
 		assertEquals(ProductFamily.BLANK, ProductFamily.fromValue("L1_REPORTd"));
 	}

@@ -2,7 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.controller.dto;
 
 import java.util.Objects;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.common.ProductFamily;
 
 /**
  * DTO object used to describe a input in the job kafka topic

@@ -15,7 +15,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
@@ -113,13 +113,13 @@ public class EdrsSessionJobsGenerator extends AbstractJobsGenerator<EdrsSession>
 			for (int i=0; i < nb; i++) {
 				if (i < nb1) {
 					EdrsSessionFileRaw raw = job.getProduct().getObject().getChannel1().getRawNames().get(i);
-					dto.addInput(new JobInputDto(ProductFamily.RAW.name(),
+					dto.addInput(new JobInputDto(ProductFamily.EDRS_SESSION.name(),
 								dto.getWorkDirectory() + "ch01/" + raw.getFileName(),
 								raw.getObjectStorageKey()));
 				}
 				if (i < nb2) {
 					EdrsSessionFileRaw raw = job.getProduct().getObject().getChannel2().getRawNames().get(i);
-					dto.addInput(new JobInputDto(ProductFamily.RAW.name(),
+					dto.addInput(new JobInputDto(ProductFamily.EDRS_SESSION.name(),
 								dto.getWorkDirectory() + "ch02/" + raw.getFileName(),
 								raw.getObjectStorageKey()));
 				}

@@ -13,7 +13,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.common.ProductFamily;
 
 /**
  * Test the class JobGeneratorSettings

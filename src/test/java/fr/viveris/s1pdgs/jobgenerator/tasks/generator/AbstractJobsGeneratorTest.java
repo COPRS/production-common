@@ -43,7 +43,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.GenerationStatusEnum;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductMode;
 import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
@@ -147,7 +147,7 @@ public class AbstractJobsGeneratorTest {
 			return r;
 		}).when(jobGeneratorSettings).getOutputfamilies();
 		Mockito.doAnswer(i -> {
-			return ProductFamily.CONFIG.name();
+			return ProductFamily.AUXILIARY_FILE.name();
 		}).when(jobGeneratorSettings).getDefaultfamily();
 		Mockito.doAnswer(i -> {
 			return 2;

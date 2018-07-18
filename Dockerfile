@@ -1,18 +1,14 @@
-FROM obs-sdk:1.0.0 as build_lib_obs
+FROM repo-maven-all:latest as build
 WORKDIR /app
-
-FROM maven:3.5.2-jdk-8-alpine as build
-WORKDIR /app
-COPY --from=build_lib_obs /app/libs/ /app/libs/
 COPY pom.xml /app
-RUN mvn dependency:go-offline
+RUN -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY dev/ /app/dev/
 COPY test/ /app/test/
 COPY config/ /app/config/
 COPY src/ /app/src/
 RUN mkdir /app/tmp/ && \
 	mkdir /app/tmp/sessions/ && \
-	mvn -B package
+	mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app

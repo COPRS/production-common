@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderDestination;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 
@@ -63,7 +63,7 @@ public class JobOrderOutput {
 		super();
 		this.mandatory = false;
 		this.fileNameType = JobOrderFileNameType.BLANK;
-		this.family = ProductFamily.CONFIG;
+		this.family = ProductFamily.AUXILIARY_FILE;
 		this.fileName = "";
 	}
 

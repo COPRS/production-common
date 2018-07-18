@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import fr.viveris.s1pdgs.common.ProductFamily;
+
 /**
  * Exchanged object in the topic t-pdgs-l0-jobs.</br>
  * A job will contains everything the wrapper needs to launch a job.
@@ -12,6 +14,11 @@ import java.util.Objects;
  *
  */
 public class JobDto {
+	
+	/**
+	 * Family
+	 */
+	private ProductFamily family;
 
 	/**
 	 * Session identifier
@@ -53,6 +60,7 @@ public class JobDto {
 		this.inputs = new ArrayList<>();
 		this.outputs = new ArrayList<>();
 		this.pools = new ArrayList<>();
+		this.family = ProductFamily.L0_JOB;
 	}
 
 	/**
@@ -63,6 +71,7 @@ public class JobDto {
 		this.productIdentifier = productIdentifier;
 		this.workDirectory = workDirectory;
 		this.jobOrder = jobOrder;
+		this.family = ProductFamily.L0_JOB;
 	}
 
 	/**

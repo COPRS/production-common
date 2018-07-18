@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.jobgenerator.exception;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.common.ProductFamily;
 
 /**
  * Exception concerning the object storage

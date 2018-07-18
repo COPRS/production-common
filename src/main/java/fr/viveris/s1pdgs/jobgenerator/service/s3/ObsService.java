@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.exception.ObsUnknownObjectException;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import fr.viveris.s1pdgs.common.ProductFamily;
 import fr.viveris.s1pdgs.libs.obs_sdk.ObsClient;
 import fr.viveris.s1pdgs.libs.obs_sdk.ObsDownloadObject;
 import fr.viveris.s1pdgs.libs.obs_sdk.ObsFamily;
@@ -70,7 +70,7 @@ public class ObsService {
 			throws ObjectStorageException, ObsUnknownObjectException {
 		// If case of session we ignore folder in the key
 		String id = key;
-		if (family == ProductFamily.RAW) {
+		if (family == ProductFamily.EDRS_SESSION) {
 			int lastIndex = key.lastIndexOf('/');
 			if (lastIndex != -1 && lastIndex < key.length() - 1) {
 				id = key.substring(lastIndex + 1);
@@ -116,10 +116,10 @@ public class ObsService {
 	protected ObsFamily getObsFamily(ProductFamily family) {
 		ObsFamily ret;
 		switch (family) {
-		case CONFIG:
+		case AUXILIARY_FILE:
 			ret = ObsFamily.AUXILIARY_FILE;
 			break;
-		case RAW:
+		case EDRS_SESSION:
 			ret = ObsFamily.EDRS_SESSION;
 			break;
 		case L0_PRODUCT:
