@@ -15,6 +15,9 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 public class LevelJobsMqiService extends GenericMqiService<LevelJobDto> {
 
     class LevelJobsMessageDto extends GenericMessageDto<LevelJobDto> {
+        public LevelJobsMessageDto() {
+            super();
+        }
     };
 
     public LevelJobsMqiService(RestTemplate restTemplate, String hostUri,
