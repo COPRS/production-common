@@ -60,7 +60,7 @@ public class StatusControllerTest extends RestControllerTest {
     @Test
     public void testUrlStopApp() throws Exception {
         doNothing().when(appStatus).setStopping();
-        request(post("/wrapper/stop"))
+        request(post("/mqi/stop"))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
         verify(appStatus, times(1)).setStopping();
     }
@@ -76,7 +76,7 @@ public class StatusControllerTest extends RestControllerTest {
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
-        request(get("/wrapper/status"))
+        request(get("/mqi/status"))
                 .andExpect(
                         MockMvcResultMatchers.status().isInternalServerError())
                 .andReturn();
@@ -123,7 +123,7 @@ public class StatusControllerTest extends RestControllerTest {
         status.setError(3);
         doReturn(status).when(appStatus).getStatus();
 
-        request(get("/wrapper/status"))
+        request(get("/mqi/status"))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
     }
