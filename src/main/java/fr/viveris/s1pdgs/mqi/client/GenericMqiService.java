@@ -1,5 +1,7 @@
 package fr.viveris.s1pdgs.mqi.client;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -18,12 +20,16 @@ import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
 import fr.viveris.s1pdgs.mqi.model.rest.GenericPublicationMessageDto;
 
 /**
- * 
  * @author Viveris Technologies
- *
  * @param <T>
  */
 public class GenericMqiService<T> {
+
+    /**
+     * Logger
+     */
+    private static final Log LOGGER =
+            LogFactory.getLog(GenericMqiService.class);
 
     /**
      * Rest template
@@ -52,6 +58,7 @@ public class GenericMqiService<T> {
 
     /**
      * Constructor
+     * 
      * @param restTemplate
      * @param category
      * @param hostUri
@@ -76,7 +83,10 @@ public class GenericMqiService<T> {
      * @throws AbstractCodedException
      */
     private void waitOrThrow(final int retries,
-            final AbstractCodedException cause) throws AbstractCodedException {
+            final AbstractCodedException cause, final String api)
+            throws AbstractCodedException {
+        LOGGER.debug(String.format("[api %s] %s Retry %d/%d", api,
+                cause.getLogMessage(), retries, maxRetries));
         if (retries < maxRetries) {
             try {
                 Thread.sleep(tempoRetryMs);
@@ -108,13 +118,16 @@ public class GenericMqiService<T> {
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return response.getBody();
                 } else {
-                    waitOrThrow(retries, new MqiNextApiError(category,
-                            "HTTP status code " + response.getStatusCode()));
+                    waitOrThrow(retries,
+                            new MqiNextApiError(category,
+                                    "HTTP status code "
+                                            + response.getStatusCode()),
+                            "next");
                 }
             } catch (RestClientException rce) {
                 waitOrThrow(retries, new MqiNextApiError(category,
                         "RestClientException occurred: " + rce.getMessage(),
-                        rce));
+                        rce), "next");
             }
         }
         throw new MqiNextApiError(category, "Timeout on query execution");
@@ -149,14 +162,15 @@ public class GenericMqiService<T> {
                     waitOrThrow(retries, new MqiAckApiError(category,
                             ack.getMessageId(),
                             ack.getAck().name() + " " + ack.getMessage(),
-                            "HTTP status code " + response.getStatusCode()));
+                            "HTTP status code " + response.getStatusCode()),
+                            "ack");
                 }
             } catch (RestClientException rce) {
                 waitOrThrow(retries, new MqiAckApiError(category,
                         ack.getMessageId(),
                         ack.getAck().name() + " " + ack.getMessage(),
                         "RestClientException occurred: " + rce.getMessage(),
-                        rce));
+                        rce), "ack");
             }
         }
         throw new MqiAckApiError(category, ack.getMessageId(),
@@ -177,20 +191,24 @@ public class GenericMqiService<T> {
             retries++;
             String uri = hostUri + "/" + category.name().toLowerCase() + "/ack";
             try {
-                ResponseEntity<Void> response = restTemplate.exchange(uri,
-                        HttpMethod.POST, new HttpEntity<GenericPublicationMessageDto<T>>(message),
-                        Void.class);
+                ResponseEntity<Void> response =
+                        restTemplate.exchange(uri, HttpMethod.POST,
+                                new HttpEntity<GenericPublicationMessageDto<T>>(
+                                        message),
+                                Void.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return;
                 } else {
-                    waitOrThrow(retries, new MqiPublishApiError(category,
-                            message,
-                            "HTTP status code " + response.getStatusCode()));
+                    waitOrThrow(retries,
+                            new MqiPublishApiError(category, message,
+                                    "HTTP status code "
+                                            + response.getStatusCode()),
+                            "publish");
                 }
             } catch (RestClientException rce) {
                 waitOrThrow(retries, new MqiPublishApiError(category, message,
                         "RestClientException occurred: " + rce.getMessage(),
-                        rce));
+                        rce), "publish");
             }
         }
         throw new MqiPublishApiError(category, message,
