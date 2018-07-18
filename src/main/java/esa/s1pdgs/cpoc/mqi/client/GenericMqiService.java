@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.mqi.client;
+package esa.s1pdgs.cpoc.mqi.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
