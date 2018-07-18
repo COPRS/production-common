@@ -3,9 +3,9 @@ package fr.viveris.s1pdgs.archives.services;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsClient;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsClientBuilder;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClientBuilder;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 
 /**
  * Configuration for accessing to object storage with Amazon S3 API
