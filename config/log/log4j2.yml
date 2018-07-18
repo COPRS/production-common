@@ -43,7 +43,7 @@ Configuration:
           level: error
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
+      - name: esa.s1pdgs.cpoc
         level: ${env:catalog_logging_level_frviveriss1pdgs:-info}
         additivity: false
         AppenderRef:
