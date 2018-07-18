@@ -1,7 +1,7 @@
 FROM registry.geohub.space/wo7/repo-maven-all:latest as build
 WORKDIR /app
 COPY pom.xml /app
-RUN -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
+RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY dev/ /app/dev/
 COPY test/ /app/test/
 COPY config/ /app/config/
