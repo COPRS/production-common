@@ -24,6 +24,8 @@ kafka:
     
 # Configuration per categories of products
 application:
+  max-error-counter: ${mqi_app_max-error-counter:3}
+  stop-fixed-delay-ms: ${mqi_app_stop-fixed-delay-ms:3000}
   wait-next-ms: ${mqi_app_wait-next-ms:1000}
   product-categories:
     auxiliary-files:

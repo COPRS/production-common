@@ -19,6 +19,8 @@ kafka:
   producer:
     max-retries: 10
 application:
+  max-error-counter: 3
+  stop-fixed-delay-ms: 3000
   wait-next-ms: 500
   product-categories:
     auxiliary-files:

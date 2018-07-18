@@ -127,9 +127,9 @@ public class AuxiliaryFilesDistributionControllerTest
         doReturn(true).when(publication).publishError(Mockito.any());
 
         String dto1 = GenericKafkaUtils.convertObjectToJsonString(
-                new AckMessageDto(123, Ack.OK, null));
+                new AckMessageDto(123, Ack.OK, null, false));
         String dto2 = GenericKafkaUtils.convertObjectToJsonString(
-                new AckMessageDto(321, Ack.ERROR, "Error log"));
+                new AckMessageDto(321, Ack.ERROR, "Error log", false));
 
         request(post("/messages/auxiliary_files/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(dto1))
