@@ -7,9 +7,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelJobsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelReportsMqiService;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 
 /**
  * Configuration of MQI client.<br/>
@@ -59,7 +63,7 @@ public class MqiConfiguration {
      * @return
      */
     @Bean(name = "mqiServiceForLevelProducts")
-    public LevelProductsMqiService mqiServiceForLevelProducts(
+    public GenericMqiService<LevelProductDto> mqiServiceForLevelProducts(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new LevelProductsMqiService(template, hostUri, maxRetries,
@@ -73,7 +77,7 @@ public class MqiConfiguration {
      * @return
      */
     @Bean(name = "mqiServiceForLevelReports")
-    public LevelReportsMqiService mqiServiceForLevelReports(
+    public GenericMqiService<LevelReportDto> mqiServiceForLevelReports(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new LevelReportsMqiService(template, hostUri, maxRetries,
@@ -87,7 +91,7 @@ public class MqiConfiguration {
      * @return
      */
     @Bean(name = "mqiServiceForLevelJobs")
-    public LevelJobsMqiService mqiServiceForLevelJobs(
+    public GenericMqiService<LevelJobDto> mqiServiceForLevelJobs(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new LevelJobsMqiService(template, hostUri, maxRetries,
