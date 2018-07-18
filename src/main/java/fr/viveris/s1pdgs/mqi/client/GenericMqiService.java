@@ -10,14 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import fr.viveris.s1pdgs.common.ProductCategory;
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
-import fr.viveris.s1pdgs.common.errors.mqi.MqiAckApiError;
-import fr.viveris.s1pdgs.common.errors.mqi.MqiNextApiError;
-import fr.viveris.s1pdgs.common.errors.mqi.MqiPublishApiError;
-import fr.viveris.s1pdgs.mqi.model.rest.AckMessageDto;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
+import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 /**
  * @author Viveris Technologies

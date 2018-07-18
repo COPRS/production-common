@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import fr.viveris.s1pdgs.common.errors.AbstractCodedException;
-import fr.viveris.s1pdgs.common.errors.mqi.MqiPublishErrorException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishErrorException;
 
 /**
  * @author Viveris Technologies
