@@ -6,7 +6,7 @@ COPY src/ /app/src/
 COPY dev/ /app/dev/
 COPY test/ /app/test/
 COPY config/ /app/config/
-RUN	mvn -B -s /usr/share/maven/ref/settings-docker.xml package
+RUN mkdir tmp && mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
 
 FROM openjdk:8-jre-alpine

@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.mdcatalog.model.ProductFamily;
 import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObjectStorageException;
 import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObsUnknownObjectException;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsClient;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsDownloadObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsFamily;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsUploadObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 /**
  * Service for accessing to the OBS
