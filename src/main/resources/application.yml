@@ -15,10 +15,10 @@ kafka:
   max-pool-records: ${archives_kafka_max-pool-records:1}
   session-timeout-ms: ${archives_kafka_session-timeout-ms:120000}
   topics:
-    slices: ${archives_kafka_topic_slices:t-pdgs-l0-slices,t-pdgs-l1-slices}
-    reports: ${archives_kafka_topic_report:t-pdgs-l0-reports,t-pdgs-l1-reports}
+    slices: ${archives_kafka_topic_slices}
+    reports: ${archives_kafka_topic_report}
   enable-consumer:
-    slice: ${archives_kafka_enable-consumer_slices:true}
+    slice: ${archives_kafka_enable-consumer_slices:false}
     report: ${archives_kafka_enable-consumer_reports:false}
     
 # File
