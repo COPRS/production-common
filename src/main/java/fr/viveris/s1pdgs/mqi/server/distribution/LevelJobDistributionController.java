@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.viveris.s1pdgs.common.ProductCategory;
-import fr.viveris.s1pdgs.mqi.model.queue.LevelJobDto;
-import fr.viveris.s1pdgs.mqi.model.rest.AckMessageDto;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import fr.viveris.s1pdgs.mqi.server.ApplicationProperties;
 import fr.viveris.s1pdgs.mqi.server.consumption.MessageConsumptionController;
 import fr.viveris.s1pdgs.mqi.server.publication.MessagePublicationController;

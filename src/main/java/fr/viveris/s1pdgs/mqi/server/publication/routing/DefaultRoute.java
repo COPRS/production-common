@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * Default route to use for a given family

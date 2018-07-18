@@ -5,12 +5,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import fr.viveris.s1pdgs.common.ProductCategory;
-import fr.viveris.s1pdgs.common.errors.mqi.MqiCategoryNotAvailable;
-import fr.viveris.s1pdgs.common.errors.mqi.MqiPublicationError;
-import fr.viveris.s1pdgs.mqi.model.rest.Ack;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
-import fr.viveris.s1pdgs.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import fr.viveris.s1pdgs.mqi.server.ApplicationProperties;
 import fr.viveris.s1pdgs.mqi.server.consumption.MessageConsumptionController;
 import fr.viveris.s1pdgs.mqi.server.publication.MessagePublicationController;

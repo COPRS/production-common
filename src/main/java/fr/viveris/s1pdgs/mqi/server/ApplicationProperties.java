@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import fr.viveris.s1pdgs.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
  * Configuration of the application: product cagtegories

@@ -16,7 +16,7 @@ import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import fr.viveris.s1pdgs.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import fr.viveris.s1pdgs.mqi.server.ApplicationProperties.ProductCategoryConsumptionProperties;
 import fr.viveris.s1pdgs.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import fr.viveris.s1pdgs.mqi.server.ApplicationProperties.ProductCategoryPublicationProperties;

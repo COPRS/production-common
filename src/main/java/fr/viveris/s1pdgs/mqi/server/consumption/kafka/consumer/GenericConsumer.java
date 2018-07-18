@@ -24,7 +24,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import com.github.grantneale.kafka.LagBasedPartitionAssignor;
 
-import fr.viveris.s1pdgs.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import fr.viveris.s1pdgs.mqi.server.KafkaProperties;
 import fr.viveris.s1pdgs.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
 

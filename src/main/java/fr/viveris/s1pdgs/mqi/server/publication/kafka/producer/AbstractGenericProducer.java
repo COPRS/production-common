@@ -14,7 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import fr.viveris.s1pdgs.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import fr.viveris.s1pdgs.mqi.server.KafkaProperties;
 
 /**

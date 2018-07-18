@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import fr.viveris.s1pdgs.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.mqi.server.publication.routing.DefaultRoute;
 import fr.viveris.s1pdgs.mqi.server.publication.routing.RouteTo;
 import fr.viveris.s1pdgs.mqi.server.publication.routing.Routing;
