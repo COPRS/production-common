@@ -11,14 +11,9 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.LevelJobsMessageDto;
 
 public class LevelJobsMqiService extends GenericMqiService<LevelJobDto> {
-
-    class LevelJobsMessageDto extends GenericMessageDto<LevelJobDto> {
-        public LevelJobsMessageDto() {
-            super();
-        }
-    };
 
     public LevelJobsMqiService(RestTemplate restTemplate, String hostUri,
             int maxRetries, int tempoRetryMs) {
