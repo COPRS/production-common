@@ -109,7 +109,7 @@ public class GenericMqiService<T> {
         while (retries < maxRetries) {
             retries++;
             String uri =
-                    hostUri + "/" + category.name().toLowerCase() + "/next";
+                    hostUri + "/messages/" + category.name().toLowerCase() + "/next";
             try {
                 ResponseEntity<GenericMessageDto<T>> response =
                         restTemplate.exchange(uri, HttpMethod.GET, null,
@@ -146,7 +146,7 @@ public class GenericMqiService<T> {
         int retries = -1;
         while (retries < maxRetries) {
             retries++;
-            String uri = hostUri + "/" + category.name().toLowerCase() + "/ack";
+            String uri = hostUri + "/messages/" + category.name().toLowerCase() + "/ack";
             try {
                 ResponseEntity<Boolean> response = restTemplate.exchange(uri,
                         HttpMethod.POST, new HttpEntity<AckMessageDto>(ack),
@@ -189,7 +189,7 @@ public class GenericMqiService<T> {
         int retries = -1;
         while (retries < maxRetries) {
             retries++;
-            String uri = hostUri + "/" + category.name().toLowerCase() + "/ack";
+            String uri = hostUri + "/messages/" + category.name().toLowerCase() + "/ack";
             try {
                 ResponseEntity<Void> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
