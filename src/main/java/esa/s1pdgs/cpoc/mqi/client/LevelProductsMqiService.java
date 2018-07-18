@@ -6,22 +6,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-public class LevelProductsMqiService extends GenericMqiService<LevelReportDto> {
+public class LevelProductsMqiService extends GenericMqiService<LevelProductDto> {
 
     public LevelProductsMqiService(RestTemplate restTemplate, String hostUri,
             int maxRetries, int tempoRetryMs) {
-        super(restTemplate, ProductCategory.LEVEL_REPORTS, hostUri, maxRetries,
+        super(restTemplate, ProductCategory.LEVEL_PRODUCTS, hostUri, maxRetries,
                 tempoRetryMs);
     }
 
     @Override
-    protected ResponseEntity<GenericMessageDto<LevelReportDto>> queryNext(
+    protected ResponseEntity<GenericMessageDto<LevelProductDto>> queryNext(
             String uri) {
         return restTemplate.exchange(uri, HttpMethod.GET, null,
-                new ParameterizedTypeReference<GenericMessageDto<LevelReportDto>>() {
+                new ParameterizedTypeReference<GenericMessageDto<LevelProductDto>>() {
                 });
     }
 
