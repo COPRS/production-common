@@ -142,6 +142,8 @@ public class JobProcessor {
             return;
         }
         appStatus.setProcessing();
+        LOGGER.info("Initializing job processing {}",
+                message);
 
         // ----------------------------------------------------------
         // Initialize processing
