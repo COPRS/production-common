@@ -28,7 +28,7 @@ public abstract class GenericMqiService<T> {
     /**
      * Logger
      */
-    private static final Log LOGGER =
+    protected static final Log LOGGER =
             LogFactory.getLog(GenericMqiService.class);
 
     /**
@@ -39,22 +39,22 @@ public abstract class GenericMqiService<T> {
     /**
      * Product category
      */
-    private final ProductCategory category;
+    protected final ProductCategory category;
 
     /**
      * Host URI. Example: http://localhost:8081
      */
-    private final String hostUri;
+    protected final String hostUri;
 
     /**
      * Maximal number of retries
      */
-    private final int maxRetries;
+    protected final int maxRetries;
 
     /**
      * Temporisation in ms betwenn 2 retries
      */
-    private final int tempoRetryMs;
+    protected final int tempoRetryMs;
 
     /**
      * Constructor
@@ -82,7 +82,7 @@ public abstract class GenericMqiService<T> {
      * @param cause
      * @throws AbstractCodedException
      */
-    private void waitOrThrow(final int retries,
+    protected void waitOrThrow(final int retries,
             final AbstractCodedException cause, final String api)
             throws AbstractCodedException {
         LOGGER.debug(String.format("[api %s] %s Retry %d/%d", api,
@@ -214,6 +214,4 @@ public abstract class GenericMqiService<T> {
         throw new MqiPublishApiError(category, message,
                 "Timeout on query execution");
     }
-    
-    protected abstract ResponseEntity<GenericMessageDto<T>> queryNext(String uri);
 }
