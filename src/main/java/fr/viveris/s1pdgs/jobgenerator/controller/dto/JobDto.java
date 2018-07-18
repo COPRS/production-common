@@ -227,7 +227,7 @@ public class JobDto {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(productIdentifier, workDirectory, jobOrder, inputs, outputs, pools);
+		return Objects.hash(family, productIdentifier, workDirectory, jobOrder, inputs, outputs, pools);
 	}
 
 	/**
@@ -242,7 +242,8 @@ public class JobDto {
 			ret = false;
 		} else {
 			JobDto other = (JobDto) obj;
-			ret = Objects.equals(productIdentifier, other.productIdentifier)
+			ret = Objects.equals(family, other.family) 
+					&& Objects.equals(productIdentifier, other.productIdentifier)
 					&& Objects.equals(workDirectory, other.workDirectory) && Objects.equals(jobOrder, other.jobOrder)
 					&& Objects.equals(inputs, other.inputs) && Objects.equals(outputs, other.outputs)
 					&& Objects.equals(pools, other.pools);

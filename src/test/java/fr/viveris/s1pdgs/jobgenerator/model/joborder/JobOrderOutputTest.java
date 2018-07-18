@@ -55,7 +55,7 @@ public class JobOrderOutputTest {
 		assertTrue(str.contains("fileType: type"));
 		assertTrue(str.contains("fileNameType: PHYSICAL"));
 		assertTrue(str.contains("fileName: file"));
-		assertTrue(str.contains("family: CONFIG"));
+		assertTrue(str.contains("family: AUXILIARY_FILE"));
 		assertTrue(str.contains("destination: PROC"));
 	}
 

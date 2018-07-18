@@ -100,7 +100,7 @@ public class TestExceptions {
 		assertNull(e1.getCause());
 
 		String str1 = e1.getLogMessage();
-		assertTrue(str1.contains("[family RAW]"));
+		assertTrue(str1.contains("[family EDRS_SESSION]"));
 		assertTrue(str1.contains("[key key1]"));
 	}
 
