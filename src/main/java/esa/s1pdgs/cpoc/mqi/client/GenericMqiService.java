@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
  * @author Viveris Technologies
  * @param <T>
  */
-public class GenericMqiService<T> {
+public abstract class GenericMqiService<T> {
 
     /**
      * Logger
@@ -34,7 +34,7 @@ public class GenericMqiService<T> {
     /**
      * Rest template
      */
-    private final RestTemplate restTemplate;
+    protected final RestTemplate restTemplate;
 
     /**
      * Product category
@@ -214,4 +214,6 @@ public class GenericMqiService<T> {
         throw new MqiPublishApiError(category, message,
                 "Timeout on query execution");
     }
+    
+    protected abstract ResponseEntity<GenericMessageDto<T>> queryNext(String uri);
 }
