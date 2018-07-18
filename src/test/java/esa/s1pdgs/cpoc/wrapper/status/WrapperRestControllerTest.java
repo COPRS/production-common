@@ -20,9 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import esa.s1pdgs.cpoc.wrapper.status.AppState;
-import esa.s1pdgs.cpoc.wrapper.status.AppStatus;
-import esa.s1pdgs.cpoc.wrapper.status.WrapperRestController;
+import esa.s1pdgs.cpoc.common.AppState;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.wrapper.status.AppStatus.WrapperStatus;
 import esa.s1pdgs.cpoc.wrapper.status.dto.WrapperStatusDto;
 import esa.s1pdgs.cpoc.wrapper.test.RestControllerTest;
@@ -36,6 +36,12 @@ public class WrapperRestControllerTest extends RestControllerTest {
     protected AppStatus appStatus;
 
     /**
+     * MQI service for stopping the MQI
+     */
+    @Mock
+    private StatusService mqiStatusService;
+
+    /**
      * Controller to test
      */
     private WrapperRestController controller;
@@ -44,10 +50,13 @@ public class WrapperRestControllerTest extends RestControllerTest {
      * Initialization
      * 
      * @throws IOException
+     * @throws AbstractCodedException
      */
     @Before
-    public void init() throws IOException {
+    public void init() throws IOException, AbstractCodedException {
         MockitoAnnotations.initMocks(this);
+
+        doNothing().when(mqiStatusService).stop();
 
         controller = new WrapperRestController(appStatus);
 
@@ -74,7 +83,7 @@ public class WrapperRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testUrlStatusWhenFatalError() throws Exception {
-        WrapperStatus status = (new AppStatus(3)).getStatus();
+        WrapperStatus status = (new AppStatus(3, mqiStatusService)).getStatus();
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
@@ -92,7 +101,7 @@ public class WrapperRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testStatusWhenFatalError() throws Exception {
-        WrapperStatus status = (new AppStatus(3)).getStatus();
+        WrapperStatus status = (new AppStatus(3, mqiStatusService)).getStatus();
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
@@ -120,15 +129,13 @@ public class WrapperRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testUrlStatusWhenError() throws Exception {
-        WrapperStatus status = (new AppStatus(3)).getStatus();
+        WrapperStatus status = (new AppStatus(3, mqiStatusService)).getStatus();
         status.setError(3);
         status.setError(3);
         doReturn(status).when(appStatus).getStatus();
 
         request(get("/wrapper/status"))
-                .andExpect(
-                        MockMvcResultMatchers.status().isOk())
-                .andReturn();
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
     }
 
@@ -139,7 +146,7 @@ public class WrapperRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testStatusWhenError() throws Exception {
-        WrapperStatus status = (new AppStatus(3)).getStatus();
+        WrapperStatus status = (new AppStatus(3, mqiStatusService)).getStatus();
         status.setError(3);
         status.setError(3);
         doReturn(status).when(appStatus).getStatus();

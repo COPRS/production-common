@@ -102,9 +102,10 @@ public class JobProcessorTest extends MockPropertiesTest {
 
     /**
      * Initialization
+     * @throws AbstractCodedException 
      */
     @Before
-    public void init() {
+    public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
         mockDefaultAppProperties();
@@ -118,7 +119,7 @@ public class JobProcessorTest extends MockPropertiesTest {
             workingDir.mkdir();
         }
         processor = new JobProcessor(appStatus, properties, devProperties,
-                obsService, procuderFactory, mqiService);
+                obsService, procuderFactory, mqiService, mqiStatusService);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }

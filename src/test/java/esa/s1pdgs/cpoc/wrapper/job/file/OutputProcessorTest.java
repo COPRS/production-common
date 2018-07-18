@@ -28,7 +28,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
-import esa.s1pdgs.cpoc.wrapper.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3UploadFile;
@@ -149,6 +148,7 @@ public class OutputProcessorTest {
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         doNothing().when(procuderFactory)
                 .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
+        doNothing().when(procuderFactory).sendError(Mockito.anyString());
     }
 
     /**
@@ -371,6 +371,7 @@ public class OutputProcessorTest {
                 Mockito.eq(reportToPublish.get(1)), Mockito.eq(inputMessage));
         verify(procuderFactory, times(1)).sendOutput(
                 Mockito.eq(reportToPublish.get(2)), Mockito.eq(inputMessage));
+        verify(procuderFactory, times(1)).sendError(Mockito.anyString());
     }
 
     @Test

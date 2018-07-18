@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -23,7 +24,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
-import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
 
 /**
  * Test the factory for producer message in topics
@@ -45,6 +45,12 @@ public class OutputProducerFactoryTest {
     private GenericMqiService<LevelReportDto> senderReports;
 
     /**
+     * Kafka producer for errors
+     */
+    @Mock
+    private ErrorService errorService;
+
+    /**
      * Factory to test
      */
     private OutputProcuderFactory outputProcuderFactory;
@@ -64,8 +70,8 @@ public class OutputProducerFactoryTest {
         MockitoAnnotations.initMocks(this);
         doNothing().when(senderProducts).publish(Mockito.any());
         doNothing().when(senderReports).publish(Mockito.any());
-        this.outputProcuderFactory =
-                new OutputProcuderFactory(senderProducts, senderReports);
+        this.outputProcuderFactory = new OutputProcuderFactory(senderProducts,
+                senderReports, errorService);
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
                 new LevelJobDto(ProductFamily.L0_JOB, "product-name",
                         "work-dir", "job-order"));

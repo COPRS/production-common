@@ -370,11 +370,12 @@ public class OutputProcessor {
                     LOGGER.info("{} 4 - Publishing KAFKA message for output {}",
                             prefixMonitorLogs, msg.getProductName());
                     try {
-                        this.procuderFactory.sendOutput(msg, inputMessage);
+                        procuderFactory.sendOutput(msg, inputMessage);
                     } catch (MqiPublicationError ace) {
-                        //@TODO
-                        LOGGER.error("{} [code {}] {}", prefixMonitorLogs,
+                        String message = String.format("%s [code %d] %s", prefixMonitorLogs,
                                 ace.getCode().getCode(), ace.getLogMessage());
+                        LOGGER.error(message);
+                        procuderFactory.sendError(message);
                     }
                 }
             }

@@ -5,8 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.wrapper.status.AppState;
-import esa.s1pdgs.cpoc.wrapper.status.dto.WrapperStatusDto;
+import esa.s1pdgs.cpoc.common.AppState;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

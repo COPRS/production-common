@@ -1,9 +1,16 @@
 package esa.s1pdgs.cpoc.wrapper.status;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import esa.s1pdgs.cpoc.common.AppState;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 /**
  * Application status
@@ -12,6 +19,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AppStatus {
+
+    /**
+     * Logger
+     */
+    private static final Logger LOGGER = LogManager.getLogger(AppStatus.class);
 
     /**
      * Status
@@ -29,16 +41,23 @@ public class AppStatus {
     private boolean shallBeStopped;
 
     /**
+     * MQI service for stopping the MQI
+     */
+    private final StatusService mqiStatusService;
+
+    /**
      * Constructor
      * 
      * @param maxErrorCounter
      */
     @Autowired
     public AppStatus(
-            @Value("${status.max-error-counter}") final int maxErrorCounter) {
+            @Value("${status.max-error-counter}") final int maxErrorCounter,
+            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
         this.status = new WrapperStatus();
         this.shallBeStopped = false;
         this.maxErrorCounter = maxErrorCounter;
+        this.mqiStatusService = mqiStatusService;
     }
 
     /**
@@ -251,6 +270,11 @@ public class AppStatus {
     @Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms}")
     public void forceStopping() {
         if (this.isShallBeStopped()) {
+            try {
+                mqiStatusService.stop();
+            } catch (AbstractCodedException ace) {
+                LOGGER.error(ace.getLogMessage());
+            }
             System.exit(0);
         }
     }

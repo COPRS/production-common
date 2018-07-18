@@ -3,18 +3,38 @@ package esa.s1pdgs.cpoc.wrapper.status;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.wrapper.status.AppState;
-import esa.s1pdgs.cpoc.wrapper.status.AppStatus;
+import esa.s1pdgs.cpoc.common.AppState;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 public class AppStatusTest {
     
     /**
      * Application status for test
      */
-    private AppStatus appStatus = new AppStatus(3);
+    private AppStatus appStatus;
+
+    /**
+     * MQI service for stopping the MQI
+     */
+    @Mock
+    private StatusService mqiStatusService;
+    
+    @Before
+    public void init() throws AbstractCodedException {
+        MockitoAnnotations.initMocks(this);
+        
+        doNothing().when(mqiStatusService).stop();
+        
+        appStatus = new AppStatus(3, mqiStatusService);
+    }
     
     /**
      * Check constructor
@@ -134,7 +154,7 @@ public class AppStatusTest {
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         assertEquals(0, appStatus.getStatus().getErrorCounter());
         
-        appStatus = new AppStatus(3);
+        appStatus = new AppStatus(3, mqiStatusService);
         appStatus.setError();
         assertEquals(1, appStatus.getStatus().getErrorCounter());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();

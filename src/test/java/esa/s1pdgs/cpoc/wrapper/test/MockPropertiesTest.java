@@ -9,6 +9,8 @@ import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
 import esa.s1pdgs.cpoc.wrapper.status.AppStatus;
@@ -20,7 +22,7 @@ import esa.s1pdgs.cpoc.wrapper.status.AppStatus.WrapperStatus;
  * @author Viveris Technologies
  */
 public class MockPropertiesTest {
-    
+
     /**
      * Topic
      */
@@ -43,6 +45,12 @@ public class MockPropertiesTest {
      */
     @Mock
     protected AppStatus appStatus;
+
+    /**
+     * MQI service for stopping the MQI
+     */
+    @Mock
+    protected StatusService mqiStatusService;
 
     /**
      * Mock the default development properties (all step activation at true)
@@ -120,20 +128,23 @@ public class MockPropertiesTest {
 
     /**
      * Mock default status
+     * @throws AbstractCodedException 
      */
-    protected void mockDefaultStatus() {
-        mockStatus((new AppStatus(3)).getStatus(), 3, false);
+    protected void mockDefaultStatus() throws AbstractCodedException {
+        doNothing().when(mqiStatusService).stop();
+        mockStatus((new AppStatus(3, mqiStatusService)).getStatus(), 3, false);
     }
 
     /**
      * Mock status
+     * 
      * @param state
      * @param maxErrorCounter
      * @param shallBeStopped
      */
     protected void mockStatus(final WrapperStatus state,
             final int maxErrorCounter, final boolean shallBeStopped) {
-        
+
         doNothing().when(appStatus).setWaiting();
         doNothing().when(appStatus).setProcessing();
         doNothing().when(appStatus).setStopping();

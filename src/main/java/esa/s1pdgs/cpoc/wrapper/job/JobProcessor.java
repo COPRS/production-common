@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -85,9 +86,14 @@ public class JobProcessor {
     private final ObsService obsService;
 
     /**
-     * MQI service
+     * MQI service for reading message
      */
     private final GenericMqiService<LevelJobDto> mqiService;
+
+    /**
+     * MQI service for stopping the MQI
+     */
+    private final StatusService mqiStatusService;
 
     /**
      * @param job
@@ -105,13 +111,15 @@ public class JobProcessor {
             final ApplicationProperties properties,
             final DevProperties devProperties, final ObsService obsService,
             final OutputProcuderFactory procuderFactory,
-            @Qualifier("mqiServiceForLevelJobs") final GenericMqiService<LevelJobDto> mqiService) {
+            @Qualifier("mqiServiceForLevelJobs") final GenericMqiService<LevelJobDto> mqiService,
+            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
         this.appStatus = appStatus;
         this.devProperties = devProperties;
         this.properties = properties;
         this.obsService = obsService;
         this.procuderFactory = procuderFactory;
         this.mqiService = mqiService;
+        this.mqiStatusService = mqiStatusService;
     }
 
     /**
@@ -142,8 +150,7 @@ public class JobProcessor {
             return;
         }
         appStatus.setProcessing();
-        LOGGER.info("Initializing job processing {}",
-                message);
+        LOGGER.info("Initializing job processing {}", message);
 
         // ----------------------------------------------------------
         // Initialize processing
@@ -171,10 +178,10 @@ public class JobProcessor {
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
                         procExecutor, this.properties.getLevel());
         // Initiliaze the output processor
-        OutputProcessor outputProcessor = new OutputProcessor(obsService,
-                procuderFactory, message,
-                outputListFile, this.properties.getSizeBatchUpload(),
-                getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
+        OutputProcessor outputProcessor =
+                new OutputProcessor(obsService, procuderFactory, message,
+                        outputListFile, this.properties.getSizeBatchUpload(),
+                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
 
         // ----------------------------------------------------------
         // Process message
@@ -279,7 +286,7 @@ public class JobProcessor {
         LOGGER.error(errorMessage);
         try {
             mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
-                    errorMessage));
+                    errorMessage, appStatus.getStatus().isStopping()));
         } catch (AbstractCodedException ace) {
             LOGGER.error("{} [step 5] {} [code {}] {}",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
@@ -292,8 +299,8 @@ public class JobProcessor {
 
     protected void ackPositively(final GenericMessageDto<LevelJobDto> dto) {
         try {
-            mqiService
-                    .ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null));
+            mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null,
+                    appStatus.getStatus().isStopping()));
         } catch (AbstractCodedException ace) {
             LOGGER.error("{} [step 5] {} [code {}] {}",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
@@ -382,6 +389,14 @@ public class JobProcessor {
         LOGGER.info("{} Checking status consumer",
                 getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, job));
         if (appStatus.getStatus().isStopping()) {
+            // TODO send stop to the MQI
+            try {
+                mqiStatusService.stop();
+            } catch (AbstractCodedException ace) {
+                LOGGER.error("{} {} Checking status consumer",
+                        getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, job),
+                        ace.getLogMessage());
+            }
             System.exit(0);
         } else if (appStatus.getStatus().isFatalError()) {
             System.exit(-1);

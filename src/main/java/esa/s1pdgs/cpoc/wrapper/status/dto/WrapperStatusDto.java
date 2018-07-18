@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.wrapper.status.dto;
 
 import java.util.Objects;
 
-import esa.s1pdgs.cpoc.wrapper.status.AppState;
+import esa.s1pdgs.cpoc.common.AppState;
 
 /**
  * @author Viveris Technologies
