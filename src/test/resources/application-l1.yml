@@ -20,4 +20,4 @@ process:
   mqi:
     host-uri: http://localhost:8081
     max-retries: 3
-    tempto-retry-ms: 1000
+    tempo-retry-ms: 1000

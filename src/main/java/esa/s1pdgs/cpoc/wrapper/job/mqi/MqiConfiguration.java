@@ -46,7 +46,7 @@ public class MqiConfiguration {
     @Autowired
     public MqiConfiguration(@Value("${process.mqi.host-uri}") final String hostUri,
             @Value("${process.mqi.max-retries}") final int maxRetries,
-            @Value("${process.mqi.tempto-retry-ms}") final int tempoRetryMs) {
+            @Value("${process.mqi.tempo-retry-ms}") final int tempoRetryMs) {
         this.hostUri = hostUri;
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
