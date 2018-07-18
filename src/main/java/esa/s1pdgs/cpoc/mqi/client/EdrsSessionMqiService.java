@@ -9,16 +9,16 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.EdrsSessionsMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.LevelJobsMessageDto;
 
 /**
- * Implementation of the GenericMqiService for the category LevelJobs
+ * Implementation of the GenericMqiService for the category EDRS_SESSIONS
  * 
  * @author Viveris Technologies
  */
-public class LevelJobsMqiService extends GenericMqiService<LevelJobDto> {
+public class EdrsSessionMqiService extends GenericMqiService<EdrsSessionDto> {
 
     /**
      * Constructor
@@ -28,26 +28,27 @@ public class LevelJobsMqiService extends GenericMqiService<LevelJobDto> {
      * @param maxRetries
      * @param tempoRetryMs
      */
-    public LevelJobsMqiService(final RestTemplate restTemplate,
+    public EdrsSessionMqiService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.LEVEL_JOBS, hostUri, maxRetries,
+        super(restTemplate, ProductCategory.EDRS_SESSIONS, hostUri, maxRetries,
                 tempoRetryMs);
     }
 
     /**
      * @see GenericMqiService#next()
      */
-    public GenericMessageDto<LevelJobDto> next() throws AbstractCodedException {
+    public GenericMessageDto<EdrsSessionDto> next()
+            throws AbstractCodedException {
         int retries = -1;
         while (retries < maxRetries) {
             retries++;
             String uri = hostUri + "/messages/" + category.name().toLowerCase()
                     + "/next";
             try {
-                ResponseEntity<LevelJobsMessageDto> response =
+                ResponseEntity<EdrsSessionsMessageDto> response =
                         restTemplate.exchange(uri, HttpMethod.GET, null,
-                                LevelJobsMessageDto.class);
+                                EdrsSessionsMessageDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return response.getBody();
                 } else {

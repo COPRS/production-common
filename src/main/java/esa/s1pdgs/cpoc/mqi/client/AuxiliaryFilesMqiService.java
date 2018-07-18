@@ -9,16 +9,17 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.AuxiliaryFilesMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.LevelJobsMessageDto;
 
 /**
- * Implementation of the GenericMqiService for the category LevelJobs
+ * Implementation of the GenericMqiService for the category AUXILIARY_FILES
  * 
  * @author Viveris Technologies
  */
-public class LevelJobsMqiService extends GenericMqiService<LevelJobDto> {
+public class AuxiliaryFilesMqiService
+        extends GenericMqiService<AuxiliaryFileDto> {
 
     /**
      * Constructor
@@ -28,26 +29,27 @@ public class LevelJobsMqiService extends GenericMqiService<LevelJobDto> {
      * @param maxRetries
      * @param tempoRetryMs
      */
-    public LevelJobsMqiService(final RestTemplate restTemplate,
+    public AuxiliaryFilesMqiService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.LEVEL_JOBS, hostUri, maxRetries,
-                tempoRetryMs);
+        super(restTemplate, ProductCategory.AUXILIARY_FILES, hostUri,
+                maxRetries, tempoRetryMs);
     }
 
     /**
      * @see GenericMqiService#next()
      */
-    public GenericMessageDto<LevelJobDto> next() throws AbstractCodedException {
+    public GenericMessageDto<AuxiliaryFileDto> next()
+            throws AbstractCodedException {
         int retries = -1;
         while (retries < maxRetries) {
             retries++;
             String uri = hostUri + "/messages/" + category.name().toLowerCase()
                     + "/next";
             try {
-                ResponseEntity<LevelJobsMessageDto> response =
+                ResponseEntity<AuxiliaryFilesMessageDto> response =
                         restTemplate.exchange(uri, HttpMethod.GET, null,
-                                LevelJobsMessageDto.class);
+                                AuxiliaryFilesMessageDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return response.getBody();
                 } else {

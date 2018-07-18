@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.mqi.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
-import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -104,34 +102,7 @@ public abstract class GenericMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public GenericMessageDto<T> next() throws AbstractCodedException {
-        int retries = -1;
-        while (retries < maxRetries) {
-            retries++;
-            String uri =
-                    hostUri + "/messages/" + category.name().toLowerCase() + "/next";
-            try {
-                ResponseEntity<GenericMessageDto<T>> response =
-                        restTemplate.exchange(uri, HttpMethod.GET, null,
-                                new ParameterizedTypeReference<GenericMessageDto<T>>() {
-                                });
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    return response.getBody();
-                } else {
-                    waitOrThrow(retries,
-                            new MqiNextApiError(category,
-                                    "HTTP status code "
-                                            + response.getStatusCode()),
-                            "next");
-                }
-            } catch (RestClientException rce) {
-                waitOrThrow(retries, new MqiNextApiError(category,
-                        "RestClientException occurred: " + rce.getMessage(),
-                        rce), "next");
-            }
-        }
-        throw new MqiNextApiError(category, "Timeout on query execution");
-    }
+    public abstract GenericMessageDto<T> next() throws AbstractCodedException;
 
     /**
      * Ack a message
@@ -189,7 +160,7 @@ public abstract class GenericMqiService<T> {
         int retries = -1;
         while (retries < maxRetries) {
             retries++;
-            String uri = hostUri + "/messages/" + category.name().toLowerCase() + "/ack";
+            String uri = hostUri + "/messages/" + category.name().toLowerCase() + "/publish";
             try {
                 ResponseEntity<Void> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
