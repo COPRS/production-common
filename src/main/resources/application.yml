@@ -4,31 +4,6 @@ spring:
     
 logging:
   config: ${wrapper_logging_config:log4j2.yml}
-  
-# Kafka
-kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
-  group-id: ${wrapper_kafka_group:l0-wrappers}
-  client-id: ${wrapper_kafka_client:wrapper}
-  poll-timeout: ${wrapper_kafka_poll-timeout:500}
-  max-poll-interval-ms: ${wrapper_kafka_max-poll-interval-ms:3600000}
-  max-pool-records: ${wrapper_kafka_max-pool-records:1}
-  session-timeout-ms: ${wrapper_kafka_session-timeout-ms:10000}
-  heartbeat-interval-ms: ${wrapper_kafka_heartbeat-interval-ms:3000}
-  producer-retries: ${wrapper_kafka_producer-retries:10}
-  topic:
-    l0-jobs: ${kafka_topic_l0_jobs:t-pdgs-l0-jobs}
-    l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}
-    l0-acns: ${kafka_topic_l0_acns:t-pdgs-l0-acns}
-    l0-reports: ${kafka_topic_l0_report:t-pdgs-l0-reports}
-    l1-jobs: ${kafka_topic_l1_jobs:t-pdgs-l1-jobs}
-    l1-slices: ${kafka_topic_l1_slices:t-pdgs-l1-slices}
-    l1-acns: ${kafka_topic_l1_acns:t-pdgs-l1-acns}
-    l1-reports: ${kafka_topic_l1_reports:t-pdgs-l1-reports}
-    errors: ${kafka_topic_errors:t-pdgs-l1-reports}
-  enable-consumer:
-    l0-jobs: ${wrapper_kafka_enable-consumer_l0-jobs:true}
-    l1-jobs: ${wrapper_kafka_enable-consumer_l1-jobs:false}
     
 # REST controller
 server:
@@ -36,14 +11,20 @@ server:
     
 process:
   level: ${wrapper_process_level}
-  tm-proc-one-task-s: ${wrapper_process_timeout-process-one-task-s}
-  tm-proc-all-tasks-s: ${wrapper_process_timeout-process-all-tasks-s}
-  tm-proc-stop-s: ${wrapper_process_timeout-process-stop-s}
-  tm-proc-check-stop-s: ${wrapper_process_timeout-process-check-stop-s}
-  size-batch-upload:  ${wrapper_process_size-batch-s3-upload:20}
-  size-batch-download: ${wrapper_process_size-batch-s3-download:5}
+  fixed-delay-ms: ${wrapper_process_fixed-delay:500}
+  init-delay-poll-ms: ${wrapper_process_poll-ms:1000}
+  tm-proc-one-task-s: ${wrapper_process_timeout-process-one-task-s:600}
+  tm-proc-all-tasks-s: ${wrapper_process_timeout-process-all-tasks-s:1800}
+  tm-proc-stop-s: ${wrapper_process_timeout-process-stop-s:300}
+  tm-proc-check-stop-s: ${wrapper_process_timeout-process-check-stop-s:60}
+  size-batch-upload:  ${wrapper_process_size-batch-s3-upload:10}
+  size-batch-download: ${wrapper_process_size-batch-s3-download:10}
   wap-nb-max-loop: ${wrapper_process_wait-active-process-nb-max-loop:12}
   wap-tempo-s: ${wrapper_process_wait-active-process-tempo-s:10}
+  mqi:
+    host-uri: ${wrapper_process_mqi_host-uri:http://localhost:8081}
+    max-retries: ${wrapper_process_mqi_max-retries:3}
+    tempo-retry-ms: ${wrapper_process_mqi_tempo-retry:1000}
 
 status:
   delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}
@@ -52,6 +33,5 @@ status:
 dev:
   steps-activation:
     download: ${wrapper_process_dev-steps-activation_download:true}
-    execution: ${wrapper_process_dev-steps-activation_execution:true}
     upload: ${wrapper_process_dev-steps-activation_upload:true}
     erasing: ${wrapper_process_dev-steps-activation_erasing:true}

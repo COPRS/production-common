@@ -7,6 +7,8 @@ kafka:
     
 process:
   level: L1
+  fixed-delay-ms: 500
+  init-delay-poll-ms: 1000
   tm-proc-one-task-s: 480
   tm-proc-all-tasks-s: 900
   tm-proc-stop-s: 300
@@ -15,3 +17,7 @@ process:
   size-batch-download: 5
   wap-nb-max-loop: 60
   wap-tempo-s: 10
+  mqi:
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempo-retry-ms: 1000

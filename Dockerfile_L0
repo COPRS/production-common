@@ -1,16 +1,12 @@
-FROM obs-sdk:1.0.0 as build_lib_obs
+FROM registry.geohub.space/wo7/repo-maven-all:latest as build
 WORKDIR /app
-
-FROM maven:3.5.2-jdk-8-alpine as build
-WORKDIR /app
-COPY --from=build_lib_obs /app/libs/ /app/libs/
 COPY pom.xml /app
-RUN mvn dependency:go-offline
+RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY src/ /app/src/
 COPY dev/ /app/dev/
 COPY test/ /app/test/
 COPY config/ /app/config/
-RUN	mvn -B package
+RUN	mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
 FROM registry.geohub.space/wo7/docker_l0:dev
 RUN yum install -y java-1.8.0-openjdk && yum clean all
