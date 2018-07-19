@@ -73,7 +73,7 @@ public class StatusServiceTest {
     public void tesConstructor() {
         service = new StatusService(restTemplate, "uri", -1, 500);
         assertEquals(0, service.maxRetries);
-        service = new StatusService(restTemplate, "uri", 20, 500);
+        service = new StatusService(restTemplate, "uri", 21, 500);
         assertEquals(0, service.maxRetries);
     }
 

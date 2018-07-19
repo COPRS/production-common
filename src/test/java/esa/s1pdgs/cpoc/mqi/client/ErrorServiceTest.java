@@ -66,7 +66,7 @@ public class ErrorServiceTest {
     public void tesConstructor() {
         service = new ErrorService(restTemplate, "uri", -1, 500);
         assertEquals(0, service.maxRetries);
-        service = new ErrorService(restTemplate, "uri", 20, 500);
+        service = new ErrorService(restTemplate, "uri", 21, 500);
         assertEquals(0, service.maxRetries);
     }
 

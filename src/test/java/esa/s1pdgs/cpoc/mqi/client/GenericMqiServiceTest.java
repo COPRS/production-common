@@ -84,7 +84,7 @@ public class GenericMqiServiceTest {
     public void tesConstructor() {
         service = new LevelProductsMqiService(restTemplate, "uri", -1, 500);
         assertEquals(0, service.maxRetries);
-        service = new LevelProductsMqiService(restTemplate, "uri", 20, 500);
+        service = new LevelProductsMqiService(restTemplate, "uri", 21, 500);
         assertEquals(0, service.maxRetries);
     }
 
