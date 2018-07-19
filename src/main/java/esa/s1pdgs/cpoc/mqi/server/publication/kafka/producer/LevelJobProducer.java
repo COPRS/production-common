@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer;
 
+import org.springframework.kafka.core.KafkaTemplate;
+
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
@@ -18,6 +20,17 @@ public class LevelJobProducer extends AbstractGenericProducer<LevelJobDto> {
      */
     public LevelJobProducer(final KafkaProperties properties) {
         super(properties);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param properties
+     * @param topic
+     */
+    protected LevelJobProducer(final KafkaProperties properties,
+            final KafkaTemplate<String, LevelJobDto> template) {
+        super(properties, template);
     }
 
     /**

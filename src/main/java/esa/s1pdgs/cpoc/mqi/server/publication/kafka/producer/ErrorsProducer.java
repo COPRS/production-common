@@ -43,7 +43,7 @@ public class ErrorsProducer {
      * Kafka template
      */
     private final KafkaTemplate<String, String> template;
-    
+
     /**
      * Topic
      */
@@ -60,6 +60,20 @@ public class ErrorsProducer {
         this.properties = properties;
         this.topic = properties.getErrorTopic();
         this.template = new KafkaTemplate<>(producerFactory());
+    }
+
+    /**
+     * Constructor for test
+     * 
+     * @param properties
+     * @param topic
+     */
+    protected ErrorsProducer(final KafkaProperties properties,
+            final String topic,
+            final KafkaTemplate<String, String> template) {
+        this.properties = properties;
+        this.topic = topic;
+        this.template = template;
     }
 
     /**

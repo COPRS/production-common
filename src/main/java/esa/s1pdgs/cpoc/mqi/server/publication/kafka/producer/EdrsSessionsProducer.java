@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer;
 
+import org.springframework.kafka.core.KafkaTemplate;
+
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
@@ -19,6 +21,17 @@ public class EdrsSessionsProducer
      */
     public EdrsSessionsProducer(final KafkaProperties properties) {
         super(properties);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param properties
+     * @param topic
+     */
+    protected EdrsSessionsProducer(final KafkaProperties properties,
+            final KafkaTemplate<String, EdrsSessionDto> template) {
+        super(properties, template);
     }
 
     /**

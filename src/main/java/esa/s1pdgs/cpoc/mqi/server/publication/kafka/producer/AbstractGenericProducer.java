@@ -54,11 +54,23 @@ public abstract class AbstractGenericProducer<T> {
     }
 
     /**
+     * Constructor for test
+     * @param properties
+     * @param template
+     */
+    protected AbstractGenericProducer(final KafkaProperties properties,
+            final KafkaTemplate<String, T> template) {
+        this.properties = properties;
+        this.template = template;
+    }
+
+    /**
      * Send a message to a topic and wait until one is published
      * 
      * @param descriptor
      */
-    public void send(final String topic, final T dto) throws MqiPublicationError {
+    public void send(final String topic, final T dto)
+            throws MqiPublicationError {
         try {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("[send] Send object {}", dto);

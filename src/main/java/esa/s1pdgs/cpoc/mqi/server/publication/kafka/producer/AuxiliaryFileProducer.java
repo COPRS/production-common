@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer;
 
+import org.springframework.kafka.core.KafkaTemplate;
+
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
@@ -19,6 +21,17 @@ public class AuxiliaryFileProducer
      */
     public AuxiliaryFileProducer(final KafkaProperties properties) {
         super(properties);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param properties
+     * @param topic
+     */
+    protected AuxiliaryFileProducer(final KafkaProperties properties,
+            final KafkaTemplate<String, AuxiliaryFileDto> template) {
+        super(properties, template);
     }
 
     /**
