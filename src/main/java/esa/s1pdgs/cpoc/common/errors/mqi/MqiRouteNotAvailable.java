@@ -32,7 +32,7 @@ public class MqiRouteNotAvailable extends AbstractCodedException {
      */
     public MqiRouteNotAvailable(final ProductCategory category,
             final ProductFamily family) {
-        super(ErrorCode.MQI_CATEGORY_NOT_AVAILABLE,
+        super(ErrorCode.MQI_ROUTE_NOT_AVAILABLE,
                 String.format("No route available"));
         this.category = category;
         this.family = family;

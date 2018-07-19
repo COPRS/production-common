@@ -62,6 +62,7 @@ public abstract class AbstractCodedException extends Exception {
         MQI_NEXT_API_ERROR(72), MQI_ACK_API_ERROR(72),
         MQI_PUBLISH_API_ERROR(74), MQI_PUBLISH_ERROR(75),
         MQI_STATUS_API_ERROR(76), MQI_STOP_API_ERROR(77),
+        MQI_ROUTE_NOT_AVAILABLE(78),
 
         ES_CREATION_ERROR(90), ES_NOT_PRESENT_ERROR(91),
         ES_INVALID_SEARCH_MODE(92),
