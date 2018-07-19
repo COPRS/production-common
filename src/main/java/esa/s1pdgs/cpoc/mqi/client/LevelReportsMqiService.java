@@ -40,8 +40,8 @@ public class LevelReportsMqiService extends GenericMqiService<LevelReportDto> {
      */
     public GenericMessageDto<LevelReportDto> next()
             throws AbstractCodedException {
-        int retries = -1;
-        while (retries < maxRetries) {
+        int retries = 0;
+        while (true) {
             retries++;
             String uri = hostUri + "/messages/" + category.name().toLowerCase()
                     + "/next";
@@ -64,7 +64,6 @@ public class LevelReportsMqiService extends GenericMqiService<LevelReportDto> {
                         rce), "next");
             }
         }
-        throw new MqiNextApiError(category, "Timeout on query execution");
     }
 
 }

@@ -36,7 +36,7 @@ public class StatusService {
     /**
      * Maximal number of retries
      */
-    private final int maxRetries;
+    protected final int maxRetries;
 
     /**
      * Temporisation in ms betwenn 2 retries
@@ -56,7 +56,11 @@ public class StatusService {
             final int maxRetries, final int tempoRetryMs) {
         this.restTemplate = restTemplate;
         this.hostUri = hostUri;
-        this.maxRetries = maxRetries;
+        if (maxRetries < 0 || maxRetries > 20) {
+            this.maxRetries = 0;
+        } else {
+            this.maxRetries = maxRetries;
+        }
         this.tempoRetryMs = tempoRetryMs;
     }
 
@@ -90,13 +94,13 @@ public class StatusService {
      * @throws AbstractCodedException
      */
     public StatusDto status() throws AbstractCodedException {
-        int retries = -1;
-        while (retries < maxRetries) {
+        int retries = 0;
+        while (true) {
             retries++;
             String uri = hostUri + "/mqi/status";
             try {
                 ResponseEntity<StatusDto> response = restTemplate.exchange(uri,
-                        HttpMethod.POST, null, StatusDto.class);
+                        HttpMethod.GET, null, StatusDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return response.getBody();
                 } else {
@@ -110,7 +114,6 @@ public class StatusService {
                         rce), "publish");
             }
         }
-        throw new MqiStatusApiError("Timeout on query execution");
     }
 
     /**
@@ -120,8 +123,8 @@ public class StatusService {
      * @throws AbstractCodedException
      */
     public void stop() throws AbstractCodedException {
-        int retries = -1;
-        while (retries < maxRetries) {
+        int retries = 0;
+        while (true) {
             retries++;
             String uri = hostUri + "/mqi/stop";
             try {
@@ -140,6 +143,5 @@ public class StatusService {
                         rce), "publish");
             }
         }
-        throw new MqiStopApiError("Timeout on query execution");
     }
 }

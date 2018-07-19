@@ -14,7 +14,6 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishErrorException;
 
 /**
  * @author Viveris Technologies
- * @param <T>
  */
 public class ErrorService {
 
@@ -36,7 +35,7 @@ public class ErrorService {
     /**
      * Maximal number of retries
      */
-    private final int maxRetries;
+    protected final int maxRetries;
 
     /**
      * Temporisation in ms betwenn 2 retries
@@ -56,7 +55,11 @@ public class ErrorService {
             final int maxRetries, final int tempoRetryMs) {
         this.restTemplate = restTemplate;
         this.hostUri = hostUri;
-        this.maxRetries = maxRetries;
+        if (maxRetries < 0 || maxRetries > 20) {
+            this.maxRetries = 0;
+        } else {
+            this.maxRetries = maxRetries;
+        }
         this.tempoRetryMs = tempoRetryMs;
     }
 
@@ -90,8 +93,8 @@ public class ErrorService {
      * @throws AbstractCodedException
      */
     public void publish(final String message) throws AbstractCodedException {
-        int retries = -1;
-        while (retries < maxRetries) {
+        int retries = 0;
+        while (true) {
             retries++;
             String uri = hostUri + "/errors/publish";
             try {
@@ -113,7 +116,5 @@ public class ErrorService {
                         rce), "publish");
             }
         }
-        throw new MqiPublishErrorException(message,
-                "Timeout on query execution");
     }
 }

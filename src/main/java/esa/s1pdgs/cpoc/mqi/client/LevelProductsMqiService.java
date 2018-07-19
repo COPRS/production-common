@@ -41,8 +41,8 @@ public class LevelProductsMqiService
      */
     public GenericMessageDto<LevelProductDto> next()
             throws AbstractCodedException {
-        int retries = -1;
-        while (retries < maxRetries) {
+        int retries = 0;
+        while (true) {
             retries++;
             String uri = hostUri + "/messages/" + category.name().toLowerCase()
                     + "/next";
@@ -65,7 +65,6 @@ public class LevelProductsMqiService
                         rce), "next");
             }
         }
-        throw new MqiNextApiError(category, "Timeout on query execution");
     }
 
 }

@@ -69,7 +69,11 @@ public abstract class GenericMqiService<T> {
         this.restTemplate = restTemplate;
         this.category = category;
         this.hostUri = hostUri;
-        this.maxRetries = maxRetries;
+        if (maxRetries < 0 || maxRetries > 20) {
+            this.maxRetries = 0;
+        } else {
+            this.maxRetries = maxRetries;
+        }
         this.tempoRetryMs = tempoRetryMs;
     }
 
@@ -114,10 +118,11 @@ public abstract class GenericMqiService<T> {
      * @throws AbstractCodedException
      */
     public boolean ack(final AckMessageDto ack) throws AbstractCodedException {
-        int retries = -1;
-        while (retries < maxRetries) {
+        int retries = 0;
+        while (true) {
             retries++;
-            String uri = hostUri + "/messages/" + category.name().toLowerCase() + "/ack";
+            String uri = hostUri + "/messages/" + category.name().toLowerCase()
+                    + "/ack";
             try {
                 ResponseEntity<Boolean> response = restTemplate.exchange(uri,
                         HttpMethod.POST, new HttpEntity<AckMessageDto>(ack),
@@ -144,9 +149,6 @@ public abstract class GenericMqiService<T> {
                         rce), "ack");
             }
         }
-        throw new MqiAckApiError(category, ack.getMessageId(),
-                ack.getAck().name() + " " + ack.getMessage(),
-                "Timeout on query execution");
     }
 
     /**
@@ -157,10 +159,11 @@ public abstract class GenericMqiService<T> {
      */
     public void publish(final GenericPublicationMessageDto<T> message)
             throws AbstractCodedException {
-        int retries = -1;
-        while (retries < maxRetries) {
+        int retries = 0;
+        while (true) {
             retries++;
-            String uri = hostUri + "/messages/" + category.name().toLowerCase() + "/publish";
+            String uri = hostUri + "/messages/" + category.name().toLowerCase()
+                    + "/publish";
             try {
                 ResponseEntity<Void> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
@@ -182,7 +185,5 @@ public abstract class GenericMqiService<T> {
                         rce), "publish");
             }
         }
-        throw new MqiPublishApiError(category, message,
-                "Timeout on query execution");
     }
 }
