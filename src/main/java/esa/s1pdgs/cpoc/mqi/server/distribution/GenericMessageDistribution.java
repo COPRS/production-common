@@ -112,7 +112,7 @@ public class GenericMessageDistribution<T> {
      * @return
      */
     protected ResponseEntity<Boolean> ack(final long identifier, final Ack ack,
-            final String message) {
+            final String message, boolean stop) {
         LOGGER.info("[MONITOR] [category {}] [api ack] [messageId {}] Starting",
                 category, identifier);
 
@@ -126,7 +126,7 @@ public class GenericMessageDistribution<T> {
                 new ResponseEntity<Boolean>(HttpStatus.INTERNAL_SERVER_ERROR);
         try {
             result = new ResponseEntity<Boolean>(
-                    messages.ackMessage(category, identifier, ack),
+                    messages.ackMessage(category, identifier, ack, stop),
                     HttpStatus.OK);
         } catch (MqiCategoryNotAvailable mcna) {
             LOGGER.error(

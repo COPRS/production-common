@@ -155,7 +155,7 @@ public class MessageConsumptionController {
      * @throws MqiCategoryNotAvailable
      */
     public boolean ackMessage(final ProductCategory category,
-            final long identifier, final Ack ack)
+            final long identifier, final Ack ack, boolean stop)
             throws MqiCategoryNotAvailable {
         boolean result = false;
         if (consumers.containsKey(category)) {
@@ -165,9 +165,11 @@ public class MessageConsumptionController {
             if (ackMsg != null && ackMsg.getIdentifier() == identifier) {
                 consumers.get(category).setConsumedMessage(null);
 
-                // Resume consumer
-                consumers.get(category).resume();
-                result = true;
+                if (!stop) {
+                    // Resume consumer
+                    consumers.get(category).resume();
+                    result = true;
+                }
             }
         } else {
             throw new MqiCategoryNotAvailable(category, "consumer");

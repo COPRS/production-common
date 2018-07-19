@@ -57,7 +57,8 @@ public class LevelJobDistributionController
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/ack")
     public ResponseEntity<Boolean> ack(@RequestBody() final AckMessageDto ack) {
-        return super.ack(ack.getMessageId(), ack.getAck(), ack.getMessage());
+        return super.ack(ack.getMessageId(), ack.getAck(), ack.getMessage(),
+                ack.isStop());
     }
 
     /**

@@ -169,7 +169,7 @@ public class MessageConsumptionControllerTest {
 
         // Check case when no message
         assertFalse(autoManager.ackMessage(ProductCategory.LEVEL_JOBS,
-                messageIdentifier, Ack.OK));
+                messageIdentifier, Ack.OK, false));
         assertFalse(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .isPaused());
 
@@ -185,7 +185,7 @@ public class MessageConsumptionControllerTest {
                 .getConsumedMessage());
         // ack message
         assertTrue(autoManager.ackMessage(ProductCategory.LEVEL_JOBS,
-                messageIdentifier, Ack.OK));
+                messageIdentifier, Ack.OK, false));
         assertFalse(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .isPaused());
         assertNull(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
@@ -197,13 +197,13 @@ public class MessageConsumptionControllerTest {
                 GenericKafkaUtils.TOPIC_L0_JOBS);
         Thread.sleep(500);
         assertFalse(autoManager.ackMessage(ProductCategory.LEVEL_JOBS,
-                messageIdentifier, Ack.OK));
+                messageIdentifier, Ack.OK, false));
         assertTrue(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .isPaused());
         assertNotNull(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .getConsumedMessage());
         assertTrue(autoManager.ackMessage(ProductCategory.LEVEL_JOBS,
-                messageIdentifier2, Ack.ERROR));
+                messageIdentifier2, Ack.ERROR, false));
         assertFalse(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .isPaused());
         assertNull(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
@@ -223,7 +223,7 @@ public class MessageConsumptionControllerTest {
                 hasProperty("category", is(ProductCategory.AUXILIARY_FILES)));
         thrown.expect(hasProperty("type", is("consumer")));
 
-        autoManager.ackMessage(ProductCategory.AUXILIARY_FILES, 123, Ack.OK);
+        autoManager.ackMessage(ProductCategory.AUXILIARY_FILES, 123, Ack.OK, false);
 
     }
 
@@ -302,7 +302,7 @@ public class MessageConsumptionControllerTest {
 
         // Acknowledgment
         assertTrue(autoManager.ackMessage(ProductCategory.EDRS_SESSIONS,
-                message1.getIdentifier(), Ack.OK));
+                message1.getIdentifier(), Ack.OK, false));
 
         // Read second message
         Thread.sleep(1000);
@@ -316,7 +316,7 @@ public class MessageConsumptionControllerTest {
 
         // Acknowledgment
         assertTrue(autoManager.ackMessage(ProductCategory.EDRS_SESSIONS,
-                message2.getIdentifier(), Ack.OK));
+                message2.getIdentifier(), Ack.OK, false));
 
     }
 }

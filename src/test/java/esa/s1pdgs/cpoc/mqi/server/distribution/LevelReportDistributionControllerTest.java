@@ -122,9 +122,9 @@ public class LevelReportDistributionControllerTest extends RestControllerTest {
     @Test
     public void testAckMessageUri() throws Exception {
         doReturn(true).when(messages).ackMessage(Mockito.any(),
-                Mockito.eq(123L), Mockito.any());
+                Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean());
         doReturn(false).when(messages).ackMessage(Mockito.any(),
-                Mockito.eq(312L), Mockito.any());
+                Mockito.eq(312L), Mockito.any(), Mockito.anyBoolean());
         doReturn(true).when(publication).publishError(Mockito.any());
 
         String dto1 = GenericKafkaUtils.convertObjectToJsonString(
@@ -138,7 +138,7 @@ public class LevelReportDistributionControllerTest extends RestControllerTest {
                         .andExpect(content().string("true"));
         verify(messages, times(1)).ackMessage(
                 Mockito.eq(ProductCategory.LEVEL_REPORTS), Mockito.eq(123L),
-                Mockito.eq(Ack.OK));
+                Mockito.eq(Ack.OK), Mockito.eq(false));
 
         request(post("/messages/level_reports/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(dto2))
@@ -146,7 +146,7 @@ public class LevelReportDistributionControllerTest extends RestControllerTest {
                         .andExpect(content().string("false"));
         verify(messages, times(1)).ackMessage(
                 Mockito.eq(ProductCategory.LEVEL_REPORTS), Mockito.eq(321L),
-                Mockito.eq(Ack.ERROR));
+                Mockito.eq(Ack.ERROR), Mockito.eq(false));
         verify(publication, times(1)).publishError(Mockito.eq("Error log"));
         verifyNoMoreInteractions(messages);
     }

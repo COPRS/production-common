@@ -106,16 +106,16 @@ public class GenericMessageDistributionTest {
             throws MqiCategoryNotAvailable {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "consumer")).when(messages).ackMessage(Mockito.any(),
-                        Mockito.anyLong(), Mockito.any());
+                        Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean());
         ResponseEntity<Boolean> message =
-                controller.ack(123L, Ack.OK, "message");
+                controller.ack(123L, Ack.OK, "message", false);
 
         assertEquals(message.getBody(), null);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, message.getStatusCode());
 
         verify(messages, times(1)).ackMessage(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(123L),
-                Mockito.eq(Ack.OK));
+                Mockito.eq(Ack.OK), Mockito.eq(false));
     }
 
     /**
