@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 /**
  * Exchanged object in the topic t-pdgs-l0-jobs.</br>
  * A job will contains everything the wrapper needs to launch a job.
@@ -12,6 +14,11 @@ import java.util.Objects;
  *
  */
 public class JobDto {
+	
+	/**
+	 * Family
+	 */
+	private ProductFamily family;
 
 	/**
 	 * Session identifier
@@ -53,6 +60,7 @@ public class JobDto {
 		this.inputs = new ArrayList<>();
 		this.outputs = new ArrayList<>();
 		this.pools = new ArrayList<>();
+		this.family = ProductFamily.L0_JOB;
 	}
 
 	/**
@@ -63,6 +71,7 @@ public class JobDto {
 		this.productIdentifier = productIdentifier;
 		this.workDirectory = workDirectory;
 		this.jobOrder = jobOrder;
+		this.family = ProductFamily.L0_JOB;
 	}
 
 	/**
@@ -72,6 +81,14 @@ public class JobDto {
 		return productIdentifier;
 	}
 
+	/**
+	 * @return the productIdentifier
+	 */
+	public ProductFamily getProductFamily() {
+		return family;
+	}
+
+	
 	/**
 	 * @param productIdentifier
 	 *            the productIdentifier to set
@@ -210,7 +227,7 @@ public class JobDto {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(productIdentifier, workDirectory, jobOrder, inputs, outputs, pools);
+		return Objects.hash(family, productIdentifier, workDirectory, jobOrder, inputs, outputs, pools);
 	}
 
 	/**
@@ -225,7 +242,8 @@ public class JobDto {
 			ret = false;
 		} else {
 			JobDto other = (JobDto) obj;
-			ret = Objects.equals(productIdentifier, other.productIdentifier)
+			ret = Objects.equals(family, other.family) 
+					&& Objects.equals(productIdentifier, other.productIdentifier)
 					&& Objects.equals(workDirectory, other.workDirectory) && Objects.equals(jobOrder, other.jobOrder)
 					&& Objects.equals(inputs, other.inputs) && Objects.equals(outputs, other.outputs)
 					&& Objects.equals(pools, other.pools);

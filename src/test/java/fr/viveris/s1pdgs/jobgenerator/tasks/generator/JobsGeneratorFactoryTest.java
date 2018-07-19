@@ -27,7 +27,7 @@ import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
 import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderOutput;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;

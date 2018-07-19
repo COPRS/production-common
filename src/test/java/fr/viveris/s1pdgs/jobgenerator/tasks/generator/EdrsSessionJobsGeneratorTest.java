@@ -29,7 +29,7 @@ import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
@@ -236,11 +236,11 @@ public class EdrsSessionJobsGeneratorTest {
 			int indexRaw1 = i * 2;
 			int indexRaw2 = i * 2 + 1;
 			assertEquals(raw1.getObjectStorageKey(), dto.getInputs().get(indexRaw1).getContentRef());
-			assertEquals(ProductFamily.RAW.name(), dto.getInputs().get(indexRaw1).getFamily());
+			assertEquals(ProductFamily.EDRS_SESSION.name(), dto.getInputs().get(indexRaw1).getFamily());
 			assertEquals("/data/test/workdir/ch01/" + raw1.getFileName(),
 					dto.getInputs().get(indexRaw1).getLocalPath());
 			assertEquals(raw2.getObjectStorageKey(), dto.getInputs().get(indexRaw2).getContentRef());
-			assertEquals(ProductFamily.RAW.name(), dto.getInputs().get(indexRaw2).getFamily());
+			assertEquals(ProductFamily.EDRS_SESSION.name(), dto.getInputs().get(indexRaw2).getFamily());
 			assertEquals("/data/test/workdir/ch02/" + raw2.getFileName(),
 					dto.getInputs().get(indexRaw2).getLocalPath());
 		}

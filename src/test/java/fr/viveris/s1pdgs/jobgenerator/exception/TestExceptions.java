@@ -11,7 +11,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException.ErrorCode;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 
 /**
@@ -92,15 +92,15 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testObsUnknownObjectException() {
-		ObsUnknownObjectException e1 = new ObsUnknownObjectException(ProductFamily.RAW, "key1");
+		ObsUnknownObjectException e1 = new ObsUnknownObjectException(ProductFamily.EDRS_SESSION, "key1");
 
 		assertEquals("key1", e1.getKey());
-		assertEquals(ProductFamily.RAW, e1.getFamily());
+		assertEquals(ProductFamily.EDRS_SESSION, e1.getFamily());
 		assertEquals(ErrorCode.OBS_UNKOWN_OBJ, e1.getCode());
 		assertNull(e1.getCause());
 
 		String str1 = e1.getLogMessage();
-		assertTrue(str1.contains("[family RAW]"));
+		assertTrue(str1.contains("[family EDRS_SESSION]"));
 		assertTrue(str1.contains("[key key1]"));
 	}
 

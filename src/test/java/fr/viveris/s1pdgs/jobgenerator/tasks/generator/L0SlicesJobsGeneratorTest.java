@@ -38,7 +38,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
@@ -149,7 +149,7 @@ public class L0SlicesJobsGeneratorTest {
 			return r;
 		}).when(jobGeneratorSettings).getOutputfamilies();
 		Mockito.doAnswer(i -> {
-			return ProductFamily.CONFIG.name();
+			return ProductFamily.AUXILIARY_FILE.name();
 		}).when(jobGeneratorSettings).getDefaultfamily();
 		Mockito.doAnswer(i -> {
 			return 2;

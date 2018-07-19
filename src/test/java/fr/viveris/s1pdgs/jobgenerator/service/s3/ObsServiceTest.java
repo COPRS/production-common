@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -23,14 +24,14 @@ import org.mockito.MockitoAnnotations;
 
 import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.exception.ObsUnknownObjectException;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsClient;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsDownloadObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsFamily;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsServiceException;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsUploadObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 /**
  * Test the ObsService
@@ -102,8 +103,8 @@ public class ObsServiceTest {
 	 */
 	@Test
 	public void testGetObsFamily() {
-		assertEquals(ObsFamily.AUXILIARY_FILE, service.getObsFamily(ProductFamily.CONFIG));
-		assertEquals(ObsFamily.EDRS_SESSION, service.getObsFamily(ProductFamily.RAW));
+		assertEquals(ObsFamily.AUXILIARY_FILE, service.getObsFamily(ProductFamily.AUXILIARY_FILE));
+		assertEquals(ObsFamily.EDRS_SESSION, service.getObsFamily(ProductFamily.EDRS_SESSION));
 		assertEquals(ObsFamily.UNKNOWN, service.getObsFamily(ProductFamily.BLANK));
 		assertEquals(ObsFamily.L0_ACN, service.getObsFamily(ProductFamily.L0_ACN));
 		assertEquals(ObsFamily.L0_PRODUCT, service.getObsFamily(ProductFamily.L0_PRODUCT));
@@ -111,7 +112,7 @@ public class ObsServiceTest {
 		assertEquals(ObsFamily.L1_ACN, service.getObsFamily(ProductFamily.L1_ACN));
 		assertEquals(ObsFamily.L1_PRODUCT, service.getObsFamily(ProductFamily.L1_PRODUCT));
 		assertEquals(ObsFamily.UNKNOWN, service.getObsFamily(ProductFamily.L1_REPORT));
-		assertEquals(ObsFamily.UNKNOWN, service.getObsFamily(ProductFamily.JOB));
+		assertEquals(ObsFamily.UNKNOWN, service.getObsFamily(ProductFamily.JOB_ORDER));
 	}
 
 	/**
@@ -123,11 +124,11 @@ public class ObsServiceTest {
 	public void testExistWhenException() throws ObjectStorageException {
 		thrown.expect(ObjectStorageException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
-		thrown.expect(hasProperty("family", is(ProductFamily.CONFIG)));
+		thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 		thrown.expectMessage("error 1 message");
 		thrown.expectCause(isA(ObsServiceException.class));
 
-		service.exist(ProductFamily.CONFIG, "error-key");
+		service.exist(ProductFamily.AUXILIARY_FILE, "error-key");
 	}
 
 	/**
@@ -139,11 +140,11 @@ public class ObsServiceTest {
 	public void testExistWhenException2() throws ObjectStorageException {
 		thrown.expect(ObjectStorageException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
-		thrown.expect(hasProperty("family", is(ProductFamily.RAW)));
+		thrown.expect(hasProperty("family", is(ProductFamily.EDRS_SESSION)));
 		thrown.expectMessage("error 2 message");
 		thrown.expectCause(isA(SdkClientException.class));
 
-		service.exist(ProductFamily.RAW, "error-key");
+		service.exist(ProductFamily.EDRS_SESSION, "error-key");
 	}
 
 	/**
@@ -155,11 +156,11 @@ public class ObsServiceTest {
 	 */
 	@Test
 	public void testNominalExist() throws ObjectStorageException, ObsServiceException, SdkClientException {
-		boolean ret = service.exist(ProductFamily.CONFIG, "test-key");
+		boolean ret = service.exist(ProductFamily.AUXILIARY_FILE, "test-key");
 		assertTrue(ret);
 		verify(client, times(1)).doesObjectExist(Mockito.eq(new ObsObject("test-key", ObsFamily.AUXILIARY_FILE)));
 
-		ret = service.exist(ProductFamily.RAW, "test-key");
+		ret = service.exist(ProductFamily.EDRS_SESSION, "test-key");
 		assertFalse(ret);
 		verify(client, times(1)).doesObjectExist(Mockito.eq(new ObsObject("test-key", ObsFamily.EDRS_SESSION)));
 	}
@@ -173,11 +174,11 @@ public class ObsServiceTest {
 	public void testUploadFileWhenException() throws ObjectStorageException {
 		thrown.expect(ObjectStorageException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
-		thrown.expect(hasProperty("family", is(ProductFamily.CONFIG)));
+		thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 		thrown.expectMessage("error 1 message");
 		thrown.expectCause(isA(ObsServiceException.class));
 
-		service.uploadFile(ProductFamily.CONFIG, "error-key", new File("pom.xml"));
+		service.uploadFile(ProductFamily.AUXILIARY_FILE, "error-key", new File("pom.xml"));
 	}
 
 	/**
@@ -189,11 +190,11 @@ public class ObsServiceTest {
 	public void testUploadFileWhenException2() throws ObjectStorageException {
 		thrown.expect(ObjectStorageException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
-		thrown.expect(hasProperty("family", is(ProductFamily.RAW)));
+		thrown.expect(hasProperty("family", is(ProductFamily.EDRS_SESSION)));
 		thrown.expectMessage("error 2 message");
 		thrown.expectCause(isA(SdkClientException.class));
 
-		service.uploadFile(ProductFamily.RAW, "error-key", new File("pom.xml"));
+		service.uploadFile(ProductFamily.EDRS_SESSION, "error-key", new File("pom.xml"));
 	}
 
 	/**
@@ -205,11 +206,11 @@ public class ObsServiceTest {
 	 */
 	@Test
 	public void testNominalUpload() throws ObjectStorageException, ObsServiceException, SdkClientException {
-		service.uploadFile(ProductFamily.CONFIG, "test-key", new File("pom.xml"));
+		service.uploadFile(ProductFamily.AUXILIARY_FILE, "test-key", new File("pom.xml"));
 		verify(client, times(1)).uploadObject(
 				Mockito.eq(new ObsUploadObject("test-key", ObsFamily.AUXILIARY_FILE, new File("pom.xml"))));
 
-		service.uploadFile(ProductFamily.RAW, "test-key", new File("pom.xml"));
+		service.uploadFile(ProductFamily.EDRS_SESSION, "test-key", new File("pom.xml"));
 		verify(client, times(1))
 				.uploadObject(Mockito.eq(new ObsUploadObject("test-key", ObsFamily.EDRS_SESSION, new File("pom.xml"))));
 	}
@@ -224,11 +225,11 @@ public class ObsServiceTest {
 	public void testDownloadFileWhenException() throws ObjectStorageException, ObsUnknownObjectException {
 		thrown.expect(ObjectStorageException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
-		thrown.expect(hasProperty("family", is(ProductFamily.CONFIG)));
+		thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 		thrown.expectMessage("error 1 message");
 		thrown.expectCause(isA(ObsServiceException.class));
 
-		service.downloadFile(ProductFamily.CONFIG, "error-key", "test/");
+		service.downloadFile(ProductFamily.AUXILIARY_FILE, "error-key", "test/");
 	}
 
 	/**
@@ -241,11 +242,11 @@ public class ObsServiceTest {
 	public void testDownloadFileWhenException2() throws ObjectStorageException, ObsUnknownObjectException {
 		thrown.expect(ObjectStorageException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
-		thrown.expect(hasProperty("family", is(ProductFamily.RAW)));
+		thrown.expect(hasProperty("family", is(ProductFamily.EDRS_SESSION)));
 		thrown.expectMessage("error 2 message");
 		thrown.expectCause(isA(SdkClientException.class));
 
-		service.downloadFile(ProductFamily.RAW, "error-key", "test/");
+		service.downloadFile(ProductFamily.EDRS_SESSION, "error-key", "test/");
 	}
 
 	/**
@@ -258,9 +259,9 @@ public class ObsServiceTest {
 	public void testDownloadFileWhenUnknown() throws ObjectStorageException, ObsUnknownObjectException {
 		thrown.expect(ObsUnknownObjectException.class);
 		thrown.expect(hasProperty("key", is("test-key")));
-		thrown.expect(hasProperty("family", is(ProductFamily.CONFIG)));
+		thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 
-		service.downloadFile(ProductFamily.CONFIG, "test-key", "test/");
+		service.downloadFile(ProductFamily.AUXILIARY_FILE, "test-key", "test/");
 	}
 
 	/**
@@ -274,13 +275,13 @@ public class ObsServiceTest {
 	@Test
 	public void testNominalDownload()
 			throws ObjectStorageException, ObsServiceException, SdkClientException, ObsUnknownObjectException {
-		File upload1 = service.downloadFile(ProductFamily.RAW, "test-key", "test/");
+		File upload1 = service.downloadFile(ProductFamily.EDRS_SESSION, "test-key", "test/");
 		verify(client, times(1))
 				.downloadObject(Mockito.eq(new ObsDownloadObject("test-key", ObsFamily.EDRS_SESSION, "test/")));
 		assertEquals("test-key", upload1.getName());
 		assertEquals("test", upload1.getParentFile().getName());
 
-		File upload2 = service.downloadFile(ProductFamily.RAW, "test-key/key2", "test/");
+		File upload2 = service.downloadFile(ProductFamily.EDRS_SESSION, "test-key/key2", "test/");
 		verify(client, times(1))
 				.downloadObject(Mockito.eq(new ObsDownloadObject("test-key/key2", ObsFamily.EDRS_SESSION, "test/")));
 		assertEquals("key2", upload2.getName());

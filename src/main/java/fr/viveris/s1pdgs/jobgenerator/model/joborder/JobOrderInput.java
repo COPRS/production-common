@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.eclipse.persistence.oxm.annotations.XmlPath;
 import org.springframework.util.CollectionUtils;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 
 /**
@@ -79,7 +79,7 @@ public class JobOrderInput {
 		this.filenames = new ArrayList<>();
 		this.nbTimeIntervals = 0;
 		this.nbFilenames = 0;
-		this.family = ProductFamily.CONFIG;
+		this.family = ProductFamily.AUXILIARY_FILE;
 	}
 
 	/**

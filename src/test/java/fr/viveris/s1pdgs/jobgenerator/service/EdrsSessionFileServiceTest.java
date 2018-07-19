@@ -22,7 +22,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
 import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.service.s3.ObsService;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestL0Utils;
 
@@ -100,7 +100,7 @@ public class EdrsSessionFileServiceTest {
 	public void testCreateSessionFile() throws AbstractCodedException {
 		try {
 			EdrsSessionFile r1 = service.createSessionFile("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml");
-			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.RAW),
+			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
 					Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"),
 
 					Mockito.eq("./tmp/"));
@@ -108,7 +108,7 @@ public class EdrsSessionFileServiceTest {
 			assertEquals(session1, r1);
 
 			EdrsSessionFile r2 = service.createSessionFile("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml");
-			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.RAW),
+			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
 					Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"),
 
 					Mockito.eq("./tmp/"));
@@ -116,7 +116,7 @@ public class EdrsSessionFileServiceTest {
 			assertEquals(session2, r2);
 
 			EdrsSessionFile r3 = service.createSessionFile("KEY_OBS_SESSION_1_2.xml");
-			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.RAW),
+			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
 					Mockito.eq("KEY_OBS_SESSION_1_2.xml"),
 
 					Mockito.eq("./tmp/"));

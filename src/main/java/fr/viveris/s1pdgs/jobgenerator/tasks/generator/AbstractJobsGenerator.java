@@ -39,7 +39,7 @@ import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.GenerationStatusEnum;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.JobGenerationStatus;
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductMode;
 import fr.viveris.s1pdgs.jobgenerator.model.converter.TaskTableToJobOrderConverter;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
@@ -588,7 +588,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 					.collect(Collectors.toList()));
 
 			// Add the jobOrder itself in inputs
-			r.addInput(new JobInputDto(ProductFamily.JOB.name(), jobOrder,
+			r.addInput(new JobInputDto(ProductFamily.JOB_ORDER.name(), jobOrder,
 					xmlConverter.convertFromObjectToXMLString(job.getJobOrder())));
 
 			// Add joborder output to the DTO

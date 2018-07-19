@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderDestination;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -21,7 +21,7 @@ public class JobOrderOutputTest {
 
 		JobOrderOutput obj = new JobOrderOutput();
 		obj.setDestination(JobOrderDestination.PROC);
-		obj.setFamily(ProductFamily.CONFIG);
+		obj.setFamily(ProductFamily.AUXILIARY_FILE);
 		obj.setFileName("file");
 		obj.setFileNameType(JobOrderFileNameType.PHYSICAL);
 		obj.setFileType("type");
@@ -44,7 +44,7 @@ public class JobOrderOutputTest {
 
 		JobOrderOutput obj = new JobOrderOutput();
 		obj.setDestination(JobOrderDestination.PROC);
-		obj.setFamily(ProductFamily.CONFIG);
+		obj.setFamily(ProductFamily.AUXILIARY_FILE);
 		obj.setFileName("file");
 		obj.setFileNameType(JobOrderFileNameType.PHYSICAL);
 		obj.setFileType("type");
@@ -55,7 +55,7 @@ public class JobOrderOutputTest {
 		assertTrue(str.contains("fileType: type"));
 		assertTrue(str.contains("fileNameType: PHYSICAL"));
 		assertTrue(str.contains("fileName: file"));
-		assertTrue(str.contains("family: CONFIG"));
+		assertTrue(str.contains("family: AUXILIARY_FILE"));
 		assertTrue(str.contains("destination: PROC"));
 	}
 
