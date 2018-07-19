@@ -24,13 +24,13 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.mdcatalog.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdcatalog.controllers.kafka.ConfigFileConsumer;
 import esa.s1pdgs.cpoc.mdcatalog.model.ConfigFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
 import esa.s1pdgs.cpoc.mdcatalog.model.dto.KafkaConfigFileDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.FilePathException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.IgnoredFileException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataExtractionException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObjectStorageException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObsUnknownObjectException;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.MetadataBuilder;
@@ -165,8 +165,8 @@ public class ConfigFileConsumerTest {
 	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testReceiveWhenNotExistInOBS() throws ObjectStorageException, ObsUnknownObjectException {
-		doThrow(new ObsUnknownObjectException(ProductFamily.AUXILIARY_FILE, "key-obs")).when(s3Services)
+	public void testReceiveWhenNotExistInOBS() throws ObsException, ObsUnknownObject {
+		doThrow(new ObsUnknownObject(ProductFamily.AUXILIARY_FILE, "key-obs")).when(s3Services)
 				.downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		controller.receive(new KafkaConfigFileDto("product-name", "key-obs"));
@@ -184,8 +184,8 @@ public class ConfigFileConsumerTest {
 	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testReceiveWhenGetFromObsFailed() throws ObjectStorageException, ObsUnknownObjectException {
-		doThrow(new ObjectStorageException(ProductFamily.AUXILIARY_FILE, "key-obs", new Exception())).when(s3Services)
+	public void testReceiveWhenGetFromObsFailed() throws ObsException, ObsUnknownObject {
+		doThrow(new ObsException(ProductFamily.AUXILIARY_FILE, "key-obs", new Exception())).when(s3Services)
 				.downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		controller.receive(new KafkaConfigFileDto("product-name", "key-obs"));
@@ -206,8 +206,8 @@ public class ConfigFileConsumerTest {
 	 */
 	@Test
 	public void testReceiveWhenBuildDescriptorFailed()
-			throws ObjectStorageException, FilePathException, IgnoredFileException, ObsUnknownObjectException {
-		doThrow(new IgnoredFileException("product-name", "ignored-name")).when(fileDescriptorBuilder)
+			throws ObsException, MetadataFilePathException, MetadataIgnoredFileException, ObsUnknownObject {
+		doThrow(new MetadataIgnoredFileException("ignored-name")).when(fileDescriptorBuilder)
 				.buildConfigFileDescriptor(Mockito.any());
 
 		controller.receive(new KafkaConfigFileDto("product-name", "file_no_safe.xml"));
@@ -229,9 +229,9 @@ public class ConfigFileConsumerTest {
 	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testReceiveWhenExtractionFailed() throws ObjectStorageException, FilePathException,
-			IgnoredFileException, MetadataExtractionException, ObsUnknownObjectException {
-		doThrow(new MetadataExtractionException("product-name", new Exception("erro"))).when(mdBuilder)
+	public void testReceiveWhenExtractionFailed() throws ObsException, MetadataFilePathException,
+			MetadataIgnoredFileException, MetadataExtractionException, ObsUnknownObject {
+		doThrow(new MetadataExtractionException(new Exception("erro"))).when(mdBuilder)
 				.buildConfigFileMetadata(Mockito.any(), Mockito.any());
 		ConfigFileDescriptor desc = new ConfigFileDescriptor();
 		desc.setKeyObjectStorage("file_no_safe.xml");

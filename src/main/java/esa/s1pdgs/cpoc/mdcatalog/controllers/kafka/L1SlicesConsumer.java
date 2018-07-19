@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.mdcatalog.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdcatalog.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.ProductFamily;
-import esa.s1pdgs.cpoc.mdcatalog.model.ResumeDetails;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.mdcatalog.model.dto.KafkaL1SliceDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.MetadataBuilder;

@@ -22,9 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataCreationException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.L0SliceMetadata;
@@ -237,37 +237,37 @@ public class EsServices {
 		if (source.containsKey("productName")) {
 			r.setProductName(source.get("productName").toString());
 		} else {
-			throw new MetadataMalformedException(dataTakeID, "productName");
+			throw new MetadataMalformedException("productName");
 		}
 		if (source.containsKey("url")) {
 			r.setKeyObjectStorage(source.get("url").toString());
 		} else {
-			throw new MetadataMalformedException(r.getProductName(), "url");
+			throw new MetadataMalformedException("url");
 		}
 		if (source.containsKey("instrumentConfigurationId")) {
 			r.setInstrumentConfigurationId(Integer.parseInt(source.get("instrumentConfigurationId").toString()));
 		} else {
-			throw new MetadataMalformedException(r.getProductName(), "instrumentConfigurationId");
+			throw new MetadataMalformedException("instrumentConfigurationId");
 		}
 		if (source.containsKey("totalNumberOfSlice")) {
 			r.setNumberOfSlices(Integer.parseInt(source.get("totalNumberOfSlice").toString()));
 		} else {
-			throw new MetadataMalformedException(r.getProductName(), "totalNumberOfSlice");
+			throw new MetadataMalformedException("totalNumberOfSlice");
 		}
 		if (source.containsKey("startTime")) {
 			r.setValidityStart(source.get("startTime").toString());
 		} else {
-			throw new MetadataMalformedException(r.getProductName(), "startTime");
+			throw new MetadataMalformedException("startTime");
 		}
 		if (source.containsKey("stopTime")) {
 			r.setValidityStop(source.get("stopTime").toString());
 		} else {
-			throw new MetadataMalformedException(r.getProductName(), "stopTime");
+			throw new MetadataMalformedException("stopTime");
 		}
 		if (source.containsKey("dataTakeId")) {
 			r.setDatatakeId(source.get("dataTakeId").toString());
 		} else {
-			throw new MetadataMalformedException(r.getProductName(), "dataTakeId");
+			throw new MetadataMalformedException("dataTakeId");
 		}
 		return r;
 	}
@@ -286,32 +286,32 @@ public class EsServices {
 		if (source.containsKey("url")) {
 			r.setKeyObjectStorage(source.get("url").toString());
 		} else {
-			throw new MetadataMalformedException(productName, "url");
+			throw new MetadataMalformedException("url");
 		}
 		if (source.containsKey("instrumentConfigurationId")) {
 			r.setInstrumentConfigurationId(Integer.parseInt(source.get("instrumentConfigurationId").toString()));
 		} else {
-			throw new MetadataMalformedException(productName, "instrumentConfigurationId");
+			throw new MetadataMalformedException("instrumentConfigurationId");
 		}
 		if (source.containsKey("sliceNumber")) {
 			r.setNumberSlice(Integer.parseInt(source.get("sliceNumber").toString()));
 		} else {
-			throw new MetadataMalformedException(productName, "sliceNumber");
+			throw new MetadataMalformedException("sliceNumber");
 		}
 		if (source.containsKey("startTime")) {
 			r.setValidityStart(source.get("startTime").toString());
 		} else {
-			throw new MetadataMalformedException(productName, "startTime");
+			throw new MetadataMalformedException("startTime");
 		}
 		if (source.containsKey("stopTime")) {
 			r.setValidityStop(source.get("stopTime").toString());
 		} else {
-			throw new MetadataMalformedException(productName, "stopTime");
+			throw new MetadataMalformedException("stopTime");
 		}
 		if (source.containsKey("dataTakeId")) {
 			r.setDatatakeId(source.get("dataTakeId").toString());
 		} else {
-			throw new MetadataMalformedException(productName, "dataTakeId");
+			throw new MetadataMalformedException("dataTakeId");
 		}
 		return r;
 	}

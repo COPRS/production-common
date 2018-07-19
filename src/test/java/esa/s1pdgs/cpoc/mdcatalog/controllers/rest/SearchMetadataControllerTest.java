@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.SearchMetadataController;
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.dto.SearchMetadataDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 import esa.s1pdgs.cpoc.test.RestControllerTest;

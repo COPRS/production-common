@@ -21,13 +21,13 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.mdcatalog.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdcatalog.controllers.kafka.EdrsSessionFileConsumer;
 import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
 import esa.s1pdgs.cpoc.mdcatalog.model.dto.KafkaEdrsSessionDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.FilePathException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.IgnoredFileException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.IllegalFileExtension;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataExtractionException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObjectStorageException;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.MetadataBuilder;
@@ -114,8 +114,8 @@ public class EdrsSessionConsumerTest {
 	 */
 	@Test
 	public void testReceiveWhenBuildDescriptorFailed()
-			throws ObjectStorageException, FilePathException, IgnoredFileException, IllegalFileExtension {
-		doThrow(new IgnoredFileException("product-name", "ignored-name")).when(fileDescriptorBuilder)
+			throws ObsException, MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtension {
+		doThrow(new MetadataIgnoredFileException("ignored-name")).when(fileDescriptorBuilder)
 				.buildEdrsSessionFileDescriptor(Mockito.any());
 
 		controller.receive(new KafkaEdrsSessionDto("file_no_safe.xml", 1, EdrsSessionFileType.RAW));
@@ -135,8 +135,9 @@ public class EdrsSessionConsumerTest {
 	 */
 	@Test
 	public void testReceiveWhenExtractionFailed()
-			throws ObjectStorageException, FilePathException, IgnoredFileException, MetadataExtractionException, IllegalFileExtension {
-		doThrow(new MetadataExtractionException("product-name", new Exception("erro"))).when(mdBuilder)
+			throws ObsException, MetadataFilePathException, MetadataIgnoredFileException,
+			MetadataExtractionException, MetadataIllegalFileExtension {
+		doThrow(new MetadataExtractionException(new Exception("erro"))).when(mdBuilder)
 				.buildEdrsSessionFileMetadata(Mockito.any());
 		EdrsSessionFileDescriptor desc = new EdrsSessionFileDescriptor();
 		desc.setKeyObjectStorage("file_no_safe.xml");

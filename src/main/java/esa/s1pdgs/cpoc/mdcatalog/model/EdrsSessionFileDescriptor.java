@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.mdcatalog.model;
 
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 
 /**
  * Class describing a ERDS session file (RAW or SESSIONS)

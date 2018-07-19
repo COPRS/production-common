@@ -12,14 +12,14 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.mdcatalog.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.mdcatalog.model.FileExtension;
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
 import esa.s1pdgs.cpoc.mdcatalog.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.FilePathException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.IgnoredFileException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.IllegalFileExtension;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.FileDescriptorBuilder;
 
 public class FileDescriptorBuilderTest {
@@ -241,7 +241,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml",
-					"S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_FILE_PATH, fe.getCode());
 		}
 		//Edrs Session file
 		file = new File("test/workDir/S1A/SESSION1/ch03/DCS_02_SESSION1_ch1_DSIB.xml");
@@ -253,7 +253,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1/ch03/DCS_02_SESSION1_ch1_DSIB.xml",
-					"S1A/SESSION1/ch03/DCS_02_SESSION1_ch1_DSIB.xml", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_FILE_PATH, fe.getCode());
 		}
 		//L0
 		file = new File("test/workDir/S1A_IR_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
@@ -265,7 +265,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IR_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
-					"S1A_IR_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_FILE_PATH, fe.getCode());
 		}		
 		//L1
 		file = new File("test/workDir/S1A_IW_GRDH_1ZDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe");
@@ -277,7 +277,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1ZDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe",
-					"S1A_IW_GRDH_1ZDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_FILE_PATH, fe.getCode());
 		}
 	}
 	
@@ -293,7 +293,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_AUX.xml",
-					"S1A_OPER_AUX.xml", fe.getProductName());
+					AbstractCodedException.ErrorCode.METADATA_FILE_PATH, fe.getCode());
 		}
 		//Edrs Session file
 		file = new File("/S1A/SESSION1");
@@ -305,7 +305,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1",
-					"SESSION1", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_FILE_PATH, fe.getCode());
 		}
 		//L0
 		file = new File("/S1A_IW_RAW__0SDV");
@@ -317,7 +317,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
-					"S1A_IW_RAW__0SDV", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_FILE_PATH, fe.getCode());
 		}		
 		//L1
 		file = new File("/S1A_IW_GRDH_1SDV");
@@ -329,7 +329,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur");
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe",
-					"S1A_IW_GRDH_1SDV", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_FILE_PATH, fe.getCode());
 		}
 	}
 	
@@ -345,7 +345,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
-					"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_IGNORE_FILE, fe.getCode());
 		}
 		//Edrs Session file
 		file = new File("test/workDir/S1A/SESSION1/ch01");
@@ -357,7 +357,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A/SESSION1/ch01",
-					"S1A/SESSION1/ch01", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_IGNORE_FILE, fe.getCode());
 		}
 		//L0
 		file = new File("test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -369,7 +369,7 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-					"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_IGNORE_FILE, fe.getCode());
 		}		
 		//L1
 		file = new File("test/workDir/S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE");
@@ -381,12 +381,12 @@ public class FileDescriptorBuilderTest {
 			fail("An exception should occur " + file.getName() + " shall be a directory : " + file.isDirectory());
 		} catch (AbstractCodedException fe) {
 			assertEquals("Raised exception shall concern S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE",
-					"S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_IGNORE_FILE, fe.getCode());
 		}
 	}
 	
-	@Test(expected = AbstractCodedException.class)
-	public void testBuildEdrsSessionFileDescriptorExtensionFail() throws FilePathException, IgnoredFileException, IllegalFileExtension {
+	@Test(expected = IllegalArgumentException.class)
+	public void testBuildEdrsSessionFileDescriptorExtensionFail() throws MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtension {
 		//Edrs Session file
 		File file = new File("test/workDir/S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xmll");
 		fileDescriptorBuilder = new FileDescriptorBuilder(Paths.get("").toAbsolutePath()+"/test/workDir/", 

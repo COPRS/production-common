@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ResumeDetails;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.ResumeDetails;
 import esa.s1pdgs.cpoc.mdcatalog.model.dto.KafkaEdrsSessionDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.MetadataBuilder;

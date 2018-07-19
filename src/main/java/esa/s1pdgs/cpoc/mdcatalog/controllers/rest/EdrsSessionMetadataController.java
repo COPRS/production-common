@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.dto.EdrsSessionMetadataDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataNotPresentException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 

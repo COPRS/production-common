@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mdcatalog.model;
 
+import esa.s1pdgs.cpoc.common.FileExtension;
+
 /**
  * Abstract class describing a file
  * 

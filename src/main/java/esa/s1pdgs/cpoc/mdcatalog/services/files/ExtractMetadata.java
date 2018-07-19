@@ -22,11 +22,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataExtractionException;
 
 /**
  * Class to extract the metadata from various types of files
@@ -102,7 +102,7 @@ public class ExtractMetadata {
 				coordinates.put(new JSONArray("[" + (rawCoordinates.split(" ")[0].split(","))[1] + "," + (rawCoordinates.split(" ")[0].split(","))[0] + "]"));
 			}
 		} catch (JSONException e) {
-			throw new MetadataExtractionException(productName, e);
+			throw new MetadataExtractionException(e);
 		}
 		return new JSONArray().put(coordinates);
 	}
@@ -173,7 +173,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(descriptor.getProductName(), e);
+			throw new MetadataExtractionException(e);
 		}
 	}
 
@@ -213,7 +213,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(descriptor.getProductName(), e);
+			throw new MetadataExtractionException(e);
 		}
 	}
 
@@ -258,7 +258,7 @@ public class ExtractMetadata {
 			return metadataJSONObject;
 
 		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(descriptor.getProductName(), e);
+			throw new MetadataExtractionException(e);
 		}
 	}
 
@@ -298,7 +298,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(descriptor.getProductName(), e);
+			throw new MetadataExtractionException(e);
 		}
 	}
 
@@ -323,7 +323,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 			return metadataJSONObject;
 		} catch (JSONException e) {
-			throw new MetadataExtractionException(descriptor.getProductName(), e);
+			throw new MetadataExtractionException(e);
 		}
 	}
 
@@ -348,7 +348,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 			return metadataJSONObject;
 		} catch (JSONException e) {
-			throw new MetadataExtractionException(descriptor.getProductName(), e);
+			throw new MetadataExtractionException(e);
 		}
 	}
 	
@@ -486,7 +486,7 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("creationTime", dt);
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException | ParseException e) {
-			throw new MetadataExtractionException(descriptor.getProductName(), e);
+			throw new MetadataExtractionException(e);
 		}
 	}
 	
@@ -586,7 +586,7 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("creationTime", dt);
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(descriptor.getProductName(), e);
+			throw new MetadataExtractionException(e);
 		}	
 	}
 }

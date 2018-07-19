@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.mdcatalog.model.dto;
 
-import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 
 /**
  * Exchanged object in the topic t-pdgs-edrs-sessions

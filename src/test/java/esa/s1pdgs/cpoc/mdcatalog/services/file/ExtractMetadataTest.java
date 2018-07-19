@@ -17,12 +17,12 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.mdcatalog.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.mdcatalog.model.FileExtension;
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.ExtractMetadata;
 
 /**

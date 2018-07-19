@@ -17,8 +17,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.EdrsSessionMetadataController;
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.dto.EdrsSessionMetadataDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 import esa.s1pdgs.cpoc.test.RestControllerTest;
@@ -47,7 +47,7 @@ public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 	}
 	
 	private void mockGetEdrsSessionMetadataMalformedException() throws Exception {
-		doThrow(new MetadataMalformedException("name","url")).when(esServices).getEdrsSession(Mockito.any(String.class), Mockito.any(String.class));
+		doThrow(new MetadataMalformedException("url")).when(esServices).getEdrsSession(Mockito.any(String.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetEdrsSessionException() throws Exception {

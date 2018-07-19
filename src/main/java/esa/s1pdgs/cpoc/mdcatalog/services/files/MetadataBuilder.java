@@ -4,12 +4,12 @@ import java.io.File;
 
 import org.json.JSONObject;
 
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdcatalog.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataExtractionException;
 
 /**
  * Class to build metadata for configuration and ERDS session files
@@ -69,7 +69,7 @@ public class MetadataBuilder {
 			metadataToIndex = extractor.processXMLFile(descriptor, file);
 			break;
 		default:
-			throw new MetadataExtractionException(descriptor.getProductName(), new Exception("Invalid extension"));
+			throw new MetadataExtractionException(new Exception("Invalid extension"));
 		}
 		return metadataToIndex;
 	}
@@ -95,7 +95,7 @@ public class MetadataBuilder {
 			metadataToIndex = extractor.processSESSIONFile(descriptor);
 			break;
 		default:
-			throw new MetadataExtractionException(descriptor.getProductName(), new Exception("Invalid extension"));
+			throw new MetadataExtractionException(new Exception("Invalid extension"));
 		}
 		return metadataToIndex;
 	}

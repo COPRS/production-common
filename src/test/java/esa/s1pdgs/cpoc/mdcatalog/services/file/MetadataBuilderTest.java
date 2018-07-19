@@ -16,12 +16,12 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.mdcatalog.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.mdcatalog.model.FileExtension;
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.mdcatalog.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.MetadataBuilder;
 
@@ -300,7 +300,7 @@ public class MetadataBuilderTest {
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-					"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", fe.getProductName());
+					AbstractCodedException.ErrorCode.METADATA_EXTRACTION_ERROR, fe.getCode());
 		}
 
 		try {
@@ -310,7 +310,7 @@ public class MetadataBuilderTest {
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-					"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_EXTRACTION_ERROR, fe.getCode());
 		}
 
 		try {
@@ -320,7 +320,7 @@ public class MetadataBuilderTest {
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-					"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_EXTRACTION_ERROR, fe.getCode());
 		}
 
 		try {
@@ -330,7 +330,7 @@ public class MetadataBuilderTest {
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
 			assertEquals("Raised exception shall concern S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-					"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", fe.getProductName());
+			        AbstractCodedException.ErrorCode.METADATA_EXTRACTION_ERROR, fe.getCode());
 		}
 	}
 

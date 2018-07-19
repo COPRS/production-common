@@ -20,8 +20,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.L0SliceMetadataController;
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.dto.L0AcnMetadataDto;
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.dto.L0SliceMetadataDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.L0SliceMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
@@ -59,7 +59,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 	}
 	
 	private void mockGetL0SliceMetadataMalformedException() throws Exception {
-		doThrow(new MetadataMalformedException("name","url")).when(esServices).getL0Slice(Mockito.any(String.class), Mockito.any(String.class));
+		doThrow(new MetadataMalformedException("url")).when(esServices).getL0Slice(Mockito.any(String.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetL0SliceException() throws Exception {
@@ -67,7 +67,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 	}
 		
 	private void mockGetL0AcnMetadataMalformedException() throws Exception {
-		doThrow(new MetadataMalformedException("name","url")).when(esServices).getL0Acn(Mockito.any(String.class), Mockito.any(String.class));
+		doThrow(new MetadataMalformedException("url")).when(esServices).getL0Acn(Mockito.any(String.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetL0AcnException() throws Exception {

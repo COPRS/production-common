@@ -24,13 +24,13 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.mdcatalog.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdcatalog.controllers.kafka.L1AConsumer;
 import esa.s1pdgs.cpoc.mdcatalog.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.ProductFamily;
 import esa.s1pdgs.cpoc.mdcatalog.model.dto.KafkaL1ADto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.FilePathException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.IgnoredFileException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataExtractionException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObjectStorageException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObsUnknownObjectException;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.services.files.MetadataBuilder;
@@ -164,8 +164,8 @@ public class L1AConsumerTest {
 	 * @throws ObsUnknownObjectException 
 	 */
 	@Test
-	public void testReceiveWhenNotExistInOBS() throws ObjectStorageException, ObsUnknownObjectException {
-		doThrow(new ObsUnknownObjectException(ProductFamily.L1_ACN, "key-obs")).when(s3Services)
+	public void testReceiveWhenNotExistInOBS() throws ObsException, ObsUnknownObject {
+		doThrow(new ObsUnknownObject(ProductFamily.L1_ACN, "key-obs")).when(s3Services)
 				.downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		controller.receive(new KafkaL1ADto("product-name", "key-obs"));
@@ -183,8 +183,8 @@ public class L1AConsumerTest {
 	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testReceiveWhenGetFromObsFailed() throws ObjectStorageException, ObsUnknownObjectException {
-		doThrow(new ObjectStorageException(ProductFamily.L1_ACN, "key-obs", new Exception())).when(s3Services)
+	public void testReceiveWhenGetFromObsFailed() throws ObsException, ObsUnknownObject {
+		doThrow(new ObsException(ProductFamily.L1_ACN, "key-obs", new Exception())).when(s3Services)
 				.downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		controller.receive(new KafkaL1ADto("product-name", "key-obs"));
@@ -205,8 +205,8 @@ public class L1AConsumerTest {
 	 */
 	@Test
 	public void testReceiveWhenBuildDescriptorFailed()
-			throws ObjectStorageException, FilePathException, IgnoredFileException, ObsUnknownObjectException {
-		doThrow(new IgnoredFileException("product-name", "ignored-name")).when(fileDescriptorBuilder)
+			throws ObsException, MetadataFilePathException, MetadataIgnoredFileException, ObsUnknownObject {
+		doThrow(new MetadataIgnoredFileException("ignored-name")).when(fileDescriptorBuilder)
 				.buildL1OutputFileDescriptor(Mockito.any());
 
 		controller.receive(new KafkaL1ADto("product-name", "file_no_safe.xml"));
@@ -229,8 +229,9 @@ public class L1AConsumerTest {
 	 */
 	@Test
 	public void testReceiveWhenExtractionFailed()
-			throws ObjectStorageException, FilePathException, IgnoredFileException, MetadataExtractionException, ObsUnknownObjectException {
-		doThrow(new MetadataExtractionException("product-name", new Exception("erro"))).when(mdBuilder)
+			throws ObsException, MetadataFilePathException, MetadataIgnoredFileException, 
+			MetadataExtractionException, ObsUnknownObject {
+		doThrow(new MetadataExtractionException(new Exception("erro"))).when(mdBuilder)
 				.buildL1AcnOutputFileMetadata(Mockito.any(), Mockito.any());
 		L1OutputFileDescriptor desc = new L1OutputFileDescriptor();
 		desc.setKeyObjectStorage("file_no_safe.xml");

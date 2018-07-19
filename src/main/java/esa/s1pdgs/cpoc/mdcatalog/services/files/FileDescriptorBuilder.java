@@ -4,15 +4,15 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
 import esa.s1pdgs.cpoc.mdcatalog.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.mdcatalog.model.FileExtension;
 import esa.s1pdgs.cpoc.mdcatalog.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.FilePathException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.IgnoredFileException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.IllegalFileExtension;
 
 /**
  * Service to build file descriptor
@@ -57,19 +57,19 @@ public class FileDescriptorBuilder {
 	 * @throws FilePathException
 	 *             if we have
 	 */
-	public ConfigFileDescriptor buildConfigFileDescriptor(File file) throws FilePathException, IgnoredFileException {
+	public ConfigFileDescriptor buildConfigFileDescriptor(File file) throws MetadataFilePathException, MetadataIgnoredFileException {
 
 		// Extract object storage key
 		String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.length()) {
-			throw new FilePathException(file.getName(), absolutePath, "CONFIG", "File is not in root directory");
+			throw new MetadataFilePathException(absolutePath, "CONFIG", "File is not in root directory");
 		}
 		String relativePath = absolutePath.substring(localDirectory.length());
 		relativePath = relativePath.replace("\\", "/");
 
 		// Ignored if directory
 		if (file.isDirectory()) {
-			throw new IgnoredFileException(relativePath, file.getName());
+			throw new MetadataIgnoredFileException(file.getName());
 		}
 
 		// Check if key matches the pattern
@@ -101,7 +101,7 @@ public class FileDescriptorBuilder {
 			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));
 
 		} else {
-			throw new FilePathException(relativePath, relativePath, "CONFIG",
+			throw new MetadataFilePathException(relativePath, "CONFIG",
 					"File does not match the configuration file pattern");
 		}
 
@@ -120,18 +120,18 @@ public class FileDescriptorBuilder {
 	 * @throws IllegalFileExtension
 	 */
 	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(File file)
-			throws FilePathException, IgnoredFileException, IllegalFileExtension {
+			throws MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtension {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.length()) {
-			throw new FilePathException(file.getName(), absolutePath, "SESSION", "File is not in root directory");
+			throw new MetadataFilePathException(absolutePath, "SESSION", "File is not in root directory");
 		}
 		String relativePath = absolutePath.substring(localDirectory.length());
 		relativePath = relativePath.replace("\\", "/");
 
 		// Ignored if directory
 		if (file.isDirectory()) {
-			throw new IgnoredFileException(relativePath, file.getName());
+			throw new MetadataIgnoredFileException(file.getName());
 		}
 
 		Matcher m = pattern.matcher(relativePath);
@@ -150,24 +150,24 @@ public class FileDescriptorBuilder {
 
 			return descriptor;
 		} else {
-			throw new FilePathException(relativePath, relativePath, "SESSION",
+			throw new MetadataFilePathException(relativePath, "SESSION",
 					"File does not match the configuration file pattern");
 		}
 	}
 
 	public L0OutputFileDescriptor buildL0OutputFileDescriptor(File file)
-			throws FilePathException, IgnoredFileException {
+			throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.length()) {
-			throw new FilePathException(file.getName(), absolutePath, "L0_PRODUCT", "File is not in root directory");
+			throw new MetadataFilePathException(absolutePath, "L0_PRODUCT", "File is not in root directory");
 		}
 		String relativePath = absolutePath.substring(localDirectory.length());
 		relativePath = relativePath.replace("\\", "/");
 
 		// Ignored if directory
 		if (file.isDirectory()) {
-			throw new IgnoredFileException(relativePath, file.getName());
+			throw new MetadataIgnoredFileException(file.getName());
 		}
 		L0OutputFileDescriptor l0Descriptor = null;
 		Matcher m = pattern.matcher(relativePath);
@@ -200,7 +200,7 @@ public class FileDescriptorBuilder {
 			l0Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));
 
 		} else {
-			throw new FilePathException(relativePath, relativePath, "L0_PRODUCT",
+			throw new MetadataFilePathException(relativePath, "L0_PRODUCT",
 					"File does not match the configuration file pattern");
 		}
 
@@ -208,18 +208,18 @@ public class FileDescriptorBuilder {
 	}
 
 	public L1OutputFileDescriptor buildL1OutputFileDescriptor(File file)
-			throws FilePathException, IgnoredFileException {
+			throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.length()) {
-			throw new FilePathException(file.getName(), absolutePath, "L1_PRODUCT", "File is not in root directory");
+			throw new MetadataFilePathException(absolutePath, "L1_PRODUCT", "File is not in root directory");
 		}
 		String relativePath = absolutePath.substring(localDirectory.length());
 		relativePath = relativePath.replace("\\", "/");
 
 		// Ignored if directory
 		if (file.isDirectory()) {
-			throw new IgnoredFileException(relativePath, file.getName());
+			throw new MetadataIgnoredFileException(file.getName());
 		}
 		L1OutputFileDescriptor l1Descriptor = null;
 		Matcher m = pattern.matcher(relativePath);
@@ -252,7 +252,7 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));
 
 		} else {
-			throw new FilePathException(relativePath, relativePath, "L1_PRODUCT",
+			throw new MetadataFilePathException(relativePath, "L1_PRODUCT",
 					"File does not match the configuration file pattern");
 		}
 		return l1Descriptor;

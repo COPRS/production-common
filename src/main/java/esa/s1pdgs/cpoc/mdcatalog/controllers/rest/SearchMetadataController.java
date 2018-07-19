@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.mdcatalog.controllers.rest.dto.SearchMetadataDto;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.services.es.EsServices;
 
@@ -57,7 +57,7 @@ public class SearchMetadataController {
 				return new ResponseEntity<SearchMetadataDto>(response, HttpStatus.OK);
 			} else {
 				LOGGER.error("[productType {}] [code {}] [mode {}] [msg Unknown mode]", productType,
-						ErrorCode.INVALID_SEARCH_MODE.getCode(), mode);
+						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);
 				return new ResponseEntity<SearchMetadataDto>(HttpStatus.BAD_REQUEST);
 			}
 		} catch (AbstractCodedException e) {

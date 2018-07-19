@@ -21,9 +21,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.mdcatalog.model.ProductFamily;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObjectStorageException;
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.ObsUnknownObjectException;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.mdcatalog.services.s3.ObsService;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -105,7 +105,6 @@ public class ObsServiceTest {
 	public void testGetObsFamily() {
 		assertEquals(ObsFamily.AUXILIARY_FILE, service.getObsFamily(ProductFamily.AUXILIARY_FILE));
 		assertEquals(ObsFamily.EDRS_SESSION, service.getObsFamily(ProductFamily.EDRS_SESSION));
-		assertEquals(ObsFamily.UNKNOWN, service.getObsFamily(ProductFamily.UNKNOWN));
 		assertEquals(ObsFamily.L0_ACN, service.getObsFamily(ProductFamily.L0_ACN));
 		assertEquals(ObsFamily.L0_PRODUCT, service.getObsFamily(ProductFamily.L0_PRODUCT));
 		assertEquals(ObsFamily.L1_ACN, service.getObsFamily(ProductFamily.L1_ACN));
@@ -118,8 +117,8 @@ public class ObsServiceTest {
 	 * @throws ObjectStorageException
 	 */
 	@Test
-	public void testExistWhenException() throws ObjectStorageException {
-		thrown.expect(ObjectStorageException.class);
+	public void testExistWhenException() throws ObsException {
+		thrown.expect(ObsException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
 		thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 		thrown.expectMessage("error 1 message");
@@ -134,8 +133,8 @@ public class ObsServiceTest {
 	 * @throws ObjectStorageException
 	 */
 	@Test
-	public void testExistWhenException2() throws ObjectStorageException {
-		thrown.expect(ObjectStorageException.class);
+	public void testExistWhenException2() throws ObsException {
+		thrown.expect(ObsException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
 		thrown.expect(hasProperty("family", is(ProductFamily.EDRS_SESSION)));
 		thrown.expectMessage("error 2 message");
@@ -152,7 +151,7 @@ public class ObsServiceTest {
 	 * @throws SdkClientException
 	 */
 	@Test
-	public void testNominalExist() throws ObjectStorageException, ObsServiceException, SdkClientException {
+	public void testNominalExist() throws ObsException, ObsServiceException, SdkClientException {
 		boolean ret = service.exist(ProductFamily.AUXILIARY_FILE, "test-key");
 		assertTrue(ret);
 		verify(client, times(1)).doesObjectExist(Mockito.eq(new ObsObject("test-key", ObsFamily.AUXILIARY_FILE)));
@@ -168,8 +167,8 @@ public class ObsServiceTest {
 	 * @throws ObjectStorageException
 	 */
 	@Test
-	public void testUploadFileWhenException() throws ObjectStorageException {
-		thrown.expect(ObjectStorageException.class);
+	public void testUploadFileWhenException() throws ObsException {
+		thrown.expect(ObsException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
 		thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 		thrown.expectMessage("error 1 message");
@@ -184,8 +183,8 @@ public class ObsServiceTest {
 	 * @throws ObjectStorageException
 	 */
 	@Test
-	public void testUploadFileWhenException2() throws ObjectStorageException {
-		thrown.expect(ObjectStorageException.class);
+	public void testUploadFileWhenException2() throws ObsException {
+		thrown.expect(ObsException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
 		thrown.expect(hasProperty("family", is(ProductFamily.EDRS_SESSION)));
 		thrown.expectMessage("error 2 message");
@@ -202,7 +201,7 @@ public class ObsServiceTest {
 	 * @throws SdkClientException
 	 */
 	@Test
-	public void testNominalUpload() throws ObjectStorageException, ObsServiceException, SdkClientException {
+	public void testNominalUpload() throws ObsException, ObsServiceException, SdkClientException {
 		service.uploadFile(ProductFamily.AUXILIARY_FILE, "test-key", new File("pom.xml"));
 		verify(client, times(1)).uploadObject(
 				Mockito.eq(new ObsUploadObject("test-key", ObsFamily.AUXILIARY_FILE, new File("pom.xml"))));
@@ -219,8 +218,8 @@ public class ObsServiceTest {
 	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testDownloadFileWhenException() throws ObjectStorageException, ObsUnknownObjectException {
-		thrown.expect(ObjectStorageException.class);
+	public void testDownloadFileWhenException() throws ObsException, ObsUnknownObject {
+		thrown.expect(ObsException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
 		thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 		thrown.expectMessage("error 1 message");
@@ -236,8 +235,8 @@ public class ObsServiceTest {
 	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testDownloadFileWhenException2() throws ObjectStorageException, ObsUnknownObjectException {
-		thrown.expect(ObjectStorageException.class);
+	public void testDownloadFileWhenException2() throws ObsException, ObsUnknownObject {
+		thrown.expect(ObsException.class);
 		thrown.expect(hasProperty("key", is("error-key")));
 		thrown.expect(hasProperty("family", is(ProductFamily.EDRS_SESSION)));
 		thrown.expectMessage("error 2 message");
@@ -253,8 +252,8 @@ public class ObsServiceTest {
 	 * @throws ObsUnknownObjectException
 	 */
 	@Test
-	public void testDownloadFileWhenUnknown() throws ObjectStorageException, ObsUnknownObjectException {
-		thrown.expect(ObsUnknownObjectException.class);
+	public void testDownloadFileWhenUnknown() throws ObsException, ObsUnknownObject {
+		thrown.expect(ObsException.class);
 		thrown.expect(hasProperty("key", is("test-key")));
 		thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 
@@ -271,7 +270,7 @@ public class ObsServiceTest {
 	 */
 	@Test
 	public void testNominalDownload()
-			throws ObjectStorageException, ObsServiceException, SdkClientException, ObsUnknownObjectException {
+			throws ObsException, ObsServiceException, SdkClientException, ObsUnknownObject {
 		File upload1 = service.downloadFile(ProductFamily.EDRS_SESSION, "test-key", "test/");
 		verify(client, times(1))
 				.downloadObject(Mockito.eq(new ObsDownloadObject("test-key", ObsFamily.EDRS_SESSION, "test/")));

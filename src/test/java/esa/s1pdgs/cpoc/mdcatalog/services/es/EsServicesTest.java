@@ -31,7 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.mdcatalog.model.exception.MetadataMalformedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.model.metadata.L0SliceMetadata;
@@ -406,7 +406,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"url", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING startTime
 		source = new BytesArray("{\"url\""
@@ -420,7 +420,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"startTime", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING stopTime
 		source = new BytesArray("{\"url\""
@@ -434,7 +434,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"stopTime", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING instrumentConfigurationId
 		source = new BytesArray("{\"url\""
@@ -448,7 +448,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"instrumentConfigurationId", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING sliceNumber
 		source = new BytesArray("{\"url\""
@@ -462,7 +462,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"sliceNumber", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING dataTakeId
 		source = new BytesArray("{\"url\""
@@ -476,7 +476,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"dataTakeId", ((MetadataMalformedException) e).getMissingField());
 		}
 		
 	}
@@ -563,7 +563,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"datatakeId", ((MetadataMalformedException) e).getProductName());
+					"productName", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING URL
 		source = new BytesArray("{\"productName\":\"name\",\"startTime\":\"validityStartTime\",\"stopTime\":"
@@ -580,7 +580,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"url", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING startTime
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -598,7 +598,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"startTime", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING stopTime
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -616,7 +616,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"stopTime", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING instrumentConfigurationId
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -634,9 +634,9 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"instrumentConfigurationId", ((MetadataMalformedException) e).getMissingField());
 		}
-		//MISSING sliceNumber
+		//MISSING totalNumberOfSlice
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
 		        + "\"validityStopTime\", \"instrumentConfigurationId\":0,\"dataTakeId\":\"datatakeId\"}");
@@ -652,7 +652,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"totalNumberOfSlice", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING dataTakeId
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -670,7 +670,7 @@ public class EsServicesTest{
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
-					"name", ((MetadataMalformedException) e).getProductName());
+					"dataTakeId", ((MetadataMalformedException) e).getMissingField());
 		}
 		
 	}
