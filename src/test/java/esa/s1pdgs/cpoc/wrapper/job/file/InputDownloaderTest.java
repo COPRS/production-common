@@ -22,13 +22,12 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
-import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
 import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
-import esa.s1pdgs.cpoc.wrapper.utils.FileUtils;
 
 /**
  * Test the input downloader

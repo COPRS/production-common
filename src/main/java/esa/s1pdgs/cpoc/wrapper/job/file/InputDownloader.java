@@ -12,11 +12,11 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
 import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
-import esa.s1pdgs.cpoc.wrapper.utils.FileUtils;
 
 /**
  * Class which create the local working directory and download all the inputs

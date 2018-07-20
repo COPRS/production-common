@@ -79,12 +79,7 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>commons</artifactId>
-			<version>0.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>spdgs-sdk</groupId>
-			<artifactId>mqi-core</artifactId>
-			<version>0.0.1</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>spdgs-sdk</groupId>

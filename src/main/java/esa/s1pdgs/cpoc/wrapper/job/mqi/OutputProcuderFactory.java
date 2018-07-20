@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -16,7 +17,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
-import esa.s1pdgs.cpoc.wrapper.utils.FileUtils;
 
 /**
  * Service for publishing in KAFKA topics

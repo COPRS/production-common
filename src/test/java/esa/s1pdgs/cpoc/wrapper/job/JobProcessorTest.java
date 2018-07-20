@@ -22,13 +22,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
+import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
 import esa.s1pdgs.cpoc.wrapper.job.JobProcessor;
@@ -102,7 +108,8 @@ public class JobProcessorTest extends MockPropertiesTest {
 
     /**
      * Initialization
-     * @throws AbstractCodedException 
+     * 
+     * @throws AbstractCodedException
      */
     @Before
     public void init() throws AbstractCodedException {
@@ -145,6 +152,42 @@ public class JobProcessorTest extends MockPropertiesTest {
 
         verify(appStatus, times(1)).forceStopping();
         verifyZeroInteractions(mqiService);
+    }
+
+    /**
+     * Test ack when exception
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testAckNegativelyWhenException() throws AbstractCodedException {
+        doThrow(new MqiAckApiError(ProductCategory.AUXILIARY_FILES, 1,
+                "ack-msg", "error-ùmessage")).when(mqiService)
+                        .ack(Mockito.any());
+
+        processor.ackNegatively(inputMessage, "error message");
+
+        verify(mqiService, times(1)).ack(Mockito
+                .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
+        verify(appStatus, times(1)).setError();
+    }
+
+    /**
+     * Test ack when exception
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testAckPositivelyWhenException() throws AbstractCodedException {
+        doThrow(new MqiAckApiError(ProductCategory.AUXILIARY_FILES, 1,
+                "ack-msg", "error-message")).when(mqiService)
+                        .ack(Mockito.any());
+
+        processor.ackPositively(inputMessage);
+
+        verify(mqiService, times(1))
+                .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)));
+        verify(appStatus, times(1)).setError();
     }
 
     /**
@@ -241,6 +284,25 @@ public class JobProcessorTest extends MockPropertiesTest {
         File file2 =
                 new File(inputMessage.getBody().getWorkDirectory() + "file2");
         file2.createNewFile();
+    }
+
+    /**
+     * Nominal test case of call
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCallWithNext() throws Exception {
+        mockAllStep(false);
+        doReturn(ApplicationLevel.L0).when(properties).getLevel();
+        doReturn(inputMessage).when(mqiService).next();
+
+        processor.processJob();
+
+        verify(mqiService, times(1)).next();
+        verify(appStatus, times(1)).setProcessing();
+        verify(appStatus, times(1)).setWaiting();
+        doReturn(ApplicationLevel.L1).when(properties).getLevel();
     }
 
     /**
