@@ -1,0 +1,12 @@
+/.mvn/
+/.settings/
+.classpath                                                                                                                       
+.eclipse-pmd    
+.pmd
+.pmdruleset.xml 
+.project                                                                                                                   
+/target/                                                                                                                             
+/reports/                                                                                                                            
+/bin/                                                                                                                             
+*.log        
+*.gz
