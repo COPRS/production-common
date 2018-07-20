@@ -5,14 +5,7 @@ spring:
     
 # Logging
 logging:
-  level:
-    ROOT: ERROR
-    org.springframework: WARN
-    fr.viveris.s1pdgs: DEBUG
-    kafka: WARN
-    org.apache: WARN
-    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
-  file: ./s1pdgs-metadata-catalog-test.log
+  config: test/log4j2-test.yml
 
 # KAFKA
 kafka:
