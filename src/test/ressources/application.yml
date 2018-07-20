@@ -1,0 +1,8 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-applicative-catalog
+    
+# Logging
+logging:
+  config: log4j2.yml  
