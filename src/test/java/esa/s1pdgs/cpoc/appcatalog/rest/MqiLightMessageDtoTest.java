@@ -70,8 +70,12 @@ public class MqiLightMessageDtoTest {
      */
     @Test
     public void testToString() {
-        MqiLightMessageDto obj = new MqiLightMessageDto(
-                ProductCategory.AUXILIARY_FILES, 1000, "topic-name", 2, 3210);
+        MqiLightMessageDto obj = new MqiLightMessageDto();
+        obj.setCategory(ProductCategory.EDRS_SESSIONS);
+        obj.setTopic("topic-name");
+        obj.setIdentifier(1000);
+        obj.setPartition(2);
+        obj.setOffset(3210);
         obj.setGroup("group-name");
         obj.setLastAckDate(new Date(888888888));
         obj.setLastReadDate(new Date(999999999));
@@ -82,7 +86,7 @@ public class MqiLightMessageDtoTest {
         obj.setState(MqiStateMessageEnum.ACK_WARN);
 
         String str = obj.toString();
-        assertTrue(str.contains("category: AUXILIARY_FILES"));
+        assertTrue(str.contains("category: EDRS_SESSIONS"));
         assertTrue(str.contains("identifier: 1000"));
         assertTrue(str.contains("topic: topic-name"));
         assertTrue(str.contains("partition: 2"));
