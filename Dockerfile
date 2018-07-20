@@ -4,7 +4,6 @@ COPY pom.xml /app
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY src/ /app/src/
 COPY dev/ /app/dev/
-COPY test/ /app/test/
 COPY config/ /app/config/
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
