@@ -9,9 +9,8 @@
 	<properties>
 		<java.version>1.8</java.version>
 
-		<version.spdgs.commons>0.0.1</version.spdgs.commons>
+		<version.spdgs.commons>1.0.0</version.spdgs.commons>
 		<version.spdgs.obs>1.0.1</version.spdgs.obs>
-		<version.spdgs.mqi-core>0.0.1</version.spdgs.mqi-core>
 
 		<version.equals>2.4.6</version.equals>
 
@@ -112,11 +111,6 @@
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>commons</artifactId>
 			<version>${version.spdgs.commons}</version>
-		</dependency>
-		<dependency>
-			<groupId>spdgs-sdk</groupId>
-			<artifactId>mqi-core</artifactId>
-			<version>${version.spdgs.mqi-core}</version>
 		</dependency>
 
 		<!-- Tests -->
