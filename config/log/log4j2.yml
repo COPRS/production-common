@@ -7,13 +7,13 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} ${env:archives_application_name}-1.0.0 %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-metadata-catalog-app-1.0.0 %-5level: %msg [%thread] %n"
     RollingFile:
       name: FILE
       fileName: ${env:archives_logging_file}
       filePattern: "${env:archives_logging_file}.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} ${env:archives_application_name}--1.0.0 %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-metadata-catalog-app-1.0.0 %-5level: %msg [%thread] %n"
       Policies:
         SizeBasedTriggeringPolicy:
           size: 10 MB
@@ -23,7 +23,7 @@ Configuration:
       name: KAFKA_ERROR
       topic: ${env:kafka_topic_errors:-t-pdgs-errors}
       PatternLayout:
-        Pattern: "[date %d{yyyy-MM-dd HH:mm:ss.SSS}] [podName ${env:HOSTNAME}] [app ${env:archives_application_name}--1.0.0] [thread %thread] [level %-5level] [message %msg] %n"
+        Pattern: "[date %d{yyyy-MM-dd HH:mm:ss.SSS}] [podName ${env:HOSTNAME}] [app s1pdgs-metadata-catalog-app-1.0.0] [thread %thread] [level %-5level] [message %msg] %n"
       Property:
         name: bootstrap.servers
         value: ${env:kafka_bootstrap-servers}
@@ -32,7 +32,7 @@ Configuration:
           level: error
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
+      - name: esa.s1pdgs.cpoc
         level: ${env:archives_logging_level_frviveriss1pdgs:-info}
         additivity: false
         AppenderRef:

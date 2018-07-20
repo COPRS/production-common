@@ -5,4 +5,4 @@ spring:
     
 # Logging
 logging:
-  config: log4j2.yml  
+  config: config/log/log4j2.yml  
