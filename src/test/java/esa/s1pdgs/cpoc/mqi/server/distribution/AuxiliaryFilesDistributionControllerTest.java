@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mqi.server.distribution;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -85,6 +86,8 @@ public class AuxiliaryFilesDistributionControllerTest
         doReturn(consumedMessage).when(messages).nextMessage(Mockito.any());
 
         doReturn(1000).when(properties).getWaitNextMs();
+        
+        doReturn(true).when(publication).publishError(Mockito.anyString());
 
         controller = new AuxiliaryFilesDistributionController(messages,
                 publication, properties);
@@ -119,17 +122,19 @@ public class AuxiliaryFilesDistributionControllerTest
      */
     @Test
     public void testAckMessageUri() throws Exception {
-        doReturn(new ResumeDetails("topic", "dto-obj")).when(messages).ackMessage(Mockito.any(),
-                Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean());
-        //TODO update
-        doReturn(new ResumeDetails("topic", "dto-obj")).when(messages).ackMessage(Mockito.any(),
-                Mockito.eq(312L), Mockito.any(), Mockito.anyBoolean());
-        doReturn(true).when(publication).publishError(Mockito.any());
 
         String dto1 = GenericKafkaUtils.convertObjectToJsonString(
                 new AckMessageDto(123, Ack.OK, null, false));
+        ResumeDetails rd1 = new ResumeDetails("topic", "dto1-obj");
         String dto2 = GenericKafkaUtils.convertObjectToJsonString(
+                new AckMessageDto(111, Ack.ERROR, "Error log", false));
+        String dto3 = GenericKafkaUtils.convertObjectToJsonString(
                 new AckMessageDto(321, Ack.ERROR, "Error log", true));
+        ResumeDetails rd3 = new ResumeDetails("topic", "dto3-obj");
+        String expectedMessage = String.format("%s [resumeDetails %s]", "Error log", rd3.toString());
+        
+        doReturn(rd1, null, rd3).when(messages).ackMessage(Mockito.any(),
+                Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean());
 
         request(post("/messages/auxiliary_files/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(dto1))
@@ -138,15 +143,27 @@ public class AuxiliaryFilesDistributionControllerTest
         verify(messages, times(1)).ackMessage(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(123L),
                 Mockito.eq(Ack.OK), Mockito.eq(false));
+        verify(publication, never()).publishError(Mockito.anyString());
+        verifyNoMoreInteractions(messages);
 
         request(post("/messages/auxiliary_files/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(dto2))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().string("true"));
         verify(messages, times(1)).ackMessage(
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(111L),
+                Mockito.eq(Ack.ERROR), Mockito.eq(false));
+        verify(publication, times(1)).publishError(Mockito.eq("Error log"));
+        verifyNoMoreInteractions(messages);
+
+        request(post("/messages/auxiliary_files/ack")
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(dto3))
+                        .andExpect(MockMvcResultMatchers.status().isOk())
+                        .andExpect(content().string("true"));
+        verify(messages, times(1)).ackMessage(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(321L),
                 Mockito.eq(Ack.ERROR), Mockito.eq(true));
-        verify(publication, times(1)).publishError(Mockito.eq("Error log"));
+        verify(publication, times(1)).publishError(Mockito.eq(expectedMessage));
         verifyNoMoreInteractions(messages);
     }
 

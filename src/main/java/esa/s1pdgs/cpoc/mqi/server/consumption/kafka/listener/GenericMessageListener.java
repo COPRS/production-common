@@ -150,15 +150,19 @@ public class GenericMessageListener<T>
         }
     }
 
-    private void pause() {
+    /**
+     * Pause the consumer
+     */
+    protected void pause() {
         this.genericConsumer.pause();
     }
 
     /**
+     * Acknowledge KAFKA message
      * @param data
      * @param acknowledgment
      */
-    private void acknowlegde(final ConsumerRecord<String, T> data,
+    protected void acknowlegde(final ConsumerRecord<String, T> data,
             final Acknowledgment acknowledgment) {
         try {
             acknowledgment.acknowledge();
@@ -177,7 +181,7 @@ public class GenericMessageListener<T>
      * @return
      * @throws AbstractCodedException
      */
-    private boolean messageShallBeIgnored(final ConsumerRecord<String, T> data,
+    protected boolean messageShallBeIgnored(final ConsumerRecord<String, T> data,
             final MqiLightMessageDto lightMessage)
             throws AbstractCodedException {
         boolean ret = false;

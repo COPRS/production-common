@@ -46,6 +46,40 @@ public class AppStatusTest {
      * Test set stopping
      */
     @Test
+    public void testResetError() {
+        long timeBefore = appStatus.getStatus().getDateLastChangeMs();
+        
+        appStatus.setError();
+        assertTrue(appStatus.getStatus().isError());
+        timeBefore = appStatus.getStatus().getDateLastChangeMs();
+        appStatus.resetError();
+        assertFalse(appStatus.getStatus().isError());
+        assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
+        assertEquals(0, appStatus.getStatus().getErrorCounter());
+        
+        appStatus = new AppStatus(3);
+        appStatus.setError();
+        appStatus.setError();
+        appStatus.setError();
+        timeBefore = appStatus.getStatus().getDateLastChangeMs();
+        assertTrue(appStatus.getStatus().isFatalError());
+        appStatus.resetError();
+        assertTrue(appStatus.getStatus().isFatalError());
+        assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
+        assertEquals(3, appStatus.getStatus().getErrorCounter());
+
+        appStatus.setStopping();
+        timeBefore = appStatus.getStatus().getDateLastChangeMs();
+        appStatus.resetError();
+        assertTrue(appStatus.getStatus().isStopping());
+        assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
+        assertEquals(0, appStatus.getStatus().getErrorCounter());
+    }
+
+    /**
+     * Test set stopping
+     */
+    @Test
     public void testStopping() {
         long timeBefore = appStatus.getStatus().getDateLastChangeMs();
         

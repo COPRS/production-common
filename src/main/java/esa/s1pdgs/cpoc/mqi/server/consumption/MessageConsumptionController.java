@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
@@ -253,7 +253,7 @@ public class MessageConsumptionController {
         List<MqiGenericMessageDto<AuxiliaryFileDto>> messages =
                 persistAuxiliaryFilesService.next(appProperties.getHostname());
         MqiGenericMessageDto<AuxiliaryFileDto> result = null;
-        if (StringUtils.isEmpty(messages)) {
+        if (!CollectionUtils.isEmpty(messages)) {
             for (MqiGenericMessageDto<AuxiliaryFileDto> tmpMessage : messages) {
                 if (send(persistAuxiliaryFilesService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -277,7 +277,7 @@ public class MessageConsumptionController {
         List<MqiGenericMessageDto<EdrsSessionDto>> messages =
                 persistEdrsSessionsService.next(appProperties.getHostname());
         MqiGenericMessageDto<EdrsSessionDto> result = null;
-        if (StringUtils.isEmpty(messages)) {
+        if (!CollectionUtils.isEmpty(messages)) {
             for (MqiGenericMessageDto<EdrsSessionDto> tmpMessage : messages) {
                 if (send(persistEdrsSessionsService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -301,7 +301,7 @@ public class MessageConsumptionController {
         List<MqiGenericMessageDto<LevelJobDto>> messages =
                 persistLevelJobsService.next(appProperties.getHostname());
         MqiGenericMessageDto<LevelJobDto> result = null;
-        if (StringUtils.isEmpty(messages)) {
+        if (!CollectionUtils.isEmpty(messages)) {
             for (MqiGenericMessageDto<LevelJobDto> tmpMessage : messages) {
                 if (send(persistLevelJobsService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -325,7 +325,7 @@ public class MessageConsumptionController {
         List<MqiGenericMessageDto<LevelProductDto>> messages =
                 persistLevelProductsService.next(appProperties.getHostname());
         MqiGenericMessageDto<LevelProductDto> result = null;
-        if (StringUtils.isEmpty(messages)) {
+        if (!CollectionUtils.isEmpty(messages)) {
             for (MqiGenericMessageDto<LevelProductDto> tmpMessage : messages) {
                 if (send(persistLevelProductsService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -349,7 +349,7 @@ public class MessageConsumptionController {
         List<MqiGenericMessageDto<LevelReportDto>> messages =
                 persistLevelReportsService.next(appProperties.getHostname());
         MqiGenericMessageDto<LevelReportDto> result = null;
-        if (StringUtils.isEmpty(messages)) {
+        if (!CollectionUtils.isEmpty(messages)) {
             for (MqiGenericMessageDto<LevelReportDto> tmpMessage : messages) {
                 if (send(persistLevelReportsService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -443,7 +443,7 @@ public class MessageConsumptionController {
         if (consumers.containsKey(category)) {
 
             MqiGenericMessageDto<?> message =
-                    persistServices.get(category).ack(identifier);
+                    persistServices.get(category).ack(identifier, ack);
 
             result = new ResumeDetails(message.getTopic(), message.getDto());
 

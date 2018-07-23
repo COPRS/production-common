@@ -56,8 +56,33 @@ public class OtherApplicationService {
             final int tempoRetryMs) {
         this.restTemplate = restTemplate;
         this.portUri = portUri;
-        this.maxRetries = maxRetries;
+        if (maxRetries < 0 || maxRetries > 20) {
+            this.maxRetries = 0;
+        } else {
+            this.maxRetries = maxRetries;
+        }
         this.tempoRetryMs = tempoRetryMs;
+    }
+
+    /**
+     * @return the portUri
+     */
+    public String getPortUri() {
+        return portUri;
+    }
+
+    /**
+     * @return the maxRetries
+     */
+    public int getMaxRetries() {
+        return maxRetries;
+    }
+
+    /**
+     * @return the tempoRetryMs
+     */
+    public int getTempoRetryMs() {
+        return tempoRetryMs;
     }
 
     /**

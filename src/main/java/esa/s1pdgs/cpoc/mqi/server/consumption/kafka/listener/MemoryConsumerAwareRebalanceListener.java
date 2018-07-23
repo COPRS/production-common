@@ -1,8 +1,8 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
@@ -93,9 +93,6 @@ public class MemoryConsumerAwareRebalanceListener
             final Collection<TopicPartition> partitions) {
         LOGGER.info("onPartitionsAssigned call");
         // We seek the consumer on the right offset
-        Map<TopicPartition, Long> beginningOffsets =
-                consumer.beginningOffsets(partitions);
-        Map<TopicPartition, Long> endOffsets = consumer.endOffsets(partitions);
         Iterator<TopicPartition> topicPartitionIterator = partitions.iterator();
         while (topicPartitionIterator.hasNext()) {
             TopicPartition topicPartition = topicPartitionIterator.next();
@@ -114,11 +111,10 @@ public class MemoryConsumerAwareRebalanceListener
                 LOGGER.debug("Leaving it alone");
             } else if (startingOffset == 0) {
                 LOGGER.debug("Setting offset to begining");
-                consumer.seek(topicPartition,
-                        beginningOffsets.get(topicPartition));
+                consumer.seekToBeginning(Arrays.asList(topicPartition));
             } else if (startingOffset == -1) {
                 LOGGER.debug("Setting offset to end");
-                consumer.seek(topicPartition, endOffsets.get(topicPartition));
+                consumer.seekToEnd(Arrays.asList(topicPartition));
             } else {
                 LOGGER.debug("Resetting offset to {}", startingOffset);
                 consumer.seek(topicPartition, startingOffset);
