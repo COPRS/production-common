@@ -2,16 +2,10 @@ package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
@@ -19,14 +13,16 @@ import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListe
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.listener.config.ContainerProperties;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import com.github.grantneale.kafka.LagBasedPartitionAssignor;
 
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.client.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
+import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
 
 /**
  * Generic consumer
@@ -37,30 +33,29 @@ import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAware
 public class GenericConsumer<T> {
 
     /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(GenericConsumer.class);
-
-    /**
      * Properties
      */
     private final KafkaProperties properties;
 
     /**
+     * Service for persisting data
+     */
+    private final GenericAppCatalogMqiService<T> service;
+
+    /**
+     * Service for checking if a message is processing or not by another
+     */
+    private final OtherApplicationService otherAppService;
+
+    /**
+     * Application status
+     */
+    private final AppStatus appStatus;
+
+    /**
      * Topic name
      */
     private final String topic;
-
-    /**
-     * Last consumed message
-     */
-    private GenericMessageDto<T> consumedMessage;
-
-    /**
-     * Integer to build the message identifier
-     */
-    private final AtomicInteger inc;
 
     /**
      * Listener container
@@ -73,17 +68,25 @@ public class GenericConsumer<T> {
     private final Class<T> consumedMsgClass;
 
     /**
-     * Constructor
      * 
      * @param properties
+     * @param service
+     * @param otherAppService
+     * @param appStatus
      * @param topic
+     * @param consumedMsgClass
      */
-    public GenericConsumer(final KafkaProperties properties, final String topic,
+    public GenericConsumer(final KafkaProperties properties,
+            final GenericAppCatalogMqiService<T> service,
+            final OtherApplicationService otherAppService,
+            final AppStatus appStatus, final String topic,
             final Class<T> consumedMsgClass) {
         this.properties = properties;
+        this.service = service;
+        this.otherAppService = otherAppService;
+        this.appStatus = appStatus;
         this.topic = topic;
         this.consumedMsgClass = consumedMsgClass;
-        this.inc = new AtomicInteger(0);
     }
 
     /**
@@ -91,21 +94,6 @@ public class GenericConsumer<T> {
      */
     public String getTopic() {
         return topic;
-    }
-
-    /**
-     * @return the consumedMessage
-     */
-    public GenericMessageDto<T> getConsumedMessage() {
-        return consumedMessage;
-    }
-
-    /**
-     * @param consumedMessage
-     *            the consumedMessage to set
-     */
-    public void setConsumedMessage(final GenericMessageDto<T> consumedMessage) {
-        this.consumedMessage = consumedMessage;
     }
 
     /**
@@ -120,31 +108,8 @@ public class GenericConsumer<T> {
      */
     public void start() {
         AcknowledgingConsumerAwareMessageListener<String, T> messageListener =
-                new AcknowledgingConsumerAwareMessageListener<String, T>() {
-                    @Override
-                    public void onMessage(ConsumerRecord<String, T> data,
-                            Acknowledgment acknowledgment,
-                            Consumer<?, ?> consumer) {
-                        // Get message
-                        long identifier =
-                                Objects.hash(topic, inc.incrementAndGet());
-                        consumedMessage = new GenericMessageDto<T>(identifier,
-                                data.topic(), data.value());
-
-                        // Ack
-                        try {
-                            acknowledgment.acknowledge();
-                        } catch (Exception exc) {
-                            LOGGER.error(
-                                    "[topic {}] [partition {}] [offset {}] Cannot ack KAFKA message: {}",
-                                    topic, data.partition(), data.offset(),
-                                    exc.getMessage());
-                        }
-
-                        // Pause
-                        pause();
-                    }
-                };
+                new GenericMessageListener<>(properties, service,
+                        otherAppService, this, appStatus);
 
         container = new ConcurrentMessageListenerContainer<>(consumerFactory(),
                 containerProperties(topic, messageListener));
@@ -200,7 +165,9 @@ public class GenericConsumer<T> {
         containerProp.setAckMode(
                 AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
         containerProp.setConsumerRebalanceListener(
-                new MemoryConsumerAwareRebalanceListener());
+                new MemoryConsumerAwareRebalanceListener(service,
+                        properties.getConsumer().getGroupId(),
+                        properties.getConsumer().getOffsetDftMode()));
         return containerProp;
     }
 

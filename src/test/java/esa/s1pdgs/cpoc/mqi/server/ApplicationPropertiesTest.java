@@ -50,6 +50,7 @@ public class ApplicationPropertiesTest {
      */
     @Test
     public void testInitialization() {
+        assertEquals("wrapper-0", properties.getHostname());
         assertEquals(5, properties.getProductCategories().size());
         assertEquals(500, properties.getWaitNextMs());
 
@@ -133,9 +134,11 @@ public class ApplicationPropertiesTest {
         map.put(ProductCategory.AUXILIARY_FILES, catProp);
         properties.setProductCategories(map);
         properties.setWaitNextMs(1000);
+        properties.setHostname("host-test");
 
         assertEquals(1, properties.getProductCategories().size());
         assertEquals(1000, properties.getWaitNextMs());
+        assertEquals("host-test", properties.getHostname());
         // Auxiliary files
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.AUXILIARY_FILES).getConsumption()

@@ -8,6 +8,7 @@ logging:
 # Kafka
 kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
+  hostname: ${HOSTNAME}
   client-id: ${HOSTNAME}
   error-topic: ${kafka_topic_errors:t-pdgs-errors}
   consumer:
@@ -17,6 +18,7 @@ kafka:
     heartbeat-intv-ms: ${mqi_kafka_consumer_heartbeat-interval-ms:3000}
     session-timeout-ms: ${mqi_kafka_consumer_session-timeout-ms:10000}
     auto-offset-reset: ${mqi_kafka_consumer_auto-offset-reset:latest}
+    offset-dft-mode: ${mqi_kafka_consumer_offset-dft-mode:-2}
   listener:
     poll-timeout-ms: ${mqi_kafka_listener_poll-timeout-ms:500}
   producer:
@@ -24,6 +26,7 @@ kafka:
     
 # Configuration per categories of products
 application:
+  hostname: ${HOSTNAME}
   max-error-counter: ${mqi_app_max-error-counter:3}
   stop-fixed-delay-ms: ${mqi_app_stop-fixed-delay-ms:3000}
   wait-next-ms: ${mqi_app_wait-next-ms:1000}
@@ -67,3 +70,10 @@ application:
 # REST controller
 server:
   port: ${mqi_rest_server_port:8081}
+  
+# App catlog
+persistence:
+  host-uri-catalog: ${mqi_persistence_host-uri-catalog:http://app-catalog:8080}
+  port-uri-other-app: ${mqi_persistence_port-uri-other-app:8080}
+  max-retries: ${mqi_persistence_max-retries:3}
+  tempo-retry-ms: ${mqi_persistence_tempo-retry-ms:500}

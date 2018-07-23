@@ -18,6 +18,11 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "application")
 public class ApplicationProperties {
+
+    /**
+     * Hostname.
+     */
+    private String hostname;
     
     /**
      * Time to wait before getting next message when API is called
@@ -35,6 +40,20 @@ public class ApplicationProperties {
     public ApplicationProperties() {
         super();
         this.productCategories = new HashMap<>();
+    }
+
+    /**
+     * @return the hostname
+     */
+    public String getHostname() {
+        return hostname;
+    }
+
+    /**
+     * @param hostname the hostname to set
+     */
+    public void setHostname(final String hostname) {
+        this.hostname = hostname;
     }
 
     /**

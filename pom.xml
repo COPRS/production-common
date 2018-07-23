@@ -112,6 +112,11 @@
 			<artifactId>commons</artifactId>
 			<version>${version.spdgs.commons}</version>
 		</dependency>
+		<dependency>
+			<groupId>spdgs-sdk</groupId>
+			<artifactId>app-catalog-client</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<!-- Tests -->
 		<dependency>

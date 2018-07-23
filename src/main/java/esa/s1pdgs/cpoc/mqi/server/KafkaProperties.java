@@ -26,6 +26,11 @@ public class KafkaProperties {
     private String errorTopic;
 
     /**
+     * Hostname.
+     */
+    private String hostname;
+
+    /**
      * ID to pass to the server when making requests. Used for server-side
      * logging.
      */
@@ -82,6 +87,21 @@ public class KafkaProperties {
      */
     public void setBootstrapServers(final String bootstrapServers) {
         this.bootstrapServers = bootstrapServers;
+    }
+
+    /**
+     * @return the hostname
+     */
+    public String getHostname() {
+        return hostname;
+    }
+
+    /**
+     * @param hostname
+     *            the hostname to set
+     */
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 
     /**
@@ -192,6 +212,14 @@ public class KafkaProperties {
         private String autoOffsetReset;
 
         /**
+         * Default offset seek mode when rebalance:
+         * <li>-2: let the consumer</li>
+         * <li>-1: start to the beginning offset</li>
+         * <li>-0: start to the end offset</li>
+         */
+        private int offsetDftMode;
+
+        /**
          * Constructor
          */
         public KafkaConsumerProperties() {
@@ -290,6 +318,20 @@ public class KafkaProperties {
          */
         public void setAutoOffsetReset(final String autoOffsetReset) {
             this.autoOffsetReset = autoOffsetReset;
+        }
+
+        /**
+         * @return the defaultMode
+         */
+        public int getOffsetDftMode() {
+            return offsetDftMode;
+        }
+
+        /**
+         * @param defaultMode the defaultMode to set
+         */
+        public void setOffsetDftMode(final int defaultMode) {
+            this.offsetDftMode = defaultMode;
         }
 
     }

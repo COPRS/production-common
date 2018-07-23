@@ -21,7 +21,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
+import esa.s1pdgs.cpoc.common.ResumeDetails;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -30,7 +31,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.consumption.MessageConsumptionController;
-import esa.s1pdgs.cpoc.mqi.server.distribution.AuxiliaryFilesDistributionController;
 import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 import esa.s1pdgs.cpoc.mqi.server.test.RestControllerTest;
 
@@ -72,11 +72,10 @@ public class AuxiliaryFilesDistributionControllerTest
 
     /**
      * Initialization
-     * 
-     * @throws MqiCategoryNotAvailable
+     * @throws AbstractCodedException 
      */
     @Before
-    public void init() throws MqiCategoryNotAvailable {
+    public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
         AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
@@ -120,9 +119,10 @@ public class AuxiliaryFilesDistributionControllerTest
      */
     @Test
     public void testAckMessageUri() throws Exception {
-        doReturn(true).when(messages).ackMessage(Mockito.any(),
+        doReturn(new ResumeDetails("topic", "dto-obj")).when(messages).ackMessage(Mockito.any(),
                 Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean());
-        doReturn(false).when(messages).ackMessage(Mockito.any(),
+        //TODO update
+        doReturn(new ResumeDetails("topic", "dto-obj")).when(messages).ackMessage(Mockito.any(),
                 Mockito.eq(312L), Mockito.any(), Mockito.anyBoolean());
         doReturn(true).when(publication).publishError(Mockito.any());
 
@@ -142,7 +142,7 @@ public class AuxiliaryFilesDistributionControllerTest
         request(post("/messages/auxiliary_files/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(dto2))
                         .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().string("false"));
+                        .andExpect(content().string("true"));
         verify(messages, times(1)).ackMessage(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(321L),
                 Mockito.eq(Ack.ERROR), Mockito.eq(true));

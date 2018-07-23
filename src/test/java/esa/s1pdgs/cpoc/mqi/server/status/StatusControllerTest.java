@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.mqi.model.rest.StatusDto;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatus.WrapperStatus;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatus.MqiServerStatus;
 import esa.s1pdgs.cpoc.mqi.server.test.RestControllerTest;
 
 public class StatusControllerTest extends RestControllerTest {
@@ -72,7 +72,7 @@ public class StatusControllerTest extends RestControllerTest {
      */
     @Test
     public void testUrlStatusWhenFatalError() throws Exception {
-        WrapperStatus status = (new AppStatus(3)).getStatus();
+        MqiServerStatus status = (new AppStatus(3)).getStatus();
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
@@ -90,7 +90,7 @@ public class StatusControllerTest extends RestControllerTest {
      */
     @Test
     public void testStatusWhenFatalError() throws Exception {
-        WrapperStatus status = (new AppStatus(3)).getStatus();
+        MqiServerStatus status = (new AppStatus(3)).getStatus();
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
@@ -118,7 +118,7 @@ public class StatusControllerTest extends RestControllerTest {
      */
     @Test
     public void testUrlStatusWhenError() throws Exception {
-        WrapperStatus status = (new AppStatus(3)).getStatus();
+        MqiServerStatus status = (new AppStatus(3)).getStatus();
         status.setError(3);
         status.setError(3);
         doReturn(status).when(appStatus).getStatus();
@@ -135,7 +135,7 @@ public class StatusControllerTest extends RestControllerTest {
      */
     @Test
     public void testStatusWhenError() throws Exception {
-        WrapperStatus status = (new AppStatus(3)).getStatus();
+        MqiServerStatus status = (new AppStatus(3)).getStatus();
         status.setError(3);
         status.setError(3);
         doReturn(status).when(appStatus).getStatus();

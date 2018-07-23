@@ -44,6 +44,7 @@ public class KafkaPropertiesTest {
      */
     @Test
     public void testInitialization() {
+        assertEquals("wrapper-0", properties.getHostname());
         assertEquals("wrapper", properties.getClientId());
         assertEquals("t-pdgs-errors", properties.getErrorTopic());
 
@@ -54,6 +55,7 @@ public class KafkaPropertiesTest {
         assertEquals(1, properties.getConsumer().getMaxPollRecords());
         assertEquals(10000, properties.getConsumer().getSessionTimeoutMs());
         assertEquals("latest", properties.getConsumer().getAutoOffsetReset());
+        assertEquals(-2, properties.getConsumer().getOffsetDftMode());
 
         // Listener
         assertEquals(500, properties.getListener().getPollTimeoutMs());
@@ -78,16 +80,21 @@ public class KafkaPropertiesTest {
         consumer.setMaxPollRecords(3);
         consumer.setSessionTimeoutMs(4);
         consumer.setAutoOffsetReset("earliest");
+        consumer.setOffsetDftMode(-1);
 
         properties.setListener(listener);
         properties.setProducer(producer);
         properties.setConsumer(consumer);
         properties.setBootstrapServers("url:port");
+        properties.setErrorTopic("test-error-topic");
         properties.setClientId("client-id");
+        properties.setHostname("host-test");
 
         // General
         assertEquals("url:port", properties.getBootstrapServers());
         assertEquals("client-id", properties.getClientId());
+        assertEquals("host-test", properties.getHostname());
+        assertEquals("test-error-topic", properties.getErrorTopic());
 
         // Consumer
         assertEquals("group-id", properties.getConsumer().getGroupId());
@@ -96,6 +103,7 @@ public class KafkaPropertiesTest {
         assertEquals(3, properties.getConsumer().getMaxPollRecords());
         assertEquals(4, properties.getConsumer().getSessionTimeoutMs());
         assertEquals("earliest", properties.getConsumer().getAutoOffsetReset());
+        assertEquals(-1, properties.getConsumer().getOffsetDftMode());
 
         // Listener
         assertEquals(50, properties.getListener().getPollTimeoutMs());

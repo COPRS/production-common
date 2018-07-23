@@ -1,14 +1,17 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.listener.ConsumerAwareRebalanceListener;
-import org.springframework.util.CollectionUtils;
+
+import esa.s1pdgs.cpoc.appcatalog.client.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 
 /**
  * Rebalance listener when messages are in memory
@@ -25,23 +28,43 @@ public class MemoryConsumerAwareRebalanceListener
             LogManager.getLogger(MemoryConsumerAwareRebalanceListener.class);
 
     /**
-     * Indicates if the consumer was is pause before rebalance
+     * Service for checking if a message is processing or not by another
      */
-    private boolean isPaused;
+    private final GenericAppCatalogMqiService<?> service;
+
+    /**
+     * Group name
+     */
+    private final String group;
     
+    /**
+     * Default mode
+     */
+    private final int defaultMode;
+
     /**
      * Default constructor
      */
-    public MemoryConsumerAwareRebalanceListener() {
+    public MemoryConsumerAwareRebalanceListener(
+            final GenericAppCatalogMqiService<?> service, final String group, final int defaultMode) {
         super();
-        isPaused = false;
+        this.service = service;
+        this.group = group;
+        this.defaultMode = defaultMode;
     }
 
     /**
-     * @return the isPaused
+     * @return the group
      */
-    public boolean isPaused() {
-        return isPaused;
+    public String getGroup() {
+        return group;
+    }
+
+    /**
+     * @return the defaultMode
+     */
+    public int getDefaultMode() {
+        return defaultMode;
     }
 
     /**
@@ -51,14 +74,6 @@ public class MemoryConsumerAwareRebalanceListener
     public void onPartitionsRevokedBeforeCommit(final Consumer<?, ?> consumer,
             final Collection<TopicPartition> partitions) {
         LOGGER.info("onPartitionsRevokedBeforeCommit call");
-        Set<TopicPartition> pausedP = consumer.paused();
-        if (CollectionUtils.isEmpty(pausedP)) {
-            isPaused = false;
-            LOGGER.info("onPartitionsRevokedBeforeCommit call paused = false");
-        } else {
-            isPaused = true;
-            LOGGER.info("onPartitionsRevokedBeforeCommit call paused = true");
-        }
     }
 
     /**
@@ -68,14 +83,6 @@ public class MemoryConsumerAwareRebalanceListener
     public void onPartitionsRevokedAfterCommit(final Consumer<?, ?> consumer,
             final Collection<TopicPartition> partitions) {
         LOGGER.info("onPartitionsRevokedAfterCommit call");
-        Set<TopicPartition> pausedP = consumer.paused();
-        if (CollectionUtils.isEmpty(pausedP)) {
-            isPaused = false;
-            LOGGER.info("onPartitionsRevokedAfterCommit call paused = false");
-        } else {
-            isPaused = true;
-            LOGGER.info("onPartitionsRevokedAfterCommit call paused = true");
-        }
     }
 
     /**
@@ -85,9 +92,37 @@ public class MemoryConsumerAwareRebalanceListener
     public void onPartitionsAssigned(final Consumer<?, ?> consumer,
             final Collection<TopicPartition> partitions) {
         LOGGER.info("onPartitionsAssigned call");
-        if (isPaused) {
-            LOGGER.info("onPartitionsAssigned call set pause = true");
-            consumer.pause(partitions);
+        // We seek the consumer on the right offset
+        Map<TopicPartition, Long> beginningOffsets =
+                consumer.beginningOffsets(partitions);
+        Map<TopicPartition, Long> endOffsets = consumer.endOffsets(partitions);
+        Iterator<TopicPartition> topicPartitionIterator = partitions.iterator();
+        while (topicPartitionIterator.hasNext()) {
+            TopicPartition topicPartition = topicPartitionIterator.next();
+            LOGGER.debug("Current offset is {} committed offset is -> {}",
+                    consumer.position(topicPartition),
+                    consumer.committed(topicPartition));
+            long startingOffset = defaultMode;
+            try {
+                startingOffset =
+                        service.getEarliestOffset(topicPartition.topic(),
+                                topicPartition.partition(), group);
+            } catch (AbstractCodedException ace) {
+                LOGGER.error("{} Set default mode: -2");
+            }
+            if (startingOffset == -2) {
+                LOGGER.debug("Leaving it alone");
+            } else if (startingOffset == 0) {
+                LOGGER.debug("Setting offset to begining");
+                consumer.seek(topicPartition,
+                        beginningOffsets.get(topicPartition));
+            } else if (startingOffset == -1) {
+                LOGGER.debug("Setting offset to end");
+                consumer.seek(topicPartition, endOffsets.get(topicPartition));
+            } else {
+                LOGGER.debug("Resetting offset to {}", startingOffset);
+                consumer.seek(topicPartition, startingOffset);
+            }
         }
     }
 
