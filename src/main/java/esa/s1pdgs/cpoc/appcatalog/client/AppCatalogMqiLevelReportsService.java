@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
  * Service for managing MQI auxiliary files messages in applicative catalog
@@ -92,8 +94,8 @@ public class AppCatalogMqiLevelReportsService
      * @see GenericAppCatalogMqiService#ack(long)
      */
     @Override
-    public MqiGenericMessageDto<LevelReportDto> ack(final long messageId)
-            throws AbstractCodedException {
+    public MqiGenericMessageDto<LevelReportDto> ack(final long messageId,
+            final Ack ack) throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
@@ -101,19 +103,20 @@ public class AppCatalogMqiLevelReportsService
                     + messageId + "/ack";
             try {
                 ResponseEntity<MqiLevelReportMessageDto> response =
-                        restTemplate.exchange(uri, HttpMethod.POST, null,
+                        restTemplate.exchange(uri, HttpMethod.POST,
+                                new HttpEntity<Ack>(ack),
                                 MqiLevelReportMessageDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return response.getBody();
                 } else {
                     waitOrThrow(retries, new AppCatalogMqiAckApiError(category,
-                            uri, null,
+                            uri, ack,
                             "HTTP status code " + response.getStatusCode()),
                             "ack");
                 }
             } catch (RestClientException rce) {
                 waitOrThrow(retries, new AppCatalogMqiAckApiError(category, uri,
-                        null,
+                        ack,
                         "RestClientException occurred: " + rce.getMessage(),
                         rce), "ack");
             }

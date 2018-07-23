@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
+import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
  * @author Viveris Technologies
@@ -214,7 +215,7 @@ public abstract class GenericAppCatalogMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public abstract MqiGenericMessageDto<T> ack(final long messageId)
+    public abstract MqiGenericMessageDto<T> ack(final long messageId, final Ack ack)
             throws AbstractCodedException;
 
     /**

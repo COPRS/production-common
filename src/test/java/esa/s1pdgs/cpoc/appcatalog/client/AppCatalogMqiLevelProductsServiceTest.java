@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
  * Test the REST service ErrorService
@@ -272,7 +274,7 @@ public class AppCatalogMqiLevelProductsServiceTest {
     public void testAckWhenNoResponse() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
                 .when(restTemplate).exchange(Mockito.anyString(),
-                        Mockito.any(HttpMethod.class), Mockito.isNull(),
+                        Mockito.any(HttpMethod.class), Mockito.any(),
                         Mockito.any(Class.class));
 
         thrown.expect(AppCatalogMqiAckApiError.class);
@@ -280,8 +282,9 @@ public class AppCatalogMqiLevelProductsServiceTest {
                 hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
         thrown.expect(
                 hasProperty("uri", is("uri/mqi/level_products/1234/ack")));
+        thrown.expect(hasProperty("dto", is(Ack.ERROR)));
 
-        service.ack(1234);
+        service.ack(1234, Ack.ERROR);
     }
 
     /**
@@ -300,7 +303,7 @@ public class AppCatalogMqiLevelProductsServiceTest {
                 new ResponseEntity<MqiLevelProductMessageDto>(
                         HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
                                 Mockito.anyString(),
-                                Mockito.any(HttpMethod.class), Mockito.isNull(),
+                                Mockito.any(HttpMethod.class), Mockito.any(),
                                 Mockito.any(Class.class));
 
         thrown.expect(AppCatalogMqiAckApiError.class);
@@ -308,10 +311,11 @@ public class AppCatalogMqiLevelProductsServiceTest {
                 hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
         thrown.expect(
                 hasProperty("uri", is("uri/mqi/level_products/1234/ack")));
+        thrown.expect(hasProperty("dto", is(Ack.ERROR)));
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.ack(1234);
+        service.ack(1234, Ack.ERROR);
     }
 
     /**
@@ -328,14 +332,16 @@ public class AppCatalogMqiLevelProductsServiceTest {
                 new ResponseEntity<MqiLevelProductMessageDto>(message1,
                         HttpStatus.OK)).when(restTemplate).exchange(
                                 Mockito.anyString(),
-                                Mockito.any(HttpMethod.class), Mockito.isNull(),
+                                Mockito.any(HttpMethod.class), Mockito.any(),
                                 Mockito.any(Class.class));
 
-        MqiGenericMessageDto<LevelProductDto> ret = service.ack(1234);
+        MqiGenericMessageDto<LevelProductDto> ret =
+                service.ack(1234, Ack.ERROR);
         assertEquals(ret, message1);
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234/ack"),
-                Mockito.eq(HttpMethod.POST), Mockito.eq(null),
+                Mockito.eq(HttpMethod.POST),
+                Mockito.eq(new HttpEntity<Ack>(Ack.ERROR)),
                 Mockito.eq(MqiLevelProductMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
@@ -350,14 +356,16 @@ public class AppCatalogMqiLevelProductsServiceTest {
     public void testAck2() throws AbstractCodedException {
         doReturn(new ResponseEntity<MqiLevelProductMessageDto>(message1,
                 HttpStatus.OK)).when(restTemplate).exchange(Mockito.anyString(),
-                        Mockito.any(HttpMethod.class), Mockito.isNull(),
+                        Mockito.any(HttpMethod.class), Mockito.any(),
                         Mockito.any(Class.class));
 
-        MqiGenericMessageDto<LevelProductDto> ret = service.ack(1234);
+        MqiGenericMessageDto<LevelProductDto> ret =
+                service.ack(1234, Ack.ERROR);
         assertEquals(ret, message1);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234/ack"),
-                Mockito.eq(HttpMethod.POST), Mockito.eq(null),
+                Mockito.eq(HttpMethod.POST),
+                Mockito.eq(new HttpEntity<Ack>(Ack.ERROR)),
                 Mockito.eq(MqiLevelProductMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
