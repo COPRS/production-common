@@ -13,6 +13,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.net.URI;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
@@ -33,6 +36,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -259,9 +263,10 @@ public class GenericAppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadWhenResponseKO() throws AbstractCodedException {
-        doReturn(new ResponseEntity<Boolean>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<Boolean>(HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<Boolean>(HttpStatus.NOT_FOUND))
+        doReturn(new ResponseEntity<MqiLightMessageDto>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<MqiLightMessageDto>(
+                        HttpStatus.INTERNAL_SERVER_ERROR),
+                new ResponseEntity<MqiLightMessageDto>(HttpStatus.NOT_FOUND))
                         .when(restTemplate).exchange(Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
                                 Mockito.any(HttpEntity.class),
@@ -275,6 +280,30 @@ public class GenericAppCatalogMqiServiceTest {
         thrown.expect(hasProperty("dto", is(readMessage)));
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
+
+        service.read("topic", 2, 9876, readMessage);
+    }
+
+    /**
+     * Test send when the rest server respond an error
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testReadWhenResponseEmpty() throws AbstractCodedException {
+        doReturn(new ResponseEntity<MqiLightMessageDto>(HttpStatus.OK))
+                .when(restTemplate).exchange(Mockito.anyString(),
+                        Mockito.any(HttpMethod.class),
+                        Mockito.any(HttpEntity.class),
+                        Mockito.any(Class.class));
+
+        thrown.expect(AppCatalogMqiReadApiError.class);
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
+        thrown.expect(hasProperty("uri",
+                is("uri/mqi/level_products/topic/2/9876/read")));
+        thrown.expect(hasProperty("dto", is(readMessage)));
 
         service.read("topic", 2, 9876, readMessage);
     }
@@ -330,6 +359,125 @@ public class GenericAppCatalogMqiServiceTest {
                         new HttpEntity<MqiGenericReadMessageDto<LevelProductDto>>(
                                 readMessage)),
                 Mockito.eq(MqiLightMessageDto.class));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test send when no response from the rest server
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetEarliestOffsetWhenNoResponse()
+            throws AbstractCodedException {
+        doThrow(new RestClientException("rest client exception"))
+                .when(restTemplate).exchange(Mockito.any(URI.class),
+                        Mockito.any(HttpMethod.class), Mockito.isNull(),
+                        Mockito.any(Class.class));
+
+        thrown.expect(AppCatalogMqiGetOffsetApiError.class);
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
+        thrown.expect(hasProperty("uri", is(
+                "uri/mqi/level_products/topic/2/earliestOffset?group=groupname")));
+
+        service.getEarliestOffset("topic", 2, "groupname");
+    }
+
+    /**
+     * Test send when the rest server respond an error
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetEarliestOffsetWhenResponseKO()
+            throws AbstractCodedException {
+        doReturn(new ResponseEntity<Long>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<Long>(HttpStatus.INTERNAL_SERVER_ERROR),
+                new ResponseEntity<Long>(HttpStatus.NOT_FOUND))
+                        .when(restTemplate).exchange(Mockito.any(URI.class),
+                                Mockito.any(HttpMethod.class), Mockito.isNull(),
+                                Mockito.any(Class.class));
+
+        thrown.expect(AppCatalogMqiGetOffsetApiError.class);
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
+        thrown.expect(hasProperty("uri", is(
+                "uri/mqi/level_products/topic/2/earliestOffset?group=groupname")));
+        thrown.expectMessage(
+                containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
+
+        service.getEarliestOffset("topic", 2, "groupname");
+    }
+
+    /**
+     * Test send when the rest server respond an error
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetEarliestOffsetWhenResponseEmpty()
+            throws AbstractCodedException {
+        doReturn(new ResponseEntity<Long>(HttpStatus.OK)).when(restTemplate)
+                .exchange(Mockito.any(URI.class), Mockito.any(HttpMethod.class),
+                        Mockito.isNull(), Mockito.any(Class.class));
+
+        assertEquals(0, service.getEarliestOffset("topic", 2, "groupname"));
+    }
+
+    /**
+     * Test send when the first time fails and the second works
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetEarliestOffset1() throws AbstractCodedException {
+        doReturn(new ResponseEntity<Long>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<Long>(125L, HttpStatus.OK))
+                        .when(restTemplate).exchange(Mockito.any(URI.class),
+                                Mockito.any(HttpMethod.class), Mockito.isNull(),
+                                Mockito.any(Class.class));
+
+        String uriStr = "uri/mqi/level_products/topic/2/earliestOffset";
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uriStr).queryParam("group", "groupname");
+        URI expectedUri = builder.build().toUri();
+
+        long ret = service.getEarliestOffset("topic", 2, "groupname");
+        assertEquals(ret, 125L);
+        verify(restTemplate, times(2)).exchange(Mockito.eq(expectedUri),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
+                Mockito.eq(Long.class));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test send when the first time works
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetEarliestOffset2() throws AbstractCodedException {
+        doReturn(new ResponseEntity<Long>(7596L, HttpStatus.OK))
+                .when(restTemplate).exchange(Mockito.any(URI.class),
+                        Mockito.any(HttpMethod.class), Mockito.isNull(),
+                        Mockito.any(Class.class));
+
+        String uriStr = "uri/mqi/level_products/topic/2/earliestOffset";
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uriStr).queryParam("group", "groupname");
+        URI expectedUri = builder.build().toUri();
+
+        long ret = service.getEarliestOffset("topic", 2, "groupname");
+        assertEquals(ret, 7596L);
+        verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
+                Mockito.eq(Long.class));
         verifyNoMoreInteractions(restTemplate);
     }
 }

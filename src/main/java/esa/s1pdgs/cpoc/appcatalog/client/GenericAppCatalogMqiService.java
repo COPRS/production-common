@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog.client;
 
+import java.net.URI;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
@@ -17,6 +19,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
 
@@ -104,7 +107,15 @@ public abstract class GenericAppCatalogMqiService<T> {
     }
 
     /**
-     * @see GenericMqiService#next()
+     * Inform that a consumer is reading a message.<br/>
+     * Must not return null (throw an exception)
+     * 
+     * @param topic
+     * @param partition
+     * @param offset
+     * @param body
+     * @return
+     * @throws AbstractCodedException
      */
     public MqiLightMessageDto read(final String topic, final int partition,
             final long offset, final MqiGenericReadMessageDto<T> body)
@@ -121,7 +132,14 @@ public abstract class GenericAppCatalogMqiService<T> {
                                         body),
                                 MqiLightMessageDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
-                    return response.getBody();
+                    if (response.getBody() == null) {
+                        waitOrThrow(
+                                retries, new AppCatalogMqiReadApiError(category,
+                                        uri, body, "Null return object"),
+                                "read");
+                    } else {
+                        return response.getBody();
+                    }
                 } else {
                     waitOrThrow(retries,
                             new AppCatalogMqiReadApiError(category, uri, body,
@@ -179,8 +197,8 @@ public abstract class GenericAppCatalogMqiService<T> {
                             "send");
                 }
             } catch (RestClientException rce) {
-                waitOrThrow(retries, new AppCatalogMqiSendApiError(category, uri,
-                        body,
+                waitOrThrow(retries, new AppCatalogMqiSendApiError(category,
+                        uri, body,
                         "RestClientException occurred: " + rce.getMessage(),
                         rce), "send");
             }
@@ -198,4 +216,49 @@ public abstract class GenericAppCatalogMqiService<T> {
      */
     public abstract MqiGenericMessageDto<T> ack(final long messageId)
             throws AbstractCodedException;
+
+    /**
+     * Publish a message
+     * 
+     * @param message
+     * @throws AbstractCodedException
+     */
+    public long getEarliestOffset(final String topic, final int partition,
+            final String group) throws AbstractCodedException {
+        int retries = 0;
+        while (true) {
+            retries++;
+            // TODO use URI builder
+            String uriStr = hostUri + "/mqi/" + category.name().toLowerCase()
+                    + "/" + topic + "/" + partition + "/earliestOffset";
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromUriString(uriStr).queryParam("group", group);
+            URI uri = builder.build().toUri();
+            try {
+                ResponseEntity<Long> response = restTemplate.exchange(uri,
+                        HttpMethod.GET, null, Long.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    Long ret = response.getBody();
+                    if (ret == null) {
+                        //TODO default value
+                        return 0;
+                    } else {
+                        return ret.longValue();
+                    }
+                } else {
+                    waitOrThrow(retries,
+                            new AppCatalogMqiGetOffsetApiError(category,
+                                    uri.toString(),
+                                    "HTTP status code "
+                                            + response.getStatusCode()),
+                            "send");
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new AppCatalogMqiGetOffsetApiError(
+                        category, uri.toString(),
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce), "send");
+            }
+        }
+    }
 }
