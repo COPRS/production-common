@@ -234,6 +234,35 @@ public class AppCatalogMqiLevelProductsServiceTest {
     }
 
     /**
+     * Test next when the server returns an empty body
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testNextEmptyBody() throws AbstractCodedException {
+        doReturn(new ResponseEntity<List<MqiLevelProductMessageDto>>(
+                HttpStatus.OK)).when(restTemplate).exchange(
+                        Mockito.any(URI.class), Mockito.any(HttpMethod.class),
+                        Mockito.isNull(),
+                        Mockito.any(ParameterizedTypeReference.class));
+
+        String uriStr = "uri/mqi/level_products/next";
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uriStr).queryParam("pod", "pod-name");
+        URI expectedUri = builder.build().toUri();
+
+        List<MqiGenericMessageDto<LevelProductDto>> result =
+                service.next("pod-name");
+        assertEquals(0, result.size());
+        verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null), Mockito.eq(
+                        new ParameterizedTypeReference<List<MqiLevelProductMessageDto>>() {
+                        }));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
      * Test next when no response from the rest server
      * 
      * @throws AbstractCodedException

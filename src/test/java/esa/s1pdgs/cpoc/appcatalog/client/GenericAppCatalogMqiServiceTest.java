@@ -232,6 +232,29 @@ public class GenericAppCatalogMqiServiceTest {
     }
 
     /**
+     * Test send when server returns an empty body
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSendWhenEmptyBody() throws AbstractCodedException {
+        doReturn(new ResponseEntity<Boolean>(HttpStatus.OK))
+                .when(restTemplate).exchange(Mockito.anyString(),
+                        Mockito.any(HttpMethod.class),
+                        Mockito.any(HttpEntity.class),
+                        Mockito.any(Class.class));
+
+        assertFalse(service.send(1234, sendMessage));
+        verify(restTemplate, times(1)).exchange(
+                Mockito.eq("uri/mqi/level_products/1234/send"),
+                Mockito.eq(HttpMethod.POST),
+                Mockito.eq(new HttpEntity<MqiSendMessageDto>(sendMessage)),
+                Mockito.eq(Boolean.class));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
      * Test send when no response from the rest server
      * 
      * @throws AbstractCodedException
