@@ -162,7 +162,7 @@ public abstract class GenericAppCatalogMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public abstract List<MqiGenericMessageDto<T>> next()
+    public abstract List<MqiGenericMessageDto<T>> next(String podName)
             throws AbstractCodedException;
 
     /**

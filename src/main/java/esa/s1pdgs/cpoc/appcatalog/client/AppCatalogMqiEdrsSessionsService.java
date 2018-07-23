@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog.client;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiEdrsSessionMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
@@ -38,21 +40,24 @@ public class AppCatalogMqiEdrsSessionsService
     public AppCatalogMqiEdrsSessionsService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.EDRS_SESSIONS, hostUri,
-                maxRetries, tempoRetryMs);
+        super(restTemplate, ProductCategory.EDRS_SESSIONS, hostUri, maxRetries,
+                tempoRetryMs);
     }
 
     /**
      * @see GenericAppCatalogMqiService#next()
      */
     @Override
-    public List<MqiGenericMessageDto<EdrsSessionDto>> next()
+    public List<MqiGenericMessageDto<EdrsSessionDto>> next(String podName)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            String uri =
+            String uriStr =
                     hostUri + "/mqi/" + category.name().toLowerCase() + "/next";
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromUriString(uriStr).queryParam("pod", podName);
+            URI uri = builder.build().toUri();
             try {
                 ResponseEntity<List<MqiEdrsSessionMessageDto>> response =
                         restTemplate.exchange(uri, HttpMethod.GET, null,

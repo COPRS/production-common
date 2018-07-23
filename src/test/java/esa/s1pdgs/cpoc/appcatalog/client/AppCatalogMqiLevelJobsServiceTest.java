@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLevelJobMessageDto;
@@ -97,14 +99,14 @@ public class AppCatalogMqiLevelJobsServiceTest {
     @Test
     public void testNextWhenNoResponse() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
-                .when(restTemplate).exchange(Mockito.anyString(),
+                .when(restTemplate).exchange(Mockito.any(URI.class),
                         Mockito.any(HttpMethod.class), Mockito.isNull(),
                         Mockito.any(ParameterizedTypeReference.class));
 
         thrown.expect(AppCatalogMqiNextApiError.class);
         thrown.expect(hasProperty("category", is(ProductCategory.LEVEL_JOBS)));
 
-        service.next();
+        service.next("pod-name");
     }
 
     /**
@@ -122,7 +124,7 @@ public class AppCatalogMqiLevelJobsServiceTest {
                         HttpStatus.INTERNAL_SERVER_ERROR),
                 new ResponseEntity<List<MqiLevelJobMessageDto>>(
                         HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
-                                Mockito.anyString(),
+                                Mockito.any(URI.class),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(ParameterizedTypeReference.class));
 
@@ -130,7 +132,7 @@ public class AppCatalogMqiLevelJobsServiceTest {
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.next();
+        service.next("pod-name");
     }
 
     /**
@@ -148,16 +150,20 @@ public class AppCatalogMqiLevelJobsServiceTest {
                         HttpStatus.INTERNAL_SERVER_ERROR),
                 new ResponseEntity<List<MqiLevelJobMessageDto>>(
                         HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
-                                Mockito.anyString(),
+                                Mockito.any(URI.class),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(ParameterizedTypeReference.class));
 
+        String uriStr = "uri/mqi/level_jobs/next";
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uriStr).queryParam("pod", "pod-name");
+        URI expectedUri = builder.build().toUri();
+
         try {
-            service.next();
+            service.next("pod-name");
             fail("An exception shall be raised");
         } catch (AppCatalogMqiNextApiError mpee) {
-            verify(restTemplate, times(2)).exchange(
-                    Mockito.eq("uri/mqi/level_jobs/next"),
+            verify(restTemplate, times(2)).exchange(Mockito.eq(expectedUri),
                     Mockito.eq(HttpMethod.GET), Mockito.eq(null), Mockito.eq(
                             new ParameterizedTypeReference<List<MqiLevelJobMessageDto>>() {
                             }));
@@ -178,14 +184,19 @@ public class AppCatalogMqiLevelJobsServiceTest {
                         HttpStatus.BAD_GATEWAY),
                 new ResponseEntity<List<MqiLevelJobMessageDto>>(messages2,
                         HttpStatus.OK)).when(restTemplate).exchange(
-                                Mockito.anyString(),
+                                Mockito.any(URI.class),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(ParameterizedTypeReference.class));
 
-        List<MqiGenericMessageDto<LevelJobDto>> result = service.next();
+        String uriStr = "uri/mqi/level_jobs/next";
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uriStr).queryParam("pod", "pod-name");
+        URI expectedUri = builder.build().toUri();
+
+        List<MqiGenericMessageDto<LevelJobDto>> result =
+                service.next("pod-name");
         assertEquals(messages, result);
-        verify(restTemplate, times(2)).exchange(
-                Mockito.eq("uri/mqi/level_jobs/next"),
+        verify(restTemplate, times(2)).exchange(Mockito.eq(expectedUri),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null), Mockito.eq(
                         new ParameterizedTypeReference<List<MqiLevelJobMessageDto>>() {
                         }));
@@ -201,14 +212,20 @@ public class AppCatalogMqiLevelJobsServiceTest {
     @Test
     public void testNext2() throws AbstractCodedException {
         doReturn(new ResponseEntity<List<MqiLevelJobMessageDto>>(messages2,
-                HttpStatus.OK)).when(restTemplate).exchange(Mockito.anyString(),
-                        Mockito.any(HttpMethod.class), Mockito.isNull(),
+                HttpStatus.OK)).when(restTemplate).exchange(
+                        Mockito.any(URI.class), Mockito.any(HttpMethod.class),
+                        Mockito.isNull(),
                         Mockito.any(ParameterizedTypeReference.class));
 
-        List<MqiGenericMessageDto<LevelJobDto>> result = service.next();
+        String uriStr = "uri/mqi/level_jobs/next";
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uriStr).queryParam("pod", "pod-name");
+        URI expectedUri = builder.build().toUri();
+
+        List<MqiGenericMessageDto<LevelJobDto>> result =
+                service.next("pod-name");
         assertEquals(messages, result);
-        verify(restTemplate, times(1)).exchange(
-                Mockito.eq("uri/mqi/level_jobs/next"),
+        verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null), Mockito.eq(
                         new ParameterizedTypeReference<List<MqiLevelJobMessageDto>>() {
                         }));
