@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.enums.TaskTableTestEnum;
 
 /**
@@ -65,7 +65,7 @@ public class TaskTable {
 	/**
 	 * 
 	 */
-	private ProcessLevel level;
+	private ApplicationLevel level;
 
 	/**
 	 * 
@@ -76,7 +76,7 @@ public class TaskTable {
 		this.cfgFiles = new ArrayList<>();
 		this.pools = new ArrayList<>();
 		this.test = TaskTableTestEnum.BLANK;
-		this.level = ProcessLevel.L0;
+		this.level = ApplicationLevel.L0;
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class TaskTable {
 	/**
 	 * @return the level
 	 */
-	public ProcessLevel getLevel() {
+	public ApplicationLevel getLevel() {
 		return level;
 	}
 
@@ -196,7 +196,7 @@ public class TaskTable {
 	 * @param level
 	 *            the level to set
 	 */
-	public void setLevel(final ProcessLevel level) {
+	public void setLevel(final ApplicationLevel level) {
 		this.level = level;
 	}
 

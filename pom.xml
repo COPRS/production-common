@@ -75,16 +75,12 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka-test</artifactId>
-			<scope>test</scope>
-		</dependency>
 
+		<dependency>
+			<groupId>spdgs-sdk</groupId>
+			<artifactId>mqi-client</artifactId>
+			<version>0.0.1</version>
+		</dependency>
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>obs-clients</artifactId>
@@ -93,7 +89,7 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>commons</artifactId>
-			<version>0.0.1</version>
+			<version>1.0.0</version>
 		</dependency>
 		
 		<dependency>

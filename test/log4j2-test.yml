@@ -19,17 +19,6 @@ Configuration:
           size: 10 MB
       DefaultRollOverStrategy:
         max: 30
-    Kafka:
-      name: KAFKA_ERROR
-      topic: t-pdgs-errors
-      PatternLayout:
-        Pattern: "[date %d{yyyy-MM-dd HH:mm:ss.SSS}] [podName ${env:HOSTNAME}] [app s1pdgs-jobgenerator-app:1.0.0] [thread %thread] [level %-5level] [message %msg] %n"
-      Property:
-        name: bootstrap.servers
-        value: 172.17.50.7:9092
-      Filters:
-        ThresholdFilter:
-          level: error
   Loggers:
     logger:
       - name: fr.viveris.s1pdgs
@@ -40,12 +29,6 @@ Configuration:
           - ref: FILE
       - name: org.springframework
         level: error
-        additivity: false
-        AppenderRef:
-          - ref: STDOUT
-          - ref: FILE
-      - name: kafka
-        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT

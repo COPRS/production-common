@@ -5,7 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
 /**
  * Utilities around date

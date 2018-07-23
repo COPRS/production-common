@@ -3,12 +3,10 @@ package fr.viveris.s1pdgs.jobgenerator.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -22,9 +20,7 @@ public class ProcessSettingsTest {
 	@Autowired
 	private ProcessSettings l0ProcessSettings;
 
-	// Embedded KAFKA
-	@ClassRule
-	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "t-pdgs-l0-jobs");
+
 
 	@Test
 	public void testSettings() {

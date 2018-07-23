@@ -51,6 +51,11 @@ process:
   loglevelstderr: ${job_process_loglevelstderr:INFO}
   processingstation: ${job_process_processingstation}
   outputregexpstr: ${job_process_outputregexps}
+  mqi:
+    host-uri: ${job_process_mqi_host-uri:http://localhost:8081}
+    max-retries: ${job_process_mqi_max-retries:3}
+    tempo-retry-ms: ${job_process_mqi_tempo-retry:1000}
+  fixed-delay-ms: ${job_process_fixed-delay-ms:200}
     
 level0:
   maxnumberofsessions: ${l0_maxnumberofsessions:20}

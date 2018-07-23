@@ -12,9 +12,7 @@ import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.AbstractJobsDispatcher;
 @ComponentScan(basePackages = "fr.viveris.s1pdgs.jobgenerator.service", basePackageClasses = { AbstractJobsDispatcher.class })
 public class ThreadPoolTaskSchedulerConfig {
 
-	/**
-	 * URI of KAFKA cluster
-	 */
+
 	@Value("${job-generator.maxnboftasktable}")
 	protected int poolSize;
 

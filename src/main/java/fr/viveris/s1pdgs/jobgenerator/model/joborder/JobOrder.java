@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.persistence.oxm.annotations.XmlPath;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 
 /**
  * Class describing the content of a file jobOrder.xml
@@ -58,9 +58,9 @@ public class JobOrder {
 	 * 
 	 * @param obj
 	 */
-	public JobOrder(final JobOrder obj, final ProcessLevel level) {
+	public JobOrder(final JobOrder obj, final ApplicationLevel applicationLevel) {
 		this();
-		this.conf = level == ProcessLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());
+		this.conf = applicationLevel == ApplicationLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());
 		this.procs.addAll(obj.getProcs().stream().filter(item -> item != null).map(item -> new JobOrderProc(item))
 				.collect(Collectors.toList()));
 		this.nbProcs = this.procs.size();

@@ -40,7 +40,7 @@ public class JobTest {
 		metadata.put(2, result1);
 		metadata.put(15, result2);
 
-		Job<String> job = new Job<>(product, new ResumeDetails("topic-name", "dto-object"));
+		Job<String> job = new Job<>(product, null);
 
 		job.setWorkDirectory("working-dir");
 		job.setWorkDirectoryInc(15);

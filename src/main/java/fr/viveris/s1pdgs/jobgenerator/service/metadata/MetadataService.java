@@ -17,7 +17,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.L0AcnMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.L0SliceMetadata;
@@ -96,7 +96,7 @@ public class MetadataService {
 	 * @throws MetadataException
 	 */
 	public EdrsSessionMetadata getEdrsSession(final String productType, final String productName)
-			throws MetadataException {
+			throws JobGenMetadataException {
 		for (int retries = 0;; retries++) {
 			try {
 				String uri = this.uriEdrsSession + "/" + productType + "/" + productName;
@@ -111,12 +111,12 @@ public class MetadataService {
 						try {
 							Thread.sleep(this.temporetryms);
 						} catch (InterruptedException e) {
-							throw new MetadataException(e.getMessage(), e);
+							throw new JobGenMetadataException(e.getMessage(), e);
 						}
 						continue;
 					}
 					else {
-						throw new MetadataException(
+						throw new JobGenMetadataException(
 							String.format("Invalid HTTP status code %s", response.getStatusCode().name()));
 					}
 				}
@@ -130,12 +130,12 @@ public class MetadataService {
 					try {
 						Thread.sleep(this.temporetryms);
 					} catch (InterruptedException e1) {
-						throw new MetadataException(e1.getMessage(), e1);
+						throw new JobGenMetadataException(e1.getMessage(), e1);
 					}
 					continue;
 				}
 				else {
-					throw new MetadataException(e.getMessage(), e);
+					throw new JobGenMetadataException(e.getMessage(), e);
 				}
 			}
 		}
@@ -150,7 +150,7 @@ public class MetadataService {
 	 * @return
 	 * @throws MetadataException
 	 */
-	public L0SliceMetadata getSlice(final String productType, final String productName) throws MetadataException {
+	public L0SliceMetadata getSlice(final String productType, final String productName) throws JobGenMetadataException {
 		for (int retries = 0;; retries++) {
 			try {
 				String uri = this.uriL0Slice + "/" + productType + "/" + productName;
@@ -165,12 +165,12 @@ public class MetadataService {
 						try {
 							Thread.sleep(this.temporetryms);
 						} catch (InterruptedException e) {
-							throw new MetadataException(e.getMessage(), e);
+							throw new JobGenMetadataException(e.getMessage(), e);
 						}
 						continue;
 					}
 					else {
-					throw new MetadataException(
+					throw new JobGenMetadataException(
 							String.format("Invalid HTTP status code %s", response.getStatusCode().name()));
 					}
 				}
@@ -184,12 +184,12 @@ public class MetadataService {
 					try {
 						Thread.sleep(this.temporetryms);
 					} catch (InterruptedException e1) {
-						throw new MetadataException(e1.getMessage(), e1);
+						throw new JobGenMetadataException(e1.getMessage(), e1);
 					}
 					continue;
 				}
 				else {
-					throw new MetadataException(e.getMessage(), e);
+					throw new JobGenMetadataException(e.getMessage(), e);
 				}
 			}
 		}
@@ -204,7 +204,7 @@ public class MetadataService {
 	 * @return
 	 * @throws MetadataException
 	 */
-	public L0AcnMetadata getFirstACN(final String productType, final String productName) throws MetadataException {
+	public L0AcnMetadata getFirstACN(final String productType, final String productName) throws JobGenMetadataException {
 		for (int retries = 0;; retries++) {
 			try {
 				String uri = this.uriL0Slice + "/" + productType + "/" + productName + "/acns";
@@ -220,12 +220,12 @@ public class MetadataService {
 						try {
 							Thread.sleep(this.temporetryms);
 						} catch (InterruptedException e) {
-							throw new MetadataException(e.getMessage(), e);
+							throw new JobGenMetadataException(e.getMessage(), e);
 						}
 						continue;
 					}
 					else {
-						throw new MetadataException(
+						throw new JobGenMetadataException(
 							String.format("Invalid HTTP status code %s", response.getStatusCode().name()));
 					}
 				}
@@ -242,12 +242,12 @@ public class MetadataService {
 						try {
 							Thread.sleep(this.temporetryms);
 						} catch (InterruptedException e) {
-							throw new MetadataException(e.getMessage(), e);
+							throw new JobGenMetadataException(e.getMessage(), e);
 						}
 						continue;
 					}
 					else {
-						throw new MetadataException(String.format("No retrieved ACNs for %s", productName));
+						throw new JobGenMetadataException(String.format("No retrieved ACNs for %s", productName));
 					}
 				}
 	
@@ -258,19 +258,19 @@ public class MetadataService {
 					try {
 						Thread.sleep(this.temporetryms);
 					} catch (InterruptedException e1) {
-						throw new MetadataException(e1.getMessage(), e1);
+						throw new JobGenMetadataException(e1.getMessage(), e1);
 					}
 					continue;
 				}
 				else {
-					throw new MetadataException(e.getMessage(), e);
+					throw new JobGenMetadataException(e.getMessage(), e);
 				}
 			}
 		}
 	}
 
 	public SearchMetadata search(final SearchMetadataQuery query, final Date t0, final Date t1,
-			final String satelliteId, final int instrumentConfigurationId) throws MetadataException {
+			final String satelliteId, final int instrumentConfigurationId) throws JobGenMetadataException {
 		for (int retries = 0;; retries++) {
 			try {
 				DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -294,12 +294,12 @@ public class MetadataService {
 						try {
 							Thread.sleep(this.temporetryms);
 						} catch (InterruptedException e) {
-							throw new MetadataException(e.getMessage(), e);
+							throw new JobGenMetadataException(e.getMessage(), e);
 						}
 						continue;
 					}
 					else {
-						throw new MetadataException(
+						throw new JobGenMetadataException(
 							String.format("Invalid HTTP status code %s", response.getStatusCode().name()));
 					}
 				}
@@ -313,12 +313,12 @@ public class MetadataService {
 					try {
 						Thread.sleep(this.temporetryms);
 					} catch (InterruptedException e1) {
-						throw new MetadataException(e1.getMessage(), e1);
+						throw new JobGenMetadataException(e1.getMessage(), e1);
 					}
 					continue;
 				}
 				else {
-					throw new MetadataException(e.getMessage(), e);
+					throw new JobGenMetadataException(e.getMessage(), e);
 				}
 			}
 		}

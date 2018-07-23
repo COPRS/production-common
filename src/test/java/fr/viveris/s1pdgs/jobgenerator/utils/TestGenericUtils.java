@@ -2,7 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.utils;
 
 import java.util.ArrayList;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
@@ -36,7 +36,7 @@ public class TestGenericUtils {
 		t.setProcessorName("AIO_PROCESSOR");
 		t.setVersion("01.00");
 		t.setTest(TaskTableTestEnum.NO);
-		t.setLevel(ProcessLevel.L0);
+		t.setLevel(ApplicationLevel.L0);
 
 		t.addDynProcParam(new TaskTableDynProcParam("Processing_Mode", "String", "NRT"));
 		t.addDynProcParam(new TaskTableDynProcParam("PT_Assembly", "String", "yes"));
@@ -336,7 +336,7 @@ public class TestGenericUtils {
 		t.setProcessorName("IW_RAW__0_GRDH_1");
 		t.setVersion("02.84");
 		t.setTest(TaskTableTestEnum.NO);
-		t.setLevel(ProcessLevel.L1);
+		t.setLevel(ApplicationLevel.L1);
 
 		t.addDynProcParam(new TaskTableDynProcParam("Application_LUT", "String", "IW_Default"));
 		t.addDynProcParam(new TaskTableDynProcParam("Timeliness_Category", "String", "NRT-3h"));

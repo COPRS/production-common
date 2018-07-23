@@ -6,12 +6,10 @@ import static org.junit.Assert.assertEquals;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,9 +23,6 @@ public class L0SlicePatternSettingsTest {
 	@Autowired
 	private L0SlicePatternSettings l0SlicePatternSettings;
 
-	// Embedded KAFKA
-	@ClassRule
-	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "t-pdgs-l0-jobs");
 
 	@Test
 	public void testSettings() {

@@ -18,9 +18,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MissingRoutingEntryException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.l1routing.L1Routing;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
@@ -124,7 +124,7 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 					L0SliceProduct p = (L0SliceProduct) job.getProduct();
 					L0SliceProduct pClone = new L0SliceProduct(p.getIdentifier(), p.getSatelliteId(), p.getMissionId(),
 							p.getStartTime(), p.getStopTime(), new L0Slice(p.getObject().getAcquisition()));
-					Job<L0Slice> cloneJob = new Job<>(pClone, job.getResumeDetails());
+					Job<L0Slice> cloneJob = new Job<>(pClone, job.getInputMessage());
 					LOGGER.info("[MONITOR] [Step 2] [productName {}] [taskTable {}] Caching job",
 							job.getProduct().getIdentifier(), taskTable);
 					this.generators.get(taskTable).addJob(cloneJob);
@@ -134,7 +134,7 @@ public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 				}
 			}
 		} else {
-			throw new MissingRoutingEntryException(String.format("No found routing entries for %s", key));
+			throw new JobGenMissingRoutingEntryException(String.format("No found routing entries for %s", key));
 		}
 	}
 
