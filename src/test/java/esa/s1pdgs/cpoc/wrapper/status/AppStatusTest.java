@@ -47,6 +47,7 @@ public class AppStatusTest {
         assertEquals(0, appStatus.getStatus().getErrorCounter());
         assertTrue(System.currentTimeMillis() >= appStatus.getStatus().getDateLastChangeMs());
         assertTrue(appStatus.getStatus().getDateLastChangeMs() > 0);
+        assertEquals(0, appStatus.getProcessingMsgId());
         
         appStatus.setShallBeStopped(true);
         assertEquals(true, appStatus.isShallBeStopped());
@@ -69,9 +70,11 @@ public class AppStatusTest {
     public void testWaiting() {
         long timeBefore = appStatus.getStatus().getDateLastChangeMs();
         
-        appStatus.getStatus().setProcessing();
+        appStatus.setProcessing(123);
+        assertEquals(123, appStatus.getProcessingMsgId());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         appStatus.setWaiting();
+        assertEquals(0, appStatus.getProcessingMsgId());
         assertTrue(appStatus.getStatus().isWaiting());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         
@@ -107,33 +110,41 @@ public class AppStatusTest {
         long timeBefore = appStatus.getStatus().getDateLastChangeMs();
         
         appStatus.getStatus().setWaiting();
+        assertEquals(0, appStatus.getProcessingMsgId());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setProcessing();
+        appStatus.setProcessing(123);
+        assertEquals(123, appStatus.getProcessingMsgId());
         assertTrue(appStatus.getStatus().isProcessing());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setProcessing();
+        appStatus.setProcessing(123);
+        assertEquals(123, appStatus.getProcessingMsgId());
         assertTrue(appStatus.getStatus().isProcessing());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         
         appStatus.setError();
+        assertEquals(123, appStatus.getProcessingMsgId());
         assertEquals(1, appStatus.getStatus().getErrorCounter());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setProcessing();
+        appStatus.setProcessing(123);
+        assertEquals(123, appStatus.getProcessingMsgId());
         assertTrue(appStatus.getStatus().isProcessing());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         assertEquals(0, appStatus.getStatus().getErrorCounter());
         
         appStatus.getStatus().setFatalError();
+        assertEquals(123, appStatus.getProcessingMsgId());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setProcessing();
+        appStatus.setProcessing(123);
+        assertEquals(123, appStatus.getProcessingMsgId());
         assertFalse(appStatus.getStatus().isProcessing());
         assertEquals(timeBefore, appStatus.getStatus().getDateLastChangeMs());
         
         appStatus.setStopping();
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setProcessing();
+        appStatus.setProcessing(123);
+        assertEquals(123, appStatus.getProcessingMsgId());
         assertFalse(appStatus.getStatus().isProcessing());
         assertEquals(timeBefore, appStatus.getStatus().getDateLastChangeMs());
     }
@@ -145,7 +156,7 @@ public class AppStatusTest {
     public void testStopping() {
         long timeBefore = appStatus.getStatus().getDateLastChangeMs();
         
-        appStatus.setProcessing();
+        appStatus.setProcessing(123);
         assertFalse(appStatus.isShallBeStopped());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         appStatus.setStopping();

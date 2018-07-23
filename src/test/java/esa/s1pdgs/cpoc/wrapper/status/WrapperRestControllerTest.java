@@ -167,4 +167,25 @@ public class WrapperRestControllerTest extends RestControllerTest {
         assertTrue(diffTmAfter >= result.getBody().getTimeSinceLastChange());
     }
 
+    /**
+     * Test get status when fatal error
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testIsProcessing() throws Exception {
+        doReturn(1234L).when(appStatus).getProcessingMsgId();
+        request(get("/wrapper/process/1234"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("true"));
+        request(get("/wrapper/process/1235"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("false"));
+        doReturn(0L).when(appStatus).getProcessingMsgId();
+        request(get("/wrapper/process/1235"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("false"));
+
+    }
+
 }

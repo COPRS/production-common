@@ -300,7 +300,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         processor.processJob();
 
         verify(mqiService, times(1)).next();
-        verify(appStatus, times(1)).setProcessing();
+        verify(appStatus, times(1)).setProcessing(Mockito.eq(inputMessage.getIdentifier()));
         verify(appStatus, times(1)).setWaiting();
         doReturn(ApplicationLevel.L1).when(properties).getLevel();
     }

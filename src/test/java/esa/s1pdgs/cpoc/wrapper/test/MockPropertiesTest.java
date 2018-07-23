@@ -128,7 +128,8 @@ public class MockPropertiesTest {
 
     /**
      * Mock default status
-     * @throws AbstractCodedException 
+     * 
+     * @throws AbstractCodedException
      */
     protected void mockDefaultStatus() throws AbstractCodedException {
         doNothing().when(mqiStatusService).stop();
@@ -146,7 +147,7 @@ public class MockPropertiesTest {
             final int maxErrorCounter, final boolean shallBeStopped) {
 
         doNothing().when(appStatus).setWaiting();
-        doNothing().when(appStatus).setProcessing();
+        doNothing().when(appStatus).setProcessing(Mockito.anyLong());
         doNothing().when(appStatus).setStopping();
         doNothing().when(appStatus).setError();
         doNothing().when(appStatus).setShallBeStopped(Mockito.anyBoolean());

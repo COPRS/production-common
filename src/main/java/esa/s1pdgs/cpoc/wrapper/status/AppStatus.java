@@ -46,6 +46,11 @@ public class AppStatus {
     private final StatusService mqiStatusService;
 
     /**
+     * Identifier of the processing message
+     */
+    private long processingMsgId;
+
+    /**
      * Constructor
      * 
      * @param maxErrorCounter
@@ -58,6 +63,7 @@ public class AppStatus {
         this.shallBeStopped = false;
         this.maxErrorCounter = maxErrorCounter;
         this.mqiStatusService = mqiStatusService;
+        this.processingMsgId = 0;
     }
 
     /**
@@ -68,16 +74,25 @@ public class AppStatus {
     }
 
     /**
+     * @return the processingMsgId
+     */
+    public long getProcessingMsgId() {
+        return processingMsgId;
+    }
+
+    /**
      * Set application as waiting
      */
     public synchronized void setWaiting() {
+        this.processingMsgId = 0;
         this.status.setWaiting();
     }
 
     /**
      * Set application as processing
      */
-    public synchronized void setProcessing() {
+    public synchronized void setProcessing(final long processingMsgId) {
+        this.processingMsgId = processingMsgId;
         this.status.setProcessing();
     }
 

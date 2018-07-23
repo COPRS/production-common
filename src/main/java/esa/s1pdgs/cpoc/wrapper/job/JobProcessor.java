@@ -149,7 +149,7 @@ public class JobProcessor {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;
         }
-        appStatus.setProcessing();
+        appStatus.setProcessing(message.getIdentifier());
         LOGGER.info("Initializing job processing {}", message);
 
         // ----------------------------------------------------------
