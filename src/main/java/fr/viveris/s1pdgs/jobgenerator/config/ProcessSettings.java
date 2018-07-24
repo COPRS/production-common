@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 
 /**
  * Extraction class of "process" configuration properties
@@ -37,7 +37,7 @@ public class ProcessSettings {
 	/**
 	 * Process level
 	 */
-	private ProcessLevel level;
+	private ApplicationLevel level;
 
 	/**
 	 * Log level for the sdtout
@@ -135,7 +135,7 @@ public class ProcessSettings {
 	/**
 	 * @return the level
 	 */
-	public ProcessLevel getLevel() {
+	public ApplicationLevel getLevel() {
 		return level;
 	}
 
@@ -143,7 +143,7 @@ public class ProcessSettings {
 	 * @param level
 	 *            the level to set
 	 */
-	public void setLevel(final ProcessLevel level) {
+	public void setLevel(final ApplicationLevel level) {
 		this.level = level;
 	}
 

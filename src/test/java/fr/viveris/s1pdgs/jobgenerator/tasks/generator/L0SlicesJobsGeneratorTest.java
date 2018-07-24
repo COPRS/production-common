@@ -32,14 +32,12 @@ import fr.viveris.s1pdgs.jobgenerator.config.AppConfig;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
-import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
-import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
@@ -53,6 +51,7 @@ import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.TaskTable;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.service.metadata.MetadataService;
+import fr.viveris.s1pdgs.jobgenerator.service.mqi.OutputProcuderFactory;
 import fr.viveris.s1pdgs.jobgenerator.utils.DateUtils;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestGenericUtils;
 
@@ -77,7 +76,7 @@ public class L0SlicesJobsGeneratorTest {
 	private JobGeneratorSettings jobGeneratorSettings;
 
 	@Mock
-	private JobsProducer kafkaJobsSender;
+	private OutputProcuderFactory JobsSender;
 
 	private TaskTable expectedTaskTable;
 
@@ -105,7 +104,7 @@ public class L0SlicesJobsGeneratorTest {
 		this.mockKafkaSender();
 
 		JobsGeneratorFactory factory = new JobsGeneratorFactory(processSettings, jobGeneratorSettings, xmlConverter,
-				metadataService, kafkaJobsSender);
+				metadataService, JobsSender);
 		generator = (L0SlicesJobsGenerator) factory
 				.createJobGeneratorForL0Slice(new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
 
@@ -113,7 +112,7 @@ public class L0SlicesJobsGeneratorTest {
 		L0SliceProduct productA = new L0SliceProduct(
 				"S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
 				DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"), sliceA);
-		jobA = new Job<>(productA, new ResumeDetails("topic", "dto"));
+		jobA = new Job<>(productA, null);
 	}
 
 	private void mockProcessSettings() {
@@ -122,7 +121,7 @@ public class L0SlicesJobsGeneratorTest {
 			return r;
 		}).when(processSettings).getParams();
 		Mockito.doAnswer(i -> {
-			return ProcessLevel.L1;
+			return ApplicationLevel.L1;
 		}).when(processSettings).getLevel();
 		Mockito.doAnswer(i -> {
 			Map<String, String> r = new HashMap<String, String>(5);
@@ -250,7 +249,7 @@ public class L0SlicesJobsGeneratorTest {
 				return null;
 			}).when(this.metadataService).search(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyString(),
 					Mockito.anyInt());
-		} catch (MetadataException e) {
+		} catch (JobGenMetadataException e) {
 			fail(e.getMessage());
 		}
 	}
@@ -260,15 +259,15 @@ public class L0SlicesJobsGeneratorTest {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.writeValue(new File("./tmp/jobDtoL1.json"), i.getArgument(0));
 			return null;
-		}).when(this.kafkaJobsSender).send(Mockito.any());
+		}).when(this.JobsSender).sendJob(Mockito.any(),Mockito.any());
 	}
 
 	@Test
-	public void testPresearchWhenSliceMissing() throws InputsMissingException, MetadataException {
-		doThrow(new MetadataException("test ex")).when(this.metadataService).getSlice(Mockito.anyString(),
+	public void testPresearchWhenSliceMissing() throws JobGenInputsMissingException, JobGenMetadataException {
+		doThrow(new JobGenMetadataException("test ex")).when(this.metadataService).getSlice(Mockito.anyString(),
 				Mockito.anyString());
 
-		thrown.expect(InputsMissingException.class);
+		thrown.expect(JobGenInputsMissingException.class);
 		thrown.expectMessage("Missing inputs");
 		thrown.expect(hasProperty("missingMetadata", hasKey(jobA.getProduct().getIdentifier())));
 		thrown.expect(hasProperty("missingMetadata", hasValue(containsString("lice: test ex"))));
@@ -276,11 +275,11 @@ public class L0SlicesJobsGeneratorTest {
 	}
 
 	@Test
-	public void testPresearchWhenAcnMissing() throws InputsMissingException, MetadataException {
-		doThrow(new MetadataException("test ex")).when(this.metadataService).getFirstACN(Mockito.anyString(),
+	public void testPresearchWhenAcnMissing() throws JobGenInputsMissingException, JobGenMetadataException {
+		doThrow(new JobGenMetadataException("test ex")).when(this.metadataService).getFirstACN(Mockito.anyString(),
 				Mockito.anyString());
 
-		thrown.expect(InputsMissingException.class);
+		thrown.expect(JobGenInputsMissingException.class);
 		thrown.expectMessage("Missing inputs");
 		thrown.expect(hasProperty("missingMetadata", hasKey(jobA.getProduct().getIdentifier())));
 		thrown.expect(hasProperty("missingMetadata", hasValue(containsString("CNs: test ex"))));
@@ -323,7 +322,7 @@ public class L0SlicesJobsGeneratorTest {
 			generator.addJob(jobA);
 			generator.run();
 
-			Mockito.verify(kafkaJobsSender).send(Mockito.any());
+			Mockito.verify(JobsSender).sendJob(Mockito.any(),Mockito.any());
 
 			// As job is not removed from cached if no another run is launch we can it
 			assertFalse(generator.cachedJobs.containsKey("SESSION_1"));

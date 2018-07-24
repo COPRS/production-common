@@ -19,10 +19,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberTaskTablesReachException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedJobsReachException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
@@ -106,7 +106,7 @@ public class AbstractJobDispatcherTest {
 		try {
 			dispatcher.initTaskTables();
 			fail("An exception shall be raised");
-		} catch (MaxNumberTaskTablesReachException e) {
+		} catch (JobGenMaxNumberTaskTablesReachException e) {
 			assertTrue(e.getMessage().contains("Too much task"));
 		} catch (AbstractCodedException e) {
 			fail("Invalid raised exception: " + e.getMessage());
@@ -125,7 +125,7 @@ public class AbstractJobDispatcherTest {
 			return null;
 		}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(Mockito.any(), Mockito.any());
 
-		// Intitialize
+		// Initialize
 		AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
 		try {
 			dispatcher.initTaskTables();
@@ -156,13 +156,13 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<String> {
 	}
 
 	@Override
-	protected AbstractJobsGenerator<String> createJobGenerator(File xmlFile) throws BuildTaskTableException {
+	protected AbstractJobsGenerator<String> createJobGenerator(File xmlFile) throws JobGenBuildTaskTableException {
 		this.counter++;
 		return null;
 	}
 
 	@Override
-	public void dispatch(Job<String> job) throws MaxNumberCachedJobsReachException {
+	public void dispatch(Job<String> job) throws JobGenMaxNumberCachedJobsReachException {
 
 	}
 

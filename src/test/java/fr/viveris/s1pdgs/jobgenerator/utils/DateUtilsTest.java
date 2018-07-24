@@ -2,7 +2,7 @@ package fr.viveris.s1pdgs.jobgenerator.utils;
 
 import org.junit.Test;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
 /**
  * 

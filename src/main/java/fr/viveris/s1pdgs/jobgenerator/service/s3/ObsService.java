@@ -5,8 +5,8 @@ import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
-import fr.viveris.s1pdgs.jobgenerator.exception.ObsUnknownObjectException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -47,12 +47,12 @@ public class ObsService {
 	 * @return
 	 * @throws ObjectStorageException
 	 */
-	public boolean exist(ProductFamily family, String key) throws ObjectStorageException {
+	public boolean exist(ProductFamily family, String key) throws ObsException {
 		ObsObject object = new ObsObject(key, getObsFamily(family));
 		try {
 			return client.doesObjectExist(object);
 		} catch (SdkClientException exc) {
-			throw new ObjectStorageException(family, key, exc);
+			throw new ObsException(family, key, exc);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class ObsService {
 	 * @throws ObsUnknownObjectException
 	 */
 	public File downloadFile(ProductFamily family, String key, String targetDir)
-			throws ObjectStorageException, ObsUnknownObjectException {
+			throws ObsException, ObsUnknownObject {
 		// If case of session we ignore folder in the key
 		String id = key;
 		if (family == ProductFamily.EDRS_SESSION) {
@@ -81,10 +81,10 @@ public class ObsService {
 		try {
 			int nbObjects = client.downloadObject(object);
 			if (nbObjects <= 0) {
-				throw new ObsUnknownObjectException(family, key);
+				throw new ObsUnknownObject(family, key);
 			}
 		} catch (SdkClientException exc) {
-			throw new ObjectStorageException(family, key, exc);
+			throw new ObsException(family, key, exc);
 		}
 		// Get file
 		return new File(targetDir + id);
@@ -98,12 +98,12 @@ public class ObsService {
 	 * @param file
 	 * @throws ObjectStorageException
 	 */
-	public void uploadFile(ProductFamily family, String key, File file) throws ObjectStorageException {
+	public void uploadFile(ProductFamily family, String key, File file) throws ObsException {
 		ObsUploadObject object = new ObsUploadObject(key, getObsFamily(family), file);
 		try {
 			client.uploadObject(object);
 		} catch (SdkClientException exc) {
-			throw new ObjectStorageException(family, key, exc);
+			throw new ObsException(family, key, exc);
 		}
 	}
 

@@ -33,25 +33,24 @@ import fr.viveris.s1pdgs.jobgenerator.config.AppConfig;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
-import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
-import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
-import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedJobsReachException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import fr.viveris.s1pdgs.jobgenerator.model.GenerationStatusEnum;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
-import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.model.ProductMode;
-import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadataQuery;
 import fr.viveris.s1pdgs.jobgenerator.model.product.AbstractProduct;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.TaskTable;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.service.metadata.MetadataService;
+import fr.viveris.s1pdgs.jobgenerator.service.mqi.OutputProcuderFactory;
 import fr.viveris.s1pdgs.jobgenerator.utils.TestGenericUtils;
 
 public class AbstractJobsGeneratorTest {
@@ -75,7 +74,7 @@ public class AbstractJobsGeneratorTest {
 	private JobGeneratorSettings jobGeneratorSettings;
 
 	@Mock
-	private JobsProducer kafkaJobsSender;
+	private OutputProcuderFactory JobsSender;
 
 	private int nbLoopMetadata;
 
@@ -111,7 +110,7 @@ public class AbstractJobsGeneratorTest {
 		this.mockKafkaSender();
 
 		generator = new AbstractJobsGeneratorImpl(xmlConverter, metadataService, processSettings, jobGeneratorSettings,
-				kafkaJobsSender);
+				JobsSender);
 		generator.initialize(new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
 		generator.setMode(ProductMode.SLICING);
 	}
@@ -131,7 +130,7 @@ public class AbstractJobsGeneratorTest {
 			return r;
 		}).when(processSettings).getOutputregexps();
 		Mockito.doAnswer(i -> {
-			return ProcessLevel.L0;
+			return ApplicationLevel.L0;
 		}).when(processSettings).getLevel();
 	}
 
@@ -229,7 +228,7 @@ public class AbstractJobsGeneratorTest {
 				return null;
 			}).when(this.metadataService).search(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyString(),
 					Mockito.anyInt());
-		} catch (MetadataException e) {
+		} catch (JobGenMetadataException e) {
 			fail(e.getMessage());
 		}
 	}
@@ -239,7 +238,7 @@ public class AbstractJobsGeneratorTest {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.writeValue(new File("./tmp/jobDtoGeneric.json"), i.getArgument(0));
 			return null;
-		}).when(this.kafkaJobsSender).send(Mockito.any());
+		}).when(this.JobsSender).sendJob(Mockito.any(), Mockito.any());
 	}
 
 	// ---------------------------------------------------------
@@ -254,9 +253,9 @@ public class AbstractJobsGeneratorTest {
 	@Test
 	public void testAddJobs() {
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
+		Job<String> job1 = new Job<String>(p1, null);
 		AstractProductImpl p2 = new AstractProductImpl("SESSION_2", "A", "S1A", new Date(), new Date(), "product2");
-		Job<String> job2 = new Job<String>(p2, new ResumeDetails("topic", "dto"));
+		Job<String> job2 = new Job<String>(p2, null);
 
 		try {
 			generator.addJob(job1);
@@ -272,26 +271,26 @@ public class AbstractJobsGeneratorTest {
 			generator.addJob(job2);
 			assertEquals(2, generator.cachedJobs.size());
 			assertTrue(generator.cachedJobs.containsKey("SESSION_2"));
-		} catch (MaxNumberCachedJobsReachException e) {
+		} catch (JobGenMaxNumberCachedJobsReachException e) {
 			fail("SessionProcessingException raised: " + e.getMessage());
 		}
 	}
 
-	@Test(expected = MaxNumberCachedJobsReachException.class)
-	public void testAddJobsMaxNumber() throws MaxNumberCachedJobsReachException {
+	@Test(expected = JobGenMaxNumberCachedJobsReachException.class)
+	public void testAddJobsMaxNumber() throws JobGenMaxNumberCachedJobsReachException {
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
+		Job<String> job1 = new Job<String>(p1, null);
 		AstractProductImpl p2 = new AstractProductImpl("SESSION_2", "A", "S1A", new Date(), new Date(), "product2");
-		Job<String> job2 = new Job<String>(p2, new ResumeDetails("topic", "dto"));
+		Job<String> job2 = new Job<String>(p2, null);
 		AstractProductImpl p3 = new AstractProductImpl("SESSION_3", "A", "S1A", new Date(), new Date(), "product3");
-		Job<String> job3 = new Job<String>(p3, new ResumeDetails("topic", "dto"));
+		Job<String> job3 = new Job<String>(p3, null);
 
 		try {
 			generator.addJob(job1);
 			assertEquals(1, generator.cachedJobs.size());
 			assertTrue(generator.cachedJobs.containsKey("SESSION_1"));
 			generator.addJob(job2);
-		} catch (MaxNumberCachedJobsReachException e) {
+		} catch (JobGenMaxNumberCachedJobsReachException e) {
 			fail("SessionProcessingException raised: " + e.getMessage());
 		}
 
@@ -301,16 +300,16 @@ public class AbstractJobsGeneratorTest {
 	@Test
 	public void testAddSessionExist() {
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
+		Job<String> job1 = new Job<String>(p1, null);
 		AstractProductImpl p2 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product2");
-		Job<String> job2 = new Job<String>(p2, new ResumeDetails("topic", "dto"));
+		Job<String> job2 = new Job<String>(p2, null);
 
 		try {
 			generator.addJob(job1);
 			generator.addJob(job2);
 			assertEquals(1, generator.cachedJobs.size());
 			assertTrue(generator.cachedJobs.containsKey("SESSION_1"));
-		} catch (MaxNumberCachedJobsReachException e) {
+		} catch (JobGenMaxNumberCachedJobsReachException e) {
 			fail("SessionProcessingException raised: " + e.getMessage());
 		}
 	}
@@ -323,12 +322,13 @@ public class AbstractJobsGeneratorTest {
 	public void testRun() {
 		try {
 			AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-			Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
+			
+			Job<String> job1 = new Job<String>(p1, null);
 
 			generator.addJob(job1);
 			generator.run();
 
-			Mockito.verify(kafkaJobsSender).send(Mockito.any());
+			Mockito.verify(JobsSender).sendJob(Mockito.any(),Mockito.any());
 
 			// As job is not removed from cached if no another run is launch we can it
 			assertFalse(generator.cachedJobs.containsKey("SESSION_1"));
@@ -344,13 +344,13 @@ public class AbstractJobsGeneratorTest {
 	// ---------------------------------------------------------
 
 	@Test
-	public void testInitializeWhenTaskTableIOException() throws IOException, JAXBException, BuildTaskTableException {
+	public void testInitializeWhenTaskTableIOException() throws IOException, JAXBException, JobGenBuildTaskTableException {
 		doThrow(new IOException("IO exception raised")).when(xmlConverter).convertFromXMLToObject(Mockito.anyString());
 		AbstractJobsGeneratorImpl gen = new AbstractJobsGeneratorImpl(xmlConverter, metadataService, processSettings,
-				jobGeneratorSettings, kafkaJobsSender);
+				jobGeneratorSettings, JobsSender);
 		generator.setMode(ProductMode.SLICING);
 
-		thrown.expect(BuildTaskTableException.class);
+		thrown.expect(JobGenBuildTaskTableException.class);
 		thrown.expect(hasProperty("taskTable", is("IW_RAW__0_GRDH_1.xml")));
 		thrown.expectMessage("IO exception raised");
 		thrown.expectCause(isA(IOException.class));
@@ -358,14 +358,14 @@ public class AbstractJobsGeneratorTest {
 	}
 
 	@Test
-	public void testInitializeWhenTaskTableJAXBException() throws IOException, JAXBException, BuildTaskTableException {
+	public void testInitializeWhenTaskTableJAXBException() throws IOException, JAXBException, JobGenBuildTaskTableException {
 		doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
 				.convertFromXMLToObject(Mockito.anyString());
 		AbstractJobsGeneratorImpl gen = new AbstractJobsGeneratorImpl(xmlConverter, metadataService, processSettings,
-				jobGeneratorSettings, kafkaJobsSender);
+				jobGeneratorSettings, JobsSender);
 		generator.setMode(ProductMode.SLICING);
 
-		thrown.expect(BuildTaskTableException.class);
+		thrown.expect(JobGenBuildTaskTableException.class);
 		thrown.expect(hasProperty("taskTable", is("IW_RAW__0_GRDH_1.xml")));
 		thrown.expectMessage("JAXB exception raised");
 		thrown.expectCause(isA(JAXBException.class));
@@ -381,7 +381,7 @@ public class AbstractJobsGeneratorTest {
 		doReturn(new WaitTempo(100, 1)).when(jobGeneratorSettings).getWaitprimarycheck();
 
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
+		Job<String> job1 = new Job<String>(p1, null);
 		generator.cachedJobs.put("test-job", job1);
 
 		// here nbretries = 1
@@ -402,7 +402,7 @@ public class AbstractJobsGeneratorTest {
 		doReturn(new WaitTempo(100, 2)).when(jobGeneratorSettings).getWaitprimarycheck();
 
 		AstractProductImpl p1 = new AstractProductImpl("SESSION_1", "A", "S1A", new Date(), new Date(), "product1");
-		Job<String> job1 = new Job<String>(p1, new ResumeDetails("topic", "dto"));
+		Job<String> job1 = new Job<String>(p1, null);
 		generator.cachedJobs.put("test-job", job1);
 
 		// here nbretries = 0
@@ -432,15 +432,15 @@ class AbstractJobsGeneratorImpl extends AbstractJobsGenerator<String> {
 	private int counterJobDto;
 
 	public AbstractJobsGeneratorImpl(XmlConverter xmlConverter, MetadataService metadataService,
-			ProcessSettings l0ProcessSettings, JobGeneratorSettings taskTablesSettings, JobsProducer kafkaJobsSender) {
-		super(xmlConverter, metadataService, l0ProcessSettings, taskTablesSettings, kafkaJobsSender);
+			ProcessSettings l0ProcessSettings, JobGeneratorSettings taskTablesSettings, OutputProcuderFactory JobsSender) {
+		super(xmlConverter, metadataService, l0ProcessSettings, taskTablesSettings, JobsSender);
 		counterPreSearch = 0;
 		counterCustomJobOrder = 0;
 		counterJobDto = 0;
 	}
 
 	@Override
-	protected void preSearch(Job<String> job) throws InputsMissingException {
+	protected void preSearch(Job<String> job) throws JobGenInputsMissingException {
 		counterPreSearch++;
 
 	}
@@ -452,7 +452,7 @@ class AbstractJobsGeneratorImpl extends AbstractJobsGenerator<String> {
 	}
 
 	@Override
-	protected void customJobDto(Job<String> job, JobDto dto) {
+	protected void customJobDto(Job<String> job, LevelJobDto dto) {
 		counterJobDto++;
 
 	}

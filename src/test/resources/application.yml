@@ -12,21 +12,6 @@ metadata:
   rest-api_nb-retry: 3
   rest-api_tempo-retry-ms: 1000
 
-# KAFKA
-kafka:
-  bootstrap-servers: ${spring.embedded.kafka.brokers}
-  group-id: level0-jobgenerators
-  client-id: l0-job-generator
-  poll-timeout: 500
-  producer-retries: 10
-  producer-request-timeout-ms: 2000
-  topics:
-    edrs-sessions: t-pdgs-edrs-sessions
-    l0-slices: t-pdgs-l0-slices
-    lx-jobs: t-pdgs-l0-jobs
-  enable-consumer:
-    edrs-sessions: true
-    l0-slices: false
     
 level0:
   maxnumberofsessions: 20
@@ -61,7 +46,12 @@ process:
   loglevelstderr: INFO
   processingstation: WILE
   outputregexpstr: "SM_RAW__0S:^S1[A-B]_S[1-6]_RAW__0S.*$||AN_RAW__0S:^S1[A-B]_N[1-6]_RAW__0S.*$||ZS_RAW__0S:^S1[A-B]_Z[1-6]_RAW__0S.*$||REP_L0PSA_:^S1[A|B|_]_OPER_REP_ACQ.*$||REP_EFEP_:^S1[A|B|_]_OPER_REP_PASS.*.EOF$"
-  
+  mqi:
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempo-retry-ms: 1000
+  fixed-delay-ms: 200
+    
 pattern-l0-slices:
   regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
   m-group-sat-id: 2

@@ -10,9 +10,19 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedJobsReachException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedSessionsReachException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenerationException;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 
 /**
  * Test the Exceptions
@@ -55,7 +65,7 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testBuildTaskTableException() {
-		JobGenerationException e1 = new BuildTaskTableException("tasktable", "error message",
+		JobGenerationException e1 = new JobGenBuildTaskTableException("tasktable", "error message",
 				new Throwable("throwable message"));
 
 		assertEquals("tasktable", e1.getTaskTable());
@@ -73,7 +83,7 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testObsS3Exception() {
-		ObjectStorageException e1 = new ObjectStorageException(ProductFamily.L0_PRODUCT, "key1", new Throwable("throwable message"));
+		ObsException e1 = new ObsException(ProductFamily.L0_PRODUCT, "key1", new Throwable("throwable message"));
 
 		assertEquals("key1", e1.getKey());
 		assertEquals(ProductFamily.L0_PRODUCT, e1.getFamily());
@@ -92,7 +102,7 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testObsUnknownObjectException() {
-		ObsUnknownObjectException e1 = new ObsUnknownObjectException(ProductFamily.EDRS_SESSION, "key1");
+		ObsUnknownObject e1 = new ObsUnknownObject(ProductFamily.EDRS_SESSION, "key1");
 
 		assertEquals("key1", e1.getKey());
 		assertEquals(ProductFamily.EDRS_SESSION, e1.getFamily());
@@ -109,7 +119,7 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testMissingRoutingEntryException() {
-		MissingRoutingEntryException e1 = new MissingRoutingEntryException("erreur message");
+		JobGenMissingRoutingEntryException e1 = new JobGenMissingRoutingEntryException("erreur message");
 
 		assertEquals(ErrorCode.MISSING_ROUTING_ENTRY, e1.getCode());
 		assertEquals("erreur message", e1.getMessage());
@@ -124,7 +134,7 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testMaxNumberTaskTablesReachException() {
-		MaxNumberTaskTablesReachException e1 = new MaxNumberTaskTablesReachException("erreur message");
+		JobGenMaxNumberTaskTablesReachException e1 = new JobGenMaxNumberTaskTablesReachException("erreur message");
 
 		assertEquals(ErrorCode.MAX_NUMBER_TASKTABLE_REACH, e1.getCode());
 		assertEquals("erreur message", e1.getMessage());
@@ -139,7 +149,7 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testMaxNumberCachedSessionsReachException() {
-		MaxNumberCachedSessionsReachException e1 = new MaxNumberCachedSessionsReachException("erreur message");
+		JobGenMaxNumberCachedSessionsReachException e1 = new JobGenMaxNumberCachedSessionsReachException("erreur message");
 
 		assertEquals(ErrorCode.MAX_NUMBER_CACHED_SESSIONS_REACH, e1.getCode());
 		assertEquals("erreur message", e1.getMessage());
@@ -154,7 +164,7 @@ public class TestExceptions {
 	 */
 	@Test
 	public void testMaxNumberCachedJobsReachException() {
-		MaxNumberCachedJobsReachException e1 = new MaxNumberCachedJobsReachException("task-table-1", "erreur message");
+		JobGenMaxNumberCachedJobsReachException e1 = new JobGenMaxNumberCachedJobsReachException("task-table-1", "erreur message");
 
 		assertEquals(ErrorCode.MAX_NUMBER_CACHED_JOB_REACH, e1.getCode());
 		assertEquals("task-table-1", e1.getTaskTable());
@@ -166,26 +176,7 @@ public class TestExceptions {
 		assertTrue(str1.contains("[msg erreur message]"));
 	}
 
-	/**
-	 * Test the KafkaSendException
-	 */
-	@Test
-	public void testKafkaSendException() {
-		KafkaSendException e1 = new KafkaSendException("topic-kafka", "dto-object", "product-name", "error message",
-				new Throwable("throwable message"));
 
-		assertEquals("topic-kafka", e1.getTopic());
-		assertEquals("dto-object", e1.getDto());
-		assertEquals("product-name", e1.getProductName());
-		assertEquals(ErrorCode.KAFKA_SEND_ERROR, e1.getCode());
-		assertEquals("error message", e1.getMessage());
-		assertEquals("throwable message", e1.getCause().getMessage());
-
-		String str1 = e1.getLogMessage();
-		assertTrue(str1.contains("[resuming " + (new ResumeDetails("topic-kafka", "dto-object")).toString() + "]"));
-		assertTrue(str1.contains("[productName product-name]"));
-		assertTrue(str1.contains("[msg error message]"));
-	}
 
 	/**
 	 * Test the InvalidFormatProduct
@@ -210,7 +201,7 @@ public class TestExceptions {
 		Map<String, String> data = new HashMap<>();
 		data.put("key1", "value1");
 		data.put("key3", "");
-		InputsMissingException e1 = new InputsMissingException(data);
+		JobGenInputsMissingException e1 = new JobGenInputsMissingException(data);
 
 		assertTrue(e1.getMissingMetadata().size() == 2);
 		assertEquals(ErrorCode.MISSING_INPUT, e1.getCode());

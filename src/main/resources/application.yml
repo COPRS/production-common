@@ -10,21 +10,7 @@ metadata:
   host: ${catalog_rest_host:metadata-catalog-svc:8080}
   rest-api_nb-retry: ${job_rest-api_nb-retry:3}
   rest-api_tempo-retry-ms: ${job_rest-api_tempo-retry-ms:1000}
-  
-kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
-  group-id: ${job_kafka_group:jobgenerators}
-  client-id: ${job_kafka_client:job-generator}
-  poll-timeout: ${job_kafka_poll-timeout:500}
-  producer-retries: ${job_kafka_producer-retries:10}
-  producer-request-timeout-ms: ${job_kafka_producer-request-timeout-ms:2000}
-  topics:
-    edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
-    l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}
-    lx-jobs: ${job_kafka_topic_lx_jobs}
-  enable-consumer:
-    edrs-sessions: ${job_kafka_enable-consumer_edrs-sessions:true}
-    l0-slices: ${job_kafka_enable-consumer_l0-slices:false}
+ 
   
 job-generator:
   diroftasktables: ${job_directoryoftasktables}
@@ -51,6 +37,11 @@ process:
   loglevelstderr: ${job_process_loglevelstderr:INFO}
   processingstation: ${job_process_processingstation}
   outputregexpstr: ${job_process_outputregexps}
+  mqi:
+    host-uri: ${job_process_mqi_host-uri:http://localhost:8081}
+    max-retries: ${job_process_mqi_max-retries:3}
+    tempo-retry-ms: ${job_process_mqi_tempo-retry:1000}
+  fixed-delay-ms: ${job_process_fixed-delay-ms:200}
     
 level0:
   maxnumberofsessions: ${l0_maxnumberofsessions:20}

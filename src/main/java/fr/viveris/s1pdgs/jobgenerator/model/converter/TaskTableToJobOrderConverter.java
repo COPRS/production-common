@@ -1,6 +1,6 @@
 package fr.viveris.s1pdgs.jobgenerator.model.converter;
 
-import fr.viveris.s1pdgs.jobgenerator.model.ProcessLevel;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.AbstractJobOrderConf;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderBreakpoint;
@@ -39,7 +39,7 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
 		final TaskTableTaskToJobOrderProc procConv = new TaskTableTaskToJobOrderProc();
 
 		final JobOrder order = new JobOrder();
-		AbstractJobOrderConf conf = tObj.getLevel() == ProcessLevel.L0 ? new L0JobOrderConf() : new L1JobOrderConf();
+		AbstractJobOrderConf conf = tObj.getLevel() == ApplicationLevel.L0 ? new L0JobOrderConf() : new L1JobOrderConf();
 		conf.setProcessorName(tObj.getProcessorName());
 		conf.setVersion(tObj.getVersion());
 		if (tObj.getTest() == TaskTableTestEnum.YES) {

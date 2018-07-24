@@ -12,7 +12,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
@@ -26,7 +26,7 @@ import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
  *
  */
 @Service
-@ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "edrs-sessions")
+@ConditionalOnProperty(name="process.level", havingValue="L0")
 public class EdrsSessionJobDispatcher extends AbstractJobsDispatcher<EdrsSession> {
 
 	/**

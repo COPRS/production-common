@@ -29,11 +29,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
-import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.l1routing.L1Routing;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
@@ -133,7 +132,7 @@ public class L0SliceJobsDispatcherTest {
 				}
 				return this.mockGeneratorOther;
 			}).when(jobsGeneratorFactory).createJobGeneratorForL0Slice(Mockito.any());
-		} catch (BuildTaskTableException e) {
+		} catch (JobGenBuildTaskTableException e) {
 			fail("Exception occurred: " + e.getMessage());
 		}
 
@@ -256,7 +255,7 @@ public class L0SliceJobsDispatcherTest {
 			L0SliceProduct productA = new L0SliceProduct(
 					"S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
 					DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"), sliceA);
-			Job<L0Slice> jobA = new Job<L0Slice>(productA, new ResumeDetails("topic", "dto"));
+			Job<L0Slice> jobA = new Job<L0Slice>(productA, null);
 			this.dispatcher.initialize();
 			this.dispatcher.dispatch(jobA);
 			verify(mockGeneratorOther, never()).addJob(Mockito.any());
@@ -274,7 +273,7 @@ public class L0SliceJobsDispatcherTest {
 			L0SliceProduct productA = new L0SliceProduct(
 					"S1B_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "B", "S1",
 					DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"), sliceA);
-			Job<L0Slice> jobA = new Job<L0Slice>(productA, new ResumeDetails("topic", "dto"));
+			Job<L0Slice> jobA = new Job<L0Slice>(productA, null);
 			this.dispatcher.initialize();
 			this.dispatcher.dispatch(jobA);
 			verify(mockGeneratorOther, never()).addJob(Mockito.any());
@@ -292,7 +291,7 @@ public class L0SliceJobsDispatcherTest {
 			L0SliceProduct productA = new L0SliceProduct(
 					"S1A_EW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
 					DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"), sliceA);
-			Job<L0Slice> jobA = new Job<L0Slice>(productA, new ResumeDetails("topic", "dto"));
+			Job<L0Slice> jobA = new Job<L0Slice>(productA, null);
 			this.dispatcher.initialize();
 			this.dispatcher.dispatch(jobA);
 			verify(mockGeneratorIW, never()).addJob(Mockito.any());
@@ -309,7 +308,7 @@ public class L0SliceJobsDispatcherTest {
 		L0SliceProduct productA = new L0SliceProduct(
 				"S1A_EW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", "A", "S1",
 				DateUtils.convertDateIso("20171213T142312"), DateUtils.convertDateIso("20171213T142312"), sliceA);
-		Job<L0Slice> jobA = new Job<L0Slice>(productA, new ResumeDetails("topic", "dto"));
+		Job<L0Slice> jobA = new Job<L0Slice>(productA, null);
 		this.dispatcher.initialize();
 		this.dispatcher.dispatch(jobA);
 	}

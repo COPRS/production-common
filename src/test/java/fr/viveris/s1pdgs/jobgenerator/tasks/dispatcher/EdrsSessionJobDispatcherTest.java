@@ -22,12 +22,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.BuildTaskTableException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberCachedJobsReachException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedJobsReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
-import fr.viveris.s1pdgs.jobgenerator.model.ResumeDetails;
 import fr.viveris.s1pdgs.jobgenerator.model.product.EdrsSessionProduct;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.EdrsSessionJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
@@ -106,11 +105,11 @@ public class EdrsSessionJobDispatcherTest {
 			doAnswer(i -> {
 				return null;
 			}).when(jobsGeneratorFactory).createJobGeneratorForEdrsSession(Mockito.eq(taskTable1));
-		} catch (BuildTaskTableException e1) {
+		} catch (JobGenBuildTaskTableException e1) {
 			fail("Invalid raised exception: " + e1.getMessage());
 		}
 
-		// Intitialize
+		// Initialize
 		EdrsSessionJobDispatcher dispatcher = this.createSessionDispatcher();
 		try {
 			dispatcher.createJobGenerator(taskTable1);
@@ -137,7 +136,7 @@ public class EdrsSessionJobDispatcherTest {
 			doAnswer(i -> {
 				return null;
 			}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(Mockito.any(), Mockito.any());
-		} catch (BuildTaskTableException e1) {
+		} catch (JobGenBuildTaskTableException e1) {
 			fail("Invalid raised exception: " + e1.getMessage());
 		}
 
@@ -164,7 +163,7 @@ public class EdrsSessionJobDispatcherTest {
 	public void testDispatch() {
 		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
-		Job<EdrsSession> job1 = new Job<EdrsSession>(p, new ResumeDetails("topic", "dto"));
+		Job<EdrsSession> job1 = new Job<EdrsSession>(p, null);
 
 		// Mocks
 		this.mockJobGeneratorSettings();
@@ -176,7 +175,7 @@ public class EdrsSessionJobDispatcherTest {
 				return null;
 			}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(any(), any());
 			doNothing().when(mockGenerator).addJob(eq(job1));
-		} catch (BuildTaskTableException | MaxNumberCachedJobsReachException e1) {
+		} catch (JobGenBuildTaskTableException | JobGenMaxNumberCachedJobsReachException e1) {
 			fail("Invalid raised exception: " + e1.getMessage());
 		}
 
@@ -203,11 +202,11 @@ public class EdrsSessionJobDispatcherTest {
 	 * @throws MaxNumberCachedJobsReachException
 	 * @throws JobDispatcherException 
 	 */
-	@Test(expected = MaxNumberCachedJobsReachException.class)
+	@Test(expected = JobGenMaxNumberCachedJobsReachException.class)
 	public void testDispatchThrow() throws AbstractCodedException {
 		File taskTable1 = new File("./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
 		EdrsSessionProduct p = new EdrsSessionProduct("TEST", "A", "S1A", new Date(), new Date(), new EdrsSession());
-		Job<EdrsSession> job1 = new Job<EdrsSession>(p, new ResumeDetails("topic", "dto"));
+		Job<EdrsSession> job1 = new Job<EdrsSession>(p, null);
 
 		// Mocks
 		this.mockJobGeneratorSettings();
@@ -218,8 +217,8 @@ public class EdrsSessionJobDispatcherTest {
 			doAnswer(i -> {
 				return null;
 			}).when(jobGenerationTaskScheduler).scheduleAtFixedRate(any(), any());
-			doThrow(MaxNumberCachedJobsReachException.class).when(mockGenerator).addJob(eq(job1));
-		} catch (BuildTaskTableException | MaxNumberCachedJobsReachException e1) {
+			doThrow(JobGenMaxNumberCachedJobsReachException.class).when(mockGenerator).addJob(eq(job1));
+		} catch (JobGenBuildTaskTableException | JobGenMaxNumberCachedJobsReachException e1) {
 			fail("Invalid raised exception: " + e1.getMessage());
 		}
 

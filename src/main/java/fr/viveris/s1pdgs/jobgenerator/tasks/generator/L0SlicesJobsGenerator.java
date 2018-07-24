@@ -5,12 +5,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
-import fr.viveris.s1pdgs.jobgenerator.controller.JobsProducer;
-import fr.viveris.s1pdgs.jobgenerator.controller.dto.JobDto;
-import fr.viveris.s1pdgs.jobgenerator.exception.InputsMissingException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MetadataException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrder;
 import fr.viveris.s1pdgs.jobgenerator.model.joborder.JobOrderProcParam;
@@ -21,6 +20,7 @@ import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.service.metadata.MetadataService;
+import fr.viveris.s1pdgs.jobgenerator.service.mqi.OutputProcuderFactory;
 
 /**
  * Customization of the job generator for L0 slice products
@@ -36,19 +36,19 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 	 * @param metadataService
 	 * @param l0ProcessSettings
 	 * @param taskTablesSettings
-	 * @param kafkaJobsSender
+	 * @param JobsSender
 	 */
 	public L0SlicesJobsGenerator(final XmlConverter xmlConverter, final MetadataService metadataService,
 			final ProcessSettings l0ProcessSettings, final JobGeneratorSettings taskTablesSettings,
-			final JobsProducer kafkaJobsSender) {
-		super(xmlConverter, metadataService, l0ProcessSettings, taskTablesSettings, kafkaJobsSender);
+			final OutputProcuderFactory outputFactory) {
+		super(xmlConverter, metadataService, l0ProcessSettings, taskTablesSettings, outputFactory);
 	}
 
 	/**
 	 * Check the product and retrieve usefull information before searching inputs
 	 */
 	@Override
-	protected void preSearch(final Job<L0Slice> job) throws InputsMissingException {
+	protected void preSearch(final Job<L0Slice> job) throws JobGenInputsMissingException {
 		Map<String, String> missingMetadata = new HashMap<>();
 		// Retrieve instrument configuration id and slice number
 		try {
@@ -57,9 +57,9 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 			job.getProduct().setInsConfId(file.getInstrumentConfigurationId());
 			job.getProduct().getObject().setNumberSlice(file.getNumberSlice());
 			job.getProduct().getObject().setDataTakeId(file.getDatatakeId());
-		} catch (MetadataException e) {
+		} catch (JobGenMetadataException e) {
 			missingMetadata.put(job.getProduct().getIdentifier(), "No Slice: " + e.getMessage());
-			throw new InputsMissingException(missingMetadata);
+			throw new JobGenInputsMissingException(missingMetadata);
 		}
 		// Retrieve Total_Number_Of_Slices
 		try {
@@ -68,9 +68,9 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 			job.getProduct().getObject().setTotalNbOfSlice(acn.getNumberOfSlices());
 			job.getProduct().getObject().setSegmentStartDate(acn.getValidityStart());
 			job.getProduct().getObject().setSegmentStopDate(acn.getValidityStop());
-		} catch (MetadataException e) {
+		} catch (JobGenMetadataException e) {
 			missingMetadata.put(job.getProduct().getIdentifier(), "No ACNs: " + e.getMessage());
-			throw new InputsMissingException(missingMetadata);
+			throw new JobGenInputsMissingException(missingMetadata);
 		}
 	}
 
@@ -126,7 +126,7 @@ public class L0SlicesJobsGenerator extends AbstractJobsGenerator<L0Slice> {
 	 * Customisation of the job DTO before sending it
 	 */
 	@Override
-	protected void customJobDto(final Job<L0Slice> job, final JobDto dto) {
+	protected void customJobDto(final Job<L0Slice> job, final LevelJobDto dto) {
 		// NOTHING TO DO
 
 	}

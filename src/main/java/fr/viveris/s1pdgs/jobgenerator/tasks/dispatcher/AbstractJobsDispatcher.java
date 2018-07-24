@@ -7,8 +7,8 @@ import java.util.Map;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.MaxNumberTaskTablesReachException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
@@ -65,7 +65,7 @@ public abstract class AbstractJobsDispatcher<T> {
 			File[] taskTableFiles = directoryXml.listFiles(parameter -> parameter.isFile());
 			if (taskTableFiles != null) {
 				if (taskTableFiles.length > this.settings.getMaxnboftasktable()) {
-					throw new MaxNumberTaskTablesReachException(
+					throw new JobGenMaxNumberTaskTablesReachException(
 							String.format("Too much task tables %d", taskTableFiles.length));
 				}
 				for (File taskTableFile : taskTableFiles) {

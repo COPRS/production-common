@@ -17,10 +17,10 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.FileCopyUtils;
 
-import fr.viveris.s1pdgs.jobgenerator.exception.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.exception.InternalErrorException;
-import fr.viveris.s1pdgs.jobgenerator.exception.InvalidFormatProduct;
-import fr.viveris.s1pdgs.jobgenerator.exception.ObjectStorageException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import fr.viveris.s1pdgs.jobgenerator.service.s3.ObsService;
@@ -123,7 +123,7 @@ public class EdrsSessionFileServiceTest {
 			Mockito.verify(xmlConverter, times(2)).convertFromXMLToObject(Mockito.eq(fileCh2.getAbsolutePath()));
 			assertEquals(session2, r3);
 
-		} catch (ObjectStorageException | InvalidFormatProduct | IOException | JAXBException e) {
+		} catch (ObsException | InvalidFormatProduct | IOException | JAXBException e) {
 			fail("Invalid exception raised " + e.getMessage());
 		}
 	}
