@@ -37,14 +37,14 @@ application:
         topics: ${mqi_auxiliary-files_consumption_topics}
       publication:
         enable: ${mqi_auxiliary-files_publication_enable:false}
-        routing-file: ${mqi_auxiliary-files_publication_routing-file}
+        routing-file: ${mqi_auxiliary-files_publication_routing-file:routing-files/auxiliary-files.xml}
     edrs-sessions:
       consumption:
         enable: ${mqi_edrs-sessions_consumption_enable:false}
         topics: ${mqi_edrs-sessions_consumption_topics}
       publication:
         enable: ${mqi_edrs-sessions_publication_enable:false}
-        routing-file: ${mqi_edrs-sessions_publication_routing-file}
+        routing-file: ${mqi_edrs-sessions_publication_routing-file:routing-files/edrs-sessions.xml}
     level-products:
       consumption:
         enable: ${mqi_level-products_consumption_enable:false}
@@ -65,7 +65,7 @@ application:
         topics: ${mqi_level-jobs_consumption_topics}
       publication:
         enable: ${mqi_level-jobs_publication_enable:false}
-        routing-file: ${mqi_level-jobs_publication_routing-file}
+        routing-file: ${mqi_level-jobs_publication_routing-file:routing-files/level-jobs.xml}
     
 # REST controller
 server:
