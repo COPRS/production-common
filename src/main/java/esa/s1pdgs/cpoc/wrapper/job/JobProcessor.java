@@ -283,6 +283,8 @@ public class JobProcessor {
      */
     protected void ackNegatively(final GenericMessageDto<LevelJobDto> dto,
             final String errorMessage) {
+        LOGGER.info("{} Acknowledging negatively",
+                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
         LOGGER.error(errorMessage);
         try {
             mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
@@ -298,6 +300,8 @@ public class JobProcessor {
     }
 
     protected void ackPositively(final GenericMessageDto<LevelJobDto> dto) {
+        LOGGER.info("{} Acknowledging positively",
+                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
         try {
             mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null,
                     appStatus.getStatus().isStopping()));
