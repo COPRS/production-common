@@ -27,7 +27,7 @@ import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.L0SliceJobsDispatcher;
 import fr.viveris.s1pdgs.jobgenerator.utils.DateUtils;
 
 @Component
-@ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "l0-slices")
+@ConditionalOnProperty(name="process.level", havingValue="L1")
 
 public class L0SlicesConsumer {
     /**
