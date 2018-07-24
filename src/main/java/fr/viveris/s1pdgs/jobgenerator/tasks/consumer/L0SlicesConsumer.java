@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -71,6 +72,8 @@ public class L0SlicesConsumer {
             
         this.mqiService = mqiService;
     }
+    
+    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}")
     public void consumeMessages() {
         // First, consume message
         GenericMessageDto<LevelProductDto> message = null;
