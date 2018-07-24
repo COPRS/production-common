@@ -38,7 +38,7 @@ import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
  * @author Cyrielle Gailliard
  */
 @Service
-@ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "l0-slices")
+@ConditionalOnProperty(name="process.level", havingValue="L1")
 public class L0SliceJobsDispatcher extends AbstractJobsDispatcher<L0Slice> {
 
 	/**

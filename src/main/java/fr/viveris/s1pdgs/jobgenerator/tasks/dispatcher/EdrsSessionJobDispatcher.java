@@ -26,7 +26,7 @@ import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
  *
  */
 @Service
-@ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "edrs-sessions")
+@ConditionalOnProperty(name="process.level", havingValue="L0")
 public class EdrsSessionJobDispatcher extends AbstractJobsDispatcher<EdrsSession> {
 
 	/**

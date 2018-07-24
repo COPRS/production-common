@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 /**
- * Service for publishing in KAFKA topics
+ * Service for publishing in topics
  * 
  * @author Viveris Technologies
  */

@@ -12,21 +12,6 @@ metadata:
   rest-api_nb-retry: 3
   rest-api_tempo-retry-ms: 1000
 
-# KAFKA
-kafka:
-  bootstrap-servers: ${spring.embedded.kafka.brokers}
-  group-id: level0-jobgenerators
-  client-id: l0-job-generator
-  poll-timeout: 500
-  producer-retries: 10
-  producer-request-timeout-ms: 2000
-  topics:
-    edrs-sessions: t-pdgs-edrs-sessions
-    l0-slices: t-pdgs-l0-slices
-    lx-jobs: t-pdgs-l0-jobs
-  enable-consumer:
-    edrs-sessions: true
-    l0-slices: false
     
 level0:
   maxnumberofsessions: 20
