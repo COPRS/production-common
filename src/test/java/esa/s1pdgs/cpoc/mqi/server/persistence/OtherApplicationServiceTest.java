@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 
@@ -93,9 +94,9 @@ public class OtherApplicationServiceTest {
 
         thrown.expect(StatusProcessingApiError.class);
         thrown.expect(hasProperty("uri",
-                is("http://pod-name:uri/status/process/12345")));
+                is("http://pod-name:uri/status/level_jobs/process/12345")));
 
-        service.isProcessing("pod-name", 12345);
+        service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS, 12345);
     }
 
     /**
@@ -115,11 +116,11 @@ public class OtherApplicationServiceTest {
 
         thrown.expect(StatusProcessingApiError.class);
         thrown.expect(hasProperty("uri",
-                is("http://pod-name:uri/status/process/12345")));
+                is("http://pod-name:uri/status/level_jobs/process/12345")));
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.isProcessing("pod-name", 12345);
+        service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS, 12345);
     }
 
     /**
@@ -138,11 +139,11 @@ public class OtherApplicationServiceTest {
                                 Mockito.any(Class.class));
 
         try {
-            service.isProcessing("pod-name", 12345);
+            service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS, 12345);
             fail("An exception shall be raised");
         } catch (StatusProcessingApiError mpee) {
-            verify(restTemplate, times(2)).exchange(
-                    Mockito.eq("http://pod-name:uri/status/process/12345"),
+            verify(restTemplate, times(2)).exchange(Mockito
+                    .eq("http://pod-name:uri/status/level_jobs/process/12345"),
                     Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                     Mockito.eq(Boolean.class));
             verifyNoMoreInteractions(restTemplate);
@@ -163,9 +164,11 @@ public class OtherApplicationServiceTest {
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(Class.class));
 
-        assertTrue(service.isProcessing("pod-name", 12345));
+        assertTrue(service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS,
+                12345));
         verify(restTemplate, times(2)).exchange(
-                Mockito.eq("http://pod-name:uri/status/process/12345"),
+                Mockito.eq(
+                        "http://pod-name:uri/status/level_jobs/process/12345"),
                 Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
@@ -184,9 +187,11 @@ public class OtherApplicationServiceTest {
                         Mockito.any(HttpMethod.class), Mockito.isNull(),
                         Mockito.any(Class.class));
 
-        assertFalse(service.isProcessing("pod-name", 12345));
+        assertFalse(service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS,
+                12345));
         verify(restTemplate, times(1)).exchange(
-                Mockito.eq("http://pod-name:uri/status/process/12345"),
+                Mockito.eq(
+                        "http://pod-name:uri/status/level_jobs/process/12345"),
                 Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
@@ -204,9 +209,11 @@ public class OtherApplicationServiceTest {
                 .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
                         Mockito.isNull(), Mockito.any(Class.class));
 
-        assertFalse(service.isProcessing("pod-name", 12345));
+        assertFalse(service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS,
+                12345));
         verify(restTemplate, times(1)).exchange(
-                Mockito.eq("http://pod-name:uri/status/process/12345"),
+                Mockito.eq(
+                        "http://pod-name:uri/status/level_jobs/process/12345"),
                 Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);

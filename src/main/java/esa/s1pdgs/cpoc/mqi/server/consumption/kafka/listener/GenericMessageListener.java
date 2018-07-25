@@ -159,6 +159,7 @@ public class GenericMessageListener<T>
 
     /**
      * Acknowledge KAFKA message
+     * 
      * @param data
      * @param acknowledgment
      */
@@ -181,14 +182,15 @@ public class GenericMessageListener<T>
      * @return
      * @throws AbstractCodedException
      */
-    protected boolean messageShallBeIgnored(final ConsumerRecord<String, T> data,
+    protected boolean messageShallBeIgnored(
+            final ConsumerRecord<String, T> data,
             final MqiLightMessageDto lightMessage)
             throws AbstractCodedException {
         boolean ret = false;
         // Ask to the other application
         try {
             ret = otherAppService.isProcessing(lightMessage.getSendingPod(),
-                    lightMessage.getIdentifier());
+                    service.getCategory(), lightMessage.getIdentifier());
         } catch (AbstractCodedException ace) {
             ret = false;
             LOGGER.warn(

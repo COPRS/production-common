@@ -134,6 +134,7 @@ public class GenericMessageListenerTest {
                 ProductCategory.AUXILIARY_FILES, "uri", "message"))
                         .when(service).getEarliestOffset(Mockito.anyString(),
                                 Mockito.eq(4), Mockito.anyString());
+        doReturn(ProductCategory.AUXILIARY_FILES).when(service).getCategory();
 
         listener = new GenericMessageListener<>(properties, service,
                 otherAppService, genericConsumer, appStatus);
@@ -199,13 +200,12 @@ public class GenericMessageListenerTest {
         msgLight.setSendingPod("other-name");
 
         doReturn(true).when(otherAppService).isProcessing(Mockito.anyString(),
-                Mockito.anyLong());
+                Mockito.any(), Mockito.anyLong());
 
         // First time: msgLightForceRead
         assertTrue(listener.messageShallBeIgnored(data, msgLight));
         verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1234L));
-        verifyZeroInteractions(service);
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
     }
 
     /**
@@ -218,8 +218,8 @@ public class GenericMessageListenerTest {
             throws AbstractCodedException {
 
         doThrow(new StatusProcessingApiError("uri", "error message"))
-                .when(otherAppService)
-                .isProcessing(Mockito.anyString(), Mockito.anyLong());
+                .when(otherAppService).isProcessing(Mockito.anyString(),
+                        Mockito.any(), Mockito.anyLong());
 
         testmessageShallBeIgnoredWhenFalse();
     }
@@ -234,7 +234,7 @@ public class GenericMessageListenerTest {
             throws AbstractCodedException {
 
         doReturn(false).when(otherAppService).isProcessing(Mockito.anyString(),
-                Mockito.anyLong());
+                Mockito.any(), Mockito.anyLong());
 
         testmessageShallBeIgnoredWhenFalse();
     }
@@ -276,7 +276,7 @@ public class GenericMessageListenerTest {
         // First time: msgLightForceRead
         assertFalse(listener.messageShallBeIgnored(data, msgLight));
         verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1234L));
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
         verify(service, times(1)).read(Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBody));
@@ -284,7 +284,7 @@ public class GenericMessageListenerTest {
         // Second time msgLightForceAck
         assertTrue(listener.messageShallBeIgnored(data, msgLight));
         verify(otherAppService, times(2)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1234L));
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
         verify(service, times(2)).read(Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBody));
@@ -292,7 +292,7 @@ public class GenericMessageListenerTest {
         // Third time msgLightForceSend
         assertTrue(listener.messageShallBeIgnored(data, msgLight));
         verify(otherAppService, times(3)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1234L));
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
         verify(service, times(3)).read(Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBody));
@@ -393,7 +393,7 @@ public class GenericMessageListenerTest {
                         false, data.value());
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
-        
+
         verify(appStatus, times(1)).setError();
         verifyNoMoreInteractions(appStatus);
         verifyZeroInteractions(onMsgConsumer);
@@ -457,7 +457,7 @@ public class GenericMessageListenerTest {
         doReturn(msgLight).when(service).read(Mockito.anyString(),
                 Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
         doReturn(true).when(otherAppService).isProcessing(Mockito.anyString(),
-                Mockito.anyLong());
+                Mockito.any(), Mockito.anyLong());
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
@@ -470,7 +470,7 @@ public class GenericMessageListenerTest {
         verifyZeroInteractions(genericConsumer);
         verifyZeroInteractions(onMsgConsumer);
         verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1234L));
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
     }
 
     /**
@@ -499,10 +499,11 @@ public class GenericMessageListenerTest {
                 new MqiGenericReadMessageDto<String>("group-name", "pod-name",
                         true, data.value());
 
-        doReturn(msgLight, msgLightForceRead).when(service).read(Mockito.anyString(),
-                Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
+        doReturn(msgLight, msgLightForceRead).when(service).read(
+                Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
+                Mockito.any());
         doReturn(false).when(otherAppService).isProcessing(Mockito.anyString(),
-                Mockito.anyLong());
+                Mockito.any(), Mockito.anyLong());
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
@@ -512,14 +513,13 @@ public class GenericMessageListenerTest {
         verify(service, times(1)).read(Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBodyForce));
-        verifyNoMoreInteractions(service);
         verify(appStatus, times(1)).resetError();
         verifyNoMoreInteractions(appStatus);
         verify(acknowledgment, times(1)).acknowledge();
         verify(genericConsumer, times(1)).pause();
         verifyZeroInteractions(onMsgConsumer);
         verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1234L));
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
     }
 
 }

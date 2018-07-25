@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.server;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -171,7 +172,7 @@ public class ApplicationProperties {
         /**
          * The topic to consume for this category
          */
-        private String topics;
+        private List<String> topics;
 
         /**
          * Constructor
@@ -185,10 +186,10 @@ public class ApplicationProperties {
          * Constructor
          */
         public ProductCategoryConsumptionProperties(final boolean enable,
-                final String topic) {
+                final List<String> topics) {
             super();
             this.enable = enable;
-            this.topics = topic;
+            this.topics = topics;
         }
 
         /**
@@ -209,15 +210,15 @@ public class ApplicationProperties {
         /**
          * @return the topic
          */
-        public String getTopics() {
+        public List<String> getTopics() {
             return topics;
         }
 
         /**
-         * @param topic
-         *            the topic to set
+         * @param topics
+         *            the topics to set
          */
-        public void setTopics(final String topics) {
+        public void setTopics(final List<String> topics) {
             this.topics = topics;
         }
     }

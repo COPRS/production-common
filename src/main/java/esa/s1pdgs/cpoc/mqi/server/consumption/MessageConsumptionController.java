@@ -54,7 +54,7 @@ public class MessageConsumptionController {
     /**
      * List of consumers
      */
-    protected final Map<ProductCategory, GenericConsumer<?>> consumers;
+    protected final Map<ProductCategory, Map<String, GenericConsumer<?>>> consumers;
 
     /**
      * Application properties
@@ -161,49 +161,64 @@ public class MessageConsumptionController {
                     catProp.getConsumption();
             if (prop.isEnable()) {
                 LOGGER.info(
-                        "Creating consumer on topic {} with for category {}",
+                        "Creating consumers on topics {} with for category {}",
                         prop.getTopics(), cat);
-                switch (cat) {
-                    case AUXILIARY_FILES:
-                        consumers.put(cat,
-                                new GenericConsumer<AuxiliaryFileDto>(
-                                        kafkaProperties,
-                                        persistAuxiliaryFilesService,
-                                        otherAppService, appStatus,
-                                        prop.getTopics(),
-                                        AuxiliaryFileDto.class));
-                        break;
-                    case EDRS_SESSIONS:
-                        consumers.put(cat, new GenericConsumer<EdrsSessionDto>(
-                                kafkaProperties, persistEdrsSessionsService,
-                                otherAppService, appStatus, prop.getTopics(),
-                                EdrsSessionDto.class));
-                        break;
-                    case LEVEL_JOBS:
-                        consumers.put(cat, new GenericConsumer<LevelJobDto>(
-                                kafkaProperties, persistLevelJobsService,
-                                otherAppService, appStatus, prop.getTopics(),
-                                LevelJobDto.class));
-                        break;
-                    case LEVEL_PRODUCTS:
-                        consumers.put(cat, new GenericConsumer<LevelProductDto>(
-                                kafkaProperties, persistLevelProductsService,
-                                otherAppService, appStatus, prop.getTopics(),
-                                LevelProductDto.class));
-                        break;
-                    case LEVEL_REPORTS:
-                        consumers.put(cat, new GenericConsumer<LevelReportDto>(
-                                kafkaProperties, persistLevelReportsService,
-                                otherAppService, appStatus, prop.getTopics(),
-                                LevelReportDto.class));
-                        break;
+                Map<String, GenericConsumer<?>> catConsumers = new HashMap<>();
+                for (String topic : prop.getTopics()) {
+                    switch (cat) {
+                        case AUXILIARY_FILES:
+                            catConsumers.put(topic,
+                                    new GenericConsumer<AuxiliaryFileDto>(
+                                            kafkaProperties,
+                                            persistAuxiliaryFilesService,
+                                            otherAppService, appStatus, topic,
+                                            AuxiliaryFileDto.class));
+                            break;
+                        case EDRS_SESSIONS:
+                            catConsumers.put(topic,
+                                    new GenericConsumer<EdrsSessionDto>(
+                                            kafkaProperties,
+                                            persistEdrsSessionsService,
+                                            otherAppService, appStatus, topic,
+                                            EdrsSessionDto.class));
+                            break;
+                        case LEVEL_JOBS:
+                            catConsumers.put(topic,
+                                    new GenericConsumer<LevelJobDto>(
+                                            kafkaProperties,
+                                            persistLevelJobsService,
+                                            otherAppService, appStatus, topic,
+                                            LevelJobDto.class));
+                            break;
+                        case LEVEL_PRODUCTS:
+                            catConsumers.put(topic,
+                                    new GenericConsumer<LevelProductDto>(
+                                            kafkaProperties,
+                                            persistLevelProductsService,
+                                            otherAppService, appStatus, topic,
+                                            LevelProductDto.class));
+                            break;
+                        case LEVEL_REPORTS:
+                            catConsumers.put(topic,
+                                    new GenericConsumer<LevelReportDto>(
+                                            kafkaProperties,
+                                            persistLevelReportsService,
+                                            otherAppService, appStatus, topic,
+                                            LevelReportDto.class));
+                            break;
+                    }
                 }
+                consumers.put(cat, catConsumers);
             }
         }
         // Start the consumers
-        for (GenericConsumer<?> consumer : consumers.values()) {
-            LOGGER.info("Starting consumer on topic {}", consumer.getTopic());
-            consumer.start();
+        for (Map<String, GenericConsumer<?>> catConsumers : consumers
+                .values()) {
+            for (GenericConsumer<?> consumer : catConsumers.values()) {
+                LOGGER.info("Starting consumer on topic {}",
+                        consumer.getTopic());
+                consumer.start();
+            }
         }
     }
 
@@ -381,7 +396,8 @@ public class MessageConsumptionController {
                 boolean isProcessing = false;
                 try {
                     isProcessing = otherAppService.isProcessing(
-                            message.getSendingPod(), message.getIdentifier());
+                            message.getSendingPod(), service.getCategory(),
+                            message.getIdentifier());
                 } catch (AbstractCodedException ace) {
                     isProcessing = false;
                     LOGGER.warn(
@@ -449,7 +465,13 @@ public class MessageConsumptionController {
 
             if (!stop) {
                 // Resume consumer
-                consumers.get(category).resume();
+                if (consumers.get(category).containsKey(message.getTopic())) {
+                    consumers.get(category).get(message.getTopic()).resume();
+                } else {
+                    LOGGER.warn(
+                            "Cannot resume consumer for this topic because does not exist: {}",
+                            message);
+                }
             }
         } else {
             throw new MqiCategoryNotAvailable(category, "consumer");

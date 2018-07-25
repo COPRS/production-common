@@ -136,7 +136,7 @@ public class MessageConsumptionControllerTest {
                 otherService, appStatus);
 
         doReturn("pod-name").when(appProperties).getHostname();
-        
+
         startManagerWithAllConsumers();
     }
 
@@ -146,21 +146,31 @@ public class MessageConsumptionControllerTest {
      */
     private void startManagerWithAllConsumers() {
         Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
-        map.put(ProductCategory.AUXILIARY_FILES, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic1"),
-                null));
-        map.put(ProductCategory.LEVEL_PRODUCTS, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic3"),
-                null));
-        map.put(ProductCategory.LEVEL_JOBS, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic4"),
-                null));
-        map.put(ProductCategory.EDRS_SESSIONS, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic2"),
-                null));
-        map.put(ProductCategory.LEVEL_REPORTS, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic5"),
-                null));
+        map.put(ProductCategory.AUXILIARY_FILES,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic1", "topic-other")),
+                        null));
+        map.put(ProductCategory.LEVEL_PRODUCTS,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic3")),
+                        null));
+        map.put(ProductCategory.LEVEL_JOBS,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic4")),
+                        null));
+        map.put(ProductCategory.EDRS_SESSIONS,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic2")),
+                        null));
+        map.put(ProductCategory.LEVEL_REPORTS,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic5", "another-topic")),
+                        null));
         doReturn(map).when(appProperties).getProductCategories();
 
         manager.startConsumers();
@@ -181,30 +191,57 @@ public class MessageConsumptionControllerTest {
     @Test
     public void testPostConstructAllConsumer() {
 
+        assertEquals(2,
+                manager.consumers.get(ProductCategory.AUXILIARY_FILES).size());
         assertEquals("topic1", manager.consumers
-                .get(ProductCategory.AUXILIARY_FILES).getTopic());
-        assertEquals(AuxiliaryFileDto.class, manager.consumers
-                .get(ProductCategory.AUXILIARY_FILES).getConsumedMsgClass());
+                .get(ProductCategory.AUXILIARY_FILES).get("topic1").getTopic());
+        assertEquals(AuxiliaryFileDto.class,
+                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
+                        .get("topic1").getConsumedMsgClass());
+        assertEquals("topic-other",
+                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
+                        .get("topic-other").getTopic());
+        assertEquals(AuxiliaryFileDto.class,
+                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
+                        .get("topic-other").getConsumedMsgClass());
 
+        assertEquals(1,
+                manager.consumers.get(ProductCategory.EDRS_SESSIONS).size());
         assertEquals("topic2", manager.consumers
-                .get(ProductCategory.EDRS_SESSIONS).getTopic());
-        assertEquals(EdrsSessionDto.class, manager.consumers
-                .get(ProductCategory.EDRS_SESSIONS).getConsumedMsgClass());
+                .get(ProductCategory.EDRS_SESSIONS).get("topic2").getTopic());
+        assertEquals(EdrsSessionDto.class,
+                manager.consumers.get(ProductCategory.EDRS_SESSIONS)
+                        .get("topic2").getConsumedMsgClass());
 
+        assertEquals(1,
+                manager.consumers.get(ProductCategory.LEVEL_PRODUCTS).size());
         assertEquals("topic3", manager.consumers
-                .get(ProductCategory.LEVEL_PRODUCTS).getTopic());
-        assertEquals(LevelProductDto.class, manager.consumers
-                .get(ProductCategory.LEVEL_PRODUCTS).getConsumedMsgClass());
+                .get(ProductCategory.LEVEL_PRODUCTS).get("topic3").getTopic());
+        assertEquals(LevelProductDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_PRODUCTS)
+                        .get("topic3").getConsumedMsgClass());
 
-        assertEquals("topic4",
-                manager.consumers.get(ProductCategory.LEVEL_JOBS).getTopic());
-        assertEquals(LevelJobDto.class, manager.consumers
-                .get(ProductCategory.LEVEL_JOBS).getConsumedMsgClass());
+        assertEquals(1,
+                manager.consumers.get(ProductCategory.LEVEL_JOBS).size());
+        assertEquals("topic4", manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").getTopic());
+        assertEquals(LevelJobDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4")
+                        .getConsumedMsgClass());
 
+        assertEquals(2,
+                manager.consumers.get(ProductCategory.LEVEL_REPORTS).size());
         assertEquals("topic5", manager.consumers
-                .get(ProductCategory.LEVEL_REPORTS).getTopic());
-        assertEquals(LevelReportDto.class, manager.consumers
-                .get(ProductCategory.LEVEL_REPORTS).getConsumedMsgClass());
+                .get(ProductCategory.LEVEL_REPORTS).get("topic5").getTopic());
+        assertEquals(LevelReportDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
+                        .get("topic5").getConsumedMsgClass());
+        assertEquals("another-topic",
+                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
+                        .get("another-topic").getTopic());
+        assertEquals(LevelReportDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
+                        .get("another-topic").getConsumedMsgClass());
     }
 
     /**
@@ -258,6 +295,7 @@ public class MessageConsumptionControllerTest {
 
         doReturn(null, new ArrayList<>()).when(mockedService)
                 .next(Mockito.anyString());
+        doReturn(category).when(mockedService).getCategory();
 
         assertNull(manager.nextMessage(category));
         assertNull(manager.nextMessage(category));
@@ -295,6 +333,7 @@ public class MessageConsumptionControllerTest {
             final GenericAppCatalogMqiService<?> mockedService,
             final ProductCategory category, int nbCallOtherService)
             throws AbstractCodedException {
+        doReturn(category).when(mockedService).getCategory();
 
         // Processing by another pod
         MqiGenericMessageDto<?> msg1 =
@@ -302,7 +341,7 @@ public class MessageConsumptionControllerTest {
         msg1.setState(MqiStateMessageEnum.SEND);
         msg1.setSendingPod("other-pod");
         doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
-                Mockito.eq(1L));
+                Mockito.any(), Mockito.eq(1L));
 
         // Status read
         MqiGenericMessageDto<?> msg2 =
@@ -323,9 +362,8 @@ public class MessageConsumptionControllerTest {
                 manager.nextMessage(category));
         verify(mockedService, times(1)).next(Mockito.eq("pod-name"));
         verify(mockedService, times(1)).send(Mockito.eq(2L), Mockito.any());
-        verifyNoMoreInteractions(mockedService);
-        verify(otherService, times(nbCallOtherService))
-                .isProcessing(Mockito.eq("other-pod"), Mockito.eq(1L));
+        verify(otherService, times(1)).isProcessing(
+                Mockito.eq("other-pod"), Mockito.eq(category), Mockito.eq(1L));
         verifyNoMoreInteractions(otherService);
 
     }
@@ -349,59 +387,100 @@ public class MessageConsumptionControllerTest {
     }
 
     @Test
-    public void testAckWhenStopNotAsk() throws AbstractCodedException, InterruptedException {
+    public void testAckWhenStopNotAsk()
+            throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "work-dir", "job-order");
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+                "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(
-                        ProductCategory.LEVEL_JOBS, 123, "topic-name", 1,
-                        22, dto);
+                        ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
-        doReturn(message).when(persistLevelJobsService)
-                .ack(Mockito.eq(123L), Mockito.any());
-        
-        ResumeDetails expectedRd = new ResumeDetails("topic-name", dto);
+        doReturn(message).when(persistLevelJobsService).ack(Mockito.eq(123L),
+                Mockito.any());
+
+        ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
 
         Thread.sleep(2000);
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).pause();
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
 
         Thread.sleep(2500);
-        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS).isPaused());
-        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK,
-                false);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
+                Ack.OK, false);
         assertEquals(expectedRd, rd);
-        
+
         // Check resume call
         Thread.sleep(2000);
-        assertFalse(manager.consumers.get(ProductCategory.LEVEL_JOBS).isPaused());
+        assertFalse(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
     }
 
     @Test
-    public void testAckWhenStopAsk() throws AbstractCodedException, InterruptedException {
-       
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "work-dir", "job-order");
+    public void testAckWhenStopNotAskButTopicUnknown()
+            throws AbstractCodedException, InterruptedException {
+
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+                "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(
-                        ProductCategory.LEVEL_JOBS, 123, "topic-name", 1,
-                        22, dto);
+                        ProductCategory.LEVEL_JOBS, 123, "topic-unknown", 1, 22,
+                        dto);
 
-        doReturn(message).when(persistLevelJobsService)
-                .ack(Mockito.eq(123L), Mockito.any());
-        
-        ResumeDetails expectedRd = new ResumeDetails("topic-name", dto);
+        doReturn(message).when(persistLevelJobsService).ack(Mockito.eq(123L),
+                Mockito.any());
 
-        Thread.sleep(2000);
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).pause();
+        ResumeDetails expectedRd = new ResumeDetails("topic-unknown", dto);
 
         Thread.sleep(2000);
-        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS).isPaused());
-        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK,
-                true);
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
+
+        Thread.sleep(2500);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
+                Ack.OK, false);
         assertEquals(expectedRd, rd);
-        
+
         // Check resume call
         Thread.sleep(2000);
-        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS).isPaused());
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4")
+                .resume();
+    }
+
+    @Test
+    public void testAckWhenStopAsk()
+            throws AbstractCodedException, InterruptedException {
+
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+                "work-dir", "job-order");
+        MqiGenericMessageDto<LevelJobDto> message =
+                new MqiGenericMessageDto<LevelJobDto>(
+                        ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
+
+        doReturn(message).when(persistLevelJobsService).ack(Mockito.eq(123L),
+                Mockito.any());
+
+        ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
+
+        Thread.sleep(2000);
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
+
+        Thread.sleep(2000);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
+                Ack.OK, true);
+        assertEquals(expectedRd, rd);
+
+        // Check resume call
+        Thread.sleep(2000);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
     }
 
     /**
@@ -433,7 +512,6 @@ public class MessageConsumptionControllerTest {
      */
     private void testSendMessageWhenAskOtherAppNotNeeded(
             MqiStateMessageEnum state) throws AbstractCodedException {
-       
 
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
@@ -448,7 +526,7 @@ public class MessageConsumptionControllerTest {
         msgLight2.setSendingPod("pod-name");
 
         doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
-                Mockito.anyLong());
+                Mockito.any(), Mockito.anyLong());
         doReturn(true).when(persistAuxiliaryFilesService)
                 .send(Mockito.eq(1234L), Mockito.any());
         doReturn(false).when(persistAuxiliaryFilesService)
@@ -474,7 +552,6 @@ public class MessageConsumptionControllerTest {
     @Test
     public void testSendWhenMessageProcessingByAnotherAndResponseTrue()
             throws AbstractCodedException {
-        
 
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
@@ -483,13 +560,14 @@ public class MessageConsumptionControllerTest {
         msgLight.setSendingPod("other-name");
 
         doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
-                Mockito.anyLong());
+                Mockito.any(), Mockito.anyLong());
+        doReturn(ProductCategory.AUXILIARY_FILES)
+                .when(persistAuxiliaryFilesService).getCategory();
 
         // First time: msgLightForceRead
         assertFalse(manager.send(persistAuxiliaryFilesService, msgLight));
         verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1234L));
-        verifyZeroInteractions(persistAuxiliaryFilesService);
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
     }
 
     /**
@@ -501,8 +579,8 @@ public class MessageConsumptionControllerTest {
     public void testSendWhenNoResponse() throws AbstractCodedException {
 
         doThrow(new StatusProcessingApiError("uri", "error message"))
-                .when(otherService)
-                .isProcessing(Mockito.anyString(), Mockito.anyLong());
+                .when(otherService).isProcessing(Mockito.anyString(),
+                        Mockito.any(), Mockito.anyLong());
 
         testSendWhenMessageProcessingByAnotherAndResponseFalse();
     }
@@ -516,14 +594,13 @@ public class MessageConsumptionControllerTest {
     public void testSendWhenResponseFalse() throws AbstractCodedException {
 
         doReturn(false).when(otherService).isProcessing(Mockito.anyString(),
-                Mockito.anyLong());
+                Mockito.any(), Mockito.anyLong());
 
         testSendWhenMessageProcessingByAnotherAndResponseFalse();
     }
 
     private void testSendWhenMessageProcessingByAnotherAndResponseFalse()
             throws AbstractCodedException {
-     
 
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234L, "topic", 1, 111);
@@ -541,15 +618,17 @@ public class MessageConsumptionControllerTest {
                 .send(Mockito.eq(1234L), Mockito.any());
         doReturn(false).when(persistAuxiliaryFilesService)
                 .send(Mockito.eq(1235L), Mockito.any());
+        doReturn(ProductCategory.AUXILIARY_FILES)
+                .when(persistAuxiliaryFilesService).getCategory();
 
         MqiSendMessageDto expected = new MqiSendMessageDto("pod-name", true);
 
         assertTrue(manager.send(persistAuxiliaryFilesService, msgLight));
         assertFalse(manager.send(persistAuxiliaryFilesService, msgLight2));
         verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1234L));
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
         verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(1235L));
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1235L));
         verify(persistAuxiliaryFilesService, times(1)).send(Mockito.eq(1234L),
                 Mockito.eq(expected));
         verify(persistAuxiliaryFilesService, times(1)).send(Mockito.eq(1235L),

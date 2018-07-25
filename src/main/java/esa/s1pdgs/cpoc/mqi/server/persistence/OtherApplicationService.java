@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 
@@ -114,13 +115,15 @@ public class OtherApplicationService {
      * @param message
      * @throws AbstractCodedException
      */
-    public boolean isProcessing(final String podName, final long messageId)
+    public boolean isProcessing(final String podName,
+            final ProductCategory category, final long messageId)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
             String uri = "http://" + podName + ":" + this.portUri
-                    + "/status/process/" + messageId;
+                    + "/status/" + category.name().toLowerCase() + "/process/"
+                    + messageId;
             try {
                 ResponseEntity<Boolean> response = restTemplate.exchange(uri,
                         HttpMethod.POST, null, Boolean.class);
