@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.wrapper.status.AppStatus.WrapperStatus;
 import esa.s1pdgs.cpoc.wrapper.status.dto.WrapperStatusDto;
 
@@ -83,13 +84,19 @@ public class WrapperRestController {
      * 
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/process/{messageId}")
+    @RequestMapping(method = RequestMethod.GET, path = "/{category}/process/{messageId}")
     public ResponseEntity<Boolean> isProcessing(
+            @PathVariable(name = "category") final String category,
             @PathVariable(name = "messageId") final long messageId) {
-        LOGGER.info("tutu");
         boolean ret = false;
-        if (appStatus.getProcessingMsgId() == messageId) {
-            ret = true;
+        if (ProductCategory.LEVEL_JOBS.name().toLowerCase().equals(category)) {
+            if (appStatus.getProcessingMsgId() == messageId) {
+                ret = true;
+            }
+        } else {
+            LOGGER.warn(
+                    "[category {}] [messageId {}] Ask for message processing on a not manageable category",
+                    category, messageId);
         }
         return new ResponseEntity<Boolean>(ret, HttpStatus.OK);
     }
