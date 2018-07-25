@@ -5,6 +5,7 @@ RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY src/ /app/src/
 COPY dev/ /app/dev/
 COPY config/ /app/config/
+COPY test/ /app/test/
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
 FROM openjdk:8-jre-alpine
