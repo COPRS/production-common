@@ -1,8 +1,20 @@
-#TODO: figure out why I need this here and in bootstrap.yml
+#Spring
 spring:
   application:
     name: s1pdgs-applicative-catalog
     
 # Logging
 logging:
-  config: config/log/log4j2.yml  
+  config: ./test/log4j2-test.yml
+  
+# MongoDB
+mongodb:
+  host: 127.0.0.1
+  port: 27017
+  database: databaseName
+  old-entry-ms: 86400
+  clean-cron: "0 0 0 * * *"
+  
+#MQI
+mqi:
+  max-retries: 3  
