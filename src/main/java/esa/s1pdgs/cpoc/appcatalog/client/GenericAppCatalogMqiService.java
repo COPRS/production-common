@@ -85,6 +85,34 @@ public abstract class GenericAppCatalogMqiService<T> {
     }
 
     /**
+     * @return the category
+     */
+    public ProductCategory getCategory() {
+        return category;
+    }
+
+    /**
+     * @return the hostUri
+     */
+    public String getHostUri() {
+        return hostUri;
+    }
+
+    /**
+     * @return the maxRetries
+     */
+    public int getMaxRetries() {
+        return maxRetries;
+    }
+
+    /**
+     * @return the tempoRetryMs
+     */
+    public int getTempoRetryMs() {
+        return tempoRetryMs;
+    }
+
+    /**
      * Wait or throw an error according the number of retries
      * 
      * @param retries

@@ -95,12 +95,18 @@ public class GenericAppCatalogMqiServiceTest {
 
     @Test
     public void tesConstructor() {
+        assertEquals(2, service.getMaxRetries());
+        assertEquals(500, service.getTempoRetryMs());
+        assertEquals("uri", service.getHostUri());
+        assertEquals(ProductCategory.LEVEL_PRODUCTS, service.getCategory());
+        
         service = new AppCatalogMqiLevelProductsService(restTemplate, "uri", -1,
                 500);
-        assertEquals(0, service.maxRetries);
+        assertEquals(0, service.getMaxRetries());
+        
         service = new AppCatalogMqiLevelProductsService(restTemplate, "uri", 21,
                 500);
-        assertEquals(0, service.maxRetries);
+        assertEquals(0, service.getMaxRetries());
     }
 
     /**
