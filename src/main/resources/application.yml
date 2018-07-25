@@ -14,12 +14,12 @@ metadata:
   
 job-generator:
   diroftasktables: ${job_directoryoftasktables}
-  maxnboftasktable: ${job_maxnumberoftasktables:2}
-  maxnumberofjobs: ${job_maxnumberoftasktables:40}
+  maxnboftasktable: ${job_maxnumberoftasktables}
+  maxnumberofjobs: ${job_maxnumberoftasktables}
   jobgenfixedrate: ${job_scheduledfixedrate:500}
   waitprimarycheck:
-    tempo: ${job_waitprimarycheck_tempo:2000}
-    retries: ${job_waitprimarycheck_retries:2}
+    tempo: ${job_waitprimarycheck_tempo:30000}
+    retries: ${job_waitprimarycheck_retries:50}
   waitmetadatainput:
     tempo: ${job_waitmetadatainput_tempo:60000}
     retries: ${job_waitmetadatainput_retries:300}
@@ -29,14 +29,17 @@ job-generator:
   typeslicelenstr: ${products_slice-length-per-acq}
   map-type-meta-str: ${products_link-producttype-metadataindex}
     
-    
+status:
+  delete-fixed-delay-ms: ${job_status_delete-fixed-delay-ms:3000}
+  max-error-counter: ${job_status_max-error-counter:3}
+
 process:
   level: ${job_process_level}
-  paramstr: ${job_process_params}
+  paramstr: ${job_process_params:Processing_Mode:NRT||Timeout:300}
   loglevelstdout: ${job_process_loglevelstdout:INFO}
   loglevelstderr: ${job_process_loglevelstderr:INFO}
-  processingstation: ${job_process_processingstation}
-  outputregexpstr: ${job_process_outputregexps}
+  processingstation: ${job_process_processingstation:WILE}
+  outputregexpstr: ${job_process_outputregexps:SM_RAW__0S:^S1[A-B]_S[1-6]_RAW__0S.*$||AN_RAW__0S:^S1[A-B]_N[1-6]_RAW__0S.*$||ZS_RAW__0S:^S1[A-B]_Z[1-6]_RAW__0S.*$||REP_L0PSA_:^S1[A|B|_]_OPER_REP_ACQ.*$||REP_EFEP_:^S1[A|B|_]_OPER_REP_PASS.*.EOF$}
   mqi:
     host-uri: ${job_process_mqi_host-uri:http://localhost:8081}
     max-retries: ${job_process_mqi_max-retries:3}
@@ -49,7 +52,7 @@ level0:
   dir-extractor-sessions: ${l0_dir-extractor-sessions:/data/sessions/}
   
 level1:
-  pathroutingxmlfile: ${l1_pathroutingxmlfile}
+  pathroutingxmlfile: ${l1_pathroutingxmlfile:/data/config/l1_config/routing.xml}
   
 pattern-l0-slices:
   regexp: ${pattern-l0-slices_regexp:^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$}

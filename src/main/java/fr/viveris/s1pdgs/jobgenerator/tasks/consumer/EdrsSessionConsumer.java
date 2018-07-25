@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import fr.viveris.s1pdgs.jobgenerator.status.AppStatus;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
@@ -64,19 +65,25 @@ public class EdrsSessionConsumer {
     private final int maxNbSessions;
 
     private final GenericMqiService<EdrsSessionDto> mqiService;
+    /**
+     * Application status
+     */
+    private final AppStatus appStatus;
     
     @Autowired
     public EdrsSessionConsumer(
             @Qualifier("mqiServiceForEdrsSessions") final GenericMqiService<EdrsSessionDto> mqiService,
             final EdrsSessionJobDispatcher jobDispatcher, final EdrsSessionFileService edrsService,
             @Value("${level0.maxagesession}") final long maxAgeSession,
-            @Value("${level0.maxnumberofsessions}") final int maxNbSessions) {
+            @Value("${level0.maxnumberofsessions}") final int maxNbSessions,
+            final AppStatus appStatus) {
         this.mqiService = mqiService;
         this.jobDispatcher = jobDispatcher;
         this.edrsService = edrsService;
         this.maxAgeSession = maxAgeSession;
         this.maxNbSessions = maxNbSessions;
         this.cachedSessions = new ConcurrentHashMap<>(this.maxNbSessions);
+        this.appStatus = appStatus;
 
     }
 
@@ -95,6 +102,7 @@ public class EdrsSessionConsumer {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;
         }
+        appStatus.setProcessing(message.getIdentifier());
         LOGGER.info("Initializing job processing {}", message);
 
         
@@ -177,9 +185,11 @@ public class EdrsSessionConsumer {
         // Ack message
         try {
             mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, "OK", false));
+            appStatus.setWaiting();
         }
         catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step {} [code {}] {}", step, ace.getCode(), ace.getLogMessage());
+            appStatus.setError();
         }
     }
 }

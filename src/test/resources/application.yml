@@ -59,3 +59,8 @@ pattern-l0-slices:
   m-group-acquisition: 4
   m-group-start-time: 6
   m-group-stop-time: 7
+
+  
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter: 3
