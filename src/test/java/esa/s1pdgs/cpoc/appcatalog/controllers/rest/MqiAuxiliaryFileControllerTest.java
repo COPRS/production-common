@@ -86,7 +86,7 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
     private void mockSearchByTopicPartitionGroup(List<MqiMessage> message) {
         doReturn(message).when(mongoDBServices)
         .searchByTopicPartitionGroup(Mockito.anyString(), 
-                Mockito.anyInt(), Mockito.anyString());
+                Mockito.anyInt(), Mockito.anyString(), Mockito.any());
     }
     
     private void mockSearchByID(List<MqiMessage> message) {
@@ -396,7 +396,7 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
         verify(mongoDBServices, times(1)).searchByTopicPartitionGroup(Mockito.anyString(), 
-                Mockito.anyInt(), Mockito.anyString());
+                Mockito.anyInt(), Mockito.anyString(), Mockito.any());
     }
     
     @Test
@@ -411,7 +411,7 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
         verify(mongoDBServices, times(1)).searchByTopicPartitionGroup(Mockito.anyString(), 
-                Mockito.anyInt(), Mockito.anyString());
+                Mockito.anyInt(), Mockito.anyString(), Mockito.any());
     }
     
 }

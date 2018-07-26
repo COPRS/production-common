@@ -221,7 +221,7 @@ private final MongoDBServices mongoDBServices;
             } else if(messageFromDB.getState().equals(MqiStateMessageEnum.READ)) {
                 HashMap<String, Object> updateMap = new HashMap<>();
                 // on met status à SEND et son processing_pod
-                messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
+                messageFromDB.setState(MqiStateMessageEnum.SEND);
                 updateMap.put("state", messageFromDB.getState());
                 // on met à jour les éventuelles dates
                 Date now = new Date();
@@ -305,7 +305,11 @@ private final MongoDBServices mongoDBServices;
             @PathVariable(name = "partition") int partition, @RequestParam("group") String group) {
         
         // Pour le topic / partition / group donné, on récupère l’offset du message avec status != ACK et la plus petite date de lecture (à voir si on prend le plus petit offset)
-        List<MqiMessage> responseFromDB = mongoDBServices.searchByTopicPartitionGroup(topic, partition, group);
+        Set<MqiStateMessageEnum> ackStates = new HashSet<>();
+        ackStates.add(MqiStateMessageEnum.ACK_KO);
+        ackStates.add(MqiStateMessageEnum.ACK_OK);
+        ackStates.add(MqiStateMessageEnum.ACK_WARN);
+        List<MqiMessage> responseFromDB = mongoDBServices.searchByTopicPartitionGroup(topic, partition, group, ackStates);
         if(responseFromDB.isEmpty()) {
             //TODO define the strategy
             // Si pas d’entrée, on renvoie valeur par défaut :

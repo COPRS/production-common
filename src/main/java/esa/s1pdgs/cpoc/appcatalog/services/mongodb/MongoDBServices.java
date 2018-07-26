@@ -81,9 +81,10 @@ public class MongoDBServices {
      * 
      * @return the list of message
      */
-    public List<MqiMessage> searchByTopicPartitionGroup(String topic, int partition, String group) {
+    public List<MqiMessage> searchByTopicPartitionGroup (String topic, int partition, 
+            String group, Set<MqiStateMessageEnum> states){
         Query query = query(where("topic").is(topic).and("partition").is(partition)
-                .and("group").is(group));
+                .and("group").is(group).and("states").nin(states));
         query.with(new Sort(Direction.ASC, "lastReadDate"));
         return mongoDBDAO.find(query);
     }
@@ -124,7 +125,8 @@ public class MongoDBServices {
      * 
      */
     public void insertMqiMessage(MqiMessage messageToInsert) {
-    	messageToInsert.setIdentifier(sequenceDao.getNextSequenceId(MQI_MSG_SEQ_KEY));
+        long sequence = sequenceDao.getNextSequenceId(MQI_MSG_SEQ_KEY);
+    	messageToInsert.setIdentifier(sequence);
         mongoDBDAO.insert(messageToInsert);
     }
     
