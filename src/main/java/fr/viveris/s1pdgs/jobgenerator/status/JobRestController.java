@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import fr.viveris.s1pdgs.jobgenerator.status.AppStatus;
 import fr.viveris.s1pdgs.jobgenerator.status.JobRestController;
 import fr.viveris.s1pdgs.jobgenerator.status.AppStatus.JobStatus;
 import fr.viveris.s1pdgs.jobgenerator.status.dto.JobStatusDto;
 
 @RestController
-@RequestMapping(path = "/job")
+@RequestMapping(path = "/jobgenerator")
 public class JobRestController {
 
     /**
@@ -51,14 +52,14 @@ public class JobRestController {
         long currentTimestamp = System.currentTimeMillis();
         long timeSinceLastChange =
                 currentTimestamp - currentStatus.getDateLastChangeMs();
-        JobStatusDto wrapperStatus =
+        JobStatusDto jobStatus =
                 new JobStatusDto(currentStatus.getState(),
                         timeSinceLastChange, currentStatus.getErrorCounter());
         if (currentStatus.isFatalError()) {
-            return new ResponseEntity<JobStatusDto>(wrapperStatus,
+            return new ResponseEntity<JobStatusDto>(jobStatus,
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<JobStatusDto>(wrapperStatus,
+        return new ResponseEntity<JobStatusDto>(jobStatus,
                 HttpStatus.OK);
     }
 
@@ -82,13 +83,21 @@ public class JobRestController {
      * 
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/process/{messageId}")
+    @RequestMapping(method = RequestMethod.GET, path = "/{category}/process/{messageId}")
     public ResponseEntity<Boolean> isProcessing(
+            @PathVariable(name = "category") final String category,
             @PathVariable(name = "messageId") final long messageId) {
         LOGGER.info("tutu");
         boolean ret = false;
-        if (appStatus.getProcessingMsgId() == messageId) {
-            ret = true;
+        if (ProductCategory.EDRS_SESSIONS.name().toLowerCase().equals(category) ||
+                ProductCategory.LEVEL_PRODUCTS.name().toLowerCase().equals(category)) {
+            if (appStatus.getProcessingMsgId() == messageId) {
+                ret = true;
+            }
+        } else {
+            LOGGER.warn(
+                    "[category {}] [messageId {}] Ask for message processing on a not manageable category",
+                    category, messageId);
         }
         return new ResponseEntity<Boolean>(ret, HttpStatus.OK);
     }

@@ -1,4 +1,4 @@
-package fr.viveris.s1pdgs.jobgenerator.utils;
+package fr.viveris.s1pdgs.jobgenerator.status;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 

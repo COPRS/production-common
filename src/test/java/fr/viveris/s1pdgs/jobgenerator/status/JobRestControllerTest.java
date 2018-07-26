@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import fr.viveris.s1pdgs.jobgenerator.status.AppStatus.JobStatus;
 import fr.viveris.s1pdgs.jobgenerator.status.dto.JobStatusDto;
-import fr.viveris.s1pdgs.jobgenerator.utils.RestControllerTest;
+import fr.viveris.s1pdgs.jobgenerator.status.RestControllerTest;
 
 
 public class JobRestControllerTest extends RestControllerTest {
@@ -72,7 +72,7 @@ public class JobRestControllerTest extends RestControllerTest {
     @Test
     public void testUrlStopApp() throws Exception {
         doNothing().when(appStatus).setStopping();
-        request(post("/wrapper/stop"))
+        request(post("/jobgenerator/stop"))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
         verify(appStatus, times(1)).setStopping();
     }
@@ -88,7 +88,7 @@ public class JobRestControllerTest extends RestControllerTest {
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
-        request(get("/wrapper/status"))
+        request(get("/jobgenerator/status"))
                 .andExpect(
                         MockMvcResultMatchers.status().isInternalServerError())
                 .andReturn();
@@ -135,7 +135,7 @@ public class JobRestControllerTest extends RestControllerTest {
         status.setError(3);
         doReturn(status).when(appStatus).getStatus();
 
-        request(get("/wrapper/status"))
+        request(get("/jobgenerator/status"))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
     }
@@ -176,17 +176,20 @@ public class JobRestControllerTest extends RestControllerTest {
     @Test
     public void testIsProcessing() throws Exception {
         doReturn(1234L).when(appStatus).getProcessingMsgId();
-        request(get("/wrapper/level_jobs/process/1234"))
+        request(get("/jobgenerator/edrs_sessions/process/1234"))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().string("true"));
+        request(get("/jobgenerator/level_products/process/1234"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("true"));
-        request(get("/wrapper/level_products/process/1234"))
+        request(get("/jobgenerator/level_jobs/process/1234"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("false"));
-        request(get("/wrapper/level_jobs/process/1235"))
+        request(get("/jobgenerator/level_products/process/1235"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("false"));
         doReturn(0L).when(appStatus).getProcessingMsgId();
-        request(get("/wrapper/level_jobs/process/1235"))
+        request(get("/jobgenerator/level_products/process/1235"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("false"));
 

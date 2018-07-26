@@ -30,8 +30,8 @@ job-generator:
   map-type-meta-str: ${products_link-producttype-metadataindex}
     
 status:
-  delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}
-  max-error-counter: ${wrapper_status_max-error-counter:3}
+  delete-fixed-delay-ms: ${job_status_delete-fixed-delay-ms:3000}
+  max-error-counter: ${job_status_max-error-counter:3}
 
 process:
   level: ${job_process_level}
