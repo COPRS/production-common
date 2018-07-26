@@ -22,7 +22,7 @@ Configuration:
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc
-        level: info
+        level: debug
         additivity: false
         AppenderRef:
           - ref: STDOUT

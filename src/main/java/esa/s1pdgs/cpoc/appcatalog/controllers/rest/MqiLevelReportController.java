@@ -62,16 +62,16 @@ private final MongoDBServices mongoDBServices;
             @PathVariable(name = "partition") int partition, @PathVariable(name = "offset") long offset, 
             @RequestBody MqiGenericReadMessageDto<LevelReportDto> body) {
         
-        LOGGER.info("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Searching MqiMessage", 
-                topic, partition, offset, body.getGroup());
+        log(String.format("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Searching MqiMessage", 
+                topic, partition, offset, body.getGroup()));
         List<MqiMessage> responseFromDB = 
                 mongoDBServices.searchByTopicPartitionOffsetGroup(topic, partition, offset, body.getGroup());
         
         //Si un objet n'existe pas dans la BDD avec topic / partition / offset / group
         if(responseFromDB.isEmpty()) {
             //On créer le message dans la BDD
-            LOGGER.info("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Inserting new MqiMessage", 
-                    topic, partition, offset, body.getGroup());
+            log(String.format("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Inserting new MqiMessage", 
+                    topic, partition, offset, body.getGroup()));
             MqiMessage messageToInsert = new MqiMessage(ProductCategory.LEVEL_REPORTS, 
                     topic, partition, offset, body.getGroup(), MqiStateMessageEnum.READ, 
                     body.getPod(), new Date(), null, null, null, 0, body.getDto());
@@ -80,20 +80,20 @@ private final MongoDBServices mongoDBServices;
             //On renvoie le message que l'on vient de créer
             return new ResponseEntity<MqiLightMessageDto>(transformMqiMessageToMqiLightMessage(messageToInsert), HttpStatus.OK);
         } else { //Sinon on récupère le premier de la liste
-            LOGGER.info("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Found MqiMessage", 
-                    topic, partition, offset, body.getGroup());
+            log(String.format("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Found MqiMessage", 
+                    topic, partition, offset, body.getGroup()));
             MqiMessage messageFromDB = responseFromDB.get(0);
             //Si l'état est à ACK
             if(messageFromDB.getState().equals(MqiStateMessageEnum.ACK_OK) || 
                     messageFromDB.getState().equals(MqiStateMessageEnum.ACK_KO) ||
                     messageFromDB.getState().equals(MqiStateMessageEnum.ACK_WARN)) {
                 //on renvoie l’objet
-                LOGGER.info("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] MqiMessage is Acknowledge", 
-                        topic, partition, offset, body.getGroup());
+                log(String.format("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is Acknowledge", 
+                        topic, partition, offset, body.getGroup()));
                 return new ResponseEntity<MqiLightMessageDto>(transformMqiMessageToMqiLightMessage(messageFromDB), HttpStatus.OK);
             } else if(body.isForce()) { // sinon si force = true
-                LOGGER.info("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Force is true", 
-                        topic, partition, offset, body.getGroup());
+                log(String.format("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Force is true", 
+                        topic, partition, offset, body.getGroup()));
                 HashMap<String, Object> updateMap = new HashMap<>();
                 // on incrémente nb_retry
                 messageFromDB.setNbRetries(messageFromDB.getNbRetries() + 1);
@@ -101,7 +101,7 @@ private final MongoDBServices mongoDBServices;
                 if(messageFromDB.getNbRetries() == maxRetries) {
                     // on publie un message d’erreur dans queue (via mqi du catalogue)
                     //TODO 
-                    LOGGER.error("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Number of retries is reached", 
+                    LOGGER.error("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Number of retries is reached", 
                             topic, partition, offset, body.getGroup());
                     // on met status = ACK_KO
                     messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
@@ -117,8 +117,8 @@ private final MongoDBServices mongoDBServices;
                     // on renvoie l’objet
                     return new ResponseEntity<MqiLightMessageDto>(transformMqiMessageToMqiLightMessage(messageFromDB), HttpStatus.OK);     
                 } else {
-                    LOGGER.info("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Number of retries is not reached", 
-                            topic, partition, offset, body.getGroup());
+                    log(String.format("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Number of retries is not reached", 
+                            topic, partition, offset, body.getGroup()));
                     // on met status = READ
                     messageFromDB.setState(MqiStateMessageEnum.READ);
                     updateMap.put("state", messageFromDB.getState());
@@ -142,8 +142,8 @@ private final MongoDBServices mongoDBServices;
             } else {
                 HashMap<String, Object> updateMap = new HashMap<>();
                 if(messageFromDB.getState().equals(MqiStateMessageEnum.READ)) {
-                    LOGGER.info("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] MqiMessage is at State READ", 
-                            topic, partition, offset, body.getGroup());
+                    log(String.format("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State READ", 
+                            topic, partition, offset, body.getGroup()));
                     // on met à jour les éventuelles dates et le reading_pod
                     Date now = new Date();
                     messageFromDB.setLastReadDate(now);
@@ -156,8 +156,8 @@ private final MongoDBServices mongoDBServices;
                     return new ResponseEntity<MqiLightMessageDto>(transformMqiMessageToMqiLightMessage(messageFromDB), HttpStatus.OK);
                 }
                 if(messageFromDB.getState().equals(MqiStateMessageEnum.SEND)) {
-                    LOGGER.info("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] MqiMessage is at State SEND", 
-                            topic, partition, offset, body.getGroup());
+                    log(String.format("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State SEND", 
+                            topic, partition, offset, body.getGroup()));
                     // on met à jour les éventuelles dates et le reading_pod
                     Date now = new Date();
                     messageFromDB.setLastSendPod(now);
@@ -171,7 +171,7 @@ private final MongoDBServices mongoDBServices;
                 }
             }
         }
-        LOGGER.error("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] ERROR", 
+        LOGGER.error("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] ERROR", 
                 topic, partition, offset, body.getGroup());
         return new ResponseEntity<MqiLightMessageDto>(HttpStatus.NOT_FOUND);
         
@@ -184,17 +184,17 @@ private final MongoDBServices mongoDBServices;
         ackStates.add(MqiStateMessageEnum.ACK_KO);
         ackStates.add(MqiStateMessageEnum.ACK_OK);
         ackStates.add(MqiStateMessageEnum.ACK_WARN);
-        LOGGER.info("[Next] [Pod {}] [States {}] [Product Category {}] Searching MqiMessage", 
-                pod, ackStates, ProductCategory.LEVEL_REPORTS);
+        log(String.format("[Next] [Pod %s] [States %s] [Product Category %s] Searching MqiMessage", 
+                pod, ackStates, ProductCategory.LEVEL_REPORTS));
         List<MqiMessage> mqiMessages  = mongoDBServices.searchByPodStateCategory(pod,
                 ProductCategory.LEVEL_REPORTS, ackStates);
         if(mqiMessages.isEmpty()) {
-            LOGGER.error("[Next] [Pod {}] [States {}] [Product Category {}] No MqiMessage found", 
+            LOGGER.error("[Next] [Pod %s] [States %s] [Product Category %s] No MqiMessage found", 
                     pod, ackStates, ProductCategory.LEVEL_REPORTS);
             return new ResponseEntity<List<MqiLevelReportMessageDto>>(HttpStatus.NOT_FOUND);
         } else {
-            LOGGER.info("[Next] [Pod {}] [States {}] [Product Category {}] Returning list of found MqiMessage", 
-                    pod, ackStates, ProductCategory.LEVEL_REPORTS);
+            log(String.format("[Next] [Pod %s] [States %s] [Product Category %s] Returning list of found MqiMessage", 
+                    pod, ackStates, ProductCategory.LEVEL_REPORTS));
             List<MqiLevelReportMessageDto> messagesToReturn = new ArrayList<>();
             mqiMessages.forEach(x-> messagesToReturn.add(transformMqiMessageToMqiLevelReportMessage(x)));
             return new ResponseEntity<List<MqiLevelReportMessageDto>>(messagesToReturn, HttpStatus.OK);
@@ -206,16 +206,16 @@ private final MongoDBServices mongoDBServices;
     public ResponseEntity<Boolean> sendMessage(@PathVariable(name = "messageID") long messageID, 
             @RequestBody MqiSendMessageDto body) {
         
-        LOGGER.info("[Send Message] [MessageID {}] Searching MqiMessage", messageID);
+        log(String.format("[Send Message] [MessageID %d] Searching MqiMessage", messageID));
         List<MqiMessage> responseFromDB = mongoDBServices.searchByID(messageID);
         
         if(responseFromDB.isEmpty()) {
-            LOGGER.error("[Send Message] [MessageID {}] No MqiMessage found", messageID);
+            LOGGER.error("[Send Message] [MessageID %d] No MqiMessage found", messageID);
             return new ResponseEntity<Boolean>(HttpStatus.NOT_FOUND);
         } else { // Si le message existe
             MqiMessage messageFromDB = responseFromDB.get(0);
             if(messageFromDB.getState().equals(MqiStateMessageEnum.ACK_OK)) {
-                LOGGER.info("[Send Message] [MessageID {}] MqiMessage found is at state ACK", messageID);
+                log(String.format("[Send Message] [MessageID %d] MqiMessage found is at state ACK", messageID));
                 return new ResponseEntity<Boolean>(Boolean.FALSE, HttpStatus.OK);
             } else if(messageFromDB.getState().equals(MqiStateMessageEnum.READ)) {
                 HashMap<String, Object> updateMap = new HashMap<>();
@@ -229,7 +229,7 @@ private final MongoDBServices mongoDBServices;
                 updateMap.put("lastAckDate", now);
                 updateMap.put("lastSendPod", now);
                 mongoDBServices.updateByID(messageID, updateMap);
-                LOGGER.info("[Send Message] [MessageID {}] MqiMessage found is at state READ", messageID);
+                log(String.format("[Send Message] [MessageID %d] MqiMessage found is at state READ", messageID));
                 return new ResponseEntity<Boolean>(Boolean.TRUE, HttpStatus.OK);
             } else {
                 HashMap<String, Object> updateMap = new HashMap<>();
@@ -239,7 +239,7 @@ private final MongoDBServices mongoDBServices;
                 if(messageFromDB.getNbRetries() == maxRetries) {
                     // on publie un message d’erreur dans queue (via mqi du catalogue)
                     //TODO
-                    LOGGER.error("[Send Message] [MessageID {}] Number of retries is not reached", messageID);
+                    LOGGER.error("[Send Message] [MessageID %d] Number of retries is not reached", messageID);
                     // on met status = ACK_KO
                     messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
                     updateMap.put("state", messageFromDB.getState());
@@ -260,7 +260,7 @@ private final MongoDBServices mongoDBServices;
                     messageFromDB.setLastSendPod(now);
                     updateMap.put("lastSendPod", now);
                     mongoDBServices.updateByID(messageID, updateMap);
-                    LOGGER.info("[Send Message] [MessageID {}] MqiMessage found state is set at SEND", messageID);
+                    log(String.format("[Send Message] [MessageID %d] MqiMessage found state is set at SEND", messageID));
                     return new ResponseEntity<Boolean>(Boolean.TRUE, HttpStatus.OK);
                 }
             }
@@ -280,7 +280,7 @@ private final MongoDBServices mongoDBServices;
         } else if(ackMessageDto.getAck().equals(Ack.WARN)) {
             updateMap.put("state", MqiStateMessageEnum.ACK_WARN);
         } else {
-            LOGGER.error("[Ack Message] [MessageID {}] [Ack {}] Ack is not valid", 
+            LOGGER.error("[Ack Message] [MessageID %d] [Ack %s] Ack is not valid", 
                     messageID, ackMessageDto.getAck());
             return new ResponseEntity<MqiLevelReportMessageDto>(HttpStatus.NOT_FOUND);
         }
@@ -289,7 +289,7 @@ private final MongoDBServices mongoDBServices;
         //on met le status à ak_ok ou ack_ko
         
         if(responseFromDB.isEmpty()) {
-            LOGGER.error("[Ack Message] [MessageID {}] [Ack {}] No MqiMessage Found with MessageID", 
+            LOGGER.error("[Ack Message] [MessageID %d] [Ack %s] No MqiMessage Found with MessageID", 
                     messageID, ackMessageDto.getAck());
             return new ResponseEntity<MqiLevelReportMessageDto>(HttpStatus.NOT_FOUND);
         } else {
@@ -311,12 +311,12 @@ private final MongoDBServices mongoDBServices;
             // -2 : on laisse le consumer faire ce qu’il veut
             // -1 : on démarre à l’offset du début
             // 0 : on démarre à l’offset de fin
-            LOGGER.info("[EarliestOffset] [Topic {}] [Partition {}] [Group {}] Returning default Strategy", 
-                    topic, partition, group);
+            log(String.format("[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning default Strategy", 
+                    topic, partition, group));
             return new ResponseEntity<Long>(Long.valueOf(0), HttpStatus.OK);
         } else {
-            LOGGER.info("[EarliestOffset] [Topic {}] [Partition {}] [Group {}] Returning earlist offset", 
-                    topic, partition, group);
+            log(String.format("[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning earlist offset", 
+                    topic, partition, group));
             return new ResponseEntity<Long>(responseFromDB.get(0).getOffset(), HttpStatus.OK);
         }
     }
@@ -356,6 +356,17 @@ private final MongoDBServices mongoDBServices;
         messageTransformed.setTopic(messageToTransform.getTopic());
         messageTransformed.setDto((LevelReportDto) messageToTransform.getDto());
         return messageTransformed;
+    }
+    
+    /**
+     * Internal function to log messages
+     * 
+     * @param message
+     */
+    private void log(final String message) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(message);
+        }
     }
     
 }
