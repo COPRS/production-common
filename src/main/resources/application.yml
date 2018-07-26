@@ -73,7 +73,7 @@ server:
   
 # App catlog
 persistence:
-  host-uri-catalog: ${mqi_persistence_host-uri-catalog:http://app-catalog:8080}
+  host-uri-catalog: ${mqi_persistence_host-uri-catalog:http://app-catalog-svc:8080}
   port-uri-other-app: ${mqi_persistence_port-uri-other-app:8080}
   max-retries: ${mqi_persistence_max-retries:3}
   tempo-retry-ms: ${mqi_persistence_tempo-retry-ms:500}
