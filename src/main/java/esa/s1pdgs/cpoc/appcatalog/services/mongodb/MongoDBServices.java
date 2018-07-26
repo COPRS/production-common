@@ -28,11 +28,18 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  */
 @Service
 public class MongoDBServices {
+
+	private static final String MQI_MSG_SEQ_KEY = "mqiMessage";
     
     /**
      * DAO for mongoDB
      */
-    private MongoDBDAO mongoDBDAO;
+    private final MongoDBDAO mongoDBDAO;
+    
+    /**
+     * DAO for mongoDB
+     */
+    private final SequenceDao sequenceDao;
     
     /**
      * Constructor for the Services
@@ -40,8 +47,10 @@ public class MongoDBServices {
      * @param mongoDBDAO
      */
     @Autowired
-    public MongoDBServices(final MongoDBDAO mongoDBDAO) {
+    public MongoDBServices(final MongoDBDAO mongoDBDAO,
+    		final SequenceDao sequenceDao) {
         this.mongoDBDAO = mongoDBDAO;
+        this.sequenceDao = sequenceDao;
     }
     
     /**
@@ -115,6 +124,7 @@ public class MongoDBServices {
      * 
      */
     public void insertMqiMessage(MqiMessage messageToInsert) {
+    	messageToInsert.setIdentifier(sequenceDao.getNextSequenceId(MQI_MSG_SEQ_KEY));
         mongoDBDAO.insert(messageToInsert);
     }
     

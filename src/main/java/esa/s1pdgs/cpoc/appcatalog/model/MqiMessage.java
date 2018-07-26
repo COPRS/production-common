@@ -135,6 +135,13 @@ public class MqiMessage {
         return identifier;
     }
     /**
+	 * @param identifier the identifier to set
+	 */
+	public void setIdentifier(long identifier) {
+		this.identifier = identifier;
+	}
+
+	/**
      * @return the topic
      */
     public String getTopic() {
