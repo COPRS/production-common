@@ -39,7 +39,6 @@ import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 
 
 @RunWith(SpringRunner.class)
@@ -330,10 +329,9 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByID(response);
-        AckMessageDto ackMessageDto = new AckMessageDto(1, Ack.OK, "message", true);
         request(post("/mqi/level_reports/1/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(ackMessageDto)))
+                .content(convertObjectToJsonString(Ack.OK)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
@@ -350,10 +348,9 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByID(response);
-        AckMessageDto ackMessageDto = new AckMessageDto(1, Ack.ERROR, "message", true);
         request(post("/mqi/level_reports/1/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(ackMessageDto)))
+                .content(convertObjectToJsonString(Ack.ERROR)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
@@ -370,10 +367,9 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByID(response);
-        AckMessageDto ackMessageDto = new AckMessageDto(1, Ack.WARN, "message", true);
         request(post("/mqi/level_reports/1/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(ackMessageDto)))
+                .content(convertObjectToJsonString(Ack.WARN)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());

@@ -21,7 +21,6 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 
 /**
  * @author Viveris Technologies
@@ -276,94 +275,97 @@ public class GenericMqiController<T> {
             return new ResponseEntity<Boolean>(HttpStatus.NOT_FOUND);
         } else { // Si le message existe
             MqiMessage messageFromDB = responseFromDB.get(0);
-            if (messageFromDB.getState().equals(MqiStateMessageEnum.ACK_OK)) {
-                log(String.format(
-                        "[Send Message] [MessageID %d] MqiMessage found is at state ACK",
-                        messageID));
-                return new ResponseEntity<Boolean>(Boolean.FALSE,
-                        HttpStatus.OK);
-            } else if (messageFromDB.getState()
-                    .equals(MqiStateMessageEnum.READ)) {
-                HashMap<String, Object> updateMap = new HashMap<>();
-                // on met status à SEND et son processing_pod
-                messageFromDB.setState(MqiStateMessageEnum.SEND);
-                messageFromDB.setSendingPod(body.getPod());
-                updateMap.put("state", messageFromDB.getState());
-                updateMap.put("sendingPod", messageFromDB.getSendingPod());
-                // on met à jour les éventuelles dates
-                Date now = new Date();
-                messageFromDB.setLastAckDate(now);
-                messageFromDB.setLastSendDate(now);
-                updateMap.put("lastAckDate", now);
-                updateMap.put("lastSendDate", now);
-                mongoDBServices.updateByID(messageID, updateMap);
-                log(String.format(
-                        "[Send Message] [MessageID %d] MqiMessage found is at state READ",
-                        messageID));
-                return new ResponseEntity<Boolean>(Boolean.TRUE, HttpStatus.OK);
-            } else {
-                HashMap<String, Object> updateMap = new HashMap<>();
-                //  on incrémente nb_retry
-                messageFromDB.setNbRetries(messageFromDB.getNbRetries() + 1);
-                updateMap.put("nbRetries", messageFromDB.getNbRetries());
-                if (messageFromDB.getNbRetries() == maxRetries) {
-                    // on publie un message d’erreur dans queue (via mqi du
-                    // catalogue)
-                    // TODO
-                    LOGGER.error(
-                            "[Send Message] [MessageID {}] Number of retries is not reached",
-                            messageID);
-                    // on met status = ACK_KO
-                    messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
-                    updateMap.put("state", messageFromDB.getState());
-                    // on met à jour les éventuelles dates
-                    Date now = new Date();
-                    messageFromDB.setLastAckDate(now);
-                    updateMap.put("lastAckDate", now);
-                    mongoDBServices.updateByID(messageID, updateMap);
+            Date now = new Date();
+            switch (messageFromDB.getState()) {
+                case ACK_KO:
+                case ACK_OK:
+                case ACK_WARN:
+                    log(String.format(
+                            "[Send Message] [MessageID %d] MqiMessage found is at state ACK",
+                            messageID));
                     return new ResponseEntity<Boolean>(Boolean.FALSE,
                             HttpStatus.OK);
-                } else {
-                    // on met status = à SEND et son processing_pod
+                case READ:
+                    HashMap<String, Object> updateMap1 = new HashMap<>();
+                    // on met status à SEND et son processing_pod
                     messageFromDB.setState(MqiStateMessageEnum.SEND);
                     messageFromDB.setSendingPod(body.getPod());
-                    updateMap.put("state", messageFromDB.getState());
-                    updateMap.put("sendingPod", messageFromDB.getSendingPod());
+                    updateMap1.put("state", messageFromDB.getState());
+                    updateMap1.put("sendingPod", messageFromDB.getSendingPod());
                     // on met à jour les éventuelles dates
-                    Date now = new Date();
+                    messageFromDB.setLastAckDate(now);
                     messageFromDB.setLastSendDate(now);
-                    updateMap.put("lastSendDate", now);
-                    mongoDBServices.updateByID(messageID, updateMap);
+                    updateMap1.put("lastAckDate", now);
+                    mongoDBServices.updateByID(messageID, updateMap1);
                     log(String.format(
-                            "[Send Message] [MessageID %d] MqiMessage found state is set at SEND",
+                            "[Send Message] [MessageID %d] MqiMessage found is at state READ",
                             messageID));
                     return new ResponseEntity<Boolean>(Boolean.TRUE,
                             HttpStatus.OK);
-                }
+                default:
+                    HashMap<String, Object> updateMap2 = new HashMap<>();
+                    //  on incrémente nb_retry
+                    messageFromDB
+                            .setNbRetries(messageFromDB.getNbRetries() + 1);
+                    updateMap2.put("nbRetries", messageFromDB.getNbRetries());
+                    if (messageFromDB.getNbRetries() == maxRetries) {
+                        // on publie un message d’erreur dans queue (via mqi du
+                        // catalogue)
+                        // TODO
+                        LOGGER.error(
+                                "[Send Message] [MessageID {}] Number of retries is not reached",
+                                messageID);
+                        // on met status = ACK_KO
+                        messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
+                        updateMap2.put("state", messageFromDB.getState());
+                        // on met à jour les éventuelles dates
+                        messageFromDB.setLastAckDate(now);
+                        updateMap2.put("lastAckDate", now);
+                        mongoDBServices.updateByID(messageID, updateMap2);
+                        return new ResponseEntity<Boolean>(Boolean.FALSE,
+                                HttpStatus.OK);
+                    } else {
+                        // on met status = à SEND et son processing_pod
+                        messageFromDB.setState(MqiStateMessageEnum.SEND);
+                        messageFromDB.setSendingPod(body.getPod());
+                        updateMap2.put("state", messageFromDB.getState());
+                        updateMap2.put("sendingPod",
+                                messageFromDB.getSendingPod());
+                        // on met à jour les éventuelles dates
+                        messageFromDB.setLastSendDate(now);
+                        updateMap2.put("lastSendDate", now);
+                        mongoDBServices.updateByID(messageID, updateMap2);
+                        log(String.format(
+                                "[Send Message] [MessageID %d] MqiMessage found state is set at SEND",
+                                messageID));
+                        return new ResponseEntity<Boolean>(Boolean.TRUE,
+                                HttpStatus.OK);
+                    }
+
             }
         }
     }
 
     public ResponseEntity<MqiGenericMessageDto<T>> ackMessage(
-            final long messageID, final AckMessageDto ackMessageDto) {
+            final long messageID, final Ack ack) {
 
         HashMap<String, Object> updateMap = new HashMap<>();
-        if (ackMessageDto.getAck().equals(Ack.OK)) {
+        if (ack.equals(Ack.OK)) {
             updateMap.put("state", MqiStateMessageEnum.ACK_OK);
-        } else if (ackMessageDto.getAck().equals(Ack.ERROR)) {
+        } else if (ack.equals(Ack.ERROR)) {
             updateMap.put("state", MqiStateMessageEnum.ACK_KO);
-        } else if (ackMessageDto.getAck().equals(Ack.WARN)) {
+        } else if (ack.equals(Ack.WARN)) {
             updateMap.put("state", MqiStateMessageEnum.ACK_WARN);
         } else {
             LOGGER.error(
                     "[Ack Message] [MessageID {}] [Ack {}] Ack is not valid",
-                    messageID, ackMessageDto.getAck());
+                    messageID, ack);
             return new ResponseEntity<MqiGenericMessageDto<T>>(
                     HttpStatus.NOT_FOUND);
         }
         Date now = new Date();
         updateMap.put("lastAckDate", now);
-        
+
         mongoDBServices.updateByID(messageID, updateMap);
         List<MqiMessage> responseFromDB = mongoDBServices.searchByID(messageID);
         // on met le status à ak_ok ou ack_ko
@@ -371,7 +373,7 @@ public class GenericMqiController<T> {
         if (responseFromDB.isEmpty()) {
             LOGGER.error(
                     "[Ack Message] [MessageID {}] [Ack {}] No MqiMessage Found with MessageID",
-                    messageID, ackMessageDto.getAck());
+                    messageID, ack);
             return new ResponseEntity<MqiGenericMessageDto<T>>(
                     HttpStatus.NOT_FOUND);
         } else {

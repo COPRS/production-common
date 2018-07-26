@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 
 /**
@@ -83,8 +84,8 @@ public class MqiLevelReportController
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{messageID}/ack")
     public ResponseEntity<MqiGenericMessageDto<LevelReportDto>> ackMessage(
             @PathVariable(name = "messageID") final long messageID,
-            @RequestBody final AckMessageDto ackMessageDto) {
-        return super.ackMessage(messageID, ackMessageDto);
+            @RequestBody final Ack ack) {
+        return super.ackMessage(messageID, ack);
     }
 
     /**
