@@ -184,27 +184,31 @@ public class MqiAuxiliaryFileController {
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/next")
     public ResponseEntity<List<MqiAuxiliaryFileMessageDto>> next(@RequestParam("pod") String pod) {
         
-        //TODO : modify search function when we will use priority
-        Set<MqiStateMessageEnum> ackStates = new HashSet<>();
-        ackStates.add(MqiStateMessageEnum.ACK_KO);
-        ackStates.add(MqiStateMessageEnum.ACK_OK);
-        ackStates.add(MqiStateMessageEnum.ACK_WARN);
-        LOGGER.info("[Next] [Pod {}] [States {}] [Product Category {}] Searching MqiMessage", 
-                pod, ackStates, ProductCategory.AUXILIARY_FILES);
-        List<MqiMessage> mqiMessages  = mongoDBServices.searchByPodStateCategory(pod,
-                ProductCategory.AUXILIARY_FILES, ackStates);
-        if(mqiMessages.isEmpty()) {
-            LOGGER.error("[Next] [Pod {}] [States {}] [Product Category {}] No MqiMessage found", 
+        try {
+            //TODO : modify search function when we will use priority
+            Set<MqiStateMessageEnum> ackStates = new HashSet<>();
+            ackStates.add(MqiStateMessageEnum.ACK_KO);
+            ackStates.add(MqiStateMessageEnum.ACK_OK);
+            ackStates.add(MqiStateMessageEnum.ACK_WARN);
+            LOGGER.info("[Next] [Pod {}] [States {}] [Product Category {}] Searching MqiMessage", 
                     pod, ackStates, ProductCategory.AUXILIARY_FILES);
-            return new ResponseEntity<List<MqiAuxiliaryFileMessageDto>>(HttpStatus.NOT_FOUND);
-        } else {
-            LOGGER.info("[Next] [Pod {}] [States {}] [Product Category {}] Returning list of found MqiMessage", 
-                    pod, ackStates, ProductCategory.AUXILIARY_FILES);
-            List<MqiAuxiliaryFileMessageDto> messagesToReturn = new ArrayList<>();
-            mqiMessages.forEach(x-> messagesToReturn.add(transformMqiMessageToMqiAuxiliaryFileMessage(x)));
-            return new ResponseEntity<List<MqiAuxiliaryFileMessageDto>>(messagesToReturn, HttpStatus.OK);
+            List<MqiMessage> mqiMessages  = mongoDBServices.searchByPodStateCategory(pod,
+                    ProductCategory.AUXILIARY_FILES, ackStates);
+            if(mqiMessages.isEmpty()) {
+                LOGGER.error("[Next] [Pod {}] [States {}] [Product Category {}] No MqiMessage found", 
+                        pod, ackStates, ProductCategory.AUXILIARY_FILES);
+                return new ResponseEntity<List<MqiAuxiliaryFileMessageDto>>(HttpStatus.NOT_FOUND);
+            } else {
+                LOGGER.info("[Next] [Pod {}] [States {}] [Product Category {}] Returning list of found MqiMessage", 
+                        pod, ackStates, ProductCategory.AUXILIARY_FILES);
+                List<MqiAuxiliaryFileMessageDto> messagesToReturn = new ArrayList<>();
+                mqiMessages.forEach(x-> messagesToReturn.add(transformMqiMessageToMqiAuxiliaryFileMessage(x)));
+                return new ResponseEntity<List<MqiAuxiliaryFileMessageDto>>(messagesToReturn, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            LOGGER.error(e);
         }
-        
+        return new ResponseEntity<List<MqiAuxiliaryFileMessageDto>>(HttpStatus.NOT_FOUND);
      }
     
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, 
