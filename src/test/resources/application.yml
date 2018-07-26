@@ -12,8 +12,8 @@ mongodb:
   host: 127.0.0.1
   port: 27017
   database: databaseName
-  old-entry-ms: 86400
-  clean-cron: "0 0 0 * * *"
+  old-entry-ms: 86400000
+  clean-cron: 0 0 0 * * *
   
 #MQI
 mqi:

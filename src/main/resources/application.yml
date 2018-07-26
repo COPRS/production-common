@@ -12,9 +12,9 @@ mongodb:
   host: ${appcatalog_mongodb_host:127.0.0.1}
   port: ${appcatalog_mongodb_port:27017}
   database: ${appcatalog_mongodb_database:test}
-  old-entry-ms: ${appcatalog_mongodb_old_entry_ms:86400}
-  clean-cron: ${appcatalog_mongodb_clean_cron:"0 0 0 * * *"}
+  old-entry-ms: ${appcatalog_mongodb_old_entry_ms:86400000}
+  clean-cron: ${appcatalog_mongodb_clean_cron:0 0 0 * * *}
   
 #MQI
 mqi:
-  max-retries: 3
+  max-retries: ${appcatalog_mqi_max_retries:3}

@@ -22,36 +22,36 @@ Configuration:
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc
-        level: -info
+        level: info
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: org.springframework
-        level: -error
+        level: error
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: kafka
-        level: -warn
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: org.apache
-        level: -warn
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: com.amazonaws
-        level: -warn
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
     Root:
-      level: -error
+      level: error
       AppenderRef:
         ref: STDOUT
