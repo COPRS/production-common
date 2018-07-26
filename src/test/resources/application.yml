@@ -7,20 +7,6 @@ spring:
 logging:
   config: test/log4j2-test.yml
 
-# KAFKA
-kafka:
-  bootstrap-servers: 172.17.50.10:9200
-  group-id: metadata-catalogs
-  client-id: metadata-catalog
-  poll-timeout: 500
-  topic:
-    auxiliary-files: t-pdgs-auxiliary-files
-    edrs-sessions: t-pdgs-edrs-sessions
-    l0-slices: t-pdgs-l0-slices
-    l0-acns: t-pdgs-l0-acns
-    l1-acns: t-pdgs-l1-acns
-    l1-slices: t-pdgs-l1-slices
-
 # Elastic Search
 elasticsearch:
   host: es-svc
@@ -34,22 +20,29 @@ elasticsearch:
 file:
   file-with-manifest-ext: .safe
   manifest-filename: manifest.safe
-  auxiliary-files:
-    local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
-  session-files:
-    local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
-  l0-slices:
-    local-directory: /data/local-catalog/l0_slices/ # Must contains the last /
-  l0-acns:
-    local-directory: /data/local-catalog/l0_acns/ # Must contains the last /
-  l1-slices:
-    local-directory: /data/local-catalog/l1_slices/ # Must contains the last /
-  l1-acns:
-    local-directory: /data/local-catalog/l1_acns/ # Must contains the last /
+  mqi:
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempo-retry-ms: 1000
+  product-categories:
+    auxiliary-files:
+      local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    edrs_sessions:
+      local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    level-products:
+      local-directory: /data/local-catalog/level_products/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
     
 # Metadata Extractor
 mdextractor:
   typeoverlapstr: "EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"
   typeslicelengthstr: "EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"
-  xslt-directory: ${catalog_xslt-directory:config/xsltDir/} # Must contains the last /
+  xslt-directory: config/xsltDir/ # Must contains the last /
       
+status:
+  max-error-counter: 3

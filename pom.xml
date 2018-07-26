@@ -108,6 +108,12 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>commons</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>spdgs-sdk</groupId>
+			<artifactId>mqi-client</artifactId>
 			<version>0.0.1</version>
 		</dependency>
 		

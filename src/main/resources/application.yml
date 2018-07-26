@@ -6,20 +6,6 @@ spring:
 # Logging
 logging:
   config: ${catalog_logging_config:log4j2.yml}
-
-# KAFKA
-kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
-  group-id: ${catalog_kafka_group:metadata-catalogs}
-  client-id: ${catalog_kafka_client:metadata-catalog}
-  poll-timeout: ${catalog_kafka_poll-timeout:500}
-  topic:
-    auxiliary-files: ${kafka_topic_auxiliary_files:t-pdgs-auxiliary-files}
-    edrs-sessions: ${kafka_topic_edrs_sessions:t-pdgs-edrs-sessions}
-    l0-slices: ${kafka_topic_l0_slices:t-pdgs-l0-slices}
-    l0-acns: ${kafka_topic_l0_acns:t-pdgs-l0-acns}
-    l1-slices: ${kafka_topic_l1_slices:t-pdgs-l1-slices}
-    l1-acns: ${kafka_topic_l1_acns:t-pdgs-l1-acns}
     
 # Elastic Search
 elasticsearch:
@@ -34,19 +20,24 @@ elasticsearch:
 file:
   file-with-manifest-ext: ${catalog_file-with-manifest-ext:.safe}
   manifest-filename: ${catalog_manifest-filename:manifest.safe}
-  auxiliary-files:
-    local-directory: ${catalog_auxiliary-files_local-directory:/data/local-catalog/auxiliary_files/} # Must contains the last /
-  session-files:
-    local-directory: ${catalog_session-files_local-directory:/data/local-catalog/edrs_sessions/} # Must contains the last /
-  l0-slices:
-    local-directory: ${catalog_l0-slices_local-directory:/data/local-catalog/l0_slices/} # Must contains the last /
-  l0-acns:
-    local-directory: ${catalog_l0-acns_local-directory:/data/local-catalog/l0_acns/} # Must contains the last /
-  l1-slices:
-    local-directory: ${catalog_l1-slices_local-directory:/data/local-catalog/l1_slices/} # Must contains the last /
-  l1-acns:
-    local-directory: ${catalog_l1-acns_local-directory:/data/local-catalog/l1_acns/} # Must contains the last /
-
+  mqi:
+    host-uri: ${catalog_mqi_host-uri:http://localhost:8081}
+    max-retries: ${catalog_mqi_max-retries:3}
+    tempo-retry-ms: ${catalog_mqi_tempo-retry-ms:1000}
+  product-categories:
+    auxiliary-files:
+      local-directory: ${catalog_auxiliary-files_local-directory:/data/local-catalog/auxiliary_files/} # Must contains the last /
+      fixed-delay-ms: ${catalog_auxiliary-files_fixed-delay-ms:500}
+      init-delay-poll-ms: ${catalog_auxiliary-files_init-delay-poll-ms:2000}
+    edrs-sessions:
+      local-directory: ${catalog_edrs-sessions_local-directory:/data/local-catalog/edrs_sessions/} # Must contains the last /
+      fixed-delay-ms: ${catalog_edrs-sessions_fixed-delay-ms:500}
+      init-delay-poll-ms: ${catalog_edrs-sessions_init-delay-poll-ms:2000}
+    level-products:
+      local-directory: ${catalog_level-products_local-directory:/data/local-catalog/level_products/} # Must contains the last /
+      fixed-delay-ms: ${catalog_level-products_fixed-delay-ms:500}
+      init-delay-poll-ms: ${catalog_level-products_init-delay-poll-ms:2000}
+    
 # REST controller
 server:
   port: ${catalog_rest_server_port:8080}
@@ -57,3 +48,5 @@ mdextractor:
   typeslicelengthstr: ${products_slice-length-per-acq}
   xslt-directory: ${catalog_xslt-directory:xsltDir/} # Must contains the last /
   
+status:
+  max-error-counter: ${catalog_status_max-error-counter:3}
