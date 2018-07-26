@@ -58,7 +58,7 @@ public class MqiMessage {
     /**
      * Date whe the pod last send the message
      */
-    private Date lastSendPod;
+    private Date lastSendDate;
     /**
      * Date where the message was last acknowledge
      */
@@ -90,7 +90,7 @@ public class MqiMessage {
      * @param readingPod
      * @param lastReadDate
      * @param sendingPod
-     * @param lastSendPod
+     * @param lastSendDate
      * @param lastAckDate
      * @param nbRetries
      * @param dto
@@ -98,7 +98,7 @@ public class MqiMessage {
     public MqiMessage(ProductCategory category, String topic,
             int partition, long offset, String group, MqiStateMessageEnum state,
             String readingPod, Date lastReadDate, String sendingPod,
-            Date lastSendPod, Date lastAckDate, int nbRetries, Object dto) {
+            Date lastSendDate, Date lastAckDate, int nbRetries, Object dto) {
         super();
         this.category = category;
         this.topic = topic;
@@ -109,7 +109,7 @@ public class MqiMessage {
         this.readingPod = readingPod;
         this.lastReadDate = lastReadDate;
         this.sendingPod = sendingPod;
-        this.lastSendPod = lastSendPod;
+        this.lastSendDate = lastSendDate;
         this.lastAckDate = lastAckDate;
         this.nbRetries = nbRetries;
         this.dto = dto;
@@ -238,16 +238,16 @@ public class MqiMessage {
         this.sendingPod = sendingPod;
     }
     /**
-     * @return the lastSendPod
+     * @return the lastSendDate
      */
-    public Date getLastSendPod() {
-        return lastSendPod;
+    public Date getLastSendDate() {
+        return lastSendDate;
     }
     /**
-     * @param lastSendPod the lastSendPod to set
+     * @param lastSendDate the lastSendDate to set
      */
-    public void setLastSendPod(Date lastSendPod) {
-        this.lastSendPod = lastSendPod;
+    public void setLastSendDate(Date lastSendDate) {
+        this.lastSendDate = lastSendDate;
     }
     /**
      * @return the lastAckDate
@@ -296,8 +296,8 @@ public class MqiMessage {
                 + "\", \"topic\":\"" + topic + "\", \"partition\":\"" + partition + "\", \"offset\":\""
                 + offset + "\", \"group\":\"" + group + "\", \"state\":\"" + state
                 + "\", \"readingPod\":\"" + readingPod + "\", \"lastReadDate\":\""
-                + lastReadDate + "\", \"sendingPod\":\"" + sendingPod + "\", \"lastSendPod\":\""
-                + lastSendPod + "\", \"lastAckDate\":\"" + lastAckDate + "\", \"nbRetries\":\""
+                + lastReadDate + "\", \"sendingPod\":\"" + sendingPod + "\", \"lastSendDate\":\""
+                + lastSendDate + "\", \"lastAckDate\":\"" + lastAckDate + "\", \"nbRetries\":\""
                 + nbRetries + "\", \"dto\":\"" + dto + "\"}";
     }
 
@@ -318,7 +318,7 @@ public class MqiMessage {
         result = prime * result
                 + ((lastReadDate == null) ? 0 : lastReadDate.hashCode());
         result = prime * result
-                + ((lastSendPod == null) ? 0 : lastSendPod.hashCode());
+                + ((lastSendDate == null) ? 0 : lastSendDate.hashCode());
         result = prime * result + nbRetries;
         result = prime * result + (int) (offset ^ (offset >>> 32));
         result = prime * result + partition;
@@ -368,10 +368,10 @@ public class MqiMessage {
                 return false;
         } else if (!lastReadDate.equals(other.lastReadDate))
             return false;
-        if (lastSendPod == null) {
-            if (other.lastSendPod != null)
+        if (lastSendDate == null) {
+            if (other.lastSendDate != null)
                 return false;
-        } else if (!lastSendPod.equals(other.lastSendPod))
+        } else if (!lastSendDate.equals(other.lastSendDate))
             return false;
         if (nbRetries != other.nbRetries)
             return false;

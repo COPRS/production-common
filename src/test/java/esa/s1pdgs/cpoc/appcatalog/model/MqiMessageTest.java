@@ -38,7 +38,7 @@ public class MqiMessageTest {
         assertEquals("readingPod", message.getReadingPod());
         assertEquals(now, message.getLastAckDate());
         assertEquals(now, message.getLastReadDate());
-        assertEquals(now, message.getLastSendPod());
+        assertEquals(now, message.getLastSendDate());
         assertEquals("sendingPod", message.getSendingPod());
         assertEquals(0, message.getNbRetries());
         assertEquals(null, message.getDto());
@@ -60,7 +60,7 @@ public class MqiMessageTest {
         message.setReadingPod("readingPod");
         message.setLastAckDate(now);
         message.setLastReadDate(now);
-        message.setLastSendPod(now);
+        message.setLastSendDate(now);
         message.setSendingPod("sendingPod");
         message.setNbRetries(0);
         message.setDto(null);
@@ -75,7 +75,7 @@ public class MqiMessageTest {
         assertTrue(str.contains("readingPod\":\"readingPod"));
         assertTrue(str.contains("lastAckDate\":\""+now));
         assertTrue(str.contains("lastReadDate\":\""+now));
-        assertTrue(str.contains("lastSendPod\":\""+now));
+        assertTrue(str.contains("lastSendDate\":\""+now));
         assertTrue(str.contains("sendingPod\":\"sendingPod"));
         assertTrue(str.contains("nbRetries\":\"0"));
         assertTrue(str.contains("dto\":\"null"));

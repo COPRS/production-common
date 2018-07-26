@@ -48,7 +48,7 @@ public class MongoDBClean {
     @Scheduled(cron = "${mongodb.clean-cron}")
     public void clean() {
         Date oldDate = new Date(System.currentTimeMillis() - oldms);
-        Query query = query(where("lastReadDate").lt(oldDate).and("lastSendPod").lt(oldDate)
+        Query query = query(where("lastReadDate").lt(oldDate).and("lastSendDate").lt(oldDate)
                 .and("lastAckDate").lt(oldDate));
         mongoDBDAO.findAllAndRemove(query);
     }

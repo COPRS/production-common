@@ -84,7 +84,7 @@ public class MongoDBServices {
     public List<MqiMessage> searchByTopicPartitionGroup (String topic, int partition, 
             String group, Set<MqiStateMessageEnum> states){
         Query query = query(where("topic").is(topic).and("partition").is(partition)
-                .and("group").is(group).and("states").nin(states));
+                .and("group").is(group).and("state").nin(states));
         query.with(new Sort(Direction.ASC, "lastReadDate"));
         return mongoDBDAO.find(query);
     }

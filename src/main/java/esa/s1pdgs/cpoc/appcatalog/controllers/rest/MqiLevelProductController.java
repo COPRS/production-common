@@ -130,9 +130,9 @@ public class MqiLevelProductController {
                     updateMap.put("sendingPod", messageFromDB.getSendingPod());
                     // on met à jour les éventuelles dates
                     Date now = new Date();
-                    messageFromDB.setLastSendPod(now);
+                    messageFromDB.setLastSendDate(now);
                     messageFromDB.setLastReadDate(now);
-                    updateMap.put("lastSendPod", now);
+                    updateMap.put("lastSendDate", now);
                     updateMap.put("lastReadDate", now);
                     // Modifier l'objet dans la bdd
                     mongoDBServices.updateByID(messageFromDB.getIdentifier() ,updateMap);
@@ -160,8 +160,8 @@ public class MqiLevelProductController {
                             topic, partition, offset, body.getGroup()));
                     // on met à jour les éventuelles dates et le reading_pod
                     Date now = new Date();
-                    messageFromDB.setLastSendPod(now);
-                    updateMap.put("lastSendPod", now);
+                    messageFromDB.setLastSendDate(now);
+                    updateMap.put("lastSendDate", now);
                     messageFromDB.setReadingPod(body.getPod());
                     updateMap.put("readingPod", messageFromDB.getReadingPod());                    
                     // Modifier l'objet dans la bdd
@@ -222,13 +222,15 @@ public class MqiLevelProductController {
                 HashMap<String, Object> updateMap = new HashMap<>();
                 // on met status à SEND et son processing_pod
                 messageFromDB.setState(MqiStateMessageEnum.SEND);
+                messageFromDB.setSendingPod(body.getPod());
                 updateMap.put("state", messageFromDB.getState());
+                updateMap.put("sendingPod", messageFromDB.getSendingPod());
                 // on met à jour les éventuelles dates
                 Date now = new Date();
                 messageFromDB.setLastAckDate(now);
-                messageFromDB.setLastSendPod(now);
+                messageFromDB.setLastSendDate(now);
                 updateMap.put("lastAckDate", now);
-                updateMap.put("lastSendPod", now);
+                updateMap.put("lastSendDate", now);
                 mongoDBServices.updateByID(messageID, updateMap);
                 log(String.format("[Send Message] [MessageID %d] MqiMessage found is at state READ", messageID));
                 return new ResponseEntity<Boolean>(Boolean.TRUE, HttpStatus.OK);
@@ -247,19 +249,19 @@ public class MqiLevelProductController {
                     // on met à jour les éventuelles dates
                     Date now = new Date();
                     messageFromDB.setLastAckDate(now);
-                    messageFromDB.setLastSendPod(now);
                     updateMap.put("lastAckDate", now);
-                    updateMap.put("lastSendPod", now);
                     mongoDBServices.updateByID(messageID, updateMap);
                     return new ResponseEntity<Boolean>(Boolean.FALSE, HttpStatus.OK);
                 } else {
                     // on met status = à SEND et son processing_pod
                     messageFromDB.setState(MqiStateMessageEnum.SEND);
+                    messageFromDB.setSendingPod(body.getPod());
                     updateMap.put("state", messageFromDB.getState());
+                    updateMap.put("sendingPod", messageFromDB.getSendingPod());
                     // on met à jour les éventuelles dates
                     Date now = new Date();
-                    messageFromDB.setLastSendPod(now);
-                    updateMap.put("lastSendPod", now);
+                    messageFromDB.setLastSendDate(now);
+                    updateMap.put("lastSendDate", now);
                     mongoDBServices.updateByID(messageID, updateMap);
                     log(String.format("[Send Message] [MessageID %d] MqiMessage found state is set at SEND", messageID));
                     return new ResponseEntity<Boolean>(Boolean.TRUE, HttpStatus.OK);
@@ -333,7 +335,7 @@ public class MqiLevelProductController {
         messageTransformed.setIdentifier(messageToTransform.getIdentifier());
         messageTransformed.setLastAckDate(messageToTransform.getLastAckDate());
         messageTransformed.setLastReadDate(messageToTransform.getLastReadDate());
-        messageTransformed.setLastSendDate(messageToTransform.getLastSendPod());
+        messageTransformed.setLastSendDate(messageToTransform.getLastSendDate());
         messageTransformed.setNbRetries(messageToTransform.getNbRetries());
         messageTransformed.setOffset(messageToTransform.getOffset());
         messageTransformed.setPartition(messageToTransform.getPartition());
@@ -351,7 +353,7 @@ public class MqiLevelProductController {
         messageTransformed.setIdentifier(messageToTransform.getIdentifier());
         messageTransformed.setLastAckDate(messageToTransform.getLastAckDate());
         messageTransformed.setLastReadDate(messageToTransform.getLastReadDate());
-        messageTransformed.setLastSendDate(messageToTransform.getLastSendPod());
+        messageTransformed.setLastSendDate(messageToTransform.getLastSendDate());
         messageTransformed.setNbRetries(messageToTransform.getNbRetries());
         messageTransformed.setOffset(messageToTransform.getOffset());
         messageTransformed.setPartition(messageToTransform.getPartition());
