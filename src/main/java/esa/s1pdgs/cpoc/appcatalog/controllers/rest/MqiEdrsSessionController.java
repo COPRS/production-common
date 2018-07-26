@@ -103,7 +103,7 @@ public class MqiEdrsSessionController {
                 if(messageFromDB.getNbRetries() == maxRetries) {
                     // on publie un message d’erreur dans queue (via mqi du catalogue)
                     //TODO 
-                    LOGGER.error("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Number of retries is reached", 
+                    LOGGER.error("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Number of retries is reached", 
                             topic, partition, offset, body.getGroup());
                     // on met status = ACK_KO
                     messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
@@ -173,7 +173,7 @@ public class MqiEdrsSessionController {
                 }
             }
         }
-        LOGGER.error("[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] ERROR", 
+        LOGGER.error("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] ERROR", 
                 topic, partition, offset, body.getGroup());
         return new ResponseEntity<MqiLightMessageDto>(HttpStatus.NOT_FOUND);
         
@@ -191,9 +191,9 @@ public class MqiEdrsSessionController {
         List<MqiMessage> mqiMessages  = mongoDBServices.searchByPodStateCategory(pod,
                 ProductCategory.EDRS_SESSIONS, ackStates);
         if(mqiMessages.isEmpty()) {
-            LOGGER.error("[Next] [Pod %s] [States %s] [Product Category %s] No MqiMessage found", 
-                    pod, ackStates, ProductCategory.EDRS_SESSIONS);
-            return new ResponseEntity<List<MqiEdrsSessionMessageDto>>(HttpStatus.NOT_FOUND);
+            log(String.format("[Next] [Pod %s] [States %s] [Product Category %s] No MqiMessage found", 
+                    pod, ackStates, ProductCategory.EDRS_SESSIONS));
+            return new ResponseEntity<List<MqiEdrsSessionMessageDto>>(new ArrayList<MqiEdrsSessionMessageDto>() ,HttpStatus.OK);
         } else {
             log(String.format("[Next] [Pod %s] [States %s] [Product Category %s] Returning list of found MqiMessage", 
                     pod, ackStates, ProductCategory.EDRS_SESSIONS));
@@ -212,7 +212,7 @@ public class MqiEdrsSessionController {
         List<MqiMessage> responseFromDB = mongoDBServices.searchByID(messageID);
         
         if(responseFromDB.isEmpty()) {
-            LOGGER.error("[Send Message] [MessageID %d] No MqiMessage found", messageID);
+            LOGGER.error("[Send Message] [MessageID {}] No MqiMessage found", messageID);
             return new ResponseEntity<Boolean>(HttpStatus.NOT_FOUND);
         } else { // Si le message existe
             MqiMessage messageFromDB = responseFromDB.get(0);
@@ -241,7 +241,7 @@ public class MqiEdrsSessionController {
                 if(messageFromDB.getNbRetries() == maxRetries) {
                     // on publie un message d’erreur dans queue (via mqi du catalogue)
                     //TODO
-                    LOGGER.error("[Send Message] [MessageID %d] Number of retries is not reached", messageID);
+                    LOGGER.error("[Send Message] [MessageID {}] Number of retries is not reached", messageID);
                     // on met status = ACK_KO
                     messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
                     updateMap.put("state", messageFromDB.getState());
@@ -282,7 +282,7 @@ public class MqiEdrsSessionController {
         } else if(ackMessageDto.getAck().equals(Ack.WARN)) {
             updateMap.put("state", MqiStateMessageEnum.ACK_WARN);
         } else {
-            LOGGER.error("[Ack Message] [MessageID %d] [Ack %s] Ack is not valid", 
+            LOGGER.error("[Ack Message] [MessageID {}] [Ack {}] Ack is not valid", 
                     messageID, ackMessageDto.getAck());
             return new ResponseEntity<MqiEdrsSessionMessageDto>(HttpStatus.NOT_FOUND);
         }
@@ -291,7 +291,7 @@ public class MqiEdrsSessionController {
         //on met le status à ak_ok ou ack_ko
         
         if(responseFromDB.isEmpty()) {
-            LOGGER.error("[Ack Message] [MessageID %d] [Ack %s] No MqiMessage Found with MessageID", 
+            LOGGER.error("[Ack Message] [MessageID {}] [Ack {}] No MqiMessage Found with MessageID", 
                     messageID, ackMessageDto.getAck());
             return new ResponseEntity<MqiEdrsSessionMessageDto>(HttpStatus.NOT_FOUND);
         } else {
