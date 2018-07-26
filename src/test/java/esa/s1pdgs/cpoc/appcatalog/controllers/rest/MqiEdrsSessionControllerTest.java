@@ -99,7 +99,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         this.mockSearchByTopicPartitionOffsetGroup(new ArrayList<MqiMessage>());
         MqiGenericReadMessageDto<EdrsSessionDto> body = 
                 new MqiGenericReadMessageDto<EdrsSessionDto>("group","readingPod",false, null);
-        request(post("/mqi/edrs_session/topic/1/5/read")
+        request(post("/mqi/edrs_sessions/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -118,7 +118,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         this.mockSearchByTopicPartitionOffsetGroup(response);
         MqiGenericReadMessageDto<EdrsSessionDto> body = 
                 new MqiGenericReadMessageDto<EdrsSessionDto>("group","readingPod",false, null);
-        request(post("/mqi/edrs_session/topic/1/5/read")
+        request(post("/mqi/edrs_sessions/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -138,7 +138,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         this.mockSearchByTopicPartitionOffsetGroup(response);
         MqiGenericReadMessageDto<EdrsSessionDto> body = 
                 new MqiGenericReadMessageDto<EdrsSessionDto>("group","readingPod",true, null);
-        request(post("/mqi/edrs_session/topic/1/5/read")
+        request(post("/mqi/edrs_sessions/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -159,7 +159,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         this.mockSearchByTopicPartitionOffsetGroup(response);
         MqiGenericReadMessageDto<EdrsSessionDto> body = 
                 new MqiGenericReadMessageDto<EdrsSessionDto>("group","readingPod",true, null);
-        request(post("/mqi/edrs_session/topic/1/5/read")
+        request(post("/mqi/edrs_sessions/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -180,7 +180,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         this.mockSearchByTopicPartitionOffsetGroup(response);
         MqiGenericReadMessageDto<EdrsSessionDto> body = 
                 new MqiGenericReadMessageDto<EdrsSessionDto>("group","readingPod",false, null);
-        request(post("/mqi/edrs_session/topic/1/5/read")
+        request(post("/mqi/edrs_sessions/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -201,7 +201,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         this.mockSearchByTopicPartitionOffsetGroup(response);
         MqiGenericReadMessageDto<EdrsSessionDto> body = 
                 new MqiGenericReadMessageDto<EdrsSessionDto>("group","readingPod",false, null);
-        request(post("/mqi/edrs_session/topic/1/5/read")
+        request(post("/mqi/edrs_sessions/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -214,7 +214,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
     @Test
     public void testNextMessageMqiMessageDontExists() throws Exception {
         this.mockSearchByPodStateCategory(new ArrayList<MqiMessage>());
-        request(get("/mqi/edrs_session/next")
+        request(get("/mqi/edrs_sessions/next")
                 .param("pod", "readingPod"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -235,7 +235,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
                 1, 18, "group", MqiStateMessageEnum.READ, "readingPod", null, 
                 "sendingPod", null, null, 2, null));
         this.mockSearchByPodStateCategory(response);
-        request(get("/mqi/edrs_session/next")
+        request(get("/mqi/edrs_sessions/next")
                 .param("pod", "readingPod"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -247,7 +247,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
     public void testSendMessageMqiMessageDontExists() throws Exception {
         this.mockSearchByID(new ArrayList<MqiMessage>());
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_session/1/send")
+        request(post("/mqi/edrs_sessions/1/send")
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
@@ -261,7 +261,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
                 "sendingPod", null, null, 2, null));
         this.mockSearchByID(response);
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_session/1/send")
+        request(post("/mqi/edrs_sessions/1/send")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -277,7 +277,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
                 "sendingPod", null, null, 0, null));
         this.mockSearchByID(response);
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_session/1/send")
+        request(post("/mqi/edrs_sessions/1/send")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -294,7 +294,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
                 "sendingPod", null, null, 0, null));
         this.mockSearchByID(response);
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_session/1/send")
+        request(post("/mqi/edrs_sessions/1/send")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -311,7 +311,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
                 "sendingPod", null, null, 2, null));
         this.mockSearchByID(response);
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_session/1/send")
+        request(post("/mqi/edrs_sessions/1/send")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(convertObjectToJsonString(body)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -330,7 +330,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         response.add(message);
         this.mockSearchByID(response);
         AckMessageDto ackMessageDto = new AckMessageDto(1, Ack.OK, "message", true);
-        request(post("/mqi/edrs_session/1/ack")
+        request(post("/mqi/edrs_sessions/1/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(convertObjectToJsonString(ackMessageDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -350,7 +350,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         response.add(message);
         this.mockSearchByID(response);
         AckMessageDto ackMessageDto = new AckMessageDto(1, Ack.ERROR, "message", true);
-        request(post("/mqi/edrs_session/1/ack")
+        request(post("/mqi/edrs_sessions/1/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(convertObjectToJsonString(ackMessageDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -370,7 +370,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
         response.add(message);
         this.mockSearchByID(response);
         AckMessageDto ackMessageDto = new AckMessageDto(1, Ack.WARN, "message", true);
-        request(post("/mqi/edrs_session/1/ack")
+        request(post("/mqi/edrs_sessions/1/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(convertObjectToJsonString(ackMessageDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -383,7 +383,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
     @Test
     public void testEarliestOffsetMessageMqiMessageDontExists() throws Exception {
         this.mockSearchByTopicPartitionGroup(new ArrayList<MqiMessage>());
-        request(get("/mqi/edrs_session/topic/1/earliestOffset")
+        request(get("/mqi/edrs_sessions/topic/1/earliestOffset")
                 .param("group", "group"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
@@ -398,7 +398,7 @@ public class MqiEdrsSessionControllerTest  extends RestControllerTest {
                 1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null, 
                 "sendingPod", null, null, 2, null));
         this.mockSearchByTopicPartitionGroup(response);
-        request(get("/mqi/edrs_session/topic/1/earliestOffset")
+        request(get("/mqi/edrs_sessions/topic/1/earliestOffset")
                 .param("group", "group"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));

@@ -42,7 +42,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
  * @author Viveris Technologies
  */
 @RestController
-@RequestMapping(path = "/mqi/edrs_session")
+@RequestMapping(path = "/mqi/edrs_sessions")
 public class MqiEdrsSessionController {
 
     private static final Logger LOGGER = LogManager.getLogger(MqiEdrsSessionController.class);
