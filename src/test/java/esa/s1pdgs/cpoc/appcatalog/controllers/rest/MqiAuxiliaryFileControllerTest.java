@@ -224,7 +224,8 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
         this.mockSearchByPodStateCategory(new ArrayList<MqiMessage>());
         request(get("/mqi/auxiliary_files/next")
                 .param("pod", "readingPod"))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
         verify(mongoDBServices, times(1)).searchByPodStateCategory(Mockito.anyString(), 
                 Mockito.any(ProductCategory.class), Mockito.any());
     }
