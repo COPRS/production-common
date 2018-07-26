@@ -308,7 +308,7 @@ public class GenericMqiController<T> {
                     messageFromDB
                             .setNbRetries(messageFromDB.getNbRetries() + 1);
                     updateMap2.put("nbRetries", messageFromDB.getNbRetries());
-                    if (messageFromDB.getNbRetries() == maxRetries) {
+                    if (messageFromDB.getNbRetries() >= maxRetries) {
                         // on publie un message d’erreur dans queue (via mqi du
                         // catalogue)
                         // TODO

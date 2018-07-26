@@ -356,6 +356,9 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
         verify(mongoDBServices, never()).insertMqiMessage(Mockito.any(MqiMessage.class));
         verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(), Mockito.any());
+        System.out.println("CYRRIEIEIILLLLLLLLLLLLLL");
+        System.out.println("["+convertObjectToJsonString(Ack.ERROR)+"]");
+        System.out.println("["+convertObjectToJsonString(new MqiSendMessageDto("pod", false))+"]");
     }
     
     @Test
