@@ -125,7 +125,7 @@ public class AuxiliaryFilesExtractor
      */
     private String getKeyObs(final GenericMessageDto<AuxiliaryFileDto> message) {
         String keyObs = message.getBody().getKeyObjectStorage();
-        if (keyObs.endsWith(fileManifestExt.toLowerCase())) {
+        if (keyObs.toLowerCase().endsWith(fileManifestExt.toLowerCase())) {
             keyObs += "/" + manifestFilename;
         }
         return keyObs;
