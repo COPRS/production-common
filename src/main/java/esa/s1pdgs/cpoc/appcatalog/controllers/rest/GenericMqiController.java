@@ -250,20 +250,20 @@ public class GenericMqiController<T> {
         ackStates.add(MqiStateMessageEnum.ACK_OK);
         ackStates.add(MqiStateMessageEnum.ACK_WARN);
         log(String.format(
-                "[Next] [Pod %s] [States %s] [Product Category %s] Searching MqiMessage",
-                pod, ackStates, category));
+                "[Next] [Pod %s] [Product Category %s] Searching MqiMessage",
+                pod, category));
         List<MqiMessage> mqiMessages = mongoDBServices
                 .searchByPodStateCategory(pod, category, ackStates);
         if (mqiMessages.isEmpty()) {
             log(String.format(
-                    "[Next] [Pod %s] [States %s] [Product Category %s] No MqiMessage found",
-                    pod, ackStates, category));
+                    "[Next] [Pod %s] [Product Category %s] No MqiMessage found",
+                    pod, category));
             return new ResponseEntity<List<MqiGenericMessageDto<T>>>(
                     new ArrayList<MqiGenericMessageDto<T>>(), HttpStatus.OK);
         } else {
             log(String.format(
-                    "[Next] [Pod %s] [States %s] [Product Category %s] Returning list of found MqiMessage",
-                    pod, ackStates, category));
+                    "[Next] [Pod %s] [Product Category %s] Returning list of found MqiMessage",
+                    pod, category));
             List<MqiGenericMessageDto<T>> messagesToReturn = new ArrayList<>();
             mqiMessages.forEach(x -> messagesToReturn
                     .add(transformMqiMessageToDtoGenericMessage(x)));
