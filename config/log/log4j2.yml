@@ -10,10 +10,10 @@ Configuration:
         Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-metadata-catalog-app-1.0.0 %-5level: %msg [%thread] %n"
     RollingFile:
       name: FILE
-      fileName: ${env:appcatalog_logging_file:s1pdgs-metadata-catalog.log}
-      filePattern: "${env:appcatalog_logging_file:s1pdgs-metadata-catalog.log}.%d{yyyy-MM-dd-hh-mm}.gz"
+      fileName: ${env:appcatalog_logging_file:-s1pdgs-app-catalog.log}
+      filePattern: "${env:appcatalog_logging_file:-s1pdgs-metadata-app.log}.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-metadata-catalog-app-1.0.0 %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-app-catalog-1.0.0 %-5level: %msg [%thread] %n"
       Policies:
         SizeBasedTriggeringPolicy:
           size: 10 MB
