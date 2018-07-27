@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelJobsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -109,5 +110,17 @@ public class MqiConfiguration {
     public ErrorService mqiServiceForErrors(final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new ErrorService(template, hostUri, maxRetries, tempoRetryMs);
+    }
+
+    /**
+     * Service for stopping MQI server
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = "mqiServiceForStatus")
+    public StatusService mqiServiceForStatus(final RestTemplateBuilder builder) {
+        RestTemplate template = builder.build();
+        return new StatusService(template, hostUri, maxRetries, tempoRetryMs);
     }
 }
