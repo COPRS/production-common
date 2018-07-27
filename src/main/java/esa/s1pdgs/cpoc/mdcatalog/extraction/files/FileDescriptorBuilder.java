@@ -240,16 +240,16 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setProductName(productName);
 			l1Descriptor.setRelativePath(relativePath);
 			l1Descriptor.setFilename(filename);
-			l1Descriptor.setMissionId(m.group(1));
+			l1Descriptor.setMissionId(m.group(1) + m.group(2));
 			// l1Descriptor.setSatelliteId(m.group(2));
-			l1Descriptor.setSwathtype(m.group(2));
-			l1Descriptor.setResolution(m.group(4));
-			l1Descriptor.setProductClass(m.group(6));
-			l1Descriptor.setProductType(m.group(2) + "_" + m.group(3) + m.group(4) + "_" + m.group(5) + m.group(6));
-			l1Descriptor.setPolarisation(m.group(7));
-			l1Descriptor.setDataTakeId(m.group(11));
+			l1Descriptor.setSwathtype(m.group(3));
+			l1Descriptor.setResolution(m.group(5));
+			l1Descriptor.setProductClass(m.group(7));
+			l1Descriptor.setProductType(m.group(3) + "_" + m.group(4) + m.group(5) + "_" + m.group(6) + m.group(7));
+			l1Descriptor.setPolarisation(m.group(8));
+			l1Descriptor.setDataTakeId(m.group(12));
 			l1Descriptor.setKeyObjectStorage(productName);
-			l1Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));
+			l1Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(14)));
 
 		} else {
 			throw new MetadataFilePathException(relativePath, "L1_PRODUCT",
