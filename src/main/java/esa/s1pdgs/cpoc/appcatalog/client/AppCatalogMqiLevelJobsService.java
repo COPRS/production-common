@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiLevelJobMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiAckApiError;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -117,6 +118,46 @@ public class AppCatalogMqiLevelJobsService
             } catch (RestClientException rce) {
                 waitOrThrow(retries, new AppCatalogMqiAckApiError(category, uri,
                         ack,
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce), "ack");
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    public int getNbReadingMessages(final String topic, final String podName)
+            throws AbstractCodedException {
+        int retries = 0;
+        while (true) {
+            retries++;
+            String uriStr = hostUri + "/mqi/" + category.name().toLowerCase()
+                    + "/" + topic + "/nbReading";
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromUriString(uriStr).queryParam("pod", podName);
+            URI uri = builder.build().toUri();
+            try {
+                ResponseEntity<Integer> response = restTemplate.exchange(uri,
+                        HttpMethod.GET, null, Integer.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    Integer ret = response.getBody();
+                    if (ret == null) {
+                        // TODO default value
+                        return 0;
+                    } else {
+                        return ret.intValue();
+                    }
+                } else {
+                    waitOrThrow(retries, new AppCatalogMqiGetOffsetApiError(
+                            category, uri.toString(),
+                            "HTTP status code " + response.getStatusCode()),
+                            "ack");
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new AppCatalogMqiGetOffsetApiError(
+                        category, uri.toString(),
+
                         "RestClientException occurred: " + rce.getMessage(),
                         rce), "ack");
             }
