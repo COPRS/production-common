@@ -46,6 +46,11 @@ public class OtherApplicationService {
     private final int tempoRetryMs;
 
     /**
+     * 
+     */
+    private final String suffixUriOtherApp;
+
+    /**
      * Constructor
      * 
      * @param hostUri
@@ -54,7 +59,7 @@ public class OtherApplicationService {
      */
     public OtherApplicationService(final RestTemplate restTemplate,
             final String portUri, final int maxRetries,
-            final int tempoRetryMs) {
+            final int tempoRetryMs,final String suffixUriOtherApp) {
         this.restTemplate = restTemplate;
         this.portUri = portUri;
         if (maxRetries < 0 || maxRetries > 20) {
@@ -63,6 +68,7 @@ public class OtherApplicationService {
             this.maxRetries = maxRetries;
         }
         this.tempoRetryMs = tempoRetryMs;
+        this.suffixUriOtherApp = suffixUriOtherApp;
     }
 
     /**
@@ -121,7 +127,7 @@ public class OtherApplicationService {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = "http://" + podName + ":" + this.portUri
+            String uri = "http://" + podName + suffixUriOtherApp + ":" + this.portUri
                     + "/status/" + category.name().toLowerCase() + "/process/"
                     + messageId;
             try {

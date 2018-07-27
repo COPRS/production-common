@@ -62,3 +62,4 @@ persistence:
   port-uri-other-app: 8080
   max-retries: 3
   tempo-retry-ms: 500
+  suffix-uri-other-app: .processing.default.svc.cluster.local

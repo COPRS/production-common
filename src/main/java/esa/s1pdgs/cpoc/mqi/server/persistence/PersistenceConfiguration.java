@@ -49,6 +49,11 @@ public class PersistenceConfiguration {
     private final int tempoRetryMs;
 
     /**
+     * 
+     */
+    private final String suffixUriOtherApp;
+
+    /**
      * Constructor
      * 
      * @param hostUri
@@ -60,11 +65,13 @@ public class PersistenceConfiguration {
             @Value("${persistence.host-uri-catalog}") final String hostUriCatalog,
             @Value("${persistence.port-uri-other-app}") final String portUriOtherApp,
             @Value("${persistence.max-retries}") final int maxRetries,
-            @Value("${persistence.tempo-retry-ms}") final int tempoRetryMs) {
+            @Value("${persistence.tempo-retry-ms}") final int tempoRetryMs,
+            @Value("${persistence.suffix-uri-other-app}") final String suffixUriOtherApp) {
         this.hostUriCatalog = hostUriCatalog;
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
         this.portUriOtherApp = portUriOtherApp;
+        this.suffixUriOtherApp = suffixUriOtherApp;
     }
 
     /**
@@ -145,7 +152,7 @@ public class PersistenceConfiguration {
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new OtherApplicationService(template, portUriOtherApp,
-                maxRetries, tempoRetryMs);
+                maxRetries, tempoRetryMs, suffixUriOtherApp);
     }
     
 

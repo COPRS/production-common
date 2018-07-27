@@ -153,9 +153,9 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         // Check P0 => startingoffset 0
         verify(service, times(1)).getEarliestOffset(Mockito.eq("topic2"),
                 Mockito.eq(2), Mockito.eq("groupname"));
-        verify(consumer, never()).seek(Mockito.eq(partitions.get(2)),
-                Mockito.anyLong());
-        verify(consumer, times(1))
+        verify(consumer, times(1)).seek(Mockito.eq(partitions.get(2)),
+                Mockito.eq(0L));
+        verify(consumer, never())
                 .seekToBeginning(Mockito.eq(Arrays.asList(partitions.get(2))));
         verify(consumer, never())
                 .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(2))));

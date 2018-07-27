@@ -111,7 +111,7 @@ public class MemoryConsumerAwareRebalanceListener
                 LOGGER.debug("Leaving it alone");
             } else if (startingOffset == 0) {
                 LOGGER.debug("Setting offset to begining");
-                consumer.seekToBeginning(Arrays.asList(topicPartition));
+                consumer.seek(topicPartition, 0);
             } else if (startingOffset == -1) {
                 LOGGER.debug("Setting offset to end");
                 consumer.seekToEnd(Arrays.asList(topicPartition));

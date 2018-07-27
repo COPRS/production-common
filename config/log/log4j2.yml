@@ -27,6 +27,12 @@ Configuration:
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
+      - name: com.github.grantneale
+        level: ${env:mqi_logging_level_com-github-grantneale:-info}
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
       - name: org.springframework
         level: ${env:mqi_logging_level_orgspringframework:-error}
         additivity: false
