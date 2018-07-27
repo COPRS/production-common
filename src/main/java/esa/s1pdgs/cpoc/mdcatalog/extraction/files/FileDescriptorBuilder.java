@@ -249,7 +249,7 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setPolarisation(m.group(8));
 			l1Descriptor.setDataTakeId(m.group(12));
 			l1Descriptor.setKeyObjectStorage(productName);
-			l1Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(14)));
+			l1Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));
 
 		} else {
 			throw new MetadataFilePathException(relativePath, "L1_PRODUCT",
