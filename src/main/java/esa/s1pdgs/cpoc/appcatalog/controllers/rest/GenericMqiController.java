@@ -10,7 +10,13 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import esa.s1pdgs.cpoc.appcatalog.model.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
@@ -82,9 +88,12 @@ public class GenericMqiController<T> {
      * @param body
      * @return
      */
-    public ResponseEntity<MqiLightMessageDto> readMessage(final String topic,
-            final int partition, final long offset,
-            final MqiGenericReadMessageDto<T> body) {
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{topic}/{partition}/{offset}/read")
+    public ResponseEntity<MqiLightMessageDto> readMessage(
+            @PathVariable(name = "topic") final String topic,
+            @PathVariable(name = "partition") final int partition,
+            @PathVariable(name = "offset") final long offset,
+            @RequestBody final MqiGenericReadMessageDto<T> body) {
 
         log(String.format(
                 "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Searching MqiMessage",
@@ -233,8 +242,9 @@ public class GenericMqiController<T> {
 
     }
 
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/next")
     public ResponseEntity<List<MqiGenericMessageDto<T>>> next(
-            final String pod) {
+            @RequestParam("pod") final String pod) {
         Set<MqiStateMessageEnum> ackStates = new HashSet<>();
         ackStates.add(MqiStateMessageEnum.ACK_KO);
         ackStates.add(MqiStateMessageEnum.ACK_OK);
@@ -262,8 +272,10 @@ public class GenericMqiController<T> {
         }
     }
 
-    public ResponseEntity<Boolean> sendMessage(final long messageID,
-            final MqiSendMessageDto body) {
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{messageID}/send")
+    public ResponseEntity<Boolean> sendMessage(
+            @PathVariable(name = "messageID") final long messageID,
+            @RequestBody final MqiSendMessageDto body) {
 
         log(String.format("[Send Message] [MessageID %d] Searching MqiMessage",
                 messageID));
@@ -345,9 +357,10 @@ public class GenericMqiController<T> {
             }
         }
     }
-
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{messageID}/ack")
     public ResponseEntity<MqiGenericMessageDto<T>> ackMessage(
-            final long messageID, final Ack ack) {
+            @PathVariable(name = "messageID") final long messageID,
+            @RequestBody final Ack ack) {
 
         HashMap<String, Object> updateMap = new HashMap<>();
         if (ack.equals(Ack.OK)) {
@@ -384,8 +397,11 @@ public class GenericMqiController<T> {
         }
     }
 
-    public ResponseEntity<Long> earliestOffset(final String topic,
-            final int partition, final String group) {
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{topic}/{partition}/earliestOffset")
+    public ResponseEntity<Long> earliestOffset(
+            @PathVariable(name = "topic") final String topic,
+            @PathVariable(name = "partition") final int partition,
+            @RequestParam("group") final String group) {
 
         // Pour le topic / partition / group donné, on récupère l’offset du
         // message avec status != ACK et la plus petite date de lecture (à voir

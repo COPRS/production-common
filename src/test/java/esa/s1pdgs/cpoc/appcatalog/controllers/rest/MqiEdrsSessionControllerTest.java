@@ -37,7 +37,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 @RunWith(SpringRunner.class)
@@ -62,164 +62,11 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
         this.initMockMvc(this.controller);
     }
 
-    private void mockSearchByTopicPartitionOffsetGroup(
-            List<MqiMessage> message) {
-        doReturn(message).when(mongoDBServices)
-                .searchByTopicPartitionOffsetGroup(Mockito.anyString(),
-                        Mockito.anyInt(), Mockito.anyLong(),
-                        Mockito.anyString());
-    }
-
-    private void mockSearchByPodStateCategory(List<MqiMessage> message) {
-        doReturn(message).when(mongoDBServices).searchByPodStateCategory(
-                Mockito.anyString(), Mockito.any(ProductCategory.class),
-                Mockito.any());
-    }
-
-    private void mockSearchByTopicPartitionGroup(List<MqiMessage> message) {
-        doReturn(message).when(mongoDBServices).searchByTopicPartitionGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),
-                Mockito.any());
-    }
-
-    private void mockSearchByID(List<MqiMessage> message) {
-        doReturn(message).when(mongoDBServices).searchByID(Mockito.anyLong());
-    }
-
     private static String convertObjectToJsonString(Object dto)
             throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper.writeValueAsString(dto);
-    }
-
-    @Test
-    public void testReadMessageMqiMessageDontExists() throws Exception {
-        doNothing().when(mongoDBServices)
-                .insertMqiMessage(Mockito.any(MqiMessage.class));
-        this.mockSearchByTopicPartitionOffsetGroup(new ArrayList<MqiMessage>());
-        MqiGenericReadMessageDto<EdrsSessionDto> body =
-                new MqiGenericReadMessageDto<EdrsSessionDto>("group",
-                        "readingPod", false, null);
-        request(post("/mqi/edrs_sessions/topic/1/5/read")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
-                Mockito.anyString());
-        verify(mongoDBServices, times(1))
-                .insertMqiMessage(Mockito.any(MqiMessage.class));
-    }
-
-    @Test
-    public void testReadMessageMqiMessageStateACK() throws Exception {
-        MqiMessage message = new MqiMessage(ProductCategory.EDRS_SESSIONS,
-                "topic", 1, 5, "group", MqiStateMessageEnum.ACK_OK,
-                "readingPod", null, "sendingPod", null, null, 0, null);
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(message);
-        this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<EdrsSessionDto> body =
-                new MqiGenericReadMessageDto<EdrsSessionDto>("group",
-                        "readingPod", false, null);
-        request(post("/mqi/edrs_sessions/topic/1/5/read")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
-                Mockito.anyString());
-        verify(mongoDBServices, never())
-                .insertMqiMessage(Mockito.any(MqiMessage.class));
-    }
-
-    @Test
-    public void testReadMessageMqiMessageForce() throws Exception {
-        doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(),
-                Mockito.any());
-        MqiMessage message = new MqiMessage(ProductCategory.EDRS_SESSIONS,
-                "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 0, null);
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(message);
-        this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<EdrsSessionDto> body =
-                new MqiGenericReadMessageDto<EdrsSessionDto>("group",
-                        "readingPod", true, null);
-        request(post("/mqi/edrs_sessions/topic/1/5/read")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
-                Mockito.anyString());
-        verify(mongoDBServices, never())
-                .insertMqiMessage(Mockito.any(MqiMessage.class));
-        verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
-    }
-
-    @Test
-    public void testReadMessageMqiMessageForceRetryMax() throws Exception {
-        doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(),
-                Mockito.any());
-        MqiMessage message = new MqiMessage(ProductCategory.EDRS_SESSIONS,
-                "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 2, null);
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(message);
-        this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<EdrsSessionDto> body =
-                new MqiGenericReadMessageDto<EdrsSessionDto>("group",
-                        "readingPod", true, null);
-        request(post("/mqi/edrs_sessions/topic/1/5/read")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
-                Mockito.anyString());
-        verify(mongoDBServices, never())
-                .insertMqiMessage(Mockito.any(MqiMessage.class));
-        verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
-    }
-
-    @Test
-    public void testReadMessageMqiMessageNoForceRead() throws Exception {
-        doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(),
-                Mockito.any());
-        MqiMessage message = new MqiMessage(ProductCategory.EDRS_SESSIONS,
-                "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 2, null);
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(message);
-        this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<EdrsSessionDto> body =
-                new MqiGenericReadMessageDto<EdrsSessionDto>("group",
-                        "readingPod", false, null);
-        request(post("/mqi/edrs_sessions/topic/1/5/read")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
-                Mockito.anyString());
-        verify(mongoDBServices, never())
-                .insertMqiMessage(Mockito.any(MqiMessage.class));
-        verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
     }
 
     @Test
@@ -231,9 +78,12 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
                 null, "sendingPod", null, null, 2, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
-        this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<EdrsSessionDto> body =
-                new MqiGenericReadMessageDto<EdrsSessionDto>("group",
+        doReturn(response).when(mongoDBServices)
+                .searchByTopicPartitionOffsetGroup(Mockito.anyString(),
+                        Mockito.anyInt(), Mockito.anyLong(),
+                        Mockito.anyString());
+        MqiGenericReadMessageDto<LevelReportDto> body =
+                new MqiGenericReadMessageDto<LevelReportDto>("group",
                         "readingPod", false, null);
         request(post("/mqi/edrs_sessions/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -247,18 +97,6 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
         verify(mongoDBServices, never())
                 .insertMqiMessage(Mockito.any(MqiMessage.class));
         verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
-    }
-
-    @Test
-    public void testNextMessageMqiMessageDontExists() throws Exception {
-        this.mockSearchByPodStateCategory(new ArrayList<MqiMessage>());
-        request(get("/mqi/edrs_sessions/next").param("pod", "readingPod"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(content()
-                        .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByPodStateCategory(
-                Mockito.anyString(), Mockito.any(ProductCategory.class),
                 Mockito.any());
     }
 
@@ -274,7 +112,9 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
         response.add(new MqiMessage(ProductCategory.EDRS_SESSIONS, "topic", 1,
                 18, "group", MqiStateMessageEnum.READ, "readingPod", null,
                 "sendingPod", null, null, 2, null));
-        this.mockSearchByPodStateCategory(response);
+        doReturn(response).when(mongoDBServices).searchByPodStateCategory(
+                Mockito.anyString(), Mockito.any(ProductCategory.class),
+                Mockito.any());
         request(get("/mqi/edrs_sessions/next").param("pod", "readingPod"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content()
@@ -285,23 +125,12 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
     }
 
     @Test
-    public void testSendMessageMqiMessageDontExists() throws Exception {
-        this.mockSearchByID(new ArrayList<MqiMessage>());
-        MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_sessions/1/send")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body))).andExpect(
-                        MockMvcResultMatchers.status().is4xxClientError());
-        verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
-    }
-
-    @Test
     public void testSendMessageMqiMessageACKOK() throws Exception {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.EDRS_SESSIONS, "topic", 1,
                 5, "group", MqiStateMessageEnum.ACK_OK, "readingPod", null,
                 "sendingPod", null, null, 2, null));
-        this.mockSearchByID(response);
+        doReturn(response).when(mongoDBServices).searchByID(Mockito.anyLong());
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
         request(post("/mqi/edrs_sessions/1/send")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -310,63 +139,6 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
                         .andExpect(content().contentType(
                                 MediaType.APPLICATION_JSON_UTF8_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
-    }
-
-    @Test
-    public void testSendMessageMqiMessageREAD() throws Exception {
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(new MqiMessage(ProductCategory.EDRS_SESSIONS, "topic", 1,
-                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
-        this.mockSearchByID(response);
-        MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_sessions/1/send")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
-        verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
-    }
-
-    @Test
-    public void testSendMessageMqiMessageRetry() throws Exception {
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(new MqiMessage(ProductCategory.EDRS_SESSIONS, "topic", 1,
-                5, "group", MqiStateMessageEnum.SEND, "readingPod", null,
-                "sendingPod", null, null, 0, null));
-        this.mockSearchByID(response);
-        MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_sessions/1/send")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
-        verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
-    }
-
-    @Test
-    public void testSendMessageMqiMessageRetryMax() throws Exception {
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(new MqiMessage(ProductCategory.EDRS_SESSIONS, "topic", 1,
-                5, "group", MqiStateMessageEnum.SEND, "readingPod", null,
-                "sendingPod", null, null, 2, null));
-        this.mockSearchByID(response);
-        MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
-        request(post("/mqi/edrs_sessions/1/send")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(body)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
-        verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
     }
 
     @Test
@@ -378,7 +150,7 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
                 null, "sendingPod", null, null, 2, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
-        this.mockSearchByID(response);
+        doReturn(response).when(mongoDBServices).searchByID(Mockito.anyLong());
         request(post("/mqi/edrs_sessions/1/ack")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(convertObjectToJsonString(Ack.OK)))
@@ -393,71 +165,14 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
     }
 
     @Test
-    public void testAckMessageMqiMessageError() throws Exception {
-        doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(),
-                Mockito.any());
-        MqiMessage message = new MqiMessage(ProductCategory.EDRS_SESSIONS,
-                "topic", 1, 5, "group", MqiStateMessageEnum.ACK_KO,
-                "readingPod", null, "sendingPod", null, null, 2, null);
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(message);
-        this.mockSearchByID(response);
-        request(post("/mqi/edrs_sessions/1/ack")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(Ack.ERROR)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
-        verify(mongoDBServices, never())
-                .insertMqiMessage(Mockito.any(MqiMessage.class));
-        verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
-    }
-
-    @Test
-    public void testAckMessageMqiMessageWARN() throws Exception {
-        doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(),
-                Mockito.any());
-        MqiMessage message = new MqiMessage(ProductCategory.EDRS_SESSIONS,
-                "topic", 1, 5, "group", MqiStateMessageEnum.ACK_WARN,
-                "readingPod", null, "sendingPod", null, null, 2, null);
-        List<MqiMessage> response = new ArrayList<MqiMessage>();
-        response.add(message);
-        this.mockSearchByID(response);
-        request(post("/mqi/edrs_sessions/1/ack")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(convertObjectToJsonString(Ack.WARN)))
-                        .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
-        verify(mongoDBServices, never())
-                .insertMqiMessage(Mockito.any(MqiMessage.class));
-        verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
-                Mockito.any());
-    }
-
-    @Test
-    public void testEarliestOffsetMessageMqiMessageDontExists()
-            throws Exception {
-        this.mockSearchByTopicPartitionGroup(new ArrayList<MqiMessage>());
-        request(get("/mqi/edrs_sessions/topic/1/earliestOffset").param("group",
-                "group")).andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
-        verify(mongoDBServices, times(1)).searchByTopicPartitionGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),
-                Mockito.any());
-    }
-
-    @Test
     public void testEarliestOffsetMessageMqiMessage() throws Exception {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.EDRS_SESSIONS, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
                 "sendingPod", null, null, 2, null));
-        this.mockSearchByTopicPartitionGroup(response);
+        doReturn(response).when(mongoDBServices).searchByTopicPartitionGroup(
+                Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),
+                Mockito.any());
         request(get("/mqi/edrs_sessions/topic/1/earliestOffset").param("group",
                 "group")).andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(

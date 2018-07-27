@@ -10,14 +10,33 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.model.SequenceId;
 
+/**
+ * 
+ * @author Viveris Technologies
+ *
+ */
 @Service
 public class SequenceDaoImp implements SequenceDao {
 
+    /**
+     * Mongo client
+     */
+    private final MongoTemplate mongoClient;
+    
+    /**
+     * Constructor
+     * @param mongoClient
+     */
     @Autowired
-    private MongoTemplate mongoClient;
+    public SequenceDaoImp(final MongoTemplate mongoClient) {
+        this.mongoClient = mongoClient;
+    }
 
+    /**
+     * Get the next sequence id for the given key
+     */
     @Override
-	public long getNextSequenceId(String key) throws SequenceException {
+	public long getNextSequenceId(final String key) throws SequenceException {
 		
 	  //get sequence id
 	  Query query = new Query(Criteria.where("_id").is(key));
