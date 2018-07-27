@@ -43,18 +43,18 @@ public class GenericMqiController<T> {
     /**
      * Service for managing MQI messages TODO rename class and attribute
      */
-    private final MongoDBServices mongoDBServices;
+    protected final MongoDBServices mongoDBServices;
 
     /**
      * TODO: not use here: a controller check only the input and buils the
      * ouput, the intelligence is in a service
      */
-    private final int maxRetries;
+    protected final int maxRetries;
 
     /**
      * PRoduct category
      */
-    private final ProductCategory category;
+    protected final ProductCategory category;
 
     /**
      * Constructor

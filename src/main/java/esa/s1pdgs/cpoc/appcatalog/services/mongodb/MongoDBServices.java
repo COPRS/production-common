@@ -107,6 +107,22 @@ public class MongoDBServices {
     }
     
     /**
+     * Return a list of message which contains the right pod name, product category but its not in the states
+     * 
+     * @param pod
+     * @param category
+     * @param states
+     * 
+     * @return the list of message
+     */
+    public int countReadingMessages(String pod, String topic){
+        Query query = query(where("readingPod").is(pod).and("state").is(MqiStateMessageEnum.READ)
+                .and("topic").is(topic));
+        query.with(new Sort(Direction.ASC, "lastReadDate"));
+        return mongoDBDAO.find(query).size();
+    }
+    
+    /**
      * Return a list of message which contains the right ID
      * 
      * @param messageID
