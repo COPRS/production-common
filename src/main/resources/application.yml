@@ -110,3 +110,8 @@ dev:
     value-monitored: ${scaler_dev_value-monitored:true}
     scaling: ${scaler_dev_scaling:true}
     unused-ressources-deletion: ${scaler_dev_unused-ressources-deletion:true}
+
+persistence:
+  host-uri-catalog: ${scaler_persistence_host-uri-catalog:http://app-catalog-svc:8080}
+  max-retries: ${scaler_persistence_max-retries:3}
+  tempo-retry-ms: ${scaler_persistence_tempo-retry-ms:500}

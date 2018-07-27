@@ -418,7 +418,8 @@ public class Scaler {
                             .submit(new CreateResources(k8SAdministration,
                                     osAdministration, uniqueVMID, uniquePODID));
                 }
-                waitForServerCreationcompletion(createResoucesCompletionServices, nbCreatedServer);
+                waitForServerCreationcompletion(
+                        createResoucesCompletionServices, nbCreatedServer);
             }
 
         } else {
