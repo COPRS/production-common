@@ -1,12 +1,12 @@
-FROM maven:3.5-jdk-8-alpine as build
+FROM registry.geohub.space/wo7/repo-maven-all:latest as build
 WORKDIR /app
 COPY pom.xml /app
-RUN mvn dependency:go-offline
+RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY dev/ /app/dev/
 COPY test/ /app/test/
 COPY src/ /app/src/
 COPY config/ /app/config/
-RUN mvn -B package
+RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
