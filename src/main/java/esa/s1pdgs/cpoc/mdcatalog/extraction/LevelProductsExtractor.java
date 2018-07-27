@@ -96,8 +96,8 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
         // Upload file
         String keyObs = getKeyObs(message);
         LOGGER.info(
-                "[MONITOR] [step 1] [LEVEL_PRODUCTS] [productName {}] Downloading file {}",
-                extractProductNameFromDto(dto), keyObs);
+                "[MONITOR] [step 1] [LEVEL_PRODUCTS] [family {}] [productName {}] Downloading file {}",
+                message.getBody().getFamily(), extractProductNameFromDto(dto), keyObs);
         File metadataFile = obsService.downloadFile(
                 message.getBody().getFamily(), keyObs, this.localDirectory);
 
