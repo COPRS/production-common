@@ -31,7 +31,6 @@ public class MongoConfiguration {
     private String mongoDBDatabase;
     
     public @Bean MongoClient mongoClient() {
-        MongoClient client = MongoClient(mongoDBHost, mongoDBPort);
         return new MongoClient(mongoDBHost, mongoDBPort);
     }
 
