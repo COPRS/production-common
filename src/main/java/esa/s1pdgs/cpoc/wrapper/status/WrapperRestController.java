@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.wrapper.status.dto.WrapperStatusDto;
  * @author Olivier Bex-Chauvet
  */
 @RestController
-@RequestMapping(path = "/wrapper")
+@RequestMapping(path = "/app")
 public class WrapperRestController {
 
     /**
