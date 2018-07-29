@@ -98,7 +98,7 @@ public class WrapperServiceTest {
         WrapperDesc result = service.getWrapperStatus("pod-name", "pod-ip");
         assertEquals(expected, result);
         verify(restTemplate, times(3)).exchange(
-                Mockito.eq("http://pod-ip:82/wrapper/status"),
+                Mockito.eq("http://pod-ip:82/app/status"),
                 Mockito.eq(HttpMethod.GET), Mockito.isNull(),
                 Mockito.eq(WrapperStatusDto.class));
     }
@@ -120,7 +120,7 @@ public class WrapperServiceTest {
             assertEquals("pod-ip", e.getIp());
             assertNull(e.getCause());
             verify(restTemplate, times(0)).exchange(
-                    Mockito.eq("http://pod-ip:82/wrapper/status"),
+                    Mockito.eq("http://pod-ip:82/app/status"),
                     Mockito.eq(HttpMethod.GET), Mockito.isNull(),
                     Mockito.eq(WrapperStatusDto.class));
         }
@@ -140,7 +140,7 @@ public class WrapperServiceTest {
             assertEquals("pod-ip", e.getIp());
             assertNull(e.getCause());
             verify(restTemplate, times(4)).exchange(
-                    Mockito.eq("http://pod-ip:82/wrapper/status"),
+                    Mockito.eq("http://pod-ip:82/app/status"),
                     Mockito.eq(HttpMethod.GET), Mockito.isNull(),
                     Mockito.eq(WrapperStatusDto.class));
         }
@@ -161,7 +161,7 @@ public class WrapperServiceTest {
             assertNotNull(e.getCause());
             assertEquals("message", e.getCause().getMessage());
             verify(restTemplate, times(4)).exchange(
-                    Mockito.eq("http://pod-ip:82/wrapper/status"),
+                    Mockito.eq("http://pod-ip:82/app/status"),
                     Mockito.eq(HttpMethod.GET), Mockito.isNull(),
                     Mockito.eq(WrapperStatusDto.class));
         }
@@ -177,7 +177,7 @@ public class WrapperServiceTest {
 
         service.stopWrapper("pod-ip");
          verify(restTemplate, times(3)).exchange(
-                    Mockito.eq("http://pod-ip:82/wrapper/stop"),
+                    Mockito.eq("http://pod-ip:82/app/stop"),
                     Mockito.eq(HttpMethod.POST), Mockito.isNull(),
                     Mockito.eq(String.class));
     }
@@ -196,7 +196,7 @@ public class WrapperServiceTest {
             assertEquals("pod-ip", e.getIp());
             assertNull(e.getCause());
             verify(restTemplate, times(0)).exchange(
-                    Mockito.eq("http://pod-ip:82/wrapper/stop"),
+                    Mockito.eq("http://pod-ip:82/app/stop"),
                     Mockito.eq(HttpMethod.POST), Mockito.isNull(),
                     Mockito.eq(String.class));
         }
@@ -215,7 +215,7 @@ public class WrapperServiceTest {
             assertEquals("pod-ip", e.getIp());
             assertNull(e.getCause());
             verify(restTemplate, times(4)).exchange(
-                    Mockito.eq("http://pod-ip:82/wrapper/stop"),
+                    Mockito.eq("http://pod-ip:82/app/stop"),
                     Mockito.eq(HttpMethod.POST), Mockito.isNull(),
                     Mockito.eq(String.class));
         }
@@ -235,7 +235,7 @@ public class WrapperServiceTest {
             assertNotNull(e.getCause());
             assertEquals("message", e.getCause().getMessage());
             verify(restTemplate, times(4)).exchange(
-                    Mockito.eq("http://pod-ip:82/wrapper/stop"),
+                    Mockito.eq("http://pod-ip:82/app/stop"),
                     Mockito.eq(HttpMethod.POST), Mockito.isNull(),
                     Mockito.eq(String.class));
         }

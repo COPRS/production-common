@@ -226,8 +226,11 @@ public class Scaler {
             if (devProperties.getActivations().get("k8s-monitoring")) {
                 LOGGER.info("[MONITOR] [step 3] Starting monitoring K8S");
                 wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();
-                LOGGER.debug("[MONITOR] [step 3] Monitored information {}",
-                        wrapperNodeMonitors);
+                wrapperNodeMonitors.forEach(monitor -> {
+                    LOGGER.debug("[MONITOR] [step 3] Monitored information {}",
+                            monitor);
+                });
+
             } else {
                 LOGGER.info(
                         "[MONITOR] [step 3] Starting monitoring K8S bypassed");
