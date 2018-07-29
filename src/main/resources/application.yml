@@ -79,4 +79,3 @@ persistence:
   tempo-retry-ms: ${mqi_persistence_tempo-retry-ms:500}
   other-app:
     suffix-uri: ${mqi_persistence_other-app_suffix-uri:.l1-wrapper-svc}
-    begin-uri-processing: ${mqi_persistence_other-app_prefix-uri-processing:/wrapper/}

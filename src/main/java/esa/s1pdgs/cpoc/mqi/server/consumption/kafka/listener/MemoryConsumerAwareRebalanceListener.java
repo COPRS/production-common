@@ -36,7 +36,7 @@ public class MemoryConsumerAwareRebalanceListener
      * Group name
      */
     private final String group;
-    
+
     /**
      * Default mode
      */
@@ -46,7 +46,8 @@ public class MemoryConsumerAwareRebalanceListener
      * Default constructor
      */
     public MemoryConsumerAwareRebalanceListener(
-            final GenericAppCatalogMqiService<?> service, final String group, final int defaultMode) {
+            final GenericAppCatalogMqiService<?> service, final String group,
+            final int defaultMode) {
         super();
         this.service = service;
         this.group = group;
@@ -73,7 +74,8 @@ public class MemoryConsumerAwareRebalanceListener
     @Override
     public void onPartitionsRevokedBeforeCommit(final Consumer<?, ?> consumer,
             final Collection<TopicPartition> partitions) {
-        LOGGER.info("onPartitionsRevokedBeforeCommit call");
+        LOGGER.info(
+                "[MONITOR] [rebalance] onPartitionsRevokedBeforeCommit call");
     }
 
     /**
@@ -82,7 +84,7 @@ public class MemoryConsumerAwareRebalanceListener
     @Override
     public void onPartitionsRevokedAfterCommit(final Consumer<?, ?> consumer,
             final Collection<TopicPartition> partitions) {
-        LOGGER.info("onPartitionsRevokedAfterCommit call");
+        LOGGER.info("[MONITOR] [rebalance] onPartitionsRevokedAfterCommit call");
     }
 
     /**
@@ -91,12 +93,13 @@ public class MemoryConsumerAwareRebalanceListener
     @Override
     public void onPartitionsAssigned(final Consumer<?, ?> consumer,
             final Collection<TopicPartition> partitions) {
-        LOGGER.info("onPartitionsAssigned call");
+        LOGGER.info("[MONITOR] [rebalance]onPartitionsAssigned call");
         // We seek the consumer on the right offset
         Iterator<TopicPartition> topicPartitionIterator = partitions.iterator();
         while (topicPartitionIterator.hasNext()) {
             TopicPartition topicPartition = topicPartitionIterator.next();
-            LOGGER.debug("Current offset is {} committed offset is -> {}",
+            LOGGER.debug(
+                    "[MONITOR] [rebalance]Current offset is {} committed offset is -> {}",
                     consumer.position(topicPartition),
                     consumer.committed(topicPartition));
             long startingOffset = defaultMode;
@@ -105,18 +108,25 @@ public class MemoryConsumerAwareRebalanceListener
                         service.getEarliestOffset(topicPartition.topic(),
                                 topicPartition.partition(), group);
             } catch (AbstractCodedException ace) {
-                LOGGER.error("{} Set default mode: -2");
+                LOGGER.error(
+                        "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",
+                        defaultMode, ace.getLogMessage());
+            } catch (Exception exc) {
+                LOGGER.error(
+                        "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",
+                        defaultMode, exc.getMessage());
             }
             if (startingOffset == -3) {
-                LOGGER.debug("Leaving it alone");
+                LOGGER.info("[MONITOR] [rebalance] Leaving it alone");
             } else if (startingOffset == -2) {
-                LOGGER.debug("Setting offset to end");
+                LOGGER.info("[MONITOR] [rebalance] Setting offset to end");
                 consumer.seekToEnd(Arrays.asList(topicPartition));
             } else if (startingOffset == -1) {
-                LOGGER.debug("Setting offset to begining");
+                LOGGER.info("[MONITOR] [rebalance] Setting offset to begining");
                 consumer.seekToBeginning(Arrays.asList(topicPartition));
             } else {
-                LOGGER.debug("Resetting offset to {}", startingOffset);
+                LOGGER.info("[MONITOR] [rebalance] Resetting offset to {}",
+                        startingOffset);
                 consumer.seek(topicPartition, startingOffset);
             }
         }

@@ -54,11 +54,6 @@ public class PersistenceConfiguration {
     private final String suffixUriOtherApp;
 
     /**
-     * 
-     */
-    private final String prefixUriOtherApp;
-
-    /**
      * Constructor
      * 
      * @param hostUri
@@ -78,7 +73,6 @@ public class PersistenceConfiguration {
         this.tempoRetryMs = tempoRetryMs;
         this.portUriOtherApp = portUriOtherApp;
         this.suffixUriOtherApp = suffixUriOtherApp;
-        this.prefixUriOtherApp = prefixUriOtherApp;
     }
 
     /**
@@ -159,7 +153,7 @@ public class PersistenceConfiguration {
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new OtherApplicationService(template, portUriOtherApp,
-                maxRetries, tempoRetryMs, suffixUriOtherApp, prefixUriOtherApp);
+                maxRetries, tempoRetryMs, suffixUriOtherApp);
     }
     
 

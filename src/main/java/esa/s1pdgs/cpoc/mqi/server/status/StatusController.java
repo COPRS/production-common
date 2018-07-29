@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.mqi.server.status.AppStatus.MqiServerStatus;
  *
  */
 @RestController
-@RequestMapping(path = "/mqi")
+@RequestMapping(path = "/app")
 public class StatusController {
 
 	/**

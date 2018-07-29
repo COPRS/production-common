@@ -128,7 +128,7 @@ public class GenericMessageListener<T>
                             // We ignore the message
                             if (LOGGER.isDebugEnabled()) {
                                 LOGGER.debug(
-                                        "We ignore message {} and go the next",
+                                        "We ignore message {} and go to the next",
                                         data);
                             }
                             acknowlegde(data, acknowledgment);
@@ -144,7 +144,7 @@ public class GenericMessageListener<T>
             appStatus.resetError();
         } catch (AbstractCodedException e) {
             LOGGER.error(
-                    "{} we cannot acknowledged this message and try the next time; Set app status in error",
+                    "{} we cannot acknowledge this message and try the next time; Set app status in error",
                     e.getLogMessage());
             appStatus.setError();
         }
