@@ -18,7 +18,7 @@ kafka:
     heartbeat-intv-ms: ${mqi_kafka_consumer_heartbeat-interval-ms:3000}
     session-timeout-ms: ${mqi_kafka_consumer_session-timeout-ms:10000}
     auto-offset-reset: ${mqi_kafka_consumer_auto-offset-reset:latest}
-    offset-dft-mode: ${mqi_kafka_consumer_offset-dft-mode:-2}
+    offset-dft-mode: ${mqi_kafka_consumer_offset-dft-mode:-3}
   listener:
     poll-timeout-ms: ${mqi_kafka_listener_poll-timeout-ms:500}
   producer:

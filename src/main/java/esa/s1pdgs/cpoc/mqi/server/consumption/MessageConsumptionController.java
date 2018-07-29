@@ -250,6 +250,12 @@ public class MessageConsumptionController {
                     message = nextAuxiliaryFilesMessage();
                     break;
             }
+            // if no message and consumer is pause => resume it
+            if (message == null) {
+                for(GenericConsumer<?> consumer: consumers.get(category).values()) {
+                    consumer.resume();
+                }
+            }
         } else {
             throw new MqiCategoryNotAvailable(category, "consumer");
         }
@@ -455,28 +461,39 @@ public class MessageConsumptionController {
     public ResumeDetails ackMessage(final ProductCategory category,
             final long identifier, final Ack ack, final boolean stop)
             throws AbstractCodedException {
-        ResumeDetails result = null;
+        ResumeDetails ret = null;
+        int nbReadingMsg = 0;
+        MqiGenericMessageDto<?> message = null;
         if (consumers.containsKey(category)) {
-
-            MqiGenericMessageDto<?> message =
-                    persistServices.get(category).ack(identifier, ack);
-
-            result = new ResumeDetails(message.getTopic(), message.getDto());
-
-            if (!stop) {
-                // Resume consumer
-                if (consumers.get(category).containsKey(message.getTopic())) {
-                    consumers.get(category).get(message.getTopic()).resume();
-                } else {
-                    LOGGER.warn(
-                            "Cannot resume consumer for this topic because does not exist: {}",
-                            message);
+            try {
+                // Ack message
+                persistServices.get(category).ack(identifier, ack);
+                // Get resume details and topic
+                message = persistServices.get(category).get(identifier);
+                // Get remaining message read
+                nbReadingMsg = persistServices.get(category)
+                        .getNbReadingMessages(message.getTopic(),
+                                appProperties.getHostname());
+                ret = new ResumeDetails(message.getTopic(), message.getDto());
+            } finally {
+                // Resume consumer of concerned topic
+                if (!stop && nbReadingMsg <= 0 && message != null) {
+                    // Resume consumer
+                    if (consumers.get(category)
+                            .containsKey(message.getTopic())) {
+                        consumers.get(category).get(message.getTopic())
+                                .resume();
+                    } else {
+                        LOGGER.warn(
+                                "[category {}] [messageCannot resume consumer for this topic because does not exist: {}",
+                                category, message);
+                    }
                 }
             }
         } else {
             throw new MqiCategoryNotAvailable(category, "consumer");
         }
-        return result;
+        return ret;
     }
 
 }

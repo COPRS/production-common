@@ -107,14 +107,14 @@ public class MemoryConsumerAwareRebalanceListener
             } catch (AbstractCodedException ace) {
                 LOGGER.error("{} Set default mode: -2");
             }
-            if (startingOffset == -2) {
+            if (startingOffset == -3) {
                 LOGGER.debug("Leaving it alone");
-            } else if (startingOffset == 0) {
-                LOGGER.debug("Setting offset to begining");
-                consumer.seek(topicPartition, 0);
-            } else if (startingOffset == -1) {
+            } else if (startingOffset == -2) {
                 LOGGER.debug("Setting offset to end");
                 consumer.seekToEnd(Arrays.asList(topicPartition));
+            } else if (startingOffset == -1) {
+                LOGGER.debug("Setting offset to begining");
+                consumer.seekToBeginning(Arrays.asList(topicPartition));
             } else {
                 LOGGER.debug("Resetting offset to {}", startingOffset);
                 consumer.seek(topicPartition, startingOffset);

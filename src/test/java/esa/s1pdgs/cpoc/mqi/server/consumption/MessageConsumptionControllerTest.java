@@ -362,8 +362,8 @@ public class MessageConsumptionControllerTest {
                 manager.nextMessage(category));
         verify(mockedService, times(1)).next(Mockito.eq("pod-name"));
         verify(mockedService, times(1)).send(Mockito.eq(2L), Mockito.any());
-        verify(otherService, times(1)).isProcessing(
-                Mockito.eq("other-pod"), Mockito.eq(category), Mockito.eq(1L));
+        verify(otherService, times(1)).isProcessing(Mockito.eq("other-pod"),
+                Mockito.eq(category), Mockito.eq(1L));
         verifyNoMoreInteractions(otherService);
 
     }
@@ -396,15 +396,18 @@ public class MessageConsumptionControllerTest {
                 new MqiGenericMessageDto<LevelJobDto>(
                         ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
-        doReturn(message).when(persistLevelJobsService).ack(Mockito.eq(123L),
+        doReturn(true).when(persistLevelJobsService).ack(Mockito.eq(123L),
                 Mockito.any());
+        doReturn(message).when(persistLevelJobsService).get(Mockito.eq(123L));
+        doReturn(0).when(persistLevelJobsService)
+                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
         ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
 
         Thread.sleep(2000);
         manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
 
-        Thread.sleep(2500);
+        Thread.sleep(3000);
         assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .get("topic4").isPaused());
         ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
@@ -428,8 +431,11 @@ public class MessageConsumptionControllerTest {
                         ProductCategory.LEVEL_JOBS, 123, "topic-unknown", 1, 22,
                         dto);
 
-        doReturn(message).when(persistLevelJobsService).ack(Mockito.eq(123L),
+        doReturn(true).when(persistLevelJobsService).ack(Mockito.eq(123L),
                 Mockito.any());
+        doReturn(message).when(persistLevelJobsService).get(Mockito.eq(123L));
+        doReturn(0).when(persistLevelJobsService)
+                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
         ResumeDetails expectedRd = new ResumeDetails("topic-unknown", dto);
 
@@ -462,8 +468,11 @@ public class MessageConsumptionControllerTest {
                 new MqiGenericMessageDto<LevelJobDto>(
                         ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
-        doReturn(message).when(persistLevelJobsService).ack(Mockito.eq(123L),
+        doReturn(true).when(persistLevelJobsService).ack(Mockito.eq(123L),
                 Mockito.any());
+        doReturn(message).when(persistLevelJobsService).get(Mockito.eq(123L));
+        doReturn(0).when(persistLevelJobsService)
+                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
         ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
 
