@@ -34,13 +34,13 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  *
  * @author Viveris Technologies
  */
-public class MongoDBDAOTest {
+public class MqiMessageDaoTest {
 
     @Mock
     private MongoTemplate mongoClient;
 
     @InjectMocks
-    private MongoDBDAO mongoDBDAO;
+    private MqiMessageDao mongoDBDAO;
 
     /**
      * Initialization

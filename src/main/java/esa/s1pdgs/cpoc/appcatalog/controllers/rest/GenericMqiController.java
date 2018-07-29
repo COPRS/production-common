@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
-import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
+import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MqiMessageService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
@@ -43,7 +43,7 @@ public class GenericMqiController<T> {
     /**
      * Service for managing MQI messages TODO rename class and attribute
      */
-    protected final MongoDBServices mongoDBServices;
+    protected final MqiMessageService mongoDBServices;
 
     /**
      * TODO: not use here: a controller check only the input and buils the
@@ -63,7 +63,7 @@ public class GenericMqiController<T> {
      * @param maxRetries
      * @param category
      */
-    public GenericMqiController(final MongoDBServices mongoDBServices,
+    public GenericMqiController(final MqiMessageService mongoDBServices,
             final int maxRetries, final ProductCategory category) {
         this.mongoDBServices = mongoDBServices;
         this.maxRetries = maxRetries;

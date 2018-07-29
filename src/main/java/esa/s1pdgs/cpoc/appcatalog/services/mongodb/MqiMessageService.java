@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * @author Viveris Technologies
  */
 @Service
-public class MongoDBServices {
+public class MqiMessageService {
 
     /**
      * 
@@ -30,7 +30,7 @@ public class MongoDBServices {
     /**
      * DAO for mongoDB
      */
-    private final MongoDBDAO mongoDBDAO;
+    private final MqiMessageDao mongoDBDAO;
 
     /**
      * DAO for mongoDB
@@ -43,7 +43,7 @@ public class MongoDBServices {
      * @param mongoDBDAO
      */
     @Autowired
-    public MongoDBServices(final MongoDBDAO mongoDBDAO,
+    public MqiMessageService(final MqiMessageDao mongoDBDAO,
             final SequenceDao sequenceDao) {
         this.mongoDBDAO = mongoDBDAO;
         this.sequenceDao = sequenceDao;

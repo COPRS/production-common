@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
+import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MqiMessageService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 
@@ -29,7 +29,7 @@ public class MqiAuxiliaryFileController
      * @param maxRetries
      */
     @Autowired
-    public MqiAuxiliaryFileController(final MongoDBServices mongoDBServices,
+    public MqiAuxiliaryFileController(final MqiMessageService mongoDBServices,
             @Value("${mqi.max-retries}") final int maxRetries) {
         super(mongoDBServices, maxRetries, ProductCategory.AUXILIARY_FILES);
     }

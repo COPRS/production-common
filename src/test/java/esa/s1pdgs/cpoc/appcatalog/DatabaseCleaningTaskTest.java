@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.services.mongodb;
+package esa.s1pdgs.cpoc.appcatalog;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -15,6 +15,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.appcatalog.DatabaseCleaningTask;
+import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MqiMessageDao;
+
 
 /**
  * Test class for MongoDB clean class
@@ -24,14 +27,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-public class MongoDBCleanTest {
+public class DatabaseCleaningTaskTest {
     
     @Mock
-    private MongoDBDAO mongoDBDAO;
+    private MqiMessageDao mongoDBDAO;
     
     private int oldms = 86400;
     
-    private MongoDBClean mongoDBClean;
+    private DatabaseCleaningTask mongoDBClean;
     
     /**
      * Initialization
@@ -39,7 +42,7 @@ public class MongoDBCleanTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        mongoDBClean = new MongoDBClean(mongoDBDAO, oldms);
+        mongoDBClean = new DatabaseCleaningTask(mongoDBDAO, oldms);
     }
     
     @Test

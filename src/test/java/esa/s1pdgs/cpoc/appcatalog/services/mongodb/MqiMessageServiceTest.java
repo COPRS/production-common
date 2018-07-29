@@ -31,16 +31,16 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  *
  * @author Viveris Technologies
  */
-public class MongoDBServicesTest {
+public class MqiMessageServiceTest {
 
     @Mock
-    private MongoDBDAO mongoDBDAO;
+    private MqiMessageDao mongoDBDAO;
 
     @Mock
     private SequenceDao sequenceDao;
 
     @InjectMocks
-    private MongoDBServices mongoDBServices;
+    private MqiMessageService mongoDBServices;
 
     /**
      * Initialization
@@ -190,7 +190,7 @@ public class MongoDBServicesTest {
 
         verify(mongoDBDAO, times(1)).insert(Mockito.any(MqiMessage.class));
         verify(sequenceDao, times(1))
-                .getNextSequenceId(Mockito.eq(MongoDBServices.MQI_MSG_SEQ_KEY));
+                .getNextSequenceId(Mockito.eq(MqiMessageService.MQI_MSG_SEQ_KEY));
 
     }
 

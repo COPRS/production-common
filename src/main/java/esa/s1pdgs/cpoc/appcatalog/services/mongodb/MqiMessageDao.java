@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * @author Viveris Technologies
  */
 @Service
-public class MongoDBDAO {
+public class MqiMessageDao {
 
     /**
      * Mongo DB client
@@ -39,7 +39,7 @@ public class MongoDBDAO {
      * @param mongoClient
      */
     @Autowired
-    public MongoDBDAO(final MongoTemplate mongoClient) {
+    public MqiMessageDao(final MongoTemplate mongoClient) {
         this.mongoClient = mongoClient;
     }
 

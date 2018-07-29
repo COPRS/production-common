@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.services.mongodb;
+package esa.s1pdgs.cpoc.appcatalog;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -11,6 +11,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MqiMessageDao;
+
 /**
  * Component that will clean the mongoDB entries that are older
  * Configurable 
@@ -18,12 +20,12 @@ import org.springframework.stereotype.Component;
  * @author Viveris Technologies
  */
 @Component
-public class MongoDBClean {
+public class DatabaseCleaningTask {
 
     /**
      * DAO for mongoDB
      */
-    private MongoDBDAO mongoDBDAO;
+    private MqiMessageDao mongoDBDAO;
     
     /**
      * Second after an entry is considered old
@@ -36,7 +38,7 @@ public class MongoDBClean {
      * @param mongoDBDAO
      */
     @Autowired
-    public MongoDBClean(final MongoDBDAO mongoDBDAO,
+    public DatabaseCleaningTask(final MqiMessageDao mongoDBDAO,
             @Value("${mongodb.old-entry-ms}") int oldms) {
         this.mongoDBDAO = mongoDBDAO;
         this.oldms = oldms;

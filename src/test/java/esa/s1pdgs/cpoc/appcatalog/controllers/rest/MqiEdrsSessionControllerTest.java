@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.appcatalog.model.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
-import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
+import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MqiMessageService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -46,7 +46,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 public class MqiEdrsSessionControllerTest extends RestControllerTest {
 
     @Mock
-    private MongoDBServices mongoDBServices;
+    private MqiMessageService mongoDBServices;
 
     @Value("${mqi.max-retries}")
     private int maxRetries;

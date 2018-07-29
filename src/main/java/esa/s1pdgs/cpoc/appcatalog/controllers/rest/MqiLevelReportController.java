@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
+import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MqiMessageService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 
@@ -27,7 +27,7 @@ public class MqiLevelReportController
      * @param maxRetries
      */
     @Autowired
-    public MqiLevelReportController(final MongoDBServices mongoDBServices,
+    public MqiLevelReportController(final MqiMessageService mongoDBServices,
             @Value("${mqi.max-retries}") final int maxRetries) {
         super(mongoDBServices, maxRetries, ProductCategory.LEVEL_REPORTS);
     }

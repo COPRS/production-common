@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MongoDBServices;
+import esa.s1pdgs.cpoc.appcatalog.services.mongodb.MqiMessageService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 
@@ -24,7 +24,7 @@ public class MqiLevelJobController extends GenericMqiController<LevelJobDto> {
      * @param maxRetries
      */
     @Autowired
-    public MqiLevelJobController(final MongoDBServices mongoDBServices,
+    public MqiLevelJobController(final MqiMessageService mongoDBServices,
             @Value("${mqi.max-retries}") final int maxRetries) {
         super(mongoDBServices, maxRetries, ProductCategory.LEVEL_JOBS);
 
