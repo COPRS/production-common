@@ -17,7 +17,7 @@ import fr.viveris.s1pdgs.jobgenerator.status.AppStatus.JobStatus;
 import fr.viveris.s1pdgs.jobgenerator.status.dto.JobStatusDto;
 
 @RestController
-@RequestMapping(path = "/jobgenerator")
+@RequestMapping(path = "/app")
 public class JobRestController {
 
     /**
