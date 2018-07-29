@@ -19,6 +19,8 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiAckApiError;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetNbReadingApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
@@ -243,7 +245,49 @@ public abstract class GenericAppCatalogMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public abstract MqiGenericMessageDto<T> ack(final long messageId, final Ack ack)
+    public boolean ack(final long messageId, final Ack ack)
+            throws AbstractCodedException {
+        int retries = 0;
+        while (true) {
+            retries++;
+            String uri = hostUri + "/mqi/" + category.name().toLowerCase() + "/"
+                    + messageId + "/ack";
+            try {
+                ResponseEntity<Boolean> response =
+                        restTemplate.exchange(uri, HttpMethod.POST,
+                                new HttpEntity<Ack>(ack), Boolean.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    Boolean ret = response.getBody();
+                    if (ret == null) {
+                        return false;
+                    } else {
+                        return ret.booleanValue();
+                    }
+                } else {
+                    waitOrThrow(retries, new AppCatalogMqiAckApiError(category,
+                            uri, ack,
+                            "HTTP status code " + response.getStatusCode()),
+                            "ack");
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new AppCatalogMqiAckApiError(category, uri,
+                        ack,
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce), "ack");
+            }
+        }
+    }
+
+    /**
+     * Ack a message
+     * 
+     * @param identifier
+     * @param ack
+     * @param message
+     * @return
+     * @throws AbstractCodedException
+     */
+    public abstract MqiGenericMessageDto<T> get(final long messageId)
             throws AbstractCodedException;
 
     /**
@@ -269,7 +313,7 @@ public abstract class GenericAppCatalogMqiService<T> {
                 if (response.getStatusCode() == HttpStatus.OK) {
                     Long ret = response.getBody();
                     if (ret == null) {
-                        //TODO default value
+                        // TODO default value
                         return 0;
                     } else {
                         return ret.longValue();
@@ -287,6 +331,45 @@ public abstract class GenericAppCatalogMqiService<T> {
                         category, uri.toString(),
                         "RestClientException occurred: " + rce.getMessage(),
                         rce), "send");
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    public int getNbReadingMessages(final String topic, final String podName)
+            throws AbstractCodedException {
+        int retries = 0;
+        while (true) {
+            retries++;
+            String uriStr = hostUri + "/mqi/" + category.name().toLowerCase()
+                    + "/" + topic + "/nbReading";
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromUriString(uriStr).queryParam("pod", podName);
+            URI uri = builder.build().toUri();
+            try {
+                ResponseEntity<Integer> response = restTemplate.exchange(uri,
+                        HttpMethod.GET, null, Integer.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    Integer ret = response.getBody();
+                    if (ret == null) {
+                        return 0;
+                    } else {
+                        return ret.intValue();
+                    }
+                } else {
+                    waitOrThrow(retries, new AppCatalogMqiGetNbReadingApiError(
+                            category, uri.toString(),
+                            "HTTP status code " + response.getStatusCode()),
+                            "getNbReadingMessages");
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new AppCatalogMqiGetNbReadingApiError(
+                        category, uri.toString(),
+
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce), "getNbReadingMessages");
             }
         }
     }

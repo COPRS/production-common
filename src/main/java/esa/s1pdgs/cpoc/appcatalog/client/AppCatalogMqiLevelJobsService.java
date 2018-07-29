@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +16,9 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLevelJobMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiAckApiError;
-import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
  * Service for managing MQI level jobs messages in applicative catalog (REST
@@ -92,72 +89,33 @@ public class AppCatalogMqiLevelJobsService
     }
 
     /**
-     * @see GenericAppCatalogMqiService#ack(long)
+     * @see GenericAppCatalogMqiService#get(long)
      */
     @Override
-    public MqiGenericMessageDto<LevelJobDto> ack(final long messageId,
-            final Ack ack) throws AbstractCodedException {
-        int retries = 0;
-        while (true) {
-            retries++;
-            String uri = hostUri + "/mqi/" + category.name().toLowerCase() + "/"
-                    + messageId + "/ack";
-            try {
-                ResponseEntity<MqiLevelJobMessageDto> response =
-                        restTemplate.exchange(uri, HttpMethod.POST,
-                                new HttpEntity<Ack>(ack),
-                                MqiLevelJobMessageDto.class);
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    return response.getBody();
-                } else {
-                    waitOrThrow(retries, new AppCatalogMqiAckApiError(category,
-                            uri, ack,
-                            "HTTP status code " + response.getStatusCode()),
-                            "ack");
-                }
-            } catch (RestClientException rce) {
-                waitOrThrow(retries, new AppCatalogMqiAckApiError(category, uri,
-                        ack,
-                        "RestClientException occurred: " + rce.getMessage(),
-                        rce), "ack");
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    public int getNbReadingMessages(final String topic, final String podName)
+    public MqiGenericMessageDto<LevelJobDto> get(final long messageId)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            String uriStr = hostUri + "/mqi/" + category.name().toLowerCase()
-                    + "/" + topic + "/nbReading";
-            UriComponentsBuilder builder = UriComponentsBuilder
-                    .fromUriString(uriStr).queryParam("pod", podName);
-            URI uri = builder.build().toUri();
+            String uri = hostUri + "/mqi/" + category.name().toLowerCase() + "/"
+                    + messageId;
             try {
-                ResponseEntity<Integer> response = restTemplate.exchange(uri,
-                        HttpMethod.GET, null, Integer.class);
+                ResponseEntity<MqiLevelJobMessageDto> response =
+                        restTemplate.exchange(uri, HttpMethod.GET, null,
+                                MqiLevelJobMessageDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
-                    Integer ret = response.getBody();
-                    if (ret == null) {
-                        // TODO default value
-                        return 0;
-                    } else {
-                        return ret.intValue();
-                    }
+                    return response.getBody();
+                } else if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    throw new AppCatalogMqiGetApiError(category, uri,
+                            "Message not found");
                 } else {
-                    waitOrThrow(retries, new AppCatalogMqiGetOffsetApiError(
-                            category, uri.toString(),
+                    waitOrThrow(retries, new AppCatalogMqiGetApiError(category,
+                            uri,
                             "HTTP status code " + response.getStatusCode()),
                             "ack");
                 }
             } catch (RestClientException rce) {
-                waitOrThrow(retries, new AppCatalogMqiGetOffsetApiError(
-                        category, uri.toString(),
-
+                waitOrThrow(retries, new AppCatalogMqiGetApiError(category, uri,
                         "RestClientException occurred: " + rce.getMessage(),
                         rce), "ack");
             }

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,10 +37,13 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiAckApiError;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetNbReadingApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
  * Test the REST service ErrorService
@@ -99,11 +103,11 @@ public class GenericAppCatalogMqiServiceTest {
         assertEquals(500, service.getTempoRetryMs());
         assertEquals("uri", service.getHostUri());
         assertEquals(ProductCategory.LEVEL_PRODUCTS, service.getCategory());
-        
+
         service = new AppCatalogMqiLevelProductsService(restTemplate, "uri", -1,
                 500);
         assertEquals(0, service.getMaxRetries());
-        
+
         service = new AppCatalogMqiLevelProductsService(restTemplate, "uri", 21,
                 500);
         assertEquals(0, service.getMaxRetries());
@@ -245,9 +249,8 @@ public class GenericAppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSendWhenEmptyBody() throws AbstractCodedException {
-        doReturn(new ResponseEntity<Boolean>(HttpStatus.OK))
-                .when(restTemplate).exchange(Mockito.anyString(),
-                        Mockito.any(HttpMethod.class),
+        doReturn(new ResponseEntity<Boolean>(HttpStatus.OK)).when(restTemplate)
+                .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
@@ -507,6 +510,253 @@ public class GenericAppCatalogMqiServiceTest {
         verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(Long.class));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test next when no response from the rest server
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testAckWhenNoResponse() throws AbstractCodedException {
+        doThrow(new RestClientException("rest client exception"))
+                .when(restTemplate).exchange(Mockito.anyString(),
+                        Mockito.any(HttpMethod.class), Mockito.any(),
+                        Mockito.any(Class.class));
+
+        thrown.expect(AppCatalogMqiAckApiError.class);
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
+        thrown.expect(
+                hasProperty("uri", is("uri/mqi/level_products/1234/ack")));
+        thrown.expect(hasProperty("dto", is(Ack.ERROR)));
+
+        service.ack(1234, Ack.ERROR);
+    }
+
+    /**
+     * Test next when the rest server respond an error
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testAckWhenResponseKO() throws AbstractCodedException {
+        doReturn(new ResponseEntity<Boolean>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<Boolean>(HttpStatus.INTERNAL_SERVER_ERROR),
+                new ResponseEntity<Boolean>(HttpStatus.NOT_FOUND))
+                        .when(restTemplate).exchange(Mockito.anyString(),
+                                Mockito.any(HttpMethod.class), Mockito.any(),
+                                Mockito.any(Class.class));
+
+        thrown.expect(AppCatalogMqiAckApiError.class);
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
+        thrown.expect(
+                hasProperty("uri", is("uri/mqi/level_products/1234/ack")));
+        thrown.expect(hasProperty("dto", is(Ack.OK)));
+        thrown.expectMessage(
+                containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
+
+        service.ack(1234, Ack.OK);
+    }
+
+    /**
+     * Test next when the first time fails and the second works
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testAck1() throws AbstractCodedException {
+        doReturn(new ResponseEntity<Boolean>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<Boolean>(true, HttpStatus.OK))
+                        .when(restTemplate).exchange(Mockito.anyString(),
+                                Mockito.any(HttpMethod.class), Mockito.any(),
+                                Mockito.any(Class.class));
+
+        assertTrue(service.ack(1234, Ack.WARN));
+        verify(restTemplate, times(2)).exchange(
+                Mockito.eq("uri/mqi/level_products/1234/ack"),
+                Mockito.eq(HttpMethod.POST),
+                Mockito.eq(new HttpEntity<Ack>(Ack.WARN)),
+                Mockito.eq(Boolean.class));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test next when the first time works
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testAck2() throws AbstractCodedException {
+        doReturn(new ResponseEntity<Boolean>(false, HttpStatus.OK))
+                .when(restTemplate).exchange(Mockito.anyString(),
+                        Mockito.any(HttpMethod.class), Mockito.any(),
+                        Mockito.any(Class.class));
+
+        assertFalse(service.ack(1234, Ack.OK));
+        verify(restTemplate, times(1)).exchange(
+                Mockito.eq("uri/mqi/level_products/1234/ack"),
+                Mockito.eq(HttpMethod.POST),
+                Mockito.eq(new HttpEntity<Ack>(Ack.OK)),
+                Mockito.eq(Boolean.class));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test send when no response from the rest server
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testgetNbReadingWhenNoResponse() throws AbstractCodedException {
+        doThrow(new RestClientException("rest client exception"))
+                .when(restTemplate).exchange(Mockito.any(),
+                        Mockito.any(HttpMethod.class),
+                        Mockito.isNull(),
+                        Mockito.any(Class.class));
+
+        thrown.expect(AppCatalogMqiGetNbReadingApiError.class);
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
+        thrown.expect(hasProperty("uri", is(
+                "uri/mqi/level_products/topic1/nbReading?pod=pod-name")));
+
+        service.getNbReadingMessages("topic1", "pod-name");
+    }
+
+    /**
+     * Test send when the rest server respond an error
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testgetNbReadingWhenResponseKO() throws AbstractCodedException {
+        doReturn(new ResponseEntity<Integer>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<Integer>(HttpStatus.INTERNAL_SERVER_ERROR),
+                new ResponseEntity<Integer>(HttpStatus.NOT_FOUND))
+                        .when(restTemplate).exchange(Mockito.any(),
+                                Mockito.any(HttpMethod.class),
+                                Mockito.isNull(),
+                                Mockito.any(Class.class));
+
+        thrown.expect(AppCatalogMqiGetNbReadingApiError.class);
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
+        thrown.expect(hasProperty("uri", is(
+                "uri/mqi/level_products/topic1/nbReading?pod=pod-name")));
+        thrown.expectMessage(
+                containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
+
+        service.getNbReadingMessages("topic1", "pod-name");
+    }
+
+    /**
+     * Test the max retries applied before launching an exception
+     * 
+     * @throws AbstractCodedException
+     * @throws URISyntaxException 
+     * @throws RestClientException 
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testgetNbReadingMaxRetries() throws AbstractCodedException, RestClientException, URISyntaxException {
+        doReturn(new ResponseEntity<Integer>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<Integer>(HttpStatus.INTERNAL_SERVER_ERROR),
+                new ResponseEntity<Integer>(HttpStatus.NOT_FOUND))
+                        .when(restTemplate).exchange(Mockito.any(),
+                                Mockito.any(HttpMethod.class),
+                                Mockito.isNull(),
+                                Mockito.any(Class.class));
+
+        try {
+            service.getNbReadingMessages("topic1", "pod-name");
+            fail("An exception shall be raised");
+        } catch (AppCatalogMqiGetNbReadingApiError mpee) {
+            verify(restTemplate, times(2)).exchange(Mockito.eq(
+                    new URI("uri/mqi/level_products/topic1/nbReading?pod=pod-name")),
+                    Mockito.eq(HttpMethod.GET), Mockito.eq(null),
+                    Mockito.eq(Integer.class));
+            verifyNoMoreInteractions(restTemplate);
+        }
+    }
+
+    /**
+     * Test send when the first time fails and the second works
+     * 
+     * @throws AbstractCodedException
+     * @throws URISyntaxException 
+     * @throws RestClientException 
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testgetNbReading1() throws AbstractCodedException, RestClientException, URISyntaxException {
+        doReturn(new ResponseEntity<Integer>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<Integer>(15, HttpStatus.OK))
+                        .when(restTemplate).exchange(Mockito.any(),
+                                Mockito.any(HttpMethod.class),
+                                Mockito.isNull(),
+                                Mockito.any(Class.class));
+
+        assertEquals(15, service.getNbReadingMessages("topic1", "pod-name"));
+        verify(restTemplate, times(2)).exchange(Mockito
+                .eq(new URI("uri/mqi/level_products/topic1/nbReading?pod=pod-name")),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
+                Mockito.eq(Integer.class));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test send when the first time works
+     * 
+     * @throws AbstractCodedException
+     * @throws URISyntaxException 
+     * @throws RestClientException 
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testgetNbReading2() throws AbstractCodedException, RestClientException, URISyntaxException {
+        doReturn(new ResponseEntity<Integer>(0, HttpStatus.OK))
+                .when(restTemplate).exchange(Mockito.any(),
+                        Mockito.any(HttpMethod.class),
+                        Mockito.isNull(),
+                        Mockito.any(Class.class));
+
+        assertEquals(0, service.getNbReadingMessages("topic1", "pod-name"));
+        verify(restTemplate, times(1)).exchange(Mockito
+                .eq(new URI("uri/mqi/level_products/topic1/nbReading?pod=pod-name")),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
+                Mockito.eq(Integer.class));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test send when server returns an empty body
+     * 
+     * @throws AbstractCodedException
+     * @throws URISyntaxException 
+     * @throws RestClientException 
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testgetNbReadingWhenEmptyBody() throws AbstractCodedException, RestClientException, URISyntaxException {
+        doReturn(new ResponseEntity<Integer>(HttpStatus.OK)).when(restTemplate)
+                .exchange(Mockito.any(), Mockito.any(HttpMethod.class),
+                        Mockito.isNull(),
+                        Mockito.any(Class.class));
+
+        assertEquals(0, service.getNbReadingMessages("topic1", "pod-name"));
+        verify(restTemplate, times(1)).exchange(Mockito
+                .eq(new URI("uri/mqi/level_products/topic1/nbReading?pod=pod-name")),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
+                Mockito.eq(Integer.class));
         verifyNoMoreInteractions(restTemplate);
     }
 }
