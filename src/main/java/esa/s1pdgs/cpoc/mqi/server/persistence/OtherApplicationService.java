@@ -51,6 +51,11 @@ public class OtherApplicationService {
     private final String suffixUriOtherApp;
 
     /**
+     * 
+     */
+    private final String prefixUriOtherApp;
+
+    /**
      * Constructor
      * 
      * @param hostUri
@@ -59,7 +64,8 @@ public class OtherApplicationService {
      */
     public OtherApplicationService(final RestTemplate restTemplate,
             final String portUri, final int maxRetries,
-            final int tempoRetryMs,final String suffixUriOtherApp) {
+            final int tempoRetryMs,final String suffixUriOtherApp,
+            final String prefixUriOtherApp) {
         this.restTemplate = restTemplate;
         this.portUri = portUri;
         if (maxRetries < 0 || maxRetries > 20) {
@@ -69,6 +75,7 @@ public class OtherApplicationService {
         }
         this.tempoRetryMs = tempoRetryMs;
         this.suffixUriOtherApp = suffixUriOtherApp;
+        this.prefixUriOtherApp = prefixUriOtherApp;
     }
 
     /**
@@ -128,7 +135,7 @@ public class OtherApplicationService {
         while (true) {
             retries++;
             String uri = "http://" + podName + suffixUriOtherApp + ":" + this.portUri
-                    + "/status/" + category.name().toLowerCase() + "/process/"
+                    + prefixUriOtherApp + category.name().toLowerCase() + "/process/"
                     + messageId;
             try {
                 ResponseEntity<Boolean> response = restTemplate.exchange(uri,

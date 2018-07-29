@@ -63,3 +63,6 @@ persistence:
   max-retries: 3
   tempo-retry-ms: 500
   suffix-uri-other-app: .processing.default.svc.cluster.local
+  other-app:
+    suffix-uri: .processing.default.svc.cluster.local
+    begin-uri-processing: /status/

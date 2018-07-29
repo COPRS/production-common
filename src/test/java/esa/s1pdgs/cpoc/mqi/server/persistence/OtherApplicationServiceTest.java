@@ -61,7 +61,8 @@ public class OtherApplicationServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new OtherApplicationService(restTemplate, "uri", 2, 500, ".processing.default.svc.cluster.local");
+        service = new OtherApplicationService(restTemplate, "uri", 2, 500,
+                ".processing.default.svc.cluster.local", "./status/");
     }
 
     /**
@@ -73,9 +74,11 @@ public class OtherApplicationServiceTest {
         assertEquals(500, service.getTempoRetryMs());
         assertEquals("uri", service.getPortUri());
 
-        service = new OtherApplicationService(restTemplate, "uri", -1, 500, ".processing.default.svc.cluster.local");
+        service = new OtherApplicationService(restTemplate, "uri", -1, 500,
+                ".processing.default.svc.cluster.local", "./status/");
         assertEquals(0, service.getMaxRetries());
-        service = new OtherApplicationService(restTemplate, "uri", 21, 500, ".processing.default.svc.cluster.local");
+        service = new OtherApplicationService(restTemplate, "uri", 21, 500,
+                ".processing.default.svc.cluster.local", "./status/");
         assertEquals(0, service.getMaxRetries());
     }
 
@@ -93,8 +96,8 @@ public class OtherApplicationServiceTest {
                         Mockito.any(Class.class));
 
         thrown.expect(StatusProcessingApiError.class);
-        thrown.expect(hasProperty("uri",
-                is("http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345")));
+        thrown.expect(hasProperty("uri", is(
+                "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345")));
 
         service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS, 12345);
     }
@@ -115,8 +118,8 @@ public class OtherApplicationServiceTest {
                                 Mockito.any(Class.class));
 
         thrown.expect(StatusProcessingApiError.class);
-        thrown.expect(hasProperty("uri",
-                is("http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345")));
+        thrown.expect(hasProperty("uri", is(
+                "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345")));
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
@@ -142,8 +145,8 @@ public class OtherApplicationServiceTest {
             service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS, 12345);
             fail("An exception shall be raised");
         } catch (StatusProcessingApiError mpee) {
-            verify(restTemplate, times(2)).exchange(Mockito
-                    .eq("http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345"),
+            verify(restTemplate, times(2)).exchange(Mockito.eq(
+                    "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345"),
                     Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                     Mockito.eq(Boolean.class));
             verifyNoMoreInteractions(restTemplate);
@@ -166,9 +169,8 @@ public class OtherApplicationServiceTest {
 
         assertTrue(service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS,
                 12345));
-        verify(restTemplate, times(2)).exchange(
-                Mockito.eq(
-                        "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345"),
+        verify(restTemplate, times(2)).exchange(Mockito.eq(
+                "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345"),
                 Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
@@ -189,9 +191,8 @@ public class OtherApplicationServiceTest {
 
         assertFalse(service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS,
                 12345));
-        verify(restTemplate, times(1)).exchange(
-                Mockito.eq(
-                        "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345"),
+        verify(restTemplate, times(1)).exchange(Mockito.eq(
+                "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345"),
                 Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
@@ -211,9 +212,8 @@ public class OtherApplicationServiceTest {
 
         assertFalse(service.isProcessing("pod-name", ProductCategory.LEVEL_JOBS,
                 12345));
-        verify(restTemplate, times(1)).exchange(
-                Mockito.eq(
-                        "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345"),
+        verify(restTemplate, times(1)).exchange(Mockito.eq(
+                "http://pod-name.processing.default.svc.cluster.local:uri/status/level_jobs/process/12345"),
                 Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
