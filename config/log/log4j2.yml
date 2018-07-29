@@ -22,7 +22,7 @@ Configuration:
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc
-        level: ${env:appcatalog_logging_level_frviveriss1pdgs:-info}
+        level: ${env:appcatalog_logging_level_esas1pdgscpoc:-info}
         additivity: false
         AppenderRef:
           - ref: STDOUT
@@ -33,20 +33,8 @@ Configuration:
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
-      - name: kafka
-        level: ${env:appcatalog_logging_level_kafka:-warn}
-        additivity: false
-        AppenderRef:
-          - ref: STDOUT
-          - ref: FILE
       - name: org.apache
         level: ${env:appcatalog_logging_level_orgapache:-warn}
-        additivity: false
-        AppenderRef:
-          - ref: STDOUT
-          - ref: FILE
-      - name: com.amazonaws
-        level: ${env:appcatalog_logging_level_amazonaws:-warn}
         additivity: false
         AppenderRef:
           - ref: STDOUT

@@ -9,9 +9,9 @@ logging:
   
 # MongoDB
 mongodb:
-  host: ${appcatalog_mongodb_host:127.0.0.1}
-  port: ${appcatalog_mongodb_port:27017}
-  database: ${appcatalog_mongodb_database:test}
+  host: ${mongo_db_host:mongodb-2.mongodb-svc}
+  port: ${mongo_db_port:27017}
+  database: ${mongo_db_database:s1pdgs}
   old-entry-ms: ${appcatalog_mongodb_old_entry_ms:86400000}
   clean-cron: ${appcatalog_mongodb_clean_cron:0 0 0 * * *}
   

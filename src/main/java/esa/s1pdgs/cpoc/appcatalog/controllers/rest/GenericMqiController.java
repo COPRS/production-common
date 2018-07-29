@@ -126,126 +126,138 @@ public class GenericMqiController<T> {
                         "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Found MqiMessage",
                         topic, partition, offset, body.getGroup()));
                 MqiMessage messageFromDB = responseFromDB.get(0);
-                // Si l'état est à ACK
-                if (messageFromDB.getState().equals(MqiStateMessageEnum.ACK_OK)
-                        || messageFromDB.getState()
-                                .equals(MqiStateMessageEnum.ACK_KO)
-                        || messageFromDB.getState()
-                                .equals(MqiStateMessageEnum.ACK_WARN)) {
-                    // on renvoie l’objet
-                    log(String.format(
-                            "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is Acknowledge",
-                            topic, partition, offset, body.getGroup()));
-                    return new ResponseEntity<MqiLightMessageDto>(
-                            transformMqiMessageToMqiLightMessage(messageFromDB),
-                            HttpStatus.OK);
-                } else if (body.isForce()) { // sinon si force = true
-                    log(String.format(
-                            "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Force is true",
-                            topic, partition, offset, body.getGroup()));
-                    HashMap<String, Object> updateMap = new HashMap<>();
-                    //  on incrémente nb_retry
-                    messageFromDB
-                            .setNbRetries(messageFromDB.getNbRetries() + 1);
-                    updateMap.put("nbRetries", messageFromDB.getNbRetries());
-                    if (messageFromDB.getNbRetries() == maxRetries) {
-                        // on publie un message d’erreur dans queue (via mqi du
-                        // catalogue)
-                        // TODO
-                        LOGGER.error(
-                                "[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Number of retries is reached",
-                                topic, partition, offset, body.getGroup());
-                        // on met status = ACK_KO
-                        messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
-                        updateMap.put("state", messageFromDB.getState());
-                        // on met à jour les éventuelles dates
-                        Date now = new Date();
-                        messageFromDB.setLastAckDate(now);
-                        messageFromDB.setLastReadDate(now);
-                        updateMap.put("lastAckDate", now);
-                        updateMap.put("lastReadDate", now);
-                        // Modifier l'objet dans la bdd
-                        mongoDBServices.updateByID(
-                                messageFromDB.getIdentifier(), updateMap);
+
+                switch (messageFromDB.getState()) {
+                    case ACK_KO:
+                    case ACK_OK:
+                    case ACK_WARN:
                         // on renvoie l’objet
-                        return new ResponseEntity<MqiLightMessageDto>(
-                                transformMqiMessageToMqiLightMessage(
-                                        messageFromDB),
-                                HttpStatus.OK);
-                    } else {
                         log(String.format(
-                                "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Number of retries is not reached",
+                                "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is Acknowledge",
                                 topic, partition, offset, body.getGroup()));
-                        // on met status = READ
-                        messageFromDB.setState(MqiStateMessageEnum.READ);
-                        updateMap.put("state", messageFromDB.getState());
-                        // on met le reading_pod au pod recu
-                        messageFromDB.setReadingPod(body.getPod());
-                        updateMap.put("readingPod",
-                                messageFromDB.getReadingPod());
-                        // on met le processing_pod à null
-                        messageFromDB.setSendingPod(null);
-                        updateMap.put("sendingPod",
-                                messageFromDB.getSendingPod());
-                        // on met à jour les éventuelles dates
-                        Date now = new Date();
-                        messageFromDB.setLastSendDate(now);
-                        messageFromDB.setLastReadDate(now);
-                        updateMap.put("lastSendDate", now);
-                        updateMap.put("lastReadDate", now);
-                        // Modifier l'objet dans la bdd
-                        mongoDBServices.updateByID(
-                                messageFromDB.getIdentifier(), updateMap);
-                        // on renvoie l’objet
                         return new ResponseEntity<MqiLightMessageDto>(
                                 transformMqiMessageToMqiLightMessage(
                                         messageFromDB),
                                 HttpStatus.OK);
-                    }
-                } else {
-                    HashMap<String, Object> updateMap = new HashMap<>();
-                    if (messageFromDB.getState()
-                            .equals(MqiStateMessageEnum.READ)) {
-                        log(String.format(
-                                "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State READ",
-                                topic, partition, offset, body.getGroup()));
-                        // on met à jour les éventuelles dates et le reading_pod
-                        Date now = new Date();
-                        messageFromDB.setLastReadDate(now);
-                        updateMap.put("lastReadDate", now);
-                        messageFromDB.setReadingPod(body.getPod());
-                        updateMap.put("readingPod",
-                                messageFromDB.getReadingPod());
-                        // Modifier l'objet dans la bdd
-                        mongoDBServices.updateByID(
-                                messageFromDB.getIdentifier(), updateMap);
-                        // on renvoie l’objet
-                        return new ResponseEntity<MqiLightMessageDto>(
-                                transformMqiMessageToMqiLightMessage(
-                                        messageFromDB),
-                                HttpStatus.OK);
-                    }
-                    if (messageFromDB.getState()
-                            .equals(MqiStateMessageEnum.SEND)) {
-                        log(String.format(
-                                "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State SEND",
-                                topic, partition, offset, body.getGroup()));
-                        // on met à jour les éventuelles dates et le reading_pod
-                        Date now = new Date();
-                        messageFromDB.setLastSendDate(now);
-                        updateMap.put("lastSendDate", now);
-                        messageFromDB.setReadingPod(body.getPod());
-                        updateMap.put("readingPod",
-                                messageFromDB.getReadingPod());
-                        // Modifier l'objet dans la bdd
-                        mongoDBServices.updateByID(
-                                messageFromDB.getIdentifier(), updateMap);
-                        // on renvoie l’objet
-                        return new ResponseEntity<MqiLightMessageDto>(
-                                transformMqiMessageToMqiLightMessage(
-                                        messageFromDB),
-                                HttpStatus.OK);
-                    }
+                    case SEND:
+                        if (body.isForce()) {
+
+                            log(String.format(
+                                    "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Force is true",
+                                    topic, partition, offset, body.getGroup()));
+                            HashMap<String, Object> updateMap = new HashMap<>();
+                            //  on incrémente nb_retry
+                            messageFromDB.setNbRetries(
+                                    messageFromDB.getNbRetries() + 1);
+                            updateMap.put("nbRetries",
+                                    messageFromDB.getNbRetries());
+                            if (messageFromDB.getNbRetries() >= maxRetries) {
+                                // on publie un message d’erreur dans queue (via
+                                // mqi du
+                                // catalogue)
+                                // TODO
+                                LOGGER.error(
+                                        "[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Number of retries is reached",
+                                        topic, partition, offset,
+                                        body.getGroup());
+                                // on met status = ACK_KO
+                                messageFromDB
+                                        .setState(MqiStateMessageEnum.ACK_KO);
+                                updateMap.put("state",
+                                        messageFromDB.getState());
+                                // on met à jour les éventuelles dates
+                                Date now = new Date();
+                                messageFromDB.setLastAckDate(now);
+                                updateMap.put("lastAckDate", now);
+                                // Modifier l'objet dans la bdd
+                                mongoDBServices.updateByID(
+                                        messageFromDB.getIdentifier(),
+                                        updateMap);
+                                // on renvoie l’objet
+                                return new ResponseEntity<MqiLightMessageDto>(
+                                        transformMqiMessageToMqiLightMessage(
+                                                messageFromDB),
+                                        HttpStatus.OK);
+                            } else {
+                                log(String.format(
+                                        "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Number of retries is not reached",
+                                        topic, partition, offset,
+                                        body.getGroup()));
+                                // on met status = READ
+                                messageFromDB
+                                        .setState(MqiStateMessageEnum.READ);
+                                updateMap.put("state",
+                                        messageFromDB.getState());
+                                // on met le reading_pod au pod recu
+                                messageFromDB.setReadingPod(body.getPod());
+                                updateMap.put("readingPod",
+                                        messageFromDB.getReadingPod());
+                                // on met le processing_pod à null
+                                messageFromDB.setSendingPod(null);
+                                updateMap.put("sendingPod",
+                                        messageFromDB.getSendingPod());
+                                // on met à jour les éventuelles dates
+                                Date now = new Date();
+                                messageFromDB.setLastSendDate(now);
+                                messageFromDB.setLastReadDate(now);
+                                updateMap.put("lastSendDate", now);
+                                updateMap.put("lastReadDate", now);
+                                // Modifier l'objet dans la bdd
+                                mongoDBServices.updateByID(
+                                        messageFromDB.getIdentifier(),
+                                        updateMap);
+                                // on renvoie l’objet
+                                return new ResponseEntity<MqiLightMessageDto>(
+                                        transformMqiMessageToMqiLightMessage(
+                                                messageFromDB),
+                                        HttpStatus.OK);
+                            }
+                        } else {
+                            HashMap<String, Object> updateMap = new HashMap<>();
+                            log(String.format(
+                                    "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State SEND",
+                                    topic, partition, offset, body.getGroup()));
+                            // on met à jour les éventuelles dates et le
+                            // reading_pod
+                            Date now = new Date();
+                            messageFromDB.setLastReadDate(now);
+                            updateMap.put("lastReadDate", now);
+                            messageFromDB.setReadingPod(body.getPod());
+                            updateMap.put("readingPod",
+                                    messageFromDB.getReadingPod());
+                            // Modifier l'objet dans la bdd
+                            mongoDBServices.updateByID(
+                                    messageFromDB.getIdentifier(), updateMap);
+                            // on renvoie l’objet
+                            return new ResponseEntity<MqiLightMessageDto>(
+                                    transformMqiMessageToMqiLightMessage(
+                                            messageFromDB),
+                                    HttpStatus.OK);
+                        }
+                        
+                    default:
+                        HashMap<String, Object> updateMap = new HashMap<>();
+                        if (messageFromDB.getState()
+                                .equals(MqiStateMessageEnum.READ)) {
+                            log(String.format(
+                                    "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State READ",
+                                    topic, partition, offset, body.getGroup()));
+                            // on met à jour les éventuelles dates et le reading_pod
+                            Date now = new Date();
+                            messageFromDB.setLastReadDate(now);
+                            updateMap.put("lastReadDate", now);
+                            messageFromDB.setReadingPod(body.getPod());
+                            updateMap.put("readingPod",
+                                    messageFromDB.getReadingPod());
+                            // Modifier l'objet dans la bdd
+                            mongoDBServices.updateByID(
+                                    messageFromDB.getIdentifier(), updateMap);
+                            // on renvoie l’objet
+                            return new ResponseEntity<MqiLightMessageDto>(
+                                    transformMqiMessageToMqiLightMessage(
+                                            messageFromDB),
+                                    HttpStatus.OK);
+                        }
                 }
             }
             LOGGER.error(
@@ -254,7 +266,8 @@ public class GenericMqiController<T> {
         } catch (Exception exc) {
             LOGGER.error("[read] {}", exc.getMessage());
         }
-        return new ResponseEntity<MqiLightMessageDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<MqiLightMessageDto>(
+                HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 
@@ -266,15 +279,9 @@ public class GenericMqiController<T> {
             ackStates.add(MqiStateMessageEnum.ACK_KO);
             ackStates.add(MqiStateMessageEnum.ACK_OK);
             ackStates.add(MqiStateMessageEnum.ACK_WARN);
-            log(String.format(
-                    "[Next] [Pod %s] [Product Category %s] Searching MqiMessage",
-                    pod, category));
             List<MqiMessage> mqiMessages = mongoDBServices
                     .searchByPodStateCategory(pod, category, ackStates);
             if (mqiMessages.isEmpty()) {
-                log(String.format(
-                        "[Next] [Pod %s] [Product Category %s] No MqiMessage found",
-                        pod, category));
                 return new ResponseEntity<List<MqiGenericMessageDto<T>>>(
                         new ArrayList<MqiGenericMessageDto<T>>(),
                         HttpStatus.OK);
@@ -321,7 +328,7 @@ public class GenericMqiController<T> {
                         log(String.format(
                                 "[Send Message] [MessageID %d] MqiMessage found is at state ACK",
                                 messageID));
-                        return new ResponseEntity<Boolean>(Boolean.FALSE,
+                        return new ResponseEntity<Boolean>(false,
                                 HttpStatus.OK);
                     case READ:
                         HashMap<String, Object> updateMap1 = new HashMap<>();
@@ -332,14 +339,13 @@ public class GenericMqiController<T> {
                         updateMap1.put("sendingPod",
                                 messageFromDB.getSendingPod());
                         // on met à jour les éventuelles dates
-                        messageFromDB.setLastAckDate(now);
                         messageFromDB.setLastSendDate(now);
-                        updateMap1.put("lastAckDate", now);
+                        updateMap1.put("lastSendDate", now);
                         mongoDBServices.updateByID(messageID, updateMap1);
                         log(String.format(
                                 "[Send Message] [MessageID %d] MqiMessage found is at state READ",
                                 messageID));
-                        return new ResponseEntity<Boolean>(Boolean.TRUE,
+                        return new ResponseEntity<Boolean>(true,
                                 HttpStatus.OK);
                     default:
                         HashMap<String, Object> updateMap2 = new HashMap<>();
@@ -363,7 +369,7 @@ public class GenericMqiController<T> {
                             messageFromDB.setLastAckDate(now);
                             updateMap2.put("lastAckDate", now);
                             mongoDBServices.updateByID(messageID, updateMap2);
-                            return new ResponseEntity<Boolean>(Boolean.FALSE,
+                            return new ResponseEntity<Boolean>(false,
                                     HttpStatus.OK);
                         } else {
                             // on met status = à SEND et son processing_pod
@@ -379,7 +385,7 @@ public class GenericMqiController<T> {
                             log(String.format(
                                     "[Send Message] [MessageID %d] MqiMessage found state is set at SEND",
                                     messageID));
-                            return new ResponseEntity<Boolean>(Boolean.TRUE,
+                            return new ResponseEntity<Boolean>(true,
                                     HttpStatus.OK);
                         }
 
