@@ -21,6 +21,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import esa.s1pdgs.cpoc.appcatalog.model.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
@@ -31,16 +34,13 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  *
  * @author Viveris Technologies
  */
-public class MongoDBServicesTest {
+public class MongoDBDAOTest {
 
     @Mock
-    private MongoDBDAO mongoDBDAO;
-
-    @Mock
-    private SequenceDao sequenceDao;
+    private MongoTemplate mongoClient;
 
     @InjectMocks
-    private MongoDBServices mongoDBServices;
+    private MongoDBDAO mongoDBDAO;
 
     /**
      * Initialization
@@ -56,11 +56,10 @@ public class MongoDBServicesTest {
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null));
-        doReturn(response).when(mongoDBDAO).searchByTopicPartitionOffsetGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
-                Mockito.anyString());
+        doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
+                Mockito.any());
 
-        List<MqiMessage> result = mongoDBServices
+        List<MqiMessage> result = mongoDBDAO
                 .searchByTopicPartitionOffsetGroup("topic", 1, 5, "group");
 
         MqiMessage expectedResult =
@@ -69,10 +68,9 @@ public class MongoDBServicesTest {
                         "sendingPod", null, null, 0, null);
 
         assertEquals(expectedResult, result.get(0));
-        verify(mongoDBDAO, times(1)).searchByTopicPartitionOffsetGroup(
-                Mockito.eq("topic"), Mockito.eq(1), Mockito.eq(5L),
-                Mockito.eq("group"));
-
+        verify(mongoClient, times(1)).find(Mockito.any(Query.class),
+                Mockito.eq(MqiMessage.class));
+        // TODO, check query
     }
 
     @Test
@@ -87,15 +85,14 @@ public class MongoDBServicesTest {
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 18, "group", MqiStateMessageEnum.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null));
-        doReturn(response).when(mongoDBDAO).searchByTopicPartitionGroup(
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),
+        doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
 
         Set<MqiStateMessageEnum> ackStates = new HashSet<>();
         ackStates.add(MqiStateMessageEnum.ACK_KO);
         ackStates.add(MqiStateMessageEnum.ACK_OK);
         ackStates.add(MqiStateMessageEnum.ACK_WARN);
-        List<MqiMessage> result = mongoDBServices
+        List<MqiMessage> result = mongoDBDAO
                 .searchByTopicPartitionGroup("topic", 1, "group", ackStates);
 
         List<MqiMessage> expectedResult = new ArrayList<>();
@@ -110,9 +107,9 @@ public class MongoDBServicesTest {
                 null, "sendingPod", null, null, 0, null));
 
         assertEquals(expectedResult, result);
-        verify(mongoDBDAO, times(1)).searchByTopicPartitionGroup(
-                Mockito.eq("topic"), Mockito.eq(1), Mockito.eq("group"),
-                Mockito.eq(ackStates));
+        verify(mongoClient, times(1)).find(Mockito.any(Query.class),
+                Mockito.eq(MqiMessage.class));
+        // TODO, check query
 
     }
 
@@ -128,14 +125,14 @@ public class MongoDBServicesTest {
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 18, "group", MqiStateMessageEnum.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null));
-        doReturn(response).when(mongoDBDAO).searchByPodStateCategory(
-                Mockito.anyString(), Mockito.any(), Mockito.any());
+        doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
+                Mockito.any());
 
         Set<MqiStateMessageEnum> ackStates = new HashSet<>();
         ackStates.add(MqiStateMessageEnum.ACK_KO);
         ackStates.add(MqiStateMessageEnum.ACK_OK);
         ackStates.add(MqiStateMessageEnum.ACK_WARN);
-        List<MqiMessage> result = mongoDBServices.searchByPodStateCategory(
+        List<MqiMessage> result = mongoDBDAO.searchByPodStateCategory(
                 "readingPod", ProductCategory.AUXILIARY_FILES, ackStates);
 
         List<MqiMessage> expectedResult = new ArrayList<>();
@@ -150,10 +147,9 @@ public class MongoDBServicesTest {
                 null, "sendingPod", null, null, 0, null));
 
         assertEquals(expectedResult, result);
-        verify(mongoDBDAO, times(1)).searchByPodStateCategory(
-                Mockito.eq("readingPod"),
-                Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq(ackStates));
+        verify(mongoClient, times(1)).find(Mockito.any(Query.class),
+                Mockito.eq(MqiMessage.class));
+        // TODO, check query
 
     }
 
@@ -163,9 +159,10 @@ public class MongoDBServicesTest {
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null));
-        doReturn(response).when(mongoDBDAO).searchByID(Mockito.anyLong());
+        doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
+                Mockito.any());
 
-        List<MqiMessage> result = mongoDBServices.searchByID(1);
+        List<MqiMessage> result = mongoDBDAO.searchByID(1);
 
         MqiMessage expectedResult =
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
@@ -173,7 +170,30 @@ public class MongoDBServicesTest {
                         "sendingPod", null, null, 0, null);
 
         assertEquals(expectedResult, result.get(0));
-        verify(mongoDBDAO, times(1)).searchByID(Mockito.eq(1L));
+        verify(mongoClient, times(1)).find(Mockito.any(Query.class),
+                Mockito.eq(MqiMessage.class));
+        // TODO, check query
+
+    }
+
+    @Test
+    public void testCountReadingMsg() {
+        List<MqiMessage> response = new ArrayList<>();
+        response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
+                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                "sendingPod", null, null, 0, null));
+        response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic2",
+                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                "sendingPod", null, null, 0, null));
+        doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
+                Mockito.any());
+
+        int result = mongoDBDAO.countReadingMessages("pod-name", "topic");
+
+        assertEquals(2, result);
+        verify(mongoClient, times(1)).find(Mockito.any(Query.class),
+                Mockito.eq(MqiMessage.class));
+        // TODO, check query
 
     }
 
@@ -183,26 +203,23 @@ public class MongoDBServicesTest {
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
                         "group", MqiStateMessageEnum.READ, "readingPod", null,
                         "sendingPod", null, null, 0, null);
-        doNothing().when(mongoDBDAO).insert(Mockito.any(MqiMessage.class));
-        doReturn(2L).when(sequenceDao).getNextSequenceId(Mockito.anyString());
+        doNothing().when(mongoClient).insert(Mockito.any(MqiMessage.class));
 
-        mongoDBServices.insertMqiMessage(messageToInsert);
+        mongoDBDAO.insert(messageToInsert);
 
-        verify(mongoDBDAO, times(1)).insert(Mockito.any(MqiMessage.class));
-        verify(sequenceDao, times(1))
-                .getNextSequenceId(Mockito.eq(MongoDBServices.MQI_MSG_SEQ_KEY));
+        verify(mongoClient, times(1)).insert(Mockito.eq(messageToInsert));
 
     }
 
     @Test
     public void testUpdateByID() {
-        doNothing().when(mongoDBDAO).updateByID(Mockito.anyLong(),
-                Mockito.any());
+        doReturn(null).when(mongoClient).updateFirst(Mockito.any(Query.class),
+                Mockito.any(Update.class), Mockito.any(Class.class));
 
-        mongoDBServices.updateByID(1, new HashMap<>());
+        mongoDBDAO.updateByID(1, new HashMap<>());
 
-        verify(mongoDBDAO, times(1)).updateByID(Mockito.eq(1L),
-                Mockito.eq(new HashMap<>()));
+        verify(mongoClient, times(1)).updateFirst(Mockito.any(Query.class),
+                Mockito.any(Update.class), Mockito.eq(MqiMessage.class));
 
     }
 }

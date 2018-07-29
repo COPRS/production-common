@@ -254,7 +254,7 @@ public class GenericMqiController<T> {
         } catch (Exception exc) {
             LOGGER.error("[read] {}", exc.getMessage());
         }
-        return new ResponseEntity<MqiLightMessageDto>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<MqiLightMessageDto>(HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 
@@ -392,7 +392,7 @@ public class GenericMqiController<T> {
     }
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{messageID}/ack")
-    public ResponseEntity<MqiGenericMessageDto<T>> ackMessage(
+    public ResponseEntity<Boolean> ackMessage(
             @PathVariable(name = "messageID") final long messageID,
             @RequestBody final Ack ack) {
         try {
@@ -407,8 +407,7 @@ public class GenericMqiController<T> {
                 LOGGER.error(
                         "[Ack Message] [MessageID {}] [Ack {}] Ack is not valid",
                         messageID, ack);
-                return new ResponseEntity<MqiGenericMessageDto<T>>(
-                        HttpStatus.NOT_FOUND);
+                return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
             }
             Date now = new Date();
             updateMap.put("lastAckDate", now);
@@ -422,6 +421,26 @@ public class GenericMqiController<T> {
                 LOGGER.error(
                         "[Ack Message] [MessageID {}] [Ack {}] No MqiMessage Found with MessageID",
                         messageID, ack);
+                return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+            }
+        } catch (Exception exc) {
+            LOGGER.error("[ack] {}", exc.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{messageID}")
+    public ResponseEntity<MqiGenericMessageDto<T>> getMessage(
+            @PathVariable(name = "messageID") final long messageID) {
+        try {
+            List<MqiMessage> responseFromDB =
+                    mongoDBServices.searchByID(messageID);
+            if (responseFromDB.isEmpty()) {
+                LOGGER.error(
+                        "[Get] [MessageID {}] No MqiMessage Found with MessageID",
+                        messageID);
                 return new ResponseEntity<MqiGenericMessageDto<T>>(
                         HttpStatus.NOT_FOUND);
             } else {
@@ -431,7 +450,7 @@ public class GenericMqiController<T> {
                         HttpStatus.OK);
             }
         } catch (Exception exc) {
-            LOGGER.error("[ack] {}", exc.getMessage());
+            LOGGER.error("[Get] {}", exc.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -470,6 +489,25 @@ public class GenericMqiController<T> {
                 return new ResponseEntity<Long>(
                         responseFromDB.get(0).getOffset(), HttpStatus.OK);
             }
+        } catch (Exception exc) {
+            LOGGER.error("[earliestOffset] {}", exc.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @param topic
+     * @param pod
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{topic}/nbReading")
+    public ResponseEntity<Integer> nbMessages(
+            @PathVariable(name = "topic") final String topic,
+            @RequestParam("pod") final String pod) {
+        try {
+            return new ResponseEntity<Integer>(
+                    mongoDBServices.countReadingMessages(pod, topic),
+                    HttpStatus.OK);
         } catch (Exception exc) {
             LOGGER.error("[earliestOffset] {}", exc.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
