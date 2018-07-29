@@ -23,8 +23,8 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -223,6 +223,8 @@ public class JobProcessor {
         boolean poolProcessing = false;
         LevelJobDto job = message.getBody();
         int step = 0;
+        boolean ackOk = false;
+        String errorMessage = "";
         try {
             step = 3;
             LOGGER.info("{} Starting process executor",
@@ -241,11 +243,11 @@ public class JobProcessor {
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
             }
 
-            step = 4;
+            step = 3;
             this.waitForPoolProcessesEnding(procCompletionSrv);
             poolProcessing = false;
 
-            step = 5;
+            step = 4;
             if (devProperties.getStepsActivation().get("upload")) {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
@@ -255,64 +257,27 @@ public class JobProcessor {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
             }
-
-            step = 6;
-            ackPositively(message);
+            ackOk = true;
 
         } catch (AbstractCodedException ace) {
-            String errorMessage = String.format("%s [step %d] %s [code %d] %s",
+            ackOk = false;
+            errorMessage = String.format("%s [step %d] %s [code %d] %s",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
-            ackNegatively(message, errorMessage);
         } catch (InterruptedException e) {
-            String errorMessage = String.format(
+            ackOk = false;
+            errorMessage = String.format(
                     "%s [step %d] %s [code %d] [msg interrupted exception]",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ErrorCode.INTERNAL_ERROR.getCode());
-            ackNegatively(message, errorMessage);
         } finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
-    }
 
-    /**
-     * @param dto
-     * @param errorMessage
-     */
-    protected void ackNegatively(final GenericMessageDto<LevelJobDto> dto,
-            final String errorMessage) {
-        LOGGER.info("{} Acknowledging negatively",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
-        LOGGER.error(errorMessage);
-        try {
-            mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
-                    errorMessage, appStatus.getStatus().isStopping()));
-        } catch (AbstractCodedException ace) {
-            LOGGER.error("{} [step 5] {} [code {}] {}",
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
-                            dto.getBody()),
-                    ace.getCode().getCode(), ace.getLogMessage());
-        }
-        appStatus.setError();
-    }
-
-    protected void ackPositively(final GenericMessageDto<LevelJobDto> dto) {
-        LOGGER.info("{} Acknowledging positively",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
-        try {
-            mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null,
-                    appStatus.getStatus().isStopping()));
-        } catch (AbstractCodedException ace) {
-            LOGGER.error("{} [step 5] {} [code {}] {}",
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
-                            dto.getBody()),
-                    ace.getCode().getCode(), ace.getLogMessage());
-            appStatus.setError();
-        }
+        // Ack and check if application shall stopped
+        ackProcessing(message, ackOk, errorMessage);
     }
 
     /**
@@ -389,16 +354,36 @@ public class JobProcessor {
             LOGGER.info("{} Erasing local working directory bypassed",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));
         }
+    }
 
+    /**
+     * Ack job processing and stop app if needed
+     * @param dto
+     * @param ackOk
+     * @param errorMessage
+     */
+    protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto,
+            final boolean ackOk, final String errorMessage) {
+        boolean stopping = appStatus.getStatus().isStopping();
+
+        // Ack
+        if (ackOk) {
+            ackPositively(stopping, dto);
+        } else {
+            ackNegatively(stopping, dto, errorMessage);
+        }
+
+        // Check status
         LOGGER.info("{} Checking status consumer",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, job));
+                getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, dto.getBody()));
         if (appStatus.getStatus().isStopping()) {
             // TODO send stop to the MQI
             try {
                 mqiStatusService.stop();
             } catch (AbstractCodedException ace) {
                 LOGGER.error("{} {} Checking status consumer",
-                        getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, job),
+                        getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS,
+                                dto.getBody()),
                         ace.getLogMessage());
             }
             System.exit(0);
@@ -406,6 +391,46 @@ public class JobProcessor {
             System.exit(-1);
         } else {
             appStatus.setWaiting();
+        }
+    }
+
+    /**
+     * @param dto
+     * @param errorMessage
+     */
+    protected void ackNegatively(final boolean stop,
+            final GenericMessageDto<LevelJobDto> dto,
+            final String errorMessage) {
+        LOGGER.info("{} Acknowledging negatively",
+                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
+        LOGGER.error(errorMessage);
+        try {
+            mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
+                    errorMessage, stop));
+        } catch (AbstractCodedException ace) {
+            LOGGER.error("{} [step 5] {} [code {}] {}",
+                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
+                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
+                            dto.getBody()),
+                    ace.getCode().getCode(), ace.getLogMessage());
+        }
+        appStatus.setError();
+    }
+
+    protected void ackPositively(final boolean stop,
+            final GenericMessageDto<LevelJobDto> dto) {
+        LOGGER.info("{} Acknowledging positively",
+                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
+        try {
+            mqiService.ack(
+                    new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));
+        } catch (AbstractCodedException ace) {
+            LOGGER.error("{} [step 5] {} [code {}] {}",
+                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
+                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
+                            dto.getBody()),
+                    ace.getCode().getCode(), ace.getLogMessage());
+            appStatus.setError();
         }
     }
 }

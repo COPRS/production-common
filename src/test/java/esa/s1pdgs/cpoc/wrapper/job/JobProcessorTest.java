@@ -165,7 +165,7 @@ public class JobProcessorTest extends MockPropertiesTest {
                 "ack-msg", "error-ùmessage")).when(mqiService)
                         .ack(Mockito.any());
 
-        processor.ackNegatively(inputMessage, "error message");
+        processor.ackNegatively(false, inputMessage, "error message");
 
         verify(mqiService, times(1)).ack(Mockito
                 .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
@@ -183,7 +183,7 @@ public class JobProcessorTest extends MockPropertiesTest {
                 "ack-msg", "error-message")).when(mqiService)
                         .ack(Mockito.any());
 
-        processor.ackPositively(inputMessage);
+        processor.ackPositively(false, inputMessage);
 
         verify(mqiService, times(1))
                 .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)));
