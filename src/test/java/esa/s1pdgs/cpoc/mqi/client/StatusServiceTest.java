@@ -136,7 +136,7 @@ public class StatusServiceTest {
             service.stop();
             fail("An exception shall be raised");
         } catch (MqiStopApiError mpee) {
-            verify(restTemplate, times(2)).exchange(Mockito.eq("uri/mqi/stop"),
+            verify(restTemplate, times(2)).exchange(Mockito.eq("uri/app/stop"),
                     Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                     Mockito.eq(String.class));
             verifyNoMoreInteractions(restTemplate);
@@ -158,7 +158,7 @@ public class StatusServiceTest {
                                 Mockito.any(Class.class));
 
         service.stop();
-        verify(restTemplate, times(2)).exchange(Mockito.eq("uri/mqi/stop"),
+        verify(restTemplate, times(2)).exchange(Mockito.eq("uri/app/stop"),
                 Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                 Mockito.eq(String.class));
         verifyNoMoreInteractions(restTemplate);
@@ -177,7 +177,7 @@ public class StatusServiceTest {
                         Mockito.isNull(), Mockito.any(Class.class));
 
         service.stop();
-        verify(restTemplate, times(1)).exchange(Mockito.eq("uri/mqi/stop"),
+        verify(restTemplate, times(1)).exchange(Mockito.eq("uri/app/stop"),
                 Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                 Mockito.eq(String.class));
         verifyNoMoreInteractions(restTemplate);
@@ -239,7 +239,7 @@ public class StatusServiceTest {
 
         StatusDto ret = service.status();
         assertEquals(message, ret);
-        verify(restTemplate, times(2)).exchange(Mockito.eq("uri/mqi/status"),
+        verify(restTemplate, times(2)).exchange(Mockito.eq("uri/app/status"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(StatusDto.class));
         verifyNoMoreInteractions(restTemplate);
@@ -260,7 +260,7 @@ public class StatusServiceTest {
 
         StatusDto ret = service.status();
         assertEquals(message, ret);
-        verify(restTemplate, times(1)).exchange(Mockito.eq("uri/mqi/status"),
+        verify(restTemplate, times(1)).exchange(Mockito.eq("uri/app/status"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(StatusDto.class));
         verifyNoMoreInteractions(restTemplate);

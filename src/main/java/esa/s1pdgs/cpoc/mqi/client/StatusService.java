@@ -97,7 +97,7 @@ public class StatusService {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + "/mqi/status";
+            String uri = hostUri + "/app/status";
             try {
                 ResponseEntity<StatusDto> response = restTemplate.exchange(uri,
                         HttpMethod.GET, null, StatusDto.class);
@@ -126,7 +126,7 @@ public class StatusService {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + "/mqi/stop";
+            String uri = hostUri + "/app/stop";
             try {
                 ResponseEntity<String> response = restTemplate.exchange(uri,
                         HttpMethod.POST, null, String.class);
