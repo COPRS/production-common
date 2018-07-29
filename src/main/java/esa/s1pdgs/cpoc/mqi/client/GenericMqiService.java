@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -123,12 +124,16 @@ public abstract class GenericMqiService<T> {
             retries++;
             String uri = hostUri + "/messages/" + category.name().toLowerCase()
                     + "/ack";
+            LogUtils.traceLog(LOGGER,
+                    String.format("[uri %s] [body %s]", uri, ack));
             try {
                 ResponseEntity<Boolean> response = restTemplate.exchange(uri,
                         HttpMethod.POST, new HttpEntity<AckMessageDto>(ack),
                         Boolean.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     Boolean ret = response.getBody();
+                    LogUtils.traceLog(LOGGER, String.format(
+                            "[uri %s] [body %s] [ret %s]", uri, ack, ret));
                     if (ret == null) {
                         return false;
                     } else {
@@ -164,6 +169,8 @@ public abstract class GenericMqiService<T> {
             retries++;
             String uri = hostUri + "/messages/" + category.name().toLowerCase()
                     + "/publish";
+            LogUtils.traceLog(LOGGER,
+                    String.format("[uri %s] [body %s]", uri, message));
             try {
                 ResponseEntity<Void> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
@@ -171,6 +178,8 @@ public abstract class GenericMqiService<T> {
                                         message),
                                 Void.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
+                    LogUtils.traceLog(LOGGER, String.format(
+                            "[uri %s] [body %s] [ret OK]", uri, message));
                     return;
                 } else {
                     waitOrThrow(retries,
