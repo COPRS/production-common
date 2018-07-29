@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 
 /**
@@ -99,13 +100,18 @@ public class AppCatalogMqiLevelJobsService
             retries++;
             String uri = hostUri + "/mqi/" + category.name().toLowerCase() + "/"
                     + messageId;
+            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
                 ResponseEntity<MqiLevelJobMessageDto> response =
                         restTemplate.exchange(uri, HttpMethod.GET, null,
                                 MqiLevelJobMessageDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
+                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
+                            uri, response.getBody()));
                     return response.getBody();
                 } else if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    LogUtils.traceLog(LOGGER,
+                            String.format("[uri %s] [ret NOT_FOUND]", uri));
                     throw new AppCatalogMqiGetApiError(category, uri,
                             "Message not found");
                 } else {

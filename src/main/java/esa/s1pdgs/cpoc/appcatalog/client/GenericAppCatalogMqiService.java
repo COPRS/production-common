@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetNbReadingApiErro
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
@@ -156,6 +157,8 @@ public abstract class GenericAppCatalogMqiService<T> {
             retries++;
             String uri = hostUri + "/mqi/" + category.name().toLowerCase() + "/"
                     + topic + "/" + partition + "/" + offset + "/read";
+            LogUtils.traceLog(LOGGER,
+                    String.format("[uri %s] [body %s]", uri, body));
             try {
                 ResponseEntity<MqiLightMessageDto> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
@@ -169,6 +172,9 @@ public abstract class GenericAppCatalogMqiService<T> {
                                         uri, body, "Null return object"),
                                 "read");
                     } else {
+                        LogUtils.traceLog(LOGGER,
+                                String.format("[uri %s] [body %s] [ret %s]",
+                                        uri, body, response.getBody()));
                         return response.getBody();
                     }
                 } else {
@@ -215,6 +221,9 @@ public abstract class GenericAppCatalogMqiService<T> {
                         new HttpEntity<MqiSendMessageDto>(body), Boolean.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     Boolean ret = response.getBody();
+                    LogUtils.traceLog(LOGGER,
+                            String.format("[uri %s] [body %s] [ret %s]",
+                                    uri, body, ret));
                     if (ret == null) {
                         return false;
                     } else {
@@ -252,12 +261,17 @@ public abstract class GenericAppCatalogMqiService<T> {
             retries++;
             String uri = hostUri + "/mqi/" + category.name().toLowerCase() + "/"
                     + messageId + "/ack";
+            LogUtils.traceLog(LOGGER,
+                    String.format("[uri %s] [body %s]", uri, ack));
             try {
                 ResponseEntity<Boolean> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
                                 new HttpEntity<Ack>(ack), Boolean.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     Boolean ret = response.getBody();
+                    LogUtils.traceLog(LOGGER,
+                            String.format("[uri %s] [body %s] [ret %s]",
+                                    uri, ack, ret));
                     if (ret == null) {
                         return false;
                     } else {
@@ -307,11 +321,16 @@ public abstract class GenericAppCatalogMqiService<T> {
             UriComponentsBuilder builder = UriComponentsBuilder
                     .fromUriString(uriStr).queryParam("group", group);
             URI uri = builder.build().toUri();
+            LogUtils.traceLog(LOGGER,
+                    String.format("[uri %s]", uri));
             try {
                 ResponseEntity<Long> response = restTemplate.exchange(uri,
                         HttpMethod.GET, null, Long.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     Long ret = response.getBody();
+                    LogUtils.traceLog(LOGGER,
+                            String.format("[uri %s] [ret %s]",
+                                    uri, response.getBody()));
                     if (ret == null) {
                         // TODO default value
                         return 0;
@@ -348,28 +367,38 @@ public abstract class GenericAppCatalogMqiService<T> {
             UriComponentsBuilder builder = UriComponentsBuilder
                     .fromUriString(uriStr).queryParam("pod", podName);
             URI uri = builder.build().toUri();
+            LogUtils.traceLog(LOGGER,
+                    String.format("[uri %s]", uri));
             try {
                 ResponseEntity<Integer> response = restTemplate.exchange(uri,
                         HttpMethod.GET, null, Integer.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     Integer ret = response.getBody();
+                    LogUtils.traceLog(LOGGER,
+                            String.format("[uri %s] [ret %s]",
+                                    uri, ret));
                     if (ret == null) {
                         return 0;
                     } else {
                         return ret.intValue();
                     }
                 } else {
-                    waitOrThrow(retries, new AppCatalogMqiGetNbReadingApiError(
-                            category, uri.toString(),
-                            "HTTP status code " + response.getStatusCode()),
+                    waitOrThrow(retries,
+                            new AppCatalogMqiGetNbReadingApiError(category,
+                                    uri.toString(),
+                                    "HTTP status code "
+                                            + response.getStatusCode()),
                             "getNbReadingMessages");
                 }
             } catch (RestClientException rce) {
-                waitOrThrow(retries, new AppCatalogMqiGetNbReadingApiError(
-                        category, uri.toString(),
+                waitOrThrow(retries,
+                        new AppCatalogMqiGetNbReadingApiError(category,
+                                uri.toString(),
 
-                        "RestClientException occurred: " + rce.getMessage(),
-                        rce), "getNbReadingMessages");
+                                "RestClientException occurred: "
+                                        + rce.getMessage(),
+                                rce),
+                        "getNbReadingMessages");
             }
         }
     }
