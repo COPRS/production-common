@@ -81,7 +81,7 @@ public class StatusRestControllerTest extends RestControllerTest {
 
 		doReturn(catStatus).when(appStatus).getStatus();
 
-		request(get("/wrapper/status")).andExpect(MockMvcResultMatchers.status().isInternalServerError())
+		request(get("/app/status")).andExpect(MockMvcResultMatchers.status().isInternalServerError())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(jsonPath("$.globalStatus", is("FATALERROR")))
 				.andExpect(jsonPath("$.statusPerCategory['AUXILIARY_FILES'].status", is("PROCESSING")))
@@ -110,7 +110,7 @@ public class StatusRestControllerTest extends RestControllerTest {
 
 		doReturn(catStatus).when(appStatus).getStatus();
 
-		request(get("/wrapper/status")).andExpect(MockMvcResultMatchers.status().isOk())
+		request(get("/app/status")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(jsonPath("$.globalStatus", is("ERROR")))
 				.andExpect(jsonPath("$.statusPerCategory['AUXILIARY_FILES'].status", is("PROCESSING")))
@@ -128,16 +128,16 @@ public class StatusRestControllerTest extends RestControllerTest {
 	public void testIsProcessing() throws Exception {
 		doReturn(1234L).when(appStatus).getProcessingMsgId(ProductCategory.LEVEL_JOBS);
 		doReturn(526L).when(appStatus).getProcessingMsgId(ProductCategory.EDRS_SESSIONS);
-		request(get("/wrapper/level_jobs/process/1234")).andExpect(MockMvcResultMatchers.status().isOk())
+		request(get("/app/level_jobs/process/1234")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().string("true"));
-		request(get("/wrapper/edrs_sessions/process/1234")).andExpect(MockMvcResultMatchers.status().isOk())
+		request(get("/app/edrs_sessions/process/1234")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().string("false"));
-		request(get("/wrapper/edrs_sessions/process/526")).andExpect(MockMvcResultMatchers.status().isOk())
+		request(get("/app/edrs_sessions/process/526")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().string("true"));
-		request(get("/wrapper/level_jobs/process/1235")).andExpect(MockMvcResultMatchers.status().isOk())
+		request(get("/app/level_jobs/process/1235")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().string("false"));
 		doReturn(0L).when(appStatus).getProcessingMsgId(ProductCategory.LEVEL_JOBS);
-		request(get("/wrapper/level_jobs/process/1235")).andExpect(MockMvcResultMatchers.status().isOk())
+		request(get("/app/level_jobs/process/1235")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().string("false"));
 
 	}

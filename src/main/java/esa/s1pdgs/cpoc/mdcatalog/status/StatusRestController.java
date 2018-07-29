@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.dto.StatusPerCategoryDto;
  * @author Viveris Technologies
  */
 @RestController
-@RequestMapping(path = "/wrapper")
+@RequestMapping(path = "/app")
 public class StatusRestController {
 
 	/**
