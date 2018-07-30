@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ResumeDetails;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
@@ -93,7 +95,7 @@ public class GenericMessageDistribution<T> {
             result = new ResponseEntity<GenericMessageDto<T>>(
                     (GenericMessageDto<T>) messages.nextMessage(category),
                     HttpStatus.OK);
-        } catch (MqiCategoryNotAvailable mcna) {
+        } catch (AbstractCodedException mcna) {
             LOGGER.error(
                     "[MONITOR] [category {}] [api next] [code {}] [error {}]",
                     category, mcna.getCode().getCode(), mcna.getLogMessage());
@@ -116,19 +118,15 @@ public class GenericMessageDistribution<T> {
         LOGGER.info("[MONITOR] [category {}] [api ack] [messageId {}] Starting",
                 category, identifier);
 
-        // If error, log in KAFKA topic the message
-        if (ack == Ack.ERROR) {
-            publication.publishError(message);
-        }
-
         // Ack message if OK
         ResponseEntity<Boolean> result =
                 new ResponseEntity<Boolean>(HttpStatus.INTERNAL_SERVER_ERROR);
+        ResumeDetails resumeDetails = null;
         try {
-            result = new ResponseEntity<Boolean>(
-                    messages.ackMessage(category, identifier, ack, stop),
-                    HttpStatus.OK);
-        } catch (MqiCategoryNotAvailable mcna) {
+            resumeDetails =
+                    messages.ackMessage(category, identifier, ack, stop);
+            result = new ResponseEntity<Boolean>(true, HttpStatus.OK);
+        } catch (AbstractCodedException mcna) {
             LOGGER.error(
                     "[MONITOR] [category {}] [api ack] [messageId {}] [code {}] [error {}]",
                     category, identifier, mcna.getCode().getCode(),
@@ -136,6 +134,17 @@ public class GenericMessageDistribution<T> {
             result = new ResponseEntity<Boolean>(
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        // If error, log in KAFKA topic the message
+        if (ack == Ack.ERROR) {
+            String logMessage = message;
+            if (resumeDetails != null) {
+                logMessage = message
+                        + String.format(" [resumeDetails %s]", resumeDetails);
+            }
+            publication.publishError(logMessage);
+        }
+
         LOGGER.info(
                 "[MONITOR] [category {}] [api ack] [messageId {}] [httpCode {}] End",
                 category, identifier, result.getStatusCodeValue());

@@ -27,6 +27,12 @@ Configuration:
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
+      - name: com.github.grantneale
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
       - name: org.springframework
         level: warn
         additivity: false

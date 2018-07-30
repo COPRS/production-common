@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -30,6 +32,7 @@ import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryPublicati
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
+@ActiveProfiles("test-properties")
 public class ApplicationPropertiesTest {
 
     /**
@@ -50,6 +53,7 @@ public class ApplicationPropertiesTest {
      */
     @Test
     public void testInitialization() {
+        assertEquals("wrapper-0", properties.getHostname());
         assertEquals(5, properties.getProductCategories().size());
         assertEquals(500, properties.getWaitNextMs());
 
@@ -63,14 +67,14 @@ public class ApplicationPropertiesTest {
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.EDRS_SESSIONS).getConsumption()
                 .isEnable());
-        assertEquals("t-pdgs-edrs-sessions",
+        assertEquals(Arrays.asList("t-pdgs-edrs-sessions","t-topic-2"),
                 properties.getProductCategories()
                         .get(ProductCategory.EDRS_SESSIONS).getConsumption()
                         .getTopics());
         // Level jobs
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.LEVEL_JOBS).getConsumption().isEnable());
-        assertEquals("t-pdgs-l0-jobs", properties.getProductCategories()
+        assertEquals(Arrays.asList("t-pdgs-l0-jobs"), properties.getProductCategories()
                 .get(ProductCategory.LEVEL_JOBS).getConsumption().getTopics());
         // Level reports
         assertFalse(properties.getProductCategories()
@@ -121,7 +125,7 @@ public class ApplicationPropertiesTest {
         ProductCategoryConsumptionProperties consProp =
                 new ProductCategoryConsumptionProperties();
         consProp.setEnable(true);
-        consProp.setTopics("test-topic");
+        consProp.setTopics(Arrays.asList("test-topic","test-topic-1"));
         catProp.setConsumption(consProp);
         ProductCategoryPublicationProperties pubProp =
                 new ProductCategoryPublicationProperties();
@@ -133,14 +137,16 @@ public class ApplicationPropertiesTest {
         map.put(ProductCategory.AUXILIARY_FILES, catProp);
         properties.setProductCategories(map);
         properties.setWaitNextMs(1000);
+        properties.setHostname("host-test");
 
         assertEquals(1, properties.getProductCategories().size());
         assertEquals(1000, properties.getWaitNextMs());
+        assertEquals("host-test", properties.getHostname());
         // Auxiliary files
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.AUXILIARY_FILES).getConsumption()
                 .isEnable());
-        assertEquals("test-topic",
+        assertEquals(Arrays.asList("test-topic","test-topic-1"),
                 properties.getProductCategories()
                         .get(ProductCategory.AUXILIARY_FILES).getConsumption()
                         .getTopics());

@@ -4,16 +4,19 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -22,6 +25,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,9 +33,17 @@ import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.appcatalog.client.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ResumeDetails;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
+import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -40,11 +52,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryConsumptionProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
-import esa.s1pdgs.cpoc.mqi.server.consumption.MessageConsumptionController;
+import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
+import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -65,83 +78,180 @@ public class MessageConsumptionControllerTest {
     @Autowired
     private KafkaProperties kafkaProperties;
 
+    /**
+     * Service for AUXILIARY_FILES
+     */
+    @Mock
+    private GenericAppCatalogMqiService<AuxiliaryFileDto> persistAuxiliaryFilesService;
+
+    /**
+     * Service for AUXILIARY_FILES
+     */
+    @Mock
+    private GenericAppCatalogMqiService<EdrsSessionDto> persistEdrsSessionsService;
+
+    /**
+     * Service for AUXILIARY_FILES
+     */
+    @Mock
+    private GenericAppCatalogMqiService<LevelJobDto> persistLevelJobsService;
+
+    /**
+     * Service for AUXILIARY_FILES
+     */
+    @Mock
+    private GenericAppCatalogMqiService<LevelProductDto> persistLevelProductsService;
+
+    /**
+     * Service for AUXILIARY_FILES
+     */
+    @Mock
+    private GenericAppCatalogMqiService<LevelReportDto> persistLevelReportsService;
+
+    /**
+     * 
+     */
+    @Mock
+    private OtherApplicationService otherService;
+
+    /**
+     * Application status
+     */
+    @Autowired
+    protected AppStatus appStatus;
+
     @Autowired
     private MessageConsumptionController autoManager;
 
     private MessageConsumptionController manager;
-
-    private GenericKafkaUtils<EdrsSessionDto> kafkaUtilsEdrsSession;
-
-    private GenericKafkaUtils<LevelJobDto> kafkaUtilsJobs;
 
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
 
         manager = new MessageConsumptionController(appProperties,
-                kafkaProperties);
+                kafkaProperties, persistAuxiliaryFilesService,
+                persistEdrsSessionsService, persistLevelJobsService,
+                persistLevelProductsService, persistLevelReportsService,
+                otherService, appStatus);
 
-        kafkaUtilsEdrsSession =
-                new GenericKafkaUtils<EdrsSessionDto>(embeddedKafka);
+        doReturn("pod-name").when(appProperties).getHostname();
 
-        kafkaUtilsJobs = new GenericKafkaUtils<LevelJobDto>(embeddedKafka);
+        startManagerWithAllConsumers();
     }
 
+    /**
+     * Build the "manager" which is a message controller with all categories
+     * activated
+     */
+    private void startManagerWithAllConsumers() {
+        Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
+        map.put(ProductCategory.AUXILIARY_FILES,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic1", "topic-other")),
+                        null));
+        map.put(ProductCategory.LEVEL_PRODUCTS,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic3")),
+                        null));
+        map.put(ProductCategory.LEVEL_JOBS,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic4")),
+                        null));
+        map.put(ProductCategory.EDRS_SESSIONS,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic2")),
+                        null));
+        map.put(ProductCategory.LEVEL_REPORTS,
+                new ProductCategoryProperties(
+                        new ProductCategoryConsumptionProperties(true,
+                                Arrays.asList("topic5", "another-topic")),
+                        null));
+        doReturn(map).when(appProperties).getProductCategories();
+
+        manager.startConsumers();
+        assertEquals(5, manager.consumers.size());
+    }
+
+    /**
+     * Test spring initialization
+     */
     @Test
     public void testPostConstructSpring() {
         assertEquals(2, autoManager.consumers.size());
     }
 
     /**
-     * Test the nextMessage when consumer OK
-     * 
-     * @throws MqiCategoryNotAvailable
-     * @throws InterruptedException
-     * @throws ExecutionException
+     * Test initialization when all consumers
      */
-    @SuppressWarnings("unchecked")
     @Test
-    public void testNextMessage() throws MqiCategoryNotAvailable,
-            InterruptedException, ExecutionException {
+    public void testPostConstructAllConsumer() {
 
-        // Check case when no message
-        GenericMessageDto<EdrsSessionDto> message =
-                (GenericMessageDto<EdrsSessionDto>) autoManager
-                        .nextMessage(ProductCategory.EDRS_SESSIONS);
-        assertNull(message);
+        assertEquals(2,
+                manager.consumers.get(ProductCategory.AUXILIARY_FILES).size());
+        assertEquals("topic1", manager.consumers
+                .get(ProductCategory.AUXILIARY_FILES).get("topic1").getTopic());
+        assertEquals(AuxiliaryFileDto.class,
+                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
+                        .get("topic1").getConsumedMsgClass());
+        assertEquals("topic-other",
+                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
+                        .get("topic-other").getTopic());
+        assertEquals(AuxiliaryFileDto.class,
+                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
+                        .get("topic-other").getConsumedMsgClass());
 
-        // Check message retrieved when published
-        EdrsSessionDto dto1 = new EdrsSessionDto("obs-key-1", 1,
-                EdrsSessionFileType.RAW, "S1", "A");
-        kafkaUtilsEdrsSession.sendMessageToKafka(dto1,
-                GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
-        Thread.sleep(1000);
-        message = (GenericMessageDto<EdrsSessionDto>) autoManager
-                .nextMessage(ProductCategory.EDRS_SESSIONS);
-        assertEquals(dto1, message.getBody());
-        assertEquals(GenericKafkaUtils.TOPIC_EDRS_SESSIONS,
-                message.getInputKey());
+        assertEquals(1,
+                manager.consumers.get(ProductCategory.EDRS_SESSIONS).size());
+        assertEquals("topic2", manager.consumers
+                .get(ProductCategory.EDRS_SESSIONS).get("topic2").getTopic());
+        assertEquals(EdrsSessionDto.class,
+                manager.consumers.get(ProductCategory.EDRS_SESSIONS)
+                        .get("topic2").getConsumedMsgClass());
 
-        // Check even if a new message is send the nextMessage is the same
-        EdrsSessionDto dto2 = new EdrsSessionDto("obs-key-2", 1,
-                EdrsSessionFileType.RAW, "S1", "A");
-        kafkaUtilsEdrsSession.sendMessageToKafka(dto2,
-                GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
-        Thread.sleep(1000);
-        GenericMessageDto<EdrsSessionDto> message1 =
-                (GenericMessageDto<EdrsSessionDto>) autoManager
-                        .nextMessage(ProductCategory.EDRS_SESSIONS);
-        assertEquals(message, message1);
+        assertEquals(1,
+                manager.consumers.get(ProductCategory.LEVEL_PRODUCTS).size());
+        assertEquals("topic3", manager.consumers
+                .get(ProductCategory.LEVEL_PRODUCTS).get("topic3").getTopic());
+        assertEquals(LevelProductDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_PRODUCTS)
+                        .get("topic3").getConsumedMsgClass());
+
+        assertEquals(1,
+                manager.consumers.get(ProductCategory.LEVEL_JOBS).size());
+        assertEquals("topic4", manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").getTopic());
+        assertEquals(LevelJobDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4")
+                        .getConsumedMsgClass());
+
+        assertEquals(2,
+                manager.consumers.get(ProductCategory.LEVEL_REPORTS).size());
+        assertEquals("topic5", manager.consumers
+                .get(ProductCategory.LEVEL_REPORTS).get("topic5").getTopic());
+        assertEquals(LevelReportDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
+                        .get("topic5").getConsumedMsgClass());
+        assertEquals("another-topic",
+                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
+                        .get("another-topic").getTopic());
+        assertEquals(LevelReportDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
+                        .get("another-topic").getConsumedMsgClass());
     }
 
     /**
      * Test nextMessage when no available consumer
      * 
-     * @throws MqiCategoryNotAvailable
+     * @throws AbstractCodedException
      */
     @Test
     public void testNextMessageWhenCategoryNotInit()
-            throws MqiCategoryNotAvailable {
+            throws AbstractCodedException {
         thrown.expect(MqiCategoryNotAvailable.class);
         thrown.expect(
                 hasProperty("category", is(ProductCategory.AUXILIARY_FILES)));
@@ -152,171 +262,385 @@ public class MessageConsumptionControllerTest {
     }
 
     /**
-     * Test the nextMessage when consumer OK
+     * Test nextMessages for all categories when app server return no messages
      * 
-     * @throws MqiCategoryNotAvailable
-     * @throws InterruptedException
-     * @throws ExecutionException
+     * @throws AbstractCodedException
      */
     @Test
-    public void testAckMessage() throws MqiCategoryNotAvailable,
-            InterruptedException, ExecutionException {
+    public void testNextMessageWhenAppServerReturnNull()
+            throws AbstractCodedException {
+        testNextMessageWhenNoResponse(persistAuxiliaryFilesService,
+                ProductCategory.AUXILIARY_FILES);
+        testNextMessageWhenNoResponse(persistEdrsSessionsService,
+                ProductCategory.EDRS_SESSIONS);
+        testNextMessageWhenNoResponse(persistLevelJobsService,
+                ProductCategory.LEVEL_JOBS);
+        testNextMessageWhenNoResponse(persistLevelProductsService,
+                ProductCategory.LEVEL_PRODUCTS);
+        testNextMessageWhenNoResponse(persistLevelReportsService,
+                ProductCategory.LEVEL_REPORTS);
+    }
 
-        long messageIdentifier =
-                Objects.hash(GenericKafkaUtils.TOPIC_L0_JOBS, 1);
-        long messageIdentifier2 =
-                Objects.hash(GenericKafkaUtils.TOPIC_L0_JOBS, 2);
+    /**
+     * Mock and check next message for a given category when server return no
+     * messages
+     * 
+     * @param mockedService
+     * @param category
+     * @throws AbstractCodedException
+     */
+    private void testNextMessageWhenNoResponse(
+            final GenericAppCatalogMqiService<?> mockedService,
+            final ProductCategory category) throws AbstractCodedException {
 
-        // Check case when no message
-        assertFalse(autoManager.ackMessage(ProductCategory.LEVEL_JOBS,
-                messageIdentifier, Ack.OK, false));
-        assertFalse(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .isPaused());
+        doReturn(null, new ArrayList<>()).when(mockedService)
+                .next(Mockito.anyString());
+        doReturn(category).when(mockedService).getCategory();
 
-        // Check case message is the right
-        // Wait for message consumption
-        LevelJobDto dto1 = new LevelJobDto();
-        kafkaUtilsJobs.sendMessageToKafka(dto1,
-                GenericKafkaUtils.TOPIC_L0_JOBS);
-        Thread.sleep(1500);
-        assertTrue(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .isPaused());
-        assertNotNull(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .getConsumedMessage());
-        // ack message
-        assertTrue(autoManager.ackMessage(ProductCategory.LEVEL_JOBS,
-                messageIdentifier, Ack.OK, false));
-        assertFalse(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .isPaused());
-        assertNull(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .getConsumedMessage());
+        assertNull(manager.nextMessage(category));
+        assertNull(manager.nextMessage(category));
+        verify(mockedService, times(2)).next(Mockito.eq("pod-name"));
+    }
 
-        // Check case message is not the right
-        LevelJobDto dto2 = new LevelJobDto();
-        kafkaUtilsJobs.sendMessageToKafka(dto2,
-                GenericKafkaUtils.TOPIC_L0_JOBS);
-        Thread.sleep(500);
-        assertFalse(autoManager.ackMessage(ProductCategory.LEVEL_JOBS,
-                messageIdentifier, Ack.OK, false));
-        assertTrue(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .isPaused());
-        assertNotNull(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .getConsumedMessage());
-        assertTrue(autoManager.ackMessage(ProductCategory.LEVEL_JOBS,
-                messageIdentifier2, Ack.ERROR, false));
-        assertFalse(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .isPaused());
-        assertNull(autoManager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .getConsumedMessage());
+    /**
+     * Test nextMessages for all categories when app server return no messages
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testNextMessage() throws AbstractCodedException {
+        testNextMessage(persistAuxiliaryFilesService,
+                ProductCategory.AUXILIARY_FILES, 1);
+        testNextMessage(persistEdrsSessionsService,
+                ProductCategory.EDRS_SESSIONS, 2);
+        testNextMessage(persistLevelJobsService, ProductCategory.LEVEL_JOBS, 3);
+        testNextMessage(persistLevelProductsService,
+                ProductCategory.LEVEL_PRODUCTS, 4);
+        testNextMessage(persistLevelReportsService,
+                ProductCategory.LEVEL_REPORTS, 5);
+    }
+
+    /**
+     * Mock and check next message for a given category when server return a
+     * list of objects: the first is processing by another pod, the second and
+     * the thrid are ok
+     * 
+     * @param mockedService
+     * @param category
+     * @throws AbstractCodedException
+     */
+    private void testNextMessage(
+            final GenericAppCatalogMqiService<?> mockedService,
+            final ProductCategory category, int nbCallOtherService)
+            throws AbstractCodedException {
+        doReturn(category).when(mockedService).getCategory();
+
+        // Processing by another pod
+        MqiGenericMessageDto<?> msg1 =
+                new MqiGenericMessageDto<>(category, 1, "topic", 1, 10);
+        msg1.setState(MqiStateMessageEnum.SEND);
+        msg1.setSendingPod("other-pod");
+        doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
+                Mockito.any(), Mockito.eq(1L));
+
+        // Status read
+        MqiGenericMessageDto<?> msg2 =
+                new MqiGenericMessageDto<>(category, 2, "topic", 1, 11);
+        msg2.setState(MqiStateMessageEnum.READ);
+        doReturn(true).when(mockedService).send(Mockito.eq(2L), Mockito.any());
+
+        // Status read
+        MqiGenericMessageDto<?> msg3 =
+                new MqiGenericMessageDto<>(category, 3, "topic", 2, 11);
+        msg3.setState(MqiStateMessageEnum.READ);
+        doReturn(true).when(mockedService).send(Mockito.eq(3L), Mockito.any());
+
+        doReturn(Arrays.asList(msg1, msg2, msg3)).when(mockedService)
+                .next(Mockito.anyString());
+
+        assertEquals(new GenericMessageDto<>(2, "topic", null),
+                manager.nextMessage(category));
+        verify(mockedService, times(1)).next(Mockito.eq("pod-name"));
+        verify(mockedService, times(1)).send(Mockito.eq(2L), Mockito.any());
+        verify(otherService, times(1)).isProcessing(Mockito.eq("other-pod"),
+                Mockito.eq(category), Mockito.eq(1L));
+        verifyNoMoreInteractions(otherService);
+
     }
 
     /**
      * Test ackMessage when no available consumer
      * 
-     * @throws MqiCategoryNotAvailable
+     * @throws AbstractCodedException
      */
     @Test
     public void testAckMessageWhenCategoryNotInit()
-            throws MqiCategoryNotAvailable {
+            throws AbstractCodedException {
         thrown.expect(MqiCategoryNotAvailable.class);
         thrown.expect(
                 hasProperty("category", is(ProductCategory.AUXILIARY_FILES)));
         thrown.expect(hasProperty("type", is("consumer")));
 
-        autoManager.ackMessage(ProductCategory.AUXILIARY_FILES, 123, Ack.OK, false);
+        autoManager.ackMessage(ProductCategory.AUXILIARY_FILES, 123, Ack.OK,
+                false);
 
     }
 
     @Test
-    public void testPostConstructAllConsumer() {
-        Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
-        map.put(ProductCategory.AUXILIARY_FILES, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic1"),
-                null));
-        map.put(ProductCategory.LEVEL_PRODUCTS, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic3"),
-                null));
-        map.put(ProductCategory.LEVEL_JOBS, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic4"),
-                null));
-        map.put(ProductCategory.EDRS_SESSIONS, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic2"),
-                null));
-        map.put(ProductCategory.LEVEL_REPORTS, new ProductCategoryProperties(
-                new ProductCategoryConsumptionProperties(true, "topic5"),
-                null));
-        doReturn(map).when(appProperties).getProductCategories();
+    public void testAckWhenStopNotAsk()
+            throws AbstractCodedException, InterruptedException {
 
-        manager.startConsumers();
-        assertEquals(5, manager.consumers.size());
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+                "work-dir", "job-order");
+        MqiGenericMessageDto<LevelJobDto> message =
+                new MqiGenericMessageDto<LevelJobDto>(
+                        ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
-        assertEquals("topic1", manager.consumers
-                .get(ProductCategory.AUXILIARY_FILES).getTopic());
-        assertEquals(AuxiliaryFileDto.class, manager.consumers
-                .get(ProductCategory.AUXILIARY_FILES).getConsumedMsgClass());
+        doReturn(true).when(persistLevelJobsService).ack(Mockito.eq(123L),
+                Mockito.any());
+        doReturn(message).when(persistLevelJobsService).get(Mockito.eq(123L));
+        doReturn(0).when(persistLevelJobsService)
+                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
-        assertEquals("topic2", manager.consumers
-                .get(ProductCategory.EDRS_SESSIONS).getTopic());
-        assertEquals(EdrsSessionDto.class, manager.consumers
-                .get(ProductCategory.EDRS_SESSIONS).getConsumedMsgClass());
+        ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
 
-        assertEquals("topic3", manager.consumers
-                .get(ProductCategory.LEVEL_PRODUCTS).getTopic());
-        assertEquals(LevelProductDto.class, manager.consumers
-                .get(ProductCategory.LEVEL_PRODUCTS).getConsumedMsgClass());
+        Thread.sleep(2000);
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
 
-        assertEquals("topic4",
-                manager.consumers.get(ProductCategory.LEVEL_JOBS).getTopic());
-        assertEquals(LevelJobDto.class, manager.consumers
-                .get(ProductCategory.LEVEL_JOBS).getConsumedMsgClass());
+        Thread.sleep(3000);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
+                Ack.OK, false);
+        assertEquals(expectedRd, rd);
 
-        assertEquals("topic5", manager.consumers
-                .get(ProductCategory.LEVEL_REPORTS).getTopic());
-        assertEquals(LevelReportDto.class, manager.consumers
-                .get(ProductCategory.LEVEL_REPORTS).getConsumedMsgClass());
+        // Check resume call
+        Thread.sleep(2000);
+        assertFalse(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testReadMessageOnePerOne() throws MqiCategoryNotAvailable,
-            InterruptedException, ExecutionException {
+    public void testAckWhenStopNotAskButTopicUnknown()
+            throws AbstractCodedException, InterruptedException {
 
-        // Publish messages
-        EdrsSessionDto dto1 = new EdrsSessionDto("obs-key-1", 1,
-                EdrsSessionFileType.RAW, "S1", "A");
-        EdrsSessionDto dto2 = new EdrsSessionDto("obs-key-2", 1,
-                EdrsSessionFileType.RAW, "S1", "A");
-        kafkaUtilsEdrsSession.sendMessageToKafka(dto1,
-                GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
-        kafkaUtilsEdrsSession.sendMessageToKafka(dto2,
-                GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+                "work-dir", "job-order");
+        MqiGenericMessageDto<LevelJobDto> message =
+                new MqiGenericMessageDto<LevelJobDto>(
+                        ProductCategory.LEVEL_JOBS, 123, "topic-unknown", 1, 22,
+                        dto);
 
-        // First consumption
-        Thread.sleep(1500);
-        GenericMessageDto<EdrsSessionDto> message1 =
-                (GenericMessageDto<EdrsSessionDto>) autoManager
-                        .nextMessage(ProductCategory.EDRS_SESSIONS);
-        assertEquals(dto1, message1.getBody());
-        assertEquals(GenericKafkaUtils.TOPIC_EDRS_SESSIONS,
-                message1.getInputKey());
+        doReturn(true).when(persistLevelJobsService).ack(Mockito.eq(123L),
+                Mockito.any());
+        doReturn(message).when(persistLevelJobsService).get(Mockito.eq(123L));
+        doReturn(0).when(persistLevelJobsService)
+                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
-        // Acknowledgment
-        assertTrue(autoManager.ackMessage(ProductCategory.EDRS_SESSIONS,
-                message1.getIdentifier(), Ack.OK, false));
+        ResumeDetails expectedRd = new ResumeDetails("topic-unknown", dto);
 
-        // Read second message
-        Thread.sleep(1000);
-        GenericMessageDto<EdrsSessionDto> message2 =
-                (GenericMessageDto<EdrsSessionDto>) autoManager
-                        .nextMessage(ProductCategory.EDRS_SESSIONS);
-        assertNotEquals(message1.getIdentifier(), message2.getIdentifier());
-        assertEquals(dto2, message2.getBody());
-        assertEquals(GenericKafkaUtils.TOPIC_EDRS_SESSIONS,
-                message2.getInputKey());
+        Thread.sleep(2000);
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
 
-        // Acknowledgment
-        assertTrue(autoManager.ackMessage(ProductCategory.EDRS_SESSIONS,
-                message2.getIdentifier(), Ack.OK, false));
+        Thread.sleep(2500);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
+                Ack.OK, false);
+        assertEquals(expectedRd, rd);
 
+        // Check resume call
+        Thread.sleep(2000);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4")
+                .resume();
+    }
+
+    @Test
+    public void testAckWhenStopAsk()
+            throws AbstractCodedException, InterruptedException {
+
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+                "work-dir", "job-order");
+        MqiGenericMessageDto<LevelJobDto> message =
+                new MqiGenericMessageDto<LevelJobDto>(
+                        ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
+
+        doReturn(true).when(persistLevelJobsService).ack(Mockito.eq(123L),
+                Mockito.any());
+        doReturn(message).when(persistLevelJobsService).get(Mockito.eq(123L));
+        doReturn(0).when(persistLevelJobsService)
+                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
+
+        ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
+
+        Thread.sleep(2000);
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
+
+        Thread.sleep(2000);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
+                Ack.OK, true);
+        assertEquals(expectedRd, rd);
+
+        // Check resume call
+        Thread.sleep(2000);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic4").isPaused());
+    }
+
+    /**
+     * Test send when message is READ
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testSendWhenMessageRead() throws AbstractCodedException {
+        testSendMessageWhenAskOtherAppNotNeeded(MqiStateMessageEnum.READ);
+    }
+
+    /**
+     * Test send when message is processing by same pod
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testSendWhenMessageProcessingBySamePod()
+            throws AbstractCodedException {
+        testSendMessageWhenAskOtherAppNotNeeded(MqiStateMessageEnum.SEND);
+    }
+
+    /**
+     * Internal check when asking for other app is not needed
+     * 
+     * @param state
+     * @throws AbstractCodedException
+     */
+    private void testSendMessageWhenAskOtherAppNotNeeded(
+            MqiStateMessageEnum state) throws AbstractCodedException {
+
+        MqiLightMessageDto msgLight = new MqiLightMessageDto(
+                ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
+        msgLight.setState(state);
+        msgLight.setReadingPod("pod-name");
+        msgLight.setSendingPod("pod-name");
+
+        MqiLightMessageDto msgLight2 = new MqiLightMessageDto(
+                ProductCategory.AUXILIARY_FILES, 1235, "topic", 1, 111);
+        msgLight2.setState(state);
+        msgLight2.setReadingPod("pod-name");
+        msgLight2.setSendingPod("pod-name");
+
+        doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
+                Mockito.any(), Mockito.anyLong());
+        doReturn(true).when(persistAuxiliaryFilesService)
+                .send(Mockito.eq(1234L), Mockito.any());
+        doReturn(false).when(persistAuxiliaryFilesService)
+                .send(Mockito.eq(1235L), Mockito.any());
+
+        MqiSendMessageDto expected = new MqiSendMessageDto("pod-name", false);
+
+        assertTrue(manager.send(persistAuxiliaryFilesService, msgLight));
+        assertFalse(manager.send(persistAuxiliaryFilesService, msgLight2));
+        verifyZeroInteractions(otherService);
+        verify(persistAuxiliaryFilesService, times(1)).send(Mockito.eq(1234L),
+                Mockito.eq(expected));
+        verify(persistAuxiliaryFilesService, times(1)).send(Mockito.eq(1235L),
+                Mockito.eq(expected));
+        verifyNoMoreInteractions(persistAuxiliaryFilesService);
+    }
+
+    /**
+     * Test send when message is processing
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testSendWhenMessageProcessingByAnotherAndResponseTrue()
+            throws AbstractCodedException {
+
+        MqiLightMessageDto msgLight = new MqiLightMessageDto(
+                ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
+        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setReadingPod("pod-name");
+        msgLight.setSendingPod("other-name");
+
+        doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
+                Mockito.any(), Mockito.anyLong());
+        doReturn(ProductCategory.AUXILIARY_FILES)
+                .when(persistAuxiliaryFilesService).getCategory();
+
+        // First time: msgLightForceRead
+        assertFalse(manager.send(persistAuxiliaryFilesService, msgLight));
+        verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
+    }
+
+    /**
+     * Test messageShallBeIgnored when no response from the other app
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testSendWhenNoResponse() throws AbstractCodedException {
+
+        doThrow(new StatusProcessingApiError("uri", "error message"))
+                .when(otherService).isProcessing(Mockito.anyString(),
+                        Mockito.any(), Mockito.anyLong());
+
+        testSendWhenMessageProcessingByAnotherAndResponseFalse();
+    }
+
+    /**
+     * Test messageShallBeIgnored when the other app return false
+     * 
+     * @throws AbstractCodedException
+     */
+    @Test
+    public void testSendWhenResponseFalse() throws AbstractCodedException {
+
+        doReturn(false).when(otherService).isProcessing(Mockito.anyString(),
+                Mockito.any(), Mockito.anyLong());
+
+        testSendWhenMessageProcessingByAnotherAndResponseFalse();
+    }
+
+    private void testSendWhenMessageProcessingByAnotherAndResponseFalse()
+            throws AbstractCodedException {
+
+        MqiLightMessageDto msgLight = new MqiLightMessageDto(
+                ProductCategory.AUXILIARY_FILES, 1234L, "topic", 1, 111);
+        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setReadingPod("pod-name");
+        msgLight.setSendingPod("other-name");
+
+        MqiLightMessageDto msgLight2 = new MqiLightMessageDto(
+                ProductCategory.AUXILIARY_FILES, 1235L, "topic", 1, 111);
+        msgLight2.setState(MqiStateMessageEnum.SEND);
+        msgLight2.setReadingPod("pod-name");
+        msgLight2.setSendingPod("other-name");
+
+        doReturn(true).when(persistAuxiliaryFilesService)
+                .send(Mockito.eq(1234L), Mockito.any());
+        doReturn(false).when(persistAuxiliaryFilesService)
+                .send(Mockito.eq(1235L), Mockito.any());
+        doReturn(ProductCategory.AUXILIARY_FILES)
+                .when(persistAuxiliaryFilesService).getCategory();
+
+        MqiSendMessageDto expected = new MqiSendMessageDto("pod-name", true);
+
+        assertTrue(manager.send(persistAuxiliaryFilesService, msgLight));
+        assertFalse(manager.send(persistAuxiliaryFilesService, msgLight2));
+        verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
+        verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
+                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1235L));
+        verify(persistAuxiliaryFilesService, times(1)).send(Mockito.eq(1234L),
+                Mockito.eq(expected));
+        verify(persistAuxiliaryFilesService, times(1)).send(Mockito.eq(1235L),
+                Mockito.eq(expected));
     }
 }

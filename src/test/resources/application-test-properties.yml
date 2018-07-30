@@ -34,7 +34,7 @@ application:
     edrs-sessions:
       consumption:
         enable: true
-        topics: t-pdgs-edrs-sessions
+        topics: t-pdgs-edrs-sessions, t-topic-2
       publication:
         enable: false
     level-products:

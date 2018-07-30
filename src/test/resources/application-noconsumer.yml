@@ -8,6 +8,7 @@ logging:
 # Kafka
 kafka:
   bootstrap-servers: ${spring.embedded.kafka.brokers}
+  hostname: wrapper-0
   client-id: wrapper
   error-topic: t-pdgs-errors
   consumer:
@@ -17,12 +18,14 @@ kafka:
     session-timeout-ms: 10000
     heartbeat-intv-ms: 3000
     auto-offset-reset: latest
+    offset-dft-mode: -2
   listener:
     poll-timeout-ms: 500
   producer:
     max-retries: 10
     
 application:
+  hostname: wrapper-0
   max-error-counter: 3
   stop-fixed-delay-ms: 3000
   wait-next-ms: 500
@@ -52,7 +55,14 @@ application:
         enable: false
       publication:
         enable: false
-    
-# REST controller
 server:
-  port: ${mqi_rest_server_port:8081}
+  port: 8081
+persistence:
+  host-uri-catalog: http://app-catalog:8080
+  port-uri-other-app: 8080
+  max-retries: 3
+  tempo-retry-ms: 500
+  suffix-uri-other-app: .processing.default.svc.cluster.local
+  other-app:
+    suffix-uri: .processing.default.svc.cluster.local
+    begin-uri-processing: /status/

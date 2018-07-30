@@ -18,7 +18,7 @@ public class AppStatus {
     /**
      * Status
      */
-    private final WrapperStatus status;
+    private final MqiServerStatus status;
 
     /**
      * Maximal number of consecutive errors
@@ -38,7 +38,7 @@ public class AppStatus {
     @Autowired
     public AppStatus(
             @Value("${application.max-error-counter}") final int maxErrorCounter) {
-        this.status = new WrapperStatus();
+        this.status = new MqiServerStatus();
         this.shallBeStopped = false;
         this.maxErrorCounter = maxErrorCounter;
     }
@@ -46,31 +46,22 @@ public class AppStatus {
     /**
      * @return the status
      */
-    public synchronized WrapperStatus getStatus() {
+    public synchronized MqiServerStatus getStatus() {
         return status;
     }
 
     /**
      * Set application as waiting
      */
-    public synchronized void setWaiting() {
-        this.status.setWaiting();
-    }
-
-    /**
-     * Set application as processing
-     */
-    public synchronized void setProcessing() {
-        this.status.setProcessing();
+    public synchronized void resetError() {
+        this.status.resetError();
     }
 
     /**
      * Set application as stopping
      */
     public synchronized void setStopping() {
-        if (!this.status.isProcessing()) {
-            this.setShallBeStopped(true);
-        }
+        this.setShallBeStopped(true);
         this.status.setStopping();
     }
 
@@ -101,7 +92,7 @@ public class AppStatus {
      * 
      * @author Viveris Technologies
      */
-    public class WrapperStatus {
+    public class MqiServerStatus {
 
         /**
          * State
@@ -121,7 +112,7 @@ public class AppStatus {
         /**
          * Constrcutor
          */
-        public WrapperStatus() {
+        public MqiServerStatus() {
             this.state = AppState.WAITING;
             errorCounter = 0;
             dateLastChangeMs = System.currentTimeMillis();
@@ -149,21 +140,11 @@ public class AppStatus {
         }
 
         /**
-         * Set status WAITING
-         */
-        public void setWaiting() {
-            if (!isStopping() && !isFatalError()) {
-                state = AppState.WAITING;
-                dateLastChangeMs = System.currentTimeMillis();
-            }
-        }
-
-        /**
          * Set status PROCESSING
          */
-        public void setProcessing() {
+        public void resetError() {
             if (!isStopping() && !isFatalError()) {
-                state = AppState.PROCESSING;
+                state = AppState.WAITING;
                 dateLastChangeMs = System.currentTimeMillis();
                 errorCounter = 0;
             }
@@ -198,24 +179,6 @@ public class AppStatus {
         public void setFatalError() {
             state = AppState.FATALERROR;
             dateLastChangeMs = System.currentTimeMillis();
-        }
-
-        /**
-         * Indicate if state is waiting
-         * 
-         * @return
-         */
-        public boolean isWaiting() {
-            return state == AppState.WAITING;
-        }
-
-        /**
-         * Indicate if state is PROCESSING
-         * 
-         * @return
-         */
-        public boolean isProcessing() {
-            return state == AppState.PROCESSING;
         }
 
         /**

@@ -1,16 +1,20 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.rule.KafkaEmbedded;
@@ -18,15 +22,17 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.appcatalog.client.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
+import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+import esa.s1pdgs.cpoc.mqi.server.test.DataUtils;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -42,60 +48,104 @@ public class GenericConsumerTest {
     @Autowired
     private KafkaProperties properties;
 
+    /**
+     * Application status
+     */
+    @Autowired
+    private AppStatus appStatus;
+
+    @Mock
+    private GenericAppCatalogMqiService<AuxiliaryFileDto> service;
+
+    @Mock
+    private OtherApplicationService otherService;
+
+    private MqiLightMessageDto messageLight1 = DataUtils.getLightMessage1();
+
+    private MqiLightMessageDto messageLight2 = DataUtils.getLightMessage2();
+
+    private MqiLightMessageDto messageLight3 = DataUtils.getLightMessage1();
+
     @ClassRule
-    public static KafkaEmbedded embeddedKafka =
-            new KafkaEmbedded(1, false, CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_ERROR);
+    public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, false,
+            CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
+
+    @Before
+    public void init() throws AbstractCodedException {
+        MockitoAnnotations.initMocks(this);
+
+        properties.setHostname("test-host");
+
+        messageLight2.setState(MqiStateMessageEnum.SEND);
+        messageLight2.setSendingPod("test-host");
+        messageLight3.setState(MqiStateMessageEnum.SEND);
+        messageLight3.setSendingPod("other-host");
+
+        doReturn(messageLight1, messageLight2, messageLight3).when(service)
+                .read(Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
+                        Mockito.any());
+    }
 
     @Test
     public void testConstructor() {
-        GenericConsumer<AuxiliaryFileDto> consumer = new GenericConsumer<>(
-                properties, CONSUMER_TOPIC, AuxiliaryFileDto.class);
-        assertEquals(CONSUMER_TOPIC, consumer.getTopic());
-        assertNull(consumer.getConsumedMessage());
+        GenericConsumer<AuxiliaryFileDto> consumer =
+                new GenericConsumer<>(properties, service, otherService,
+                        appStatus, GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
+                        AuxiliaryFileDto.class);
+        assertEquals(GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
+                consumer.getTopic());
         assertEquals(AuxiliaryFileDto.class, consumer.getConsumedMsgClass());
     }
 
     @Test
-    public void testAuxiliaryFilesConsumer()
-            throws InterruptedException, ExecutionException {
+    public void testAuxiliaryFilesConsumer() throws InterruptedException,
+            ExecutionException, AbstractCodedException {
         AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
-        GenericMessageDto<AuxiliaryFileDto> genDto1 =
-                new GenericMessageDto<AuxiliaryFileDto>(
-                        Objects.hash(CONSUMER_TOPIC, 1), CONSUMER_TOPIC, dto);
         AuxiliaryFileDto dto2 =
                 new AuxiliaryFileDto("product-name-2", "key-obs-2");
-        GenericMessageDto<AuxiliaryFileDto> genDto2 =
-                new GenericMessageDto<AuxiliaryFileDto>(
-                        Objects.hash(CONSUMER_TOPIC, 2), CONSUMER_TOPIC, dto2);
         GenericKafkaUtils<AuxiliaryFileDto> kafkaUtils =
                 new GenericKafkaUtils<>(embeddedKafka);
 
-        GenericConsumer<AuxiliaryFileDto> consumer = new GenericConsumer<>(
-                properties, CONSUMER_TOPIC, AuxiliaryFileDto.class);
+        GenericConsumer<AuxiliaryFileDto> consumer =
+                new GenericConsumer<>(properties, service, otherService,
+                        appStatus, GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
+                        AuxiliaryFileDto.class);
         consumer.start();
-        assertNull("No read message", consumer.getConsumedMessage());
-
         Thread.sleep(5000);
+        verify(service, never()).read(Mockito.anyString(), Mockito.anyInt(),
+                Mockito.anyLong(), Mockito.any());
 
         // Send first DTO
-        kafkaUtils.sendMessageToKafka(dto, CONSUMER_TOPIC);
-        await().atMost(1, SECONDS).until(() -> consumer.getConsumedMessage(),
-                is(genDto1));
-        assertNotNull("A message should be read",
-                consumer.getConsumedMessage());
-        assertEquals(genDto1, consumer.getConsumedMessage());
-        assertTrue(consumer.isPaused());
+        kafkaUtils.sendMessageToKafka(dto,
+                GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
+        Thread.sleep(1500);
+        MqiGenericReadMessageDto<AuxiliaryFileDto> expected =
+                new MqiGenericReadMessageDto<AuxiliaryFileDto>("wrappers",
+                        "test-host", false, dto);
+        verify(service, times(1)).read(
+                Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
+                Mockito.anyInt(), Mockito.anyLong(), Mockito.eq(expected));
 
         // Send second DTO without resuming consumer
-        kafkaUtils.sendMessageToKafka(dto2, CONSUMER_TOPIC);
+        kafkaUtils.sendMessageToKafka(dto2,
+                GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
         Thread.sleep(1000);
-        assertEquals(genDto1, consumer.getConsumedMessage());
-        assertTrue(consumer.isPaused());
+        verify(service, times(1)).read(
+                Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
+                Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
 
         // REsume consumer
         consumer.resume();
         Thread.sleep(1000);
-        assertEquals(genDto2, consumer.getConsumedMessage());
+        MqiGenericReadMessageDto<AuxiliaryFileDto> expected2 =
+                new MqiGenericReadMessageDto<AuxiliaryFileDto>("wrappers",
+                        "test-host", false, dto2);
+        verify(service, times(2)).read(
+                Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
+                Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
+        verify(service, times(1)).read(
+                Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
+                Mockito.anyInt(), Mockito.anyLong(), Mockito.eq(expected2));
 
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
@@ -59,11 +60,10 @@ public class GenericMessageDistributionTest {
 
     /**
      * Initialization
-     * 
-     * @throws MqiCategoryNotAvailable
+     * @throws AbstractCodedException 
      */
     @Before
-    public void init() throws MqiCategoryNotAvailable {
+    public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
         consumedMessage =
@@ -79,12 +79,11 @@ public class GenericMessageDistributionTest {
 
     /**
      * Test when nextMessage throw an error
-     * 
-     * @throws MqiCategoryNotAvailable
+     * @throws AbstractCodedException 
      */
     @Test
     public void testNextApiCategoryNotAvailable()
-            throws MqiCategoryNotAvailable {
+            throws AbstractCodedException {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "consumer")).when(messages).nextMessage(Mockito.any());
         ResponseEntity<GenericMessageDto<String>> message = controller.next();
@@ -98,12 +97,11 @@ public class GenericMessageDistributionTest {
 
     /**
      * Test when nextMessage throw an error
-     * 
-     * @throws MqiCategoryNotAvailable
+     * @throws AbstractCodedException 
      */
     @Test
     public void testAckApiCategoryNotAvailable()
-            throws MqiCategoryNotAvailable {
+            throws AbstractCodedException {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "consumer")).when(messages).ackMessage(Mockito.any(),
                         Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean());

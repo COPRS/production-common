@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.server;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,6 +19,11 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "application")
 public class ApplicationProperties {
+
+    /**
+     * Hostname.
+     */
+    private String hostname;
     
     /**
      * Time to wait before getting next message when API is called
@@ -35,6 +41,20 @@ public class ApplicationProperties {
     public ApplicationProperties() {
         super();
         this.productCategories = new HashMap<>();
+    }
+
+    /**
+     * @return the hostname
+     */
+    public String getHostname() {
+        return hostname;
+    }
+
+    /**
+     * @param hostname the hostname to set
+     */
+    public void setHostname(final String hostname) {
+        this.hostname = hostname;
     }
 
     /**
@@ -152,7 +172,7 @@ public class ApplicationProperties {
         /**
          * The topic to consume for this category
          */
-        private String topics;
+        private List<String> topics;
 
         /**
          * Constructor
@@ -166,10 +186,10 @@ public class ApplicationProperties {
          * Constructor
          */
         public ProductCategoryConsumptionProperties(final boolean enable,
-                final String topic) {
+                final List<String> topics) {
             super();
             this.enable = enable;
-            this.topics = topic;
+            this.topics = topics;
         }
 
         /**
@@ -190,15 +210,15 @@ public class ApplicationProperties {
         /**
          * @return the topic
          */
-        public String getTopics() {
+        public List<String> getTopics() {
             return topics;
         }
 
         /**
-         * @param topic
-         *            the topic to set
+         * @param topics
+         *            the topics to set
          */
-        public void setTopics(final String topics) {
+        public void setTopics(final List<String> topics) {
             this.topics = topics;
         }
     }

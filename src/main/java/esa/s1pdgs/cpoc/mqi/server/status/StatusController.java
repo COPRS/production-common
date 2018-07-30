@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.mqi.model.rest.StatusDto;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatus.WrapperStatus;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatus.MqiServerStatus;
 
 /**
  * @author Olivier Bex-Chauvet
  *
  */
 @RestController
-@RequestMapping(path = "/mqi")
+@RequestMapping(path = "/app")
 public class StatusController {
 
 	/**
@@ -45,7 +45,7 @@ public class StatusController {
 	 */
 	@RequestMapping(method = RequestMethod.GET, path = "/status")
 	public ResponseEntity<StatusDto> getStatusRest() {
-		WrapperStatus currentStatus = appStatus.getStatus();
+		MqiServerStatus currentStatus = appStatus.getStatus();
 		long currentTimestamp = System.currentTimeMillis();
 		long timeSinceLastChange = currentTimestamp - currentStatus.getDateLastChangeMs();
 		StatusDto wrapperStatus = new StatusDto(currentStatus.getState(),
