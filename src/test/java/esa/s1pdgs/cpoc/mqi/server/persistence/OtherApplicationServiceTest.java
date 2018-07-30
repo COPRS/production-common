@@ -147,7 +147,7 @@ public class OtherApplicationServiceTest {
         } catch (StatusProcessingApiError mpee) {
             verify(restTemplate, times(2)).exchange(Mockito.eq(
                     "http://pod-name.processing.default.svc.cluster.local:uri/app/level_jobs/process/12345"),
-                    Mockito.eq(HttpMethod.POST), Mockito.eq(null),
+                    Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                     Mockito.eq(Boolean.class));
             verifyNoMoreInteractions(restTemplate);
         }
@@ -171,7 +171,7 @@ public class OtherApplicationServiceTest {
                 12345));
         verify(restTemplate, times(2)).exchange(Mockito.eq(
                 "http://pod-name.processing.default.svc.cluster.local:uri/app/level_jobs/process/12345"),
-                Mockito.eq(HttpMethod.POST), Mockito.eq(null),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
     }
@@ -193,7 +193,7 @@ public class OtherApplicationServiceTest {
                 12345));
         verify(restTemplate, times(1)).exchange(Mockito.eq(
                 "http://pod-name.processing.default.svc.cluster.local:uri/app/level_jobs/process/12345"),
-                Mockito.eq(HttpMethod.POST), Mockito.eq(null),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
     }
@@ -214,7 +214,7 @@ public class OtherApplicationServiceTest {
                 12345));
         verify(restTemplate, times(1)).exchange(Mockito.eq(
                 "http://pod-name.processing.default.svc.cluster.local:uri/app/level_jobs/process/12345"),
-                Mockito.eq(HttpMethod.POST), Mockito.eq(null),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
     }

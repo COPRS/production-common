@@ -132,7 +132,7 @@ public class OtherApplicationService {
                     + messageId;
             try {
                 ResponseEntity<Boolean> response = restTemplate.exchange(uri,
-                        HttpMethod.POST, null, Boolean.class);
+                        HttpMethod.GET, null, Boolean.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     Boolean ret = response.getBody();
                     if (ret == null) {
