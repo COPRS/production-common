@@ -90,12 +90,12 @@ public final class MonitorLogUtils {
                 break;
             case LOG_ACK:
                 ret = String.format(
-                        "[MONITOR] [step 5] [productName %s] [workDir %s]",
+                        "[MONITOR] [step 6] [productName %s] [workDir %s]",
                         job.getProductIdentifier(), job.getWorkDirectory());
                 break;
             case LOG_ERASE:
                 ret = String.format(
-                        "[MONITOR] [step 6] [productName %s] [workDir %s]",
+                        "[MONITOR] [step 5] [productName %s] [workDir %s]",
                         job.getProductIdentifier(), job.getWorkDirectory());
                 break;
             case LOG_STATUS:

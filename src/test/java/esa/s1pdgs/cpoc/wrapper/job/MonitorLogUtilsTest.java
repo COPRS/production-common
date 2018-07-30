@@ -40,9 +40,9 @@ public class MonitorLogUtilsTest {
                 MonitorLogUtils.getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
         assertEquals(baseLog + " [step 4] " + productLog,
                 MonitorLogUtils.getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-        assertEquals(baseLog + " [step 6] " + productLog,
-                MonitorLogUtils.getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));
         assertEquals(baseLog + " [step 5] " + productLog,
+                MonitorLogUtils.getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));
+        assertEquals(baseLog + " [step 6] " + productLog,
                 MonitorLogUtils.getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, job));
         assertEquals(baseLog + " [step 7] " + productLog,
                 MonitorLogUtils.getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, job));
