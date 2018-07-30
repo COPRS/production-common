@@ -24,6 +24,7 @@ import fr.viveris.s1pdgs.jobgenerator.config.L0SlicePatternSettings;
 import fr.viveris.s1pdgs.jobgenerator.model.Job;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
 import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
+import fr.viveris.s1pdgs.jobgenerator.status.AppStatus;
 import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.L0SliceJobsDispatcher;
 import fr.viveris.s1pdgs.jobgenerator.utils.DateUtils;
 
@@ -61,16 +62,20 @@ public class L0SlicesConsumer {
     private final Pattern l0SLicesPattern;
 
     private final GenericMqiService<LevelProductDto> mqiService;
+    /**
+     * Application status
+     */
+    private final AppStatus appStatus;
     
     
     @Autowired
     public L0SlicesConsumer(final L0SliceJobsDispatcher jobsDispatcher, final L0SlicePatternSettings patternSettings,
-            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiService) {
+            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiService, final AppStatus appStatus) {
         this.jobsDispatcher = jobsDispatcher;
         this.patternSettings = patternSettings;
         this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(), Pattern.CASE_INSENSITIVE);
-            
         this.mqiService = mqiService;
+        this.appStatus = appStatus;
     }
     
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}")
@@ -88,8 +93,10 @@ public class L0SlicesConsumer {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;
         }
-        //    Second process message
+        
+        // process message
         LevelProductDto leveldto = message.getBody();
+        appStatus.setProcessing(message.getIdentifier());
         LOGGER.info("[MONITOR] [step 0] [productName {}] Starting job generation", leveldto.getProductName());
         int step = 1;
 
@@ -136,9 +143,10 @@ public class L0SlicesConsumer {
         // Ack message
         try {
             mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, "OK", false));
+            appStatus.setWaiting();
         }
         catch (AbstractCodedException ace) {
-            LOGGER.error("");
+            LOGGER.error("[MONITOR] [step {} [code {}] {}\", step, ace.getCode(), ace.getLogMessage()");
         }
         
     }
