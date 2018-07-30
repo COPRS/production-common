@@ -88,7 +88,8 @@ public class ScalerTest {
 
     @Before
     public void init() throws PodResourceException, K8sUnknownResourceException,
-            WrapperStatusException, OsEntityException {
+            WrapperStatusException, OsEntityException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
         scaler = new Scaler(kafkaMonitoring, k8SMonitoring, k8SAdministration,
@@ -114,7 +115,8 @@ public class ScalerTest {
 
     private void mockStepsForAllocation()
             throws WrapperStatusException, PodResourceException,
-            K8sUnknownResourceException, OsEntityException {
+            K8sUnknownResourceException, OsEntityException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockWrapperProperties(ScalingAction.ALLOC);
         mockStep2(ScalingAction.ALLOC);
         mockStep3(ScalingAction.ALLOC);
@@ -123,7 +125,8 @@ public class ScalerTest {
 
     private void mockStepsForFree()
             throws WrapperStatusException, PodResourceException,
-            K8sUnknownResourceException, OsEntityException {
+            K8sUnknownResourceException, OsEntityException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockWrapperProperties(ScalingAction.FREE);
         mockStep2(ScalingAction.FREE);
         mockStep3(ScalingAction.FREE);
@@ -242,7 +245,8 @@ public class ScalerTest {
         doReturn(kafkaMonitor).when(kafkaMonitoring).monitorL1Jobs();
     }
 
-    private void mockStep3(ScalingAction action) throws WrapperStatusException {
+    private void mockStep3(ScalingAction action) throws WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         switch (action) {
             case ALLOC:
                 wrappersMonitor = new ArrayList<>();
@@ -420,9 +424,10 @@ public class ScalerTest {
     @Test
     public void testInitscaleWhenException()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException {
-        doThrow(new WrapperStatusException("ip","server","error")).when(k8SMonitoring)
-                .monitorL1Wrappers();
+            OsEntityException, WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
+        doThrow(new WrapperStatusException("ip", "server", "error"))
+                .when(k8SMonitoring).monitorL1Wrappers();
         scaler.initscale();
 
         verify(k8SMonitoring, times(1)).monitorL1Wrappers();
@@ -433,7 +438,8 @@ public class ScalerTest {
     @Test
     public void testInitscaleAdd()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException {
+            OsEntityException, WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         scaler.initscale();
 
         verify(k8SMonitoring, times(1)).monitorL1Wrappers();
@@ -448,7 +454,8 @@ public class ScalerTest {
     @Test
     public void testInitscaleAddWhenNoNeed()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException {
+            OsEntityException, WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForFree();
         scaler.initscale();
 
@@ -460,7 +467,8 @@ public class ScalerTest {
     @Test
     public void testInitscaleFreeWhenNoNeed()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException {
+            OsEntityException, WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForFree();
         scaler.initscale();
 
@@ -472,7 +480,8 @@ public class ScalerTest {
     @Test
     public void testInitscaleFree()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException, WrapperStopException {
+            OsEntityException, WrapperStatusException, WrapperStopException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForFree();
         WrapperNodeMonitor wFree6 = buildWrapperNodeMonitor("node7", "nodeId7",
                 LABEL_WRAPPER_L1, LABEL_WRAPPER_USED);
@@ -554,7 +563,8 @@ public class ScalerTest {
     @Test
     public void nominalScaleNothing()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException {
+            OsEntityException, WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
 
         scaler.scale();
 
@@ -580,7 +590,8 @@ public class ScalerTest {
     @Test
     public void nominalScaleAlloc()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException {
+            OsEntityException, WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         this.mockStepsForAllocation();
 
         scaler.scale();
@@ -609,7 +620,8 @@ public class ScalerTest {
     @Test
     public void nominalScaleFree()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException, WrapperStopException {
+            OsEntityException, WrapperStatusException, WrapperStopException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         this.mockStepsForFree();
 
         scaler.scale();
@@ -644,7 +656,8 @@ public class ScalerTest {
     @Test
     public void nominalNothingWithoutStepActivated()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException {
+            OsEntityException, WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockDevProperties(false);
 
         scaler.scale();
@@ -667,7 +680,8 @@ public class ScalerTest {
     @Test
     public void nominalNothingWithoutStepActivatedExceptKafka()
             throws PodResourceException, K8sUnknownResourceException,
-            OsEntityException, WrapperStatusException {
+            OsEntityException, WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         Map<String, Boolean> activations = new HashMap<>();
         activations.put("pod-deletion", false);
         activations.put("kafka-monitoring", true);
@@ -697,7 +711,8 @@ public class ScalerTest {
     }
 
     @Test
-    public void testScaleWhenNoKafkaMonitor() throws WrapperStatusException {
+    public void testScaleWhenNoKafkaMonitor() throws WrapperStatusException,
+            esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
 
         // Mock no consumer
         KafkaPerGroupPerTopicMonitor noConsumer =
@@ -800,7 +815,7 @@ public class ScalerTest {
     }
 
     @Test
-    public void testAddResources() throws AbstractCodedException {
+    public void testAddResources() throws AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForAllocation();
         scaler.addRessources(wrappersMonitor, 3);
 
@@ -816,7 +831,7 @@ public class ScalerTest {
     }
 
     @Test
-    public void testAddResourcesOnlyReused() throws AbstractCodedException {
+    public void testAddResourcesOnlyReused() throws AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForAllocation();
         scaler.addRessources(wrappersMonitor, 1);
 
@@ -830,7 +845,7 @@ public class ScalerTest {
     }
 
     @Test
-    public void testAddRessourcesWhenMax() throws AbstractCodedException {
+    public void testAddRessourcesWhenMax() throws AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForFree();
 
         scaler.addRessources(wrappersMonitor, 3);
@@ -843,7 +858,7 @@ public class ScalerTest {
 
     @Test
     public void testAddRessourcesWhenServerCreationFailed()
-            throws AbstractCodedException {
+            throws AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForAllocation();
 
         doReturn(null).when(osAdministration)
@@ -863,7 +878,7 @@ public class ScalerTest {
 
     @Test(expected = OsServerNotActiveException.class)
     public void testAddRessourcesWhenServerCreationException()
-            throws AbstractCodedException {
+            throws AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForAllocation();
 
         doThrow(new OsServerNotActiveException("serverId", "error message"))
@@ -875,7 +890,7 @@ public class ScalerTest {
 
     @Test(expected = InternalErrorException.class)
     public void testAddRessourcesWhenServerCreationException2()
-            throws AbstractCodedException {
+            throws AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForAllocation();
 
         doThrow(new IllegalArgumentException("error message"))
@@ -886,7 +901,7 @@ public class ScalerTest {
     }
 
     @Test
-    public void testFreeResourcesWhenMin() throws AbstractCodedException {
+    public void testFreeResourcesWhenMin() throws AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForAllocation();
 
         scaler.freeRessources(wrappersMonitor, 3);
@@ -895,7 +910,7 @@ public class ScalerTest {
     }
 
     @Test
-    public void testFreeResources() throws AbstractCodedException {
+    public void testFreeResources() throws AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException, esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
         mockStepsForFree();
 
         scaler.freeRessources(wrappersMonitor, 3);

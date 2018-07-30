@@ -54,7 +54,7 @@ public class WrapperService {
             retries++;
             try {
                 String uri =
-                        "http://" + podIp + ":" + this.port + "/wrapper/status";
+                        "http://" + podIp + ":" + this.port + "/app/status";
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Call rest api: {}", uri);
                 }
@@ -146,7 +146,7 @@ public class WrapperService {
         while (retries < nbretry) {
             retries++;
             try {
-                String uri = "http://" + ip + ":" + this.port + "/wrapper/stop";
+                String uri = "http://" + ip + ":" + this.port + "/app/stop";
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Call rest api: {}, retries: {}", uri,
                             retries);

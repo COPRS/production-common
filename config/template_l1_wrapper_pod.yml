@@ -52,7 +52,7 @@ spec:
       name: fast-wrapper-pv-storage
     livenessProbe:
       httpGet:
-        path: /wrapper/status
+        path: /app/status
         port: 8080
       initialDelaySeconds: 5
       periodSeconds: 15

@@ -110,3 +110,8 @@ dev:
     value-monitored: true
     scaling: false
     unused-ressources-deletion: false
+
+persistence:
+  host-uri-catalog: http://app-catalog:8080
+  max-retries: 3
+  tempo-retry-ms: 500

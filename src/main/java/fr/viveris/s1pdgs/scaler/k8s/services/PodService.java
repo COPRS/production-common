@@ -93,6 +93,7 @@ public class PodService {
 					Volume v = pod.getSpec().getVolumes().get(0);
 					v.getPersistentVolumeClaim().setClaimName(v.getPersistentVolumeClaim().getClaimName() + suffixe);
 				}
+				pod.getSpec().setHostname(pod.getSpec().getHostname() + suffixe);
 				break;
 			default:
 				throw new K8sUnknownResourceException("Unknown kind " + resource.getKind());

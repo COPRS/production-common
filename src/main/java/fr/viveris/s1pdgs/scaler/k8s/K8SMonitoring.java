@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import esa.s1pdgs.cpoc.appcatalog.client.AppCatalogMqiLevelJobsService;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import fr.viveris.s1pdgs.scaler.k8s.model.AddressType;
 import fr.viveris.s1pdgs.scaler.k8s.model.NodeDesc;
 import fr.viveris.s1pdgs.scaler.k8s.model.PodDesc;
@@ -21,117 +25,156 @@ import fr.viveris.s1pdgs.scaler.k8s.model.exceptions.WrapperStatusException;
 import fr.viveris.s1pdgs.scaler.k8s.services.NodeService;
 import fr.viveris.s1pdgs.scaler.k8s.services.PodService;
 import fr.viveris.s1pdgs.scaler.k8s.services.WrapperService;
+import fr.viveris.s1pdgs.scaler.kafka.KafkaMonitoringProperties;
+import fr.viveris.s1pdgs.scaler.kafka.model.SpdgsTopic;
 
 @Service
 public class K8SMonitoring {
 
-	private final WrapperProperties wrapperProperties;
+    private final WrapperProperties wrapperProperties;
 
-	private final NodeService nodeService;
+    private final NodeService nodeService;
 
-	private final PodService podService;
+    private final PodService podService;
 
-	private final WrapperService wrapperService;
+    private final WrapperService wrapperService;
 
-	public K8SMonitoring(final WrapperProperties wrapperProperties, final NodeService nodeService,
-			final PodService podService, final WrapperService wrapperService) {
-		this.wrapperProperties = wrapperProperties;
-		this.nodeService = nodeService;
-		this.podService = podService;
-		this.wrapperService = wrapperService;
-	}
+    private final AppCatalogMqiLevelJobsService appCatalogService;
 
-	public List<WrapperNodeMonitor> monitorNodesToDelete() {
-		List<WrapperNodeMonitor> monitors = new ArrayList<>();
+    /**
+     * Kafka properties
+     */
+    private final KafkaMonitoringProperties kafkaProperties;
 
-		// Get nodes unused
-		Map<String, String> labels = new HashMap<>();
-		labels.put(wrapperProperties.getLabelWrapperConfig().getLabel(),
-				wrapperProperties.getLabelWrapperConfig().getValue());
-		labels.put(wrapperProperties.getLabelWrapperStateUnused().getLabel(),
-				wrapperProperties.getLabelWrapperStateUnused().getValue());
-		List<NodeDesc> unusedNodes = this.nodeService.getNodesWithLabels(labels);
+    @Autowired
+    public K8SMonitoring(final WrapperProperties wrapperProperties,
+            final NodeService nodeService, final PodService podService,
+            final WrapperService wrapperService,
+            @Qualifier("persistenceServiceForLevelJobs") final AppCatalogMqiLevelJobsService appCatalogService,
+            final KafkaMonitoringProperties kafkaProperties) {
+        this.wrapperProperties = wrapperProperties;
+        this.nodeService = nodeService;
+        this.podService = podService;
+        this.wrapperService = wrapperService;
+        this.appCatalogService = appCatalogService;
+        this.kafkaProperties = kafkaProperties;
+    }
 
-		if (!CollectionUtils.isEmpty(unusedNodes)) {
-			// Get pods
-			List<PodDesc> pods = this.podService.getPodsWithLabel(wrapperProperties.getLabelWrapperApp().getLabel(),
-					wrapperProperties.getLabelWrapperApp().getValue());
+    public List<WrapperNodeMonitor> monitorNodesToDelete() {
+        List<WrapperNodeMonitor> monitors = new ArrayList<>();
 
-			// Reorganize pods per nodes
-			Map<String, List<PodDesc>> podsPerNodes = new HashMap<>();
-			if (!CollectionUtils.isEmpty(pods)) {
-				pods.forEach(pod -> {
-					if (!podsPerNodes.containsKey(pod.getNodeName())) {
-						podsPerNodes.put(pod.getNodeName(), new ArrayList<>());
-					}
-					podsPerNodes.get(pod.getNodeName()).add(pod);
-				});
-			}
+        // Get nodes unused
+        Map<String, String> labels = new HashMap<>();
+        labels.put(wrapperProperties.getLabelWrapperConfig().getLabel(),
+                wrapperProperties.getLabelWrapperConfig().getValue());
+        labels.put(wrapperProperties.getLabelWrapperStateUnused().getLabel(),
+                wrapperProperties.getLabelWrapperStateUnused().getValue());
+        List<NodeDesc> unusedNodes =
+                this.nodeService.getNodesWithLabels(labels);
 
-			// Assign pod to nodes
-			for (NodeDesc node : unusedNodes) {
-				WrapperNodeMonitor nodeMonitor = new WrapperNodeMonitor(node);
-				if (podsPerNodes.containsKey(node.getName())) {
-					for (PodDesc pod : podsPerNodes.get(node.getName())) {
-						WrapperPodMonitor podMonitor = new WrapperPodMonitor(pod);
-						nodeMonitor.addWrapperPod(podMonitor);
-					}
-				}
-				monitors.add(nodeMonitor);
-			}
-		}
+        if (!CollectionUtils.isEmpty(unusedNodes)) {
+            // Get pods
+            List<PodDesc> pods = this.podService.getPodsWithLabel(
+                    wrapperProperties.getLabelWrapperApp().getLabel(),
+                    wrapperProperties.getLabelWrapperApp().getValue());
 
-		return monitors.stream().filter(monitor -> monitor.getNbPodsPerK8SStatus(PodStatus.Running) == 0)
-				.collect(Collectors.toList());
-	}
+            // Reorganize pods per nodes
+            Map<String, List<PodDesc>> podsPerNodes = new HashMap<>();
+            if (!CollectionUtils.isEmpty(pods)) {
+                pods.forEach(pod -> {
+                    if (!podsPerNodes.containsKey(pod.getNodeName())) {
+                        podsPerNodes.put(pod.getNodeName(), new ArrayList<>());
+                    }
+                    podsPerNodes.get(pod.getNodeName()).add(pod);
+                });
+            }
 
-	public List<WrapperNodeMonitor> monitorL1Wrappers() throws WrapperStatusException {
-		List<WrapperNodeMonitor> monitors = new ArrayList<>();
+            // Assign pod to nodes
+            for (NodeDesc node : unusedNodes) {
+                WrapperNodeMonitor nodeMonitor = new WrapperNodeMonitor(node);
+                if (podsPerNodes.containsKey(node.getName())) {
+                    for (PodDesc pod : podsPerNodes.get(node.getName())) {
+                        WrapperPodMonitor podMonitor =
+                                new WrapperPodMonitor(pod);
+                        nodeMonitor.addWrapperPod(podMonitor);
+                    }
+                }
+                monitors.add(nodeMonitor);
+            }
+        }
 
-		// Retrieve nodes dedicated to L1
-		List<NodeDesc> nodes = this.nodeService.getNodesWithLabel(wrapperProperties.getLabelWrapperConfig().getLabel(),
-				wrapperProperties.getLabelWrapperConfig().getValue());
+        return monitors.stream()
+                .filter(monitor -> monitor
+                        .getNbPodsPerK8SStatus(PodStatus.Running) == 0)
+                .collect(Collectors.toList());
+    }
 
-		// Retrieve pods dedicated to L1
-		List<PodDesc> pods = this.podService.getPodsWithLabel(wrapperProperties.getLabelWrapperApp().getLabel(),
-				wrapperProperties.getLabelWrapperApp().getValue());
+    public List<WrapperNodeMonitor> monitorL1Wrappers()
+            throws WrapperStatusException, AbstractCodedException {
+        String topic = kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS);
+        List<WrapperNodeMonitor> monitors = new ArrayList<>();
 
-		// Reorganize pods per nodes
-		Map<String, List<PodDesc>> podsPerNodes = new HashMap<>();
-		if (!CollectionUtils.isEmpty(pods)) {
-			pods.forEach(pod -> {
-				if (!podsPerNodes.containsKey(pod.getNodeName())) {
-					podsPerNodes.put(pod.getNodeName(), new ArrayList<>());
-				}
-				podsPerNodes.get(pod.getNodeName()).add(pod);
-			});
-		}
+        // Retrieve nodes dedicated to L1
+        List<NodeDesc> nodes = this.nodeService.getNodesWithLabel(
+                wrapperProperties.getLabelWrapperConfig().getLabel(),
+                wrapperProperties.getLabelWrapperConfig().getValue());
 
-		// build monitor
-		if (!CollectionUtils.isEmpty(nodes)) {
-			for (NodeDesc node : nodes) {
-				WrapperNodeMonitor nodeMonitor = new WrapperNodeMonitor(node);
-				if (podsPerNodes.containsKey(node.getName())) {
-					for (PodDesc pod : podsPerNodes.get(node.getName())) {
-						WrapperPodMonitor podMonitor = new WrapperPodMonitor(pod);
-						if (pod.getStatus() == PodStatus.Running) {
-							WrapperDesc wrapper = this.wrapperService.getWrapperStatus(pod.getName(),
-									pod.getAddresses().get(AddressType.INTERNAL_IP));
-							podMonitor.setLogicalStatus(wrapper.getStatus());
-							if (wrapper.getStatus().equals(PodLogicalStatus.PROCESSING)) {
-								podMonitor.setPassedExecutionTime(wrapper.getTimeSinceLastChange());
-								podMonitor.setRemainingExecutionTime(
-										wrapperProperties.getExecutionTime().getAverageS() * 1000
-												- wrapper.getTimeSinceLastChange());
-							}
-						}
-						nodeMonitor.addWrapperPod(podMonitor);
-					}
-				}
-				monitors.add(nodeMonitor);
-			}
-		}
+        // Retrieve pods dedicated to L1
+        List<PodDesc> pods = this.podService.getPodsWithLabel(
+                wrapperProperties.getLabelWrapperApp().getLabel(),
+                wrapperProperties.getLabelWrapperApp().getValue());
 
-		return monitors;
-	}
+        // Reorganize pods per nodes
+        Map<String, List<PodDesc>> podsPerNodes = new HashMap<>();
+        if (!CollectionUtils.isEmpty(pods)) {
+            pods.forEach(pod -> {
+                if (!podsPerNodes.containsKey(pod.getNodeName())) {
+                    podsPerNodes.put(pod.getNodeName(), new ArrayList<>());
+                }
+                podsPerNodes.get(pod.getNodeName()).add(pod);
+            });
+        }
+
+        // build monitor
+        if (!CollectionUtils.isEmpty(nodes)) {
+            for (NodeDesc node : nodes) {
+                WrapperNodeMonitor nodeMonitor = new WrapperNodeMonitor(node);
+                if (podsPerNodes.containsKey(node.getName())) {
+                    for (PodDesc pod : podsPerNodes.get(node.getName())) {
+                        WrapperPodMonitor podMonitor =
+                                new WrapperPodMonitor(pod);
+                        if (pod.getStatus() == PodStatus.Running) {
+                            WrapperDesc wrapper = this.wrapperService
+                                    .getWrapperStatus(pod.getName(),
+                                            pod.getAddresses().get(
+                                                    AddressType.INTERNAL_IP));
+                            long nbReadingMessage = this.appCatalogService
+                                    .getNbReadingMessages(topic, pod.getName());
+                            podMonitor.setLogicalStatus(wrapper.getStatus());
+                            if (wrapper.getStatus()
+                                    .equals(PodLogicalStatus.PROCESSING)) {
+                                podMonitor.setPassedExecutionTime(
+                                        wrapper.getTimeSinceLastChange());
+                                podMonitor.setRemainingExecutionTime(
+                                        wrapperProperties.getExecutionTime()
+                                                .getAverageS() * 1000
+                                                - wrapper
+                                                        .getTimeSinceLastChange());
+                            }
+                            long remTime = podMonitor
+                                    .getRemainingExecutionTime()
+                                    + nbReadingMessage * wrapperProperties
+                                            .getExecutionTime().getAverageS()
+                                            * 1000;
+                            podMonitor.setRemainingExecutionTime(remTime);
+                        }
+                        nodeMonitor.addWrapperPod(podMonitor);
+                    }
+                }
+                monitors.add(nodeMonitor);
+            }
+        }
+
+        return monitors;
+    }
 }
