@@ -66,8 +66,7 @@ public class PersistenceConfiguration {
             @Value("${persistence.port-uri-other-app}") final String portUriOtherApp,
             @Value("${persistence.max-retries}") final int maxRetries,
             @Value("${persistence.tempo-retry-ms}") final int tempoRetryMs,
-            @Value("${persistence.other-app.suffix-uri}") final String suffixUriOtherApp,
-            @Value("${persistence.other-app.begin-uri-processing}") final String prefixUriOtherApp) {
+            @Value("${persistence.other-app.suffix-uri}") final String suffixUriOtherApp) {
         this.hostUriCatalog = hostUriCatalog;
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
