@@ -160,6 +160,11 @@ public class JobProcessor {
         LOGGER.info("{} Initializing job processing",
                 getPrefixMonitorLog(MonitorLogUtils.LOG_READ, job));
         File workdir = new File(job.getWorkDirectory());
+        // Remove working directory if exist
+        if (workdir.exists()) {
+            this.eraseDirectory(job);
+        }
+        // Build output list
         String outputListFile =
                 job.getWorkDirectory() + workdir.getName() + ".LIST";
         if (properties.getLevel() == ApplicationLevel.L0) {
@@ -334,7 +339,10 @@ public class JobProcessor {
                 Thread.currentThread().interrupt();
             }
         }
-
+        this.eraseDirectory(job);
+    }
+    
+    private void eraseDirectory(final LevelJobDto job) {
         if (devProperties.getStepsActivation().get("erasing")) {
             try {
                 LOGGER.info("{} Erasing local working directory",
