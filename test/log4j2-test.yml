@@ -7,13 +7,13 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-metadata-catalog-app-1.0.0 %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} hostname-local s1pdgs-metadata-catalog-app-1.0.0 %-5level: %msg [%thread] %n"
     RollingFile:
       name: FILE
-      fileName: ${env:appcatalog_logging_file:-s1pdgs-app-catalog.log}
-      filePattern: "${env:appcatalog_logging_file:-s1pdgs-metadata-app.log}.%d{yyyy-MM-dd-hh-mm}.gz"
+      fileName: s1pdgs-app-catalog.log
+      filePattern: "s1pdgs-app-catalog.log.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-app-catalog-1.0.0 %-5level: %msg [%thread] %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} hostname-local s1pdgs-app-catalog-app-1.0.0 %-5level: %msg [%thread] %n"
       Policies:
         SizeBasedTriggeringPolicy:
           size: 10 MB
@@ -22,24 +22,36 @@ Configuration:
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc
-        level: ${env:appcatalog_logging_level_esas1pdgscpoc:-info}
+        level: debug
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: org.springframework
-        level: ${env:appcatalog_logging_level_orgspringframework:-error}
+        level: error
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: kafka
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: org.apache
-        level: ${env:appcatalog_logging_level_orgapache:-warn}
+        level: warn
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: com.amazonaws
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
     Root:
-      level: ${env:appcatalog_logging_level_root:-error}
+      level: error
       AppenderRef:
         ref: STDOUT

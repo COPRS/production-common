@@ -5,4 +5,16 @@ spring:
     
 # Logging
 logging:
-  config: ${catalog_logging_config:log4j2.yml}
+  config: ${appcatalog_logging_config:log4j2.yml}
+  
+# MongoDB
+mongodb:
+  host: ${mongo_db_host:mongodb-2.mongodb-svc}
+  port: ${mongo_db_port:27017}
+  database: ${mongo_db_database:s1pdgs}
+  old-entry-ms: ${appcatalog_mongodb_old_entry_ms:86400000}
+  clean-cron: ${appcatalog_mongodb_clean_cron:0 0 0 * * *}
+  
+#MQI
+mqi:
+  max-retries: ${appcatalog_mqi_max_retries:3}
