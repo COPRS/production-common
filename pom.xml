@@ -5,7 +5,7 @@
 
 	<groupId>spdgs</groupId>
 	<artifactId>s1pdgs-metadata-catalog</artifactId>
-	<version>1.0.0</version>
+	<version>2.0.0</version>
 	<packaging>jar</packaging>
 	<name>Spring Boot Docker For S1-PDGS metadata catalog</name>
 
@@ -76,28 +76,6 @@
 		   <groupId>com.fasterxml.jackson.core</groupId>
 		   <artifactId>jackson-databind</artifactId>
 		</dependency>
-        
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka-log4j-appender</artifactId>
-			<version>1.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
@@ -108,7 +86,13 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>commons</artifactId>
-			<version>0.0.1</version>
+			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>spdgs-sdk</groupId>
+			<artifactId>mqi-client</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		
 		<dependency>

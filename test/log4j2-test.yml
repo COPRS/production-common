@@ -19,17 +19,6 @@ Configuration:
           size: 10 MB
       DefaultRollOverStrategy:
         max: 30
-    Kafka:
-      name: KAFKA_ERROR
-      topic: t-pdgs-errors
-      PatternLayout:
-        Pattern: "[date %d{yyyy-MM-dd HH:mm:ss.SSS}] [podName ${env:HOSTNAME}] [app s1pdgs-metadata-catalog-app:1.0.0] [thread %thread] [level %-5level] [message %msg] %n"
-      Property:
-        name: bootstrap.servers
-        value: 172.17.50.7:9092
-      Filters:
-        ThresholdFilter:
-          level: error
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc
