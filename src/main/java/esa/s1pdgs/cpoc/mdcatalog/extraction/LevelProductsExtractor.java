@@ -169,7 +169,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
      * @param message
      * @return
      */
-    private String getKeyObs(final GenericMessageDto<LevelProductDto> message) {
+    protected String getKeyObs(final GenericMessageDto<LevelProductDto> message) {
         String keyObs = message.getBody().getKeyObjectStorage();
         if (keyObs.toLowerCase().endsWith(fileManifestExt.toLowerCase())) {
             keyObs += "/" + manifestFilename;
