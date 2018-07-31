@@ -222,4 +222,26 @@ public class MqiMessageDaoTest {
                 Mockito.any(Update.class), Mockito.eq(MqiMessage.class));
 
     }
+
+    @SuppressWarnings({ "unchecked" })
+    @Test
+    public void testFindAllAndRemove() {
+        List<MqiMessage> response = new ArrayList<>();
+        response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
+                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                "sendingPod", null, null, 0, null));
+        response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic2",
+                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                "sendingPod", null, null, 0, null));
+        doReturn(response).when(mongoClient).findAllAndRemove(Mockito.any(Query.class),
+                Mockito.any(Class.class));
+
+        Query query = new Query();
+        mongoDBDAO.findAllAndRemove(query);
+
+        verify(mongoClient, times(1)).findAllAndRemove(Mockito.eq(query),
+                Mockito.eq(MqiMessage.class));
+        // TODO, check query
+
+    }
 }
