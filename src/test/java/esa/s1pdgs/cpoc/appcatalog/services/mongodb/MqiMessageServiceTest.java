@@ -205,4 +205,12 @@ public class MqiMessageServiceTest {
                 Mockito.eq(new HashMap<>()));
 
     }
+    
+    @Test
+    public void testCountReading() {
+        doReturn(15).when(mongoDBDAO).countReadingMessages(Mockito.anyString(), Mockito.anyString());
+        
+        assertEquals(15, mongoDBServices.countReadingMessages("pod-name", "topic-name"));
+        verify(mongoDBDAO, times(1)).countReadingMessages(Mockito.eq("pod-name"), Mockito.eq("topic-name"));
+    }
 }
