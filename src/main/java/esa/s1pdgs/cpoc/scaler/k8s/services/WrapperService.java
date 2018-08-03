@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStatusException;
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStopException;
 import esa.s1pdgs.cpoc.scaler.k8s.model.PodLogicalStatus;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperDesc;
 import esa.s1pdgs.cpoc.scaler.k8s.model.dto.WrapperStatusDto;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.WrapperStatusException;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.WrapperStopException;
 
 @Service
 public class WrapperService {

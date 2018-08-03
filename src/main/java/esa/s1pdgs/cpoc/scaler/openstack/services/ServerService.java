@@ -20,12 +20,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityInternaloErrorException;
+import esa.s1pdgs.cpoc.common.errors.os.OsFloatingIpNotActiveException;
+import esa.s1pdgs.cpoc.common.errors.os.OsServerNotActiveException;
+import esa.s1pdgs.cpoc.common.errors.os.OsServerNotDeletedException;
 import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsEntityException;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsEntityInternaloErrorException;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsFloatingIpNotActiveException;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsServerNotActiveException;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsServerNotDeletedException;
 
 @Service
 public class ServerService {
@@ -123,8 +123,7 @@ public class ServerService {
         }
     }
 
-    public void deleteFloatingIp(OSClientV3 osClient, 
-            String floatingIpId) {
+    public void deleteFloatingIp(OSClientV3 osClient, String floatingIpId) {
         osClient.networking().floatingip().delete(floatingIpId);
     }
 

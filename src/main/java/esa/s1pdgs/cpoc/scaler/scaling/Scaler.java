@@ -21,23 +21,23 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.scaler.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.k8s.K8sUnknownResourceException;
+import esa.s1pdgs.cpoc.common.errors.k8s.PodResourceException;
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStopException;
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
 import esa.s1pdgs.cpoc.scaler.DevProperties;
-import esa.s1pdgs.cpoc.scaler.InternalErrorException;
-import esa.s1pdgs.cpoc.scaler.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.scaler.k8s.K8SAdministration;
 import esa.s1pdgs.cpoc.scaler.k8s.K8SMonitoring;
 import esa.s1pdgs.cpoc.scaler.k8s.WrapperProperties;
 import esa.s1pdgs.cpoc.scaler.k8s.model.AddressType;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperNodeMonitor;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperPodMonitor;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.K8sUnknownResourceException;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.PodResourceException;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.WrapperStopException;
 import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoring;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
 import esa.s1pdgs.cpoc.scaler.openstack.OpenStackAdministration;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsEntityException;
 
 /**
  * L1 resources scaler

@@ -20,13 +20,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStatusException;
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStopException;
 import esa.s1pdgs.cpoc.scaler.k8s.model.PodLogicalStatus;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperDesc;
 import esa.s1pdgs.cpoc.scaler.k8s.model.dto.AppState;
 import esa.s1pdgs.cpoc.scaler.k8s.model.dto.WrapperStatusDto;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.WrapperStatusException;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.WrapperStopException;
-import esa.s1pdgs.cpoc.scaler.k8s.services.WrapperService;
 
 public class WrapperServiceTest {
 
@@ -118,7 +117,7 @@ public class WrapperServiceTest {
             fail("WrapperStatusExcetpion waiting");
         } catch (WrapperStatusException e) {
             assertEquals("pod-name", e.getName());
-            assertEquals("pod-ip", e.getIp());
+            assertEquals("pod-ip", e.getIpAddress());
             assertNull(e.getCause());
             verify(restTemplate, times(0)).exchange(
                     Mockito.eq("http://pod-ip:82/app/status"),
@@ -138,7 +137,7 @@ public class WrapperServiceTest {
             fail("WrapperStatusExcetpion waiting");
         } catch (WrapperStatusException e) {
             assertEquals("pod-name", e.getName());
-            assertEquals("pod-ip", e.getIp());
+            assertEquals("pod-ip", e.getIpAddress());
             assertNull(e.getCause());
             verify(restTemplate, times(4)).exchange(
                     Mockito.eq("http://pod-ip:82/app/status"),
@@ -158,7 +157,7 @@ public class WrapperServiceTest {
             fail("WrapperStatusExcetpion waiting");
         } catch (WrapperStatusException e) {
             assertEquals("pod-name", e.getName());
-            assertEquals("pod-ip", e.getIp());
+            assertEquals("pod-ip", e.getIpAddress());
             assertNotNull(e.getCause());
             assertEquals("message", e.getCause().getMessage());
             verify(restTemplate, times(4)).exchange(
@@ -194,7 +193,7 @@ public class WrapperServiceTest {
             service.stopWrapper("pod-ip");
             fail("WrapperStatusExcetpion waiting");
         } catch (WrapperStopException e) {
-            assertEquals("pod-ip", e.getIp());
+            assertEquals("pod-ip", e.getIpAddress());
             assertNull(e.getCause());
             verify(restTemplate, times(0)).exchange(
                     Mockito.eq("http://pod-ip:82/app/stop"),
@@ -213,7 +212,7 @@ public class WrapperServiceTest {
             service.stopWrapper("pod-ip");
             fail("WrapperStatusExcetpion waiting");
         } catch (WrapperStopException e) {
-            assertEquals("pod-ip", e.getIp());
+            assertEquals("pod-ip", e.getIpAddress());
             assertNull(e.getCause());
             verify(restTemplate, times(4)).exchange(
                     Mockito.eq("http://pod-ip:82/app/stop"),
@@ -232,7 +231,7 @@ public class WrapperServiceTest {
             service.stopWrapper("pod-ip");
             fail("WrapperStatusExcetpion waiting");
         } catch (WrapperStopException e) {
-            assertEquals("pod-ip", e.getIp());
+            assertEquals("pod-ip", e.getIpAddress());
             assertNotNull(e.getCause());
             assertEquals("message", e.getCause().getMessage());
             verify(restTemplate, times(4)).exchange(

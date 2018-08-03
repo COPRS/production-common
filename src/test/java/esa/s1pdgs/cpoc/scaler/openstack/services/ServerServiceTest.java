@@ -38,11 +38,11 @@ import org.openstack4j.model.network.NetFloatingIP;
 import org.openstack4j.openstack.compute.domain.NovaServer;
 import org.openstack4j.openstack.networking.domain.NeutronFloatingIP;
 
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
+import esa.s1pdgs.cpoc.common.errors.os.OsFloatingIpNotActiveException;
+import esa.s1pdgs.cpoc.common.errors.os.OsServerNotActiveException;
+import esa.s1pdgs.cpoc.common.errors.os.OsServerNotDeletedException;
 import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsEntityException;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsFloatingIpNotActiveException;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsServerNotActiveException;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsServerNotDeletedException;
 
 public class ServerServiceTest {
 

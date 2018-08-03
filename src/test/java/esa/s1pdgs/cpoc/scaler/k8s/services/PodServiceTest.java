@@ -20,11 +20,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.errors.k8s.K8sUnknownResourceException;
+import esa.s1pdgs.cpoc.common.errors.k8s.PodResourceException;
 import esa.s1pdgs.cpoc.scaler.k8s.model.AddressType;
 import esa.s1pdgs.cpoc.scaler.k8s.model.PodDesc;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.K8sUnknownResourceException;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.PodResourceException;
-import esa.s1pdgs.cpoc.scaler.k8s.services.PodService;
 import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -109,8 +108,8 @@ public class PodServiceTest {
         expectedResult.addAddress(AddressType.fromLabel("Hostname"),
                 "hostname");
         expectedResult.addLabels(labels);
-        expectedResult.setStatus(
-                esa.s1pdgs.cpoc.scaler.k8s.model.PodStatus.Running);
+        expectedResult
+                .setStatus(esa.s1pdgs.cpoc.scaler.k8s.model.PodStatus.Running);
         return expectedResult;
     }
 
@@ -179,13 +178,13 @@ public class PodServiceTest {
 
     @Mock
     private MixedOperation<PersistentVolumeClaim, PersistentVolumeClaimList, DoneablePersistentVolumeClaim, Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim>> persistentVolumeClaims;
-    
+
     @Mock
     private NonNamespaceOperation<PersistentVolumeClaim, PersistentVolumeClaimList, DoneablePersistentVolumeClaim, Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim>> mockedVolumes;
-    
+
     @Mock
     private NonNamespaceOperation<Pod, PodList, DoneablePod, PodResource<Pod, DoneablePod>> mockedPods;
-    
+
     private List<HasMetadata> resources;
 
     private void mockPodOperations() {
@@ -195,15 +194,19 @@ public class PodServiceTest {
 
         doReturn(load).when(k8sClient).load(Mockito.any());
         doReturn(resources).when(load).get();
-        
-        doReturn(persistentVolumeClaims).when(k8sClient).persistentVolumeClaims();
-        doReturn(mockedVolumes).when(persistentVolumeClaims).inNamespace(Mockito.anyString());
-        doReturn(buildPersistentVolumeClaim("volName1")).when(mockedVolumes).create(Mockito.any());
-        
+
+        doReturn(persistentVolumeClaims).when(k8sClient)
+                .persistentVolumeClaims();
+        doReturn(mockedVolumes).when(persistentVolumeClaims)
+                .inNamespace(Mockito.anyString());
+        doReturn(buildPersistentVolumeClaim("volName1")).when(mockedVolumes)
+                .create(Mockito.any());
+
         doReturn(mockedPods).when(pods).inNamespace(Mockito.anyString());
-        doReturn(buildPodWithVol("podName1", null)).when(mockedPods).create(Mockito.any());
-        
-        }
+        doReturn(buildPodWithVol("podName1", null)).when(mockedPods)
+                .create(Mockito.any());
+
+    }
 
     private PersistentVolumeClaim buildPersistentVolumeClaim(
             String volumeName) {
@@ -289,61 +292,74 @@ public class PodServiceTest {
         assertEquals("claimName-suffixe", pExp.getSpec().getVolumes().get(0)
                 .getPersistentVolumeClaim().getClaimName());
     }
-    
+
     @Test
-    public void testCreatePod() throws PodResourceException, K8sUnknownResourceException {
+    public void testCreatePod()
+            throws PodResourceException, K8sUnknownResourceException {
         mockPodOperations();
-        
+
         service.createPodFromTemplate("./pom.xml", 12);
         verify(mockedVolumes, times(1)).create(Mockito.any());
         verify(mockedPods, times(2)).create(Mockito.any());
         verifyNoMoreInteractions(mockedPods, mockedVolumes);
     }
-    
+
     @Test
-    public void testDeletePod() throws PodResourceException, K8sUnknownResourceException {
+    public void testDeletePod()
+            throws PodResourceException, K8sUnknownResourceException {
         mockPodOperations();
-        doReturn(true).when(mockedVolumes).delete(Mockito.any(PersistentVolumeClaim.class));
+        doReturn(true).when(mockedVolumes)
+                .delete(Mockito.any(PersistentVolumeClaim.class));
         doReturn(true).when(mockedPods).delete(Mockito.any(Pod.class));
-        boolean ret =  service.deletePodFromTemplate("./pom.xml", "12");
+        boolean ret = service.deletePodFromTemplate("./pom.xml", "12");
         assertTrue(ret);
-        verify(mockedVolumes, times(1)).delete(Mockito.any(PersistentVolumeClaim.class));
+        verify(mockedVolumes, times(1))
+                .delete(Mockito.any(PersistentVolumeClaim.class));
         verify(mockedPods, times(2)).delete(Mockito.any(Pod.class));
         verifyNoMoreInteractions(mockedPods, mockedVolumes);
     }
-    
+
     @Test
-    public void testDeletePod2() throws PodResourceException, K8sUnknownResourceException {
+    public void testDeletePod2()
+            throws PodResourceException, K8sUnknownResourceException {
         mockPodOperations();
-        doReturn(false).when(mockedVolumes).delete(Mockito.any(PersistentVolumeClaim.class));
+        doReturn(false).when(mockedVolumes)
+                .delete(Mockito.any(PersistentVolumeClaim.class));
         doReturn(false).when(mockedPods).delete(Mockito.any(Pod.class));
-        boolean ret =  service.deletePodFromTemplate("./pom.xml", "12");
+        boolean ret = service.deletePodFromTemplate("./pom.xml", "12");
         assertFalse(ret);
-        verify(mockedVolumes, times(1)).delete(Mockito.any(PersistentVolumeClaim.class));
+        verify(mockedVolumes, times(1))
+                .delete(Mockito.any(PersistentVolumeClaim.class));
         verify(mockedPods, times(2)).delete(Mockito.any(Pod.class));
         verifyNoMoreInteractions(mockedPods, mockedVolumes);
     }
-    
+
     @Test
-    public void testDeletePod3() throws PodResourceException, K8sUnknownResourceException {
+    public void testDeletePod3()
+            throws PodResourceException, K8sUnknownResourceException {
         mockPodOperations();
-        doReturn(false).when(mockedVolumes).delete(Mockito.any(PersistentVolumeClaim.class));
+        doReturn(false).when(mockedVolumes)
+                .delete(Mockito.any(PersistentVolumeClaim.class));
         doReturn(true).when(mockedPods).delete(Mockito.any(Pod.class));
-        boolean ret =  service.deletePodFromTemplate("./pom.xml", "12");
+        boolean ret = service.deletePodFromTemplate("./pom.xml", "12");
         assertFalse(ret);
-        verify(mockedVolumes, times(1)).delete(Mockito.any(PersistentVolumeClaim.class));
+        verify(mockedVolumes, times(1))
+                .delete(Mockito.any(PersistentVolumeClaim.class));
         verify(mockedPods, times(2)).delete(Mockito.any(Pod.class));
         verifyNoMoreInteractions(mockedPods, mockedVolumes);
     }
-    
+
     @Test
-    public void testDeletePod4() throws PodResourceException, K8sUnknownResourceException {
+    public void testDeletePod4()
+            throws PodResourceException, K8sUnknownResourceException {
         mockPodOperations();
-        doReturn(true).when(mockedVolumes).delete(Mockito.any(PersistentVolumeClaim.class));
+        doReturn(true).when(mockedVolumes)
+                .delete(Mockito.any(PersistentVolumeClaim.class));
         doReturn(false).when(mockedPods).delete(Mockito.any(Pod.class));
-        boolean ret =  service.deletePodFromTemplate("./pom.xml", "12");
+        boolean ret = service.deletePodFromTemplate("./pom.xml", "12");
         assertFalse(ret);
-        verify(mockedVolumes, times(1)).delete(Mockito.any(PersistentVolumeClaim.class));
+        verify(mockedVolumes, times(1))
+                .delete(Mockito.any(PersistentVolumeClaim.class));
         verify(mockedPods, times(2)).delete(Mockito.any(Pod.class));
         verifyNoMoreInteractions(mockedPods, mockedVolumes);
     }

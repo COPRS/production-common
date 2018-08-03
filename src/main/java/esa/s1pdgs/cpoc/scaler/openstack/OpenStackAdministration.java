@@ -11,10 +11,10 @@ import org.openstack4j.model.compute.Server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
 import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc;
-import esa.s1pdgs.cpoc.scaler.openstack.model.VolumeDesc;
 import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc.ServerDescBuilder;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsEntityException;
+import esa.s1pdgs.cpoc.scaler.openstack.model.VolumeDesc;
 import esa.s1pdgs.cpoc.scaler.openstack.services.ServerService;
 import esa.s1pdgs.cpoc.scaler.openstack.services.VolumeService;
 

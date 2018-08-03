@@ -26,10 +26,9 @@ import org.openstack4j.api.storage.BlockVolumeService;
 import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.storage.block.Volume;
 
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
+import esa.s1pdgs.cpoc.common.errors.os.OsVolumeNotAvailableException;
 import esa.s1pdgs.cpoc.scaler.openstack.model.VolumeDesc;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsEntityException;
-import esa.s1pdgs.cpoc.scaler.openstack.model.exceptions.OsVolumeNotAvailableException;
-import esa.s1pdgs.cpoc.scaler.openstack.services.VolumeService;
 
 public class VolumeServiceTest {
 

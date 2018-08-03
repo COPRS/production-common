@@ -13,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.AppCatalogMqiLevelJobsService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStatusException;
 import esa.s1pdgs.cpoc.scaler.k8s.model.AddressType;
 import esa.s1pdgs.cpoc.scaler.k8s.model.NodeDesc;
 import esa.s1pdgs.cpoc.scaler.k8s.model.PodDesc;
@@ -21,7 +22,6 @@ import esa.s1pdgs.cpoc.scaler.k8s.model.PodStatus;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperDesc;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperNodeMonitor;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperPodMonitor;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.WrapperStatusException;
 import esa.s1pdgs.cpoc.scaler.k8s.services.NodeService;
 import esa.s1pdgs.cpoc.scaler.k8s.services.PodService;
 import esa.s1pdgs.cpoc.scaler.k8s.services.WrapperService;

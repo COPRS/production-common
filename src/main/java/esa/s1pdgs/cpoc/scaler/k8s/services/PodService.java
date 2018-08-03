@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import esa.s1pdgs.cpoc.common.errors.k8s.K8sUnknownResourceException;
+import esa.s1pdgs.cpoc.common.errors.k8s.PodResourceException;
 import esa.s1pdgs.cpoc.scaler.k8s.model.PodDesc;
 import esa.s1pdgs.cpoc.scaler.k8s.model.converter.K8SPodToPodDesc;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.K8sUnknownResourceException;
-import esa.s1pdgs.cpoc.scaler.k8s.model.exceptions.PodResourceException;
 import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.HasMetadata;
