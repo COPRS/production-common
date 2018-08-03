@@ -5,8 +5,8 @@ import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.ingestor.exceptions.ObjectStorageException;
-import esa.s1pdgs.cpoc.ingestor.files.model.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -29,6 +29,7 @@ public class ObsService {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param client
 	 */
 	@Autowired
@@ -38,38 +39,41 @@ public class ObsService {
 
 	/**
 	 * Check if given file exist in OBS
+	 * 
 	 * @param family
 	 * @param key
 	 * @return
 	 * @throws ObjectStorageException
 	 */
-	public boolean exist(ProductFamily family, String key) throws ObjectStorageException {
+	public boolean exist(ProductFamily family, String key) throws ObsException {
 		ObsObject object = new ObsObject(key, getObsFamily(family));
 		try {
 			return client.doesObjectExist(object);
 		} catch (SdkClientException exc) {
-			throw new ObjectStorageException(key, key, family, exc);
+			throw new ObsException(family, key, exc);
 		}
 	}
 
 	/**
 	 * Upload a file in object storage
+	 * 
 	 * @param family
 	 * @param key
 	 * @param file
 	 * @throws ObjectStorageException
 	 */
-	public void uploadFile(ProductFamily family, String key, File file) throws ObjectStorageException {
+	public void uploadFile(ProductFamily family, String key, File file) throws ObsException {
 		ObsUploadObject object = new ObsUploadObject(key, getObsFamily(family), file);
 		try {
 			client.uploadObject(object);
 		} catch (SdkClientException exc) {
-			throw new ObjectStorageException(key, key, family, exc);
+			throw new ObsException(family, key, exc);
 		}
 	}
 
 	/**
 	 * Get ObsFamily from ProductFamily
+	 * 
 	 * @param family
 	 * @return
 	 */

@@ -2,87 +2,90 @@ package esa.s1pdgs.cpoc.ingestor.files.services;
 
 import java.io.File;
 
-import esa.s1pdgs.cpoc.ingestor.exceptions.FilePathException;
-import esa.s1pdgs.cpoc.ingestor.exceptions.IgnoredFileException;
+import esa.s1pdgs.cpoc.common.errors.processing.IngestorFilePathException;
+import esa.s1pdgs.cpoc.common.errors.processing.IngestorIgnoredFileException;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 
 /**
  * File descriptor
  * 
  * @author Cyrielle
- *
  */
 public abstract class AbstractFileDescriptorService {
 
-	/**
-	 * Local directory
-	 */
-	protected final String directory;
+    /**
+     * Local directory
+     */
+    protected final String directory;
 
-	/**
-	 * Family
-	 */
-	protected final String family;
+    /**
+     * Family
+     */
+    protected final String family;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param directory
-	 * @param pattern
-	 */
-	protected AbstractFileDescriptorService(final String directory, final String family) {
-		this.directory = directory;
-		this.family = family;
-	}
+    /**
+     * Constructor
+     * 
+     * @param directory
+     * @param pattern
+     */
+    protected AbstractFileDescriptorService(final String directory,
+            final String family) {
+        this.directory = directory;
+        this.family = family;
+    }
 
-	/**
-	 * Extract information from filename
-	 * 
-	 * @param file
-	 * @return
-	 * @throws FilePathException
-	 * @throws IgnoredFileException
-	 */
-	public FileDescriptor extractDescriptor(final File file) throws FilePathException, IgnoredFileException {
-		String absolutePath = file.getAbsolutePath();
-		
-		// Extract object storage key
-		if (!absolutePath.contains(directory)) {
-			throw new FilePathException(file.getName(), absolutePath, family, "File is not in root directory");
-		}
-		String relativePath = absolutePath.substring(directory.length());
-		relativePath = relativePath.replace("\\", "/");
+    /**
+     * Extract information from filename
+     * 
+     * @param file
+     * @return
+     * @throws FilePathException
+     * @throws IgnoredFileException
+     */
+    public FileDescriptor extractDescriptor(final File file)
+            throws IngestorFilePathException, IngestorIgnoredFileException {
+        String absolutePath = file.getAbsolutePath();
 
-		// Ignored if directory
-		if (file.isDirectory()) {
-			throw new IgnoredFileException(relativePath, file.getName());
-		}
+        // Extract object storage key
+        if (!absolutePath.contains(directory)) {
+            throw new IngestorFilePathException(absolutePath, family,
+                    "File is not in root directory");
+        }
+        String relativePath = absolutePath.substring(directory.length());
+        relativePath = relativePath.replace("\\", "/");
 
-		// Check if key matches the pattern
+        // Ignored if directory
+        if (file.isDirectory()) {
+            throw new IngestorIgnoredFileException(file.getName());
+        }
 
-		return buildDescriptor(relativePath);
-	}
+        // Check if key matches the pattern
 
-	/**
-	 * Implementation function of extraction from the pattern
-	 * 
-	 * @param m
-	 * @return
-	 */
-	protected abstract FileDescriptor buildDescriptor(final String relativePath) throws FilePathException;
+        return buildDescriptor(relativePath);
+    }
 
-	/**
-	 * @return the directory
-	 */
-	public String getDirectory() {
-		return directory;
-	}
+    /**
+     * Implementation function of extraction from the pattern
+     * 
+     * @param m
+     * @return
+     */
+    protected abstract FileDescriptor buildDescriptor(final String relativePath)
+            throws IngestorFilePathException;
 
-	/**
-	 * @return the family
-	 */
-	public String getFamily() {
-		return family;
-	}
+    /**
+     * @return the directory
+     */
+    public String getDirectory() {
+        return directory;
+    }
+
+    /**
+     * @return the family
+     */
+    public String getFamily() {
+        return family;
+    }
 
 }

@@ -13,9 +13,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import esa.s1pdgs.cpoc.common.errors.processing.IngestorFilePathException;
 import esa.s1pdgs.cpoc.ingestor.FileUtils;
-import esa.s1pdgs.cpoc.ingestor.exceptions.FilePathException;
-import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 
 /**
  * Test the FileDescriptorService for auxiliary files
@@ -117,9 +116,8 @@ public class AuxiliaryFileDescriptorServiceTest {
 	 * Test buildDescriptor when relative path does not match the pattern
 	 */
 	@Test
-	public void testBuildDescriptorWhenNoMatch() throws FilePathException {
-		thrown.expect(FilePathException.class);
-		thrown.expect(hasProperty("productName", is(FileUtils.RPATH_AUX_NO_MATCH)));
+	public void testBuildDescriptorWhenNoMatch() throws IngestorFilePathException {
+		thrown.expect(IngestorFilePathException.class);
 		thrown.expect(hasProperty("path", is(FileUtils.RPATH_AUX_NO_MATCH)));
 		thrown.expect(hasProperty("family", is(FAMILY)));
 		service.buildDescriptor(FileUtils.RPATH_AUX_NO_MATCH);
@@ -129,7 +127,7 @@ public class AuxiliaryFileDescriptorServiceTest {
 	 * Test buildDescriptor when relative path matches the pattern
 	 */
 	@Test
-	public void testBuildDescriptor() throws FilePathException {
+	public void testBuildDescriptor() throws IngestorFilePathException {
 
 		assertEquals("Invalid file descriptor for RPATH_AUX_INS_MANIFEST",
 				FileUtils.getFileDescriptorForAuxiliary(FileUtils.RPATH_AUX_INS_MANIFEST),

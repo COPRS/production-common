@@ -7,7 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import esa.s1pdgs.cpoc.ingestor.exceptions.KafkaSendException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 
 /**
  * Implementation of the publication service using Kafka
@@ -46,12 +46,12 @@ public abstract class AbstractKafkaService<T> implements PublicationServices<T> 
 	 * 
 	 */
 	@Override
-	public void send(T obj) throws KafkaSendException {
+	public void send(T obj) throws MqiPublicationError {
 		try {
 			LOGGER.debug("[send] Send metadata = {}", obj);
 			kafkaTemplate.send(kafkaTopic, obj).get();
 		} catch (CancellationException | InterruptedException | ExecutionException e) {
-			throw new KafkaSendException(kafkaTopic, obj, extractProductName(obj), e.getMessage(), e);
+			throw new MqiPublicationError(kafkaTopic, obj, extractProductName(obj), e.getMessage(), e);
 		}
 	}
 

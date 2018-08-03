@@ -8,8 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import esa.s1pdgs.cpoc.ingestor.files.model.dto.KafkaConfigFileDto;
-import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
+import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 
 public class KafkaConfigFileProducerTest {
 
@@ -22,7 +21,7 @@ public class KafkaConfigFileProducerTest {
 	 * KAFKA client
 	 */
 	@Mock
-	private KafkaTemplate<String, KafkaConfigFileDto> kafkaTemplate;
+	private KafkaTemplate<String, AuxiliaryFileDto> kafkaTemplate;
 
 	/**
 	 * Service to test
@@ -52,7 +51,7 @@ public class KafkaConfigFileProducerTest {
 	 */
 	@Test
 	public void testGetProductName() {
-		KafkaConfigFileDto dto = new KafkaConfigFileDto("product-name", "key-obs");
+	    AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
 		assertEquals("getProductName should return the product name", "product-name", service.extractProductName(dto));
 	}
 

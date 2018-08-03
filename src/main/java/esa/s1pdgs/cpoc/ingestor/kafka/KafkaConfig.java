@@ -22,123 +22,140 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import esa.s1pdgs.cpoc.ingestor.files.model.dto.KafkaConfigFileDto;
-import esa.s1pdgs.cpoc.ingestor.files.model.dto.KafkaEdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 
 /**
  * KAFKA configuration
+ * 
  * @author Cyrielle Gailliard
- *
  */
 @Configuration
 @EnableKafka
 public class KafkaConfig {
-	
-	/**
-	 * URI of KAFKA cluster
-	 */
-	@Value("${kafka.bootstrap-servers}")
-	private String bootstrapServers;
-	/**
-	 * Ingestor group identifier for KAFKA
-	 */
-	@Value("${kafka.group-id}")
-	private String kafkaGroupId;
-	/**
-	 * Pool timeout for consumption
-	 */
-	@Value("${kafka.poll-timeout}")
-	private long kafkaPooltimeout;
 
-	@Value("${kafka.producer-retries}")
-	protected int kafkaRetriesConfig;
+    /**
+     * URI of KAFKA cluster
+     */
+    @Value("${kafka.bootstrap-servers}")
+    private String bootstrapServers;
+    /**
+     * Ingestor group identifier for KAFKA
+     */
+    @Value("${kafka.group-id}")
+    private String kafkaGroupId;
+    /**
+     * Pool timeout for consumption
+     */
+    @Value("${kafka.poll-timeout}")
+    private long kafkaPooltimeout;
 
-	/**
-	 * Consumer configuration
-	 * @return
-	 */
-	@Bean
-	public Map<String, Object> consumerConfigs() {
-		Map<String, Object> props = new HashMap<>();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
-		return props;
-	}
+    @Value("${kafka.producer-retries}")
+    protected int kafkaRetriesConfig;
 
-	/**
-	 * Consumer factory
-	 * @return
-	 */
-	@Bean
-	public ConsumerFactory<String, KafkaConfigFileDto> consumerFactory() {
-		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new JsonDeserializer<>(KafkaConfigFileDto.class));
-	}
+    /**
+     * Consumer configuration
+     * 
+     * @return
+     */
+    @Bean
+    public Map<String, Object> consumerConfigs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                JsonDeserializer.class);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
+        return props;
+    }
 
-	/**
-	 * Listener containers factory
-	 * @return
-	 */
-	@Bean
-	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, KafkaConfigFileDto>> kafkaListenerContainerFactory() {
-		
-		ConcurrentKafkaListenerContainerFactory<String, KafkaConfigFileDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(consumerFactory());
-		factory.getContainerProperties();
-		factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
-		return factory;
-	}
+    /**
+     * Consumer factory
+     * 
+     * @return
+     */
+    @Bean
+    public ConsumerFactory<String, AuxiliaryFileDto> consumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(consumerConfigs(),
+                new StringDeserializer(),
+                new JsonDeserializer<>(AuxiliaryFileDto.class));
+    }
 
-	/**
-	 * Producer configuration
-	 * @return
-	 */
-	@Bean
-	public Map<String, Object> producerConfig() {
-		Map<String, Object> props = new HashMap<>();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-		props.put(ProducerConfig.RETRIES_CONFIG, kafkaRetriesConfig);
-		props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
-		return props;
-	}
+    /**
+     * Listener containers factory
+     * 
+     * @return
+     */
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, AuxiliaryFileDto>> kafkaListenerContainerFactory() {
 
-	/**
-	 * Producer factory
-	 * @return
-	 */
-	@Bean(name="producerSessionFactory")
-	public ProducerFactory<String, KafkaEdrsSessionDto> producerSessionFactory() {
-		return new DefaultKafkaProducerFactory<>(producerConfig());
-	}
+        ConcurrentKafkaListenerContainerFactory<String, AuxiliaryFileDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.getContainerProperties();
+        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
+        return factory;
+    }
 
-	/**
-	 * KAFKA template, the producer wrapper (the producer factory is provided in it)
-	 * @return
-	 */
-	@Bean(name="kafkaSessionTemplate")
-	public KafkaTemplate<String, KafkaEdrsSessionDto> kafkaSessionTemplate() {
-		return new KafkaTemplate<>(producerSessionFactory());
-	}
+    /**
+     * Producer configuration
+     * 
+     * @return
+     */
+    @Bean
+    public Map<String, Object> producerConfig() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                JsonSerializer.class);
+        props.put(ProducerConfig.RETRIES_CONFIG, kafkaRetriesConfig);
+        props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
+        return props;
+    }
 
-	/**
-	 * Producer factory
-	 * @return
-	 */
-	@Bean(name="producerConfigFileFactory")
-	public ProducerFactory<String, KafkaConfigFileDto> producerConfigFileFactory() {
-		return new DefaultKafkaProducerFactory<>(producerConfig());
-	}
+    /**
+     * Producer factory
+     * 
+     * @return
+     */
+    @Bean(name = "producerSessionFactory")
+    public ProducerFactory<String, EdrsSessionDto> producerSessionFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfig());
+    }
 
-	/**
-	 * KAFKA template, the producer wrapper (the producer factory is provided in it)
-	 * @return
-	 */
-	@Bean(name="kafkaConfigFileTemplate")
-	public KafkaTemplate<String, KafkaConfigFileDto> kafkaConfigFileTemplate() {
-		return new KafkaTemplate<>(producerConfigFileFactory());
-	}
+    /**
+     * KAFKA template, the producer wrapper (the producer factory is provided in
+     * it)
+     * 
+     * @return
+     */
+    @Bean(name = "kafkaSessionTemplate")
+    public KafkaTemplate<String, EdrsSessionDto> kafkaSessionTemplate() {
+        return new KafkaTemplate<>(producerSessionFactory());
+    }
+
+    /**
+     * Producer factory
+     * 
+     * @return
+     */
+    @Bean(name = "producerConfigFileFactory")
+    public ProducerFactory<String, AuxiliaryFileDto> producerConfigFileFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfig());
+    }
+
+    /**
+     * KAFKA template, the producer wrapper (the producer factory is provided in
+     * it)
+     * 
+     * @return
+     */
+    @Bean(name = "kafkaConfigFileTemplate")
+    public KafkaTemplate<String, AuxiliaryFileDto> kafkaConfigFileTemplate() {
+        return new KafkaTemplate<>(producerConfigFileFactory());
+    }
 
 }

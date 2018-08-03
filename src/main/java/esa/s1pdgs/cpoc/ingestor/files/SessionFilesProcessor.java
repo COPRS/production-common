@@ -3,18 +3,18 @@ package esa.s1pdgs.cpoc.ingestor.files;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
-import esa.s1pdgs.cpoc.ingestor.files.model.ProductFamily;
-import esa.s1pdgs.cpoc.ingestor.files.model.dto.KafkaEdrsSessionDto;
 import esa.s1pdgs.cpoc.ingestor.files.services.EdrsSessionFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaSessionProducer;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 
 /**
  * 
  */
 @Component
-public class SessionFilesProcessor extends AbstractFileProcessor<KafkaEdrsSessionDto> {
+public class SessionFilesProcessor extends AbstractFileProcessor<EdrsSessionDto> {
 
 	/**
 	 * 
@@ -32,8 +32,8 @@ public class SessionFilesProcessor extends AbstractFileProcessor<KafkaEdrsSessio
 	 * 
 	 */
 	@Override
-	protected KafkaEdrsSessionDto buildDto(final FileDescriptor descriptor) {
-		return new KafkaEdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(),
+	protected EdrsSessionDto buildDto(final FileDescriptor descriptor) {
+		return new EdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(),
 				descriptor.getProductType(), descriptor.getMissionId(), descriptor.getSatelliteId());
 	}
 
