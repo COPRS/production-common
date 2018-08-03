@@ -5,9 +5,9 @@ import static org.mockito.Mockito.doReturn;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import fr.viveris.s1pdgs.scaler.openstack.OpenStackServerProperties;
-import fr.viveris.s1pdgs.scaler.openstack.OpenStackServerProperties.ServerProperties;
-import fr.viveris.s1pdgs.scaler.openstack.OpenStackServerProperties.VolumeProperties;
+import esa.s1pdgs.cpoc.scaler.openstack.OpenStackServerProperties;
+import esa.s1pdgs.cpoc.scaler.openstack.OpenStackServerProperties.ServerProperties;
+import esa.s1pdgs.cpoc.scaler.openstack.OpenStackServerProperties.VolumeProperties;
 
 public class MockPropertiesTest {
 
