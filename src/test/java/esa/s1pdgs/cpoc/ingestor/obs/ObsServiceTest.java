@@ -23,13 +23,12 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.ingestor.exceptions.ObjectStorageException;
 import esa.s1pdgs.cpoc.ingestor.files.model.ProductFamily;
-import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsClient;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsFamily;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsServiceException;
-import fr.viveris.s1pdgs.libs.obs_sdk.ObsUploadObject;
-import fr.viveris.s1pdgs.libs.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 /**
  * Test the ObsService
