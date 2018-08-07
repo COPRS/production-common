@@ -634,9 +634,15 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		} catch (IOException | JAXBException e) {
 			throw new InternalErrorException("Cannot send the job", e);
 		}
-
-		// Thrid, send the job
-		LOGGER.info("{} [productName {}] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier());
+		String s1pdgsTask;
+		if(family == ProductFamily.L1_JOB) {
+		    s1pdgsTask="L1JobGenerator";
+		}
+		else {
+		    s1pdgsTask="L0JobGenerator";
+		}
+		// Third, send the job
+		LOGGER.info("{} [productName {}] [s1pdgsTask {}] [subTask sendJob] [STOP] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier(), s1pdgsTask);
 		
         this.outputFactory.sendJob(job.getInputMessage(), r);
 		
