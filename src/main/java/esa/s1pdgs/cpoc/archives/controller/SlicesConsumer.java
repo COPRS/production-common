@@ -54,7 +54,7 @@ public class SlicesConsumer {
     		final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
         LOGGER.info(
-                "[MONITOR] [step 0] [family {}] [productName {}] Starting distribution",
+                "[REPORT] [step 0] [family {}] [productName {}] [s1pdgsTask Archiver] [START] Start distribution",
                 dto.getFamily(), dto.getProductName());
         try {
             this.obsService.downloadFile(dto.getFamily(),
@@ -72,7 +72,7 @@ public class SlicesConsumer {
                     dto.getFamily(), dto.getProductName(), ErrorCode.KAFKA_COMMIT_ERROR.getCode(),
                     exc.getMessage());
 		}
-        LOGGER.info("[MONITOR] [step 0] [family {}] [productName {}] End",
+        LOGGER.info("[REPORT] [step 0] [family {}] [productName {}] [s1pdgsTask Archiver] [STOP] End Distribution",
                 dto.getFamily(), dto.getProductName());
     }
 }
