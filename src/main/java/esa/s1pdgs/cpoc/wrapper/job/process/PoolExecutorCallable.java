@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
@@ -48,6 +48,10 @@ public class PoolExecutorCallable implements Callable<Boolean> {
      * Application properties
      */
     private final ApplicationProperties properties;
+    /**
+     * Application level
+     */
+    private final ApplicationLevel appLevel;
 
     /**
      * Will create one PoolProcessor per pool
@@ -57,7 +61,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
      * @param prefixMonitorLogs
      */
     public PoolExecutorCallable(final ApplicationProperties properties,
-            final LevelJobDto job, final String prefixLogs) {
+            final LevelJobDto job, final String prefixLogs, final ApplicationLevel appLevel) {
         this.active = false;
         this.properties = properties;
         this.prefixMonitorLogs = prefixLogs;
@@ -67,9 +71,10 @@ public class PoolExecutorCallable implements Callable<Boolean> {
             counter++;
             this.processors.add(new PoolProcessor(pool, job.getJobOrder(),
                     job.getWorkDirectory(),
-                    String.format("%s [pool %d]", prefixMonitorLogs, counter),
+                    String.format("%s [poolCounter %d] [s1pdgsTask %sProcessing] ", prefixMonitorLogs, counter, appLevel),
                     properties.getTmProcOneTaskS()));
         }
+        this.appLevel = appLevel;
     }
 
     /**
@@ -105,7 +110,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
                                 + " seconds");
             }
 
-            LOGGER.info("{} Start launching processes", prefixMonitorLogs);
+            LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] Start launching processes", prefixMonitorLogs, this.appLevel);
             for (PoolProcessor poolProcessor : processors) {
                 if (isInterrupted()) {
                     throw new InternalErrorException(

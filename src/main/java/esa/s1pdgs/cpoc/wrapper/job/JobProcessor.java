@@ -156,9 +156,8 @@ public class JobProcessor {
         // Initialize processing
         // ------------------------------------------------------
         LevelJobDto job = message.getBody();
-        // Initialize job processing
-        LOGGER.info("{} Initializing job processing",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_READ, job));
+        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [START] Start L0 Job generation",
+        		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_READ, job), job.getProductIdentifier());
         File workdir = new File(job.getWorkDirectory());
         // Remove working directory if exist
         if (workdir.exists()) {
@@ -172,7 +171,7 @@ public class JobProcessor {
         }
         // Initialize the pool processor executor
         PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties,
-                job, getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));
+                job, getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());
         ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
         ExecutorCompletionService<Boolean> procCompletionSrv =
                 new ExecutorCompletionService<>(procExecutorSrv);
@@ -186,7 +185,7 @@ public class JobProcessor {
         OutputProcessor outputProcessor =
                 new OutputProcessor(obsService, procuderFactory, message,
                         outputListFile, this.properties.getSizeBatchUpload(),
-                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
+                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), this.properties.getLevel());
 
         // ----------------------------------------------------------
         // Process message
@@ -194,8 +193,8 @@ public class JobProcessor {
         processJob(message, inputDownloader, outputProcessor, procExecutorSrv,
                 procCompletionSrv, procExecutor);
 
-        LOGGER.info("{} End L0 job generation",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_END, job));
+        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing {} [productName {}] [STOP] End L0 job generation",
+        		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_END, job), job.getProductIdentifier());
 
     }
 

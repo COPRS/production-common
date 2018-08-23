@@ -98,13 +98,17 @@ public class PoolProcessor {
      */
     public void process() throws AbstractCodedException {
         boolean stopAllProcessCall = false;
+        String prefixReport;
+        int j=0;
         try {
             try {
                 LOGGER.info("{} 1 - Submitting tasks {}", prefixLogs,
                         pool.getTasks());
                 for (LevelJobTaskDto task : pool.getTasks()) {
+                	prefixReport= "[REPORT] " + prefixLogs + "[taskCounter " + j + "]";
                     completionSrv.submit(new TaskCallable(task.getBinaryPath(),
-                            jobOrderPath, workDirectory));
+                            jobOrderPath, workDirectory, prefixReport));
+                    j++;
                 }
                 LOGGER.info("{} 2 - Waiting for tasks execution", prefixLogs);
                 for (int i = 0; i < nbTasks; i++) {

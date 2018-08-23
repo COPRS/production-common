@@ -46,7 +46,7 @@ public class TaskCallableTest {
 		assertTrue(!(new File("./3")).exists());
 		ExecutorService service = Executors.newSingleThreadExecutor();
 		CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
-		completionService.submit(new TaskCallable(command, "3", "./"));
+		completionService.submit(new TaskCallable(command, "3", "./", ""));
 		Future<TaskResult> future = completionService.take();
 		TaskResult r = future.get();
 		assertEquals(command, r.getBinary());
@@ -54,7 +54,7 @@ public class TaskCallableTest {
 		assertTrue((new File("./3")).isDirectory());
 		
 		command = SystemUtils.getCmdRmdir();
-		completionService.submit(new TaskCallable(command, "3", "./"));
+		completionService.submit(new TaskCallable(command, "3", "./", ""));
 		completionService.take();
 		assertTrue(!(new File("./3")).exists());
 	}
@@ -67,12 +67,12 @@ public class TaskCallableTest {
 		// Test when folder do not exist
 		ExecutorService service = Executors.newSingleThreadExecutor();
 		CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
-		completionService.submit(new TaskCallable(command, "not_exist", "./src/main/"));
+		completionService.submit(new TaskCallable(command, "not_exist", "./src/main/", ""));
 		Future<TaskResult> future = completionService.take();
 		TaskResult r = future.get();
 		assertNotEquals(0, r.getExitCode());
 		// Test when folder exist
-		completionService.submit(new TaskCallable(command, "resources", "./src/main/"));
+		completionService.submit(new TaskCallable(command, "resources", "./src/main/", ""));
 		Future<TaskResult> future2 = completionService.take();
 		TaskResult r2 = future2.get();
 		assertEquals(0, r2.getExitCode());
@@ -86,7 +86,7 @@ public class TaskCallableTest {
         assertTrue(!(new File("./3")).exists());
         ExecutorService service = Executors.newSingleThreadExecutor();
         CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
-        completionService.submit(new TaskCallable(command, "3", "./"));
+        completionService.submit(new TaskCallable(command, "3", "./", ""));
         
         // Interrupt
         service.shutdownNow();
