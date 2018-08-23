@@ -124,7 +124,7 @@ public abstract class GenericExtractor<T> {
         // ----------------------------------------------------------
         T dto = message.getBody();
         LOGGER.info(
-                "[MONITOR] [Step 0] [{}] [productName {}] Starting metadata extraction",
+                "[REPORT] [Step 0] [{}] [s1pdgsTask MetadataExtraction] [START] [productName {}] Starting metadata extraction",
                 category, extractProductNameFromDto(dto));
         appStatus.setProcessing(category, message.getIdentifier());
 
@@ -180,7 +180,7 @@ public abstract class GenericExtractor<T> {
     protected void ackNegatively(final GenericMessageDto<T> message,
             final String errorMessage) {
         LOGGER.info(
-                "[MONITOR] [step 5] [{}] [productName {}] Acknowledging negatively",
+                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP] [productName {}] Acknowledging negatively",
                 category, extractProductNameFromDto(message.getBody()));
         LOGGER.error(errorMessage);
         try {
@@ -202,7 +202,7 @@ public abstract class GenericExtractor<T> {
      */
     protected void ackPositively(final GenericMessageDto<T> message) {
         LOGGER.info(
-                "[MONITOR] [step 5] [{}] [productName {}] Acknowledging positively",
+                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP] [productName {}] Acknowledging positively",
                 category, extractProductNameFromDto(message.getBody()));
         try {
             mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK,
