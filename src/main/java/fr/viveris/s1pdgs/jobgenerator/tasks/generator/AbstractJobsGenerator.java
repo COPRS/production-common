@@ -642,7 +642,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		    s1pdgsTask="L0JobGenerator";
 		}
 		// Third, send the job
-		LOGGER.info("{} [productName {}] [s1pdgsTask {}] [subTask sendJob] [STOP] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier(), s1pdgsTask);
+		LOGGER.info("[REPORT] {} [productName {}] [s1pdgsTask {}] [subTask sendJob] [STOP] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier(), s1pdgsTask);
 		
         this.outputFactory.sendJob(job.getInputMessage(), r);
 		

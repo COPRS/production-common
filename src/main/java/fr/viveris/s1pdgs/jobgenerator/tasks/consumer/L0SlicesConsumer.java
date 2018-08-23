@@ -115,7 +115,7 @@ public class L0SlicesConsumer {
             String stopTime = m.group(this.patternSettings.getMGroupStopTime());
             Date dateStart = DateUtils.convertWithSimpleDateFormat(startTime, DATE_FORMAT);
             Date dateStop = DateUtils.convertWithSimpleDateFormat(stopTime, DATE_FORMAT);
-            LOGGER.info("[MONITOR] [step 1] [s1pdgsTask L1JobGeneration] [subTask StartJobGeneration] [productName {}] [START] [satelliteId {}] [missionId {}] [acquisition {}] [dateStart {}]  [dateStop {}]", 
+            LOGGER.info("[REPORT] [step 1] [s1pdgsTask L1JobGeneration] [subTask StartJobGeneration] [productName {}] [START] [satelliteId {}] [missionId {}] [acquisition {}] [dateStart {}]  [dateStop {}]", 
                     leveldto.getProductName(), satelliteId, missionId, acquisition, dateStart, dateStop);
             // Initialize the JOB
             L0Slice slice = new L0Slice(acquisition);
@@ -125,7 +125,7 @@ public class L0SlicesConsumer {
 
             // Dispatch job
             step++;
-            LOGGER.info("[MONITOR] [step 2] [productName {}] [s1pdgsTask L1JobGeneration] [subTask Dispatch] [productName {}] [START] [satelliteId {}] [missionId {}] [acquisition {}] [dateStart {}]  [dateStop {}] Dispatching product", 
+            LOGGER.info("[REPORT] [step 2] [productName {}] [s1pdgsTask L1JobGeneration] [subTask Dispatch] [productName {}] [STOP] [satelliteId {}] [missionId {}] [acquisition {}] [dateStart {}]  [dateStop {}] Dispatching product", 
                     leveldto.getProductName(), satelliteId, missionId, acquisition, dateStart, dateStop);
             this.jobsDispatcher.dispatch(job);
 
