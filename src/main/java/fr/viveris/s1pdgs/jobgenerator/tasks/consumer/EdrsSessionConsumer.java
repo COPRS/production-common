@@ -110,8 +110,8 @@ public class EdrsSessionConsumer {
 		if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
 
 			int step = 0;
-			LOGGER.info("[MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask StartJobGeneration] [START] [productName {}] [channelId {}] [missionId {}] [satelliteId {}] Starting job generation", step,
-					leveldto.getObjectStorageKey(), leveldto.getChannelId(), leveldto.getMissionId(), leveldto.getSatelliteId());
+			LOGGER.info("[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Dispatch] [START] [productName {}] Starting job generation", step,
+					leveldto.getObjectStorageKey());
 
 			try {
 				// Clean sessions for whom the last message has been consumed for too long
@@ -150,8 +150,7 @@ public class EdrsSessionConsumer {
 					if (session.getObject().getChannel1() != null && session.getObject().getChannel2() != null) {
 						step = 2;
 						this.cachedSessions.remove(file.getSessionId());
-						LOGGER.info("[MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Dispatch] [productName {}] [missionId {}] [satelliteId {}] Dispatching session", step,
-								file.getSessionId(), session.getMissionId(), session.getSatelliteId());
+						LOGGER.info("[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Dispatch] [STOP OK] [productName {}] Dispatching session", step);
 						this.jobDispatcher.dispatch(new Job<EdrsSession>(session, message));
 					} else {
 						session.getObject().setLastTsMsg(System.currentTimeMillis());

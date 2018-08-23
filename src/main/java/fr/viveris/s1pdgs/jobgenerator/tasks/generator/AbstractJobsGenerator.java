@@ -338,7 +338,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 					}
 
 					if (todo) {
-						LOGGER.info("{} [productName {}] [status {}] Trying job generation", this.prefixLogMonitor,
+					    String headReport = "";
+					    if(status.getNbRetries() == 0){
+					        headReport = String.format("[REPORT] [s1pdgsTask %sProcessing] [subTask Generation] [START]", this.taskTable.getLevel());
+					        
+					    }
+						LOGGER.info("{} {} [productName {}] [status {}] Trying job generation", headReport, this.prefixLogMonitor,
 								v.getProduct().getIdentifier(), status);
 
 						// Check primary input
@@ -634,15 +639,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 		} catch (IOException | JAXBException e) {
 			throw new InternalErrorException("Cannot send the job", e);
 		}
-		String s1pdgsTask;
-		if(family == ProductFamily.L1_JOB) {
-		    s1pdgsTask="L1JobGenerator";
-		}
-		else {
-		    s1pdgsTask="L0JobGenerator";
-		}
 		// Third, send the job
-		LOGGER.info("[REPORT] {} [productName {}] [s1pdgsTask {}] [subTask sendJob] [STOP] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier(), s1pdgsTask);
+		LOGGER.info("[REPORT] {} [productName {}] [s1pdgsTask {}JobGenerator] [subTask Generation] [STOP OK] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier(), family);
 		
         this.outputFactory.sendJob(job.getInputMessage(), r);
 		
