@@ -28,7 +28,8 @@ process:
 
 status:
   delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}
-  max-error-counter: ${wrapper_status_max-error-counter:3}
+  max-error-counter-processing: ${wrapper_status_max-error-counter-processing:3}
+  max-error-counter-mqi: ${wrapper_status_max-error-counter-mqi:30}
 
 dev:
   steps-activation:

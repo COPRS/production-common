@@ -147,6 +147,7 @@ public class JobProcessor {
         }
         if (message == null || message.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
+            this.appStatus.setError("NEXT_MESSAGE");
             return;
         }
         appStatus.setProcessing(message.getIdentifier());
@@ -356,7 +357,7 @@ public class JobProcessor {
                         "{} [code {}] Failed to erase local working directory",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job),
                         ErrorCode.INTERNAL_ERROR.getCode());
-                this.appStatus.setError();
+                this.appStatus.setError("PROCESSING");
             }
         } else {
             LOGGER.info("{} Erasing local working directory bypassed",
@@ -422,7 +423,7 @@ public class JobProcessor {
                             dto.getBody()),
                     ace.getCode().getCode(), ace.getLogMessage());
         }
-        appStatus.setError();
+        appStatus.setError("PROCESSING");
     }
 
     protected void ackPositively(final boolean stop,
@@ -438,7 +439,7 @@ public class JobProcessor {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
                             dto.getBody()),
                     ace.getCode().getCode(), ace.getLogMessage());
-            appStatus.setError();
+            appStatus.setError("PROCESSING");
         }
     }
 }
