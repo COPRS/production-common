@@ -101,8 +101,8 @@ public class StatusRestControllerTest extends RestControllerTest {
 		StatusPerCategory status1 = new StatusPerCategory(ProductCategory.AUXILIARY_FILES);
 		status1.setProcessing(125);
 		StatusPerCategory status2 = new StatusPerCategory(ProductCategory.EDRS_SESSIONS);
-		status2.setError(3);
-		status2.setError(3);
+		status2.setErrorProcessing(3);
+		status2.setErrorProcessing(3);
 
 		Map<ProductCategory, StatusPerCategory> catStatus = new HashMap<>();
 		catStatus.put(ProductCategory.AUXILIARY_FILES, status1);

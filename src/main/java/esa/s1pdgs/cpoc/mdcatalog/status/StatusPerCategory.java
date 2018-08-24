@@ -26,9 +26,14 @@ public class StatusPerCategory {
     private long dateLastChangeMs;
 
     /**
-     * Number of consecutive errors
+     * Number of consecutive errors for processing
      */
-    private int errorCounter;
+    private int errorCounterProcessing;
+    
+    /**
+     * Number of consecutive errors for next message
+     */
+    private int errorCounterNextMessage;
 
     /**
      * Processing message identifier
@@ -40,7 +45,8 @@ public class StatusPerCategory {
      */
     public StatusPerCategory(final ProductCategory category) {
         this.state = AppState.WAITING;
-        this.errorCounter = 0;
+        this.errorCounterProcessing = 0;
+        this.errorCounterNextMessage = 0;
         this.dateLastChangeMs = System.currentTimeMillis();
         this.category = category;
         this.processingMsgId = 0;
@@ -77,9 +83,17 @@ public class StatusPerCategory {
     /**
      * @return the errorCounter
      */
-    public int getErrorCounter() {
-        return errorCounter;
+    public int getErrorCounterProcessing() {
+        return errorCounterProcessing;
     }
+
+    /**
+     * @return the errorCounterNextMessage
+     */
+    public int getErrorCounterNextMessage() {
+        return errorCounterNextMessage;
+    }
+
 
     /**
      * Set status WAITING
@@ -100,19 +114,34 @@ public class StatusPerCategory {
             state = AppState.PROCESSING;
             this.processingMsgId = processingMsgId;
             dateLastChangeMs = System.currentTimeMillis();
-            errorCounter = 0;
+            errorCounterProcessing = 0;
+            errorCounterNextMessage = 0;
         }
     }
 
     /**
      * Set status ERROR
      */
-    public void setError(final int maxErrorCounter) {
+    public void setErrorProcessing(final int maxErrorCounter) {
         if (!isFatalError()) {
             state = AppState.ERROR;
             dateLastChangeMs = System.currentTimeMillis();
-            errorCounter++;
-            if (errorCounter >= maxErrorCounter) {
+            errorCounterProcessing++;
+            if (errorCounterProcessing >= maxErrorCounter) {
+                setFatalError();
+            }
+        }
+    }
+    
+    /**
+     * @param errorCounterNextMessage the errorCounterNextMessage to set
+     */
+    public void setErrorNextMessage(final int maxErrorCounterNextMessage) {
+        if (!isFatalError()) {
+            state = AppState.ERROR;
+            dateLastChangeMs = System.currentTimeMillis();
+            errorCounterNextMessage++;
+            if (errorCounterNextMessage >= maxErrorCounterNextMessage) {
                 setFatalError();
             }
         }
@@ -168,9 +197,10 @@ public class StatusPerCategory {
     @Override
     public String toString() {
         return String.format(
-                "{state: %s, category: %s, dateLastChangeMs: %s, errorCounter: %s, processingMsgId: %s}",
-                state, category, dateLastChangeMs, errorCounter,
-                processingMsgId);
+                "{state: %s, category: %s, dateLastChangeMs: %s, errorCounterProcessing: %s, "
+                + "errorCounterNextMessage: %s, processingMsgId: %s}",
+                state, category, dateLastChangeMs, errorCounterProcessing,
+                errorCounterNextMessage, processingMsgId);
     }
 
     /**
@@ -178,8 +208,8 @@ public class StatusPerCategory {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(state, category, dateLastChangeMs, errorCounter,
-                processingMsgId);
+        return Objects.hash(state, category, dateLastChangeMs, errorCounterProcessing,
+                errorCounterNextMessage, processingMsgId);
     }
 
     /**
@@ -198,7 +228,8 @@ public class StatusPerCategory {
             ret = Objects.equals(state, other.state)
                     && Objects.equals(category, other.category)
                     && dateLastChangeMs == other.dateLastChangeMs
-                    && errorCounter == other.errorCounter
+                    && errorCounterProcessing == other.errorCounterProcessing
+                    && errorCounterNextMessage == other.errorCounterNextMessage
                     && processingMsgId == other.processingMsgId;
         }
         return ret;

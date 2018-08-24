@@ -18,10 +18,15 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 @Component
 public class AppStatus {
 
-	/**
-	 * Maximal number of consecutive errors
-	 */
-	private final int maxErrorCounter;
+    /**
+     * Maximal number of consecutive errors for processing
+     */
+    private final int maxErrorCounterProcessing;
+    
+    /**
+     * Maximal number of consecutive errors for MQI
+     */
+    private final int maxErrorCounterNextMessage;
 
 	/**
 	 * Identifier of the processing message
@@ -34,8 +39,10 @@ public class AppStatus {
 	 * @param maxErrorCounter
 	 */
 	@Autowired
-	public AppStatus(@Value("${status.max-error-counter}") final int maxErrorCounter) {
-		this.maxErrorCounter = maxErrorCounter;
+	public AppStatus(@Value("${status.max-error-counter-processing}") final int maxErrorCounterProcessing, 
+	        @Value("${status.max-error-counter-mqi}") final int maxErrorCounterNextMessage) {
+		this.maxErrorCounterProcessing = maxErrorCounterProcessing;
+		this.maxErrorCounterNextMessage = maxErrorCounterNextMessage;
 		this.status = new HashMap<>();
 		this.status.put(ProductCategory.AUXILIARY_FILES, new StatusPerCategory(ProductCategory.AUXILIARY_FILES));
 		this.status.put(ProductCategory.EDRS_SESSIONS, new StatusPerCategory(ProductCategory.EDRS_SESSIONS));
@@ -117,9 +124,15 @@ public class AppStatus {
 	/**
 	 * Set application as error
 	 */
-	public synchronized void setError(final ProductCategory category) {
+	public synchronized void setError(final ProductCategory category, final String ErrorType) {
 		if (status.containsKey(category)) {
-			status.get(category).setError(maxErrorCounter);
+		    if(ErrorType.equals("PROCESSING")) {
+		        status.get(category).setErrorProcessing(maxErrorCounterProcessing);
+		    }
+		    if(ErrorType.equals("NEXT_MESSAGE")) {
+		        status.get(category).setErrorNextMessage(maxErrorCounterNextMessage);
+		    }
 		}
 	}
+	
 }

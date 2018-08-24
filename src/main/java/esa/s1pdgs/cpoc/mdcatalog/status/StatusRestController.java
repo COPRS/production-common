@@ -53,7 +53,7 @@ public class StatusRestController {
 			long currentTimestamp = System.currentTimeMillis();
 			long timeSinceLastChange = currentTimestamp - catStatus.getDateLastChangeMs();
 			globalStatus.addStatusPerCategory(new StatusPerCategoryDto(catStatus.getState(), timeSinceLastChange,
-					catStatus.getErrorCounter(), catStatus.getCategory()));
+					catStatus.getErrorCounterProcessing(), catStatus.getCategory()));
 		}
 		if (appStatus.isFatalError()) {
 			return new ResponseEntity<GlobalStatusDto>(globalStatus, HttpStatus.INTERNAL_SERVER_ERROR);

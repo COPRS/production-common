@@ -25,7 +25,8 @@ public class StatusPerCategoryTest {
         StatusPerCategory dto =
                 new StatusPerCategory(ProductCategory.EDRS_SESSIONS);
         assertEquals(AppState.WAITING, dto.getState());
-        assertEquals(0, dto.getErrorCounter());
+        assertEquals(0, dto.getErrorCounterProcessing());
+        assertEquals(0, dto.getErrorCounterNextMessage());
         assertEquals(0, dto.getProcessingMsgId());
         assertEquals(ProductCategory.EDRS_SESSIONS, dto.getCategory());
     }
@@ -51,41 +52,41 @@ public class StatusPerCategoryTest {
         dto.setProcessing(1245);
         assertTrue(dto.isProcessing());
         assertEquals(AppState.PROCESSING, dto.getState());
-        assertEquals(0, dto.getErrorCounter());
+        assertEquals(0, dto.getErrorCounterProcessing());
         assertEquals(1245, dto.getProcessingMsgId());
         
         // Set processing -> waiting
         dto.setWaiting();
         assertTrue(dto.isWaiting());
         assertEquals(AppState.WAITING, dto.getState());
-        assertEquals(0, dto.getErrorCounter());
+        assertEquals(0, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
         
         // Set waiting -> error (twice)
-        dto.setError(3);
+        dto.setErrorProcessing(3);
         assertTrue(dto.isError());
         assertEquals(AppState.ERROR, dto.getState());
-        assertEquals(1, dto.getErrorCounter());
+        assertEquals(1, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
         
-        dto.setError(3);
+        dto.setErrorProcessing(3);
         assertTrue(dto.isError());
         assertEquals(AppState.ERROR, dto.getState());
-        assertEquals(2, dto.getErrorCounter());
+        assertEquals(2, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
         
         // Set error -> waiting
         dto.setWaiting();
         assertTrue(dto.isWaiting());
         assertEquals(AppState.WAITING, dto.getState());
-        assertEquals(2, dto.getErrorCounter());
+        assertEquals(2, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
         
         // Set waiting -> fatal error
         dto.setFatalError();
         assertTrue(dto.isFatalError());
         assertEquals(AppState.FATALERROR, dto.getState());
-        assertEquals(2, dto.getErrorCounter());
+        assertEquals(2, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
         
     }
@@ -103,21 +104,21 @@ public class StatusPerCategoryTest {
         dto.setWaiting();
         assertTrue(dto.isFatalError());
         assertEquals(AppState.FATALERROR, dto.getState());
-        assertEquals(0, dto.getErrorCounter());
+        assertEquals(0, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
         
         // Set fatalerror -> waiting
         dto.setProcessing(1245);
         assertTrue(dto.isFatalError());
         assertEquals(AppState.FATALERROR, dto.getState());
-        assertEquals(0, dto.getErrorCounter());
+        assertEquals(0, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
         
         // Set fatalerror -> error (twice)
-        dto.setError(3);
+        dto.setErrorProcessing(3);
         assertTrue(dto.isFatalError());
         assertEquals(AppState.FATALERROR, dto.getState());
-        assertEquals(0, dto.getErrorCounter());
+        assertEquals(0, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
         
     }
@@ -130,19 +131,19 @@ public class StatusPerCategoryTest {
         StatusPerCategory dto =
                 new StatusPerCategory(ProductCategory.EDRS_SESSIONS);
         
-        dto.setError(3);
+        dto.setErrorProcessing(3);
         assertEquals(AppState.ERROR, dto.getState());
-        assertEquals(1, dto.getErrorCounter());
+        assertEquals(1, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
 
-        dto.setError(3);
+        dto.setErrorProcessing(3);
         assertEquals(AppState.ERROR, dto.getState());
-        assertEquals(2, dto.getErrorCounter());
+        assertEquals(2, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
 
-        dto.setError(3);
+        dto.setErrorProcessing(3);
         assertEquals(AppState.FATALERROR, dto.getState());
-        assertEquals(3, dto.getErrorCounter());
+        assertEquals(3, dto.getErrorCounterProcessing());
         assertEquals(0, dto.getProcessingMsgId());
     }
 

@@ -34,7 +34,7 @@ public class AppStatusTest {
         
         doNothing().when(mqiStatusService).stop();
         
-        appStatus = new AppStatus(3);
+        appStatus = new AppStatus(3,30);
     }
     
     /**
@@ -67,22 +67,22 @@ public class AppStatusTest {
         assertEquals(0, appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).getProcessingMsgId());
         assertEquals(0, appStatus.getProcessingMsgId(ProductCategory.AUXILIARY_FILES));
 
-        appStatus.setError(ProductCategory.AUXILIARY_FILES);
+        appStatus.setError(ProductCategory.AUXILIARY_FILES, "PROCESSING");
         assertTrue(appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).isError());
         assertTrue(appStatus.getStatus().get(ProductCategory.EDRS_SESSIONS).isWaiting());
         assertTrue(appStatus.getStatus().get(ProductCategory.LEVEL_PRODUCTS).isWaiting());
         assertEquals(0, appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).getProcessingMsgId());
-        assertEquals(1, appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).getErrorCounter());
+        assertEquals(1, appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).getErrorCounterProcessing());
         assertEquals(0, appStatus.getProcessingMsgId(ProductCategory.AUXILIARY_FILES));
 
-        appStatus.setError(ProductCategory.AUXILIARY_FILES);
+        appStatus.setError(ProductCategory.AUXILIARY_FILES, "PROCESSING");
         assertTrue(appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).isError());
 
-        appStatus.setError(ProductCategory.AUXILIARY_FILES);
+        appStatus.setError(ProductCategory.AUXILIARY_FILES, "PROCESSING");
         assertTrue(appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).isFatalError());
         assertTrue(appStatus.getStatus().get(ProductCategory.EDRS_SESSIONS).isWaiting());
         assertTrue(appStatus.getStatus().get(ProductCategory.LEVEL_PRODUCTS).isWaiting());
-        assertEquals(3, appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).getErrorCounter());
+        assertEquals(3, appStatus.getStatus().get(ProductCategory.AUXILIARY_FILES).getErrorCounterProcessing());
     }
 
     /**
@@ -91,11 +91,11 @@ public class AppStatusTest {
     @Test
     public void testIsFatalError() {
         assertFalse(appStatus.isFatalError());
-        appStatus.setError(ProductCategory.EDRS_SESSIONS);
+        appStatus.setError(ProductCategory.EDRS_SESSIONS, "PROCESSING");
         assertFalse(appStatus.isFatalError());
-        appStatus.setError(ProductCategory.EDRS_SESSIONS);
+        appStatus.setError(ProductCategory.EDRS_SESSIONS, "PROCESSING");
         assertFalse(appStatus.isFatalError());
-        appStatus.setError(ProductCategory.EDRS_SESSIONS);
+        appStatus.setError(ProductCategory.EDRS_SESSIONS, "PROCESSING");
         assertTrue(appStatus.isFatalError());
     }
     
@@ -115,19 +115,19 @@ public class AppStatusTest {
         appStatus.setProcessing(ProductCategory.LEVEL_PRODUCTS, 1245);
         assertEquals(AppState.PROCESSING, appStatus.getGlobalAppState());
         
-        appStatus.setError(ProductCategory.EDRS_SESSIONS);
+        appStatus.setError(ProductCategory.EDRS_SESSIONS, "PROCESSING");
         assertEquals(AppState.ERROR, appStatus.getGlobalAppState());
         
-        appStatus.setError(ProductCategory.AUXILIARY_FILES);
+        appStatus.setError(ProductCategory.AUXILIARY_FILES, "PROCESSING");
         assertEquals(AppState.ERROR, appStatus.getGlobalAppState());
         
-        appStatus.setError(ProductCategory.AUXILIARY_FILES);
+        appStatus.setError(ProductCategory.AUXILIARY_FILES, "PROCESSING");
         assertEquals(AppState.ERROR, appStatus.getGlobalAppState());
         
-        appStatus.setError(ProductCategory.EDRS_SESSIONS);
+        appStatus.setError(ProductCategory.EDRS_SESSIONS, "PROCESSING");
         assertEquals(AppState.ERROR, appStatus.getGlobalAppState());
         
-        appStatus.setError(ProductCategory.EDRS_SESSIONS);
+        appStatus.setError(ProductCategory.EDRS_SESSIONS, "PROCESSING");
         assertEquals(AppState.FATALERROR, appStatus.getGlobalAppState());
     }
 }
