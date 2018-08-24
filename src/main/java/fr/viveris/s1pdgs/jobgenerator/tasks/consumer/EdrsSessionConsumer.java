@@ -99,6 +99,7 @@ public class EdrsSessionConsumer {
 		}
 		if (message == null || message.getBody() == null) {
 			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
+            appStatus.setError("NEXT_MESSAGE");
 			return;
 		}
 		appStatus.setProcessing(message.getIdentifier());
@@ -190,7 +191,7 @@ public class EdrsSessionConsumer {
 			appStatus.setWaiting();
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[MONITOR] [step {} [code {}] {}", 0, ace.getCode(), ace.getLogMessage());
-			appStatus.setError();
+			appStatus.setError("NEXT_MESSAGE");
 		}
 
 	}

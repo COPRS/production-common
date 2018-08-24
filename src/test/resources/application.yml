@@ -63,4 +63,6 @@ pattern-l0-slices:
   
 status:
   delete-fixed-delay-ms: 3000
-  max-error-counter: 3
+  max-error-counter-processing: 3
+  max-error-counter-mqi: 30
+  

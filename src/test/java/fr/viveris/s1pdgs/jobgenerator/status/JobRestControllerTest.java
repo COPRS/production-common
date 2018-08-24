@@ -84,7 +84,7 @@ public class JobRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testUrlStatusWhenFatalError() throws Exception {
-        JobStatus status = (new AppStatus(3, mqiStatusService)).getStatus();
+        JobStatus status = (new AppStatus(3, 30, mqiStatusService)).getStatus();
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
@@ -102,7 +102,7 @@ public class JobRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testStatusWhenFatalError() throws Exception {
-        JobStatus status = (new AppStatus(3, mqiStatusService)).getStatus();
+        JobStatus status = (new AppStatus(3, 30, mqiStatusService)).getStatus();
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
@@ -130,9 +130,9 @@ public class JobRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testUrlStatusWhenError() throws Exception {
-        JobStatus status = (new AppStatus(3, mqiStatusService)).getStatus();
-        status.setError(3);
-        status.setError(3);
+        JobStatus status = (new AppStatus(3, 30, mqiStatusService)).getStatus();
+        status.setErrorCounterProcessing(3);
+        status.setErrorCounterProcessing(3);
         doReturn(status).when(appStatus).getStatus();
 
         request(get("/app/status"))
@@ -147,9 +147,9 @@ public class JobRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testStatusWhenError() throws Exception {
-        JobStatus status = (new AppStatus(3, mqiStatusService)).getStatus();
-        status.setError(3);
-        status.setError(3);
+        JobStatus status = (new AppStatus(3, 30, mqiStatusService)).getStatus();
+        status.setErrorCounterProcessing(3);
+        status.setErrorCounterProcessing(3);
         doReturn(status).when(appStatus).getStatus();
 
         long diffTmBefore =

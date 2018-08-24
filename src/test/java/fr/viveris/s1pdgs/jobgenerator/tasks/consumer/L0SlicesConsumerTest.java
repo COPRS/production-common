@@ -82,7 +82,7 @@ public class L0SlicesConsumerTest {
 		// Mock app status
 		doNothing().when(appStatus).setWaiting();
 		doNothing().when(appStatus).setProcessing(Mockito.anyLong());
-		doNothing().when(appStatus).setError();
+		doNothing().when(appStatus).setError(Mockito.anyString());
 	}
 
 	@Test

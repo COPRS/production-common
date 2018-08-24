@@ -54,7 +54,7 @@ public class JobRestController {
                 currentTimestamp - currentStatus.getDateLastChangeMs();
         JobStatusDto jobStatus =
                 new JobStatusDto(currentStatus.getState(),
-                        timeSinceLastChange, currentStatus.getErrorCounter());
+                        timeSinceLastChange, currentStatus.getErrorCounterProcessing());
         if (currentStatus.isFatalError()) {
             return new ResponseEntity<JobStatusDto>(jobStatus,
                     HttpStatus.INTERNAL_SERVER_ERROR);
