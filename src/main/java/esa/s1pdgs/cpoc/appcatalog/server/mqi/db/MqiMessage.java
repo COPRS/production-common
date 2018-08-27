@@ -73,6 +73,11 @@ public class MqiMessage {
     private Object dto;
     
     /**
+     * Date of the insertion in MongoDB
+     */
+    private Date creationDate;
+    
+    /**
      * Default Constructor
      */
     public MqiMessage() {
@@ -98,7 +103,8 @@ public class MqiMessage {
     public MqiMessage(ProductCategory category, String topic,
             int partition, long offset, String group, MqiStateMessageEnum state,
             String readingPod, Date lastReadDate, String sendingPod,
-            Date lastSendDate, Date lastAckDate, int nbRetries, Object dto) {
+            Date lastSendDate, Date lastAckDate, int nbRetries, Object dto,
+            Date creationDate) {
         super();
         this.category = category;
         this.topic = topic;
@@ -113,6 +119,7 @@ public class MqiMessage {
         this.lastAckDate = lastAckDate;
         this.nbRetries = nbRetries;
         this.dto = dto;
+        this.setCreationDate(creationDate);
     }
     
     
@@ -287,6 +294,20 @@ public class MqiMessage {
     }
 
 
+    /**
+     * @return the creationDate
+     */
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    /**
+     * @param creationDate the creationDate to set
+     */
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -298,7 +319,7 @@ public class MqiMessage {
                 + "\", \"readingPod\":\"" + readingPod + "\", \"lastReadDate\":\""
                 + lastReadDate + "\", \"sendingPod\":\"" + sendingPod + "\", \"lastSendDate\":\""
                 + lastSendDate + "\", \"lastAckDate\":\"" + lastAckDate + "\", \"nbRetries\":\""
-                + nbRetries + "\", \"dto\":\"" + dto + "\"}";
+                + nbRetries + "\", \"dto\":\"" + dto + "\" , \"creationDate\":\"" + creationDate + "\"}";
     }
 
     /* (non-Javadoc)
@@ -310,6 +331,8 @@ public class MqiMessage {
         int result = 1;
         result = prime * result
                 + ((category == null) ? 0 : category.hashCode());
+        result = prime * result
+                + ((creationDate == null) ? 0 : creationDate.hashCode());
         result = prime * result + ((dto == null) ? 0 : dto.hashCode());
         result = prime * result + ((group == null) ? 0 : group.hashCode());
         result = prime * result + (int) (identifier ^ (identifier >>> 32));
@@ -345,6 +368,11 @@ public class MqiMessage {
             return false;
         MqiMessage other = (MqiMessage) obj;
         if (category != other.category)
+            return false;
+        if (creationDate == null) {
+            if (other.creationDate != null)
+                return false;
+        } else if (!creationDate.equals(other.creationDate))
             return false;
         if (dto == null) {
             if (other.dto != null)

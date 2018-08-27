@@ -29,7 +29,7 @@ public class MqiMessageTest {
         Date now = new Date();
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic",
                 1, 5, "group", MqiStateMessageEnum.READ, "readingPod", now, 
-                "sendingPod", now, now, 0, null);
+                "sendingPod", now, now, 0, null, now);
         assertEquals(ProductCategory.AUXILIARY_FILES, message.getCategory());
         assertEquals("topic", message.getTopic());
         assertEquals(1, message.getPartition());
@@ -43,6 +43,7 @@ public class MqiMessageTest {
         assertEquals("sendingPod", message.getSendingPod());
         assertEquals(0, message.getNbRetries());
         assertEquals(null, message.getDto());
+        assertEquals(now, message.getCreationDate());
     }
     
     @Test
@@ -50,7 +51,7 @@ public class MqiMessageTest {
         Date now = new Date();
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic",
                 1, 5, "group", MqiStateMessageEnum.READ, "readingPod", now, 
-                "sendingPod", now, now, 0, null);
+                "sendingPod", now, now, 0, null, now);
         message = new MqiMessage();
         message.setCategory(ProductCategory.AUXILIARY_FILES);
         message.setTopic("topic");
@@ -65,6 +66,7 @@ public class MqiMessageTest {
         message.setSendingPod("sendingPod");
         message.setNbRetries(0);
         message.setDto(null);
+        message.setCreationDate(now);
         
         String str = message.toString();
         assertTrue(str.contains("category\":\"AUXILIARY_FILES"));
@@ -80,6 +82,7 @@ public class MqiMessageTest {
         assertTrue(str.contains("sendingPod\":\"sendingPod"));
         assertTrue(str.contains("nbRetries\":\"0"));
         assertTrue(str.contains("dto\":\"null"));
+        assertTrue(str.contains("creationDate\":\""+now));
         assertNotNull(message.getIdentifier());
     }
     

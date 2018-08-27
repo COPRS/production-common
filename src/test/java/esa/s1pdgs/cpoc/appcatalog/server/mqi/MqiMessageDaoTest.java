@@ -56,7 +56,7 @@ public class MqiMessageDaoTest {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
 
@@ -66,7 +66,7 @@ public class MqiMessageDaoTest {
         MqiMessage expectedResult =
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
                         "group", MqiStateMessageEnum.READ, "readingPod", null,
-                        "sendingPod", null, null, 0, null);
+                        "sendingPod", null, null, 0, null, null);
 
         assertEquals(expectedResult, result.get(0));
         verify(mongoClient, times(1)).find(Mockito.any(Query.class),
@@ -79,13 +79,13 @@ public class MqiMessageDaoTest {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 8, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 18, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
 
@@ -99,13 +99,13 @@ public class MqiMessageDaoTest {
         List<MqiMessage> expectedResult = new ArrayList<>();
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 0, null));
+                null, "sendingPod", null, null, 0, null, null));
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 8, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 0, null));
+                null, "sendingPod", null, null, 0, null, null));
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 18, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 0, null));
+                null, "sendingPod", null, null, 0, null, null));
 
         assertEquals(expectedResult, result);
         verify(mongoClient, times(1)).find(Mockito.any(Query.class),
@@ -119,13 +119,13 @@ public class MqiMessageDaoTest {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 8, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 18, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
 
@@ -139,13 +139,13 @@ public class MqiMessageDaoTest {
         List<MqiMessage> expectedResult = new ArrayList<>();
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 0, null));
+                null, "sendingPod", null, null, 0, null, null));
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 8, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 0, null));
+                null, "sendingPod", null, null, 0, null, null));
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 18, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 0, null));
+                null, "sendingPod", null, null, 0, null, null));
 
         assertEquals(expectedResult, result);
         verify(mongoClient, times(1)).find(Mockito.any(Query.class),
@@ -159,7 +159,7 @@ public class MqiMessageDaoTest {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
 
@@ -168,7 +168,7 @@ public class MqiMessageDaoTest {
         MqiMessage expectedResult =
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
                         "group", MqiStateMessageEnum.READ, "readingPod", null,
-                        "sendingPod", null, null, 0, null);
+                        "sendingPod", null, null, 0, null, null);
 
         assertEquals(expectedResult, result.get(0));
         verify(mongoClient, times(1)).find(Mockito.any(Query.class),
@@ -182,10 +182,10 @@ public class MqiMessageDaoTest {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic2",
                 1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
 
@@ -203,7 +203,7 @@ public class MqiMessageDaoTest {
         MqiMessage messageToInsert =
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
                         "group", MqiStateMessageEnum.READ, "readingPod", null,
-                        "sendingPod", null, null, 0, null);
+                        "sendingPod", null, null, 0, null, null);
         doNothing().when(mongoClient).insert(Mockito.any(MqiMessage.class));
 
         mongoDBDAO.insert(messageToInsert);
@@ -230,10 +230,10 @@ public class MqiMessageDaoTest {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic2",
                 1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).findAllAndRemove(Mockito.any(Query.class),
                 Mockito.any(Class.class));
 
