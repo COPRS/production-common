@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,15 +66,20 @@ public class ApplicationPropertiesTest {
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.EDRS_SESSIONS).getConsumption()
                 .isEnable());
-        assertEquals(Arrays.asList("t-pdgs-edrs-sessions","t-topic-2"),
+        Map<String, Integer> expectedTopics = new HashMap<>();
+        expectedTopics.put("t-pdgs-edrs-sessions", 0);
+        expectedTopics.put("t-topic-2", 0);
+        assertEquals(expectedTopics.keySet(),
                 properties.getProductCategories()
                         .get(ProductCategory.EDRS_SESSIONS).getConsumption()
-                        .getTopics());
+                        .getTopicsWithPriority().keySet());
         // Level jobs
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.LEVEL_JOBS).getConsumption().isEnable());
-        assertEquals(Arrays.asList("t-pdgs-l0-jobs"), properties.getProductCategories()
-                .get(ProductCategory.LEVEL_JOBS).getConsumption().getTopics());
+        expectedTopics = new HashMap<>();
+        expectedTopics.put("t-pdgs-l0-jobs", 0);
+        assertEquals(expectedTopics.keySet(), properties.getProductCategories()
+                .get(ProductCategory.LEVEL_JOBS).getConsumption().getTopicsWithPriority().keySet());
         // Level reports
         assertFalse(properties.getProductCategories()
                 .get(ProductCategory.LEVEL_REPORTS).getConsumption()
@@ -125,7 +129,10 @@ public class ApplicationPropertiesTest {
         ProductCategoryConsumptionProperties consProp =
                 new ProductCategoryConsumptionProperties();
         consProp.setEnable(true);
-        consProp.setTopics(Arrays.asList("test-topic","test-topic-1"));
+        Map<String, Integer> topicsWithPriority = new HashMap<>();
+        topicsWithPriority.put("test-topic", 100);
+        topicsWithPriority.put("test-topic-1", 10);
+        consProp.setTopicsWithPriority(topicsWithPriority);
         catProp.setConsumption(consProp);
         ProductCategoryPublicationProperties pubProp =
                 new ProductCategoryPublicationProperties();
@@ -146,10 +153,13 @@ public class ApplicationPropertiesTest {
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.AUXILIARY_FILES).getConsumption()
                 .isEnable());
-        assertEquals(Arrays.asList("test-topic","test-topic-1"),
+        Map<String, Integer> expectedTopics = new HashMap<>();
+        expectedTopics.put("test-topic", 0);
+        expectedTopics.put("test-topic-1", 0);
+        assertEquals(expectedTopics.keySet(),
                 properties.getProductCategories()
                         .get(ProductCategory.AUXILIARY_FILES).getConsumption()
-                        .getTopics());
+                        .getTopicsWithPriority().keySet());
         // Auxiliary files
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.AUXILIARY_FILES).getPublication()

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,9 +163,9 @@ public class MessageConsumptionController {
             if (prop.isEnable()) {
                 LOGGER.info(
                         "Creating consumers on topics {} with for category {}",
-                        prop.getTopics(), cat);
+                        prop.getTopicsWithPriority(), cat);
                 Map<String, GenericConsumer<?>> catConsumers = new HashMap<>();
-                for (String topic : prop.getTopics()) {
+                for (String topic : prop.getTopicsWithPriority().keySet()) {
                     switch (cat) {
                         case AUXILIARY_FILES:
                             catConsumers.put(topic,
@@ -172,6 +173,7 @@ public class MessageConsumptionController {
                                             kafkaProperties,
                                             persistAuxiliaryFilesService,
                                             otherAppService, appStatus, topic,
+                                            prop.getTopicsWithPriority().get(topic),
                                             AuxiliaryFileDto.class));
                             break;
                         case EDRS_SESSIONS:
@@ -180,6 +182,7 @@ public class MessageConsumptionController {
                                             kafkaProperties,
                                             persistEdrsSessionsService,
                                             otherAppService, appStatus, topic,
+                                            prop.getTopicsWithPriority().get(topic),
                                             EdrsSessionDto.class));
                             break;
                         case LEVEL_JOBS:
@@ -188,6 +191,7 @@ public class MessageConsumptionController {
                                             kafkaProperties,
                                             persistLevelJobsService,
                                             otherAppService, appStatus, topic,
+                                            prop.getTopicsWithPriority().get(topic),
                                             LevelJobDto.class));
                             break;
                         case LEVEL_PRODUCTS:
@@ -196,6 +200,7 @@ public class MessageConsumptionController {
                                             kafkaProperties,
                                             persistLevelProductsService,
                                             otherAppService, appStatus, topic,
+                                            prop.getTopicsWithPriority().get(topic),
                                             LevelProductDto.class));
                             break;
                         case LEVEL_REPORTS:
@@ -204,6 +209,7 @@ public class MessageConsumptionController {
                                             kafkaProperties,
                                             persistLevelReportsService,
                                             otherAppService, appStatus, topic,
+                                            prop.getTopicsWithPriority().get(topic),
                                             LevelReportDto.class));
                             break;
                     }
@@ -275,6 +281,27 @@ public class MessageConsumptionController {
                 persistAuxiliaryFilesService.next(appProperties.getHostname());
         MqiGenericMessageDto<AuxiliaryFileDto> result = null;
         if (!CollectionUtils.isEmpty(messages)) {
+            messages.sort(new Comparator<MqiGenericMessageDto<AuxiliaryFileDto>>() {
+                @Override
+                public int compare(MqiGenericMessageDto<AuxiliaryFileDto> o1,
+                        MqiGenericMessageDto<AuxiliaryFileDto> o2) {
+                    if(consumers.get(ProductCategory.AUXILIARY_FILES).get(o1.getTopic()).getPriority() >
+                        consumers.get(ProductCategory.AUXILIARY_FILES).get(o2.getTopic()).getPriority()) {
+                        return 1;
+                    } else if(consumers.get(ProductCategory.AUXILIARY_FILES).get(o1.getTopic()).getPriority() ==
+                            consumers.get(ProductCategory.AUXILIARY_FILES).get(o2.getTopic()).getPriority()) {
+                        if(o1.getCreationDate()==null) {
+                            return 1;
+                        } else if(o2.getCreationDate()==null) {
+                            return -1;
+                        } else {
+                            return o1.getCreationDate().compareTo(o2.getCreationDate());
+                        }
+                    } else {
+                        return -1;
+                    }
+                }                
+            });
             for (MqiGenericMessageDto<AuxiliaryFileDto> tmpMessage : messages) {
                 if (send(persistAuxiliaryFilesService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -299,6 +326,27 @@ public class MessageConsumptionController {
                 persistEdrsSessionsService.next(appProperties.getHostname());
         MqiGenericMessageDto<EdrsSessionDto> result = null;
         if (!CollectionUtils.isEmpty(messages)) {
+            messages.sort(new Comparator<MqiGenericMessageDto<EdrsSessionDto>>() {
+                @Override
+                public int compare(MqiGenericMessageDto<EdrsSessionDto> o1,
+                        MqiGenericMessageDto<EdrsSessionDto> o2) {
+                    if(consumers.get(ProductCategory.EDRS_SESSIONS).get(o1.getTopic()).getPriority() >
+                        consumers.get(ProductCategory.EDRS_SESSIONS).get(o2.getTopic()).getPriority()) {
+                        return 1;
+                    } else if(consumers.get(ProductCategory.EDRS_SESSIONS).get(o1.getTopic()).getPriority() ==
+                            consumers.get(ProductCategory.EDRS_SESSIONS).get(o2.getTopic()).getPriority()) {
+                        if(o1.getCreationDate()==null) {
+                            return 1;
+                        } else if(o2.getCreationDate()==null) {
+                            return -1;
+                        } else {
+                            return o1.getCreationDate().compareTo(o2.getCreationDate());
+                        }
+                    } else {
+                        return -1;
+                    }
+                }                
+            });
             for (MqiGenericMessageDto<EdrsSessionDto> tmpMessage : messages) {
                 if (send(persistEdrsSessionsService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -323,6 +371,27 @@ public class MessageConsumptionController {
                 persistLevelJobsService.next(appProperties.getHostname());
         MqiGenericMessageDto<LevelJobDto> result = null;
         if (!CollectionUtils.isEmpty(messages)) {
+            messages.sort(new Comparator<MqiGenericMessageDto<LevelJobDto>>() {
+                @Override
+                public int compare(MqiGenericMessageDto<LevelJobDto> o1,
+                        MqiGenericMessageDto<LevelJobDto> o2) {
+                    if(consumers.get(ProductCategory.LEVEL_JOBS).get(o1.getTopic()).getPriority() >
+                        consumers.get(ProductCategory.LEVEL_JOBS).get(o2.getTopic()).getPriority()) {
+                        return 1;
+                    } else if(consumers.get(ProductCategory.LEVEL_JOBS).get(o1.getTopic()).getPriority() ==
+                            consumers.get(ProductCategory.LEVEL_JOBS).get(o2.getTopic()).getPriority()) {
+                        if(o1.getCreationDate()==null) {
+                            return 1;
+                        } else if(o2.getCreationDate()==null) {
+                            return -1;
+                        } else {
+                            return o1.getCreationDate().compareTo(o2.getCreationDate());
+                        }
+                    } else {
+                        return -1;
+                    }
+                }                
+            });
             for (MqiGenericMessageDto<LevelJobDto> tmpMessage : messages) {
                 if (send(persistLevelJobsService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -347,6 +416,27 @@ public class MessageConsumptionController {
                 persistLevelProductsService.next(appProperties.getHostname());
         MqiGenericMessageDto<LevelProductDto> result = null;
         if (!CollectionUtils.isEmpty(messages)) {
+            messages.sort(new Comparator<MqiGenericMessageDto<LevelProductDto>>() {
+                @Override
+                public int compare(MqiGenericMessageDto<LevelProductDto> o1,
+                        MqiGenericMessageDto<LevelProductDto> o2) {
+                    if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() >
+                        consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
+                        return 1;
+                    } else if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() ==
+                            consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
+                        if(o1.getCreationDate()==null) {
+                            return 1;
+                        } else if(o2.getCreationDate()==null) {
+                            return -1;
+                        } else {
+                            return o1.getCreationDate().compareTo(o2.getCreationDate());
+                        }
+                    } else {
+                        return -1;
+                    }
+                }                
+            });
             for (MqiGenericMessageDto<LevelProductDto> tmpMessage : messages) {
                 if (send(persistLevelProductsService,
                         (MqiLightMessageDto) tmpMessage)) {
@@ -371,6 +461,27 @@ public class MessageConsumptionController {
                 persistLevelReportsService.next(appProperties.getHostname());
         MqiGenericMessageDto<LevelReportDto> result = null;
         if (!CollectionUtils.isEmpty(messages)) {
+            messages.sort(new Comparator<MqiGenericMessageDto<LevelReportDto>>() {
+                @Override
+                public int compare(MqiGenericMessageDto<LevelReportDto> o1,
+                        MqiGenericMessageDto<LevelReportDto> o2) {
+                    if(consumers.get(ProductCategory.LEVEL_REPORTS).get(o1.getTopic()).getPriority() >
+                        consumers.get(ProductCategory.LEVEL_REPORTS).get(o2.getTopic()).getPriority()) {
+                        return 1;
+                    } else if(consumers.get(ProductCategory.LEVEL_REPORTS).get(o1.getTopic()).getPriority() ==
+                            consumers.get(ProductCategory.LEVEL_REPORTS).get(o2.getTopic()).getPriority()) {
+                        if(o1.getCreationDate()==null) {
+                            return 1;
+                        } else if(o2.getCreationDate()==null) {
+                            return -1;
+                        } else {
+                            return o1.getCreationDate().compareTo(o2.getCreationDate());
+                        }
+                    } else {
+                        return -1;
+                    }
+                }                
+            });
             for (MqiGenericMessageDto<LevelReportDto> tmpMessage : messages) {
                 if (send(persistLevelReportsService,
                         (MqiLightMessageDto) tmpMessage)) {

@@ -34,7 +34,7 @@ application:
     edrs-sessions:
       consumption:
         enable: true
-        topics: t-pdgs-edrs-sessions, t-topic-2
+        topics-with-priority: {t-pdgs-edrs-sessions: 100, t-topic-2: 10}        
       publication:
         enable: false
     level-products:
@@ -52,7 +52,7 @@ application:
     level-jobs:
       consumption:
         enable: true
-        topics: t-pdgs-l0-jobs
+        topics-with-priority: {t-pdgs-l0-jobs: 100}          
       publication:
         enable: false
 server:

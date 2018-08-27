@@ -91,7 +91,7 @@ public class GenericConsumerTest {
         GenericConsumer<AuxiliaryFileDto> consumer =
                 new GenericConsumer<>(properties, service, otherService,
                         appStatus, GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-                        AuxiliaryFileDto.class);
+                        100, AuxiliaryFileDto.class);
         assertEquals(GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
                 consumer.getTopic());
         assertEquals(AuxiliaryFileDto.class, consumer.getConsumedMsgClass());
@@ -109,7 +109,7 @@ public class GenericConsumerTest {
         GenericConsumer<AuxiliaryFileDto> consumer =
                 new GenericConsumer<>(properties, service, otherService,
                         appStatus, GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-                        AuxiliaryFileDto.class);
+                        100, AuxiliaryFileDto.class);
         consumer.start();
         Thread.sleep(5000);
         verify(service, never()).read(Mockito.anyString(), Mockito.anyInt(),

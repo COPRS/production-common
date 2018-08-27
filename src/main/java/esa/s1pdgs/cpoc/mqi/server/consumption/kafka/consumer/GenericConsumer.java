@@ -56,6 +56,11 @@ public class GenericConsumer<T> {
      * Topic name
      */
     private final String topic;
+    
+    /**
+     * Topic priority
+     */
+    private final int priority;
 
     /**
      * Listener container
@@ -80,12 +85,14 @@ public class GenericConsumer<T> {
             final GenericAppCatalogMqiService<T> service,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus, final String topic,
+            final int priority,
             final Class<T> consumedMsgClass) {
         this.properties = properties;
         this.service = service;
         this.otherAppService = otherAppService;
         this.appStatus = appStatus;
         this.topic = topic;
+        this.priority = priority;
         this.consumedMsgClass = consumedMsgClass;
     }
 
@@ -94,6 +101,13 @@ public class GenericConsumer<T> {
      */
     public String getTopic() {
         return topic;
+    }
+
+    /**
+     * @return the priority
+     */
+    public int getPriority() {
+        return priority;
     }
 
     /**
