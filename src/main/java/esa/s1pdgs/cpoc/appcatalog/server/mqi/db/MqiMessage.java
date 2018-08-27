@@ -119,7 +119,7 @@ public class MqiMessage {
         this.lastAckDate = lastAckDate;
         this.nbRetries = nbRetries;
         this.dto = dto;
-        this.setCreationDate(creationDate);
+        this.creationDate = creationDate;
     }
     
     
