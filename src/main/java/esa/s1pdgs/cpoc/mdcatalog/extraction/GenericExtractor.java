@@ -180,7 +180,7 @@ public abstract class GenericExtractor<T> {
     protected void ackNegatively(final GenericMessageDto<T> message,
             final String errorMessage) {
         LOGGER.info(
-                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP] [productName {}] Acknowledging negatively",
+                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP KO] [productName {}] Acknowledging negatively",
                 category, extractProductNameFromDto(message.getBody()));
         LOGGER.error(errorMessage);
         try {
@@ -202,7 +202,7 @@ public abstract class GenericExtractor<T> {
      */
     protected void ackPositively(final GenericMessageDto<T> message) {
         LOGGER.info(
-                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP] [productName {}] Acknowledging positively",
+                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP OK] [productName {}] Acknowledging positively",
                 category, extractProductNameFromDto(message.getBody()));
         try {
             mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK,
