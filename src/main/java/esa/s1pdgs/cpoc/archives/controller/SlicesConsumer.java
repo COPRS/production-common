@@ -63,16 +63,16 @@ public class SlicesConsumer {
             acknowledgment.acknowledge();
         } catch (ObjectStorageException | ObsUnknownObjectException e) {
             LOGGER.error(
-                    "[MONITOR] [step 0] [family {}] [productName {}] [resuming {}] {}",
+                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask Archiver] [STOP KO] [family {}] [productName {}] [resuming {}] {}",
                     dto.getFamily(), dto.getProductName(),
                     new ResumeDetails(topic, dto), e.getMessage());
         } catch (Exception exc) {
             LOGGER.error(
-                    "[MONITOR] [step 0] [family {}] [productName {}] [code {}] Exception occurred during acknowledgment {}",
+                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask Archiver] [STOP KO] [family {}] [productName {}] [code {}] Exception occurred during acknowledgment {}",
                     dto.getFamily(), dto.getProductName(), ErrorCode.KAFKA_COMMIT_ERROR.getCode(),
                     exc.getMessage());
 		}
-        LOGGER.info("[REPORT] [step 0] [family {}] [productName {}] [s1pdgsTask Archiver] [STOP] End Distribution",
+        LOGGER.info("[REPORT] [MONITOR] [step 0] [family {}] [productName {}] [s1pdgsTask Archiver] [STOP OK] End Distribution",
                 dto.getFamily(), dto.getProductName());
     }
 }
