@@ -64,9 +64,9 @@ public class SlicesConsumer {
         try {
             if(devProperties.getActivations().get("download-manifest")) {
                 this.obsService.downloadFile(dto.getFamily(),
-                        dto.getKeyObjectStorage(), this.sharedVolume + "/"
-                                + dto.getFamily().name().toLowerCase()
-                                + "/manifest.safe");
+                        dto.getKeyObjectStorage()+ "/manifest.safe",
+                        this.sharedVolume + "/" + 
+                        dto.getFamily().name().toLowerCase());
             } else {
                 this.obsService.downloadFile(dto.getFamily(),
                         dto.getKeyObjectStorage(), this.sharedVolume + "/"
