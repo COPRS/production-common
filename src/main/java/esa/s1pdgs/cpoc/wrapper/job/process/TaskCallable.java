@@ -94,7 +94,7 @@ public class TaskCallable implements Callable<TaskResult> {
             }
         }
         LOGGER.info(
-                "{} [task {}] [workDirectory {}] [STOP] Ending call with exit code {}",
+                "{} [task {}] [workDirectory {}] [STOP OK] Ending call with exit code {}",
                 this.prefixReport, binaryPath, workDirectory, r);
 
         return new TaskResult(binaryPath, r);

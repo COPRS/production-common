@@ -110,7 +110,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
                                 + " seconds");
             }
 
-            LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] Start launching processes", prefixMonitorLogs, this.appLevel);
+            LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask processing] [START] Start launching processes", prefixMonitorLogs, this.appLevel);
             for (PoolProcessor poolProcessor : processors) {
                 if (isInterrupted()) {
                     throw new InternalErrorException(

@@ -146,7 +146,7 @@ public class InputDownloader {
      * @throws InternalErrorException
      */
     protected void completeDownload() throws InternalErrorException {
-        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [STOP] 5 - Updating status.txt file with COMPLETED",
+        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [STOP OK] 5 - Updating status.txt file with COMPLETED",
                 prefixMonitorLogs, this.appLevel);
         this.writeStatusFile(STATUS_COMPLETION);
         poolProcExecutor.setActive(true);

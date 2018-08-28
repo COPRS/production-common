@@ -310,7 +310,7 @@ public class OutputProcessor {
             }
         }
 
-        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP] 3 - Publishing KAFKA messages for the last batch",
+        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch",
                 this.prefixMonitorLogs, this.appLevel);
         publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);
     }

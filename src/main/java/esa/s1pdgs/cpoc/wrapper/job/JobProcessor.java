@@ -193,7 +193,7 @@ public class JobProcessor {
         processJob(message, inputDownloader, outputProcessor, procExecutorSrv,
                 procCompletionSrv, procExecutor);
 
-        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing {} [productName {}] [STOP] End L0 job generation",
+        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing {} [productName {}] [STOP OK] End L0 job generation",
         		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_END, job), job.getProductIdentifier());
 
     }
@@ -265,17 +265,19 @@ public class JobProcessor {
 
         } catch (AbstractCodedException ace) {
             ackOk = false;
-            errorMessage = String.format("%s [step %d] %s [code %d] %s",
+            errorMessage = String.format("[REPORT] [s1pdgsTask {}Processing] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s",
+            		properties.getLevel(),
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
         } catch (InterruptedException e) {
             ackOk = false;
             errorMessage = String.format(
-                    "%s [step %d] %s [code %d] [msg interrupted exception]",
+                    "[REPORT] %s [step %d] %s [code %d] [s1pdgsTask {}Processing] [STOP KO] [subTask processing] [msg interrupted exception]",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
-                    ErrorCode.INTERNAL_ERROR.getCode());
+                    ErrorCode.INTERNAL_ERROR.getCode(),
+                    properties.getLevel());
         } finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
