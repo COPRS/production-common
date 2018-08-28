@@ -102,7 +102,7 @@ public class MqiMessageDao {
             final Set<MqiStateMessageEnum> states) {
         Query query = query(where("readingPod").is(pod).and("state").nin(states)
                 .and("category").is(category));
-        query.with(new Sort(Direction.ASC, "lastReadDate"));
+        query.with(new Sort(Direction.ASC, "creationDate"));
         return find(query);
     }
 
@@ -118,7 +118,7 @@ public class MqiMessageDao {
     public int countReadingMessages(final String pod, final String topic) {
         Query query = query(where("readingPod").is(pod).and("state")
                 .is(MqiStateMessageEnum.READ).and("topic").is(topic));
-        query.with(new Sort(Direction.ASC, "lastReadDate"));
+        query.with(new Sort(Direction.ASC, "creationDate"));
         return find(query).size();
     }
 

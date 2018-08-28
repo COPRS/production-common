@@ -111,10 +111,11 @@ public class GenericMqiController<T> {
                 log(String.format(
                         "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Inserting new MqiMessage",
                         topic, partition, offset, body.getGroup()));
+                Date now = new Date();
                 MqiMessage messageToInsert = new MqiMessage(category, topic,
                         partition, offset, body.getGroup(),
-                        MqiStateMessageEnum.READ, body.getPod(), new Date(),
-                        null, null, null, 0, body.getDto());
+                        MqiStateMessageEnum.READ, body.getPod(), now,
+                        null, null, null, 0, body.getDto(), now);
                 mongoDBServices.insertMqiMessage(messageToInsert);
 
                 // On renvoie le message que l'on vient de créer

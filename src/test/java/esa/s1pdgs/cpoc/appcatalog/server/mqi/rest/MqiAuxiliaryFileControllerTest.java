@@ -84,7 +84,7 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.SEND, "readingPod",
-                null, "sendingPod", null, null, 2, null);
+                null, "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         doReturn(response).when(mongoDBServices)
@@ -114,13 +114,13 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 8, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 18, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         doReturn(response).when(mongoDBServices).searchByPodStateCategory(
                 Mockito.anyString(), Mockito.any(ProductCategory.class),
                 Mockito.any());
@@ -136,7 +136,7 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoDBServices).searchByID(Mockito.anyLong());
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
         request(post("/mqi/auxiliary_files/1/send")
@@ -153,7 +153,7 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 2, null);
+                null, "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         doReturn(response).when(mongoDBServices).searchByID(Mockito.anyLong());
@@ -170,7 +170,7 @@ public class MqiAuxiliaryFileControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         doReturn(response).when(mongoDBServices).searchByTopicPartitionGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),
                 Mockito.any());

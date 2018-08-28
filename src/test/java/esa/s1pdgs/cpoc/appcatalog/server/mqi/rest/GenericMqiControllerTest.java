@@ -131,7 +131,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
     public void testReadMessageMqiMessageStateACK() throws Exception {
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.ACK_OK,
-                "readingPod", null, "sendingPod", null, null, 0, null);
+                "readingPod", null, "sendingPod", null, null, 0, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
@@ -155,7 +155,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
     public void testReadMessageMqiMessageStateSendNotForce() throws Exception {
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.SEND, "readingPod",
-                null, "sendingPod", null, null, 0, null);
+                null, "sendingPod", null, null, 0, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
@@ -190,7 +190,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.SEND, "readingPod",
-                null, "sendingPod", null, null, 0, null);
+                null, "sendingPod", null, null, 0, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
@@ -220,7 +220,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.SEND, "readingPod",
-                null, "sendingPod", null, null, 2, null);
+                null, "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
@@ -249,7 +249,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 2, null);
+                null, "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
@@ -277,7 +277,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.SEND, "readingPod",
-                null, "sendingPod", null, null, 2, null);
+                null, "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
@@ -331,13 +331,13 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 8, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 18, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         this.mockSearchByPodStateCategory(response);
         request(get("/mqi/auxiliary_files/next").param("pod", "readingPod"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -374,7 +374,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.ACK_OK, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         this.mockSearchByID(response);
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
         request(post("/mqi/auxiliary_files/1/send")
@@ -391,7 +391,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         this.mockSearchByID(response);
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
         request(post("/mqi/auxiliary_files/1/send")
@@ -410,7 +410,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.SEND, "readingPod", null,
-                "sendingPod", null, null, 0, null));
+                "sendingPod", null, null, 0, null, null));
         this.mockSearchByID(response);
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
         request(post("/mqi/auxiliary_files/1/send")
@@ -429,7 +429,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.SEND, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         this.mockSearchByID(response);
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
         request(post("/mqi/auxiliary_files/1/send")
@@ -460,7 +460,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
-                null, "sendingPod", null, null, 2, null);
+                null, "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByID(response);
@@ -483,7 +483,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.ACK_KO,
-                "readingPod", null, "sendingPod", null, null, 2, null);
+                "readingPod", null, "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByID(response);
@@ -506,7 +506,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.ACK_WARN,
-                "readingPod", null, "sendingPod", null, null, 2, null);
+                "readingPod", null, "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByID(response);
@@ -552,7 +552,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
                 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
-                "sendingPod", null, null, 2, null));
+                "sendingPod", null, null, 2, null, null));
         this.mockSearchByTopicPartitionGroup(response);
         request(get("/mqi/auxiliary_files/topic/1/earliestOffset")
                 .param("group", "group"))
@@ -626,10 +626,10 @@ public class GenericMqiControllerTest extends RestControllerTest {
     public void testGetWhenMEssages() throws Exception {
         MqiMessage message1 = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 5, "group", MqiStateMessageEnum.ACK_WARN,
-                "readingPod", null, "sendingPod", null, null, 2, null);
+                "readingPod", null, "sendingPod", null, null, 2, null, null);
         MqiMessage message2 = new MqiMessage(ProductCategory.AUXILIARY_FILES,
                 "topic", 1, 6, "group", MqiStateMessageEnum.ACK_WARN,
-                "readingPod", null, "sendingPod", null, null, 2, null);
+                "readingPod", null, "sendingPod", null, null, 2, null, null);
         doReturn(Arrays.asList(message1, message2)).when(mongoDBServices)
                 .searchByID(Mockito.anyLong());
 
