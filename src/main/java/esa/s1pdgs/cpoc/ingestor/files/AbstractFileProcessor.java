@@ -96,25 +96,25 @@ public abstract class AbstractFileProcessor<T> {
                     step++;
                     if (descriptor.isHasToBePublished()) {
                         LOGGER.info(
-                                "[REPORT] [MONITOR] [step 2] [productName {}] [s1pdgsTask Ingestion] [STOP] Publishing file in topic",
+                                "[REPORT] [MONITOR] [step 2] [productName {}] [s1pdgsTask Ingestion] [STOP OK] Publishing file in topic",
                                 productName);
                         publisher.send(buildDto(descriptor));
                     }
                 } catch (IngestorIgnoredFileException ce) {
                     LOGGER.debug(
-                            "[MONITOR] [step {}] [productName {}] [code {}] {}",
+                            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
                             step, productName, ce.getCode().getCode(),
                             ce.getLogMessage());
                 } catch (ObsAlreadyExist ace) {
                     LOGGER.error(
-                            "[MONITOR] [step {}] [productName {}] [code {}] {}",
+                            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
                             step, productName, ace.getCode().getCode(),
                             ace.getLogMessage());
                 } catch (ObsException ace) {
                     throw ace;
                 } catch (AbstractCodedException ace) {
                     LOGGER.error(
-                            "[MONITOR] [step {}] [productName {}] [code {}] {}",
+                            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
                             step, productName, ace.getCode().getCode(),
                             ace.getLogMessage());
                 }
@@ -133,7 +133,7 @@ public abstract class AbstractFileProcessor<T> {
 
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
-                        "[MONITOR] [step {}] [productName {}] [code {}] {}",
+                        "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
                         step, productName, ace.getCode().getCode(),
                         ace.getLogMessage());
             }
