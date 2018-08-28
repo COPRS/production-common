@@ -28,4 +28,8 @@ file:
     local-directory: test/data/slices/ # Must contains the last /
   reports:
     local-directory: test/data/reports/ # Must contains the last /
+
+dev:
+  activations:
+    download-manifest : true
     
