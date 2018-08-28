@@ -68,7 +68,7 @@ public abstract class AbstractFileProcessor<T> {
         if (!file.isDirectory()) {
             int step = 0;
             LOGGER.info(
-                    "[MONITOR] [step 0] Start processing of file {} for family {}",
+                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]",
                     file.getPath(), extractor.getFamily());
             String productName = file.getName();
 
@@ -96,7 +96,7 @@ public abstract class AbstractFileProcessor<T> {
                     step++;
                     if (descriptor.isHasToBePublished()) {
                         LOGGER.info(
-                                "[MONITOR] [step 2] [productName {}] Starting publishing file in topic",
+                                "[REPORT] [MONITOR] [step 2] [productName {}] [s1pdgsTask Ingestion] [STOP] Publishing file in topic",
                                 productName);
                         publisher.send(buildDto(descriptor));
                     }
