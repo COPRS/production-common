@@ -19,8 +19,8 @@ Configuration:
           size: 10 MB
       DefaultRollOverStrategy:
         max: 30
-    RollingRandomAccessFile:
-      name: RANDOM_ACCESS_FILE
+    RollingFile:
+      name: FILE
       fileName: ${env:ingestor_logging_file:-./s1pdgs-ingestor.log}
       filePattern: "${env:ingestor_logging_file:-./s1pdgs-ingestor.log}.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
@@ -43,8 +43,8 @@ Configuration:
           level: error
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
-        level: ${env:ingestor_logging_level_frviveriss1pdgs:-info}
+      - name: esa.s1pdgs.cpoc
+        level: ${env:ingestor_logging_level_esa-s1pdgs-cpoc:-info}
         additivity: false
         AppenderRef:
           - ref: STDOUT
