@@ -5,6 +5,6 @@ package esa.s1pdgs.cpoc.appcatalog.common.rest.model.job;
  * @author Viveris Technologies
  *
  */
-public enum AppDataJobState {
+public enum AppDataJobDtoState {
     WAITING, DISPATCHING, GENERATING, TERMINATED;
 }

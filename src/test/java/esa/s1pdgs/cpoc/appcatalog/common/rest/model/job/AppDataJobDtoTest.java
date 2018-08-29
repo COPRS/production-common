@@ -10,46 +10,56 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiAuxiliaryFileMessageDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.AuxiliaryFilesMessageDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
-public class AppDataJobTest {
+public class AppDataJobDtoTest {
 
     /**
      * Test constructors
      */
     @Test
     public void testConstructors() {
-        AppDataJob obj = new AppDataJob();
+        AppDataJobDto<AuxiliaryFileDto> obj = new AppDataJobDto<AuxiliaryFileDto>();
+        
+        AppDataJobProductDto product = new AppDataJobProductDto();
+        product.setSessionId("session-id");
+        AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();
+        gen1.setTaskTable("tast-table-1");
+        AppDataJobGenerationDto gen2 = new AppDataJobGenerationDto();
+        gen2.setTaskTable("tast-table-2");
+        AppDataJobGenerationDto gen3 = new AppDataJobGenerationDto();
+        gen3.setTaskTable("tast-table-3");
+        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
+        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
         
         // check default constructor
         assertEquals(0, obj.getMessages().size());
-        assertEquals(AppDataJobState.WAITING, obj.getState());
+        assertEquals(AppDataJobDtoState.WAITING, obj.getState());
         assertNull(obj.getCreationDate());
         assertNull(obj.getLastUpdateDate());
         
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
-        obj.setState(AppDataJobState.DISPATCHING);
-        obj.setSessionId("session-id");
+        obj.setState(AppDataJobDtoState.DISPATCHING);
         obj.setCreationDate(new Date());
         obj.setLastUpdateDate(new Date());
-        MqiAuxiliaryFileMessageDto message1 = new MqiAuxiliaryFileMessageDto(1, "topic1", 0, 12);
-        MqiAuxiliaryFileMessageDto message2 = new MqiAuxiliaryFileMessageDto(2, "topic1", 1, 8);
+        obj.setProduct(product);
         obj.setMessages(Arrays.asList(message1, message2));
+        obj.setGenerations(Arrays.asList(gen1, gen2, gen3));
 
         // check setters
         assertEquals(123, obj.getIdentifier());
         assertEquals(ApplicationLevel.L1, obj.getLevel());
         assertEquals(2, obj.getMessages().size());
-        assertEquals(AppDataJobState.DISPATCHING, obj.getState());
+        assertEquals(AppDataJobDtoState.DISPATCHING, obj.getState());
         assertNotNull(obj.getCreationDate());
         assertNotNull(obj.getLastUpdateDate());
         assertEquals("pod-name", obj.getPod());
-        assertEquals("session-id", obj.getSessionId());
         
         // check toString
         String str = obj.toString();
@@ -57,10 +67,11 @@ public class AppDataJobTest {
         assertTrue(str.contains("level: L1"));
         assertTrue(str.contains("state: DISPATCHING"));
         assertTrue(str.contains("pod: pod-name"));
-        assertTrue(str.contains("sessionId: session-id"));
         assertTrue(str.contains("creationDate: "));
         assertTrue(str.contains("lastUpdateDate: "));
+        assertTrue(str.contains("product: " + product.toString()));
         assertTrue(str.contains("messages: " + Arrays.asList(message1, message2).toString()));
+        assertTrue(str.contains("generations: " + Arrays.asList(gen1, gen2, gen3).toString()));
     }
 
     /**
@@ -68,7 +79,7 @@ public class AppDataJobTest {
      */
     @Test
     public void testEquals() {
-        EqualsVerifier.forClass(AppDataJob.class)
+        EqualsVerifier.forClass(AppDataJobDto.class)
                 .usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
     }
 
