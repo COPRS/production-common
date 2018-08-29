@@ -27,4 +27,8 @@ file:
     local-directory: ${archives_slices_local-directory:/data/slices/} # Must contains the last /
   reports:
     local-directory: ${archives_reports_local-directory:/data/reports/} # Must contains the last /
+
+dev:
+  activations:
+    download-manifest : ${archives_dev_download-manifest:true}
     
