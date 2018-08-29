@@ -265,7 +265,7 @@ public class JobProcessor {
 
         } catch (AbstractCodedException ace) {
             ackOk = false;
-            errorMessage = String.format("[REPORT] [s1pdgsTask {}Processing] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s",
+            errorMessage = String.format("[REPORT] [s1pdgsTask %sProcessing] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s",
             		properties.getLevel(),
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
@@ -273,7 +273,7 @@ public class JobProcessor {
         } catch (InterruptedException e) {
             ackOk = false;
             errorMessage = String.format(
-                    "[REPORT] %s [step %d] %s [code %d] [s1pdgsTask {}Processing] [STOP KO] [subTask processing] [msg interrupted exception]",
+                    "[REPORT] %s [step %d] %s [code %d] [s1pdgsTask %sProcessing] [STOP KO] [subTask processing] [msg interrupted exception]",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ErrorCode.INTERNAL_ERROR.getCode(),
