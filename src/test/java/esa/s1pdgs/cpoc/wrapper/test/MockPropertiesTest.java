@@ -133,7 +133,7 @@ public class MockPropertiesTest {
      */
     protected void mockDefaultStatus() throws AbstractCodedException {
         doNothing().when(mqiStatusService).stop();
-        mockStatus((new AppStatus(3, mqiStatusService)).getStatus(), 3, false);
+        mockStatus((new AppStatus(3, 30, mqiStatusService)).getStatus(), 3, false);
     }
 
     /**
@@ -149,7 +149,7 @@ public class MockPropertiesTest {
         doNothing().when(appStatus).setWaiting();
         doNothing().when(appStatus).setProcessing(Mockito.anyLong());
         doNothing().when(appStatus).setStopping();
-        doNothing().when(appStatus).setError();
+        doNothing().when(appStatus).setError(Mockito.anyString());
         doNothing().when(appStatus).setShallBeStopped(Mockito.anyBoolean());
         doNothing().when(appStatus).forceStopping();
 
