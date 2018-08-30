@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>spdgs-sdk</groupId>
 	<artifactId>commons</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>commons</name>
 	<packaging>jar</packaging>
 

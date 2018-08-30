@@ -76,6 +76,11 @@ public class MqiLightMessageDto {
      * Number of retries
      */
     protected int nbRetries;
+    
+    /**
+     * Date of creation
+     */
+    protected Date creationDate;
 
     /**
      * Default constructor
@@ -307,6 +312,20 @@ public class MqiLightMessageDto {
     }
 
     /**
+     * @return the creationDate
+     */
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    /**
+     * @param creationDate the creationDate to set
+     */
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    /**
      * @see java.lang.Object#toString()
      */
     @Override
@@ -319,10 +338,10 @@ public class MqiLightMessageDto {
      */
     public String toStringForExtend() {
         return String.format(
-                "category: %s, identifier: %s, topic: %s, partition: %s, offset: %s, group: %s, state: %s, readingPod: %s, lastReadDate: %s, sendingPod: %s, lastSendDate: %s, lastAckDate: %s, nbRetries: %s",
+                "category: %s, identifier: %s, topic: %s, partition: %s, offset: %s, group: %s, state: %s, readingPod: %s, lastReadDate: %s, sendingPod: %s, lastSendDate: %s, lastAckDate: %s, nbRetries: %s, creationDate: %s",
                 category, identifier, topic, partition, offset, group, state,
                 readingPod, lastReadDate, sendingPod, lastSendDate, lastAckDate,
-                nbRetries);
+                nbRetries, creationDate);
     }
 
     /**
@@ -332,7 +351,7 @@ public class MqiLightMessageDto {
     public int hashCode() {
         return Objects.hash(category, identifier, topic, partition, offset,
                 group, state, readingPod, lastReadDate, sendingPod,
-                lastSendDate, lastAckDate, nbRetries);
+                lastSendDate, lastAckDate, nbRetries, creationDate);
     }
 
     /**
@@ -358,6 +377,7 @@ public class MqiLightMessageDto {
                     && Objects.equals(sendingPod, other.sendingPod)
                     && Objects.equals(lastSendDate, other.lastSendDate)
                     && Objects.equals(lastAckDate, other.lastAckDate)
+                    && Objects.equals(creationDate, other.creationDate)
                     && nbRetries == other.nbRetries;
         }
         return ret;
