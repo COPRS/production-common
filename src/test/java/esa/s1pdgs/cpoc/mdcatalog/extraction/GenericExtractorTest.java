@@ -178,7 +178,7 @@ public class GenericExtractorTest {
         extractor.genericExtract();
         verify(mqiService, times(1)).next();
         verifyZeroInteractions(obsService);
-        verify(appStatus, times(1)).setError(Mockito.any(), Mockito.anyString());
+        verifyZeroInteractions(appStatus);
         verifyZeroInteractions(esServices);
     }
 
@@ -189,7 +189,7 @@ public class GenericExtractorTest {
         extractor.genericExtract();
         verify(mqiService, times(1)).next();
         verifyZeroInteractions(obsService);
-        verify(appStatus, times(1)).setError(Mockito.any(), Mockito.anyString());
+        verifyZeroInteractions(appStatus);
         verifyZeroInteractions(esServices);
     }
 
