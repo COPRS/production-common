@@ -321,7 +321,7 @@ public class MqiLightMessageDto {
     /**
      * @param creationDate the creationDate to set
      */
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(final Date creationDate) {
         this.creationDate = creationDate;
     }
 
