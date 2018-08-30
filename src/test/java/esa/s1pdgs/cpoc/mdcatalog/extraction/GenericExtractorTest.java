@@ -80,7 +80,7 @@ public class GenericExtractorTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(appStatus).setError(Mockito.any());
+        doNothing().when(appStatus).setError(Mockito.any(), "PROCESSING");
         doReturn(true).when(mqiService).ack(Mockito.any());
 
         inputMessage = new GenericMessageDto<LevelProductDto>(123, "",
@@ -111,7 +111,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1)).ack(Mockito
                 .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
         verify(appStatus, times(1))
-                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), "PROCESSING");
     }
 
     /**
@@ -129,7 +129,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1)).ack(Mockito
                 .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
         verify(appStatus, times(1))
-                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), "PROCESSING");
     }
 
     /**
@@ -148,7 +148,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1))
                 .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)));
         verify(appStatus, times(1))
-                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), "PROCESSING");
     }
 
     /**
@@ -166,7 +166,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1))
                 .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)));
         verify(appStatus, never())
-                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), "PROCESSING");
     }
 
     @Test
