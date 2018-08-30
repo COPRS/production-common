@@ -110,7 +110,7 @@ public class AuxiliaryFilesExtractorTest {
         doReturn(typeOverlap).when(extractorConfig).getTypeOverlap();
         doReturn(typeSliceLength).when(extractorConfig).getTypeSliceLength();
 
-        doNothing().when(appStatus).setError(Mockito.any(), "PROCESSING");
+        doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any());
 
         inputMessage = new GenericMessageDto<AuxiliaryFileDto>(123, "",

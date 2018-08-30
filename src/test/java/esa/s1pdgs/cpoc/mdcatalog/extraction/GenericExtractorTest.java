@@ -80,7 +80,7 @@ public class GenericExtractorTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(appStatus).setError(Mockito.any(), "PROCESSING");
+        doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any());
 
         inputMessage = new GenericMessageDto<LevelProductDto>(123, "",
@@ -111,7 +111,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1)).ack(Mockito
                 .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
         verify(appStatus, times(1))
-                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), "PROCESSING");
+                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), Mockito.anyString());
     }
 
     /**
@@ -129,7 +129,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1)).ack(Mockito
                 .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
         verify(appStatus, times(1))
-                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), "PROCESSING");
+                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), Mockito.anyString());
     }
 
     /**
@@ -148,7 +148,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1))
                 .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)));
         verify(appStatus, times(1))
-                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), "PROCESSING");
+                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), Mockito.anyString());
     }
 
     /**
@@ -166,7 +166,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1))
                 .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)));
         verify(appStatus, never())
-                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), "PROCESSING");
+                .setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), Mockito.anyString());
     }
 
     @Test
@@ -178,7 +178,7 @@ public class GenericExtractorTest {
         extractor.genericExtract();
         verify(mqiService, times(1)).next();
         verifyZeroInteractions(obsService);
-        verifyZeroInteractions(appStatus);
+        verify(appStatus, times(1)).setError(Mockito.any(), Mockito.anyString());
         verifyZeroInteractions(esServices);
     }
 
@@ -189,7 +189,7 @@ public class GenericExtractorTest {
         extractor.genericExtract();
         verify(mqiService, times(1)).next();
         verifyZeroInteractions(obsService);
-        verifyZeroInteractions(appStatus);
+        verify(appStatus, times(1)).setError(Mockito.any(), Mockito.anyString());
         verifyZeroInteractions(esServices);
     }
 

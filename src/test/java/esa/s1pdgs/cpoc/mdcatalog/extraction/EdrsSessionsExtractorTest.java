@@ -81,7 +81,7 @@ public class EdrsSessionsExtractorTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(appStatus).setError(Mockito.any(), "PROCESSING");
+        doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any());
 
         inputMessage = new GenericMessageDto<EdrsSessionDto>(123, "",
