@@ -6,5 +6,5 @@ package esa.s1pdgs.cpoc.appcatalog.common.rest.model.job;
  * @author Viveris Technologies
  */
 public enum AppDataJobGenerationDtoState {
-    GENERATING;
+    INITIAL, PRIMARY_CHECK, READY, SENT;
 }

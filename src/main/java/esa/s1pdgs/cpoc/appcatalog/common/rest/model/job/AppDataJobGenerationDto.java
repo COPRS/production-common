@@ -35,7 +35,7 @@ public class AppDataJobGenerationDto {
      */
     public AppDataJobGenerationDto() {
         super();
-        this.state = AppDataJobGenerationDtoState.GENERATING;
+        this.state = AppDataJobGenerationDtoState.INITIAL;
     }
 
     /**

@@ -22,24 +22,24 @@ public class AppDataJobGenerationDtoTest {
         AppDataJobGenerationDto obj = new AppDataJobGenerationDto();
 
         // check default constructor
-        assertEquals(AppDataJobGenerationDtoState.GENERATING, obj.getState());
+        assertEquals(AppDataJobGenerationDtoState.INITIAL, obj.getState());
         assertNull(obj.getCreationDate());
         assertNull(obj.getLastUpdateDate());
 
         obj.setTaskTable("task-table-1");
-        obj.setState(AppDataJobGenerationDtoState.GENERATING);
+        obj.setState(AppDataJobGenerationDtoState.INITIAL);
         obj.setCreationDate(new Date());
         obj.setLastUpdateDate(new Date());
 
         // check setters
-        assertEquals(AppDataJobGenerationDtoState.GENERATING, obj.getState());
+        assertEquals(AppDataJobGenerationDtoState.INITIAL, obj.getState());
         assertNotNull(obj.getCreationDate());
         assertNotNull(obj.getLastUpdateDate());
         assertEquals("task-table-1", obj.getTaskTable());
 
         // check toString
         String str = obj.toString();
-        assertTrue(str.contains("state: GENERATING"));
+        assertTrue(str.contains("state: INITIAL"));
         assertTrue(str.contains("taskTable: task-table-1"));
         assertTrue(str.contains("creationDate: "));
         assertTrue(str.contains("lastUpdateDate: "));
