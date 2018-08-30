@@ -91,6 +91,7 @@ public class L0SlicesConsumer {
         }
         if (message == null || message.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
+            appStatus.setError("NEXT_MESSAGE");
             return;
         }
         
@@ -149,6 +150,7 @@ public class L0SlicesConsumer {
         }
         catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step {} [code {}] {}\", step, ace.getCode(), ace.getLogMessage()");
+            appStatus.setError("NEXT_MESSAGE");
         }
         
     }
