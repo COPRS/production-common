@@ -144,10 +144,10 @@ public class JobProcessor {
             LOGGER.error("[MONITOR] [step 0] [code {}] {}",
                     ace.getCode().getCode(), ace.getLogMessage());
             message = null;
+            this.appStatus.setError("NEXT_MESSAGE");
         }
         if (message == null || message.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-            this.appStatus.setError("NEXT_MESSAGE");
             return;
         }
         appStatus.setProcessing(message.getIdentifier());
