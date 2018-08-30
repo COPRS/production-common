@@ -116,6 +116,7 @@ public abstract class GenericExtractor<T> {
             LOGGER.trace(
                     "[MONITOR] [step 0] [{}] No message received: continue",
                     category);
+            appStatus.setError(category, "NEXT_MESSAGE");
             return;
         }
 
@@ -192,7 +193,7 @@ public abstract class GenericExtractor<T> {
                     category, extractProductNameFromDto(message.getBody()),
                     ace.getCode().getCode(), ace.getLogMessage());
         }
-        appStatus.setError(category);
+        appStatus.setError(category, "PROCESSING");
     }
 
     /**
@@ -212,7 +213,7 @@ public abstract class GenericExtractor<T> {
                     "[MONITOR] [step 5] [{}] [productName {}] [code {}] {}",
                     category, extractProductNameFromDto(message.getBody()),
                     ace.getCode().getCode(), ace.getLogMessage());
-            appStatus.setError(category);
+            appStatus.setError(category, "PROCESSING");
         }
     }
 
