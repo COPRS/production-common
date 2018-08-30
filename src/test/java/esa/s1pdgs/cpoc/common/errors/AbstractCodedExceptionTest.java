@@ -13,7 +13,7 @@ public class AbstractCodedExceptionTest {
 
     @Test
     public void testEnumErroCode() {
-        assertEquals(54, ErrorCode.values().length);
+        assertEquals(60, ErrorCode.values().length);
         
         assertEquals(ErrorCode.ES_CREATION_ERROR,
                 ErrorCode.valueOf("ES_CREATION_ERROR"));
