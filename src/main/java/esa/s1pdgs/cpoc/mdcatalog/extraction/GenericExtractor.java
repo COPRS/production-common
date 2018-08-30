@@ -111,12 +111,12 @@ public abstract class GenericExtractor<T> {
             LOGGER.error("[MONITOR] [step 0] [{}] [code {}] {}", category,
                     ace.getCode().getCode(), ace.getLogMessage());
             message = null;
+            appStatus.setError(category, "NEXT_MESSAGE");
         }
         if (message == null || message.getBody() == null) {
             LOGGER.trace(
                     "[MONITOR] [step 0] [{}] No message received: continue",
                     category);
-            appStatus.setError(category, "NEXT_MESSAGE");
             return;
         }
 
