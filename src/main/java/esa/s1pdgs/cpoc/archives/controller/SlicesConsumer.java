@@ -59,7 +59,7 @@ public class SlicesConsumer {
     		final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
         LOGGER.info(
-                "[REPORT] [step 0] [family {}] [productName {}] [s1pdgsTask Archiver] [START] Start distribution",
+                "[REPORT] [MONITOR] [step 0] [family {}] [productName {}] [s1pdgsTask Archiver] [START] Start distribution",
                 dto.getFamily(), dto.getProductName());
         try {
             if(devProperties.getActivations().get("download-manifest")) {
