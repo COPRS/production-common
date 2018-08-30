@@ -66,6 +66,8 @@ public class ApplicationPropertiesTest {
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.EDRS_SESSIONS).getConsumption()
                 .isEnable());
+        assertEquals("t-pdgs-edrs-sessions:100||t-topic-2:10", properties.getProductCategories()
+                .get(ProductCategory.EDRS_SESSIONS).getConsumption().getTopicswithprioritystr());
         Map<String, Integer> expectedTopics = new HashMap<>();
         expectedTopics.put("t-pdgs-edrs-sessions", 0);
         expectedTopics.put("t-topic-2", 0);

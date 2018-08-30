@@ -3,9 +3,12 @@ package esa.s1pdgs.cpoc.mqi.server;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
@@ -40,6 +43,26 @@ public class ApplicationProperties {
     public ApplicationProperties() {
         super();
         this.productCategories = new HashMap<>();
+    }
+    
+    @PostConstruct
+    public void initMaps() {
+        for(ProductCategory keyCat : this.productCategories.keySet()) {
+            ProductCategoryProperties cat = productCategories.get(keyCat);
+            cat.getConsumption().setTopicsWithPriority(new HashMap<>());
+            if (!StringUtils.isEmpty(cat.getConsumption().getTopicswithprioritystr())) {
+                    String[] paramsTmp = cat.getConsumption().getTopicswithprioritystr().split("\\|\\|");
+                    for (int i=0; i<paramsTmp.length; i++) {
+                        if (!StringUtils.isEmpty(paramsTmp[i])) {
+                            String[] tmp = paramsTmp[i].split(":", 2);
+                            if (tmp.length == 2) {
+                                cat.getConsumption().getTopicsWithPriority().put(tmp[0], Integer.valueOf(tmp[1]));
+                            }
+                        }
+                    }
+                }
+        }
+        
     }
 
     /**
@@ -88,7 +111,7 @@ public class ApplicationProperties {
 
     /**
      * Properties of a product category
-     * 
+     * consumption
      * @author Viveris Technologies
      */
     public static class ProductCategoryProperties {
@@ -168,6 +191,8 @@ public class ApplicationProperties {
          */
         private boolean enable;
 
+        private String topicswithprioritystr;
+        
         /**
          * The topic to consume for this category
          */
@@ -184,11 +209,10 @@ public class ApplicationProperties {
         /**
          * Constructor
          */
-        public ProductCategoryConsumptionProperties(final boolean enable,
-                final Map<String, Integer> topicsWithPriority) {
+        public ProductCategoryConsumptionProperties(final boolean enable) {
             super();
             this.enable = enable;
-            this.topicsWithPriority = topicsWithPriority;
+            this.topicsWithPriority = new HashMap<>();
         }
 
         /**
@@ -219,6 +243,20 @@ public class ApplicationProperties {
          */
         public void setTopicsWithPriority(final Map<String, Integer> topicsWithPriority) {
             this.topicsWithPriority = topicsWithPriority;
+        }
+
+        /**
+         * @return the topicswithprioritystr
+         */
+        public String getTopicswithprioritystr() {
+            return topicswithprioritystr;
+        }
+
+        /**
+         * @param topicswithprioritystr the topicswithprioritystr to set
+         */
+        public void setTopicswithprioritystr(String topicswithprioritystr) {
+            this.topicswithprioritystr = topicswithprioritystr;
         }
     }
 

@@ -159,30 +159,35 @@ public class MessageConsumptionControllerTest {
         lRepTopicsWithPriority.put("topic", 100);
         lRepTopicsWithPriority.put("another-topic", 10);
         Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
+        ProductCategoryConsumptionProperties prodCatAux = new ProductCategoryConsumptionProperties(true);
+        prodCatAux.setTopicsWithPriority(auxTopicsWithPriority);
         map.put(ProductCategory.AUXILIARY_FILES,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                auxTopicsWithPriority),
+                        prodCatAux,
                         null));
+        ProductCategoryConsumptionProperties prodCatProd = new ProductCategoryConsumptionProperties(true);
+        prodCatProd.setTopicsWithPriority(lProdTopicsWithPriority);
         map.put(ProductCategory.LEVEL_PRODUCTS,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                lProdTopicsWithPriority),
+                        prodCatProd,
                         null));
+        ProductCategoryConsumptionProperties prodCatJob = new ProductCategoryConsumptionProperties(true);
+        prodCatJob.setTopicsWithPriority(lJobTopicsWithPriority);
         map.put(ProductCategory.LEVEL_JOBS,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                lJobTopicsWithPriority),
+                        prodCatJob,
                         null));
+        ProductCategoryConsumptionProperties prodCatEDRS = new ProductCategoryConsumptionProperties(true);
+        prodCatEDRS.setTopicsWithPriority(edrsTopicsWithPriority);
         map.put(ProductCategory.EDRS_SESSIONS,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                edrsTopicsWithPriority),
+                        prodCatEDRS,
                         null));
+        ProductCategoryConsumptionProperties prodCatRep = new ProductCategoryConsumptionProperties(true);
+        prodCatRep.setTopicsWithPriority(lRepTopicsWithPriority);
         map.put(ProductCategory.LEVEL_REPORTS,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                lRepTopicsWithPriority),
+                        prodCatRep,
                         null));
         doReturn(map).when(appProperties).getProductCategories();
 
@@ -211,6 +216,7 @@ public class MessageConsumptionControllerTest {
         assertEquals(AuxiliaryFileDto.class,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic").getConsumedMsgClass());
+        System.out.println(manager.consumers.get(ProductCategory.AUXILIARY_FILES));
         assertEquals("topic-other",
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic-other").getTopic());

@@ -29,30 +29,33 @@ application:
     auxiliary-files:
       consumption:
         enable: false
+        topicswithprioritystr: ""
       publication:
         enable: false
     edrs-sessions:
       consumption:
         enable: true
-        topics-with-priority: {t-pdgs-edrs-sessions: 100, t-topic-2: 10}        
+        topicswithprioritystr: "t-pdgs-edrs-sessions:100||t-topic-2:10"       
       publication:
         enable: false
     level-products:
       consumption:
         enable: false
+        topicswithprioritystr: "" 
       publication:
         enable: true
         routing-file: ./src/test/resources/routing-files/level-products.xml
     level-reports:
       consumption:
-        enable: false
+        enable: false        
+        topicswithprioritystr: "" 
       publication:
         enable: true
         routing-file: ./src/test/resources/routing-files/level-reports.xml
     level-jobs:
       consumption:
         enable: true
-        topics-with-priority: {t-pdgs-l0-jobs: 100}          
+        topicswithprioritystr: "t-pdgs-l0-jobs:100"   
       publication:
         enable: false
 server:
