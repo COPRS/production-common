@@ -96,10 +96,10 @@ public class EdrsSessionConsumer {
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[MONITOR] [code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 			message = null;
+            appStatus.setError("NEXT_MESSAGE");
 		}
 		if (message == null || message.getBody() == null) {
 			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-            appStatus.setError("NEXT_MESSAGE");
 			return;
 		}
 		appStatus.setProcessing(message.getIdentifier());
