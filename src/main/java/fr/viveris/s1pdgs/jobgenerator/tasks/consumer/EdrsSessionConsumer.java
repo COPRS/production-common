@@ -151,7 +151,7 @@ public class EdrsSessionConsumer {
 					if (session.getObject().getChannel1() != null && session.getObject().getChannel2() != null) {
 						step = 2;
 						this.cachedSessions.remove(file.getSessionId());
-						LOGGER.info("[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Dispatch] [STOP OK] [productName {}] Dispatching session", step);
+						LOGGER.info("[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Dispatch] [STOP OK] [productName {}] Dispatching session", step, file.getSessionId());
 						this.jobDispatcher.dispatch(new Job<EdrsSession>(session, message));
 					} else {
 						session.getObject().setLastTsMsg(System.currentTimeMillis());
