@@ -28,6 +28,15 @@ public class AppDataJobFileDto {
     }
 
     /**
+     * @param filename
+     */
+    public AppDataJobFileDto(final String filename, final String keyObs) {
+        super();
+        this.filename = filename;
+        this.keyObs = keyObs;
+    }
+
+    /**
      * @return the filename
      */
     public String getFilename() {
