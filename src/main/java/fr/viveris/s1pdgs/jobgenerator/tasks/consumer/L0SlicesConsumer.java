@@ -126,7 +126,7 @@ public class L0SlicesConsumer {
 
             // Dispatch job
             step++;
-            LOGGER.info("[REPORT] [step 2] [productName {}] [s1pdgsTask L1JobGeneration] [subTask Dispatch] [productName {}] [STOP OK] [taskTable {}] Dispatching product", 
+            LOGGER.info("[REPORT] [step 2] [productName {}] [s1pdgsTask L1JobGeneration] [subTask Dispatch] [STOP OK] [taskTable {}] Dispatching product", 
                     leveldto.getProductName(), job.getTaskTableName());
             this.jobsDispatcher.dispatch(job);
 

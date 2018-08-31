@@ -340,7 +340,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 					if (todo) {
 					    String headReport = "";
 					    if(status.getNbRetries() == 0){
-					        headReport = String.format("[REPORT] [s1pdgsTask %sProcessing] [subTask Generation] [START]", this.taskTable.getLevel());
+					        headReport = String.format("[REPORT] [s1pdgsTask %sJobGeneration] [subTask Generation] [START]", this.taskTable.getLevel());
 					        
 					    }
 						LOGGER.info("{} {} [productName {}] [status {}] Trying job generation", headReport, this.prefixLogMonitor,
@@ -640,7 +640,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 			throw new InternalErrorException("Cannot send the job", e);
 		}
 		// Third, send the job
-		LOGGER.info("[REPORT] {} [productName {}] [s1pdgsTask {}JobGenerator] [subTask Generation] [STOP OK] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier(), family);
+		LOGGER.info("[REPORT] {} [productName {}] [s1pdgsTask {}JobGenerator] [subTask Generation] [STOP OK] [taskTable {}] 3c - Publishing job", this.prefixLogMonitor, job.getProduct().getIdentifier(), family, job.getTaskTableName());
 		
         this.outputFactory.sendJob(job.getInputMessage(), r);
 		
