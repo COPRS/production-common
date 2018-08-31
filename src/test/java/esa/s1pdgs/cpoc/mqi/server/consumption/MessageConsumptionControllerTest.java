@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -145,31 +146,48 @@ public class MessageConsumptionControllerTest {
      * activated
      */
     private void startManagerWithAllConsumers() {
+        Map<String, Integer> auxTopicsWithPriority = new HashMap<>();
+        auxTopicsWithPriority.put("topic", 100);
+        auxTopicsWithPriority.put("topic-other", 10);
+        Map<String, Integer> edrsTopicsWithPriority = new HashMap<>();
+        edrsTopicsWithPriority.put("topic", 10);
+        Map<String, Integer> lProdTopicsWithPriority = new HashMap<>();
+        lProdTopicsWithPriority.put("topic", 100);
+        Map<String, Integer> lJobTopicsWithPriority = new HashMap<>();
+        lJobTopicsWithPriority.put("topic", 10);
+        Map<String, Integer> lRepTopicsWithPriority = new HashMap<>();
+        lRepTopicsWithPriority.put("topic", 100);
+        lRepTopicsWithPriority.put("another-topic", 10);
         Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
+        ProductCategoryConsumptionProperties prodCatAux = new ProductCategoryConsumptionProperties(true);
+        prodCatAux.setTopicsWithPriority(auxTopicsWithPriority);
         map.put(ProductCategory.AUXILIARY_FILES,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                Arrays.asList("topic1", "topic-other")),
+                        prodCatAux,
                         null));
+        ProductCategoryConsumptionProperties prodCatProd = new ProductCategoryConsumptionProperties(true);
+        prodCatProd.setTopicsWithPriority(lProdTopicsWithPriority);
         map.put(ProductCategory.LEVEL_PRODUCTS,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                Arrays.asList("topic3")),
+                        prodCatProd,
                         null));
+        ProductCategoryConsumptionProperties prodCatJob = new ProductCategoryConsumptionProperties(true);
+        prodCatJob.setTopicsWithPriority(lJobTopicsWithPriority);
         map.put(ProductCategory.LEVEL_JOBS,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                Arrays.asList("topic4")),
+                        prodCatJob,
                         null));
+        ProductCategoryConsumptionProperties prodCatEDRS = new ProductCategoryConsumptionProperties(true);
+        prodCatEDRS.setTopicsWithPriority(edrsTopicsWithPriority);
         map.put(ProductCategory.EDRS_SESSIONS,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                Arrays.asList("topic2")),
+                        prodCatEDRS,
                         null));
+        ProductCategoryConsumptionProperties prodCatRep = new ProductCategoryConsumptionProperties(true);
+        prodCatRep.setTopicsWithPriority(lRepTopicsWithPriority);
         map.put(ProductCategory.LEVEL_REPORTS,
                 new ProductCategoryProperties(
-                        new ProductCategoryConsumptionProperties(true,
-                                Arrays.asList("topic5", "another-topic")),
+                        prodCatRep,
                         null));
         doReturn(map).when(appProperties).getProductCategories();
 
@@ -193,11 +211,12 @@ public class MessageConsumptionControllerTest {
 
         assertEquals(2,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES).size());
-        assertEquals("topic1", manager.consumers
-                .get(ProductCategory.AUXILIARY_FILES).get("topic1").getTopic());
+        assertEquals("topic", manager.consumers
+                .get(ProductCategory.AUXILIARY_FILES).get("topic").getTopic());
         assertEquals(AuxiliaryFileDto.class,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
-                        .get("topic1").getConsumedMsgClass());
+                        .get("topic").getConsumedMsgClass());
+        System.out.println(manager.consumers.get(ProductCategory.AUXILIARY_FILES));
         assertEquals("topic-other",
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic-other").getTopic());
@@ -207,35 +226,35 @@ public class MessageConsumptionControllerTest {
 
         assertEquals(1,
                 manager.consumers.get(ProductCategory.EDRS_SESSIONS).size());
-        assertEquals("topic2", manager.consumers
-                .get(ProductCategory.EDRS_SESSIONS).get("topic2").getTopic());
+        assertEquals("topic", manager.consumers
+                .get(ProductCategory.EDRS_SESSIONS).get("topic").getTopic());
         assertEquals(EdrsSessionDto.class,
                 manager.consumers.get(ProductCategory.EDRS_SESSIONS)
-                        .get("topic2").getConsumedMsgClass());
+                        .get("topic").getConsumedMsgClass());
 
         assertEquals(1,
                 manager.consumers.get(ProductCategory.LEVEL_PRODUCTS).size());
-        assertEquals("topic3", manager.consumers
-                .get(ProductCategory.LEVEL_PRODUCTS).get("topic3").getTopic());
+        assertEquals("topic", manager.consumers
+                .get(ProductCategory.LEVEL_PRODUCTS).get("topic").getTopic());
         assertEquals(LevelProductDto.class,
                 manager.consumers.get(ProductCategory.LEVEL_PRODUCTS)
-                        .get("topic3").getConsumedMsgClass());
+                        .get("topic").getConsumedMsgClass());
 
         assertEquals(1,
                 manager.consumers.get(ProductCategory.LEVEL_JOBS).size());
-        assertEquals("topic4", manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic4").getTopic());
+        assertEquals("topic", manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic").getTopic());
         assertEquals(LevelJobDto.class,
-                manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4")
+                manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic")
                         .getConsumedMsgClass());
 
         assertEquals(2,
                 manager.consumers.get(ProductCategory.LEVEL_REPORTS).size());
-        assertEquals("topic5", manager.consumers
-                .get(ProductCategory.LEVEL_REPORTS).get("topic5").getTopic());
+        assertEquals("topic", manager.consumers
+                .get(ProductCategory.LEVEL_REPORTS).get("topic").getTopic());
         assertEquals(LevelReportDto.class,
                 manager.consumers.get(ProductCategory.LEVEL_REPORTS)
-                        .get("topic5").getConsumedMsgClass());
+                        .get("topic").getConsumedMsgClass());
         assertEquals("another-topic",
                 manager.consumers.get(ProductCategory.LEVEL_REPORTS)
                         .get("another-topic").getTopic());
@@ -339,6 +358,7 @@ public class MessageConsumptionControllerTest {
         MqiGenericMessageDto<?> msg1 =
                 new MqiGenericMessageDto<>(category, 1, "topic", 1, 10);
         msg1.setState(MqiStateMessageEnum.SEND);
+        msg1.setCreationDate(new Date());
         msg1.setSendingPod("other-pod");
         doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
                 Mockito.any(), Mockito.eq(1L));
@@ -347,6 +367,7 @@ public class MessageConsumptionControllerTest {
         MqiGenericMessageDto<?> msg2 =
                 new MqiGenericMessageDto<>(category, 2, "topic", 1, 11);
         msg2.setState(MqiStateMessageEnum.READ);
+        msg2.setCreationDate(new Date());
         doReturn(true).when(mockedService).send(Mockito.eq(2L), Mockito.any());
 
         // Status read
@@ -394,7 +415,7 @@ public class MessageConsumptionControllerTest {
                 "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(
-                        ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
+                        ProductCategory.LEVEL_JOBS, 123, "topic", 1, 22, dto);
 
         doReturn(true).when(persistLevelJobsService).ack(Mockito.eq(123L),
                 Mockito.any());
@@ -402,14 +423,14 @@ public class MessageConsumptionControllerTest {
         doReturn(0).when(persistLevelJobsService)
                 .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
-        ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
+        ResumeDetails expectedRd = new ResumeDetails("topic", dto);
 
         Thread.sleep(2000);
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").pause();
 
         Thread.sleep(3000);
         assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic4").isPaused());
+                .get("topic").isPaused());
         ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
                 Ack.OK, false);
         assertEquals(expectedRd, rd);
@@ -417,7 +438,7 @@ public class MessageConsumptionControllerTest {
         // Check resume call
         Thread.sleep(2000);
         assertFalse(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic4").isPaused());
+                .get("topic").isPaused());
     }
 
     @Test
@@ -440,11 +461,11 @@ public class MessageConsumptionControllerTest {
         ResumeDetails expectedRd = new ResumeDetails("topic-unknown", dto);
 
         Thread.sleep(2000);
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").pause();
 
         Thread.sleep(2500);
         assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic4").isPaused());
+                .get("topic").isPaused());
         ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
                 Ack.OK, false);
         assertEquals(expectedRd, rd);
@@ -452,9 +473,9 @@ public class MessageConsumptionControllerTest {
         // Check resume call
         Thread.sleep(2000);
         assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic4").isPaused());
+                .get("topic").isPaused());
 
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4")
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic")
                 .resume();
     }
 
@@ -477,11 +498,11 @@ public class MessageConsumptionControllerTest {
         ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
 
         Thread.sleep(2000);
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic4").pause();
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").pause();
 
         Thread.sleep(2000);
         assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic4").isPaused());
+                .get("topic").isPaused());
         ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
                 Ack.OK, true);
         assertEquals(expectedRd, rd);
@@ -489,7 +510,7 @@ public class MessageConsumptionControllerTest {
         // Check resume call
         Thread.sleep(2000);
         assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic4").isPaused());
+                .get("topic").isPaused());
     }
 
     /**
