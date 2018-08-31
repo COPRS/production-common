@@ -309,9 +309,12 @@ public class OutputProcessor {
                 this.obsService.uploadFilesPerBatch(sublist);
             }
         }
-
+        String listoutputs="";
+        for (int i = 0; i < size; i++) {
+        	listoutputs =  listoutputs + " " + uploadBatch.get(i).getKey();
+        }
         LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch [outputs {}]",
-                this.prefixMonitorLogs, this.appLevel, outputToPublish.toString());
+                this.prefixMonitorLogs, this.appLevel, listoutputs);
         publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);
     }
 
