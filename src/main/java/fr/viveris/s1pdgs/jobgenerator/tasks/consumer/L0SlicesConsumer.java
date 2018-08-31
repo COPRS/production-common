@@ -1,55 +1,36 @@
 package fr.viveris.s1pdgs.jobgenerator.tasks.consumer;
-import java.util.Date;
+
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedJobsReachException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import fr.viveris.s1pdgs.jobgenerator.config.L0SlicePatternSettings;
-import fr.viveris.s1pdgs.jobgenerator.model.Job;
-import fr.viveris.s1pdgs.jobgenerator.model.product.L0Slice;
-import fr.viveris.s1pdgs.jobgenerator.model.product.L0SliceProduct;
+import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.status.AppStatus;
-import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.L0SliceJobsDispatcher;
-import fr.viveris.s1pdgs.jobgenerator.utils.DateUtils;
+import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.AbstractJobsDispatcher;
 
 @Component
-@ConditionalOnProperty(name="process.level", havingValue="L1")
+@ConditionalOnProperty(name = "process.level", havingValue = "L1")
 
-public class L0SlicesConsumer {
-    /**
-     * MQI service for reading message
-     */
-
-    /**
-     * Format of dates used in filename of the products
-     */
-    protected static final String DATE_FORMAT = "yyyyMMdd'T'HHmmss";
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER = LogManager.getLogger(L0SlicesConsumer.class);
-
-    /**
-     * Dispatcher of l0 slices
-     */
-    private final L0SliceJobsDispatcher jobsDispatcher;
+public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
 
     /**
      * Settings used to extract information from L0 product name
@@ -61,96 +42,149 @@ public class L0SlicesConsumer {
      */
     private final Pattern l0SLicesPattern;
 
-    private final GenericMqiService<LevelProductDto> mqiService;
     /**
-     * Application status
+     * Constructor
+     * 
+     * @param jobsDispatcher
+     * @param patternSettings
+     * @param processSettings
+     * @param mqiService
+     * @param appDataService
+     * @param appStatus
      */
-    private final AppStatus appStatus;
-    
-    
     @Autowired
-    public L0SlicesConsumer(final L0SliceJobsDispatcher jobsDispatcher, final L0SlicePatternSettings patternSettings,
-            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiService, final AppStatus appStatus) {
-        this.jobsDispatcher = jobsDispatcher;
+    public L0SlicesConsumer(final AbstractJobsDispatcher<LevelProductDto> jobsDispatcher,
+            final L0SlicePatternSettings patternSettings,
+            final ProcessSettings processSettings,
+            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiService,
+            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
+            @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<LevelProductDto> appDataService,
+            final AppStatus appStatus) {
+        super(jobsDispatcher,
+                processSettings, mqiService, mqiStatusService, appDataService,
+                appStatus);
         this.patternSettings = patternSettings;
-        this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(), Pattern.CASE_INSENSITIVE);
-        this.mqiService = mqiService;
-        this.appStatus = appStatus;
+        this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
+                Pattern.CASE_INSENSITIVE);
     }
-    
+
+    /**
+     * Periodic function for processing messages
+     */
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}")
     public void consumeMessages() {
         // First, consume message
-        GenericMessageDto<LevelProductDto> message = null;
-        try {
-            message = mqiService.next();
-        } catch (AbstractCodedException ace) {
-            LOGGER.error("[MONITOR] [code {}] {}",
-                    ace.getCode().getCode(), ace.getLogMessage());
-            message = null;
-        }
-        if (message == null || message.getBody() == null) {
+        GenericMessageDto<LevelProductDto> mqiMessage = readMessage();
+        if (mqiMessage == null || mqiMessage.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-            appStatus.setError("NEXT_MESSAGE");
             return;
         }
-        
         // process message
-        LevelProductDto leveldto = message.getBody();
-        appStatus.setProcessing(message.getIdentifier());
-        LOGGER.info("[MONITOR] [step 0] [productName {}] Starting job generation", leveldto.getProductName());
+        appStatus.setProcessing(mqiMessage.getIdentifier());
+        LOGGER.info(
+                "[MONITOR] [step 0] [productName {}] Starting job generation",
+                getProductName(mqiMessage));
         int step = 1;
+        boolean ackOk = false;
+        String errorMessage = "";
 
         try {
 
-            LOGGER.info("[MONITOR] [step 1] [productName {}] Building product", leveldto.getProductName());
-            Matcher m = l0SLicesPattern.matcher(leveldto.getProductName());
-            if (!m.matches()) {
-                throw new InvalidFormatProduct(
-                        "Don't match with regular expression " + this.patternSettings.getRegexp());
-            }
-            String satelliteId = m.group(this.patternSettings.getMGroupSatId());
-            String missionId = m.group(this.patternSettings.getMGroupMissionId());
-            String acquisition = m.group(this.patternSettings.getMGroupAcquisition());
-            String startTime = m.group(this.patternSettings.getMGroupStartTime());
-            String stopTime = m.group(this.patternSettings.getMGroupStopTime());
-            Date dateStart = DateUtils.convertWithSimpleDateFormat(startTime, DATE_FORMAT);
-            Date dateStop = DateUtils.convertWithSimpleDateFormat(stopTime, DATE_FORMAT);
-
-            // Initialize the JOB
-            L0Slice slice = new L0Slice(acquisition);
-            L0SliceProduct product = new L0SliceProduct(leveldto.getProductName(), satelliteId, missionId, dateStart,
-                    dateStop, slice);
-            Job<L0Slice> job = new Job<>(product, message);
+            // Check if a job is already created for message identifier
+            LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job",
+                    getProductName(mqiMessage));
+            AppDataJobDto<LevelProductDto> appDataJob = buildJob(mqiMessage);
 
             // Dispatch job
             step++;
-            LOGGER.info("[MONITOR] [step 2] [productName {}] Dispatching product", leveldto.getProductName());
-            this.jobsDispatcher.dispatch(job);
+            LOGGER.info(
+                    "[MONITOR] [step 2] [productName {}] Dispatching product",
+                    getProductName(mqiMessage));
+            appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
+                    AppDataJobDtoState.DISPATCHING, appDataJob.getPod());
+            jobsDispatcher.dispatch(appDataJob);
 
-        } catch (JobGenMaxNumberCachedJobsReachException | JobGenMissingRoutingEntryException mnce) {
-            LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step,
-                    leveldto.getKeyObjectStorage(), mnce.getCode().getCode(), mnce.getLogMessage());
-        } catch (AbstractCodedException e) {
-            LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step, leveldto.getProductName(),
-                    e.getCode().getCode(), e.getLogMessage());
+            // Ack
+            step++;
+            ackOk = true;
+
+        } catch (AbstractCodedException ace) {
+            ackOk = false;
+            errorMessage = String.format(
+                    "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
+                    getProductName(mqiMessage), ace.getCode().getCode(),
+                    ace.getLogMessage());
         }
 
-        LOGGER.info("[MONITOR] [step 0] [productName {}] End", leveldto.getProductName());
+        // Ack and check if application shall stopped
+        ackProcessing(mqiMessage, ackOk, errorMessage);
 
-
-
-        
-        // Ack message
-        try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, "OK", false));
-            appStatus.setWaiting();
-        }
-        catch (AbstractCodedException ace) {
-            LOGGER.error("[MONITOR] [step {} [code {}] {}\", step, ace.getCode(), ace.getLogMessage()");
-            appStatus.setError("NEXT_MESSAGE");
-        }
-        
+        LOGGER.info("[MONITOR] [step 0] [productName {}] End",
+                getProductName(mqiMessage));
     }
-    
+
+    protected AppDataJobDto<LevelProductDto> buildJob(
+            GenericMessageDto<LevelProductDto> mqiMessage)
+            throws AbstractCodedException {
+        LevelProductDto leveldto = mqiMessage.getBody();
+
+        // Check if a job is already created for message identifier
+        List<AppDataJobDto<LevelProductDto>> existingJobs = appDataService
+                .findByMessagesIdentifier(mqiMessage.getIdentifier());
+
+        if (CollectionUtils.isEmpty(existingJobs)) {
+            // Job does not exists => create it
+            Matcher m = l0SLicesPattern.matcher(leveldto.getProductName());
+            if (!m.matches()) {
+                throw new InvalidFormatProduct(
+                        "Don't match with regular expression "
+                                + this.patternSettings.getRegexp());
+            }
+            String satelliteId = m.group(this.patternSettings.getMGroupSatId());
+            String missionId =
+                    m.group(this.patternSettings.getMGroupMissionId());
+            String acquisition =
+                    m.group(this.patternSettings.getMGroupAcquisition());
+            String startTime =
+                    m.group(this.patternSettings.getMGroupStartTime());
+            String stopTime = m.group(this.patternSettings.getMGroupStopTime());
+
+            // Create the JOB
+            AppDataJobDto<LevelProductDto> jobDto = new AppDataJobDto<>();
+            // General details
+            jobDto.setLevel(processSettings.getLevel());
+            jobDto.setPod(processSettings.getHostname());
+            // Messages
+            jobDto.getMessages().add(mqiMessage);
+            // Product
+            AppDataJobProductDto productDto = new AppDataJobProductDto();
+            productDto.setAcquisition(acquisition);
+            productDto.setMissionId(missionId);
+            productDto.setProductName(leveldto.getProductName());
+            productDto.setSatelliteId(satelliteId);
+            productDto.setStartTime(DateUtils
+                    .convertWithSimpleDateFormat(startTime, DATE_FORMAT));
+            productDto.setStopTime(DateUtils
+                    .convertWithSimpleDateFormat(stopTime, DATE_FORMAT));
+            jobDto.setProduct(productDto);
+
+            return appDataService.newJob(jobDto);
+
+        } else {
+            // Update pod if needed
+            AppDataJobDto<LevelProductDto> jobDto = existingJobs.get(0);
+            if (!jobDto.getPod().equals(processSettings.getHostname())) {
+                jobDto.setPod(processSettings.getHostname());
+                jobDto = appDataService.patchJob(jobDto.getIdentifier(),
+                        jobDto);
+            }
+            // Job already exists
+            return existingJobs.get(0);
+        }
+    }
+
+    protected String getProductName(
+            final GenericMessageDto<LevelProductDto> dto) {
+        return dto.getBody().getProductName();
+    }
 }

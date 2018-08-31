@@ -18,21 +18,22 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
 import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
-import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
-import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFileRaw;
-import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import fr.viveris.s1pdgs.jobgenerator.model.JobGeneration;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.EdrsSessionMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadata;
 import fr.viveris.s1pdgs.jobgenerator.model.metadata.SearchMetadataQuery;
-import fr.viveris.s1pdgs.jobgenerator.model.product.EdrsSessionProduct;
 import fr.viveris.s1pdgs.jobgenerator.model.tasktable.TaskTable;
 import fr.viveris.s1pdgs.jobgenerator.service.XmlConverter;
 import fr.viveris.s1pdgs.jobgenerator.service.metadata.MetadataService;
@@ -44,7 +45,7 @@ import fr.viveris.s1pdgs.jobgenerator.utils.TestL0Utils;
  * @author Cyrielle
  *
  */
-public class EdrsSessionJobsGeneratorTest {
+public class EdrsSessionsJobsGeneratorTest {
 
 	/**
 	 * XML converter
@@ -63,9 +64,12 @@ public class EdrsSessionJobsGeneratorTest {
 
 	@Mock
 	private OutputProcuderFactory JobsSender;
+	
+	@Mock
+	private AbstractAppCatalogJobService<EdrsSessionDto> appDataService;
 
 	private TaskTable expectedTaskTable;
-	private EdrsSessionJobsGenerator generator;
+	private EdrsSessionsJobsGenerator generator;
 
 	/**
 	 * Test set up
@@ -87,8 +91,8 @@ public class EdrsSessionJobsGeneratorTest {
 
 		JobsGeneratorFactory factory = new JobsGeneratorFactory(l0ProcessSettings, jobGeneratorSettings, xmlConverter,
 				metadataService, JobsSender);
-		generator = (EdrsSessionJobsGenerator) factory.createJobGeneratorForEdrsSession(
-				new File("./test/data/generic_config/task_tables/TaskTable.AIOP.xml"));
+		generator = (EdrsSessionsJobsGenerator) factory.createJobGeneratorForEdrsSession(
+				new File("./test/data/generic_config/task_tables/TaskTable.AIOP.xml"), appDataService);
 	}
 
 	private void mockProcessSettings() {
@@ -108,6 +112,9 @@ public class EdrsSessionJobsGeneratorTest {
 		Mockito.doAnswer(i -> {
 			return ApplicationLevel.L0;
 		}).when(l0ProcessSettings).getLevel();
+        Mockito.doAnswer(i -> {
+            return "hostname";
+        }).when(l0ProcessSettings).getHostname();
 	}
 
 	private void mockJobGeneratorSettings() {
@@ -181,19 +188,19 @@ public class EdrsSessionJobsGeneratorTest {
 
 	@Test
 	public void testPreSearch() {
-		EdrsSessionProduct session = TestL0Utils.buildEdrsSessionProduct(true);
-		EdrsSessionProduct sessionComplete = TestL0Utils.buildEdrsSessionProduct(false);
-		Job<EdrsSession> job = new Job<EdrsSession>(session, null);
+	    AppDataJobDto<EdrsSessionDto> appDataJob = TestL0Utils.buildAppDataEdrsSession(true);
+        AppDataJobDto<EdrsSessionDto> appDataJobComplete = TestL0Utils.buildAppDataEdrsSession(false);
+		JobGeneration<EdrsSessionDto> job = new JobGeneration<>(appDataJob, "TaskTable.AIOP.xml");
 
 		try {
 			generator.preSearch(job);
-			for (int i = 0; i < sessionComplete.getObject().getChannel1().getRawNames().size(); i++) {
-				assertEquals(sessionComplete.getObject().getChannel1().getRawNames().get(i).getObjectStorageKey(),
-						session.getObject().getChannel1().getRawNames().get(i).getObjectStorageKey());
+			for (int i = 0; i < appDataJobComplete.getProduct().getRaws1().size(); i++) {
+				assertEquals(appDataJobComplete.getProduct().getRaws1().get(i).getKeyObs(),
+				        appDataJob.getProduct().getRaws1().get(i).getKeyObs());
 			}
-			for (int i = 0; i < sessionComplete.getObject().getChannel2().getRawNames().size(); i++) {
-				assertEquals(sessionComplete.getObject().getChannel2().getRawNames().get(i).getObjectStorageKey(),
-						session.getObject().getChannel2().getRawNames().get(i).getObjectStorageKey());
+			for (int i = 0; i < appDataJobComplete.getProduct().getRaws2().size(); i++) {
+				assertEquals(appDataJobComplete.getProduct().getRaws2().get(i).getKeyObs(),
+				        appDataJob.getProduct().getRaws2().get(i).getKeyObs());
 			}
 		} catch (JobGenInputsMissingException e) {
 			fail("MetadataMissingException raised: " + e.getMessage());
@@ -206,8 +213,8 @@ public class EdrsSessionJobsGeneratorTest {
 			return null;
 		}).when(this.metadataService).getEdrsSession(Mockito.anyString(), Mockito.anyString());
 
-		EdrsSessionProduct session = TestL0Utils.buildEdrsSessionProduct(true);
-		Job<EdrsSession> job = new Job<EdrsSession>(session, null);
+        AppDataJobDto<EdrsSessionDto> appDataJob = TestL0Utils.buildAppDataEdrsSession(true);
+        JobGeneration<EdrsSessionDto> job = new JobGeneration<>(appDataJob, "TaskTable.AIOP.xml");
 		try {
 			generator.preSearch(job);
 			fail("MetadataMissingException shall be raised");
@@ -219,37 +226,37 @@ public class EdrsSessionJobsGeneratorTest {
 
 	@Test
 	public void testCustomDto() {
-		EdrsSessionProduct sessionComplete = TestL0Utils.buildEdrsSessionProduct(false);
-		Job<EdrsSession> job = new Job<EdrsSession>(sessionComplete, null);
+        AppDataJobDto<EdrsSessionDto> appDataJob = TestL0Utils.buildAppDataEdrsSession(false);
+        JobGeneration<EdrsSessionDto> job = new JobGeneration<>(appDataJob, "TaskTable.AIOP.xml");
 		job.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 		ProductFamily family = ProductFamily.EDRS_SESSION;
-		LevelJobDto dto = new LevelJobDto(family, sessionComplete.getIdentifier(), "/data/test/workdir/",
+		LevelJobDto dto = new LevelJobDto(family, appDataJob.getProduct().getProductName(), "/data/test/workdir/",
 				"/data/test/workdir/JobOrder.xml");
 
 		generator.customJobDto(job, dto);
-		int nbChannel1 = sessionComplete.getObject().getChannel1().getRawNames().size();
-		int nbChannel2 = sessionComplete.getObject().getChannel2().getRawNames().size();
+		int nbChannel1 = appDataJob.getProduct().getRaws1().size();
+		int nbChannel2 = appDataJob.getProduct().getRaws2().size();
 		assertTrue(dto.getInputs().size() == nbChannel1 + nbChannel2);
 		for (int i = 0; i < nbChannel1; i++) {
-			EdrsSessionFileRaw raw1 = sessionComplete.getObject().getChannel1().getRawNames().get(i);
-			EdrsSessionFileRaw raw2 = sessionComplete.getObject().getChannel2().getRawNames().get(i);
+			AppDataJobFileDto raw1 = appDataJob.getProduct().getRaws1().get(i);
+			AppDataJobFileDto raw2 = appDataJob.getProduct().getRaws2().get(i);
 			int indexRaw1 = i * 2;
 			int indexRaw2 = i * 2 + 1;
-			assertEquals(raw1.getObjectStorageKey(), dto.getInputs().get(indexRaw1).getContentRef());
+			assertEquals(raw1.getKeyObs(), dto.getInputs().get(indexRaw1).getContentRef());
 			assertEquals(ProductFamily.EDRS_SESSION.name(), dto.getInputs().get(indexRaw1).getFamily());
-			assertEquals("/data/test/workdir/ch01/" + raw1.getFileName(),
+			assertEquals("/data/test/workdir/ch01/" + raw1.getFilename(),
 					dto.getInputs().get(indexRaw1).getLocalPath());
-			assertEquals(raw2.getObjectStorageKey(), dto.getInputs().get(indexRaw2).getContentRef());
+			assertEquals(raw2.getKeyObs(), dto.getInputs().get(indexRaw2).getContentRef());
 			assertEquals(ProductFamily.EDRS_SESSION.name(), dto.getInputs().get(indexRaw2).getFamily());
-			assertEquals("/data/test/workdir/ch02/" + raw2.getFileName(),
+			assertEquals("/data/test/workdir/ch02/" + raw2.getFilename(),
 					dto.getInputs().get(indexRaw2).getLocalPath());
 		}
 	}
 
 	@Test
 	public void testCustomJobOrder() {
-		EdrsSessionProduct sessionComplete = TestL0Utils.buildEdrsSessionProduct(false);
-		Job<EdrsSession> job = new Job<>(sessionComplete, null);
+        AppDataJobDto<EdrsSessionDto> appDataJob = TestL0Utils.buildAppDataEdrsSession(false);
+        JobGeneration<EdrsSessionDto> job = new JobGeneration<>(appDataJob, "TaskTable.AIOP.xml");
 		job.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 		generator.customJobOrder(job);
 		job.getJobOrder().getConf().getProcParams().forEach(param -> {
@@ -258,8 +265,8 @@ public class EdrsSessionJobsGeneratorTest {
 			}
 		});
 
-		EdrsSessionProduct sessionComplete1 = TestL0Utils.buildEdrsSessionProduct(false, "S2");
-		Job<EdrsSession> job1 = new Job<EdrsSession>(sessionComplete1, null);
+        AppDataJobDto<EdrsSessionDto> appDataJob1 = TestL0Utils.buildAppDataEdrsSession(false, "S2");
+        JobGeneration<EdrsSessionDto> job1 = new JobGeneration<>(appDataJob1, "TaskTable.AIOP.xml");
 		job1.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 		generator.customJobOrder(job1);
 		job1.getJobOrder().getConf().getProcParams().forEach(param -> {

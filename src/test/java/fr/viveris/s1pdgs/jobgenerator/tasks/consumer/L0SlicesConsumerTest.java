@@ -7,6 +7,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,101 +17,168 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import fr.viveris.s1pdgs.jobgenerator.config.L0SlicePatternSettings;
+import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.status.AppStatus;
-import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.L0SliceJobsDispatcher;
+import fr.viveris.s1pdgs.jobgenerator.status.AppStatus.JobStatus;
+import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.AbstractJobsDispatcher;
 
 public class L0SlicesConsumerTest {
 
-	@Mock
-	private L0SliceJobsDispatcher l0SliceJobsDispatcher;
+    @Mock
+    private AbstractJobsDispatcher<LevelProductDto> l0SliceJobsDispatcher;
 
-	@Mock
-	private L0SlicePatternSettings l0SlicePatternSettings;
+    @Mock
+    protected ProcessSettings processSettings;
 
-	@Mock
-	private GenericMqiService<LevelProductDto> mqiService;
+    @Mock
+    private L0SlicePatternSettings l0SlicePatternSettings;
 
-	/**
-	 * Application status
-	 */
-	@Mock
-	private AppStatus appStatus;
+    @Mock
+    private GenericMqiService<LevelProductDto> mqiService;
+    @Mock
+    protected StatusService mqiStatusService;
 
-	private LevelProductDto dtoMatch = new LevelProductDto(
-			"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-			"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", ProductFamily.L0_PRODUCT);
-	private LevelProductDto dtoNotMatch = new LevelProductDto(
-			"S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-			"S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", ProductFamily.L0_PRODUCT);
-	private GenericMessageDto<LevelProductDto> message1 = new GenericMessageDto<LevelProductDto>(1, "", dtoMatch);
-	private GenericMessageDto<LevelProductDto> message2 = new GenericMessageDto<LevelProductDto>(2, "", dtoNotMatch);
+    @Mock
+    protected AbstractAppCatalogJobService<LevelProductDto> appDataService;
 
-	@Before
-	public void setUp() throws Exception {
+    /**
+     * Application status
+     */
+    @Mock
+    private AppStatus appStatus;
+    
+    @Mock
+    private JobStatus jobStatus;
 
-		// Mcokito
-		MockitoAnnotations.initMocks(this);
+    private LevelProductDto dtoMatch = new LevelProductDto(
+            "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+            "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+            ProductFamily.L0_PRODUCT);
+    private LevelProductDto dtoNotMatch = new LevelProductDto(
+            "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+            "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+            ProductFamily.L0_PRODUCT);
+    private GenericMessageDto<LevelProductDto> message1 =
+            new GenericMessageDto<LevelProductDto>(1, "", dtoMatch);
+    private GenericMessageDto<LevelProductDto> message2 =
+            new GenericMessageDto<LevelProductDto>(2, "", dtoNotMatch);
 
-		// Mock the dispatcher
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
+    @Before
+    public void setUp() throws Exception {
 
-			}
-			return true;
-		}).when(l0SliceJobsDispatcher).dispatch(Mockito.any());
+        // Mcokito
+        MockitoAnnotations.initMocks(this);
 
-		// Mock the settings
-		Mockito.doReturn(
-				"^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$")
-				.when(l0SlicePatternSettings).getRegexp();
-		Mockito.doReturn(2).when(l0SlicePatternSettings).getMGroupSatId();
-		Mockito.doReturn(1).when(l0SlicePatternSettings).getMGroupMissionId();
-		Mockito.doReturn(4).when(l0SlicePatternSettings).getMGroupAcquisition();
-		Mockito.doReturn(6).when(l0SlicePatternSettings).getMGroupStartTime();
-		Mockito.doReturn(7).when(l0SlicePatternSettings).getMGroupStopTime();
+        // Mock the dispatcher
+        Mockito.doAnswer(i -> {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
 
-		// Mock the MQI service
-		doReturn(message1, message2).when(mqiService).next();
-		doReturn(true).when(mqiService).ack(Mockito.any());
+            }
+            return true;
+        }).when(l0SliceJobsDispatcher).dispatch(Mockito.any());
 
-		// Mock app status
-		doNothing().when(appStatus).setWaiting();
-		doNothing().when(appStatus).setProcessing(Mockito.anyLong());
-		doNothing().when(appStatus).setError(Mockito.anyString());
-	}
+        // Mock the settings
+        Mockito.doReturn(
+                "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$")
+                .when(l0SlicePatternSettings).getRegexp();
+        Mockito.doReturn(2).when(l0SlicePatternSettings).getMGroupSatId();
+        Mockito.doReturn(1).when(l0SlicePatternSettings).getMGroupMissionId();
+        Mockito.doReturn(4).when(l0SlicePatternSettings).getMGroupAcquisition();
+        Mockito.doReturn(6).when(l0SlicePatternSettings).getMGroupStartTime();
+        Mockito.doReturn(7).when(l0SlicePatternSettings).getMGroupStopTime();
+        this.mockProcessSettings();
 
-	@Test
-	public void testProductNameNotMatch() throws AbstractCodedException {
-		doReturn(message2).when(mqiService).next();
+        // Mock the MQI service
+        doReturn(message1, message2).when(mqiService).next();
+        doReturn(true).when(mqiService).ack(Mockito.any());
 
-		L0SlicesConsumer consumer = new L0SlicesConsumer(l0SliceJobsDispatcher, l0SlicePatternSettings, mqiService,
-				appStatus);
-		consumer.consumeMessages();
+        // Mock app status
+        doNothing().when(appStatus).setWaiting();
+        doNothing().when(appStatus).setProcessing(Mockito.anyLong());
+        doNothing().when(appStatus).setError(Mockito.anyString());
+        doReturn(jobStatus).when(appStatus).getStatus();
+        doReturn(false).when(jobStatus).isStopping();
 
-		verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
-		verify(appStatus, times(1)).setProcessing(Mockito.eq(2L));
-		verify(appStatus, times(1)).setWaiting();
-	}
+        // Mock the appcatalog service
+        doReturn(new ArrayList<>()).when(appDataService)
+                .findByMessagesIdentifier(Mockito.anyLong());
+        Mockito.doAnswer(i -> {
+            return i.getArgument(0);
+        }).when(appDataService).newJob(Mockito.any());
+        Mockito.doAnswer(i -> {
+            AppDataJobDto<LevelProductDto> ret = new AppDataJobDto<>();
+            ret.setIdentifier(i.getArgument(0));
+            ret.setState(i.getArgument(1));
+            ret.setPod(i.getArgument(2));
+            return ret;
+        }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
+                Mockito.anyString());
+    }
 
-	@Test
-	public void testReceiveOk() throws AbstractCodedException, ParseException {
-		doReturn(message1).when(mqiService).next();
+    private void mockProcessSettings() {
+        Mockito.doAnswer(i -> {
+            Map<String, String> r = new HashMap<String, String>(2);
+            return r;
+        }).when(processSettings).getParams();
+        Mockito.doAnswer(i -> {
+            Map<String, String> r = new HashMap<String, String>(5);
+            r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");
+            r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
+            r.put("ZS_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
+            r.put("REP_L0PSA_", "^S1[A|B|_]_OPER_REP_ACQ.*$");
+            r.put("REP_EFEP_", "^S1[A|B|_]_OPER_REP_PASS.*.EOF$");
+            return r;
+        }).when(processSettings).getOutputregexps();
+        Mockito.doAnswer(i -> {
+            return ApplicationLevel.L0;
+        }).when(processSettings).getLevel();
+        Mockito.doAnswer(i -> {
+            return "hostname";
+        }).when(processSettings).getHostname();
+        Mockito.doAnswer(i -> {
+            return ApplicationMode.TEST;
+        }).when(processSettings).getMode();
+    }
 
-		L0SlicesConsumer consumer = new L0SlicesConsumer(l0SliceJobsDispatcher, l0SlicePatternSettings, mqiService,
-				appStatus);
-		consumer.consumeMessages();
+    @Test
+    public void testProductNameNotMatch() throws AbstractCodedException {
+        doReturn(message2).when(mqiService).next();
 
-		verify(l0SliceJobsDispatcher, times(1)).dispatch(Mockito.any());
-		verify(appStatus, times(1)).setProcessing(Mockito.eq(1L));
-		verify(appStatus, times(1)).setWaiting();
-	}
+        L0SlicesConsumer consumer = new L0SlicesConsumer(l0SliceJobsDispatcher,
+                l0SlicePatternSettings, processSettings, mqiService,
+                mqiStatusService, appDataService, appStatus);
+        consumer.consumeMessages();
+
+        verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
+        verify(appStatus, times(1)).setProcessing(Mockito.eq(2L));
+        verify(appStatus, times(1)).setWaiting();
+    }
+
+    @Test
+    public void testReceiveOk() throws AbstractCodedException, ParseException {
+        doReturn(message1).when(mqiService).next();
+
+        L0SlicesConsumer consumer = new L0SlicesConsumer(l0SliceJobsDispatcher,
+                l0SlicePatternSettings, processSettings, mqiService,
+                mqiStatusService, appDataService, appStatus);
+        consumer.consumeMessages();
+
+        verify(l0SliceJobsDispatcher, times(1)).dispatch(Mockito.any());
+        verify(appStatus, times(1)).setProcessing(Mockito.eq(1L));
+        verify(appStatus, times(1)).setWaiting();
+    }
 
 }

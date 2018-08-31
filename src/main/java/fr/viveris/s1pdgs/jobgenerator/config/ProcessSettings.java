@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ApplicationMode;
 
 /**
  * Extraction class of "process" configuration properties
@@ -38,6 +39,16 @@ public class ProcessSettings {
 	 * Process level
 	 */
 	private ApplicationLevel level;
+
+    /**
+     * Process level
+     */
+    private ApplicationMode mode;
+	
+	/**
+	 * Hostname
+	 */
+	private String hostname;
 
 	/**
 	 * Log level for the sdtout
@@ -145,6 +156,34 @@ public class ProcessSettings {
 	 */
 	public void setLevel(final ApplicationLevel level) {
 		this.level = level;
+	}
+
+	/**
+     * @return the mode
+     */
+    public ApplicationMode getMode() {
+        return mode;
+    }
+
+    /**
+     * @param mode the mode to set
+     */
+    public void setMode(ApplicationMode mode) {
+        this.mode = mode;
+    }
+
+    /**
+	 * @return the hostname
+	 */
+	public String getHostname() {
+		return hostname;
+	}
+
+	/**
+	 * @param hostname the hostname to set
+	 */
+	public void setHostname(final String hostname) {
+		this.hostname = hostname;
 	}
 
 	/**

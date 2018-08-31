@@ -16,7 +16,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  * This class is the mapping of the XML EDRS session file<br/>
  * It is also used as internal object to store sessions
  * 
- * @TODO use another object for the internal processes
  * @author Cyrielle Gailliard
  *
  */

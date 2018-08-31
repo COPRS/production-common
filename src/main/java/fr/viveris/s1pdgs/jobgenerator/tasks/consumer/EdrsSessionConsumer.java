@@ -1,198 +1,205 @@
 package fr.viveris.s1pdgs.jobgenerator.tasks.consumer;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedJobsReachException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedSessionsReachException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
+import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.model.EdrsSessionFile;
-import fr.viveris.s1pdgs.jobgenerator.model.Job;
-import fr.viveris.s1pdgs.jobgenerator.model.product.EdrsSessionProduct;
 import fr.viveris.s1pdgs.jobgenerator.service.EdrsSessionFileService;
 import fr.viveris.s1pdgs.jobgenerator.status.AppStatus;
-import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.EdrsSessionJobDispatcher;
+import fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher.AbstractJobsDispatcher;
 
 @Component
 @ConditionalOnProperty(name = "process.level", havingValue = "L0")
-public class EdrsSessionConsumer {
+public class EdrsSessionConsumer
+        extends AbstractGenericConsumer<EdrsSessionDto> {
+    /**
+     * Service for EDRS session file
+     */
+    private final EdrsSessionFileService edrsService;
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(EdrsSessionConsumer.class);
-	/**
-	 * Jobs dispatcher
-	 */
-	private final EdrsSessionJobDispatcher jobDispatcher;
+    @Autowired
+    public EdrsSessionConsumer(final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
+            final ProcessSettings processSettings,
+            @Qualifier("mqiServiceForEdrsSessions") final GenericMqiService<EdrsSessionDto> mqiService,
+            final EdrsSessionFileService edrsService,
+            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
+            @Qualifier("appCatalogServiceForEdrsSessions") final AbstractAppCatalogJobService<EdrsSessionDto> appDataService,
+            final AppStatus appStatus) {
+        super(jobDispatcher,
+                processSettings, mqiService, mqiStatusService, appDataService,
+                appStatus);
+        this.edrsService = edrsService;
+    }
 
-	/**
-	 * Service for EDRS session file
-	 */
-	private final EdrsSessionFileService edrsService;
+    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}")
+    public void consumeMessages() {
+        // First, consume message
+        GenericMessageDto<EdrsSessionDto> mqiMessage = readMessage();
+        if (mqiMessage == null || mqiMessage.getBody() == null) {
+            LOGGER.trace("[MONITOR] [step 0] No message received: continue");
+            return;
+        }
 
-	/**
-	 * Session waiting for being processing by a task table
-	 */
-	protected Map<String, EdrsSessionProduct> cachedSessions;
+        // Second process message
+        EdrsSessionDto leveldto = mqiMessage.getBody();
 
-	/**
-	 * Maximal age of cached sessions
-	 */
-	private final long maxAgeSession;
+        if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
 
-	/**
-	 * Maximal number of cached sessions
-	 */
-	private final int maxNbSessions;
+            int step = 0;
+            boolean ackOk = false;
+            String errorMessage = "";
+            LOGGER.info(
+                    "[MONITOR] [step {}] [productName {}] Starting job generation",
+                    step, leveldto.getObjectStorageKey());
+            appStatus.setProcessing(mqiMessage.getIdentifier());
 
-	private final GenericMqiService<EdrsSessionDto> mqiService;
-	/**
-	 * Application status
-	 */
-	private final AppStatus appStatus;
+            try {
 
-	@Autowired
-	public EdrsSessionConsumer(
-			@Qualifier("mqiServiceForEdrsSessions") final GenericMqiService<EdrsSessionDto> mqiService,
-			final EdrsSessionJobDispatcher jobDispatcher, final EdrsSessionFileService edrsService,
-			@Value("${level0.maxagesession}") final long maxAgeSession,
-			@Value("${level0.maxnumberofsessions}") final int maxNbSessions, final AppStatus appStatus) {
-		this.mqiService = mqiService;
-		this.jobDispatcher = jobDispatcher;
-		this.edrsService = edrsService;
-		this.maxAgeSession = maxAgeSession;
-		this.maxNbSessions = maxNbSessions;
-		this.cachedSessions = new ConcurrentHashMap<>(this.maxNbSessions);
-		this.appStatus = appStatus;
+                // Create the EdrsSessionFile object from the consumed message
+                step = 1;
+                LOGGER.info(
+                        "[MONITOR] [step {}] [productName {}] Building product",
+                        step, leveldto.getObjectStorageKey());
+                if (leveldto.getChannelId() != 1
+                        && leveldto.getChannelId() != 2) {
+                    throw new InvalidFormatProduct("Invalid channel identifier "
+                            + leveldto.getChannelId());
+                }
+                AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
 
-	}
+                // Dispatch
+                step++;
+                if (appDataJob.getMessages().size() == 2) {
+                    LOGGER.info(
+                            "[MONITOR] [step 2] [productName {}] Dispatching product",
+                            getProductName(mqiMessage));
+                    appDataService.patchJob(appDataJob.getIdentifier(),
+                            AppDataJobDtoState.DISPATCHING,
+                            appDataJob.getPod());
+                    jobsDispatcher.dispatch(appDataJob);
+                }
 
-	@Scheduled(fixedDelayString = "${process.fixed-delay-ms}")
-	public void consumeMessages() {
-		// First, consume message
-		GenericMessageDto<EdrsSessionDto> message = null;
-		try {
-			message = mqiService.next();
-		} catch (AbstractCodedException ace) {
-			LOGGER.error("[MONITOR] [code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
-			message = null;
-		}
-		if (message == null || message.getBody() == null) {
-			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-            appStatus.setError("NEXT_MESSAGE");
-			return;
-		}
-		appStatus.setProcessing(message.getIdentifier());
-		LOGGER.info("Initializing job processing {}", message);
+                // Ack
+                step++;
+                ackOk = true;
 
-		// Second process message
-		EdrsSessionDto leveldto = message.getBody();
+            } catch (AbstractCodedException ace) {
+                ackOk = false;
+                errorMessage = String.format(
+                        "[MONITOR] [step %d] [productName %s] [code %d] %s",
+                        step, getProductName(mqiMessage),
+                        ace.getCode().getCode(), ace.getLogMessage());
+            }
 
-		if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
+            // Ack and check if application shall stopped
+            ackProcessing(mqiMessage, ackOk, errorMessage);
 
-			int step = 0;
-			LOGGER.info("[MONITOR] [step {}] [productName {}] Starting job generation", step,
-					leveldto.getObjectStorageKey());
+            step = 0;
+            LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,
+                    leveldto.getObjectStorageKey());
 
-			try {
-				// Clean sessions for whom the last message has been consumed for too long
-				// TODO set in a scheduled function, warning about concurrency
-				step = 999;
-				LOGGER.info("[MONITOR] [step {}] Removing old sessions", step);
-				cachedSessions.entrySet().stream().filter(entry -> entry.getValue() != null && entry.getValue()
-						.getObject().getLastTsMsg() < System.currentTimeMillis() - this.maxAgeSession)
-						.forEach(entry -> {
-							EdrsSessionProduct removedSession = cachedSessions.remove(entry.getKey());
-							if (removedSession != null) {
-								LOGGER.error("[MONITOR] [step 999] [productName {}] [code {}] [msg {}]",
-										removedSession.getIdentifier(), ErrorCode.MAX_AGE_CACHED_JOB_REACH.getCode(),
-										"Removed from cached because no message received for too long");
-							}
-						});
+        }
 
-				// Create the EdrsSessionFile object from the consumed message
-				step = 1;
-				LOGGER.info("[MONITOR] [step {}] [productName {}] Building product", step,
-						leveldto.getObjectStorageKey());
-				if (leveldto.getChannelId() != 1 && leveldto.getChannelId() != 2) {
-					throw new InvalidFormatProduct("Invalid channel identifier " + leveldto.getChannelId());
-				}
-				EdrsSessionFile file = edrsService.createSessionFile(leveldto.getObjectStorageKey());
+    }
 
-				// If session exist and raws of each channel are available => send the session
-				// to the job dispatcher
-				// Else set in cached sessions
-				step = 2;
-				LOGGER.info("[MONITOR] [step {}] [productName {}] Treating session", step, file.getSessionId());
-				EdrsSessionProduct session = null;
-				if (cachedSessions.containsKey(file.getSessionId())) {
-					session = cachedSessions.get(file.getSessionId());
-					session.getObject().setChannel(file, leveldto.getChannelId());
-					if (session.getObject().getChannel1() != null && session.getObject().getChannel2() != null) {
-						step = 2;
-						this.cachedSessions.remove(file.getSessionId());
-						LOGGER.info("[MONITOR] [step {}] [productName {}] Dispatching session", step,
-								file.getSessionId());
-						this.jobDispatcher.dispatch(new Job<EdrsSession>(session, message));
-					} else {
-						session.getObject().setLastTsMsg(System.currentTimeMillis());
-					}
-				} else {
-					// Check mx nb session not reached
-					if (this.cachedSessions.size() < this.maxNbSessions) {
-						session = new EdrsSessionProduct(file.getSessionId(), leveldto.getSatelliteId(),
-								leveldto.getMissionId(), file.getStartTime(), file.getStopTime(), new EdrsSession());
-						session.getObject().setChannel(file, leveldto.getChannelId());
-						cachedSessions.put(file.getSessionId(), session);
-					} else {
-						throw new JobGenMaxNumberCachedSessionsReachException(
-								"Maximal number of cached sessions reached");
-					}
-				}
+    protected AppDataJobDto<EdrsSessionDto> buildJob(
+            GenericMessageDto<EdrsSessionDto> mqiMessage)
+            throws AbstractCodedException {
+        // Check if a job is already created for message identifier
+        List<AppDataJobDto<EdrsSessionDto>> existingJobs = appDataService
+                .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
-			} catch (JobGenMaxNumberCachedSessionsReachException | JobGenMaxNumberCachedJobsReachException
-					| ObsException mnce) {
-				LOGGER.error("[MONITOR] [step {}] [productName {}] [resuming {}] [code {}] {} ", step,
-						leveldto.getObjectStorageKey(), mnce.getCode().getCode(), mnce.getLogMessage());
-			} catch (AbstractCodedException e) {
-				LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step, leveldto.getObjectStorageKey(),
-						e.getCode().getCode(), e.getLogMessage());
-			}
+        if (CollectionUtils.isEmpty(existingJobs)) {
+            EdrsSessionFile file = edrsService.createSessionFile(
+                    mqiMessage.getBody().getObjectStorageKey());
 
-			step = 0;
-			LOGGER.info("[MONITOR] [step {}] [productName {}] End", step, leveldto.getObjectStorageKey());
+            // Create the JOB
+            AppDataJobDto<EdrsSessionDto> jobDto = new AppDataJobDto<>();
+            // General details
+            jobDto.setLevel(processSettings.getLevel());
+            jobDto.setPod(processSettings.getHostname());
+            // Messages
+            jobDto.getMessages().add(mqiMessage);
+            // Product
+            AppDataJobProductDto productDto = new AppDataJobProductDto();
+            productDto.setSessionId(file.getSessionId());
+            productDto.setMissionId(mqiMessage.getBody().getMissionId());
+            productDto.setProductName(file.getSessionId());
+            productDto.setSatelliteId(mqiMessage.getBody().getSatelliteId());
+            productDto.setStartTime(file.getStartTime());
+            productDto.setStopTime(file.getStopTime());
+            if (mqiMessage.getBody().getChannelId() == 1) {
+                productDto.setRaws1(file.getRawNames().stream()
+                        .map(rawI -> new AppDataJobFileDto(rawI.getFileName()))
+                        .collect(Collectors.toList()));
+            } else {
+                productDto.setRaws2(file.getRawNames().stream()
+                        .map(rawI -> new AppDataJobFileDto(rawI.getFileName()))
+                        .collect(Collectors.toList()));
+            }
 
-		}
+            jobDto.setProduct(productDto);
+            return appDataService.newJob(jobDto);
 
-		// Ack message
-		// TODO ack KO if exception occured
-		try {
-			mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, "OK", false));
-			appStatus.setWaiting();
-		} catch (AbstractCodedException ace) {
-			LOGGER.error("[MONITOR] [step {} [code {}] {}", 0, ace.getCode(), ace.getLogMessage());
-			appStatus.setError("NEXT_MESSAGE");
-		}
+        } else {
+            // Update pod if needed
+            AppDataJobDto<EdrsSessionDto> jobDto = existingJobs.get(0);
+            if (!jobDto.getPod().equals(processSettings.getHostname())) {
+                jobDto.setPod(processSettings.getHostname());
+                jobDto = appDataService.patchJob(jobDto.getIdentifier(),
+                        jobDto);
+            }
+            // Updates messages if needed
+            if (jobDto.getMessages().size() == 1 && jobDto.getMessages().get(0)
+                    .getBody()
+                    .getChannelId() != mqiMessage.getBody().getChannelId()) {
+                EdrsSessionFile file = edrsService.createSessionFile(
+                        mqiMessage.getBody().getObjectStorageKey());
+                jobDto.getMessages().add(mqiMessage);
+                if (mqiMessage.getBody().getChannelId() == 1) {
+                    jobDto.getProduct()
+                            .setRaws1(file.getRawNames().stream()
+                                    .map(rawI -> new AppDataJobFileDto(
+                                            rawI.getFileName()))
+                                    .collect(Collectors.toList()));
+                } else {
+                    jobDto.getProduct()
+                            .setRaws2(file.getRawNames().stream()
+                                    .map(rawI -> new AppDataJobFileDto(
+                                            rawI.getFileName()))
+                                    .collect(Collectors.toList()));
+                }
+                jobDto = appDataService.patchJob(jobDto.getIdentifier(),
+                        jobDto);
+            }
+            // Retrun object
+            return jobDto;
+        }
 
-	}
+    }
+
+    @Override
+    protected String getProductName(GenericMessageDto<EdrsSessionDto> dto) {
+        return dto.getBody().getObjectStorageKey();
+    }
 }

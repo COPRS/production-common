@@ -1,20 +1,23 @@
 package fr.viveris.s1pdgs.jobgenerator.tasks.dispatcher;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
-import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import fr.viveris.s1pdgs.jobgenerator.model.EdrsSession;
-import fr.viveris.s1pdgs.jobgenerator.model.Job;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import fr.viveris.s1pdgs.jobgenerator.config.JobGeneratorSettings;
+import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
 
@@ -23,62 +26,61 @@ import fr.viveris.s1pdgs.jobgenerator.tasks.generator.JobsGeneratorFactory;
  * Only one task table
  * 
  * @author Cyrielle Gailliard
- *
  */
 @Service
-@ConditionalOnProperty(name="process.level", havingValue="L0")
-public class EdrsSessionJobDispatcher extends AbstractJobsDispatcher<EdrsSession> {
+@ConditionalOnProperty(name = "process.level", havingValue = "L0")
+public class EdrsSessionJobDispatcher
+        extends AbstractJobsDispatcher<EdrsSessionDto> {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(EdrsSessionJobDispatcher.class);
+    /**
+     * Task table
+     */
+    private static final String TASK_TABLE_NAME = "TaskTable.AIOP.xml";
 
-	/**
-	 * Task table
-	 */
-	private static final String TASK_TABLE_NAME = "TaskTable.AIOP.xml";
+    /**
+     * Constructor
+     * 
+     * @param taskTablesSettings
+     * @param jobsGeneratorFactory
+     * @param jobGenerationTaskScheduler
+     */
+    @Autowired
+    public EdrsSessionJobDispatcher(final JobGeneratorSettings settings,
+            final ProcessSettings processSettings,
+            final JobsGeneratorFactory factory,
+            final ThreadPoolTaskScheduler taskScheduler,
+            @Qualifier("appCatalogServiceForEdrsSessions") final AbstractAppCatalogJobService<EdrsSessionDto> appDataService) {
+        super(settings, processSettings, factory, taskScheduler,
+                appDataService);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param taskTablesSettings
-	 * @param jobsGeneratorFactory
-	 * @param jobGenerationTaskScheduler
-	 */
-	@Autowired
-	public EdrsSessionJobDispatcher(final JobGeneratorSettings settings, final JobsGeneratorFactory factory,
-			final ThreadPoolTaskScheduler taskScheduler) {
-		super(settings, factory, taskScheduler);
-	}
+    /**
+     * Initialization
+     * 
+     * @throws AbstractCodedException
+     */
+    @PostConstruct
+    public void initialize() throws AbstractCodedException {
+        // Init job generators from task tables
+        super.initTaskTables();
+    }
 
-	/**
-	 * Initialization
-	 * 
-	 * @throws AbstractCodedException
-	 */
-	@PostConstruct
-	public void initialize() throws AbstractCodedException {
-		// Init job generators from task tables
-		super.initTaskTables();
-	}
+    /**
+     * 
+     */
+    @Override
+    protected AbstractJobsGenerator<EdrsSessionDto> createJobGenerator(
+            final File xmlFile) throws AbstractCodedException {
+        return this.factory.createJobGeneratorForEdrsSession(xmlFile, appDataService);
+    }
 
-	/**
-	 * 
-	 */
-	@Override
-	protected AbstractJobsGenerator<EdrsSession> createJobGenerator(final File xmlFile) throws AbstractCodedException {
-		return this.factory.createJobGeneratorForEdrsSession(xmlFile);
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public void dispatch(final Job<EdrsSession> job) throws AbstractCodedException {
-		LOGGER.info("[MONITOR] [Step 2] [productName {}] [taskTable {}] Caching job", job.getProduct().getIdentifier(),
-				TASK_TABLE_NAME);
-		this.generators.get(TASK_TABLE_NAME).addJob(job);
-	}
+    /**
+     * Get task tables to generate for given job
+     */
+    @Override
+    protected List<String> getTaskTables(
+            final AppDataJobDto<EdrsSessionDto> job) {
+        return Arrays.asList(TASK_TABLE_NAME);
+    }
 
 }

@@ -36,6 +36,8 @@ status:
 
 process:
   level: ${job_process_level}
+  hostname: ${HOSTNAME}
+  mode: ${job_process_mode:PROD}
   paramstr: ${job_process_params:Processing_Mode:NRT||Timeout:300}
   loglevelstdout: ${job_process_loglevelstdout:INFO}
   loglevelstderr: ${job_process_loglevelstderr:INFO}
@@ -45,6 +47,11 @@ process:
     host-uri: ${job_process_mqi_host-uri:http://localhost:8081}
     max-retries: ${job_process_mqi_max-retries:3}
     tempo-retry-ms: ${job_process_mqi_tempo-retry:1000}
+  appcatalog:
+    host-uri: ${job_process_appcatalog_host-uri:http://app-catalog-svc:8080}
+    max-retries: ${job_process_appcatalog_max-retries:3}
+    tempo-retry-ms: ${job_process_appcatalog_tempo-retry:1000}
+    tm-connect-ms: ${job_process_appcatalog_tm-connect-ms:5000}
   fixed-delay-ms: ${job_process_fixed-delay-ms:200}
     
 level0:

@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import fr.viveris.s1pdgs.jobgenerator.config.ProcessSettings;
 
 @RunWith(SpringRunner.class)
@@ -20,10 +21,11 @@ public class ProcessSettingsTest {
 	@Autowired
 	private ProcessSettings l0ProcessSettings;
 
-
-
 	@Test
 	public void testSettings() {
+        assertEquals(ApplicationLevel.L0, l0ProcessSettings.getLevel());
+        assertEquals("hostname", l0ProcessSettings.getHostname());
+        
 		assertEquals("INFO", l0ProcessSettings.getLoglevelstderr());
 		assertEquals("DEBUG", l0ProcessSettings.getLoglevelstdout());
 		assertEquals("WILE", l0ProcessSettings.getProcessingstation());
