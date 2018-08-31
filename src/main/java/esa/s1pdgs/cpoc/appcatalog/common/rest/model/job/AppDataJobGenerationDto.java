@@ -31,11 +31,18 @@ public class AppDataJobGenerationDto {
     private AppDataJobGenerationDtoState state;
 
     /**
+     * Number of consecutive errors
+     */
+    private int nbErrors;
+
+    /**
      * 
      */
     public AppDataJobGenerationDto() {
         super();
         this.state = AppDataJobGenerationDtoState.INITIAL;
+        this.creationDate = new Date();
+        this.nbErrors = 0;
     }
 
     /**
@@ -99,6 +106,21 @@ public class AppDataJobGenerationDto {
     }
 
     /**
+     * @return the nbErrors
+     */
+    public int getNbErrors() {
+        return nbErrors;
+    }
+
+    /**
+     * @param nbErrors
+     *            the nbErrors to set
+     */
+    public void setNbErrors(int nbErrors) {
+        this.nbErrors = nbErrors;
+    }
+
+    /**
      * (non-Javadoc)
      * 
      * @see java.lang.Object#toString()
@@ -106,8 +128,8 @@ public class AppDataJobGenerationDto {
     @Override
     public String toString() {
         return String.format(
-                "{creationDate: %s, lastUpdateDate: %s, taskTable: %s, state: %s}",
-                creationDate, lastUpdateDate, taskTable, state);
+                "{creationDate: %s, lastUpdateDate: %s, taskTable: %s, state: %s, nbErrors: %s}",
+                creationDate, lastUpdateDate, taskTable, state, nbErrors);
     }
 
     /**
@@ -115,7 +137,8 @@ public class AppDataJobGenerationDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(creationDate, lastUpdateDate, taskTable, state);
+        return Objects.hash(creationDate, lastUpdateDate, taskTable, state,
+                nbErrors);
     }
 
     /**
@@ -133,7 +156,8 @@ public class AppDataJobGenerationDto {
             ret = Objects.equals(creationDate, other.creationDate)
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(taskTable, other.taskTable)
-                    && Objects.equals(state, other.state);
+                    && Objects.equals(state, other.state)
+                    && nbErrors == other.nbErrors;
         }
         return ret;
     }
