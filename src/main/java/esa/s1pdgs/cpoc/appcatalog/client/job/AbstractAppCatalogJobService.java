@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.appcatalog.client.job;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -309,12 +310,19 @@ public abstract class AbstractAppCatalogJobService<T> {
             final String uri, final AppDataJobDto<T> body);
 
     public AppDataJobDto<T> patchJob(final long identifier,
-            final AppDataJobDtoState state, final String pod)
+            final AppDataJobDto<T> dto, final boolean patchMessages,
+            final boolean patchProduct, final boolean patchGenerations)
             throws AbstractCodedException {
-        AppDataJobDto<T> dto = new AppDataJobDto<>();
         dto.setIdentifier(identifier);
-        dto.setState(state);
-        dto.setPod(pod);
+        if (!patchMessages) {
+            dto.setMessages(new ArrayList<>());
+        }
+        if (!patchProduct) {
+            dto.setProduct(null);
+        }
+        if (!patchGenerations) {
+            dto.setGenerations(new ArrayList<>());
+        }
         return patchJob(identifier, dto);
     }
 
@@ -325,7 +333,7 @@ public abstract class AbstractAppCatalogJobService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public AppDataJobDto<T> patchJob(final long identifier,
+    private AppDataJobDto<T> patchJob(final long identifier,
             final AppDataJobDto<T> job) throws AbstractCodedException {
         int retries = 0;
         while (true) {
