@@ -154,7 +154,7 @@ public abstract class AbstractAppCatalogJobService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uriStr = hostUri + "/" + category + "/jobs/search";
+            String uriStr = hostUri + "/" + category.name().toLowerCase() + "/jobs/search";
             UriComponentsBuilder builder =
                     UriComponentsBuilder.fromUriString(uriStr);
             for (String key : filters.keySet()) {
@@ -188,7 +188,7 @@ public abstract class AbstractAppCatalogJobService<T> {
                 waitOrThrow(retries,
                         new AppCatalogJobSearchApiError(uri.toString(),
                                 String.format(
-                                        "HttpStatusCodeException occured: %s",
+                                        "RestClientException occured: %s",
                                         rce.getMessage()),
                                 rce),
                         "search");
@@ -242,7 +242,7 @@ public abstract class AbstractAppCatalogJobService<T> {
         filters.put("generations.state[neq]",
                 AppDataJobGenerationDtoState.SENT.name());
         filters.put("generations.taskTable", taskTable);
-        filters.put("[orderBy]", "generations.lastUpdateDate");
+        filters.put("[orderByAsc]", "generations.lastUpdateDate");
         return search(filters);
     }
 
@@ -267,7 +267,7 @@ public abstract class AbstractAppCatalogJobService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + "/" + category + "/jobs";
+            String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
                 ResponseEntity<AppDataJobDto<T>> response =
@@ -338,7 +338,7 @@ public abstract class AbstractAppCatalogJobService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + "/" + category + "/jobs/" + identifier;
+            String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs/" + identifier;
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
                 ResponseEntity<AppDataJobDto<T>> response =
@@ -395,7 +395,7 @@ public abstract class AbstractAppCatalogJobService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + "/" + category + "/jobs/" + identifier
+            String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs/" + identifier
                     + "/generations/" + taskTable;
             AppDataJobGenerationDto body = new AppDataJobGenerationDto();
             body.setTaskTable(taskTable);
@@ -423,7 +423,7 @@ public abstract class AbstractAppCatalogJobService<T> {
                                 hsce.getStatusCode(),
                                 hsce.getResponseBodyAsString())),
                         "patch");
-            } catch (AppCatalogJobPatchApiError rce) {
+            } catch (RestClientException rce) {
                 waitOrThrow(retries,
                         new AppCatalogJobPatchGenerationApiError(uri, body,
                                 String.format(
