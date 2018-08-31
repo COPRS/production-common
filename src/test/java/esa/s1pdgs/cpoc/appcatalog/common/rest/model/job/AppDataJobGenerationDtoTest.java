@@ -23,7 +23,7 @@ public class AppDataJobGenerationDtoTest {
 
         // check default constructor
         assertEquals(AppDataJobGenerationDtoState.INITIAL, obj.getState());
-        assertNull(obj.getCreationDate());
+        assertNotNull(obj.getCreationDate());
         assertNull(obj.getLastUpdateDate());
 
         obj.setTaskTable("task-table-1");
