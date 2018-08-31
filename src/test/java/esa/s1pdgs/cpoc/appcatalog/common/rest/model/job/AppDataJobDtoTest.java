@@ -59,6 +59,8 @@ public class AppDataJobDtoTest {
         assertEquals(AppDataJobDtoState.DISPATCHING, obj.getState());
         assertNotNull(obj.getCreationDate());
         assertNotNull(obj.getLastUpdateDate());
+        assertEquals(product, obj.getProduct());
+        assertEquals(Arrays.asList(gen1, gen2, gen3), obj.getGenerations());
         assertEquals("pod-name", obj.getPod());
         
         // check toString

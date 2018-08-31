@@ -6,5 +6,5 @@ package esa.s1pdgs.cpoc.common.filter;
  * @author Viveris Technologies
  */
 public enum FilterOperator {
-    GT, GTE, LT, LTE, EQ;
+    GT, GTE, LT, LTE, EQ, NEQ;
 }

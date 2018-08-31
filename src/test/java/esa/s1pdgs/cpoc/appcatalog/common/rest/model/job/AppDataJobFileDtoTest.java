@@ -21,20 +21,21 @@ public class AppDataJobFileDtoTest {
      */
     @Test
     public void testConstructors() {
+        // Check default constructor and setters
         AppDataJobFileDto obj = new AppDataJobFileDto("file");
-
-        // check default constructor
         assertEquals("file", obj.getFilename());
         assertNull(obj.getKeyObs());
-
         obj.setKeyObs("key-obs");
         assertEquals("file", obj.getFilename());
         assertEquals("key-obs", obj.getKeyObs());
+        
+        // Check constrcutor will all fields
+        obj = new AppDataJobFileDto("file2", "key-obs2");
 
         // check toString
         String str = obj.toString();
-        assertTrue(str.contains("filename: file"));
-        assertTrue(str.contains("keyObs: key-obs"));
+        assertTrue(str.contains("filename: file2"));
+        assertTrue(str.contains("keyObs: key-obs2"));
     }
 
     /**

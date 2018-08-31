@@ -116,7 +116,7 @@ public class AppDataJobGenerationDto {
      * @param nbErrors
      *            the nbErrors to set
      */
-    public void setNbErrors(int nbErrors) {
+    public void setNbErrors(final int nbErrors) {
         this.nbErrors = nbErrors;
     }
 
