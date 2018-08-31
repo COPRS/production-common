@@ -58,7 +58,7 @@ public class ReportsConsumer {
     		final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
         LOGGER.info(
-                "[MONITOR] [step 0] [family {}] [productName {}] Starting distribution",
+                "[step 0] [family {}] [productName {}] Starting distribution",
                 dto.getFamily(), dto.getProductName());
         try {
             File report = new File(sharedVolume + File.separator
@@ -78,7 +78,7 @@ public class ReportsConsumer {
                     exc.getMessage());
         }
         
-        LOGGER.info("[MONITOR] [step 0] [family {}] [productName {}] End",
+        LOGGER.info("[step 0] [family {}] End Distribution",
                 dto.getFamily(), dto.getProductName());
     }
 }
