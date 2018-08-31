@@ -111,7 +111,7 @@ public class LevelProductsExtractorTest {
         doReturn(typeOverlap).when(extractorConfig).getTypeOverlap();
         doReturn(typeSliceLength).when(extractorConfig).getTypeSliceLength();
 
-        doNothing().when(appStatus).setError(Mockito.any());
+        doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any());
 
         inputMessage = new GenericMessageDto<LevelProductDto>(123, "",

@@ -111,6 +111,7 @@ public abstract class GenericExtractor<T> {
             LOGGER.error("[MONITOR] [step 0] [{}] [code {}] {}", category,
                     ace.getCode().getCode(), ace.getLogMessage());
             message = null;
+            appStatus.setError(category, "NEXT_MESSAGE");
         }
         if (message == null || message.getBody() == null) {
             LOGGER.trace(
@@ -124,7 +125,7 @@ public abstract class GenericExtractor<T> {
         // ----------------------------------------------------------
         T dto = message.getBody();
         LOGGER.info(
-                "[MONITOR] [Step 0] [{}] [productName {}] Starting metadata extraction",
+                "[REPORT] [Step 0] [{}] [s1pdgsTask MetadataExtraction] [START] [productName {}] Starting metadata extraction",
                 category, extractProductNameFromDto(dto));
         appStatus.setProcessing(category, message.getIdentifier());
 
@@ -180,7 +181,7 @@ public abstract class GenericExtractor<T> {
     protected void ackNegatively(final GenericMessageDto<T> message,
             final String errorMessage) {
         LOGGER.info(
-                "[MONITOR] [step 5] [{}] [productName {}] Acknowledging negatively",
+                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP KO] [productName {}] Acknowledging negatively",
                 category, extractProductNameFromDto(message.getBody()));
         LOGGER.error(errorMessage);
         try {
@@ -192,7 +193,7 @@ public abstract class GenericExtractor<T> {
                     category, extractProductNameFromDto(message.getBody()),
                     ace.getCode().getCode(), ace.getLogMessage());
         }
-        appStatus.setError(category);
+        appStatus.setError(category, "PROCESSING");
     }
 
     /**
@@ -202,7 +203,7 @@ public abstract class GenericExtractor<T> {
      */
     protected void ackPositively(final GenericMessageDto<T> message) {
         LOGGER.info(
-                "[MONITOR] [step 5] [{}] [productName {}] Acknowledging positively",
+                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP OK] [productName {}] Acknowledging positively",
                 category, extractProductNameFromDto(message.getBody()));
         try {
             mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK,
@@ -212,7 +213,7 @@ public abstract class GenericExtractor<T> {
                     "[MONITOR] [step 5] [{}] [productName {}] [code {}] {}",
                     category, extractProductNameFromDto(message.getBody()),
                     ace.getCode().getCode(), ace.getLogMessage());
-            appStatus.setError(category);
+            appStatus.setError(category, "PROCESSING");
         }
     }
 

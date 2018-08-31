@@ -49,4 +49,6 @@ mdextractor:
   xslt-directory: ${catalog_xslt-directory:xsltDir/} # Must contains the last /
   
 status:
-  max-error-counter: ${catalog_status_max-error-counter:3}
+  max-error-counter-processing: ${catalog_status_max-error-counter-processing:3}
+  max-error-counter-mqi: ${catalog_status_max-error-counter-mqi:30}
+  

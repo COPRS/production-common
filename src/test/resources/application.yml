@@ -45,4 +45,7 @@ mdextractor:
   xslt-directory: config/xsltDir/ # Must contains the last /
       
 status:
-  max-error-counter: 3
+  max-error-counter-processing: 3
+  max-error-counter-mqi: 30
+  
+  
