@@ -55,7 +55,7 @@ public class WrapperRestController {
                 currentTimestamp - currentStatus.getDateLastChangeMs();
         WrapperStatusDto wrapperStatus =
                 new WrapperStatusDto(currentStatus.getState(),
-                        timeSinceLastChange, currentStatus.getErrorCounter());
+                        timeSinceLastChange, currentStatus.getErrorCounterProcessing());
         if (currentStatus.isFatalError()) {
             return new ResponseEntity<WrapperStatusDto>(wrapperStatus,
                     HttpStatus.INTERNAL_SERVER_ERROR);

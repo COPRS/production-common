@@ -169,7 +169,7 @@ public class JobProcessorTest extends MockPropertiesTest {
 
         verify(mqiService, times(1)).ack(Mockito
                 .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
-        verify(appStatus, times(1)).setError();
+        verify(appStatus, times(1)).setError("PROCESSING");
     }
 
     /**
@@ -187,7 +187,7 @@ public class JobProcessorTest extends MockPropertiesTest {
 
         verify(mqiService, times(1))
                 .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)));
-        verify(appStatus, times(1)).setError();
+        verify(appStatus, times(1)).setError("PROCESSING");
     }
 
     /**
@@ -438,7 +438,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 2
         verify(inputDownloader, times(1)).processInputs();
         // Check status set to error
-        verify(appStatus, times(1)).setError();
+        verify(appStatus, times(1)).setError("PROCESSING");
         // Check step 4
         verify(outputProcessor, never()).processOutput();
         // Check step 5
