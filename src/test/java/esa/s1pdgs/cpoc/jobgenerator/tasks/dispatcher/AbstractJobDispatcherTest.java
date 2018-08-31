@@ -33,7 +33,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.dispatcher.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.JobsGeneratorFactory;
 
@@ -133,7 +132,9 @@ public class AbstractJobDispatcherTest {
                 .findByPodAndState(Mockito.anyString(), Mockito.any());
 
         doReturn(null).when(appDataService).patchJob(Mockito.anyLong(),
-                Mockito.any());
+                Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+                Mockito.anyBoolean());
+
     }
 
     /**

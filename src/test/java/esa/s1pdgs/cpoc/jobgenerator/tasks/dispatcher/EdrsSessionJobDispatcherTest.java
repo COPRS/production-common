@@ -169,7 +169,8 @@ public class EdrsSessionJobDispatcherTest {
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
         doReturn(TestL0Utils.buildAppDataEdrsSession(false))
-                .when(appDataService).patchJob(Mockito.eq(123L), Mockito.any());
+                .when(appDataService).patchJob(Mockito.eq(123L), Mockito.any(),
+                        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
                 Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));

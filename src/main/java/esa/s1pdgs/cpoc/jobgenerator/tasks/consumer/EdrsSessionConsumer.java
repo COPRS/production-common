@@ -38,16 +38,16 @@ public class EdrsSessionConsumer
     private final EdrsSessionFileService edrsService;
 
     @Autowired
-    public EdrsSessionConsumer(final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
+    public EdrsSessionConsumer(
+            final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
             final ProcessSettings processSettings,
             @Qualifier("mqiServiceForEdrsSessions") final GenericMqiService<EdrsSessionDto> mqiService,
             final EdrsSessionFileService edrsService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
             @Qualifier("appCatalogServiceForEdrsSessions") final AbstractAppCatalogJobService<EdrsSessionDto> appDataService,
             final AppStatus appStatus) {
-        super(jobDispatcher,
-                processSettings, mqiService, mqiStatusService, appDataService,
-                appStatus);
+        super(jobDispatcher, processSettings, mqiService, mqiStatusService,
+                appDataService, appStatus);
         this.edrsService = edrsService;
     }
 
@@ -93,9 +93,9 @@ public class EdrsSessionConsumer
                     LOGGER.info(
                             "[MONITOR] [step 2] [productName {}] Dispatching product",
                             getProductName(mqiMessage));
-                    appDataService.patchJob(appDataJob.getIdentifier(),
-                            AppDataJobDtoState.DISPATCHING,
-                            appDataJob.getPod());
+                    appDataJob.setState(AppDataJobDtoState.DISPATCHING);
+                    appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
+                            appDataJob, false, false, false);
                     jobsDispatcher.dispatch(appDataJob);
                 }
 
@@ -163,11 +163,13 @@ public class EdrsSessionConsumer
 
         } else {
             // Update pod if needed
+            boolean update = false;
+            boolean updateMessage = false;
+            boolean updateProduct = false;
             AppDataJobDto<EdrsSessionDto> jobDto = existingJobs.get(0);
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
-                jobDto = appDataService.patchJob(jobDto.getIdentifier(),
-                        jobDto);
+                update = true;
             }
             // Updates messages if needed
             if (jobDto.getMessages().size() == 1 && jobDto.getMessages().get(0)
@@ -189,8 +191,14 @@ public class EdrsSessionConsumer
                                             rawI.getFileName()))
                                     .collect(Collectors.toList()));
                 }
-                jobDto = appDataService.patchJob(jobDto.getIdentifier(),
-                        jobDto);
+                update = true;
+                updateMessage = true;
+                updateProduct = true;
+            }
+            // Update
+            if (update) {
+                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                        updateMessage, updateProduct, false);
             }
             // Retrun object
             return jobDto;

@@ -395,7 +395,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         this.preSearch(job);
                         AppDataJobDto<T> modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getIdentifier(),
-                                job.getAppDataJob());
+                                job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
                         updateState(job,
                                 AppDataJobGenerationDtoState.PRIMARY_CHECK);

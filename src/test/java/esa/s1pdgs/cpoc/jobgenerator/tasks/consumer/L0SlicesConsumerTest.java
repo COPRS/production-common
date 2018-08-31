@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -27,7 +26,6 @@ import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.consumer.L0SlicesConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.dispatcher.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
@@ -58,7 +56,7 @@ public class L0SlicesConsumerTest {
      */
     @Mock
     private AppStatus appStatus;
-    
+
     @Mock
     private JobStatus jobStatus;
 
@@ -120,13 +118,11 @@ public class L0SlicesConsumerTest {
             return i.getArgument(0);
         }).when(appDataService).newJob(Mockito.any());
         Mockito.doAnswer(i -> {
-            AppDataJobDto<LevelProductDto> ret = new AppDataJobDto<>();
-            ret.setIdentifier(i.getArgument(0));
-            ret.setState(i.getArgument(1));
-            ret.setPod(i.getArgument(2));
-            return ret;
+            return i.getArgument(1);
         }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
-                Mockito.anyString());
+                Mockito.anyBoolean(), Mockito.anyBoolean(),
+                Mockito.anyBoolean());
+
     }
 
     private void mockProcessSettings() {

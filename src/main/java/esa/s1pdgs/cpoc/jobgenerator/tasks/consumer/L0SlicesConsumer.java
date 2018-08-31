@@ -53,16 +53,16 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
      * @param appStatus
      */
     @Autowired
-    public L0SlicesConsumer(final AbstractJobsDispatcher<LevelProductDto> jobsDispatcher,
+    public L0SlicesConsumer(
+            final AbstractJobsDispatcher<LevelProductDto> jobsDispatcher,
             final L0SlicePatternSettings patternSettings,
             final ProcessSettings processSettings,
             @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
             @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<LevelProductDto> appDataService,
             final AppStatus appStatus) {
-        super(jobsDispatcher,
-                processSettings, mqiService, mqiStatusService, appDataService,
-                appStatus);
+        super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
+                appDataService, appStatus);
         this.patternSettings = patternSettings;
         this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
                 Pattern.CASE_INSENSITIVE);
@@ -100,8 +100,9 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
             LOGGER.info(
                     "[MONITOR] [step 2] [productName {}] Dispatching product",
                     getProductName(mqiMessage));
+            appDataJob.setState(AppDataJobDtoState.DISPATCHING);
             appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
-                    AppDataJobDtoState.DISPATCHING, appDataJob.getPod());
+                    appDataJob, false, false, false);
             jobsDispatcher.dispatch(appDataJob);
 
             // Ack
@@ -175,11 +176,11 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
             AppDataJobDto<LevelProductDto> jobDto = existingJobs.get(0);
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
-                jobDto = appDataService.patchJob(jobDto.getIdentifier(),
-                        jobDto);
+                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                        false, false, false);
             }
             // Job already exists
-            return existingJobs.get(0);
+            return jobDto;
         }
     }
 

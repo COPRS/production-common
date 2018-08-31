@@ -232,7 +232,8 @@ public class L0SliceJobsDispatcherTest {
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
         doReturn(TestL1Utils.buildJobGeneration(true)).when(appDataService)
-                .patchJob(Mockito.eq(123L), Mockito.any());
+                .patchJob(Mockito.eq(123L), Mockito.any(),
+                        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
                 Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));

@@ -29,7 +29,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFileRaw;
 import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.consumer.EdrsSessionConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.dispatcher.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -171,7 +170,8 @@ public class EdrsSessionConsumerTest {
             ret.setPod(i.getArgument(2));
             return ret;
         }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
-                Mockito.anyString());
+                Mockito.anyBoolean(), Mockito.anyBoolean(),
+                Mockito.anyBoolean());
 
     }
 
@@ -228,16 +228,17 @@ public class EdrsSessionConsumerTest {
         verify(appStatus, times(1)).setProcessing(Mockito.eq(3L));
         verify(appStatus, times(2)).setWaiting();
 
-        //TODO
-       /* edrsSessionsConsumer.consumeMessages();
-        Mockito.verify(jobsDispatcher, times(1)).dispatch(Mockito.any());
-        verify(appStatus, times(1)).setProcessing(Mockito.eq(2L));
-        verify(appStatus, times(3)).setWaiting();
-
-        edrsSessionsConsumer.consumeMessages();
-        Mockito.verify(jobsDispatcher, times(2)).dispatch(Mockito.any());
-        verify(appStatus, times(1)).setProcessing(Mockito.eq(4L));
-        verify(appStatus, times(4)).setWaiting();*/
+        // TODO
+        /*
+         * edrsSessionsConsumer.consumeMessages();
+         * Mockito.verify(jobsDispatcher, times(1)).dispatch(Mockito.any());
+         * verify(appStatus, times(1)).setProcessing(Mockito.eq(2L));
+         * verify(appStatus, times(3)).setWaiting();
+         * edrsSessionsConsumer.consumeMessages();
+         * Mockito.verify(jobsDispatcher, times(2)).dispatch(Mockito.any());
+         * verify(appStatus, times(1)).setProcessing(Mockito.eq(4L));
+         * verify(appStatus, times(4)).setWaiting();
+         */
     }
 
     /**
