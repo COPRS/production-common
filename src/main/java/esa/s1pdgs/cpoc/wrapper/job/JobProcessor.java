@@ -194,7 +194,7 @@ public class JobProcessor {
         processJob(message, inputDownloader, outputProcessor, procExecutorSrv,
                 procCompletionSrv, procExecutor);
 
-        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing {} [productName {}] [STOP OK] End L0 job generation",
+        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [STOP OK] End L0 job generation",
         		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_END, job), job.getProductIdentifier());
 
     }

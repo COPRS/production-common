@@ -105,7 +105,7 @@ public class PoolProcessor {
                 LOGGER.info("{} 1 - Submitting tasks {}", prefixLogs,
                         pool.getTasks());
                 for (LevelJobTaskDto task : pool.getTasks()) {
-                	prefixReport= "[REPORT] " + prefixLogs + "[taskCounter " + j + "]";
+                	prefixReport= "[REPORT] " + prefixLogs + "[subTask processing] [taskCounter " + j + "]";
                     completionSrv.submit(new TaskCallable(task.getBinaryPath(),
                             jobOrderPath, workDirectory, prefixReport));
                     j++;
