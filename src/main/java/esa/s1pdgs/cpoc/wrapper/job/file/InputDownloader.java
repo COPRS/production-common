@@ -229,8 +229,8 @@ public class InputDownloader {
      */
     protected void downloadInputs(final List<S3DownloadFile> downloadToBatch)
             throws AbstractCodedException {
-        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [START] 4 - Starting downloading inputs from object storage",
-                prefixMonitorLogs, this.appLevel);
+        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [START] 4 - Starting downloading inputs from object storage [inputs {}]",
+                prefixMonitorLogs, this.appLevel, downloadToBatch.toString());
         double size = Double.valueOf(downloadToBatch.size());
         double nbPool = Math.ceil(size / sizeDownBatch);
         int nbUploadedRaw = 0;
