@@ -211,6 +211,20 @@ public abstract class AbstractAppCatalogJobService<T> {
     }
 
     /**
+     * Search by message identifier
+     * 
+     * @param messageId
+     * @return
+     * @throws AbstractCodedException
+     */
+    public List<AppDataJobDto<T>> findByProductSessionId(final String sessionId)
+            throws AbstractCodedException {
+        Map<String, String> filters = new HashMap<>();
+        filters.put("product.sessionId", sessionId);
+        return search(filters);
+    }
+
+    /**
      * Search by pod and state
      * 
      * @param pod
