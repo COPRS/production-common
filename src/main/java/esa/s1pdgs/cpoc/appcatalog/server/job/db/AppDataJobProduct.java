@@ -99,6 +99,7 @@ public class AppDataJobProduct {
         super();
         this.raws1 = new ArrayList<>();
         this.raws2 = new ArrayList<>();
+        this.insConfId = -1;
     }
 
     /**

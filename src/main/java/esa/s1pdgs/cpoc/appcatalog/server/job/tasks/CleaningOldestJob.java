@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobService;
@@ -56,7 +57,7 @@ public class CleaningOldestJob {
     /**
      * Clean job terminated after x times (to avoid being done twice)
      */
-    // TODO at scheduled
+    @Scheduled(fixedDelayString="${jobs.cleaning-jobs-terminated-fixed-rate-ms}")
     public void cleanJobInGeneratedState() {
         // EDRS sessions
         Date dateCompareE =
@@ -92,7 +93,7 @@ public class CleaningOldestJob {
     /**
      * Remove jobs in transitory state for too long
      */
-    // TODO at scheduled
+    @Scheduled(fixedDelayString="${jobs.cleaning-jobs-invalid-fixed-rate-ms}")
     public void cleanJobInWaitingForTooLong() {
         this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.WAITING);
         this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.DISPATCHING);
