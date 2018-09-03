@@ -31,9 +31,14 @@ public class AppStatus {
     private final JobStatus status;
 
     /**
-     * Maximal number of consecutive errors
+     * Maximal number of consecutive errors for processing
      */
-    private final int maxErrorCounter;
+    private final int maxErrorCounterProcessing;
+    
+    /**
+     * Maximal number of consecutive errors for MQI
+     */
+    private final int maxErrorCounterNextMessage;
 
     /**
      * Indicate if the application shall be stopped
@@ -57,11 +62,13 @@ public class AppStatus {
      */
     @Autowired
     public AppStatus(
-            @Value("${status.max-error-counter}") final int maxErrorCounter,
+            @Value("${status.max-error-counter-processing}") final int maxErrorCounterProcessing,
+            @Value("${status.max-error-counter-mqi}") final int maxErrorCounterNextMessage,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
         this.status = new JobStatus();
         this.shallBeStopped = false;
-        this.maxErrorCounter = maxErrorCounter;
+        this.maxErrorCounterProcessing = maxErrorCounterProcessing;
+        this.maxErrorCounterNextMessage = maxErrorCounterNextMessage;
         this.mqiStatusService = mqiStatusService;
         this.processingMsgId = 0;
     }
@@ -109,8 +116,12 @@ public class AppStatus {
     /**
      * Set application as error
      */
-    public synchronized void setError() {
-        this.status.setError(maxErrorCounter);
+    public synchronized void setError(String type) {
+        if(type.equals("PROCESSING")) {
+            this.status.setErrorCounterProcessing(maxErrorCounterProcessing);
+        } else if(type.equals("NEXT_MESSAGE")) {
+            this.status.setErrorCounterNextMessage(maxErrorCounterNextMessage);
+        }
     }
 
     /**
@@ -146,16 +157,22 @@ public class AppStatus {
         private long dateLastChangeMs;
 
         /**
-         * Number of consecutive errors
+         * Number of consecutive errors for processing
          */
-        private int errorCounter;
+        private int errorCounterProcessing;
+        
+        /**
+         * Number of consecutive errors for next message
+         */
+        private int errorCounterNextMessage;
 
         /**
          * Constrcutor
          */
         public JobStatus() {
             this.state = AppState.WAITING;
-            errorCounter = 0;
+            errorCounterProcessing = 0;
+            errorCounterNextMessage = 0;
             dateLastChangeMs = System.currentTimeMillis();
         }
 
@@ -176,8 +193,15 @@ public class AppStatus {
         /**
          * @return the errorCounter
          */
-        public int getErrorCounter() {
-            return errorCounter;
+        public int getErrorCounterProcessing() {
+            return errorCounterProcessing;
+        }
+
+        /**
+         * @return the errorCounterNextMessage
+         */
+        public int getErrorCounterNextMessage() {
+            return errorCounterNextMessage;
         }
 
         /**
@@ -197,7 +221,8 @@ public class AppStatus {
             if (!isStopping() && !isFatalError()) {
                 state = AppState.PROCESSING;
                 dateLastChangeMs = System.currentTimeMillis();
-                errorCounter = 0;
+                errorCounterProcessing = 0;
+                errorCounterNextMessage = 0;
             }
         }
 
@@ -207,18 +232,33 @@ public class AppStatus {
         public void setStopping() {
             state = AppState.STOPPING;
             dateLastChangeMs = System.currentTimeMillis();
-            errorCounter = 0;
+            errorCounterProcessing = 0;
+            errorCounterNextMessage = 0;
         }
 
         /**
          * Set status ERROR
          */
-        public void setError(final int maxErrorCounter) {
+        public void setErrorCounterProcessing(final int maxErrorCounter) {
             if (!isStopping()) {
                 state = AppState.ERROR;
                 dateLastChangeMs = System.currentTimeMillis();
-                errorCounter++;
-                if (errorCounter >= maxErrorCounter) {
+                errorCounterProcessing++;
+                if (errorCounterProcessing >= maxErrorCounter) {
+                    setFatalError();
+                }
+            }
+        }
+        
+        /**
+         * @param errorCounterNextMessage the errorCounterNextMessage to set
+         */
+        public void setErrorCounterNextMessage(final int maxErrorCounterNextMessage) {
+            if (!isStopping()) {
+                state = AppState.ERROR;
+                dateLastChangeMs = System.currentTimeMillis();
+                errorCounterNextMessage++;
+                if (errorCounterNextMessage >= maxErrorCounterNextMessage) {
                     setFatalError();
                 }
             }

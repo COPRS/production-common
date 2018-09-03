@@ -96,6 +96,7 @@ public class EdrsSessionConsumer {
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[MONITOR] [code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 			message = null;
+            appStatus.setError("NEXT_MESSAGE");
 		}
 		if (message == null || message.getBody() == null) {
 			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
@@ -110,7 +111,7 @@ public class EdrsSessionConsumer {
 		if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
 
 			int step = 0;
-			LOGGER.info("[MONITOR] [step {}] [productName {}] Starting job generation", step,
+			LOGGER.info("[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Dispatch] [START] [productName {}] Starting job generation", step,
 					leveldto.getObjectStorageKey());
 
 			try {
@@ -150,8 +151,7 @@ public class EdrsSessionConsumer {
 					if (session.getObject().getChannel1() != null && session.getObject().getChannel2() != null) {
 						step = 2;
 						this.cachedSessions.remove(file.getSessionId());
-						LOGGER.info("[MONITOR] [step {}] [productName {}] Dispatching session", step,
-								file.getSessionId());
+						LOGGER.info("[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Dispatch] [STOP OK] [productName {}] Dispatching session", step, file.getSessionId());
 						this.jobDispatcher.dispatch(new Job<EdrsSession>(session, message));
 					} else {
 						session.getObject().setLastTsMsg(System.currentTimeMillis());
@@ -190,7 +190,7 @@ public class EdrsSessionConsumer {
 			appStatus.setWaiting();
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[MONITOR] [step {} [code {}] {}", 0, ace.getCode(), ace.getLogMessage());
-			appStatus.setError();
+			appStatus.setError("NEXT_MESSAGE");
 		}
 
 	}

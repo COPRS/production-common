@@ -88,6 +88,7 @@ public class L0SlicesConsumer {
             LOGGER.error("[MONITOR] [code {}] {}",
                     ace.getCode().getCode(), ace.getLogMessage());
             message = null;
+            appStatus.setError("NEXT_MESSAGE");
         }
         if (message == null || message.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
@@ -115,7 +116,8 @@ public class L0SlicesConsumer {
             String stopTime = m.group(this.patternSettings.getMGroupStopTime());
             Date dateStart = DateUtils.convertWithSimpleDateFormat(startTime, DATE_FORMAT);
             Date dateStop = DateUtils.convertWithSimpleDateFormat(stopTime, DATE_FORMAT);
-
+            LOGGER.info("[REPORT] [step 1] [s1pdgsTask L1JobGeneration] [subTask Dispatch] [productName {}] [START]", 
+                    leveldto.getProductName());
             // Initialize the JOB
             L0Slice slice = new L0Slice(acquisition);
             L0SliceProduct product = new L0SliceProduct(leveldto.getProductName(), satelliteId, missionId, dateStart,
@@ -124,14 +126,15 @@ public class L0SlicesConsumer {
 
             // Dispatch job
             step++;
-            LOGGER.info("[MONITOR] [step 2] [productName {}] Dispatching product", leveldto.getProductName());
+            LOGGER.info("[REPORT] [step 2] [productName {}] [s1pdgsTask L1JobGeneration] [subTask Dispatch] [STOP OK] [taskTable {}] Dispatching product", 
+                    leveldto.getProductName(), job.getTaskTableName());
             this.jobsDispatcher.dispatch(job);
 
         } catch (JobGenMaxNumberCachedJobsReachException | JobGenMissingRoutingEntryException mnce) {
-            LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step,
+            LOGGER.error("[REPORT] [MONITOR] [s1pdgsTask L1JobGeneration] [subTask Dispatch] [STOP KO] [step {}] [productName {}] [code {}] {} ", step,
                     leveldto.getKeyObjectStorage(), mnce.getCode().getCode(), mnce.getLogMessage());
         } catch (AbstractCodedException e) {
-            LOGGER.error("[MONITOR] [step {}] [productName {}] [code {}] {} ", step, leveldto.getProductName(),
+            LOGGER.error("[REPORT] [MONITOR] [s1pdgsTask L1JobGeneration]  [subTask Dispatch] [STOP KO] [step {}] [productName {}] [code {}] {} ", step, leveldto.getProductName(),
                     e.getCode().getCode(), e.getLogMessage());
         }
 
@@ -147,6 +150,7 @@ public class L0SlicesConsumer {
         }
         catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step {} [code {}] {}\", step, ace.getCode(), ace.getLogMessage()");
+            appStatus.setError("NEXT_MESSAGE");
         }
         
     }
