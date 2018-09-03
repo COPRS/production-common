@@ -10,7 +10,6 @@ metadata:
   host: ${catalog_rest_host:metadata-catalog-svc:8080}
   rest-api_nb-retry: ${job_rest-api_nb-retry:3}
   rest-api_tempo-retry-ms: ${job_rest-api_tempo-retry-ms:1000}
- 
   
 job-generator:
   diroftasktables: ${job_directoryoftasktables}
@@ -19,10 +18,8 @@ job-generator:
   jobgenfixedrate: ${job_scheduledfixedrate:500}
   waitprimarycheck:
     tempo: ${job_waitprimarycheck_tempo:30000}
-    retries: ${job_waitprimarycheck_retries:50}
   waitmetadatainput:
     tempo: ${job_waitmetadatainput_tempo:60000}
-    retries: ${job_waitmetadatainput_retries:300}
   defaultfamily: ${products_default-family}
   outputfamiliesstr: ${products_family-per-type}
   typeoverlapstr: ${products_overlap-per-acq}
@@ -55,8 +52,6 @@ process:
   fixed-delay-ms: ${job_process_fixed-delay-ms:200}
     
 level0:
-  maxnumberofsessions: ${l0_maxnumberofsessions:20}
-  maxagesession: ${l0_maxagesession:25200000}
   dir-extractor-sessions: ${l0_dir-extractor-sessions:/data/sessions/}
   
 level1:
