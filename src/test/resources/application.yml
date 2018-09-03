@@ -1,20 +1,32 @@
-#Spring
 spring:
   application:
     name: s1pdgs-applicative-catalog
-    
-# Logging
 logging:
   config: ./test/log4j2-test.yml
-  
-# MongoDB
 mongodb:
   host: 127.0.0.1
   port: 27017
   database: databaseName
   old-entry-ms: 86400000
   clean-cron: 0 0 0 * * *
-  
-#MQI
 mqi:
-  max-retries: 3  
+  max-retries: 3
+jobs:
+  level-products:
+    max-age-job-ms:
+      waiting: 600000
+      dispatching: 3600000
+      generating: 3600000
+      terminated: 600000
+    generations:
+      max-errors-initial: 50
+      max-errors-primary-check: 300
+  edrs-sessions:
+    max-age-job-ms:
+      waiting: 25200000
+      dispatching: 3600000
+      generating: 3600000
+      terminated: 600000
+    generations:
+      max-errors-initial: 50
+      max-errors-primary-check: 300

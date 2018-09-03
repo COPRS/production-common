@@ -1,10 +1,14 @@
 package esa.s1pdgs.cpoc.appcatalog.server.common.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
+import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
 
 public class RestExceptionHandlerTest {
 
@@ -12,10 +16,9 @@ public class RestExceptionHandlerTest {
     public void testHandleIllegalArgumentException() {
         RestExceptionHandler handler = new RestExceptionHandler();
 
-        ResponseEntity<ErrorResponse> error =
+        ResponseEntity<String> error =
                 handler.handle(new IllegalArgumentException("iae exception"));
         
-        assertEquals("iae exception", error.getBody().getMessage());
         assertEquals(HttpStatus.PRECONDITION_FAILED, error.getStatusCode());
     }
 
@@ -23,10 +26,9 @@ public class RestExceptionHandlerTest {
     public void testHandleRuntimeException() {
         RestExceptionHandler handler = new RestExceptionHandler();
 
-        ResponseEntity<ErrorResponse> error =
+        ResponseEntity<String> error =
                 handler.handle(new RuntimeException("iae exception"));
         
-        assertEquals("iae exception", error.getBody().getMessage());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, error.getStatusCode());
     }
 
@@ -34,10 +36,24 @@ public class RestExceptionHandlerTest {
     public void testHandleRuntimeExceptionCustomHttpStatus() {
         RestExceptionHandler handler = new RestExceptionHandler();
 
-        ResponseEntity<ErrorResponse> error =
+        ResponseEntity<String> error =
                 handler.handle(new RuntimeExceptionTestObj("iae exception"));
         
-        assertEquals("iae exception", error.getBody().getMessage());
         assertEquals(HttpStatus.INSUFFICIENT_STORAGE, error.getStatusCode());
+    }
+
+    @Test
+    public void testHandleAbstractAppDataException() {
+        RestExceptionHandler handler = new RestExceptionHandler();
+
+        ResponseEntity<String> error =
+                handler.handle(new AppCatalogJobGenerationInvalidStateException("state", "DB"));
+        assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
+        assertTrue(error.getBody().contains("Invalid job generation state"));
+
+        error =
+                handler.handle(new AppCatalogJobNotFoundException(125L));
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+        assertTrue(error.getBody().contains("Job not found"));
     }
 }
