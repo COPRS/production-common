@@ -377,12 +377,13 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         }
 
         if (job != null) {
+            String productName =
+                    job.getAppDataJob().getProduct().getProductName();
 
             try {
                 LOGGER.debug(
                         "{} [productName {}] [status {}] Trying job generation",
-                        this.prefixLogMonitor,
-                        job.getAppDataJob().getProduct().getProductName(),
+                        this.prefixLogMonitor, productName,
                         job.getGeneration().getState());
 
                 // Check primary input
@@ -393,15 +394,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                             LOGGER.info(
                                     "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [START] [productName {}] [inputs {}] Trying job generation",
                                     this.prefixLogMonitor,
-                                    this.taskTable.getLevel(),
-                                    job.getAppDataJob().getProduct()
-                                            .getProductName(),
+                                    this.taskTable.getLevel(), productName,
                                     job.getGeneration().getTaskTable());
                         }
                         LOGGER.info(
                                 "{} [productName {}] 1 - Checking the pre-requirements",
-                                this.prefixLogMonitor, job.getAppDataJob()
-                                        .getProduct().getProductName());
+                                this.prefixLogMonitor, productName);
                         this.preSearch(job);
                         AppDataJobDto<T> modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getIdentifier(),
@@ -413,8 +411,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         updateState(job, AppDataJobGenerationDtoState.INITIAL);
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
-                                this.prefixLogMonitor, job.getAppDataJob()
-                                        .getProduct().getProductName(),
+                                this.prefixLogMonitor, productName,
                                 e.getLogMessage());
                     }
                 }
@@ -433,8 +430,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                 AppDataJobGenerationDtoState.PRIMARY_CHECK);
                         LOGGER.error(
                                 "{} [productName {}] 2 - Inputs not found: {}",
-                                this.prefixLogMonitor, job.getAppDataJob()
-                                        .getProduct().getProductName(),
+                                this.prefixLogMonitor, productName,
                                 e.getLogMessage());
                     }
                 }
@@ -451,16 +447,14 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                     } catch (AbstractCodedException e) {
                         updateState(job, AppDataJobGenerationDtoState.READY);
                         LOGGER.error("{} [productName {}] 3 - Job not send: {}",
-                                this.prefixLogMonitor, job.getAppDataJob()
-                                        .getProduct().getProductName(),
+                                this.prefixLogMonitor, productName,
                                 e.getLogMessage());
                     }
                 }
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "{} [productName {}] [code ] Cannot generate job: {}",
-                        this.prefixLogMonitor,
-                        job.getAppDataJob().getProduct().getProductName(),
+                        this.prefixLogMonitor, productName,
                         ace.getCode().getCode(), ace.getLogMessage());
             }
 

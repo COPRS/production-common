@@ -171,10 +171,11 @@ public abstract class AbstractJobsDispatcher<T> {
      */
     public void dispatch(final AppDataJobDto<T> job)
             throws AbstractCodedException {
+        String productName = job.getProduct().getProductName();
         try {
             LOGGER.info(
                     "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [START] Dispatching product",
-                    job.getProduct().getProductName(),
+                    productName,
                     getTaskForFunctionalLog());
 
             List<String> taskTables = getTaskTables(job);
@@ -224,13 +225,13 @@ public abstract class AbstractJobsDispatcher<T> {
 
             LOGGER.info(
                     "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [STOP OK] [outputs {}] Product dispatched",
-                    job.getProduct().getProductName(),
+                    productName,
                     getTaskForFunctionalLog(), taskTables);
 
         } catch (AbstractCodedException ace) {
             LOGGER.error(
                     "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [STOP KO] {} Dispatching product failed ",
-                    job.getProduct().getProductName(),
+                    productName,
                     getTaskForFunctionalLog(), ace.getLogMessage());
             throw ace;
         }
