@@ -13,7 +13,7 @@ mqi:
   max-retries: 3
 jobs:
   cleaning-jobs-terminated-fixed-rate-ms: 600000
-  cleaning-jobs-invalid-fixed-rate-ms: 6000000
+  cleaning-jobs-invalid-fixed-rate-ms: 18000000
   level-products:
     max-age-job-ms:
       waiting: 600000
