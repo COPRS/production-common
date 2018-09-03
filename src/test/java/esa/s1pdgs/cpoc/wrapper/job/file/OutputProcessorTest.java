@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
@@ -140,7 +141,7 @@ public class OutputProcessorTest {
 
         processor =
                 new OutputProcessor(obsService, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR");
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0);
 
         // Mocks
         doNothing().when(obsService).uploadFilesPerBatch(Mockito.any());

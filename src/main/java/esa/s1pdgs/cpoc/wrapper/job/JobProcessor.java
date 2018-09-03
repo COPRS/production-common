@@ -144,6 +144,7 @@ public class JobProcessor {
             LOGGER.error("[MONITOR] [step 0] [code {}] {}",
                     ace.getCode().getCode(), ace.getLogMessage());
             message = null;
+            this.appStatus.setError("NEXT_MESSAGE");
         }
         if (message == null || message.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
@@ -156,9 +157,8 @@ public class JobProcessor {
         // Initialize processing
         // ------------------------------------------------------
         LevelJobDto job = message.getBody();
-        // Initialize job processing
-        LOGGER.info("{} Initializing job processing",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_READ, job));
+        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [START] Start L0 Job generation",
+        		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_READ, job), job.getProductIdentifier());
         File workdir = new File(job.getWorkDirectory());
         // Remove working directory if exist
         if (workdir.exists()) {
@@ -172,7 +172,7 @@ public class JobProcessor {
         }
         // Initialize the pool processor executor
         PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties,
-                job, getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));
+                job, getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());
         ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
         ExecutorCompletionService<Boolean> procCompletionSrv =
                 new ExecutorCompletionService<>(procExecutorSrv);
@@ -186,7 +186,7 @@ public class JobProcessor {
         OutputProcessor outputProcessor =
                 new OutputProcessor(obsService, procuderFactory, message,
                         outputListFile, this.properties.getSizeBatchUpload(),
-                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
+                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), this.properties.getLevel());
 
         // ----------------------------------------------------------
         // Process message
@@ -194,8 +194,8 @@ public class JobProcessor {
         processJob(message, inputDownloader, outputProcessor, procExecutorSrv,
                 procCompletionSrv, procExecutor);
 
-        LOGGER.info("{} End L0 job generation",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_END, job));
+        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [STOP OK] End L0 job generation",
+        		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_END, job), job.getProductIdentifier());
 
     }
 
@@ -266,17 +266,19 @@ public class JobProcessor {
 
         } catch (AbstractCodedException ace) {
             ackOk = false;
-            errorMessage = String.format("%s [step %d] %s [code %d] %s",
+            errorMessage = String.format("[REPORT] [s1pdgsTask %sProcessing] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s",
+            		properties.getLevel(),
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
         } catch (InterruptedException e) {
             ackOk = false;
             errorMessage = String.format(
-                    "%s [step %d] %s [code %d] [msg interrupted exception]",
+                    "[REPORT] %s [step %d] %s [code %d] [s1pdgsTask %sProcessing] [STOP KO] [subTask processing] [msg interrupted exception]",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
-                    ErrorCode.INTERNAL_ERROR.getCode());
+                    ErrorCode.INTERNAL_ERROR.getCode(),
+                    properties.getLevel());
         } finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
@@ -356,7 +358,7 @@ public class JobProcessor {
                         "{} [code {}] Failed to erase local working directory",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job),
                         ErrorCode.INTERNAL_ERROR.getCode());
-                this.appStatus.setError();
+                this.appStatus.setError("PROCESSING");
             }
         } else {
             LOGGER.info("{} Erasing local working directory bypassed",
@@ -422,7 +424,7 @@ public class JobProcessor {
                             dto.getBody()),
                     ace.getCode().getCode(), ace.getLogMessage());
         }
-        appStatus.setError();
+        appStatus.setError("PROCESSING");
     }
 
     protected void ackPositively(final boolean stop,
@@ -438,7 +440,7 @@ public class JobProcessor {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
                             dto.getBody()),
                     ace.getCode().getCode(), ace.getLogMessage());
-            appStatus.setError();
+            appStatus.setError("PROCESSING");
         }
     }
 }

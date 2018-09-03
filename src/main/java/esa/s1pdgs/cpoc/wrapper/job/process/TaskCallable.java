@@ -37,6 +37,11 @@ public class TaskCallable implements Callable<TaskResult> {
      * Work directory
      */
     private final String workDirectory;
+    
+    /**
+     * Prefix for REPORT
+     */
+    private final String prefixReport;
 
     /**
      * @param binaryPath
@@ -44,10 +49,11 @@ public class TaskCallable implements Callable<TaskResult> {
      * @param workDirectory
      */
     public TaskCallable(final String binaryPath, final String jobOrderPath,
-            final String workDirectory) {
+            final String workDirectory, final String prefixReport) {
         this.binaryPath = binaryPath;
         this.jobOrderPath = jobOrderPath;
         this.workDirectory = workDirectory;
+        this.prefixReport = prefixReport;
     }
 
     /**
@@ -55,8 +61,8 @@ public class TaskCallable implements Callable<TaskResult> {
      */
     @Override
     public TaskResult call() throws InternalErrorException {
-        LOGGER.info("[task {}] [workDirectory {}] Starting call",
-                this.binaryPath, this.workDirectory);
+        LOGGER.info("{} [task {}] [workDirectory {}] [START] Starting call",
+                this.prefixReport, this.binaryPath, this.workDirectory);
 
         int r = -1;
 
@@ -88,8 +94,8 @@ public class TaskCallable implements Callable<TaskResult> {
             }
         }
         LOGGER.info(
-                "[task {}] [workDirectory {}] Ending call with exit code {}",
-                binaryPath, workDirectory, r);
+                "{} [task {}] [workDirectory {}] [STOP OK] Ending call with exit code {}",
+                this.prefixReport, binaryPath, workDirectory, r);
 
         return new TaskResult(binaryPath, r);
     }

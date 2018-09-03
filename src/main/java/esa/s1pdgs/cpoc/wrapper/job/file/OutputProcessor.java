@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -96,7 +97,11 @@ public class OutputProcessor {
      * Prefix before each monitor logs
      */
     private final String prefixMonitorLogs;
-
+    
+    /**
+     * Application level
+     */
+    private final ApplicationLevel appLevel;
     /**
      * Constructor
      * 
@@ -112,7 +117,7 @@ public class OutputProcessor {
             final OutputProcuderFactory procuderFactory,
             final GenericMessageDto<LevelJobDto> inputMessage,
             final String listFile, final int sizeUploadBatch,
-            final String prefixMonitorLogs) {
+            final String prefixMonitorLogs, final ApplicationLevel appLevel) {
         this.obsService = obsService;
         this.procuderFactory = procuderFactory;
         this.listFile = listFile;
@@ -121,6 +126,7 @@ public class OutputProcessor {
         this.workDirectory = inputMessage.getBody().getWorkDirectory();
         this.sizeUploadBatch = sizeUploadBatch;
         this.prefixMonitorLogs = prefixMonitorLogs;
+        this.appLevel = appLevel;
     }
 
     /**
@@ -279,8 +285,8 @@ public class OutputProcessor {
             final List<ObsQueueMessage> outputToPublish)
             throws AbstractCodedException {
         LOGGER.info(
-                "{} 3 - Starting processing object storage compatible outputs",
-                prefixMonitorLogs);
+                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [START] 3 - Starting processing object storage compatible outputs",
+                prefixMonitorLogs, this.appLevel);
 
         double size = Double.valueOf(uploadBatch.size());
         double nbPool = Math.ceil(size / sizeUploadBatch);
@@ -303,9 +309,12 @@ public class OutputProcessor {
                 this.obsService.uploadFilesPerBatch(sublist);
             }
         }
-
-        LOGGER.info("{} 3 - Publishing KAFKA messages for the last batch",
-                this.prefixMonitorLogs);
+        String listoutputs="";
+        for (int i = 0; i < size; i++) {
+        	listoutputs =  listoutputs + " " + uploadBatch.get(i).getKey();
+        }
+        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch [outputs {}]",
+                this.prefixMonitorLogs, this.appLevel, listoutputs);
         publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);
     }
 
@@ -335,7 +344,7 @@ public class OutputProcessor {
                 if (nextKeyUpload.startsWith(msg.getKeyObs())) {
                     stop = true;
                 } else {
-                    LOGGER.info("{} 3 - Publishing KAFKA message for output {}",
+                    LOGGER.info("{} 3 - Publishing message for output {}",
                             prefixMonitorLogs, msg.getProductName());
                     try {
                         procuderFactory.sendOutput(msg, inputMessage);

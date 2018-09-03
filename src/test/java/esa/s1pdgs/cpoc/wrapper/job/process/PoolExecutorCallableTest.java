@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
@@ -60,7 +61,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         job.getPools().get(2)
                 .addTask(new LevelJobTaskDto(SystemUtils.getCmdRmdir()));
 
-        callable = new PoolExecutorCallable(properties, job, "log");
+        callable = new PoolExecutorCallable(properties, job, "log", ApplicationLevel.L0);
     }
 
     @Test
