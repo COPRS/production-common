@@ -439,6 +439,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 if (job.getGeneration()
                         .getState() == AppDataJobGenerationDtoState.READY) {
                     try {
+                        LOGGER.info("{} [productName {}] 2 - Searching inputs",
+                                this.prefixLogMonitor, job.getAppDataJob()
+                                        .getProduct().getProductName());
+                        this.inputsSearch(job);
                         LOGGER.info("{} [productName {}] 3 - Sending job",
                                 this.prefixLogMonitor, job.getAppDataJob()
                                         .getProduct().getProductName());

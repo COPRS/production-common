@@ -71,7 +71,7 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
     /**
      * Periodic function for processing messages
      */
-    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}")
+    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString="${process.initial-delay-ms}")
     public void consumeMessages() {
         // First, consume message
         GenericMessageDto<LevelProductDto> mqiMessage = readMessage();

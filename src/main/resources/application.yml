@@ -50,6 +50,7 @@ process:
     tempo-retry-ms: ${job_process_appcatalog_tempo-retry:1000}
     tm-connect-ms: ${job_process_appcatalog_tm-connect-ms:5000}
   fixed-delay-ms: ${job_process_fixed-delay-ms:200}
+  initial-delay-ms: ${job_process_initial-delay-ms:5000}
     
 level0:
   dir-extractor-sessions: ${l0_dir-extractor-sessions:/data/sessions/}

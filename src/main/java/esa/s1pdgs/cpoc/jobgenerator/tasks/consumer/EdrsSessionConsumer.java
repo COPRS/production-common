@@ -51,7 +51,7 @@ public class EdrsSessionConsumer
         this.edrsService = edrsService;
     }
 
-    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}")
+    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString="${process.initial-delay-ms}")
     public void consumeMessages() {
         // First, consume message
         GenericMessageDto<EdrsSessionDto> mqiMessage = readMessage();

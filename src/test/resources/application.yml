@@ -58,6 +58,7 @@ process:
     tempo-retry-ms: 3000
     tm-connect-ms: 200
   fixed-delay-ms: 200
+  initial-delay-ms: 500
     
 pattern-l0-slices:
   regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
