@@ -69,8 +69,8 @@ public class EdrsSessionConsumer
             boolean ackOk = false;
             String errorMessage = "";
             LOGGER.info(
-                    "[MONITOR] [step {}] [productName {}] Starting job generation",
-                    step, leveldto.getObjectStorageKey());
+                    "[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] Starting job generation",
+                    step, getProductName(mqiMessage));
             appStatus.setProcessing(mqiMessage.getIdentifier());
 
             try {
@@ -94,8 +94,9 @@ public class EdrsSessionConsumer
                             "[MONITOR] [step 2] [productName {}] Dispatching product",
                             getProductName(mqiMessage));
                     appDataJob.setState(AppDataJobDtoState.DISPATCHING);
-                    appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
-                            appDataJob, false, false, false);
+                    appDataJob =
+                            appDataService.patchJob(appDataJob.getIdentifier(),
+                                    appDataJob, false, false, false);
                     jobsDispatcher.dispatch(appDataJob);
                 }
 
@@ -159,6 +160,9 @@ public class EdrsSessionConsumer
             }
 
             jobDto.setProduct(productDto);
+            LOGGER.info(
+                    "[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [START] [productName {}] Starting job generation",
+                    jobDto.getProduct().getProductName());
             return appDataService.newJob(jobDto);
 
         } else {
@@ -209,5 +213,10 @@ public class EdrsSessionConsumer
     @Override
     protected String getProductName(GenericMessageDto<EdrsSessionDto> dto) {
         return dto.getBody().getObjectStorageKey();
+    }
+
+    @Override
+    protected String getTaskForFunctionalLog() {
+        return "L0JobGeneration";
     }
 }

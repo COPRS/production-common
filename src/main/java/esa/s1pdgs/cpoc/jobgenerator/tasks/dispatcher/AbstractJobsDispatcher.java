@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.CollectionUtils;
 
@@ -40,6 +42,12 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.JobsGeneratorFactory;
  * @param <T>
  */
 public abstract class AbstractJobsDispatcher<T> {
+
+    /**
+     * Logger
+     */
+    private static final Logger LOGGER =
+            LogManager.getLogger(AbstractJobsDispatcher.class);
 
     /**
      * Job Generator settings
@@ -163,46 +171,68 @@ public abstract class AbstractJobsDispatcher<T> {
      */
     public void dispatch(final AppDataJobDto<T> job)
             throws AbstractCodedException {
-        List<String> taskTables = getTaskTables(job);
-        List<String> notDealTaskTables = new ArrayList<>(taskTables);
-        List<AppDataJobGenerationDto> jobGens = job.getGenerations();
+        try {
+            LOGGER.info(
+                    "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [START] Dispatching product",
+                    job.getProduct().getProductName(),
+                    getTaskForFunctionalLog());
 
-        // Build the new job generations
-        boolean needUpdate = false;
-        if (CollectionUtils.isEmpty(jobGens)) {
-            // No current generation, add the new ones
-            for (String table : taskTables) {
-                needUpdate = true;
-                AppDataJobGenerationDto jobGen = new AppDataJobGenerationDto();
-                jobGen.setTaskTable(table);
-                job.getGenerations().add(jobGen);
-            }
-        } else {
-            // Some generation already exists, update or delete the useless ones
-            for (Iterator<AppDataJobGenerationDto> iterator =
-                    jobGens.iterator(); iterator.hasNext();) {
-                AppDataJobGenerationDto jobGen = iterator.next();
-                if (taskTables.contains(jobGen.getTaskTable())) {
-                    notDealTaskTables.remove(jobGen.getTaskTable());
-                } else {
+            List<String> taskTables = getTaskTables(job);
+            List<String> notDealTaskTables = new ArrayList<>(taskTables);
+            List<AppDataJobGenerationDto> jobGens = job.getGenerations();
+
+            // Build the new job generations
+            boolean needUpdate = false;
+            if (CollectionUtils.isEmpty(jobGens)) {
+                // No current generation, add the new ones
+                for (String table : taskTables) {
                     needUpdate = true;
-                    iterator.remove();
+                    AppDataJobGenerationDto jobGen =
+                            new AppDataJobGenerationDto();
+                    jobGen.setTaskTable(table);
+                    job.getGenerations().add(jobGen);
+                }
+            } else {
+                // Some generation already exists, update or delete the useless
+                // ones
+                for (Iterator<AppDataJobGenerationDto> iterator =
+                        jobGens.iterator(); iterator.hasNext();) {
+                    AppDataJobGenerationDto jobGen = iterator.next();
+                    if (taskTables.contains(jobGen.getTaskTable())) {
+                        notDealTaskTables.remove(jobGen.getTaskTable());
+                    } else {
+                        needUpdate = true;
+                        iterator.remove();
+                    }
+                }
+                // Create the new ones
+                for (String taskTable : notDealTaskTables) {
+                    needUpdate = true;
+                    AppDataJobGenerationDto jobGen =
+                            new AppDataJobGenerationDto();
+                    jobGen.setTaskTable(taskTable);
+                    job.getGenerations().add(jobGen);
                 }
             }
-            // Create the new ones
-            for (String taskTable : notDealTaskTables) {
-                needUpdate = true;
-                AppDataJobGenerationDto jobGen = new AppDataJobGenerationDto();
-                jobGen.setTaskTable(taskTable);
-                job.getGenerations().add(jobGen);
-            }
-        }
 
-        // Update task tables
-        if (needUpdate) {
-            job.setState(AppDataJobDtoState.GENERATING);
-            appDataService.patchJob(job.getIdentifier(), job, false, false,
-                    true);
+            // Update task tables
+            if (needUpdate) {
+                job.setState(AppDataJobDtoState.GENERATING);
+                appDataService.patchJob(job.getIdentifier(), job, false, false,
+                        true);
+            }
+
+            LOGGER.info(
+                    "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [STOP OK] [outputs {}] Product dispatched",
+                    job.getProduct().getProductName(),
+                    getTaskForFunctionalLog(), taskTables);
+
+        } catch (AbstractCodedException ace) {
+            LOGGER.error(
+                    "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [STOP KO] {} Dispatching product failed ",
+                    job.getProduct().getProductName(),
+                    getTaskForFunctionalLog(), ace.getLogMessage());
+            throw ace;
         }
     }
 
@@ -211,4 +241,6 @@ public abstract class AbstractJobsDispatcher<T> {
      */
     protected abstract List<String> getTaskTables(final AppDataJobDto<T> job)
             throws AbstractCodedException;
+
+    protected abstract String getTaskForFunctionalLog();
 }

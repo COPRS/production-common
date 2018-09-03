@@ -83,4 +83,9 @@ public class EdrsSessionJobDispatcher
         return Arrays.asList(TASK_TABLE_NAME);
     }
 
+    @Override
+    protected String getTaskForFunctionalLog() {
+        return "L0JobGeneration";
+    }
+
 }

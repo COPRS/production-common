@@ -77,6 +77,7 @@ public abstract class AbstractGenericConsumer<T> {
             LOGGER.error("[MONITOR] [code {}] {}", ace.getCode().getCode(),
                     ace.getLogMessage());
             message = null;
+            appStatus.setError("NEXT_MESSAGE");
         }
         return message;
     }
@@ -126,9 +127,9 @@ public abstract class AbstractGenericConsumer<T> {
      */
     protected void ackNegatively(final boolean stop,
             final GenericMessageDto<T> dto, final String errorMessage) {
-        LOGGER.info(
-                "[MONITOR] [step 3] [productName {}] Acknowledging negatively",
-                getProductName(dto));
+        LOGGER.error(
+                "[REPORT] [MONITOR] [step 3] [s1pdgsTask {}] [subTask Consume] [productName {}] [STOP K0] Acknowledging negatively: {}",
+                getTaskForFunctionalLog(), getProductName(dto), errorMessage);
         LOGGER.error(errorMessage);
         appStatus.setError("NEXT_MESSAGE");
         try {
@@ -143,9 +144,11 @@ public abstract class AbstractGenericConsumer<T> {
 
     protected void ackPositively(final boolean stop,
             final GenericMessageDto<T> dto) {
+        
+        // Log for functional monitoring
         LOGGER.info(
-                "[MONITOR] [step 3] [productName {}] Acknowledging positively",
-                getProductName(dto));
+                "[REPORT] [MONITOR] [step 3] [s1pdgsTask {}] [subTask Consume] [productName {}] [STOP OK] Acknowledging positively",
+                getTaskForFunctionalLog(), getProductName(dto));
         try {
             mqiService.ack(
                     new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));
@@ -158,5 +161,7 @@ public abstract class AbstractGenericConsumer<T> {
     }
 
     protected abstract String getProductName(final GenericMessageDto<T> dto);
+    
+    protected abstract String getTaskForFunctionalLog();
 
 }

@@ -157,4 +157,9 @@ public class L0SliceJobsDispatcher
         return taskTables;
     }
 
+    @Override
+    protected String getTaskForFunctionalLog() {
+        return "L1JobGeneration";
+    }
+
 }

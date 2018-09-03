@@ -82,7 +82,7 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
         // process message
         appStatus.setProcessing(mqiMessage.getIdentifier());
         LOGGER.info(
-                "[MONITOR] [step 0] [productName {}] Starting job generation",
+                "[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] Starting job generation",
                 getProductName(mqiMessage));
         int step = 1;
         boolean ackOk = false;
@@ -168,6 +168,10 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
             productDto.setStopTime(DateUtils
                     .convertWithSimpleDateFormat(stopTime, DATE_FORMAT));
             jobDto.setProduct(productDto);
+            
+            LOGGER.info(
+                    "[REPORT] [MONITOR] [s1pdgsTask L1JobGeneration] [START] [productName {}] Starting job generation",
+                    jobDto.getProduct().getProductName());
 
             return appDataService.newJob(jobDto);
 
@@ -187,5 +191,10 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
     protected String getProductName(
             final GenericMessageDto<LevelProductDto> dto) {
         return dto.getBody().getProductName();
+    }
+
+    @Override
+    protected String getTaskForFunctionalLog() {
+        return "L1JobGeneration";
     }
 }

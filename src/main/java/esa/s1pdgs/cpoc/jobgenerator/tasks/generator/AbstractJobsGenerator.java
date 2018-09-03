@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -388,6 +389,15 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 if (job.getGeneration()
                         .getState() == AppDataJobGenerationDtoState.INITIAL) {
                     try {
+                        if (job.getGeneration().getNbErrors() == 0) {
+                            LOGGER.info(
+                                    "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [START] [productName {}] [inputs {}] Trying job generation",
+                                    this.prefixLogMonitor,
+                                    this.taskTable.getLevel(),
+                                    job.getAppDataJob().getProduct()
+                                            .getProductName(),
+                                    job.getGeneration().getTaskTable());
+                        }
                         LOGGER.info(
                                 "{} [productName {}] 1 - Checking the pre-requirements",
                                 this.prefixLogMonitor, job.getAppDataJob()
@@ -399,7 +409,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         job.setAppDataJob(modifiedJob);
                         updateState(job,
                                 AppDataJobGenerationDtoState.PRIMARY_CHECK);
-                    } catch (JobGenInputsMissingException e) {
+                    } catch (AbstractCodedException e) {
                         updateState(job, AppDataJobGenerationDtoState.INITIAL);
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
@@ -418,7 +428,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                         .getProduct().getProductName());
                         this.inputsSearch(job);
                         updateState(job, AppDataJobGenerationDtoState.READY);
-                    } catch (JobGenInputsMissingException e) {
+                    } catch (AbstractCodedException e) {
                         updateState(job,
                                 AppDataJobGenerationDtoState.PRIMARY_CHECK);
                         LOGGER.error(
@@ -465,6 +475,34 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
         job.updateAppDataJob(modifiedJob, taskTableXmlName);
+
+        // Log functional logs
+        if (job.getGeneration()
+                .getState() == AppDataJobGenerationDtoState.SENT) {
+            if (newState == AppDataJobGenerationDtoState.SENT) {
+                // TODO addoutputs
+                LOGGER.info(
+                        "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [STOP OK] [productName {}] Job generation successfully finished",
+                        this.prefixLogMonitor, this.taskTable.getLevel(),
+                        job.getAppDataJob().getProduct().getProductName());
+            } else {
+                LOGGER.error(
+                        "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [STOP KO] [productName {}] Job generation finished but job not sent",
+                        this.prefixLogMonitor, this.taskTable.getLevel(),
+                        job.getAppDataJob().getProduct().getProductName());
+            }
+        }
+        if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {
+            List<String> taskTables = new ArrayList<>();
+            job.getAppDataJob().getGenerations().stream().forEach(gen -> {
+                taskTables.add(gen.getTaskTable());
+            });
+            LOGGER.info(
+                    "{} [REPORT] [s1pdgsTask {}JobGeneration] [STOP OK] [productName {}] [outputs {}] Job finished",
+                    this.prefixLogMonitor, this.taskTable.getLevel(),
+                    job.getAppDataJob().getProduct().getProductName(),
+                    taskTables);
+        }
     }
 
     protected abstract void preSearch(JobGeneration<T> job)
