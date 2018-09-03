@@ -216,7 +216,6 @@ public class MessageConsumptionControllerTest {
         assertEquals(AuxiliaryFileDto.class,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic").getConsumedMsgClass());
-        System.out.println(manager.consumers.get(ProductCategory.AUXILIARY_FILES));
         assertEquals("topic-other",
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic-other").getTopic());
