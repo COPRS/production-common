@@ -242,4 +242,9 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<String> {
     public int getCounter() {
         return this.counter;
     }
+
+    @Override
+    protected String getTaskForFunctionalLog() {
+        return "Task";
+    }
 }
