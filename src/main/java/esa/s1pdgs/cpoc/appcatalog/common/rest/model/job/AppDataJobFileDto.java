@@ -12,12 +12,19 @@ public class AppDataJobFileDto {
     /**
      * Name of the file
      */
-    private final String filename;
+    private String filename;
 
     /**
      * Key in the OBS
      */
     private String keyObs;
+
+    /**
+     * @param filename
+     */
+    public AppDataJobFileDto() {
+        super();
+    }
 
     /**
      * @param filename
@@ -41,6 +48,13 @@ public class AppDataJobFileDto {
      */
     public String getFilename() {
         return filename;
+    }
+
+    /**
+     * @param filename the filename to set
+     */
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     /**
