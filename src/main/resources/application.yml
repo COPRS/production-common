@@ -5,7 +5,7 @@ spring:
     
 # Logging
 logging:
-  config: ${appcatalog_logging_config:config/log/log4j2.yml}
+  config: ${appcatalog_logging_config:log4j2.yml}
   
 # MongoDB
 mongodb:
