@@ -134,36 +134,86 @@ public class EdrsSessionConsumer
             EdrsSessionFile file = edrsService.createSessionFile(
                     mqiMessage.getBody().getObjectStorageKey());
 
-            // Create the JOB
-            AppDataJobDto<EdrsSessionDto> jobDto = new AppDataJobDto<>();
-            // General details
-            jobDto.setLevel(processSettings.getLevel());
-            jobDto.setPod(processSettings.getHostname());
-            // Messages
-            jobDto.getMessages().add(mqiMessage);
-            // Product
-            AppDataJobProductDto productDto = new AppDataJobProductDto();
-            productDto.setSessionId(file.getSessionId());
-            productDto.setMissionId(mqiMessage.getBody().getMissionId());
-            productDto.setProductName(file.getSessionId());
-            productDto.setSatelliteId(mqiMessage.getBody().getSatelliteId());
-            productDto.setStartTime(file.getStartTime());
-            productDto.setStopTime(file.getStopTime());
-            if (mqiMessage.getBody().getChannelId() == 1) {
-                productDto.setRaws1(file.getRawNames().stream()
-                        .map(rawI -> new AppDataJobFileDto(rawI.getFileName()))
-                        .collect(Collectors.toList()));
-            } else {
-                productDto.setRaws2(file.getRawNames().stream()
-                        .map(rawI -> new AppDataJobFileDto(rawI.getFileName()))
-                        .collect(Collectors.toList()));
-            }
+            // Search if session is already in progress
+            List<AppDataJobDto<EdrsSessionDto>> existingJobsForSession =
+                    appDataService.findByProductSessionId(file.getSessionId());
 
-            jobDto.setProduct(productDto);
-            LOGGER.info(
-                    "[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [START] [productName {}] Starting job generation",
-                    jobDto.getProduct().getProductName());
-            return appDataService.newJob(jobDto);
+            if (CollectionUtils.isEmpty(existingJobsForSession)) {
+
+                // Create the JOB
+                AppDataJobDto<EdrsSessionDto> jobDto = new AppDataJobDto<>();
+                // General details
+                jobDto.setLevel(processSettings.getLevel());
+                jobDto.setPod(processSettings.getHostname());
+                // Messages
+                jobDto.getMessages().add(mqiMessage);
+                // Product
+                AppDataJobProductDto productDto = new AppDataJobProductDto();
+                productDto.setSessionId(file.getSessionId());
+                productDto.setMissionId(mqiMessage.getBody().getMissionId());
+                productDto.setProductName(file.getSessionId());
+                productDto
+                        .setSatelliteId(mqiMessage.getBody().getSatelliteId());
+                productDto.setStartTime(file.getStartTime());
+                productDto.setStopTime(file.getStopTime());
+                if (mqiMessage.getBody().getChannelId() == 1) {
+                    productDto.setRaws1(file.getRawNames().stream().map(
+                            rawI -> new AppDataJobFileDto(rawI.getFileName()))
+                            .collect(Collectors.toList()));
+                } else {
+                    productDto.setRaws2(file.getRawNames().stream().map(
+                            rawI -> new AppDataJobFileDto(rawI.getFileName()))
+                            .collect(Collectors.toList()));
+                }
+
+                jobDto.setProduct(productDto);
+                LOGGER.info(
+                        "[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [START] [productName {}] Starting job generation",
+                        jobDto.getProduct().getProductName());
+                return appDataService.newJob(jobDto);
+
+            } else {
+
+                // Update pod if needed
+                boolean update = false;
+                boolean updateMessage = false;
+                boolean updateProduct = false;
+                AppDataJobDto<EdrsSessionDto> jobDto = existingJobsForSession.get(0);
+                if (!jobDto.getPod().equals(processSettings.getHostname())) {
+                    jobDto.setPod(processSettings.getHostname());
+                    update = true;
+                }
+                // Updates messages if needed
+                if (jobDto.getMessages().size() == 1 && jobDto.getMessages()
+                        .get(0).getBody().getChannelId() != mqiMessage.getBody()
+                                .getChannelId()) {
+                    jobDto.getMessages().add(mqiMessage);
+                    if (mqiMessage.getBody().getChannelId() == 1) {
+                        jobDto.getProduct()
+                                .setRaws1(file.getRawNames().stream()
+                                        .map(rawI -> new AppDataJobFileDto(
+                                                rawI.getFileName()))
+                                        .collect(Collectors.toList()));
+                    } else {
+                        jobDto.getProduct()
+                                .setRaws2(file.getRawNames().stream()
+                                        .map(rawI -> new AppDataJobFileDto(
+                                                rawI.getFileName()))
+                                        .collect(Collectors.toList()));
+                    }
+                    update = true;
+                    updateMessage = true;
+                    updateProduct = true;
+                }
+                // Update
+                if (update) {
+                    jobDto = appDataService.patchJob(jobDto.getIdentifier(),
+                            jobDto, updateMessage, updateProduct, false);
+                }
+                // Return object
+                return jobDto;
+
+            }
 
         } else {
             // Update pod if needed
@@ -174,30 +224,6 @@ public class EdrsSessionConsumer
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
                 update = true;
-            }
-            // Updates messages if needed
-            if (jobDto.getMessages().size() == 1 && jobDto.getMessages().get(0)
-                    .getBody()
-                    .getChannelId() != mqiMessage.getBody().getChannelId()) {
-                EdrsSessionFile file = edrsService.createSessionFile(
-                        mqiMessage.getBody().getObjectStorageKey());
-                jobDto.getMessages().add(mqiMessage);
-                if (mqiMessage.getBody().getChannelId() == 1) {
-                    jobDto.getProduct()
-                            .setRaws1(file.getRawNames().stream()
-                                    .map(rawI -> new AppDataJobFileDto(
-                                            rawI.getFileName()))
-                                    .collect(Collectors.toList()));
-                } else {
-                    jobDto.getProduct()
-                            .setRaws2(file.getRawNames().stream()
-                                    .map(rawI -> new AppDataJobFileDto(
-                                            rawI.getFileName()))
-                                    .collect(Collectors.toList()));
-                }
-                update = true;
-                updateMessage = true;
-                updateProduct = true;
             }
             // Update
             if (update) {
