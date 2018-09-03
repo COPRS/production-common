@@ -7,10 +7,10 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.appcatalog.server.job.JobsProperties;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobService;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
@@ -33,12 +33,12 @@ public class CleaningOldestJob {
     /**
      * Maximal job age per status
      */
-    private final Map<String, Integer> maxAgeJobsLevelProducts;
+    private final Map<String, Long> maxAgeJobsLevelProducts;
 
     /**
      * Maximal job age per status
      */
-    private final Map<String, Integer> maxAgeJobsEdrsSessions;
+    private final Map<String, Long> maxAgeJobsEdrsSessions;
 
     /**
      * @param appDataJobService
@@ -48,18 +48,18 @@ public class CleaningOldestJob {
      */
     @Autowired
     public CleaningOldestJob(final AppDataJobService appDataJobService,
-            @Value("${jobs.level-products.max-age-job-ms}") final Map<String, Integer> maxAgeJobsLevelProducts,
-            @Value("${jobs.level-products.max-age-job-ms}") final Map<String, Integer> maxAgeJobsEdrsSessions,
-            final Map<String, Integer> maxNbErrorsGenerations) {
+            final JobsProperties jobsProperties) {
         this.appDataJobService = appDataJobService;
-        this.maxAgeJobsLevelProducts = maxAgeJobsLevelProducts;
-        this.maxAgeJobsEdrsSessions = maxAgeJobsEdrsSessions;
+        this.maxAgeJobsLevelProducts =
+                jobsProperties.getEdrsSessions().getMaxAgeJobMs();
+        this.maxAgeJobsEdrsSessions =
+                jobsProperties.getLevelProducts().getMaxAgeJobMs();
     }
 
     /**
      * Clean job terminated after x times (to avoid being done twice)
      */
-    @Scheduled(fixedDelayString="${jobs.cleaning-jobs-terminated-fixed-rate-ms}")
+    @Scheduled(fixedDelayString = "${jobs.cleaning-jobs-terminated-fixed-rate-ms}")
     public void cleanJobInGeneratedState() {
         // EDRS sessions
         Date dateCompareE =
@@ -95,7 +95,7 @@ public class CleaningOldestJob {
     /**
      * Remove jobs in transitory state for too long
      */
-    @Scheduled(fixedDelayString="${jobs.cleaning-jobs-invalid-fixed-rate-ms}")
+    @Scheduled(fixedDelayString = "${jobs.cleaning-jobs-invalid-fixed-rate-ms}")
     public void cleanJobInWaitingForTooLong() {
         this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.WAITING);
         this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.DISPATCHING);
@@ -134,5 +134,5 @@ public class CleaningOldestJob {
         }
     }
 
-    //TODO add clean for job generations
+    // TODO add clean for job generations
 }
