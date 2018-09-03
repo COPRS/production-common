@@ -101,6 +101,7 @@ public class AppDataJobProductDto {
         this.raws2 = new ArrayList<>();
         numberSlice = 0;
         totalNbOfSlice = 0;
+        insConfId = -1;
     }
 
     /**
