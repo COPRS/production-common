@@ -216,7 +216,6 @@ public class MessageConsumptionControllerTest {
         assertEquals(AuxiliaryFileDto.class,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic").getConsumedMsgClass());
-        System.out.println(manager.consumers.get(ProductCategory.AUXILIARY_FILES));
         assertEquals("topic-other",
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic-other").getTopic());
@@ -374,6 +373,7 @@ public class MessageConsumptionControllerTest {
         MqiGenericMessageDto<?> msg3 =
                 new MqiGenericMessageDto<>(category, 3, "topic", 2, 11);
         msg3.setState(MqiStateMessageEnum.READ);
+        msg3.setCreationDate(new Date());
         doReturn(true).when(mockedService).send(Mockito.eq(3L), Mockito.any());
 
         doReturn(Arrays.asList(msg1, msg2, msg3)).when(mockedService)

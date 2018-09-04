@@ -287,7 +287,7 @@ public class MessageConsumptionController {
                         MqiGenericMessageDto<AuxiliaryFileDto> o2) {
                     if(consumers.get(ProductCategory.AUXILIARY_FILES).get(o1.getTopic()).getPriority() >
                         consumers.get(ProductCategory.AUXILIARY_FILES).get(o2.getTopic()).getPriority()) {
-                        return 1;
+                        return -1;
                     } else if(consumers.get(ProductCategory.AUXILIARY_FILES).get(o1.getTopic()).getPriority() ==
                             consumers.get(ProductCategory.AUXILIARY_FILES).get(o2.getTopic()).getPriority()) {
                         if(o1.getCreationDate()==null) {
@@ -298,7 +298,7 @@ public class MessageConsumptionController {
                             return o1.getCreationDate().compareTo(o2.getCreationDate());
                         }
                     } else {
-                        return -1;
+                        return 1;
                     }
                 }                
             });
@@ -332,7 +332,7 @@ public class MessageConsumptionController {
                         MqiGenericMessageDto<EdrsSessionDto> o2) {
                     if(consumers.get(ProductCategory.EDRS_SESSIONS).get(o1.getTopic()).getPriority() >
                         consumers.get(ProductCategory.EDRS_SESSIONS).get(o2.getTopic()).getPriority()) {
-                        return 1;
+                        return -1;
                     } else if(consumers.get(ProductCategory.EDRS_SESSIONS).get(o1.getTopic()).getPriority() ==
                             consumers.get(ProductCategory.EDRS_SESSIONS).get(o2.getTopic()).getPriority()) {
                         if(o1.getCreationDate()==null) {
@@ -343,7 +343,7 @@ public class MessageConsumptionController {
                             return o1.getCreationDate().compareTo(o2.getCreationDate());
                         }
                     } else {
-                        return -1;
+                        return 1;
                     }
                 }                
             });
@@ -377,7 +377,7 @@ public class MessageConsumptionController {
                         MqiGenericMessageDto<LevelJobDto> o2) {
                     if(consumers.get(ProductCategory.LEVEL_JOBS).get(o1.getTopic()).getPriority() >
                         consumers.get(ProductCategory.LEVEL_JOBS).get(o2.getTopic()).getPriority()) {
-                        return 1;
+                        return -1;
                     } else if(consumers.get(ProductCategory.LEVEL_JOBS).get(o1.getTopic()).getPriority() ==
                             consumers.get(ProductCategory.LEVEL_JOBS).get(o2.getTopic()).getPriority()) {
                         if(o1.getCreationDate()==null) {
@@ -388,7 +388,7 @@ public class MessageConsumptionController {
                             return o1.getCreationDate().compareTo(o2.getCreationDate());
                         }
                     } else {
-                        return -1;
+                        return 1;
                     }
                 }                
             });
@@ -422,7 +422,7 @@ public class MessageConsumptionController {
                         MqiGenericMessageDto<LevelProductDto> o2) {
                     if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() >
                         consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
-                        return 1;
+                        return -1;
                     } else if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() ==
                             consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
                         if(o1.getCreationDate()==null) {
@@ -433,7 +433,7 @@ public class MessageConsumptionController {
                             return o1.getCreationDate().compareTo(o2.getCreationDate());
                         }
                     } else {
-                        return -1;
+                        return 1;
                     }
                 }                
             });
@@ -467,7 +467,7 @@ public class MessageConsumptionController {
                         MqiGenericMessageDto<LevelReportDto> o2) {
                     if(consumers.get(ProductCategory.LEVEL_REPORTS).get(o1.getTopic()).getPriority() >
                         consumers.get(ProductCategory.LEVEL_REPORTS).get(o2.getTopic()).getPriority()) {
-                        return 1;
+                        return -1;
                     } else if(consumers.get(ProductCategory.LEVEL_REPORTS).get(o1.getTopic()).getPriority() ==
                             consumers.get(ProductCategory.LEVEL_REPORTS).get(o2.getTopic()).getPriority()) {
                         if(o1.getCreationDate()==null) {
@@ -478,7 +478,7 @@ public class MessageConsumptionController {
                             return o1.getCreationDate().compareTo(o2.getCreationDate());
                         }
                     } else {
-                        return -1;
+                        return 1;
                     }
                 }                
             });
