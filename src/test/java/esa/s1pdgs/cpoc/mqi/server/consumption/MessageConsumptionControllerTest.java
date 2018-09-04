@@ -373,18 +373,19 @@ public class MessageConsumptionControllerTest {
         MqiGenericMessageDto<?> msg3 =
                 new MqiGenericMessageDto<>(category, 3, "topic", 2, 11);
         msg3.setState(MqiStateMessageEnum.READ);
+        msg3.setCreationDate(new Date());
         doReturn(true).when(mockedService).send(Mockito.eq(3L), Mockito.any());
 
         doReturn(Arrays.asList(msg1, msg2, msg3)).when(mockedService)
                 .next(Mockito.anyString());
 
-        assertEquals(new GenericMessageDto<>(3, "topic", null),
+        assertEquals(new GenericMessageDto<>(2, "topic", null),
                 manager.nextMessage(category));
         verify(mockedService, times(1)).next(Mockito.eq("pod-name"));
-        verify(mockedService, times(1)).send(Mockito.eq(3L), Mockito.any());
-        /*verify(otherService, times(1)).isProcessing(Mockito.eq("other-pod"),
+        verify(mockedService, times(1)).send(Mockito.eq(2L), Mockito.any());
+        verify(otherService, times(1)).isProcessing(Mockito.eq("other-pod"),
                 Mockito.eq(category), Mockito.eq(1L));
-        verifyNoMoreInteractions(otherService);*/
+        verifyNoMoreInteractions(otherService);
 
     }
 
