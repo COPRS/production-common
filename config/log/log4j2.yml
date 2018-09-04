@@ -19,21 +19,10 @@ Configuration:
           size: 10 MB
       DefaultRollOverStrategy:
         max: 30
-    RollingRandomAccessFile:
-      name: RANDOM_ACCESS_FILE
-      fileName: ${env:job_logging_file:-./s1pdgs-jobgenerator.log}
-      filePattern: "${env:job_logging_file:-./s1pdgs-jobgenerator.log}.%d{yyyy-MM-dd-hh-mm}.gz"
-      PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-jobgenerator-app:1.0.0 %-5level: %msg [%thread] %n"
-      Policies:
-        SizeBasedTriggeringPolicy:
-          size: 10 MB
-      DefaultRollOverStrategy:
-        max: 30
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
-        level: ${env:job_logging_level_frviveriss1pdgs:-info}
+      - name: esa.s1pdgs.cpoc
+        level: ${env:job_logging_level_esas1pdgscpoc:-info}
         additivity: false
         AppenderRef:
           - ref: STDOUT

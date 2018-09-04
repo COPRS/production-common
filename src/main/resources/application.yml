@@ -10,7 +10,6 @@ metadata:
   host: ${catalog_rest_host:metadata-catalog-svc:8080}
   rest-api_nb-retry: ${job_rest-api_nb-retry:3}
   rest-api_tempo-retry-ms: ${job_rest-api_tempo-retry-ms:1000}
- 
   
 job-generator:
   diroftasktables: ${job_directoryoftasktables}
@@ -19,10 +18,8 @@ job-generator:
   jobgenfixedrate: ${job_scheduledfixedrate:500}
   waitprimarycheck:
     tempo: ${job_waitprimarycheck_tempo:30000}
-    retries: ${job_waitprimarycheck_retries:50}
   waitmetadatainput:
     tempo: ${job_waitmetadatainput_tempo:60000}
-    retries: ${job_waitmetadatainput_retries:300}
   defaultfamily: ${products_default-family}
   outputfamiliesstr: ${products_family-per-type}
   typeoverlapstr: ${products_overlap-per-acq}
@@ -36,6 +33,8 @@ status:
 
 process:
   level: ${job_process_level}
+  hostname: ${HOSTNAME}
+  mode: ${job_process_mode:PROD}
   paramstr: ${job_process_params:Processing_Mode:NRT||Timeout:300}
   loglevelstdout: ${job_process_loglevelstdout:INFO}
   loglevelstderr: ${job_process_loglevelstderr:INFO}
@@ -45,11 +44,15 @@ process:
     host-uri: ${job_process_mqi_host-uri:http://localhost:8081}
     max-retries: ${job_process_mqi_max-retries:3}
     tempo-retry-ms: ${job_process_mqi_tempo-retry:1000}
+  appcatalog:
+    host-uri: ${job_process_appcatalog_host-uri:http://app-catalog-svc:8080}
+    max-retries: ${job_process_appcatalog_max-retries:3}
+    tempo-retry-ms: ${job_process_appcatalog_tempo-retry:1000}
+    tm-connect-ms: ${job_process_appcatalog_tm-connect-ms:5000}
   fixed-delay-ms: ${job_process_fixed-delay-ms:200}
+  initial-delay-ms: ${job_process_initial-delay-ms:5000}
     
 level0:
-  maxnumberofsessions: ${l0_maxnumberofsessions:20}
-  maxagesession: ${l0_maxagesession:25200000}
   dir-extractor-sessions: ${l0_dir-extractor-sessions:/data/sessions/}
   
 level1:
