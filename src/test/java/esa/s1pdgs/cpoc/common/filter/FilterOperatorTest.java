@@ -16,11 +16,12 @@ public class FilterOperatorTest {
      */
     @Test
     public void testValueOf() {
-        assertEquals(5, FilterOperator.values().length);
+        assertEquals(6, FilterOperator.values().length);
         assertEquals(FilterOperator.EQ, FilterOperator.valueOf("EQ"));
         assertEquals(FilterOperator.LT, FilterOperator.valueOf("LT"));
         assertEquals(FilterOperator.LTE, FilterOperator.valueOf("LTE"));
         assertEquals(FilterOperator.GT, FilterOperator.valueOf("GT"));
         assertEquals(FilterOperator.GTE, FilterOperator.valueOf("GTE"));
+        assertEquals(FilterOperator.NEQ, FilterOperator.valueOf("NEQ"));
     }
 }

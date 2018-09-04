@@ -43,19 +43,54 @@ public class AppDataJobProductDto {
     private Date stopTime;
 
     /**
+     * Instrument configuration id (in metadata). -1 if not exist
+     */
+    private int insConfId;
+
+    /**
+     * Its type (in metadata)
+     */
+    private String productType;
+
+    /**
      * List of raws for channel 1
      */
-    private List<String> raws1;
+    private List<AppDataJobFileDto> raws1;
 
     /**
      * List of raws for channel 2
      */
-    private List<String> raws2;
+    private List<AppDataJobFileDto> raws2;
 
     /**
      * Acquisition
      */
     private String acquisition;
+
+    /**
+     * Data take identifier
+     */
+    private String dataTakeId;
+
+    /**
+     * Slice number
+     */
+    private int numberSlice;
+
+    /**
+     * Total number of slice for its segment
+     */
+    private int totalNbOfSlice;
+
+    /**
+     * Start date of the segment
+     */
+    private String segmentStartDate;
+
+    /**
+     * Stop date of the segment
+     */
+    private String segmentStopDate;
 
     /**
      * 
@@ -64,6 +99,9 @@ public class AppDataJobProductDto {
         super();
         this.raws1 = new ArrayList<>();
         this.raws2 = new ArrayList<>();
+        numberSlice = 0;
+        totalNbOfSlice = 0;
+        insConfId = -1;
     }
 
     /**
@@ -159,7 +197,7 @@ public class AppDataJobProductDto {
     /**
      * @return the raws1
      */
-    public List<String> getRaws1() {
+    public List<AppDataJobFileDto> getRaws1() {
         return raws1;
     }
 
@@ -167,14 +205,14 @@ public class AppDataJobProductDto {
      * @param raws1
      *            the raws1 to set
      */
-    public void setRaws1(final List<String> raws1) {
+    public void setRaws1(final List<AppDataJobFileDto> raws1) {
         this.raws1 = raws1;
     }
 
     /**
      * @return the raws2
      */
-    public List<String> getRaws2() {
+    public List<AppDataJobFileDto> getRaws2() {
         return raws2;
     }
 
@@ -182,7 +220,7 @@ public class AppDataJobProductDto {
      * @param raws2
      *            the raws2 to set
      */
-    public void setRaws2(final List<String> raws2) {
+    public void setRaws2(final List<AppDataJobFileDto> raws2) {
         this.raws2 = raws2;
     }
 
@@ -202,14 +240,122 @@ public class AppDataJobProductDto {
     }
 
     /**
+     * @return the insConfId
+     */
+    public int getInsConfId() {
+        return insConfId;
+    }
+
+    /**
+     * @param insConfId
+     *            the insConfId to set
+     */
+    public void setInsConfId(final int insConfId) {
+        this.insConfId = insConfId;
+    }
+
+    /**
+     * @return the productType
+     */
+    public String getProductType() {
+        return productType;
+    }
+
+    /**
+     * @param productType
+     *            the productType to set
+     */
+    public void setProductType(final String productType) {
+        this.productType = productType;
+    }
+
+    /**
+     * @return the dataTakeId
+     */
+    public String getDataTakeId() {
+        return dataTakeId;
+    }
+
+    /**
+     * @param dataTakeId
+     *            the dataTakeId to set
+     */
+    public void setDataTakeId(final String dataTakeId) {
+        this.dataTakeId = dataTakeId;
+    }
+
+    /**
+     * @return the numberSlice
+     */
+    public int getNumberSlice() {
+        return numberSlice;
+    }
+
+    /**
+     * @param numberSlice
+     *            the numberSlice to set
+     */
+    public void setNumberSlice(final int numberSlice) {
+        this.numberSlice = numberSlice;
+    }
+
+    /**
+     * @return the totalNbOfSlice
+     */
+    public int getTotalNbOfSlice() {
+        return totalNbOfSlice;
+    }
+
+    /**
+     * @param totalNbOfSlice
+     *            the totalNbOfSlice to set
+     */
+    public void setTotalNbOfSlice(final int totalNbOfSlice) {
+        this.totalNbOfSlice = totalNbOfSlice;
+    }
+
+    /**
+     * @return the segmentStartDate
+     */
+    public String getSegmentStartDate() {
+        return segmentStartDate;
+    }
+
+    /**
+     * @param segmentStartDate
+     *            the segmentStartDate to set
+     */
+    public void setSegmentStartDate(final String segmentStartDate) {
+        this.segmentStartDate = segmentStartDate;
+    }
+
+    /**
+     * @return the segmentStopDate
+     */
+    public String getSegmentStopDate() {
+        return segmentStopDate;
+    }
+
+    /**
+     * @param segmentStopDate
+     *            the segmentStopDate to set
+     */
+    public void setSegmentStopDate(final String segmentStopDate) {
+        this.segmentStopDate = segmentStopDate;
+    }
+
+    /*
+     * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return String.format(
-                "{sessionId: %s, productName: %s, satelliteId: %s, missionId: %s, startTime: %s, stopTime: %s, raws1: %s, raws2: %s, acquisition: %s}",
+                "{sessionId: %s, productName: %s, satelliteId: %s, missionId: %s, startTime: %s, stopTime: %s, insConfId: %s, productType: %s, raws1: %s, raws2: %s, acquisition: %s, dataTakeId: %s, numberSlice: %s, totalNbOfSlice: %s, segmentStartDate: %s, segmentStopDate: %s}",
                 sessionId, productName, satelliteId, missionId, startTime,
-                stopTime, raws1, raws2, acquisition);
+                stopTime, insConfId, productType, raws1, raws2, acquisition,
+                dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate,
+                segmentStopDate);
     }
 
     /**
@@ -218,7 +364,9 @@ public class AppDataJobProductDto {
     @Override
     public int hashCode() {
         return Objects.hash(sessionId, productName, satelliteId, missionId,
-                startTime, stopTime, raws1, raws2, acquisition);
+                startTime, stopTime, insConfId, productType, raws1, raws2,
+                acquisition, dataTakeId, numberSlice, totalNbOfSlice,
+                segmentStartDate, segmentStopDate);
     }
 
     /**
@@ -239,9 +387,16 @@ public class AppDataJobProductDto {
                     && Objects.equals(missionId, other.missionId)
                     && Objects.equals(startTime, other.startTime)
                     && Objects.equals(stopTime, other.stopTime)
+                    && insConfId == other.insConfId
+                    && Objects.equals(productType, other.productType)
                     && Objects.equals(raws1, other.raws1)
                     && Objects.equals(raws2, other.raws2)
-                    && Objects.equals(acquisition, other.acquisition);
+                    && Objects.equals(acquisition, other.acquisition)
+                    && Objects.equals(dataTakeId, other.dataTakeId)
+                    && numberSlice == other.numberSlice
+                    && totalNbOfSlice == other.totalNbOfSlice
+                    && Objects.equals(segmentStartDate, other.segmentStartDate)
+                    && Objects.equals(segmentStopDate, other.segmentStopDate);
         }
         return ret;
     }

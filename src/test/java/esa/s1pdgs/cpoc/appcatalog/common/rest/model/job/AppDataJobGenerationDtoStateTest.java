@@ -14,10 +14,16 @@ public class AppDataJobGenerationDtoStateTest {
      */
     @Test
     public void basic() {
-        assertEquals(1, AppDataJobGenerationDtoState.values().length);
+        assertEquals(4, AppDataJobGenerationDtoState.values().length);
 
-        assertEquals(AppDataJobGenerationDtoState.GENERATING,
-                AppDataJobGenerationDtoState.valueOf("GENERATING"));
+        assertEquals(AppDataJobGenerationDtoState.INITIAL,
+                AppDataJobGenerationDtoState.valueOf("INITIAL"));
+        assertEquals(AppDataJobGenerationDtoState.PRIMARY_CHECK,
+                AppDataJobGenerationDtoState.valueOf("PRIMARY_CHECK"));
+        assertEquals(AppDataJobGenerationDtoState.READY,
+                AppDataJobGenerationDtoState.valueOf("READY"));
+        assertEquals(AppDataJobGenerationDtoState.SENT,
+                AppDataJobGenerationDtoState.valueOf("SENT"));
     }
 
 }

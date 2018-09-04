@@ -35,8 +35,17 @@ public class AppDataJobProductDtoTest {
         obj.setAcquisition("EW");
         obj.setStartTime(new Date());
         obj.setStopTime(new Date());
-        obj.setRaws1(Arrays.asList("message1", "message2"));
-        obj.setRaws2(Arrays.asList("gen1", "gen2", "gen3"));
+        obj.setRaws1(Arrays.asList(new AppDataJobFileDto("message1"),
+                new AppDataJobFileDto("message2")));
+        obj.setRaws2(Arrays.asList(new AppDataJobFileDto("gen1"),
+                new AppDataJobFileDto("gen2"), new AppDataJobFileDto("gen3")));
+        obj.setDataTakeId("datatake-id");
+        obj.setInsConfId(4);
+        obj.setNumberSlice(125);
+        obj.setTotalNbOfSlice(1425);
+        obj.setProductType("product-type");
+        obj.setSegmentStartDate("2018-12-12T21:25:12");
+        obj.setSegmentStopDate("2018-12-12T21:28:12");
 
         // check setters
         assertNotNull(obj.getStartTime());
@@ -46,6 +55,13 @@ public class AppDataJobProductDtoTest {
         assertEquals("B", obj.getSatelliteId());
         assertEquals("S1", obj.getMissionId());
         assertEquals("EW", obj.getAcquisition());
+        assertEquals("datatake-id", obj.getDataTakeId());
+        assertEquals(4, obj.getInsConfId());
+        assertEquals(125, obj.getNumberSlice());
+        assertEquals(1425, obj.getTotalNbOfSlice());
+        assertEquals("product-type", obj.getProductType());
+        assertEquals("2018-12-12T21:25:12", obj.getSegmentStartDate());
+        assertEquals("2018-12-12T21:28:12", obj.getSegmentStopDate());
 
         // check toString
         String str = obj.toString();
@@ -57,9 +73,18 @@ public class AppDataJobProductDtoTest {
         assertTrue(str.contains("stopTime: "));
         assertTrue(str.contains("acquisition: EW"));
         assertTrue(str.contains(
-                "raws1: " + Arrays.asList("message1", "message2").toString()));
-        assertTrue(str.contains(
-                "raws2: " + Arrays.asList("gen1", "gen2", "gen3").toString()));
+                "raws1: " + Arrays.asList(new AppDataJobFileDto("message1"),
+                        new AppDataJobFileDto("message2"))));
+        assertTrue(str.contains("raws2: " + Arrays.asList(
+                new AppDataJobFileDto("gen1"), new AppDataJobFileDto("gen2"),
+                new AppDataJobFileDto("gen3"))));
+        assertTrue(str.contains("dataTakeId: datatake-id"));
+        assertTrue(str.contains("insConfId: 4"));
+        assertTrue(str.contains("numberSlice: 125"));
+        assertTrue(str.contains("totalNbOfSlice: 1425"));
+        assertTrue(str.contains("productType: product-type"));
+        assertTrue(str.contains("segmentStartDate: 2018-12-12T21:25:12"));
+        assertTrue(str.contains("segmentStopDate: 2018-12-12T21:28:12"));
     }
 
     /**
