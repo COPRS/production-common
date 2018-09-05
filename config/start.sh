@@ -1,3 +1,3 @@
 /bin/sh
-wget $externalconf_host/template_l1_wrapper_pod.yml -P /app/config/
+wget --cut-dirs=1 --no-parent -nH -r $externalconf_host/scaler/ -P /app --reject="index.html*"
 java -Djava.security.egd=file:/dev/./urandom -jar /app/s1pdgs-scaler.jar --spring.config.location=classpath:/application.yml
