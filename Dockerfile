@@ -11,6 +11,6 @@ RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 FROM openjdk:8-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/s1pdgs-ingestor-1.0.0.jar s1pdgs-ingestor.jar
-COPY /config/log/log4j2.yml log4j2.yml
-COPY /src/main/resources/application.yml application.yml
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app/s1pdgs-ingestor.jar", "--spring.config.location=classpath:/application.yml"]
+RUN apk update && apk add wget
+COPY /config/start.sh start.sh
+ENTRYPOINT "/bin/sh" "-c" "/app/start.sh"
