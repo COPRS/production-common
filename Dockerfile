@@ -12,9 +12,8 @@ RUN mkdir /app/tmp/ && \
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
-RUN mkdir /data/ && \
-	mkdir /data/sessions/ 
+RUN mkdir -p /data/sessions/ 
+RUN apk update && apk add wget
 COPY --from=build /app/target/s1pdgs-job-generator-2.0.0.jar s1pdgs-job-generator.jar
-COPY /config/log/log4j2.yml log4j2.yml
-COPY /src/main/resources/application.yml application.yml
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app/s1pdgs-job-generator.jar"]
+COPY /config/start.sh start.sh
+ENTRYPOINT "/bin/sh" "-c" "/app/start.sh"
