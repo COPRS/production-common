@@ -53,7 +53,7 @@ public class AppDataJobFileDto {
     /**
      * @param filename the filename to set
      */
-    public void setFilename(String filename) {
+    public void setFilename(final String filename) {
         this.filename = filename;
     }
 

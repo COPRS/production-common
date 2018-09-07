@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MqiPublicationError.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.common.errors.mqi</a> &gt; <span class="el_source">MqiPublicationError.java</span></div><h1>MqiPublicationError.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.common.errors.mqi;
+
+import esa.s1pdgs.cpoc.common.ResumeDetails;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+
+/**
+ * @author Viveris Technologies
+ */
+public class MqiPublicationError extends AbstractCodedException {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8248616873024871315L;
+
+    /**
+     * Name of the topic
+     */
+    private final String topic;
+
+    /**
+     * Name of the product
+     */
+    private final String productName;
+
+    /**
+     * DTO to publish
+     */
+    private final Object dto;
+
+    /**
+     * @param topic
+     * @param productName
+     * @param message
+     * @param e
+     */
+    public MqiPublicationError(final String topic, final Object dto,
+            final String productName, final String message,
+            final Throwable cause) {
+<span class="fc" id="L40">        super(ErrorCode.MQI_PUBLICATION_ERROR, message, cause);</span>
+<span class="fc" id="L41">        this.topic = topic;</span>
+<span class="fc" id="L42">        this.productName = productName;</span>
+<span class="fc" id="L43">        this.dto = dto;</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * @return the topic
+     */
+    public String getTopic() {
+<span class="fc" id="L50">        return topic;</span>
+    }
+
+    /**
+     * @return the productName
+     */
+    public String getProductName() {
+<span class="fc" id="L57">        return productName;</span>
+    }
+
+    /**
+     * @return the dto
+     */
+    public Object getDto() {
+<span class="fc" id="L64">        return dto;</span>
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public String getLogMessage() {
+<span class="fc" id="L72">        return String.format(&quot;[resuming %s] [productName %s] [msg %s]&quot;,</span>
+<span class="fc" id="L73">                new ResumeDetails(topic, dto), productName, getMessage());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

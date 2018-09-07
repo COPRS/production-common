@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LevelJobDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.model.queue</a> &gt; <span class="el_source">LevelJobDto.java</span></div><h1>LevelJobDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.model.queue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+/**
+ * Exchanged object for the product category LevelJobs.
+ * 
+ * @author Viveris Technologies
+ */
+public class LevelJobDto {
+
+    /**
+     * Family name
+     */
+    private ProductFamily family;
+
+    /**
+     * Session identifier
+     */
+    private String productIdentifier;
+
+    /**
+     * Local work directory for launching the job
+     */
+    private String workDirectory;
+
+    /**
+     * Local path to the job order
+     */
+    private String jobOrder;
+
+    /**
+     * List of inputs needed to execute the job.&lt;br/&gt;
+     * They contain the absolute name on the target host and where we can find
+     * the file according the input family
+     */
+    private List&lt;LevelJobInputDto&gt; inputs;
+
+    /**
+     * List information needed to validate the outputs of the job and share them
+     */
+    private List&lt;LevelJobOutputDto&gt; outputs;
+
+    /**
+     * List the tasks to be executed for processing the job grouped by
+     * pools.&lt;br/&gt;
+     * The pools shall be executed one after one if the previous execution is ok
+     */
+    private List&lt;LevelJobPoolDto&gt; pools;
+
+    /**
+     * Default constructor
+     */
+<span class="fc" id="L58">    public LevelJobDto() {</span>
+<span class="fc" id="L59">        this.inputs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L60">        this.outputs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L61">        this.pools = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L62">    }</span>
+
+    /**
+     * Constructor from session identifier
+     */
+    public LevelJobDto(final ProductFamily family,
+            final String productIdentifier, final String workDirectory,
+            final String jobOrder) {
+<span class="fc" id="L70">        this();</span>
+<span class="fc" id="L71">        this.family = family;</span>
+<span class="fc" id="L72">        this.productIdentifier = productIdentifier;</span>
+<span class="fc" id="L73">        this.workDirectory = workDirectory;</span>
+<span class="fc" id="L74">        this.jobOrder = jobOrder;</span>
+<span class="fc" id="L75">    }</span>
+
+    /**
+     * @return the family
+     */
+    public ProductFamily getFamily() {
+<span class="fc" id="L81">        return family;</span>
+    }
+
+    /**
+     * @param family
+     *            the family to set
+     */
+    public void setFamily(final ProductFamily family) {
+<span class="fc" id="L89">        this.family = family;</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * @return the productIdentifier
+     */
+    public String getProductIdentifier() {
+<span class="fc" id="L96">        return productIdentifier;</span>
+    }
+
+    /**
+     * @param productIdentifier
+     *            the productIdentifier to set
+     */
+    public void setProductIdentifier(final String productIdentifier) {
+<span class="fc" id="L104">        this.productIdentifier = productIdentifier;</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * @return the workDirectory
+     */
+    public String getWorkDirectory() {
+<span class="fc" id="L111">        return workDirectory;</span>
+    }
+
+    /**
+     * @param workDirectory
+     *            the workDirectory to set
+     */
+    public void setWorkDirectory(final String workDirectory) {
+<span class="fc" id="L119">        this.workDirectory = workDirectory;</span>
+<span class="fc" id="L120">    }</span>
+
+    /**
+     * @return the jobOrder
+     */
+    public String getJobOrder() {
+<span class="fc" id="L126">        return jobOrder;</span>
+    }
+
+    /**
+     * @param jobOrder
+     *            the jobOrder to set
+     */
+    public void setJobOrder(final String jobOrder) {
+<span class="fc" id="L134">        this.jobOrder = jobOrder;</span>
+<span class="fc" id="L135">    }</span>
+
+    /**
+     * @return the inputs
+     */
+    public List&lt;LevelJobInputDto&gt; getInputs() {
+<span class="fc" id="L141">        return inputs;</span>
+    }
+
+    /**
+     * @param inputs
+     *            the inputs to set
+     */
+    public void setInputs(final List&lt;LevelJobInputDto&gt; inputs) {
+<span class="fc" id="L149">        this.inputs = inputs;</span>
+<span class="fc" id="L150">    }</span>
+
+    /**
+     * @param input
+     *            the input to set
+     */
+    public void addInput(final LevelJobInputDto input) {
+<span class="fc" id="L157">        this.inputs.add(input);</span>
+<span class="fc" id="L158">    }</span>
+
+    /**
+     * @param inputs
+     *            the inputs to set
+     */
+    public void addInputs(final List&lt;LevelJobInputDto&gt; inputs) {
+<span class="nc" id="L165">        this.inputs.addAll(inputs);</span>
+<span class="nc" id="L166">    }</span>
+
+    
+    /**
+     * @return the outputs
+     */
+    public List&lt;LevelJobOutputDto&gt; getOutputs() {
+<span class="fc" id="L173">        return outputs;</span>
+    }
+
+    /**
+     * @param outputs
+     *            the outputs to set
+     */
+    public void setOutputs(final List&lt;LevelJobOutputDto&gt; outputs) {
+<span class="fc" id="L181">        this.outputs = outputs;</span>
+<span class="fc" id="L182">    }</span>
+
+    /**
+     * @param output
+     *            the output to set
+     */
+    public void addOutput(final LevelJobOutputDto output) {
+<span class="fc" id="L189">        this.outputs.add(output);</span>
+<span class="fc" id="L190">    }</span>
+
+    /**
+     * @param outputs
+     *            the outputs to set
+     */
+    public void addOutputs(final List&lt;LevelJobOutputDto&gt; outputs) {
+<span class="nc" id="L197">        this.outputs.addAll(outputs);</span>
+<span class="nc" id="L198">    }</span>
+
+    
+    /**
+     * @return the pools
+     */
+    public List&lt;LevelJobPoolDto&gt; getPools() {
+<span class="fc" id="L205">        return pools;</span>
+    }
+
+    /**
+     * @param pools
+     *            the pools to set
+     */
+    public void setPools(final List&lt;LevelJobPoolDto&gt; pools) {
+<span class="fc" id="L213">        this.pools = pools;</span>
+<span class="fc" id="L214">    }</span>
+
+    /**
+     * @param pools
+     *            the pools to set
+     */
+    public void addPool(final LevelJobPoolDto pool) {
+<span class="fc" id="L221">        this.pools.add(pool);</span>
+<span class="fc" id="L222">    }</span>
+
+    /**
+     * to string
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L229">        return String.format(</span>
+                &quot;{family: %s, productIdentifier: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s}&quot;,
+                family, productIdentifier, workDirectory, jobOrder, inputs,
+                outputs, pools);
+    }
+
+    /**
+     * hash code
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L240">        return Objects.hash(family, productIdentifier, workDirectory, jobOrder,</span>
+                inputs, outputs, pools);
+    }
+
+    /**
+     * equals
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L251">            ret = true;</span>
+<span class="fc bfc" id="L252" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L253">            ret = false;</span>
+        } else {
+<span class="fc" id="L255">            LevelJobDto other = (LevelJobDto) obj;</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">            ret = Objects.equals(family, other.family)</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productIdentifier,</span>
+                            other.productIdentifier)
+<span class="fc bfc" id="L259" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(workDirectory, other.workDirectory)</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(jobOrder, other.jobOrder)</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(inputs, other.inputs)</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(outputs, other.outputs)</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(pools, other.pools);</span>
+        }
+<span class="fc" id="L265">        return ret;</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

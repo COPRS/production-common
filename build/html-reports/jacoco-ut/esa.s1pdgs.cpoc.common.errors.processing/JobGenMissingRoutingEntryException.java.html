@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>JobGenMissingRoutingEntryException.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.common.errors.processing</a> &gt; <span class="el_source">JobGenMissingRoutingEntryException.java</span></div><h1>JobGenMissingRoutingEntryException.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.common.errors.processing;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+
+/**
+ * 
+ * @author Viveris Technologies
+ *
+ */
+public class JobGenMissingRoutingEntryException extends AbstractCodedException {
+
+    private static final long serialVersionUID = -191284916049233409L;
+
+    /**
+     * @param message
+     */
+    public JobGenMissingRoutingEntryException(final String message) {
+<span class="fc" id="L18">        super(ErrorCode.MISSING_ROUTING_ENTRY, message);</span>
+<span class="fc" id="L19">    }</span>
+
+    /**
+     * 
+     */
+    @Override
+    public String getLogMessage() {
+<span class="fc" id="L26">        return String.format(&quot;[msg %s]&quot;, getMessage());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

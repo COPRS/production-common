@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MqiLightMessageDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.rest</a> &gt; <span class="el_source">MqiLightMessageDto.java</span></div><h1>MqiLightMessageDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.rest;
+
+import java.util.Date;
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+/**
+ * Message object (without the kafka dto) used by the REST applicative catalog
+ * 
+ * @author Viveris Technologies
+ */
+public class MqiLightMessageDto {
+
+    /**
+     * Category
+     */
+    protected ProductCategory category;
+
+    /**
+     * Identifier
+     */
+    protected long identifier;
+
+    /**
+     * Topic name
+     */
+    protected String topic;
+
+    /**
+     * Partition identifier
+     */
+    protected int partition;
+
+    /**
+     * Offset in Kafka
+     */
+    protected long offset;
+
+    /**
+     * Group name
+     */
+    protected String group;
+
+    /**
+     * State of the message
+     */
+    protected MqiStateMessageEnum state;
+
+    /**
+     * Pod name who is reading the message
+     */
+    protected String readingPod;
+
+    /**
+     * Date of the last read
+     */
+    protected Date lastReadDate;
+
+    /**
+     * Pod name who is sending the message
+     */
+    protected String sendingPod;
+
+    /**
+     * Date of the last send
+     */
+    protected Date lastSendDate;
+
+    /**
+     * Date of the last ack
+     */
+    protected Date lastAckDate;
+
+    /**
+     * Number of retries
+     */
+    protected int nbRetries;
+    
+    /**
+     * Date of creation
+     */
+    protected Date creationDate;
+
+    /**
+     * Default constructor
+     */
+    public MqiLightMessageDto() {
+<span class="fc" id="L89">        super();</span>
+<span class="fc" id="L90">        this.nbRetries = 0;</span>
+<span class="fc" id="L91">        this.state = MqiStateMessageEnum.READ;</span>
+<span class="fc" id="L92">    }</span>
+
+    /**
+     * @param category
+     */
+    public MqiLightMessageDto(final ProductCategory category) {
+<span class="fc" id="L98">        this();</span>
+<span class="fc" id="L99">        this.category = category;</span>
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * @param category
+     * @param identifier
+     * @param topic
+     * @param partition
+     * @param offset
+     */
+    public MqiLightMessageDto(final ProductCategory category,
+            final long identifier, final String topic, final int partition,
+            final long offset) {
+<span class="fc" id="L112">        this(category);</span>
+<span class="fc" id="L113">        this.identifier = identifier;</span>
+<span class="fc" id="L114">        this.topic = topic;</span>
+<span class="fc" id="L115">        this.partition = partition;</span>
+<span class="fc" id="L116">        this.offset = offset;</span>
+<span class="fc" id="L117">    }</span>
+
+    /**
+     * @return the category
+     */
+    public ProductCategory getCategory() {
+<span class="fc" id="L123">        return category;</span>
+    }
+
+    /**
+     * @param category
+     *            the category to set
+     */
+    public void setCategory(final ProductCategory category) {
+<span class="fc" id="L131">        this.category = category;</span>
+<span class="fc" id="L132">    }</span>
+
+    /**
+     * @return the identifier
+     */
+    public long getIdentifier() {
+<span class="fc" id="L138">        return identifier;</span>
+    }
+
+    /**
+     * @param identifier
+     *            the identifier to set
+     */
+    public void setIdentifier(final long identifier) {
+<span class="fc" id="L146">        this.identifier = identifier;</span>
+<span class="fc" id="L147">    }</span>
+
+    /**
+     * @return the topic
+     */
+    public String getTopic() {
+<span class="fc" id="L153">        return topic;</span>
+    }
+
+    /**
+     * @param topic
+     *            the topic to set
+     */
+    public void setTopic(final String topic) {
+<span class="fc" id="L161">        this.topic = topic;</span>
+<span class="fc" id="L162">    }</span>
+
+    /**
+     * @return the partition
+     */
+    public int getPartition() {
+<span class="fc" id="L168">        return partition;</span>
+    }
+
+    /**
+     * @param partition
+     *            the partition to set
+     */
+    public void setPartition(final int partition) {
+<span class="fc" id="L176">        this.partition = partition;</span>
+<span class="fc" id="L177">    }</span>
+
+    /**
+     * @return the offset
+     */
+    public long getOffset() {
+<span class="fc" id="L183">        return offset;</span>
+    }
+
+    /**
+     * @param offset
+     *            the offset to set
+     */
+    public void setOffset(final long offset) {
+<span class="fc" id="L191">        this.offset = offset;</span>
+<span class="fc" id="L192">    }</span>
+
+    /**
+     * @return the group
+     */
+    public String getGroup() {
+<span class="fc" id="L198">        return group;</span>
+    }
+
+    /**
+     * @param group
+     *            the group to set
+     */
+    public void setGroup(final String group) {
+<span class="fc" id="L206">        this.group = group;</span>
+<span class="fc" id="L207">    }</span>
+
+    /**
+     * @return the state
+     */
+    public MqiStateMessageEnum getState() {
+<span class="fc" id="L213">        return state;</span>
+    }
+
+    /**
+     * @param state
+     *            the state to set
+     */
+    public void setState(final MqiStateMessageEnum state) {
+<span class="fc" id="L221">        this.state = state;</span>
+<span class="fc" id="L222">    }</span>
+
+    /**
+     * @return the readingPod
+     */
+    public String getReadingPod() {
+<span class="fc" id="L228">        return readingPod;</span>
+    }
+
+    /**
+     * @param readingPod
+     *            the readingPod to set
+     */
+    public void setReadingPod(final String readingPod) {
+<span class="fc" id="L236">        this.readingPod = readingPod;</span>
+<span class="fc" id="L237">    }</span>
+
+    /**
+     * @return the lastReadDate
+     */
+    public Date getLastReadDate() {
+<span class="fc" id="L243">        return lastReadDate;</span>
+    }
+
+    /**
+     * @param lastReadDate
+     *            the lastReadDate to set
+     */
+    public void setLastReadDate(final Date lastReadDate) {
+<span class="fc" id="L251">        this.lastReadDate = lastReadDate;</span>
+<span class="fc" id="L252">    }</span>
+
+    /**
+     * @return the sendingPod
+     */
+    public String getSendingPod() {
+<span class="fc" id="L258">        return sendingPod;</span>
+    }
+
+    /**
+     * @param sendingPod
+     *            the sendingPod to set
+     */
+    public void setSendingPod(final String sendingPod) {
+<span class="fc" id="L266">        this.sendingPod = sendingPod;</span>
+<span class="fc" id="L267">    }</span>
+
+    /**
+     * @return the lastSendDate
+     */
+    public Date getLastSendDate() {
+<span class="fc" id="L273">        return lastSendDate;</span>
+    }
+
+    /**
+     * @param lastSendDate
+     *            the lastSendDate to set
+     */
+    public void setLastSendDate(final Date lastSendDate) {
+<span class="fc" id="L281">        this.lastSendDate = lastSendDate;</span>
+<span class="fc" id="L282">    }</span>
+
+    /**
+     * @return the lastAckDate
+     */
+    public Date getLastAckDate() {
+<span class="fc" id="L288">        return lastAckDate;</span>
+    }
+
+    /**
+     * @param lastAckDate
+     *            the lastAckDate to set
+     */
+    public void setLastAckDate(final Date lastAckDate) {
+<span class="fc" id="L296">        this.lastAckDate = lastAckDate;</span>
+<span class="fc" id="L297">    }</span>
+
+    /**
+     * @return the nbRetries
+     */
+    public int getNbRetries() {
+<span class="fc" id="L303">        return nbRetries;</span>
+    }
+
+    /**
+     * @param nbRetries
+     *            the nbRetries to set
+     */
+    public void setNbRetries(final int nbRetries) {
+<span class="fc" id="L311">        this.nbRetries = nbRetries;</span>
+<span class="fc" id="L312">    }</span>
+
+    /**
+     * @return the creationDate
+     */
+    public Date getCreationDate() {
+<span class="nc" id="L318">        return creationDate;</span>
+    }
+
+    /**
+     * @param creationDate the creationDate to set
+     */
+    public void setCreationDate(final Date creationDate) {
+<span class="nc" id="L325">        this.creationDate = creationDate;</span>
+<span class="nc" id="L326">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L333">        return String.format(&quot;{%s}&quot;, toStringForExtend());</span>
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toStringForExtend() {
+<span class="fc" id="L340">        return String.format(</span>
+                &quot;category: %s, identifier: %s, topic: %s, partition: %s, offset: %s, group: %s, state: %s, readingPod: %s, lastReadDate: %s, sendingPod: %s, lastSendDate: %s, lastAckDate: %s, nbRetries: %s, creationDate: %s&quot;,
+<span class="fc" id="L342">                category, identifier, topic, partition, offset, group, state,</span>
+                readingPod, lastReadDate, sendingPod, lastSendDate, lastAckDate,
+<span class="fc" id="L344">                nbRetries, creationDate);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L352">        return Objects.hash(category, identifier, topic, partition, offset,</span>
+                group, state, readingPod, lastReadDate, sendingPod,
+<span class="fc" id="L354">                lastSendDate, lastAckDate, nbRetries, creationDate);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L363" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L364">            ret = true;</span>
+<span class="fc bfc" id="L365" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L366">            ret = false;</span>
+        } else {
+<span class="fc" id="L368">            MqiLightMessageDto other = (MqiLightMessageDto) obj;</span>
+<span class="fc bfc" id="L369" title="All 4 branches covered.">            ret = Objects.equals(category, other.category)</span>
+                    &amp;&amp; identifier == other.identifier
+<span class="fc bfc" id="L371" title="All 6 branches covered.">                    &amp;&amp; Objects.equals(topic, other.topic)</span>
+                    &amp;&amp; partition == other.partition &amp;&amp; offset == other.offset
+<span class="fc bfc" id="L373" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(group, other.group)</span>
+<span class="fc bfc" id="L374" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(state, other.state)</span>
+<span class="fc bfc" id="L375" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(readingPod, other.readingPod)</span>
+<span class="fc bfc" id="L376" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(lastReadDate, other.lastReadDate)</span>
+<span class="fc bfc" id="L377" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(sendingPod, other.sendingPod)</span>
+<span class="fc bfc" id="L378" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(lastSendDate, other.lastSendDate)</span>
+<span class="fc bfc" id="L379" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(lastAckDate, other.lastAckDate)</span>
+<span class="fc bfc" id="L380" title="All 4 branches covered.">                    &amp;&amp; Objects.equals(creationDate, other.creationDate)</span>
+                    &amp;&amp; nbRetries == other.nbRetries;
+        }
+<span class="fc" id="L383">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

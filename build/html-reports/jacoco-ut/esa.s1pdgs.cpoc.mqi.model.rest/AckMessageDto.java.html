@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AckMessageDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.model.rest</a> &gt; <span class="el_source">AckMessageDto.java</span></div><h1>AckMessageDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.model.rest;
+
+import java.util.Objects;
+
+/**
+ * Exchange message for ack API
+ * 
+ * @author Viveris Technologies
+ */
+public class AckMessageDto {
+
+    /**
+     * Message identifier
+     */
+    private long messageId;
+
+    /**
+     * Acknowledgment
+     */
+    private Ack ack;
+
+    /**
+     * Message to publish in case of error
+     */
+    private String message;
+
+    /**
+     * True indicates that the consuming application will be stopped so the MQI
+     * shall be stopped to
+     */
+    private boolean stop;
+
+    /**
+     * 
+     */
+<span class="fc" id="L36">    public AckMessageDto() {</span>
+<span class="fc" id="L37">        messageId = 0;</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * @param messageId
+     * @param ack
+     * @param message
+     */
+    public AckMessageDto(final long messageId, final Ack ack,
+            final String message, final boolean stop) {
+<span class="fc" id="L47">        super();</span>
+<span class="fc" id="L48">        this.messageId = messageId;</span>
+<span class="fc" id="L49">        this.ack = ack;</span>
+<span class="fc" id="L50">        this.message = message;</span>
+<span class="fc" id="L51">        this.stop = stop;</span>
+<span class="fc" id="L52">    }</span>
+
+    /**
+     * @return the messageId
+     */
+    public long getMessageId() {
+<span class="fc" id="L58">        return messageId;</span>
+    }
+
+    /**
+     * @param messageId
+     *            the messageId to set
+     */
+    public void setMessageId(final long messageId) {
+<span class="fc" id="L66">        this.messageId = messageId;</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * @return the ack
+     */
+    public Ack getAck() {
+<span class="fc" id="L73">        return ack;</span>
+    }
+
+    /**
+     * @param ack
+     *            the ack to set
+     */
+    public void setAck(final Ack ack) {
+<span class="fc" id="L81">        this.ack = ack;</span>
+<span class="fc" id="L82">    }</span>
+
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+<span class="fc" id="L88">        return message;</span>
+    }
+
+    /**
+     * @param message
+     *            the message to set
+     */
+    public void setMessage(final String message) {
+<span class="fc" id="L96">        this.message = message;</span>
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * @return the stop
+     */
+    public boolean isStop() {
+<span class="fc" id="L103">        return stop;</span>
+    }
+
+    /**
+     * @param stop
+     *            the stop to set
+     */
+    public void setStop(final boolean stop) {
+<span class="fc" id="L111">        this.stop = stop;</span>
+<span class="fc" id="L112">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L119">        return String.format(&quot;{messageId: %s, ack: %s, message: %s, stop: %s}&quot;,</span>
+<span class="fc" id="L120">                messageId, ack, message, stop);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L128">        return Objects.hash(messageId, ack, message, stop);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L138">            ret = true;</span>
+<span class="fc bfc" id="L139" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L140">            ret = false;</span>
+        } else {
+<span class="fc" id="L142">            AckMessageDto other = (AckMessageDto) obj;</span>
+<span class="fc bfc" id="L143" title="All 4 branches covered.">            ret = messageId == other.messageId &amp;&amp; Objects.equals(ack, other.ack)</span>
+<span class="fc bfc" id="L144" title="All 4 branches covered.">                    &amp;&amp; Objects.equals(message, other.message)</span>
+                    &amp;&amp; stop == other.stop;
+        }
+<span class="fc" id="L147">        return ret;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

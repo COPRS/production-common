@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>EdrsSessionDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.model.queue</a> &gt; <span class="el_source">EdrsSessionDto.java</span></div><h1>EdrsSessionDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.model.queue;
+
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+
+/**
+ * DTO object used to transfer EDRS session files between MQI and application
+ * 
+ * @author Viveris technologies
+ */
+public class EdrsSessionDto {
+
+    /**
+     * Key in OBS
+     */
+    private String objectStorageKey;
+
+    /**
+     * Channel identifier
+     */
+    private int channelId;
+
+    /**
+     * Type of the EDRS session file: raw or XML file
+     */
+    private EdrsSessionFileType productType;
+
+    /**
+     * Satellite identifier
+     */
+    private String satelliteId;
+
+    /**
+     * Mission identifier
+     */
+    private String missionId;
+    
+    /**
+     * Default constructor
+     */
+    public EdrsSessionDto() {
+<span class="fc" id="L43">        super();</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * Default constructor
+     */
+    public EdrsSessionDto(final String objectStorageKey, final int channelId,
+            final EdrsSessionFileType productType, final String missionId,
+<span class="fc" id="L51">            final String satelliteId) {</span>
+<span class="fc" id="L52">        this.objectStorageKey = objectStorageKey;</span>
+<span class="fc" id="L53">        this.channelId = channelId;</span>
+<span class="fc" id="L54">        this.productType = productType;</span>
+<span class="fc" id="L55">        this.missionId = missionId;</span>
+<span class="fc" id="L56">        this.satelliteId = satelliteId;</span>
+<span class="fc" id="L57">    }</span>
+
+    /**
+     * @return the objectStorageKey
+     */
+    public String getObjectStorageKey() {
+<span class="fc" id="L63">        return objectStorageKey;</span>
+    }
+
+    /**
+     * @param objectStorageKey
+     *            the objectStorageKey to set
+     */
+    public void setObjectStorageKey(final String objectStorageKey) {
+<span class="fc" id="L71">        this.objectStorageKey = objectStorageKey;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * @return the channelId
+     */
+    public int getChannelId() {
+<span class="fc" id="L78">        return channelId;</span>
+    }
+
+    /**
+     * @param channelId
+     *            the channelId to set
+     */
+    public void setChannelId(final int channelId) {
+<span class="fc" id="L86">        this.channelId = channelId;</span>
+<span class="fc" id="L87">    }</span>
+
+    /**
+     * @return the productType
+     */
+    public EdrsSessionFileType getProductType() {
+<span class="fc" id="L93">        return productType;</span>
+    }
+
+    /**
+     * @param productType
+     *            the productType to set
+     */
+    public void setProductType(final EdrsSessionFileType productType) {
+<span class="fc" id="L101">        this.productType = productType;</span>
+<span class="fc" id="L102">    }</span>
+
+    /**
+     * @return the satelliteId
+     */
+    public String getSatelliteId() {
+<span class="fc" id="L108">        return satelliteId;</span>
+    }
+
+    /**
+     * @param satelliteId
+     *            the satelliteId to set
+     */
+    public void setSatelliteId(final String satelliteId) {
+<span class="fc" id="L116">        this.satelliteId = satelliteId;</span>
+<span class="fc" id="L117">    }</span>
+
+    /**
+     * @return the missionId
+     */
+    public String getMissionId() {
+<span class="fc" id="L123">        return missionId;</span>
+    }
+
+    /**
+     * @param missionId
+     *            the missionId to set
+     */
+    public void setMissionId(final String missionId) {
+<span class="fc" id="L131">        this.missionId = missionId;</span>
+<span class="fc" id="L132">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L139">        return String.format(</span>
+                &quot;{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s}&quot;,
+<span class="fc" id="L141">                objectStorageKey, channelId, productType, satelliteId,</span>
+                missionId);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L150">        return Objects.hash(objectStorageKey, channelId, productType,</span>
+                satelliteId, missionId);
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L161">            ret = true;</span>
+<span class="fc bfc" id="L162" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L163">            ret = false;</span>
+        } else {
+<span class="fc" id="L165">            EdrsSessionDto other = (EdrsSessionDto) obj;</span>
+            // field comparison
+<span class="fc bfc" id="L167" title="All 4 branches covered.">            ret = Objects.equals(objectStorageKey, other.objectStorageKey)</span>
+                    &amp;&amp; channelId == other.channelId
+<span class="fc bfc" id="L169" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productType, other.productType)</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(satelliteId, other.satelliteId)</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(missionId, other.missionId);</span>
+        }
+<span class="fc" id="L173">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
