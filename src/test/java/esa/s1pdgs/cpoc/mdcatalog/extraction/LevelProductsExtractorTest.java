@@ -243,7 +243,8 @@ public class LevelProductsExtractorTest {
                 .buildL0SliceOutputFileMetadata(descriptor, file);
         JSONObject result = extractor.extractMetadata(inputMessageSafe);
         for (String key : expected.keySet()) {
-            if (!"insertionTime".equals(key) && !"sliceCoordinates".equals(key)) {
+            if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
+                    || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));
             }
         }
@@ -296,7 +297,8 @@ public class LevelProductsExtractorTest {
                 .buildL0SliceOutputFileMetadata(descriptor, file);
         JSONObject result = extractor.extractMetadata(inputMessageSafe);
         for (String key : expected.keySet()) {
-            if (!"insertionTime".equals(key) && !"sliceCoordinates".equals(key)) {
+            if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
+                    || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));
             }
         }
@@ -345,7 +347,8 @@ public class LevelProductsExtractorTest {
                 .buildL1SliceOutputFileMetadata(descriptor, file);
         JSONObject result = extractor.extractMetadata(inputMessageSafe);
         for (String key : expected.keySet()) {
-            if (!"insertionTime".equals(key) && !"sliceCoordinates".equals(key)) {
+            if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
+                    || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));
             }
         }
@@ -394,7 +397,8 @@ public class LevelProductsExtractorTest {
                 .buildL1SliceOutputFileMetadata(descriptor, file);
         JSONObject result = extractor.extractMetadata(inputMessageSafe);
         for (String key : expected.keySet()) {
-            if (!"insertionTime".equals(key) && !"sliceCoordinates".equals(key)) {
+            if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
+                    || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));
             }
         }
