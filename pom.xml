@@ -178,6 +178,7 @@
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
 					<includeTests>false</includeTests>
+					<outputDirectory>build/html-reports/</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>
@@ -227,7 +228,7 @@
 							<!-- Sets the path to the file which contains the execution data. -->
 							<dataFile>target/jacoco.exec</dataFile>
 							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>target/jacoco-ut</outputDirectory>
+							<outputDirectory>build/html-reports/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>

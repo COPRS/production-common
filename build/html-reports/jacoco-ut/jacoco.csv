@@ -1,0 +1,19 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.kafka,KafkaConfig,0,121,0,0,0,24,0,9,0,9
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.kafka,KafkaConfigFileProducer,0,8,0,0,0,3,0,2,0,2
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.kafka,KafkaSessionProducer,0,8,0,0,0,3,0,2,0,2
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.kafka,AbstractKafkaService,0,44,0,0,0,12,0,4,0,4
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.obs,ObsService.new Object() {...},2,17,0,0,0,1,0,1,0,1
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.obs,ObsService,0,66,0,3,0,20,0,6,0,4
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.obs,ObsConfig,0,5,0,0,0,2,0,2,0,2
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor,Application,0,8,0,0,0,3,0,2,0,2
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files.services,AbstractFileDescriptorService,0,55,0,4,0,14,0,6,0,4
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files.services,AuxiliaryFileDescriptorService,0,99,0,10,0,28,0,8,0,3
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files.services,EdrsSessionFileDescriptorService,0,91,0,4,0,23,0,5,0,3
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files,AbstractFileProcessor,8,168,1,7,4,55,1,6,0,3
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files,FileReaderConfig,0,207,0,0,0,52,0,11,0,11
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files,LocalDirectoryCleaning,11,127,4,14,3,31,4,11,0,6
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files,SessionFilesProcessor,0,21,0,0,0,4,0,2,0,2
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files,AuxiliaryFilesProcessor,0,15,0,0,0,4,0,2,0,2
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files.model.filter,ExclusionRegexpPatternFileListFilter,0,33,0,8,0,8,0,8,0,4
+Cloud POC ingestor,esa.s1pdgs.cpoc.ingestor.files.model,FileDescriptor,0,255,0,24,0,50,0,34,0,22

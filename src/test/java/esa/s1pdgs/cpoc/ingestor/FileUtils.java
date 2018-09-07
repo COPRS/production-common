@@ -11,7 +11,7 @@ public class FileUtils {
     /**
      * Path of the test directory
      */
-    public static final String TEST_DIR_PATH = "test";
+    public static final String TEST_DIR_PATH = "build";
 
     /**
      * Test directory
