@@ -56,7 +56,7 @@ level0:
   dir-extractor-sessions: ${l0_dir-extractor-sessions:/data/sessions/}
   
 level1:
-  pathroutingxmlfile: ${l1_pathroutingxmlfile:/data/config/l1_config/routing.xml}
+  pathroutingxmlfile: ${l1_pathroutingxmlfile:/app/l1_config/routing.xml}
   
 pattern-l0-slices:
   regexp: ${pattern-l0-slices_regexp:^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$}
