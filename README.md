@@ -48,19 +48,16 @@ See [obs-client](https://conf.geohub.space/wo7/obs-sdk) project
 ##### application.yml
 Below the parameters to configure for the production
 
-| First Header  | Second Header |
-| ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
-
-kafka.bootstrap-servers                the bootstrap servers for KAFKA
-kafka.group-id                       | the group identifier to use for KAFKA publishers
-kafka.poll-timeout                   | the bootstrap servers for KAFKA (example: kafka-svc:9092)
-kafka.producer-retries               | the maximal number of retries when publishing a message = parameter "retries" of KAFKA producer configuration
-kafka.topic.auxiliary-files          | the name of the topic used for the auxiliary files
-kafka.topic.edrs-sessions            | the name of the topic used for EDRS sessions
-
-	file.auxiliary-files.read-fixed-rate: The fixed rate in milliseconds to read configuration files on local directory (example: 1000)
-	file.auxiliary-files.read-fixed-rate: The fixed rate in milliseconds to read session files on local directory (example: 1000)
+| First Header                                     | Second Header |
+| ------------------------------------------------ | ------------- |
+| kafka.bootstrap-servers                          | the bootstrap servers for KAFKA
+| kafka.group-id                                   | the group identifier to use for KAFKA publishers
+| kafka.poll-timeout                               | the bootstrap servers for KAFKA (example: kafka-svc:9092)
+| kafka.producer-retries                           | the maximal number of retries when publishing a message = parameter "retries" of KAFKA producer configuration
+| kafka.topic.auxiliary-files                      | the name of the topic used for the auxiliary files
+| kafka.topic.edrs-sessions                        | the name of the topic used for EDRS sessions
+| file.auxiliary-files.read-fixed-rate             | the fixed rate in milliseconds to read configuration files on local directory (example: 1000)
+| file.auxiliary-files.read-fixed-rate             | the fixed rate in milliseconds to read configuration files on local directory (example: 1000)
+| file.auxiliary-files.read-fixed-rate             | the fixed rate in milliseconds to read session files on local directory (example: 1000)
 
 
