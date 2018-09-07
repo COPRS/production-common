@@ -41,11 +41,11 @@ This project depends on:
 
 ### Create a new version
 
-1 - Replace last version by the new one in pom.xml
-2 - Replace last version by the new one in Dockerfile
-3 - Add this version in the project [repo-maven-common](https://conf.geohub.space/wo7/repo-maven-common)
-3a - Add or update a existing pom file
-3b - Add a build from your version in the dockerfile
+1. Replace last version by the new one in pom.xml
+2. Replace last version by the new one in Dockerfile
+3. Add this version in the project [repo-maven-common](https://conf.geohub.space/wo7/repo-maven-common)
+   1. Add or update a existing pom file
+   2. Add a build from your version in the dockerfile
 
 ### Configuration
 
