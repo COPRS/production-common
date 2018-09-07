@@ -3,15 +3,15 @@ S1-PDGS Cloud POC common library
 
 The basic common Java objects, used by several components, are stored in this library. They are:
 * the objects exchanged between the applicative catalog server and client:
-** for MQI messages (applicative catalog client used by the MQI server)
-** for jobs (applicative catalog clioent used by job generators) 
+  * for MQI messages (applicative catalog client used by the MQI server)
+  * for jobs (applicative catalog clioent used by job generators) 
 * the objects exchanged between the MQI server and client:
 * the objects for Kakfa messages
 * some utilities:
-** around date conversion
-** around query filtering
-** around logs
-** around files
+  * around date conversion
+  * around query filtering
+  * around logs
+  * around files
 * the processing errors
 * several enumeration (File extension, application level, product family and category, ...)
 
