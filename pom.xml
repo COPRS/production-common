@@ -112,14 +112,8 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>obs-clients</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
-
-		<!-- <dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20171018</version>
-		</dependency> -->
 
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
