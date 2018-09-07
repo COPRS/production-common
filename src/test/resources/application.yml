@@ -20,7 +20,6 @@ kafka:
 file:
   auxiliary-files:
     local-directory: /data/local-ingestor/auxiliary_files/ # Must contains the last /
-    read-fixed-rate: 1000
     poll-fixed-delay: 1000
     max-msg-per-poll: 5
     executor-pool-size: 5
@@ -29,7 +28,6 @@ file:
     cache-max-capacity: 10
   session-files:
     local-directory: /data/local-ingestor/erds_sessions/
-    read-fixed-rate: 1000
     poll-fixed-delay: 1000
     max-msg-per-poll: 5
     executor-pool-size: 5
