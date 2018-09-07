@@ -7,7 +7,7 @@
 	<artifactId>s1pdgs-ingestor</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<name>Spring Boot Docker For Template App</name>
+	<name>Cloud POC ingestor</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -173,7 +173,7 @@
 				<version>3.8</version>
 				<configuration>
 					<rulesets>
-						<ruleset>${basedir}/dev/PmdJavaRuleset.xml</ruleset>
+						<ruleset>${basedir}/build/PmdJavaRuleset.xml</ruleset>
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
@@ -239,6 +239,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<description>Template java application with Spring Boot and Docker</description>
 </project>
