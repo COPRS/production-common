@@ -1,8 +1,3 @@
-/bin/sh
-mkdir routing-files
-wget $externalconf_host/routing-files/auxiliary-files.xml -P routing-files/
-wget $externalconf_host/routing-files/edrs-sessions.xml -P routing-files/
-wget $externalconf_host/routing-files/level-jobs.xml -P routing-files/
-wget $externalconf_host/routing-files/level-products.xml -P routing-files/
-wget $externalconf_host/routing-files/level-reports.xml -P routing-files/
-java -Djava.security.egd=file:/dev/./urandom -jar /app/mqi-server.jar --spring.config.location=classpath:/application.yml
+#/bin/sh
+wget --cut-dirs=1 --no-parent -nH -r $externalconf_host/mqi-server/ -P /app --reject="index.html*"
+java -Djava.security.egd=file:/dev/./urandom -jar /app/mqi-server.jar --spring.config.location=/app/application.yml
