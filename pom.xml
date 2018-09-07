@@ -7,7 +7,7 @@
 	<artifactId>s1pdgs-ingestor</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<name>Cloud POC ingestor</name>
+	<name>S1-PDGS Cloud POC ingestor</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
