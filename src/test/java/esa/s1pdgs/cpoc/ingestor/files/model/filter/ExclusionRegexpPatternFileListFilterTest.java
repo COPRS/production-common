@@ -32,10 +32,10 @@ public class ExclusionRegexpPatternFileListFilterTest {
 	
 	@Before
 	public void init() throws IOException {
-		fileWriting = new File("test/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml.writing");
-		fileMpeg = new File("test/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.mpeg");
-		fileHidden = new File("test/.S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-		fileOk = new File("test/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+		fileWriting = new File("build/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml.writing");
+		fileMpeg = new File("build/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.mpeg");
+		fileHidden = new File("build/.S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+		fileOk = new File("build/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		
 		fileWriting.createNewFile();
 		fileMpeg.createNewFile();
@@ -70,10 +70,10 @@ public class ExclusionRegexpPatternFileListFilterTest {
 		assertTrue("File 3 shall not be filtered", filter.accept(fileWritingOk3));
 
 		ExclusionRegexpPatternFileListFilter filter2 = new ExclusionRegexpPatternFileListFilter(
-				Pattern.compile("^test$", Pattern.CASE_INSENSITIVE));
+				Pattern.compile("^build$", Pattern.CASE_INSENSITIVE));
 		
-		File file = new File("test/log4j2-test.yml");
-		File dir = new File("test");
+		File file = new File("build/log4j2-test.yml");
+		File dir = new File("build");
 		filter2.setAlwaysAcceptDirectories(true);
 		assertTrue(filter2.accept(file));
 		assertTrue(filter2.accept(dir));
@@ -87,17 +87,17 @@ public class ExclusionRegexpPatternFileListFilterTest {
 	
 	@Test
 	public void testGetFilename() {
-		File file = new File("test/log4j2-test.yml");
-		File dir = new File("test");
+		File file = new File("build/log4j2-test.yml");
+		File dir = new File("build");
 		assertEquals("log4j2-test.yml", filter.getFilename(file));
-		assertEquals("test", filter.getFilename(dir));
+		assertEquals("build", filter.getFilename(dir));
 		assertNull(filter.getFilename(null));
 	}
 	
 	@Test
 	public void testIsDirectory() {
-		File file = new File("test/log4j2-test.yml");
-		File dir = new File("test");
+		File file = new File("build/log4j2-test.yml");
+		File dir = new File("build");
 		assertFalse(filter.isDirectory(file));
 		assertTrue(filter.isDirectory(dir));
 	}
