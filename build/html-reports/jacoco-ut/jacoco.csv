@@ -1,0 +1,18 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsFamily,0,88,0,0,0,2,0,4,0,4
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsClientBuilder,7,4,0,0,2,1,1,1,1,1
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,AbstractObsClient,8,180,0,16,2,45,0,14,0,6
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsDownloadCallable,0,40,0,2,0,10,0,3,0,2
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsUploadObject,0,84,0,10,0,17,0,11,0,6
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsObject,0,104,0,10,0,21,0,14,0,9
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsServiceException,0,9,0,0,0,4,0,2,0,2
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsUploadCallable,0,16,0,0,0,5,0,2,0,2
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsDownloadObject,0,118,0,14,0,25,0,15,0,8
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,SdkClientException,0,9,0,0,0,4,0,2,0,2
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsServices,91,627,4,34,18,123,4,23,0,8
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsClient,0,125,0,4,0,35,0,11,0,9
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsServiceException,0,47,0,0,0,12,0,5,0,5
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3SdkClientException,0,47,0,0,0,12,0,5,0,5
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration,34,158,0,7,6,42,0,11,0,5
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration.new Object() {...},6,41,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3.retry,SDKCustomDefaultRetryCondition,0,45,0,4,0,8,0,5,0,3

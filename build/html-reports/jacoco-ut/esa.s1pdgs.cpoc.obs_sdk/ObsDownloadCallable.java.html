@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ObsDownloadCallable.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Object storage client</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.obs_sdk</a> &gt; <span class="el_source">ObsDownloadCallable.java</span></div><h1>ObsDownloadCallable.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.obs_sdk;
+
+import java.util.concurrent.Callable;
+
+/**
+ * Callable to download a file / folder from the OBS
+ * 
+ * @author Viveris Technologies
+ */
+public class ObsDownloadCallable implements Callable&lt;Integer&gt; {
+
+    /**
+     * OBS client
+     */
+    private final ObsClient obsClient;
+
+    /**
+     * Objects to download
+     */
+    private final ObsDownloadObject object;
+
+    /**
+     * Default constructor
+     * 
+     * @param obsClient
+     * @param object
+     */
+    public ObsDownloadCallable(final ObsClient obsClient,
+<span class="fc" id="L29">            final ObsDownloadObject object) {</span>
+<span class="fc" id="L30">        this.obsClient = obsClient;</span>
+<span class="fc" id="L31">        this.object = object;</span>
+<span class="fc" id="L32">    }</span>
+
+    /**
+     * Call
+     */
+    @Override
+    public Integer call() throws ObsServiceException, SdkClientException {
+<span class="fc" id="L39">        int nbObj = obsClient.downloadObject(object);</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (nbObj &lt;= 0) {</span>
+<span class="fc" id="L41">            throw new ObsServiceException(</span>
+<span class="fc" id="L42">                    String.format(&quot;Unknown object %s with family %s&quot;,</span>
+<span class="fc" id="L43">                            object.getKey(), object.getFamily()));</span>
+        }
+<span class="fc" id="L45">        return nbObj;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

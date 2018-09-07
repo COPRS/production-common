@@ -4,9 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>spdgs-sdk</groupId>
 	<artifactId>obs-clients</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<packaging>jar</packaging>
-	<name>Object Storage Client</name>
+	<name>S1-PDGS Cloud POC - Object storage client</name>
 
 	<properties>		
 		<java.version>1.8</java.version>
@@ -74,7 +74,7 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>commons</artifactId>
-			<version>0.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 		
 		<!-- Tests -->
@@ -133,11 +133,12 @@
 				<version>3.8</version>
 				<configuration>
 					<rulesets>
-						<ruleset>${basedir}/dev/PmdJavaRuleset.xml</ruleset>
+						<ruleset>${basedir}/build/PmdJavaRuleset.xml</ruleset>
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
 					<includeTests>false</includeTests>
+					<outputDirectory>build/html-reports</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>
@@ -187,7 +188,7 @@
 							<!-- Sets the path to the file which contains the execution data. -->
 							<dataFile>target/jacoco.exec</dataFile>
 							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>target/jacoco-ut</outputDirectory>
+							<outputDirectory>build/html-reports/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
