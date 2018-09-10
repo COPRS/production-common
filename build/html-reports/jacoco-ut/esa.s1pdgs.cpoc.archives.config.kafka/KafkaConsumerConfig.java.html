@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>KafkaConsumerConfig.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For S1-PDGS Archives</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.archives.config.kafka</a> &gt; <span class="el_source">KafkaConsumerConfig.java</span></div><h1>KafkaConsumerConfig.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package esa.s1pdgs.cpoc.archives.config.kafka;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.KafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.AbstractMessageListenerContainer;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+
+/**
+ * KAFKA consumer configuration
+ * 
+ * @author Olivier Bex-Chauvet
+ */
+@Configuration
+@EnableKafka
+<span class="fc" id="L35">public class KafkaConsumerConfig {</span>
+
+    /**
+     * URI of KAFKA cluster
+     */
+    @Value(&quot;${kafka.bootstrap-servers}&quot;)
+    private String bootstrapServers;
+    /**
+     * Group identifier for KAFKA
+     */
+    @Value(&quot;${kafka.group-id}&quot;)
+    private String kafkaGroupId;
+
+    /**
+     * Client identifier for KAFKA
+     */
+    @Value(&quot;${kafka.client-id}&quot;)
+    protected String kafkaClientId;
+    /**
+     * Pool timeout for consumption
+     */
+    @Value(&quot;${kafka.poll-timeout}&quot;)
+    private long kafkaPooltimeout;
+
+    @Value(&quot;${kafka.max-pool-records}&quot;)
+    protected int kafkaMaxPoolRecords;
+
+    @Value(&quot;${kafka.session-timeout-ms}&quot;)
+    protected int kafkaSessionTimeoutMs;
+
+    /**
+     * Consumer configuration
+     * 
+     * @return
+     */
+    @Bean
+    public Map&lt;String, Object&gt; consumerConfigs() {
+<span class="fc" id="L72">        Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L73">        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);</span>
+<span class="fc" id="L74">        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,</span>
+                StringDeserializer.class);
+<span class="fc" id="L76">        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,</span>
+                JsonDeserializer.class);
+<span class="fc" id="L78">        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);</span>
+<span class="fc" id="L79">        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, kafkaMaxPoolRecords);</span>
+<span class="fc" id="L80">        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,</span>
+<span class="fc" id="L81">                kafkaSessionTimeoutMs);</span>
+<span class="fc" id="L82">        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);</span>
+        try {
+<span class="fc" id="L84">            InetAddress myHost = InetAddress.getLocalHost();</span>
+<span class="fc" id="L85">            String hostname = myHost.getHostName();</span>
+<span class="fc" id="L86">            props.put(ConsumerConfig.CLIENT_ID_CONFIG, hostname);</span>
+<span class="nc" id="L87">        } catch (UnknownHostException ex) {</span>
+<span class="nc" id="L88">            props.put(ConsumerConfig.CLIENT_ID_CONFIG, this.kafkaClientId);</span>
+<span class="fc" id="L89">        }</span>
+<span class="fc" id="L90">        return props;</span>
+    }
+
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // SLICES
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Consumer factory
+     * 
+     * @return
+     */
+    @Bean
+    public ConsumerFactory&lt;String, LevelProductDto&gt; consumerFactory() {
+<span class="fc" id="L106">        return new DefaultKafkaConsumerFactory&lt;&gt;(consumerConfigs(),</span>
+                new StringDeserializer(),
+                new JsonDeserializer&lt;&gt;(LevelProductDto.class));
+    }
+
+    /**
+     * Listener containers factory
+     * 
+     * @return
+     */
+    @Bean
+    public KafkaListenerContainerFactory&lt;ConcurrentMessageListenerContainer&lt;String, LevelProductDto&gt;&gt; kafkaListenerContainerFactory() {
+<span class="fc" id="L118">        ConcurrentKafkaListenerContainerFactory&lt;String, LevelProductDto&gt; factory =</span>
+                new ConcurrentKafkaListenerContainerFactory&lt;&gt;();
+<span class="fc" id="L120">        factory.setConsumerFactory(consumerFactory());</span>
+<span class="fc" id="L121">        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);</span>
+<span class="fc" id="L122">        factory.getContainerProperties().setAckMode(</span>
+                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+<span class="fc" id="L124">        return factory;</span>
+    }
+
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // REPORTS
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Consumer factory
+     * 
+     * @return
+     */
+    @Bean(name = &quot;reportConsumerFactory&quot;)
+    public ConsumerFactory&lt;String, LevelReportDto&gt; reportConsumerFactory() {
+<span class="fc" id="L140">        return new DefaultKafkaConsumerFactory&lt;&gt;(consumerConfigs(),</span>
+                new StringDeserializer(),
+                new JsonDeserializer&lt;&gt;(LevelReportDto.class));
+    }
+
+    /**
+     * Listener containers factory
+     * 
+     * @return
+     */
+    @Bean(name = &quot;reportKafkaListenerContainerFactory&quot;)
+    public KafkaListenerContainerFactory&lt;ConcurrentMessageListenerContainer&lt;String, LevelReportDto&gt;&gt; reportKafkaListenerContainerFactory() {
+<span class="fc" id="L152">        ConcurrentKafkaListenerContainerFactory&lt;String, LevelReportDto&gt; factory =</span>
+                new ConcurrentKafkaListenerContainerFactory&lt;&gt;();
+<span class="fc" id="L154">        factory.setConsumerFactory(reportConsumerFactory());</span>
+<span class="fc" id="L155">        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);</span>
+<span class="fc" id="L156">        factory.getContainerProperties().setAckMode(</span>
+                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+<span class="fc" id="L158">        return factory;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.archives.controller;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,10 +12,11 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import esa.s1pdgs.cpoc.archives.controller.dto.ReportDto;
-import esa.s1pdgs.cpoc.archives.model.ResumeDetails;
-import esa.s1pdgs.cpoc.archives.model.exception.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.archives.utils.FileUtils;
+import esa.s1pdgs.cpoc.common.ResumeDetails;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 
 /**
  * Consumer of reports
@@ -54,8 +54,8 @@ public class ReportsConsumer {
      * @param topic
      */
     @KafkaListener(topics = "#{'${kafka.topics.reports}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "reportKafkaListenerContainerFactory")
-    public void receive(final ReportDto dto,
-    		final Acknowledgment acknowledgment,
+    public void receive(final LevelReportDto dto,
+            final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
         LOGGER.info(
                 "[step 0] [family {}] [productName {}] Starting distribution",
@@ -66,19 +66,20 @@ public class ReportsConsumer {
                     + dto.getProductName());
             FileUtils.writeFile(report, dto.getContent());
             acknowledgment.acknowledge();
-        } catch (IOException e) {
+        } catch (InternalErrorException iee) {
             LOGGER.error(
-                    "[MONITOR] [step 0] [family {}] [productName {}] [resuming {}] {}",
+                    "[MONITOR] [step 0] [family {}] [productName {}] [code {}] [resuming {}] {}",
                     dto.getFamily(), dto.getProductName(),
-                    new ResumeDetails(topic, dto), e.getMessage());
+                    iee.getCode().getCode(), new ResumeDetails(topic, dto),
+                    iee.getLogMessage());
         } catch (Exception exc) {
             LOGGER.error(
                     "[MONITOR] [step 0] [family {}] [productName {}] [code {}] Exception occurred during acknowledgment {}",
-                    dto.getFamily(), dto.getProductName(), ErrorCode.KAFKA_COMMIT_ERROR.getCode(),
-                    exc.getMessage());
+                    dto.getFamily(), dto.getProductName(),
+                    ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
         }
-        
-        LOGGER.info("[step 0] [family {}] End Distribution",
-                dto.getFamily(), dto.getProductName());
+
+        LOGGER.info("[step 0] [family {}] End Distribution", dto.getFamily(),
+                dto.getProductName());
     }
 }

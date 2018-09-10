@@ -5,9 +5,9 @@ import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.archives.model.ProductFamily;
-import esa.s1pdgs.cpoc.archives.model.exception.ObjectStorageException;
-import esa.s1pdgs.cpoc.archives.model.exception.ObsUnknownObjectException;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
@@ -47,12 +47,12 @@ public class ObsService {
      * @throws ObjectStorageException
      */
     public boolean exist(final ProductFamily family, final String key)
-            throws ObjectStorageException {
+            throws ObsException {
         final ObsObject object = new ObsObject(key, getObsFamily(family));
         try {
             return client.doesPrefixExist(object);
         } catch (SdkClientException exc) {
-            throw new ObjectStorageException(family, key, exc);
+            throw new ObsException(family, key, exc);
         }
     }
 
@@ -67,11 +67,10 @@ public class ObsService {
      * @throws ObsUnknownObjectException
      */
     public File downloadFile(final ProductFamily family, final String key,
-            final String targetDir)
-            throws ObjectStorageException, ObsUnknownObjectException {
+            final String targetDir) throws ObsException, ObsUnknownObject {
         // If case of session we ignore folder in the key
         String id = key;
-        if (family == ProductFamily.RAW) {
+        if (family == ProductFamily.EDRS_SESSION) {
             int lastIndex = key.lastIndexOf('/');
             if (lastIndex != -1 && lastIndex < key.length() - 1) {
                 id = key.substring(lastIndex + 1);
@@ -83,10 +82,10 @@ public class ObsService {
         try {
             int nbObjects = client.downloadObject(object);
             if (nbObjects <= 0) {
-                throw new ObsUnknownObjectException(family, key);
+                throw new ObsUnknownObject(family, key);
             }
         } catch (SdkClientException exc) {
-            throw new ObjectStorageException(family, key, exc);
+            throw new ObsException(family, key, exc);
         }
         // Get file
         return new File(targetDir + id);
@@ -101,13 +100,13 @@ public class ObsService {
      * @throws ObjectStorageException
      */
     public void uploadFile(final ProductFamily family, final String key,
-            final File file) throws ObjectStorageException {
+            final File file) throws ObsException {
         ObsUploadObject object =
                 new ObsUploadObject(key, getObsFamily(family), file);
         try {
             client.uploadObject(object);
         } catch (SdkClientException exc) {
-            throw new ObjectStorageException(family, key, exc);
+            throw new ObsException(family, key, exc);
         }
     }
 
@@ -120,10 +119,10 @@ public class ObsService {
     protected ObsFamily getObsFamily(final ProductFamily family) {
         ObsFamily ret;
         switch (family) {
-            case CONFIG:
+            case AUXILIARY_FILE:
                 ret = ObsFamily.AUXILIARY_FILE;
                 break;
-            case RAW:
+            case EDRS_SESSION:
                 ret = ObsFamily.EDRS_SESSION;
                 break;
             case L0_PRODUCT:
