@@ -1,20 +1,29 @@
-S1-PDGS Ingestor
-================
-The ingestion component is composed by:
-* An input FTP server: proposes a FTP interface for external systems to send input files (AUX/MPL configuration files or EDRS session files) to the processing chain
-* An ingestor: ingests valid input files into the object storage and makes them available to others systems
+S1-PDGS Cloud POC - Archives
+============================
 
-<div style="text-align:center"><img alt="tut" src="build/design_ingestor.jpg" align="center"/></div>
+Once L0 and L1 processes are finished, products have to be made available from outside the processing chain, such as L0 /,L1 slices and reports. As the input of the system is FTP, the outputs are too.
+This module goal is to distribute the outputs of the processes of the chain.
+
+The archive component is composed by:
+* An output FTP server: proposes a FTP interface for external systems to download L0/L1 products and reports
+* An archive: download from OBS to FTP directory the L0/L1 product or reports when they are available (put in message queue system)
+
+<div style="text-align:center"><img alt="tut" src="build/design_archives.png" align="center"/></div>
 
 
 ### Sources
 
-The ingestor is a Spring Boot application configured with annotations.
+The module has to type of Kafka consumer:
+* Slices consumer
+* Reports consumer
 
-There are 3 packages:
-* files: main component for managing files
-* kafka: services (publisher) and configuration for publishing in a KAFKA topic
-* obs: service and configuration for accessing to the OBS
+##### Slices Consumer
+This consumer is plugged to t-pdgs-l0-slices and t-pdgs-l1-slices.
+When it receives a message, it will download the slice from the right bucket of the object storage directly on the shared volume, so it will be available through FTP as soon as possible.
+
+##### Reports Consumer
+This consumer is plugged to t-pdgs-l0-reports and t-pdgs-l1-reports.
+The message in this queue contains the payload (i.e. the report itself), so when the message is read, it is written on the shared volume without accessing the object storage.
 
 ### Builds
 
@@ -36,9 +45,9 @@ Please install these dependencies in your local repository before building proje
 ##### External dependency
 This project depends on:
 * spring-boot
-* spring-integration
 * spring-log4j2
 * spring-kafka
+* kafka-log4j-appender
 	
 ### Configuration
 
@@ -51,22 +60,14 @@ Below the parameters to configure for the production
 Parameter                                        | Description
 ------------------------------------------------ | ------------- 
 kafka.bootstrap-servers                          | the bootstrap servers for KAFKA
-kafka.group-id                                   | the group identifier to use for KAFKA publishers
+kafka.group-id                                   | the group identifier to use for KAFKA consumers
 kafka.poll-timeout                               | the bootstrap servers for KAFKA (example: kafka-svc:9092)
-kafka.producer-retries                           | the maximal number of retries when publishing a message = parameter "retries" of KAFKA producer configuration
-kafka.topic.auxiliary-files                      | the name of the topic used for the auxiliary files
-kafka.topic.edrs-sessions                        | the name of the topic used for EDRS sessions
-file.auxiliary-files.local-directory             | the directory of the FTP server for auxiliary files (MUST CONTAIN THE LAST '/' CHARACTER)
-file.auxiliary-files.poll-fixed-delay            | (fixed delay) period in milliseconds between 2 poll "max-msg-per-poll" files in the local directory for auxiliary files 
-file.auxiliary-files.max-msg-per-poll            | the maximal number of files to get at each poll
-file.auxiliary-files.executor-pool-size          | the number of file processors in parallel (must be < max-msg-per-poll) 
-file.auxiliary-files.clean-empty-directory-rate  | (fixed delay) period in milliseconds between 2 execution of the task cleaning the empty sub-directory of the local directory 
-file.auxiliary-files.clean-empty-min-age			| minimal number of milliseconds after the last modified data of the file for deleting it
-file.auxiliary-files.cache-max-capacity          | the size of the map used for caching the last polled distinct filenames
-file.session-files.local-directory               | see file.auxiliary-files.local-directory description
-file.session-files.poll-fixed-delay              | see file.auxiliary-files.poll-fixed-delay description
-file.session-files.max-msg-per-poll              | see file.auxiliary-files.max-msg-per-poll description
-file.session-files.executor-pool-size            | see file.auxiliary-files.executor-pool-size description
-file.session-files.clean-empty-directory-rate    | see file.auxiliary-files.clean-empty-directory-rate description
-file.session-files.clean-empty-min-age			   | see file.auxiliary-files.clean-empty-min-age description
-file.session-files.cache-max-capacity            | see file.auxiliary-files.cache-max-capacity description
+kafka.max-pool-records                           | the maximal number of messages to get per poll
+kafka.session-timeout-ms                         | the timeout to acknowledge a message
+kafka.topics.slices                              | the list of topics of level products (separated by comma)
+kafka.topics.reports                             | the list of topics of level reports (separated by comma)
+kafka.enable-consumer.slice                      | true if the archive shall consume level products, false else
+kafka.enable-consumer.report                     | true if the archive shall consume level reports, false else
+file.slices.local-directory                      | the directory of the FTP server for level products (MUST CONTAIN THE LAST '/' CHARACTER)
+file.reports.poll-fixed-delay                    | the directory of the FTP server for level reports (MUST CONTAIN THE LAST '/' CHARACTER)
+dev.activations.download-manifest					| true if the archive shall download only manifest.safe file for level products, if false dowload all files of the product

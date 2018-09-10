@@ -1,34 +1,34 @@
 #TODO: figure out why I need this here and in bootstrap.yml
 spring:
   application:
-    name: ${archives_application_name:s1pdgs-archives}
+    name: s1pdgs-archives
     
 logging:
-  config: ${archives_logging_config:log4j2.yml}
+  config: config/log/log4j2.yml
     
 # KAFKA
 kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
-  group-id: ${archives_kafka_group:archives}
-  client-id: ${archives_kafka_client:archives}
-  poll-timeout: ${archives_kafka_poll-timeout:500}
-  max-pool-records: ${archives_kafka_max-pool-records:1}
-  session-timeout-ms: ${archives_kafka_session-timeout-ms:120000}
+  bootstrap-servers: kafka-svc:9093
+  group-id: archives
+  client-id: archives
+  poll-timeout: 500
+  max-pool-records: 1
+  session-timeout-ms: 120000
   topics:
     slices: ${archives_kafka_topic_slices}
     reports: ${archives_kafka_topic_report}
   enable-consumer:
-    slice: ${archives_kafka_enable-consumer_slices:false}
-    report: ${archives_kafka_enable-consumer_reports:false}
+    slice: true
+    report: false
     
 # File
 file:
   slices:
-    local-directory: ${archives_slices_local-directory:/data/slices/} # Must contains the last /
+    local-directory: /data/slices/ # Must contains the last /
   reports:
-    local-directory: ${archives_reports_local-directory:/data/reports/} # Must contains the last /
+    local-directory: /data/reports/ # Must contains the last /
 
 dev:
   activations:
-    download-manifest : ${archives_dev_download-manifest:true}
+    download-manifest : true
     
