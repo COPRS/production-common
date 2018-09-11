@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
+import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
@@ -52,9 +53,14 @@ public class GenericMqiController<T> {
     protected final int maxRetries;
 
     /**
-     * PRoduct category
+     * Product category
      */
     protected final ProductCategory category;
+    
+    /**
+     * Application status
+     */
+    protected final AppStatus appStatus;
 
     /**
      * Constructor
@@ -64,10 +70,13 @@ public class GenericMqiController<T> {
      * @param category
      */
     public GenericMqiController(final MqiMessageService mongoDBServices,
-            final int maxRetries, final ProductCategory category) {
+            final int maxRetries, final ProductCategory category,
+            final AppStatus appStatus) {
         this.mongoDBServices = mongoDBServices;
         this.maxRetries = maxRetries;
         this.category = category;
+        this.appStatus = appStatus;
+        this.appStatus.setWaiting("MQI");
     }
 
     /**
@@ -95,7 +104,7 @@ public class GenericMqiController<T> {
             @PathVariable(name = "offset") final long offset,
             @RequestBody final MqiGenericReadMessageDto<T> body) {
         try {
-
+            
             log(String.format(
                     "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Searching MqiMessage",
                     topic, partition, offset, body.getGroup()));
@@ -103,6 +112,7 @@ public class GenericMqiController<T> {
                     mongoDBServices.searchByTopicPartitionOffsetGroup(topic,
                             partition, offset, body.getGroup());
 
+            
             // Si un objet n'existe pas dans la BDD avec topic / partition /
             // offset
             // / group
@@ -119,6 +129,7 @@ public class GenericMqiController<T> {
                 mongoDBServices.insertMqiMessage(messageToInsert);
 
                 // On renvoie le message que l'on vient de créer
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<MqiLightMessageDto>(
                         transformMqiMessageToMqiLightMessage(messageToInsert),
                         HttpStatus.OK);
@@ -136,6 +147,7 @@ public class GenericMqiController<T> {
                         log(String.format(
                                 "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is Acknowledge",
                                 topic, partition, offset, body.getGroup()));
+                        this.appStatus.setWaiting("MQI");
                         return new ResponseEntity<MqiLightMessageDto>(
                                 transformMqiMessageToMqiLightMessage(
                                         messageFromDB),
@@ -175,6 +187,7 @@ public class GenericMqiController<T> {
                                         messageFromDB.getIdentifier(),
                                         updateMap);
                                 // on renvoie l’objet
+                                this.appStatus.setWaiting("MQI");
                                 return new ResponseEntity<MqiLightMessageDto>(
                                         transformMqiMessageToMqiLightMessage(
                                                 messageFromDB),
@@ -208,6 +221,7 @@ public class GenericMqiController<T> {
                                         messageFromDB.getIdentifier(),
                                         updateMap);
                                 // on renvoie l’objet
+                                this.appStatus.setWaiting("MQI");
                                 return new ResponseEntity<MqiLightMessageDto>(
                                         transformMqiMessageToMqiLightMessage(
                                                 messageFromDB),
@@ -230,6 +244,7 @@ public class GenericMqiController<T> {
                             mongoDBServices.updateByID(
                                     messageFromDB.getIdentifier(), updateMap);
                             // on renvoie l’objet
+                            this.appStatus.setWaiting("MQI");
                             return new ResponseEntity<MqiLightMessageDto>(
                                     transformMqiMessageToMqiLightMessage(
                                             messageFromDB),
@@ -254,6 +269,7 @@ public class GenericMqiController<T> {
                             mongoDBServices.updateByID(
                                     messageFromDB.getIdentifier(), updateMap);
                             // on renvoie l’objet
+                            this.appStatus.setWaiting("MQI");
                             return new ResponseEntity<MqiLightMessageDto>(
                                     transformMqiMessageToMqiLightMessage(
                                             messageFromDB),
@@ -264,8 +280,10 @@ public class GenericMqiController<T> {
             LOGGER.error(
                     "[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] ERROR",
                     topic, partition, offset, body.getGroup());
+            this.appStatus.setError("MQI");
         } catch (Exception exc) {
             LOGGER.error("[read] {}", exc.getMessage());
+            this.appStatus.setError("MQI");            
         }
         return new ResponseEntity<MqiLightMessageDto>(
                 HttpStatus.INTERNAL_SERVER_ERROR);
@@ -283,6 +301,7 @@ public class GenericMqiController<T> {
             List<MqiMessage> mqiMessages = mongoDBServices
                     .searchByPodStateCategory(pod, category, ackStates);
             if (mqiMessages.isEmpty()) {
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<List<MqiGenericMessageDto<T>>>(
                         new ArrayList<MqiGenericMessageDto<T>>(),
                         HttpStatus.OK);
@@ -294,11 +313,13 @@ public class GenericMqiController<T> {
                         new ArrayList<>();
                 mqiMessages.forEach(x -> messagesToReturn
                         .add(transformMqiMessageToDtoGenericMessage(x)));
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<List<MqiGenericMessageDto<T>>>(
                         messagesToReturn, HttpStatus.OK);
             }
         } catch (Exception exc) {
             LOGGER.error("[next] {}", exc.getMessage());
+            this.appStatus.setError("MQI");            
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -318,6 +339,7 @@ public class GenericMqiController<T> {
                 LOGGER.error(
                         "[Send Message] [MessageID {}] No MqiMessage found",
                         messageID);
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<Boolean>(HttpStatus.NOT_FOUND);
             } else { // Si le message existe
                 MqiMessage messageFromDB = responseFromDB.get(0);
@@ -329,6 +351,7 @@ public class GenericMqiController<T> {
                         log(String.format(
                                 "[Send Message] [MessageID %d] MqiMessage found is at state ACK",
                                 messageID));
+                        this.appStatus.setWaiting("MQI");
                         return new ResponseEntity<Boolean>(false,
                                 HttpStatus.OK);
                     case READ:
@@ -346,6 +369,7 @@ public class GenericMqiController<T> {
                         log(String.format(
                                 "[Send Message] [MessageID %d] MqiMessage found is at state READ",
                                 messageID));
+                        this.appStatus.setWaiting("MQI");
                         return new ResponseEntity<Boolean>(true,
                                 HttpStatus.OK);
                     default:
@@ -370,6 +394,7 @@ public class GenericMqiController<T> {
                             messageFromDB.setLastAckDate(now);
                             updateMap2.put("lastAckDate", now);
                             mongoDBServices.updateByID(messageID, updateMap2);
+                            this.appStatus.setWaiting("MQI");
                             return new ResponseEntity<Boolean>(false,
                                     HttpStatus.OK);
                         } else {
@@ -386,6 +411,7 @@ public class GenericMqiController<T> {
                             log(String.format(
                                     "[Send Message] [MessageID %d] MqiMessage found state is set at SEND",
                                     messageID));
+                            this.appStatus.setWaiting("MQI");
                             return new ResponseEntity<Boolean>(true,
                                     HttpStatus.OK);
                         }
@@ -394,6 +420,7 @@ public class GenericMqiController<T> {
             }
         } catch (Exception exc) {
             LOGGER.error("[send] {}", exc.getMessage());
+            this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -414,6 +441,7 @@ public class GenericMqiController<T> {
                 LOGGER.error(
                         "[Ack Message] [MessageID {}] [Ack {}] Ack is not valid",
                         messageID, ack);
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
             }
             Date now = new Date();
@@ -428,12 +456,15 @@ public class GenericMqiController<T> {
                 LOGGER.error(
                         "[Ack Message] [MessageID {}] [Ack {}] No MqiMessage Found with MessageID",
                         messageID, ack);
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<Boolean>(false, HttpStatus.OK);
             } else {
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<Boolean>(true, HttpStatus.OK);
             }
         } catch (Exception exc) {
             LOGGER.error("[ack] {}", exc.getMessage());
+            this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -448,9 +479,11 @@ public class GenericMqiController<T> {
                 LOGGER.error(
                         "[Get] [MessageID {}] No MqiMessage Found with MessageID",
                         messageID);
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<MqiGenericMessageDto<T>>(
                         HttpStatus.NOT_FOUND);
             } else {
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<MqiGenericMessageDto<T>>(
                         transformMqiMessageToDtoGenericMessage(
                                 responseFromDB.get(0)),
@@ -458,6 +491,7 @@ public class GenericMqiController<T> {
             }
         } catch (Exception exc) {
             LOGGER.error("[Get] {}", exc.getMessage());
+            this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -488,16 +522,19 @@ public class GenericMqiController<T> {
                 log(String.format(
                         "[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning default Strategy",
                         topic, partition, group));
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<Long>(Long.valueOf(0), HttpStatus.OK);
             } else {
                 log(String.format(
                         "[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning earlist offset",
                         topic, partition, group));
+                this.appStatus.setWaiting("MQI");
                 return new ResponseEntity<Long>(
                         responseFromDB.get(0).getOffset(), HttpStatus.OK);
             }
         } catch (Exception exc) {
             LOGGER.error("[earliestOffset] {}", exc.getMessage());
+            this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -512,11 +549,13 @@ public class GenericMqiController<T> {
             @PathVariable(name = "topic") final String topic,
             @RequestParam("pod") final String pod) {
         try {
+            this.appStatus.setWaiting("MQI");
             return new ResponseEntity<Integer>(
                     mongoDBServices.countReadingMessages(pod, topic),
                     HttpStatus.OK);
         } catch (Exception exc) {
             LOGGER.error("[earliestOffset] {}", exc.getMessage());
+            this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
