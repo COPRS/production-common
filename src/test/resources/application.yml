@@ -15,6 +15,12 @@ kafka:
   topic:
     auxiliary-files: t-pdgs-auxiliary-files
     edrs-sessions: t-pdgs-edrs-sessions
+
+#Status
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-aux: 3
+  max-error-counter-ses: 3
  
 # File
 file:

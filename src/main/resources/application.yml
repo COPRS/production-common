@@ -15,6 +15,12 @@ kafka:
   topic:
     auxiliary-files: ${kafka_topic_auxiliary_files}
     edrs-sessions: ${kafka_topic_edrs_sessions}
+
+#Status
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-aux: 3
+  max-error-counter-ses: 3
  
 # File
 file:

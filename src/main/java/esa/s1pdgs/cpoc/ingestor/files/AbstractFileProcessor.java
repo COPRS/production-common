@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 
 public abstract class AbstractFileProcessor<T> {
 
@@ -43,15 +44,22 @@ public abstract class AbstractFileProcessor<T> {
      * Product family processed
      */
     private final ProductFamily family;
+    
+    /**
+     * Application status for archives
+     */
+    private final AppStatus appStatus;
 
     public AbstractFileProcessor(final ObsService obsService,
             final PublicationServices<T> publisher,
             final AbstractFileDescriptorService extractor,
-            final ProductFamily family) {
+            final ProductFamily family,
+            final AppStatus appStatus) {
         this.obsService = obsService;
         this.publisher = publisher;
         this.extractor = extractor;
         this.family = family;
+        this.appStatus = appStatus;
     }
 
     /**
@@ -71,7 +79,7 @@ public abstract class AbstractFileProcessor<T> {
                     "[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]",
                     file.getPath(), extractor.getFamily());
             String productName = file.getName();
-
+            this.appStatus.setProcessing(family);
             // Build model file
             try {
                 try {
@@ -117,6 +125,7 @@ public abstract class AbstractFileProcessor<T> {
                             "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
                             step, productName, ace.getCode().getCode(),
                             ace.getLogMessage());
+                    this.appStatus.setError(family);
                 }
                 // Remove file
                 step++;
@@ -129,6 +138,7 @@ public abstract class AbstractFileProcessor<T> {
                             AbstractCodedException.ErrorCode.INGESTOR_CLEAN
                                     .getCode(),
                             file.getPath());
+                    this.appStatus.setError(family);
                 }
 
             } catch (AbstractCodedException ace) {
@@ -136,10 +146,12 @@ public abstract class AbstractFileProcessor<T> {
                         "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
                         step, productName, ace.getCode().getCode(),
                         ace.getLogMessage());
+                this.appStatus.setError(family);
             }
             LOGGER.info(
                     "[MONITOR] [step 0] End processing of configuration file {}",
                     file.getPath());
+            this.appStatus.setWaiting();
         }
     }
 
