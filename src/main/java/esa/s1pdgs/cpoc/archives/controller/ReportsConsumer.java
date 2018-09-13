@@ -12,6 +12,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -36,6 +37,11 @@ public class ReportsConsumer {
      * Path to the shared volume
      */
     private final String sharedVolume;
+    
+    /**
+     * Application status for archives
+     */
+    private final AppStatus appStatus;
 
     /**
      * Constructor
@@ -43,8 +49,10 @@ public class ReportsConsumer {
      * @param sharedVolume
      */
     public ReportsConsumer(
-            @Value("${file.reports.local-directory}") final String sharedVolume) {
+            @Value("${file.reports.local-directory}") final String sharedVolume,
+            final AppStatus appStatus) {
         this.sharedVolume = sharedVolume;
+        this.appStatus = appStatus;
     }
 
     /**
@@ -60,6 +68,7 @@ public class ReportsConsumer {
         LOGGER.info(
                 "[step 0] [family {}] [productName {}] Starting distribution",
                 dto.getFamily(), dto.getProductName());
+        this.appStatus.setProcessing("REPORTS");
         try {
             File report = new File(sharedVolume + File.separator
                     + dto.getFamily().name().toLowerCase() + File.separator
@@ -72,14 +81,17 @@ public class ReportsConsumer {
                     dto.getFamily(), dto.getProductName(),
                     iee.getCode().getCode(), new ResumeDetails(topic, dto),
                     iee.getLogMessage());
+            this.appStatus.setError("REPORTS");
         } catch (Exception exc) {
             LOGGER.error(
                     "[MONITOR] [step 0] [family {}] [productName {}] [code {}] Exception occurred during acknowledgment {}",
                     dto.getFamily(), dto.getProductName(),
                     ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
+            this.appStatus.setError("REPORTS");
         }
 
         LOGGER.info("[step 0] [family {}] End Distribution", dto.getFamily(),
                 dto.getProductName());
+        this.appStatus.setWaiting();
     }
 }

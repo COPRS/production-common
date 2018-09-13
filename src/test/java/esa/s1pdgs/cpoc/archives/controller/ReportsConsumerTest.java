@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
+import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 
@@ -26,6 +27,9 @@ public class ReportsConsumerTest {
      */
     @Mock
     private Acknowledgment ack;
+    
+    @Mock
+    private AppStatus appStatus;
 	
 	private File resultExists;
 	private File resultNotExists;
@@ -49,7 +53,7 @@ public class ReportsConsumerTest {
 	
 	@Test
 	public void testReceive() {
-		ReportsConsumer consumer = new ReportsConsumer("test/data/reports");
+		ReportsConsumer consumer = new ReportsConsumer("test/data/reports",appStatus);
 		doNothing().when(ack).acknowledge();
 		consumer.receive(new LevelReportDto("productName", "content", ProductFamily.L0_REPORT), ack, "topic");
 		assertTrue("File exist", resultExists.exists());
@@ -59,14 +63,14 @@ public class ReportsConsumerTest {
 	
 	@Test
 	public void testReceiveNoDirectory() {
-		ReportsConsumer consumer = new ReportsConsumer("test/data/reports");
+		ReportsConsumer consumer = new ReportsConsumer("test/data/reports",appStatus);
 		consumer.receive(new LevelReportDto("productName",  "content", ProductFamily.BLANK), ack, "topic");
 		assertFalse("File exist", resultNotExists.exists());
 	}
 	
 	@Test
 	public void testReceiveAckException() {
-		ReportsConsumer consumer = new ReportsConsumer("test/data/reports");
+		ReportsConsumer consumer = new ReportsConsumer("test/data/reports",appStatus);
 		doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
 		consumer.receive(new LevelReportDto("productName", "content", ProductFamily.L0_REPORT), ack, "topic");
