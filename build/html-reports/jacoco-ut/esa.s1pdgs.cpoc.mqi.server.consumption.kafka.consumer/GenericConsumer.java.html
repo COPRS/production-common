@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenericConsumer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">MQI server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer</a> &gt; <span class="el_source">GenericConsumer.java</span></div><h1>GenericConsumer.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.AbstractMessageListenerContainer;
+import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.MessageListener;
+import org.springframework.kafka.listener.config.ContainerProperties;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+import com.github.grantneale.kafka.LagBasedPartitionAssignor;
+
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
+import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+
+/**
+ * Generic consumer
+ * 
+ * @author Viveris Technologies
+ * @param &lt;T&gt;
+ */
+public class GenericConsumer&lt;T&gt; {
+
+    /**
+     * Properties
+     */
+    private final KafkaProperties properties;
+
+    /**
+     * Service for persisting data
+     */
+    private final GenericAppCatalogMqiService&lt;T&gt; service;
+
+    /**
+     * Service for checking if a message is processing or not by another
+     */
+    private final OtherApplicationService otherAppService;
+
+    /**
+     * Application status
+     */
+    private final AppStatus appStatus;
+
+    /**
+     * Topic name
+     */
+    private final String topic;
+    
+    /**
+     * Topic priority
+     */
+    private final int priority;
+
+    /**
+     * Listener container
+     */
+    private ConcurrentMessageListenerContainer&lt;String, T&gt; container;
+
+    /**
+     * 
+     */
+    private final Class&lt;T&gt; consumedMsgClass;
+
+    /**
+     * 
+     * @param properties
+     * @param service
+     * @param otherAppService
+     * @param appStatus
+     * @param topic
+     * @param consumedMsgClass
+     */
+    public GenericConsumer(final KafkaProperties properties,
+            final GenericAppCatalogMqiService&lt;T&gt; service,
+            final OtherApplicationService otherAppService,
+            final AppStatus appStatus, final String topic,
+            final int priority,
+<span class="fc" id="L89">            final Class&lt;T&gt; consumedMsgClass) {</span>
+<span class="fc" id="L90">        this.properties = properties;</span>
+<span class="fc" id="L91">        this.service = service;</span>
+<span class="fc" id="L92">        this.otherAppService = otherAppService;</span>
+<span class="fc" id="L93">        this.appStatus = appStatus;</span>
+<span class="fc" id="L94">        this.topic = topic;</span>
+<span class="fc" id="L95">        this.priority = priority;</span>
+<span class="fc" id="L96">        this.consumedMsgClass = consumedMsgClass;</span>
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * @return the topic
+     */
+    public String getTopic() {
+<span class="fc" id="L103">        return topic;</span>
+    }
+
+    /**
+     * @return the priority
+     */
+    public int getPriority() {
+<span class="fc" id="L110">        return priority;</span>
+    }
+
+    /**
+     * @return the consumedMsgClass
+     */
+    public Class&lt;T&gt; getConsumedMsgClass() {
+<span class="fc" id="L117">        return consumedMsgClass;</span>
+    }
+
+    /**
+     * Start the consumer
+     */
+    public void start() {
+<span class="fc" id="L124">        AcknowledgingConsumerAwareMessageListener&lt;String, T&gt; messageListener =</span>
+                new GenericMessageListener&lt;&gt;(properties, service,
+                        otherAppService, this, appStatus);
+
+<span class="fc" id="L128">        container = new ConcurrentMessageListenerContainer&lt;&gt;(consumerFactory(),</span>
+<span class="fc" id="L129">                containerProperties(topic, messageListener));</span>
+
+<span class="fc" id="L131">        container.start();</span>
+<span class="fc" id="L132">    }</span>
+
+    /**
+     * Resume the consumer
+     */
+    public void resume() {
+<span class="fc" id="L138">        container.resume();</span>
+<span class="fc" id="L139">    }</span>
+
+    /**
+     * Pause the consumer
+     */
+    public void pause() {
+<span class="fc" id="L145">        container.pause();</span>
+<span class="fc" id="L146">    }</span>
+
+    /**
+     * Return true if the container is paused
+     */
+    public boolean isPaused() {
+<span class="fc" id="L152">        return container.isContainerPaused();</span>
+    }
+
+    /**
+     * Build the consumer factory
+     * 
+     * @return
+     */
+    private ConsumerFactory&lt;String, T&gt; consumerFactory() {
+<span class="fc" id="L161">        return new DefaultKafkaConsumerFactory&lt;&gt;(consumerConfig(),</span>
+                new StringDeserializer(),
+                new JsonDeserializer&lt;&gt;(consumedMsgClass));
+    }
+
+    /**
+     * Build the container properties
+     * 
+     * @param topic
+     * @param messageListener
+     * @return
+     */
+    private ContainerProperties containerProperties(final String topic,
+            final MessageListener&lt;String, T&gt; messageListener) {
+<span class="fc" id="L175">        ContainerProperties containerProp = new ContainerProperties(topic);</span>
+<span class="fc" id="L176">        containerProp.setMessageListener(messageListener);</span>
+<span class="fc" id="L177">        containerProp</span>
+<span class="fc" id="L178">                .setPollTimeout(properties.getListener().getPollTimeoutMs());</span>
+<span class="fc" id="L179">        containerProp.setAckMode(</span>
+                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+<span class="fc" id="L181">        containerProp.setConsumerRebalanceListener(</span>
+                new MemoryConsumerAwareRebalanceListener(service,
+<span class="fc" id="L183">                        properties.getConsumer().getGroupId(),</span>
+<span class="fc" id="L184">                        properties.getConsumer().getOffsetDftMode()));</span>
+<span class="fc" id="L185">        return containerProp;</span>
+    }
+
+    /**
+     * Consumer configuration
+     * 
+     * @return
+     */
+    private Map&lt;String, Object&gt; consumerConfig() {
+<span class="fc" id="L194">        Map&lt;String, Object&gt; props = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="fc" id="L195">        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,</span>
+<span class="fc" id="L196">                properties.getBootstrapServers());</span>
+<span class="fc" id="L197">        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,</span>
+                StringDeserializer.class);
+<span class="fc" id="L199">        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,</span>
+                JsonDeserializer.class);
+<span class="fc" id="L201">        props.put(ConsumerConfig.GROUP_ID_CONFIG,</span>
+<span class="fc" id="L202">                properties.getConsumer().getGroupId());</span>
+<span class="fc" id="L203">        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);</span>
+<span class="fc" id="L204">        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,</span>
+<span class="fc" id="L205">                properties.getConsumer().getMaxPollIntervalMs());</span>
+<span class="fc" id="L206">        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,</span>
+<span class="fc" id="L207">                properties.getConsumer().getMaxPollRecords());</span>
+<span class="fc" id="L208">        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,</span>
+<span class="fc" id="L209">                properties.getConsumer().getSessionTimeoutMs());</span>
+<span class="fc" id="L210">        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG,</span>
+<span class="fc" id="L211">                properties.getConsumer().getHeartbeatIntvMs());</span>
+<span class="fc" id="L212">        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,</span>
+<span class="fc" id="L213">                Collections.singletonList(LagBasedPartitionAssignor.class));</span>
+<span class="fc" id="L214">        props.put(ConsumerConfig.CLIENT_ID_CONFIG, properties.getClientId());</span>
+<span class="fc" id="L215">        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,</span>
+<span class="fc" id="L216">                properties.getConsumer().getAutoOffsetReset());</span>
+<span class="fc" id="L217">        return props;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

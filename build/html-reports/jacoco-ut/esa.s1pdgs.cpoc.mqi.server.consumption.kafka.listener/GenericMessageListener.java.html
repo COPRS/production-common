@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenericMessageListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">MQI server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener</a> &gt; <span class="el_source">GenericMessageListener.java</span></div><h1>GenericMessageListener.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
+
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
+import org.springframework.kafka.support.Acknowledgment;
+
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
+import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+
+/**
+ * Kafka message listener&lt;br/&gt;
+ * Will poll a topic until consumed 1 message which can be processing by its
+ * applications, then the consumer pauses&lt;br/&gt;
+ * When a message is received, will check in applicative data if the message is
+ * already processing or not. If not, the message is acknowledge when the
+ * consumer pause. Else ask for the other application if it always prossing this
+ * message
+ * 
+ * @author Viveris Technologies
+ * @param &lt;T&gt;
+ */
+public class GenericMessageListener&lt;T&gt;
+        implements AcknowledgingConsumerAwareMessageListener&lt;String, T&gt; {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L38">    private static final Logger LOGGER =</span>
+<span class="fc" id="L39">            LogManager.getLogger(GenericMessageListener.class);</span>
+
+    /**
+     * Properties
+     */
+    private final KafkaProperties properties;
+
+    /**
+     * Service for persisting data
+     */
+    private final GenericAppCatalogMqiService&lt;T&gt; service;
+
+    /**
+     * Service for checking if a message is processing or not by another
+     */
+    private final OtherApplicationService otherAppService;
+
+    /**
+     * Generic consumer
+     */
+    private final GenericConsumer&lt;T&gt; genericConsumer;
+
+    /**
+     * Application status
+     */
+    private final AppStatus appStatus;
+
+    /**
+     * Constructor
+     * 
+     * @param properties
+     * @param service
+     * @param otherAppService
+     * @param genericConsumer
+     */
+    public GenericMessageListener(final KafkaProperties properties,
+            final GenericAppCatalogMqiService&lt;T&gt; service,
+            final OtherApplicationService otherAppService,
+            final GenericConsumer&lt;T&gt; genericConsumer,
+<span class="fc" id="L78">            final AppStatus appStatus) {</span>
+<span class="fc" id="L79">        this.properties = properties;</span>
+<span class="fc" id="L80">        this.service = service;</span>
+<span class="fc" id="L81">        this.otherAppService = otherAppService;</span>
+<span class="fc" id="L82">        this.genericConsumer = genericConsumer;</span>
+<span class="fc" id="L83">        this.appStatus = appStatus;</span>
+<span class="fc" id="L84">    }</span>
+
+    /**
+     * Listener. Method call when a message is received
+     */
+    @Override
+    public void onMessage(final ConsumerRecord&lt;String, T&gt; data,
+            final Acknowledgment acknowledgment,
+            final Consumer&lt;?, ?&gt; consumer) {
+
+        try {
+            // Save message
+<span class="fc" id="L96">            MqiLightMessageDto result = service.read(data.topic(),</span>
+<span class="fc" id="L97">                    data.partition(), data.offset(),</span>
+                    new MqiGenericReadMessageDto&lt;T&gt;(
+<span class="fc" id="L99">                            properties.getConsumer().getGroupId(),</span>
+<span class="fc" id="L100">                            properties.getHostname(), false, data.value()));</span>
+
+            // Deal with result
+<span class="pc bfc" id="L103" title="All 3 branches covered.">            switch (result.getState()) {</span>
+                case ACK_KO:
+                case ACK_OK:
+                case ACK_WARN:
+                    // We ignore the message
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">                    if (LOGGER.isDebugEnabled()) {</span>
+<span class="fc" id="L109">                        LOGGER.debug(&quot;We ignore message {} and go the next&quot;,</span>
+                                data);
+                    }
+<span class="fc" id="L112">                    acknowlegde(data, acknowledgment);</span>
+<span class="fc" id="L113">                    break;</span>
+                case SEND:
+                    // Message already processing
+<span class="fc" id="L116">                    if (properties.getHostname()</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">                            .equals(result.getSendingPod())) {</span>
+                        // Message processing by myself
+<span class="fc" id="L119">                        acknowlegde(data, acknowledgment);</span>
+<span class="fc" id="L120">                        pause();</span>
+                    } else {
+                        // Message processing by another pod
+<span class="fc bfc" id="L123" title="All 2 branches covered.">                        if (!messageShallBeIgnored(data, result)) {</span>
+                            // We have forced the reading
+<span class="fc" id="L125">                            acknowlegde(data, acknowledgment);</span>
+<span class="fc" id="L126">                            pause();</span>
+                        } else {
+                            // We ignore the message
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">                            if (LOGGER.isDebugEnabled()) {</span>
+<span class="fc" id="L130">                                LOGGER.debug(</span>
+                                        &quot;We ignore message {} and go to the next&quot;,
+                                        data);
+                            }
+<span class="fc" id="L134">                            acknowlegde(data, acknowledgment);</span>
+                        }
+                    }
+<span class="fc" id="L137">                    break;</span>
+                default:
+                    // Message assigned
+<span class="fc" id="L140">                    acknowlegde(data, acknowledgment);</span>
+<span class="fc" id="L141">                    pause();</span>
+                    break;
+            }
+<span class="fc" id="L144">            appStatus.resetError();</span>
+<span class="fc" id="L145">        } catch (AbstractCodedException e) {</span>
+<span class="fc" id="L146">            LOGGER.error(</span>
+                    &quot;{} we cannot acknowledge this message and try the next time; Set app status in error&quot;,
+<span class="fc" id="L148">                    e.getLogMessage());</span>
+<span class="fc" id="L149">            appStatus.setError();</span>
+<span class="fc" id="L150">        }</span>
+<span class="fc" id="L151">    }</span>
+
+    /**
+     * Pause the consumer
+     */
+    protected void pause() {
+<span class="fc" id="L157">        this.genericConsumer.pause();</span>
+<span class="fc" id="L158">    }</span>
+
+    /**
+     * Acknowledge KAFKA message
+     * 
+     * @param data
+     * @param acknowledgment
+     */
+    protected void acknowlegde(final ConsumerRecord&lt;String, T&gt; data,
+            final Acknowledgment acknowledgment) {
+        try {
+<span class="fc" id="L169">            acknowledgment.acknowledge();</span>
+<span class="fc" id="L170">        } catch (Exception exc) {</span>
+<span class="fc" id="L171">            LOGGER.error(</span>
+                    &quot;[topic {}] [partition {}] [offset {}] Cannot ack KAFKA message: {}&quot;,
+<span class="fc" id="L173">                    data.topic(), data.partition(), data.offset(),</span>
+<span class="fc" id="L174">                    exc.getMessage());</span>
+<span class="fc" id="L175">        }</span>
+<span class="fc" id="L176">    }</span>
+
+    /**
+     * true if the message shall be ignored, false else
+     * 
+     * @param lightMessage
+     * @return
+     * @throws AbstractCodedException
+     */
+    protected boolean messageShallBeIgnored(
+            final ConsumerRecord&lt;String, T&gt; data,
+            final MqiLightMessageDto lightMessage)
+            throws AbstractCodedException {
+<span class="fc" id="L189">        boolean ret = false;</span>
+        // Ask to the other application
+        try {
+<span class="fc" id="L192">            ret = otherAppService.isProcessing(lightMessage.getSendingPod(),</span>
+<span class="fc" id="L193">                    service.getCategory(), lightMessage.getIdentifier());</span>
+<span class="fc" id="L194">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L195">            ret = false;</span>
+<span class="fc" id="L196">            LOGGER.warn(</span>
+                    &quot;{} No response from the other application, consider it as dead&quot;,
+<span class="fc" id="L198">                    ace.getLogMessage());</span>
+<span class="fc" id="L199">        }</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (!ret) {</span>
+<span class="fc" id="L201">            MqiLightMessageDto resultForce = service.read(data.topic(),</span>
+<span class="fc" id="L202">                    data.partition(), data.offset(),</span>
+                    new MqiGenericReadMessageDto&lt;T&gt;(
+<span class="fc" id="L204">                            properties.getConsumer().getGroupId(),</span>
+<span class="fc" id="L205">                            properties.getHostname(), true, data.value()));</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">            if (resultForce.getState() != MqiStateMessageEnum.READ) {</span>
+<span class="fc" id="L207">                ret = true;</span>
+            }
+<span class="fc" id="L209">            LOGGER.warn(</span>
+                    &quot;We force the reading for the message {}, will the message be ignored {}&quot;,
+<span class="fc" id="L211">                    lightMessage, ret);</span>
+        }
+<span class="fc" id="L213">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

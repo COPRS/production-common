@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.listener.ConsumerAwareRebalanceListener;
 
-import esa.s1pdgs.cpoc.appcatalog.client.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 
 /**

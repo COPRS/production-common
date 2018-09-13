@@ -7,12 +7,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import esa.s1pdgs.cpoc.appcatalog.client.AppCatalogMqiAuxiliaryFilesService;
-import esa.s1pdgs.cpoc.appcatalog.client.AppCatalogMqiEdrsSessionsService;
-import esa.s1pdgs.cpoc.appcatalog.client.AppCatalogMqiLevelJobsService;
-import esa.s1pdgs.cpoc.appcatalog.client.AppCatalogMqiLevelProductsService;
-import esa.s1pdgs.cpoc.appcatalog.client.AppCatalogMqiLevelReportsService;
-import esa.s1pdgs.cpoc.appcatalog.client.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiAuxiliaryFilesService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiEdrsSessionsService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelJobsService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelProductsService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelReportsService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;

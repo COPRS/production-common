@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KafkaProperties.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">MQI server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server</a> &gt; <span class="el_source">KafkaProperties.java</span></div><h1>KafkaProperties.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Configuration of Kafka consumer / producer / topics
+ * 
+ * @author Viveris Technologies
+ */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;kafka&quot;)
+public class KafkaProperties {
+
+    /**
+     * host:port to use for establishing the initial connection to the Kafka
+     * cluster.
+     */
+    private String bootstrapServers;
+
+    /**
+     * Topic name for the errors
+     */
+    private String errorTopic;
+
+    /**
+     * Hostname.
+     */
+    private String hostname;
+
+    /**
+     * ID to pass to the server when making requests. Used for server-side
+     * logging.
+     */
+    private String clientId;
+
+    /**
+     * Consumer properties
+     */
+    private KafkaConsumerProperties consumer;
+
+    /**
+     * Listener properties
+     */
+    private KafkaListenerProperties listener;
+
+    /**
+     * Producer properties
+     */
+    private KafkaProducerProperties producer;
+
+    /**
+     * Default constructor
+     */
+    public KafkaProperties() {
+<span class="fc" id="L58">        super();</span>
+<span class="fc" id="L59">        this.bootstrapServers = &quot;&quot;;</span>
+<span class="fc" id="L60">    }</span>
+
+    /**
+     * @return the bootstrapServers
+     */
+    public String getBootstrapServers() {
+<span class="fc" id="L66">        return bootstrapServers;</span>
+    }
+
+    /**
+     * @return the errorTopic
+     */
+    public String getErrorTopic() {
+<span class="fc" id="L73">        return errorTopic;</span>
+    }
+
+    /**
+     * @param errorTopic
+     *            the errorTopic to set
+     */
+    public void setErrorTopic(final String errorTopic) {
+<span class="fc" id="L81">        this.errorTopic = errorTopic;</span>
+<span class="fc" id="L82">    }</span>
+
+    /**
+     * @param bootstrapServers
+     *            the bootstrapServers to set
+     */
+    public void setBootstrapServers(final String bootstrapServers) {
+<span class="fc" id="L89">        this.bootstrapServers = bootstrapServers;</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * @return the hostname
+     */
+    public String getHostname() {
+<span class="fc" id="L96">        return hostname;</span>
+    }
+
+    /**
+     * @param hostname
+     *            the hostname to set
+     */
+    public void setHostname(String hostname) {
+<span class="fc" id="L104">        this.hostname = hostname;</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * @return the clientId
+     */
+    public String getClientId() {
+<span class="fc" id="L111">        return clientId;</span>
+    }
+
+    /**
+     * @param clientId
+     *            the clientId to set
+     */
+    public void setClientId(final String clientId) {
+<span class="fc" id="L119">        this.clientId = clientId;</span>
+<span class="fc" id="L120">    }</span>
+
+    /**
+     * @return the consumer
+     */
+    public KafkaConsumerProperties getConsumer() {
+<span class="fc" id="L126">        return consumer;</span>
+    }
+
+    /**
+     * @param consumer
+     *            the consumer to set
+     */
+    public void setConsumer(final KafkaConsumerProperties consumer) {
+<span class="fc" id="L134">        this.consumer = consumer;</span>
+<span class="fc" id="L135">    }</span>
+
+    /**
+     * @return the listener
+     */
+    public KafkaListenerProperties getListener() {
+<span class="fc" id="L141">        return listener;</span>
+    }
+
+    /**
+     * @param listener
+     *            the listener to set
+     */
+    public void setListener(final KafkaListenerProperties listener) {
+<span class="fc" id="L149">        this.listener = listener;</span>
+<span class="fc" id="L150">    }</span>
+
+    /**
+     * @return the producer
+     */
+    public KafkaProducerProperties getProducer() {
+<span class="fc" id="L156">        return producer;</span>
+    }
+
+    /**
+     * @param producer
+     *            the producer to set
+     */
+    public void setProducer(final KafkaProducerProperties producer) {
+<span class="fc" id="L164">        this.producer = producer;</span>
+<span class="fc" id="L165">    }</span>
+
+    /**
+     * Properties of a KAFKA producer
+     * 
+     * @author Viveris Technologies
+     */
+    public static class KafkaConsumerProperties {
+
+        /**
+         * Unique string that identifies the consumer group to which this
+         * consumer belongs.
+         */
+        private String groupId;
+
+        /**
+         * Maximum number of records returned in a single call to poll().
+         */
+        private int maxPollRecords;
+
+        /**
+         * 
+         */
+        private int maxPollIntervalMs;
+
+        /**
+         * Expected time between heartbeats to the consumer coordinator.
+         */
+        private int heartbeatIntvMs;
+
+        /**
+         * 
+         */
+        private int sessionTimeoutMs;
+
+        /**
+         * What to do when there is no initial offset in Kafka or if the current
+         * offset does not exist any more on the server (e.g. because that data
+         * has been deleted):
+         * &lt;ul&gt;
+         * &lt;li&gt;earliest: automatically reset the offset to the earliest offset
+         * &lt;li&gt;latest: automatically reset the offset to the latest offset&lt;/li&gt;
+         * &lt;li&gt;none: throw exception to the consumer if no previous offset is
+         * found for the consumer's group&lt;/li&gt;
+         * &lt;li&gt;anything else: throw exception to the consumer.&lt;/li&gt;
+         * &lt;/ul&gt;
+         */
+        private String autoOffsetReset;
+
+        /**
+         * Default offset seek mode when rebalance:
+         * &lt;li&gt;-2: let the consumer&lt;/li&gt;
+         * &lt;li&gt;-1: start to the beginning offset&lt;/li&gt;
+         * &lt;li&gt;-0: start to the end offset&lt;/li&gt;
+         */
+        private int offsetDftMode;
+
+        /**
+         * Constructor
+         */
+        public KafkaConsumerProperties() {
+<span class="fc" id="L226">            super();</span>
+<span class="fc" id="L227">            maxPollRecords = 0;</span>
+<span class="fc" id="L228">            sessionTimeoutMs = 0;</span>
+<span class="fc" id="L229">            maxPollIntervalMs = 0;</span>
+<span class="fc" id="L230">            heartbeatIntvMs = 0;</span>
+<span class="fc" id="L231">        }</span>
+
+        /**
+         * @return the groupId
+         */
+        public String getGroupId() {
+<span class="fc" id="L237">            return groupId;</span>
+        }
+
+        /**
+         * @param groupId
+         *            the groupId to set
+         */
+        public void setGroupId(final String groupId) {
+<span class="fc" id="L245">            this.groupId = groupId;</span>
+<span class="fc" id="L246">        }</span>
+
+        /**
+         * @return the maxPollRecords
+         */
+        public int getMaxPollRecords() {
+<span class="fc" id="L252">            return maxPollRecords;</span>
+        }
+
+        /**
+         * @param maxPollRecords
+         *            the maxPollRecords to set
+         */
+        public void setMaxPollRecords(final int maxPollRecords) {
+<span class="fc" id="L260">            this.maxPollRecords = maxPollRecords;</span>
+<span class="fc" id="L261">        }</span>
+
+        /**
+         * @return the maxPollIntervalMs
+         */
+        public int getMaxPollIntervalMs() {
+<span class="fc" id="L267">            return maxPollIntervalMs;</span>
+        }
+
+        /**
+         * @param maxPollIntervalMs
+         *            the maxPollIntervalMs to set
+         */
+        public void setMaxPollIntervalMs(final int maxPollIntervalMs) {
+<span class="fc" id="L275">            this.maxPollIntervalMs = maxPollIntervalMs;</span>
+<span class="fc" id="L276">        }</span>
+
+        /**
+         * @return the heartbeatIntervalMs
+         */
+        public int getHeartbeatIntvMs() {
+<span class="fc" id="L282">            return heartbeatIntvMs;</span>
+        }
+
+        /**
+         * @param heartbeatIntvMs
+         *            the heartbeatIntvMs to set
+         */
+        public void setHeartbeatIntvMs(final int heartbeatIntvMs) {
+<span class="fc" id="L290">            this.heartbeatIntvMs = heartbeatIntvMs;</span>
+<span class="fc" id="L291">        }</span>
+
+        /**
+         * @return the sessionTimeoutMs
+         */
+        public int getSessionTimeoutMs() {
+<span class="fc" id="L297">            return sessionTimeoutMs;</span>
+        }
+
+        /**
+         * @param sessionTimeoutMs
+         *            the sessionTimeoutMs to set
+         */
+        public void setSessionTimeoutMs(final int sessionTimeoutMs) {
+<span class="fc" id="L305">            this.sessionTimeoutMs = sessionTimeoutMs;</span>
+<span class="fc" id="L306">        }</span>
+
+        /**
+         * @return the autoOffsetReset
+         */
+        public String getAutoOffsetReset() {
+<span class="fc" id="L312">            return autoOffsetReset;</span>
+        }
+
+        /**
+         * @param autoOffsetReset
+         *            the autoOffsetReset to set
+         */
+        public void setAutoOffsetReset(final String autoOffsetReset) {
+<span class="fc" id="L320">            this.autoOffsetReset = autoOffsetReset;</span>
+<span class="fc" id="L321">        }</span>
+
+        /**
+         * @return the defaultMode
+         */
+        public int getOffsetDftMode() {
+<span class="fc" id="L327">            return offsetDftMode;</span>
+        }
+
+        /**
+         * @param defaultMode the defaultMode to set
+         */
+        public void setOffsetDftMode(final int defaultMode) {
+<span class="fc" id="L334">            this.offsetDftMode = defaultMode;</span>
+<span class="fc" id="L335">        }</span>
+
+    }
+
+    /**
+     * Properties of a KAFKA listener
+     * 
+     * @author Viveris Technologies
+     */
+    public static class KafkaListenerProperties {
+
+        /**
+         * Timeout to use when polling the consumer.
+         */
+        private long pollTimeoutMs;
+
+        /**
+         * Constructor
+         */
+        public KafkaListenerProperties() {
+<span class="fc" id="L355">            super();</span>
+<span class="fc" id="L356">            this.pollTimeoutMs = 0;</span>
+<span class="fc" id="L357">        }</span>
+
+        /**
+         * @return the pollTimeoutMs
+         */
+        public long getPollTimeoutMs() {
+<span class="fc" id="L363">            return pollTimeoutMs;</span>
+        }
+
+        /**
+         * @param pollTimeoutMs
+         *            the pollTimeoutMs to set
+         */
+        public void setPollTimeoutMs(final long pollTimeoutMs) {
+<span class="fc" id="L371">            this.pollTimeoutMs = pollTimeoutMs;</span>
+<span class="fc" id="L372">        }</span>
+
+    }
+
+    /**
+     * Properties of a KAFKA producer
+     * 
+     * @author Viveris Technologies
+     */
+    public static class KafkaProducerProperties {
+
+        /**
+         * When greater than zero, enables retrying of failed sends.
+         */
+        private int maxRetries;
+
+        /**
+         * Default constructor
+         */
+        public KafkaProducerProperties() {
+<span class="fc" id="L392">            super();</span>
+<span class="fc" id="L393">            this.maxRetries = 0;</span>
+<span class="fc" id="L394">        }</span>
+
+        /**
+         * @return the maxRetries
+         */
+        public int getMaxRetries() {
+<span class="fc" id="L400">            return maxRetries;</span>
+        }
+
+        /**
+         * @param maxRetries
+         *            the maxRetries to set
+         */
+        public void setMaxRetries(final int maxRetries) {
+<span class="fc" id="L408">            this.maxRetries = maxRetries;</span>
+<span class="fc" id="L409">        }</span>
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
