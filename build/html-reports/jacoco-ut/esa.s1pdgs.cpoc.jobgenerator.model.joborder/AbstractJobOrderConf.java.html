@@ -183,7 +183,7 @@ public abstract class AbstractJobOrderConf {
 	 * @return the breakPointEnable
 	 */
 	public boolean isBreakPointEnable() {
-<span class="nc" id="L186">		return breakPointEnable;</span>
+<span class="fc" id="L186">		return breakPointEnable;</span>
 	}
 
 	/**
@@ -282,21 +282,10 @@ public abstract class AbstractJobOrderConf {
 	/**
 	 * @see java.lang.Object#toString()
 	 */
-	@Override
-	public String toString() {
-<span class="nc" id="L287">		return String.format(</span>
-				&quot;{processorName: %s, version: %s, stdoutLogLevel: %s, stderrLogLevel: %s, test: %s, breakPointEnable: %s, processingStation: %s, sensingTime: %s, configFiles: %s}&quot;,
-<span class="nc" id="L289">				processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable, processingStation,</span>
-				sensingTime, configFiles);
-	}
-
-	/**
-	 * @see java.lang.Object#toString()
-	 */
 	public String toAbstractString() {
-<span class="fc" id="L297">		return String.format(</span>
+<span class="fc" id="L286">		return String.format(</span>
 				&quot;processorName: %s, version: %s, stdoutLogLevel: %s, stderrLogLevel: %s, test: %s, breakPointEnable: %s, processingStation: %s, sensingTime: %s, configFiles: %s&quot;,
-<span class="fc" id="L299">				processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable, processingStation,</span>
+<span class="fc" id="L288">				processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable, processingStation,</span>
 				sensingTime, configFiles);
 	}
 
@@ -305,7 +294,7 @@ public abstract class AbstractJobOrderConf {
 	 */
 	@Override
 	public int hashCode() {
-<span class="fc" id="L308">		return Objects.hash(processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable,</span>
+<span class="fc" id="L297">		return Objects.hash(processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable,</span>
 				processingStation, sensingTime, configFiles);
 	}
 
@@ -315,20 +304,20 @@ public abstract class AbstractJobOrderConf {
 	@Override
 	public boolean equals(final Object obj) {
 		boolean ret;
-<span class="fc bfc" id="L318" title="All 2 branches covered.">		if (this == obj) {</span>
-<span class="fc" id="L319">			ret = true;</span>
-<span class="fc bfc" id="L320" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L321">			ret = false;</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L308">			ret = true;</span>
+<span class="fc bfc" id="L309" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L310">			ret = false;</span>
 		} else {
-<span class="fc" id="L323">			AbstractJobOrderConf other = (AbstractJobOrderConf) obj;</span>
-<span class="fc bfc" id="L324" title="All 4 branches covered.">			ret = Objects.equals(processorName, other.processorName) &amp;&amp; Objects.equals(version, other.version)</span>
-<span class="fc bfc" id="L325" title="All 2 branches covered.">					&amp;&amp; Objects.equals(stdoutLogLevel, other.stdoutLogLevel)</span>
-<span class="fc bfc" id="L326" title="All 6 branches covered.">					&amp;&amp; Objects.equals(stderrLogLevel, other.stderrLogLevel) &amp;&amp; test == other.test</span>
+<span class="fc" id="L312">			AbstractJobOrderConf other = (AbstractJobOrderConf) obj;</span>
+<span class="fc bfc" id="L313" title="All 4 branches covered.">			ret = Objects.equals(processorName, other.processorName) &amp;&amp; Objects.equals(version, other.version)</span>
+<span class="fc bfc" id="L314" title="All 2 branches covered.">					&amp;&amp; Objects.equals(stdoutLogLevel, other.stdoutLogLevel)</span>
+<span class="fc bfc" id="L315" title="All 6 branches covered.">					&amp;&amp; Objects.equals(stderrLogLevel, other.stderrLogLevel) &amp;&amp; test == other.test</span>
 					&amp;&amp; breakPointEnable == other.breakPointEnable
-<span class="fc bfc" id="L328" title="All 2 branches covered.">					&amp;&amp; Objects.equals(processingStation, other.processingStation)</span>
-<span class="fc bfc" id="L329" title="All 4 branches covered.">					&amp;&amp; Objects.equals(sensingTime, other.sensingTime) &amp;&amp; Objects.equals(configFiles, other.configFiles);</span>
+<span class="fc bfc" id="L317" title="All 2 branches covered.">					&amp;&amp; Objects.equals(processingStation, other.processingStation)</span>
+<span class="fc bfc" id="L318" title="All 4 branches covered.">					&amp;&amp; Objects.equals(sensingTime, other.sensingTime) &amp;&amp; Objects.equals(configFiles, other.configFiles);</span>
 		}
-<span class="fc" id="L331">		return ret;</span>
+<span class="fc" id="L320">		return ret;</span>
 	}
 
 }

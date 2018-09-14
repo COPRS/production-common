@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.consumer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -23,6 +25,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFileRaw;
@@ -34,7 +37,6 @@ import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class EdrsSessionConsumerTest {
@@ -164,11 +166,7 @@ public class EdrsSessionConsumerTest {
             return i.getArgument(0);
         }).when(appDataService).newJob(Mockito.any());
         Mockito.doAnswer(i -> {
-            AppDataJobDto<LevelProductDto> ret = new AppDataJobDto<>();
-            ret.setIdentifier(i.getArgument(0));
-            ret.setState(i.getArgument(1));
-            ret.setPod(i.getArgument(2));
-            return ret;
+            return i.getArgument(1);
         }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
                 Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
@@ -221,12 +219,12 @@ public class EdrsSessionConsumerTest {
         edrsSessionsConsumer.consumeMessages();
         Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
         verify(appStatus, times(1)).setProcessing(Mockito.eq(1L));
-        verify(appStatus, times(1)).setWaiting();
+        verify(appStatus, times(2)).setWaiting();
 
         edrsSessionsConsumer.consumeMessages();
         Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
         verify(appStatus, times(1)).setProcessing(Mockito.eq(3L));
-        verify(appStatus, times(2)).setWaiting();
+        verify(appStatus, times(4)).setWaiting();
 
         // TODO
         /*
@@ -294,6 +292,142 @@ public class EdrsSessionConsumerTest {
         Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
         Mockito.verify(edrsSessionFileService, Mockito.never())
                 .createSessionFile(Mockito.any());
+    }
+
+    @Test
+    public void testBuildWhenMessageIdExistSameHostname()
+            throws AbstractCodedException {
+
+        EdrsSessionDto dto = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1,
+                EdrsSessionFileType.SESSION, "S1", "A");
+        GenericMessageDto<EdrsSessionDto> message =
+                new GenericMessageDto<EdrsSessionDto>(123, "", dto);
+
+        AppDataJobDto<EdrsSessionDto> expected =
+                TestL0Utils.buildAppDataEdrsSession(false);
+
+        doReturn(Arrays.asList(expected)).when(appDataService)
+                .findByMessagesIdentifier(Mockito.anyLong());
+
+        EdrsSessionConsumer edrsSessionsConsumer =
+                new EdrsSessionConsumer(jobsDispatcher, processSettings,
+                        mqiService, edrsSessionFileService, mqiStatusService,
+                        appDataService, appStatus);
+
+        AppDataJobDto<EdrsSessionDto> result =
+                edrsSessionsConsumer.buildJob(message);
+        verify(appDataService, never()).patchJob(Mockito.anyLong(),
+                Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+                Mockito.anyBoolean());
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testBuildWhenMessageIdExistDifferentHostname()
+            throws AbstractCodedException {
+
+        EdrsSessionDto dto = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1,
+                EdrsSessionFileType.SESSION, "S1", "A");
+        GenericMessageDto<EdrsSessionDto> message =
+                new GenericMessageDto<EdrsSessionDto>(123, "", dto);
+
+        AppDataJobDto<EdrsSessionDto> expected =
+                TestL0Utils.buildAppDataEdrsSession(true);
+        AppDataJobDto<EdrsSessionDto> returned =
+                TestL0Utils.buildAppDataEdrsSession(true);
+        returned.setPod("other-pod");
+
+        doReturn(Arrays.asList(returned)).when(appDataService)
+                .findByMessagesIdentifier(Mockito.anyLong());
+
+        EdrsSessionConsumer edrsSessionsConsumer =
+                new EdrsSessionConsumer(jobsDispatcher, processSettings,
+                        mqiService, edrsSessionFileService, mqiStatusService,
+                        appDataService, appStatus);
+
+        AppDataJobDto<EdrsSessionDto> result =
+                edrsSessionsConsumer.buildJob(message);
+        verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
+                Mockito.any(), Mockito.eq(false), Mockito.eq(false),
+                Mockito.eq(false));
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testBuildWhenMessageIdNotExistNewRaw()
+            throws AbstractCodedException {
+
+        Mockito.doAnswer(i -> {
+            return TestL0Utils.createEdrsSessionFileChannel1(true);
+        }).when(edrsSessionFileService).createSessionFile(Mockito.eq("obs1"));
+
+        EdrsSessionDto dto = new EdrsSessionDto("obs1", 1,
+                EdrsSessionFileType.SESSION, "S1", "A");
+        GenericMessageDto<EdrsSessionDto> message =
+                new GenericMessageDto<EdrsSessionDto>(123, "", dto);
+
+        AppDataJobDto<EdrsSessionDto> expected =
+                TestL0Utils.buildAppDataEdrsSession(true);
+        AppDataJobDto<EdrsSessionDto> returned =
+                TestL0Utils.buildAppDataEdrsSessionWithRaw2(true);
+
+        doReturn(null).when(appDataService)
+                .findByMessagesIdentifier(Mockito.anyLong());
+        doReturn(Arrays.asList(returned)).when(appDataService)
+                .findByProductSessionId(Mockito.anyString());
+
+        EdrsSessionConsumer edrsSessionsConsumer =
+                new EdrsSessionConsumer(jobsDispatcher, processSettings,
+                        mqiService, edrsSessionFileService, mqiStatusService,
+                        appDataService, appStatus);
+
+        AppDataJobDto<EdrsSessionDto> result =
+                edrsSessionsConsumer.buildJob(message);
+        verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
+                Mockito.any(), Mockito.eq(true), Mockito.eq(true),
+                Mockito.eq(false));
+        assertTrue(result.getMessages().size() == 2);
+        assertEquals(expected.getProduct().getRaws2(), result.getProduct().getRaws2());
+        assertEquals(expected.getProduct().getRaws1(), result.getProduct().getRaws1());
+        assertEquals(expected.getPod(), result.getPod());
+    }
+
+    @Test
+    public void testBuildWhenMessageIdNotExistHostnameDifeerentAllRaw()
+            throws AbstractCodedException {
+
+        Mockito.doAnswer(i -> {
+            return TestL0Utils.createEdrsSessionFileChannel1(true);
+        }).when(edrsSessionFileService).createSessionFile(Mockito.eq("obs1"));
+
+        EdrsSessionDto dto = new EdrsSessionDto("obs1", 1,
+                EdrsSessionFileType.SESSION, "S1", "A");
+        GenericMessageDto<EdrsSessionDto> message =
+                new GenericMessageDto<EdrsSessionDto>(123, "", dto);
+
+        AppDataJobDto<EdrsSessionDto> expected =
+                TestL0Utils.buildAppDataEdrsSession(true);
+        AppDataJobDto<EdrsSessionDto> returned =
+                TestL0Utils.buildAppDataEdrsSession(true);
+        returned.setPod("other-pod");
+
+        doReturn(null).when(appDataService)
+                .findByMessagesIdentifier(Mockito.anyLong());
+        doReturn(Arrays.asList(returned)).when(appDataService)
+                .findByProductSessionId(Mockito.anyString());
+
+        EdrsSessionConsumer edrsSessionsConsumer =
+                new EdrsSessionConsumer(jobsDispatcher, processSettings,
+                        mqiService, edrsSessionFileService, mqiStatusService,
+                        appDataService, appStatus);
+
+        AppDataJobDto<EdrsSessionDto> result =
+                edrsSessionsConsumer.buildJob(message);
+        verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
+                Mockito.any(), Mockito.eq(false), Mockito.eq(false),
+                Mockito.eq(false));
+        assertTrue(result.getMessages().size() == 2);
+        assertEquals(expected.getPod(), result.getPod());
     }
 
 }

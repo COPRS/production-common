@@ -134,11 +134,11 @@
 <td>Comment is too large: Too many lines</td>
 <td>15&#x2013;24</td></tr>
 <tr class="a">
-<td>Found 'UR'-anomaly for variable 'jobGen' (lines '73'-'81').</td>
-<td>73&#x2013;81</td></tr>
-<tr class="b">
 <td>publicMethodCommentRequirement Required</td>
-<td>73&#x2013;87</td></tr></table></div>
+<td>73&#x2013;87</td></tr>
+<tr class="b">
+<td>Found 'UR'-anomaly for variable 'jobGen' (lines '73'-'81').</td>
+<td>73&#x2013;81</td></tr></table></div>
 <div class="section">
 <h3>esa/s1pdgs/cpoc/jobgenerator/model/converter/SuperConverter.java<a name="esas1pdgscpocjobgeneratormodelconverterSuperConverter.java"></a></h3>
 <table border="0" class="bodyTable">
@@ -256,6 +256,15 @@
 <tr class="b">
 <td>publicMethodCommentRequirement Required</td>
 <td>84&#x2013;86</td></tr></table></div>
+<div class="section">
+<h3>esa/s1pdgs/cpoc/jobgenerator/model/joborder/enums/JobOrderFileNameType.java<a name="esas1pdgscpocjobgeneratormodeljoborderenumsJobOrderFileNameType.java"></a></h3>
+<table border="0" class="bodyTable">
+<tr class="a">
+<th>Violation</th>
+<th>Ligne</th></tr>
+<tr class="b">
+<td>publicMethodCommentRequirement Required</td>
+<td>41&#x2013;43</td></tr></table></div>
 <div class="section">
 <h3>esa/s1pdgs/cpoc/jobgenerator/model/metadata/AbstractMetadata.java<a name="esas1pdgscpocjobgeneratormodelmetadataAbstractMetadata.java"></a></h3>
 <table border="0" class="bodyTable">
@@ -383,6 +392,15 @@
 <td>publicMethodCommentRequirement Required</td>
 <td>196&#x2013;198</td></tr></table></div>
 <div class="section">
+<h3>esa/s1pdgs/cpoc/jobgenerator/model/tasktable/TaskTablePool.java<a name="esas1pdgscpocjobgeneratormodeltasktableTaskTablePool.java"></a></h3>
+<table border="0" class="bodyTable">
+<tr class="a">
+<th>Violation</th>
+<th>Ligne</th></tr>
+<tr class="b">
+<td>Private field 'tasks' could be made final; it is only initialized in the declaration or constructor.</td>
+<td>37</td></tr></table></div>
+<div class="section">
 <h3>esa/s1pdgs/cpoc/jobgenerator/service/EdrsSessionFileService.java<a name="esas1pdgscpocjobgeneratorserviceEdrsSessionFileService.java"></a></h3>
 <table border="0" class="bodyTable">
 <tr class="a">
@@ -437,10 +455,10 @@
 <th>Violation</th>
 <th>Ligne</th></tr>
 <tr class="a">
-<td>The class 'MetadataService' has a Standard Cyclomatic Complexity of 8 (Highest = 12).</td>
+<td>The class 'MetadataService' has a Cyclomatic Complexity of 8 (Highest = 15).</td>
 <td>34&#x2013;327</td></tr>
 <tr class="b">
-<td>The class 'MetadataService' has a Cyclomatic Complexity of 8 (Highest = 15).</td>
+<td>The class 'MetadataService' has a Standard Cyclomatic Complexity of 8 (Highest = 12).</td>
 <td>34&#x2013;327</td></tr>
 <tr class="a">
 <td>The class 'MetadataService' has a Modified Cyclomatic Complexity of 8 (Highest = 12).</td>
@@ -458,10 +476,10 @@
 <td>Avoid if (x != y) ..; else ..;</td>
 <td>107&#x2013;125</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>The String literal &quot;Call rest api metadata failed: Attempt : {} / {}&quot; appears 9 times in this file; the first occurrence is on line 110</td>
 <td>110</td></tr>
 <tr class="a">
-<td>The String literal &quot;Call rest api metadata failed: Attempt : {} / {}&quot; appears 9 times in this file; the first occurrence is on line 110</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>110</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -470,10 +488,10 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>120</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>The String literal &quot;Invalid HTTP status code %s&quot; appears 4 times in this file; the first occurrence is on line 120</td>
 <td>120</td></tr>
 <tr class="a">
-<td>The String literal &quot;Invalid HTTP status code %s&quot; appears 4 times in this file; the first occurrence is on line 120</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>120</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -497,11 +515,11 @@
 <td>Found 'DU'-anomaly for variable 'retries' (lines '154'-'196').</td>
 <td>154&#x2013;196</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
-<td>161</td></tr>
-<tr class="b">
 <td>Avoid if (x != y) ..; else ..;</td>
 <td>161&#x2013;179</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>161</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>164</td></tr>
@@ -533,13 +551,13 @@
 <td>Comment is too large: Too many lines</td>
 <td>198&#x2013;206</td></tr>
 <tr class="a">
-<td>The method 'getFirstACN' has a Standard Cyclomatic Complexity of 12.</td>
+<td>The method 'getFirstACN' has a Modified Cyclomatic Complexity of 12.</td>
 <td>207&#x2013;270</td></tr>
 <tr class="b">
 <td>The method 'getFirstACN' has a Cyclomatic Complexity of 15.</td>
 <td>207&#x2013;270</td></tr>
 <tr class="a">
-<td>The method 'getFirstACN' has a Modified Cyclomatic Complexity of 12.</td>
+<td>The method 'getFirstACN' has a Standard Cyclomatic Complexity of 12.</td>
 <td>207&#x2013;270</td></tr>
 <tr class="b">
 <td>Found 'DU'-anomaly for variable 'retries' (lines '208'-'270').</td>
@@ -548,17 +566,17 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>213</td></tr>
 <tr class="b">
+<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>214</td></tr>
+<tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>214</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
-<td>214</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
-<td>216</td></tr>
-<tr class="a">
 <td>Avoid if (x != y) ..; else ..;</td>
 <td>216&#x2013;252</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>216</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>219</td></tr>
@@ -641,10 +659,10 @@
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>284</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>286</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>286</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -668,10 +686,10 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>295</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>303</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>303</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -689,7 +707,7 @@
 <td>New exception is thrown in catch block, original stack trace may be lost</td>
 <td>316</td></tr></table></div>
 <div class="section">
-<h3>esa/s1pdgs/cpoc/jobgenerator/service/mqi/OutputProcuderFactory.java<a name="esas1pdgscpocjobgeneratorservicemqiOutputProcuderFactory.java"></a></h3>
+<h3>esa/s1pdgs/cpoc/jobgenerator/service/mqi/OutputProducerFactory.java<a name="esas1pdgscpocjobgeneratorservicemqiOutputProducerFactory.java"></a></h3>
 <table border="0" class="bodyTable">
 <tr class="a">
 <th>Violation</th>
@@ -728,34 +746,34 @@
 <td>Comment is too large: Too many lines</td>
 <td>59&#x2013;68</td></tr>
 <tr class="a">
-<td>Parameter 'key' is not assigned and could be declared final</td>
-<td>69</td></tr>
-<tr class="b">
-<td>Parameter 'family' is not assigned and could be declared final</td>
-<td>69</td></tr>
-<tr class="a">
 <td>Parameter 'targetDir' is not assigned and could be declared final</td>
 <td>69</td></tr>
 <tr class="b">
-<td>Found 'DD'-anomaly for variable 'id' (lines '72'-'76').</td>
-<td>72&#x2013;76</td></tr>
+<td>Parameter 'key' is not assigned and could be declared final</td>
+<td>69</td></tr>
 <tr class="a">
-<td>Avoid variables with short names like id</td>
-<td>72</td></tr>
+<td>Parameter 'family' is not assigned and could be declared final</td>
+<td>69</td></tr>
 <tr class="b">
 <td>Found 'DU'-anomaly for variable 'id' (lines '72'-'91').</td>
 <td>72&#x2013;91</td></tr>
 <tr class="a">
+<td>Avoid variables with short names like id</td>
+<td>72</td></tr>
+<tr class="b">
+<td>Found 'DD'-anomaly for variable 'id' (lines '72'-'76').</td>
+<td>72&#x2013;76</td></tr>
+<tr class="a">
 <td>Found 'DU'-anomaly for variable 'id' (lines '76'-'91').</td>
 <td>76&#x2013;91</td></tr>
 <tr class="b">
-<td>Parameter 'file' is not assigned and could be declared final</td>
+<td>Parameter 'family' is not assigned and could be declared final</td>
 <td>101</td></tr>
 <tr class="a">
-<td>Parameter 'key' is not assigned and could be declared final</td>
+<td>Parameter 'file' is not assigned and could be declared final</td>
 <td>101</td></tr>
 <tr class="b">
-<td>Parameter 'family' is not assigned and could be declared final</td>
+<td>Parameter 'key' is not assigned and could be declared final</td>
 <td>101</td></tr>
 <tr class="a">
 <td>Parameter 'family' is not assigned and could be declared final</td>
@@ -791,11 +809,11 @@
 <td>Use block level rather than method level synchronization</td>
 <td>109&#x2013;114</td></tr>
 <tr class="a">
-<td>Use block level rather than method level synchronization</td>
-<td>119&#x2013;125</td></tr>
-<tr class="b">
 <td>Parameter 'type' is not assigned and could be declared final</td>
 <td>119</td></tr>
+<tr class="b">
+<td>Use block level rather than method level synchronization</td>
+<td>119&#x2013;125</td></tr>
 <tr class="a">
 <td>Position literals first in String comparisons</td>
 <td>120</td></tr>
@@ -816,10 +834,10 @@
 <td>167</td></tr>
 <tr class="a">
 <td>Avoid excessively long variable names like maxErrorCounterNextMessage</td>
-<td>256</td></tr>
+<td>257</td></tr>
 <tr class="b">
 <td>System.exit() should not be used in J2EE/JEE apps</td>
-<td>333</td></tr></table></div>
+<td>334</td></tr></table></div>
 <div class="section">
 <h3>esa/s1pdgs/cpoc/jobgenerator/status/JobRestController.java<a name="esas1pdgscpocjobgeneratorstatusJobRestController.java"></a></h3>
 <table border="0" class="bodyTable">
@@ -860,31 +878,31 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>92</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Using equalsIgnoreCase() is cleaner than using toUpperCase/toLowerCase().equals().</td>
 <td>92</td></tr>
 <tr class="b">
 <td>When doing a String.toLowerCase()/toUpperCase() call, use a Locale</td>
 <td>92</td></tr>
 <tr class="a">
+<td>Potential violation of Law of Demeter (static property access)</td>
+<td>92</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>92</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (static property access)</td>
+<td>93</td></tr>
+<tr class="b">
 <td>Using equalsIgnoreCase() is cleaner than using toUpperCase/toLowerCase().equals().</td>
-<td>92</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (static property access)</td>
-<td>92</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (static property access)</td>
-<td>93</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>93</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>93</td></tr>
-<tr class="b">
 <td>When doing a String.toLowerCase()/toUpperCase() call, use a Locale</td>
 <td>93</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>93</td></tr>
 <tr class="a">
-<td>Using equalsIgnoreCase() is cleaner than using toUpperCase/toLowerCase().equals().</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>93</td></tr></table></div>
 <div class="section">
 <h3>esa/s1pdgs/cpoc/jobgenerator/status/dto/JobStatusDto.java<a name="esas1pdgscpocjobgeneratorstatusdtoJobStatusDto.java"></a></h3>
@@ -909,7 +927,7 @@
 <th>Ligne</th></tr>
 <tr class="a">
 <td>headerCommentRequirement Required</td>
-<td>17&#x2013;168</td></tr>
+<td>17&#x2013;169</td></tr>
 <tr class="b">
 <td>fieldCommentRequirement Required</td>
 <td>19&#x2013;20</td></tr>
@@ -918,64 +936,64 @@
 <td>57&#x2013;70</td></tr>
 <tr class="b">
 <td>protectedMethodCommentRequirement Required</td>
-<td>72&#x2013;83</td></tr>
+<td>72&#x2013;84</td></tr>
 <tr class="a">
 <td>Found 'DD'-anomaly for variable 'message' (lines '73'-'75').</td>
 <td>73&#x2013;75</td></tr>
 <tr class="b">
-<td>Found 'DD'-anomaly for variable 'message' (lines '75'-'79').</td>
-<td>75&#x2013;79</td></tr>
+<td>Found 'DD'-anomaly for variable 'message' (lines '75'-'80').</td>
+<td>75&#x2013;80</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>77</td></tr>
+<td>78&#x2013;79</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>77&#x2013;78</td></tr>
+<td>78</td></tr>
 <tr class="a">
 <td>Assigning an Object to null is a code smell.  Consider refactoring.</td>
-<td>79</td></tr>
+<td>80</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>94</td></tr>
+<td>95</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>108</td></tr>
+<td>109</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>112&#x2013;115</td></tr>
+<td>113&#x2013;116</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>114</td></tr>
+<td>115</td></tr>
 <tr class="b">
 <td>System.exit() should not be used in J2EE/JEE apps</td>
-<td>117</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>118</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>119</td></tr>
 <tr class="b">
 <td>System.exit() should not be used in J2EE/JEE apps</td>
-<td>119</td></tr>
+<td>120</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>140&#x2013;142</td></tr>
+<td>141&#x2013;143</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>141</td></tr>
+<td>142</td></tr>
 <tr class="a">
 <td>protectedMethodCommentRequirement Required</td>
-<td>146&#x2013;162</td></tr>
+<td>147&#x2013;163</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>157&#x2013;159</td></tr>
+<td>158&#x2013;160</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>158</td></tr>
+<td>159</td></tr>
 <tr class="b">
 <td>protectedMethodCommentRequirement Required</td>
-<td>164</td></tr>
+<td>165</td></tr>
 <tr class="a">
 <td>protectedMethodCommentRequirement Required</td>
-<td>166</td></tr></table></div>
+<td>167</td></tr></table></div>
 <div class="section">
 <h3>esa/s1pdgs/cpoc/jobgenerator/tasks/consumer/EdrsSessionConsumer.java<a name="esas1pdgscpocjobgeneratortasksconsumerEdrsSessionConsumer.java"></a></h3>
 <table border="0" class="bodyTable">
@@ -983,13 +1001,13 @@
 <th>Violation</th>
 <th>Ligne</th></tr>
 <tr class="a">
-<td>The class 'EdrsSessionConsumer' has a Cyclomatic Complexity of 5 (Highest = 11).</td>
+<td>The class 'EdrsSessionConsumer' has a Modified Cyclomatic Complexity of 4 (Highest = 10).</td>
 <td>33&#x2013;248</td></tr>
 <tr class="b">
 <td>headerCommentRequirement Required</td>
 <td>33&#x2013;248</td></tr>
 <tr class="a">
-<td>The class 'EdrsSessionConsumer' has a Modified Cyclomatic Complexity of 4 (Highest = 10).</td>
+<td>The class 'EdrsSessionConsumer' has a Cyclomatic Complexity of 5 (Highest = 11).</td>
 <td>33&#x2013;248</td></tr>
 <tr class="b">
 <td>The class 'EdrsSessionConsumer' has a Standard Cyclomatic Complexity of 4 (Highest = 10).</td>
@@ -1040,10 +1058,10 @@
 <td>Found 'DD'-anomaly for variable 'step' (lines '91'-'104').</td>
 <td>91&#x2013;104</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Avoid using Literals in Conditional Statements</td>
 <td>92</td></tr>
 <tr class="a">
-<td>Avoid using Literals in Conditional Statements</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>92</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -1067,19 +1085,19 @@
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>120</td></tr>
 <tr class="a">
-<td>The method 'buildJob' has a Cyclomatic Complexity of 11.</td>
-<td>126&#x2013;237</td></tr>
-<tr class="b">
 <td>The method 'buildJob' has a Modified Cyclomatic Complexity of 10.</td>
 <td>126&#x2013;237</td></tr>
-<tr class="a">
-<td>protectedMethodCommentRequirement Required</td>
-<td>126&#x2013;237</td></tr>
 <tr class="b">
-<td>The method 'buildJob' has a Standard Cyclomatic Complexity of 10.</td>
+<td>protectedMethodCommentRequirement Required</td>
 <td>126&#x2013;237</td></tr>
 <tr class="a">
 <td>Avoid really long methods.</td>
+<td>126&#x2013;237</td></tr>
+<tr class="b">
+<td>The method 'buildJob' has a Cyclomatic Complexity of 11.</td>
+<td>126&#x2013;237</td></tr>
+<tr class="a">
+<td>The method 'buildJob' has a Standard Cyclomatic Complexity of 10.</td>
 <td>126&#x2013;237</td></tr>
 <tr class="b">
 <td>Parameter 'mqiMessage' is not assigned and could be declared final</td>
@@ -1133,10 +1151,10 @@
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>158</td></tr>
 <tr class="a">
-<td>Avoid using Literals in Conditional Statements</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>159</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Avoid using Literals in Conditional Statements</td>
 <td>159</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
@@ -1154,23 +1172,23 @@
 <td>A method should have only one exit point, and that should be the last statement in the method</td>
 <td>173</td></tr>
 <tr class="b">
-<td>Found 'DD'-anomaly for variable 'update' (lines '178'-'204').</td>
-<td>178&#x2013;204</td></tr>
-<tr class="a">
 <td>Found 'DD'-anomaly for variable 'update' (lines '178'-'184').</td>
 <td>178&#x2013;184</td></tr>
-<tr class="b">
-<td>Found 'DD'-anomaly for variable 'updateMessage' (lines '179'-'205').</td>
-<td>179&#x2013;205</td></tr>
 <tr class="a">
+<td>Found 'DD'-anomaly for variable 'update' (lines '178'-'204').</td>
+<td>178&#x2013;204</td></tr>
+<tr class="b">
 <td>Found 'DU'-anomaly for variable 'updateMessage' (lines '179'-'237').</td>
 <td>179&#x2013;237</td></tr>
-<tr class="b">
-<td>Found 'DD'-anomaly for variable 'updateProduct' (lines '180'-'206').</td>
-<td>180&#x2013;206</td></tr>
 <tr class="a">
+<td>Found 'DD'-anomaly for variable 'updateMessage' (lines '179'-'205').</td>
+<td>179&#x2013;205</td></tr>
+<tr class="b">
 <td>Found 'DU'-anomaly for variable 'updateProduct' (lines '180'-'237').</td>
 <td>180&#x2013;237</td></tr>
+<tr class="a">
+<td>Found 'DD'-anomaly for variable 'updateProduct' (lines '180'-'206').</td>
+<td>180&#x2013;206</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>181</td></tr>
@@ -1187,20 +1205,20 @@
 <td>Found 'DD'-anomaly for variable 'update' (lines '184'-'204').</td>
 <td>184&#x2013;204</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>187&#x2013;188</td></tr>
-<tr class="b">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>187</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
-<td>187&#x2013;188</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>187&#x2013;188</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>187&#x2013;188</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>187</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>187&#x2013;188</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>187&#x2013;188</td></tr>
@@ -1208,10 +1226,10 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>188&#x2013;189</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>190</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>190</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -1244,10 +1262,10 @@
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>223</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>224</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>224</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
@@ -1256,11 +1274,11 @@
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>230</td></tr>
 <tr class="b">
-<td>protectedMethodCommentRequirement Required</td>
-<td>240&#x2013;242</td></tr>
-<tr class="a">
 <td>Parameter 'dto' is not assigned and could be declared final</td>
 <td>240</td></tr>
+<tr class="a">
+<td>protectedMethodCommentRequirement Required</td>
+<td>240&#x2013;242</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>241</td></tr>
@@ -1322,10 +1340,10 @@
 <td>Found 'DU'-anomaly for variable 'leveldto' (lines '130'-'189').</td>
 <td>130&#x2013;189</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Avoid variables with short names like m</td>
 <td>138</td></tr>
 <tr class="b">
-<td>Avoid variables with short names like m</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>138</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
@@ -1334,10 +1352,10 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>144</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>144</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>144</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -1349,31 +1367,31 @@
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>146</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>148</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>148</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>148</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>150</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>150</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>150</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>151</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>151</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>151</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
@@ -1382,10 +1400,10 @@
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>157</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>159</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>159</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
@@ -1445,14 +1463,14 @@
 <td>Comment is too large: Too many lines</td>
 <td>102&#x2013;112</td></tr>
 <tr class="a">
-<td>The method 'initTaskTables' has a Cyclomatic Complexity of 10.</td>
-<td>113&#x2013;152</td></tr>
-<tr class="b">
 <td>Found 'UR'-anomaly for variable 'generation' (lines '113'-'142').</td>
 <td>113&#x2013;142</td></tr>
-<tr class="a">
+<tr class="b">
 <td>Found 'UR'-anomaly for variable 'taskTable' (lines '113'-'149').</td>
 <td>113&#x2013;149</td></tr>
+<tr class="a">
+<td>The method 'initTaskTables' has a Cyclomatic Complexity of 10.</td>
+<td>113&#x2013;152</td></tr>
 <tr class="b">
 <td>Found 'UR'-anomaly for variable 'taskTableFile' (lines '113'-'127').</td>
 <td>113&#x2013;127</td></tr>
@@ -1472,11 +1490,11 @@
 <td>Found 'DU'-anomaly for variable 'notDealTaskTables' (lines '182'-'238').</td>
 <td>182&#x2013;238</td></tr>
 <tr class="b">
-<td>Found 'DD'-anomaly for variable 'needUpdate' (lines '186'-'211').</td>
-<td>186&#x2013;211</td></tr>
-<tr class="a">
 <td>Found 'DD'-anomaly for variable 'needUpdate' (lines '186'-'205').</td>
 <td>186&#x2013;205</td></tr>
+<tr class="a">
+<td>Found 'DD'-anomaly for variable 'needUpdate' (lines '186'-'211').</td>
+<td>186&#x2013;211</td></tr>
 <tr class="b">
 <td>Found 'DD'-anomaly for variable 'needUpdate' (lines '186'-'190').</td>
 <td>186&#x2013;190</td></tr>
@@ -1532,10 +1550,10 @@
 <td>Avoid excessively long variable names like pathRoutingXmlFile</td>
 <td>69</td></tr>
 <tr class="b">
-<td>Parameter 'pathRoutingXmlFile' is not assigned and could be declared final</td>
+<td>Avoid excessively long variable names like pathRoutingXmlFile</td>
 <td>84</td></tr>
 <tr class="a">
-<td>Avoid excessively long variable names like pathRoutingXmlFile</td>
+<td>Parameter 'pathRoutingXmlFile' is not assigned and could be declared final</td>
 <td>84</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -1556,10 +1574,10 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>104&#x2013;109</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>104&#x2013;109</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>104&#x2013;109</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -1607,19 +1625,13 @@
 <th>Violation</th>
 <th>Ligne</th></tr>
 <tr class="b">
-<td>A high number of imports can indicate a high degree of coupling within an object.</td>
+<td>Possible God class (WMC=74, ATFD=132, TCC=0.01282051282051282)</td>
 <td>1&#x2013;828</td></tr>
 <tr class="a">
-<td>Possible God class (WMC=74, ATFD=132, TCC=0.01282051282051282)</td>
+<td>A high number of imports can indicate a high degree of coupling within an object.</td>
 <td>1&#x2013;828</td></tr>
 <tr class="b">
 <td>The class 'AbstractJobsGenerator' has a Standard Cyclomatic Complexity of 5 (Highest = 23).</td>
-<td>71&#x2013;828</td></tr>
-<tr class="a">
-<td>The class 'AbstractJobsGenerator' has a Modified Cyclomatic Complexity of 4 (Highest = 21).</td>
-<td>71&#x2013;828</td></tr>
-<tr class="b">
-<td>The class 'AbstractJobsGenerator' has a Cyclomatic Complexity of 5 (Highest = 24).</td>
 <td>71&#x2013;828</td></tr>
 <tr class="a">
 <td>This class has too many methods, consider refactoring it.</td>
@@ -1627,6 +1639,12 @@
 <tr class="b">
 <td>To be compliant to J2EE, a webapp should not use any thread.</td>
 <td>71</td></tr>
+<tr class="a">
+<td>The class 'AbstractJobsGenerator' has a Modified Cyclomatic Complexity of 4 (Highest = 21).</td>
+<td>71&#x2013;828</td></tr>
+<tr class="b">
+<td>The class 'AbstractJobsGenerator' has a Cyclomatic Complexity of 5 (Highest = 24).</td>
+<td>71&#x2013;828</td></tr>
 <tr class="a">
 <td>Avoid excessively long variable names like jobGeneratorSettings</td>
 <td>104</td></tr>
@@ -1646,10 +1664,10 @@
 <td>fieldCommentRequirement Required</td>
 <td>118</td></tr>
 <tr class="a">
-<td>Avoid excessively long variable names like prefixLogMonitorRemove</td>
+<td>fieldCommentRequirement Required</td>
 <td>119</td></tr>
 <tr class="b">
-<td>fieldCommentRequirement Required</td>
+<td>Avoid excessively long variable names like prefixLogMonitorRemove</td>
 <td>119</td></tr>
 <tr class="a">
 <td>Comment is too large: Too many lines</td>
@@ -1728,7 +1746,13 @@
 <td>261</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>262</td></tr>
+<td>262&#x2013;271</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>262&#x2013;271</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>262&#x2013;271</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>262&#x2013;271</td></tr>
@@ -1749,13 +1773,7 @@
 <td>262&#x2013;271</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>262&#x2013;271</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>262&#x2013;271</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>262&#x2013;271</td></tr>
+<td>262</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>265&#x2013;266</td></tr>
@@ -1799,10 +1817,10 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>285&#x2013;286</td></tr>
 <tr class="b">
-<td>Avoid variables with short names like k</td>
+<td>Avoid variables with short names like v</td>
 <td>287</td></tr>
 <tr class="a">
-<td>Avoid variables with short names like v</td>
+<td>Avoid variables with short names like k</td>
 <td>287</td></tr>
 <tr class="b">
 <td>Found 'DD'-anomaly for variable 'fileType' (lines '288'-'291').</td>
@@ -1841,35 +1859,35 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>307&#x2013;308</td></tr>
 <tr class="b">
+<td>Found 'UR'-anomaly for variable 'key' (lines '317'-'362').</td>
+<td>317&#x2013;362</td></tr>
+<tr class="a">
+<td>publicMethodCommentRequirement Required</td>
+<td>317&#x2013;467</td></tr>
+<tr class="b">
 <td>Found 'UR'-anomaly for variable 'appDataJob' (lines '317'-'333').</td>
 <td>317&#x2013;333</td></tr>
 <tr class="a">
-<td>Avoid really long methods.</td>
-<td>317&#x2013;467</td></tr>
-<tr class="b">
 <td>The method 'run' has a Cyclomatic Complexity of 20.</td>
 <td>317&#x2013;467</td></tr>
-<tr class="a">
-<td>Found 'UR'-anomaly for variable 'key' (lines '317'-'362').</td>
-<td>317&#x2013;362</td></tr>
 <tr class="b">
+<td>Avoid really long methods.</td>
+<td>317&#x2013;467</td></tr>
+<tr class="a">
 <td>The method 'run' has a Standard Cyclomatic Complexity of 19.</td>
+<td>317&#x2013;467</td></tr>
+<tr class="b">
+<td>The method run() has an NPath complexity of 798</td>
 <td>317&#x2013;467</td></tr>
 <tr class="a">
 <td>The method 'run' has a Modified Cyclomatic Complexity of 18.</td>
 <td>317&#x2013;467</td></tr>
 <tr class="b">
-<td>publicMethodCommentRequirement Required</td>
-<td>317&#x2013;467</td></tr>
-<tr class="a">
-<td>The method run() has an NPath complexity of 798</td>
-<td>317&#x2013;467</td></tr>
-<tr class="b">
-<td>Found 'DD'-anomaly for variable 'job' (lines '318'-'327').</td>
-<td>318&#x2013;327</td></tr>
-<tr class="a">
 <td>Found 'DD'-anomaly for variable 'job' (lines '318'-'333').</td>
 <td>318&#x2013;333</td></tr>
+<tr class="a">
+<td>Found 'DD'-anomaly for variable 'job' (lines '318'-'327').</td>
+<td>318&#x2013;327</td></tr>
 <tr class="b">
 <td>Assigning an Object to null is a code smell.  Consider refactoring.</td>
 <td>327</td></tr>
@@ -1880,11 +1898,11 @@
 <td>Found 'DD'-anomaly for variable 'currentTimestamp' (lines '331'-'331').</td>
 <td>331</td></tr>
 <tr class="a">
-<td>Found 'DD'-anomaly for variable 'todo' (lines '332'-'342').</td>
-<td>332&#x2013;342</td></tr>
-<tr class="b">
 <td>Found 'DD'-anomaly for variable 'todo' (lines '332'-'351').</td>
 <td>332&#x2013;351</td></tr>
+<tr class="b">
+<td>Found 'DD'-anomaly for variable 'todo' (lines '332'-'342').</td>
+<td>332&#x2013;342</td></tr>
 <tr class="a">
 <td>Found 'DD'-anomaly for variable 'todo' (lines '332'-'355').</td>
 <td>332&#x2013;355</td></tr>
@@ -1934,11 +1952,11 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>381</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>381</td></tr>
-<tr class="b">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>381</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>381</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>384&#x2013;387</td></tr>
@@ -1946,10 +1964,10 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>384&#x2013;387</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>387</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>387</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
@@ -1988,10 +2006,10 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>404&#x2013;406</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>405</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>405</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
@@ -2030,11 +2048,11 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>431&#x2013;434</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>439&#x2013;440</td></tr>
-<tr class="b">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>439&#x2013;440</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>439&#x2013;440</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>442&#x2013;444</td></tr>
@@ -2045,13 +2063,13 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>442&#x2013;444</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>443&#x2013;444</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>443&#x2013;444</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>443&#x2013;444</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -2087,11 +2105,11 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>465</td></tr>
 <tr class="b">
-<td>Parameter 'job' is not assigned and could be declared final</td>
-<td>469</td></tr>
-<tr class="a">
 <td>protectedMethodCommentRequirement Required</td>
 <td>469&#x2013;504</td></tr>
+<tr class="a">
+<td>Parameter 'job' is not assigned and could be declared final</td>
+<td>469</td></tr>
 <tr class="b">
 <td>Parameter 'newState' is not assigned and could be declared final</td>
 <td>470</td></tr>
@@ -2189,38 +2207,38 @@
 <td>protectedMethodCommentRequirement Required</td>
 <td>506&#x2013;507</td></tr>
 <tr class="b">
-<td>Found 'UR'-anomaly for variable 'input' (lines '509'-'549').</td>
-<td>509&#x2013;549</td></tr>
+<td>Found 'UR'-anomaly for variable 'task' (lines '509'-'547').</td>
+<td>509&#x2013;547</td></tr>
 <tr class="a">
 <td>Parameter 'job' is not assigned and could be declared final</td>
 <td>509</td></tr>
 <tr class="b">
-<td>The method 'inputsSearch' has a Modified Cyclomatic Complexity of 21.</td>
-<td>509&#x2013;692</td></tr>
-<tr class="a">
-<td>Avoid really long methods.</td>
-<td>509&#x2013;692</td></tr>
-<tr class="b">
-<td>Found 'UR'-anomaly for variable 'alt' (lines '509'-'558').</td>
-<td>509&#x2013;558</td></tr>
-<tr class="a">
-<td>Found 'UR'-anomaly for variable 'pool' (lines '509'-'544').</td>
-<td>509&#x2013;544</td></tr>
-<tr class="b">
 <td>The method 'inputsSearch' has a Cyclomatic Complexity of 24.</td>
 <td>509&#x2013;692</td></tr>
 <tr class="a">
+<td>The method 'inputsSearch' has a Standard Cyclomatic Complexity of 23.</td>
+<td>509&#x2013;692</td></tr>
+<tr class="b">
 <td>protectedMethodCommentRequirement Required</td>
+<td>509&#x2013;692</td></tr>
+<tr class="a">
+<td>The method 'inputsSearch' has a Modified Cyclomatic Complexity of 21.</td>
+<td>509&#x2013;692</td></tr>
+<tr class="b">
+<td>Found 'UR'-anomaly for variable 'input' (lines '509'-'549').</td>
+<td>509&#x2013;549</td></tr>
+<tr class="a">
+<td>Avoid really long methods.</td>
 <td>509&#x2013;692</td></tr>
 <tr class="b">
 <td>The method inputsSearch() has an NPath complexity of 1130</td>
 <td>509&#x2013;692</td></tr>
 <tr class="a">
-<td>Found 'UR'-anomaly for variable 'task' (lines '509'-'547').</td>
-<td>509&#x2013;547</td></tr>
+<td>Found 'UR'-anomaly for variable 'alt' (lines '509'-'558').</td>
+<td>509&#x2013;558</td></tr>
 <tr class="b">
-<td>The method 'inputsSearch' has a Standard Cyclomatic Complexity of 23.</td>
-<td>509&#x2013;692</td></tr>
+<td>Found 'UR'-anomaly for variable 'pool' (lines '509'-'544').</td>
+<td>509&#x2013;544</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>512&#x2013;514</td></tr>
@@ -2258,23 +2276,23 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>515&#x2013;535</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>515&#x2013;535</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>515&#x2013;535</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>515&#x2013;535</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>515&#x2013;535</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>515&#x2013;535</td></tr>
-<tr class="b">
 <td>Avoid variables with short names like v</td>
 <td>515</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>515&#x2013;535</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>515&#x2013;535</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>515&#x2013;535</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>515&#x2013;535</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>515&#x2013;535</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>515&#x2013;535</td></tr>
@@ -2360,11 +2378,11 @@
 <td>Avoid instantiating new objects inside loops</td>
 <td>545</td></tr>
 <tr class="a">
-<td>Found 'DU'-anomaly for variable 'futureInputs' (lines '546'-'692').</td>
-<td>546&#x2013;692</td></tr>
-<tr class="b">
 <td>Avoid instantiating new objects inside loops</td>
 <td>546</td></tr>
+<tr class="b">
+<td>Found 'DU'-anomaly for variable 'futureInputs' (lines '546'-'692').</td>
+<td>546&#x2013;692</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>551&#x2013;552</td></tr>
@@ -2384,26 +2402,26 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>559&#x2013;561</td></tr>
 <tr class="a">
-<td>Found 'DU'-anomaly for variable 'file' (lines '562'-'692').</td>
-<td>562&#x2013;692</td></tr>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>562&#x2013;565</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>562&#x2013;565</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>562&#x2013;565</td></tr>
+<td>Found 'DU'-anomaly for variable 'file' (lines '562'-'692').</td>
+<td>562&#x2013;692</td></tr>
 <tr class="b">
 <td>Found 'DD'-anomaly for variable 'type' (lines '567'-'577').</td>
 <td>567&#x2013;577</td></tr>
 <tr class="a">
-<td>Found 'DD'-anomaly for variable 'type' (lines '567'-'574').</td>
-<td>567&#x2013;574</td></tr>
-<tr class="b">
 <td>Found 'DU'-anomaly for variable 'type' (lines '567'-'692').</td>
 <td>567&#x2013;692</td></tr>
-<tr class="a">
+<tr class="b">
 <td>Found 'DD'-anomaly for variable 'type' (lines '567'-'571').</td>
 <td>567&#x2013;571</td></tr>
+<tr class="a">
+<td>Found 'DD'-anomaly for variable 'type' (lines '567'-'574').</td>
+<td>567&#x2013;574</td></tr>
 <tr class="b">
 <td>Found 'DU'-anomaly for variable 'type' (lines '571'-'692').</td>
 <td>571&#x2013;692</td></tr>
@@ -2414,11 +2432,11 @@
 <td>Found 'DU'-anomaly for variable 'type' (lines '577'-'692').</td>
 <td>577&#x2013;692</td></tr>
 <tr class="a">
-<td>Found 'DU'-anomaly for variable 'family' (lines '584'-'692').</td>
-<td>584&#x2013;692</td></tr>
-<tr class="b">
 <td>Found 'DD'-anomaly for variable 'family' (lines '584'-'592').</td>
 <td>584&#x2013;592</td></tr>
+<tr class="b">
+<td>Found 'DU'-anomaly for variable 'family' (lines '584'-'692').</td>
+<td>584&#x2013;692</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>585&#x2013;587</td></tr>
@@ -2522,15 +2540,15 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>685&#x2013;686</td></tr>
 <tr class="a">
+<td>Parameter 'job' is not assigned and could be declared final</td>
+<td>694</td></tr>
+<tr class="b">
+<td>Avoid really long methods.</td>
+<td>694&#x2013;823</td></tr>
+<tr class="a">
 <td>protectedMethodCommentRequirement Required</td>
 <td>694&#x2013;823</td></tr>
 <tr class="b">
-<td>Parameter 'job' is not assigned and could be declared final</td>
-<td>694</td></tr>
-<tr class="a">
-<td>Avoid really long methods.</td>
-<td>694&#x2013;823</td></tr>
-<tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>695&#x2013;697</td></tr>
 <tr class="a">
@@ -2573,11 +2591,11 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>706&#x2013;715</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>706&#x2013;715</td></tr>
-<tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>706</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>706&#x2013;715</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>706</td></tr>
@@ -2651,14 +2669,14 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>742</td></tr>
 <tr class="b">
-<td>Avoid excessively long variable names like distinctInputJobOrder</td>
-<td>748</td></tr>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>748&#x2013;753</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>748&#x2013;753</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>748&#x2013;753</td></tr>
+<td>Avoid excessively long variable names like distinctInputJobOrder</td>
+<td>748</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>748&#x2013;753</td></tr>
@@ -2711,14 +2729,14 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>766&#x2013;775</td></tr>
 <tr class="b">
-<td>Avoid excessively long variable names like distinctOutputJobOrder</td>
-<td>766</td></tr>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>766&#x2013;775</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>766&#x2013;775</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>766&#x2013;775</td></tr>
+<td>Avoid excessively long variable names like distinctOutputJobOrder</td>
+<td>766</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>766&#x2013;775</td></tr>
@@ -2735,26 +2753,26 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>778</td></tr>
 <tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>780&#x2013;789</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>780&#x2013;789</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>780&#x2013;789</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>780&#x2013;789</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>780&#x2013;789</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>780&#x2013;789</td></tr>
+<tr class="b">
 <td>Avoid excessively long variable names like distinctOutputJobOrderNotRegexp</td>
 <td>780</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>780&#x2013;789</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>780&#x2013;789</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>780&#x2013;789</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>780&#x2013;789</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>780&#x2013;789</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>780&#x2013;789</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>780&#x2013;789</td></tr>
@@ -2822,11 +2840,11 @@
 <td>headerCommentRequirement Required</td>
 <td>23&#x2013;145</td></tr>
 <tr class="b">
-<td>publicMethodCommentRequirement Required</td>
-<td>26&#x2013;33</td></tr>
-<tr class="a">
 <td>Parameter 'xmlConverter' is not assigned and could be declared final</td>
 <td>26</td></tr>
+<tr class="a">
+<td>publicMethodCommentRequirement Required</td>
+<td>26&#x2013;33</td></tr>
 <tr class="b">
 <td>Parameter 'l0ProcessSettings' is not assigned and could be declared final</td>
 <td>27</td></tr>
@@ -2840,11 +2858,11 @@
 <td>Parameter 'taskTablesSettings' is not assigned and could be declared final</td>
 <td>28</td></tr>
 <tr class="b">
-<td>Parameter 'job' is not assigned and could be declared final</td>
-<td>36</td></tr>
-<tr class="a">
 <td>protectedMethodCommentRequirement Required</td>
 <td>36&#x2013;73</td></tr>
+<tr class="a">
+<td>Parameter 'job' is not assigned and could be declared final</td>
+<td>36</td></tr>
 <tr class="b">
 <td>If you run in Java5 or newer and have concurrent access, you should use the ConcurrentHashMap implementation</td>
 <td>38</td></tr>
@@ -2894,14 +2912,14 @@
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>61</td></tr>
 <tr class="b">
-<td>Found 'UR'-anomaly for variable 'param' (lines '76'-'82').</td>
-<td>76&#x2013;82</td></tr>
-<tr class="a">
-<td>Parameter 'job' is not assigned and could be declared final</td>
-<td>76</td></tr>
-<tr class="b">
 <td>protectedMethodCommentRequirement Required</td>
 <td>76&#x2013;99</td></tr>
+<tr class="a">
+<td>Found 'UR'-anomaly for variable 'param' (lines '76'-'82').</td>
+<td>76&#x2013;82</td></tr>
+<tr class="b">
+<td>Parameter 'job' is not assigned and could be declared final</td>
+<td>76</td></tr>
 <tr class="a">
 <td>Found 'DD'-anomaly for variable 'update' (lines '78'-'87').</td>
 <td>78&#x2013;87</td></tr>
@@ -3002,46 +3020,46 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>112</td></tr>
 <tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>112</td></tr>
+<tr class="a">
+<td>Avoid variables with short names like p2</td>
+<td>112</td></tr>
+<tr class="b">
 <td>Avoid variables with short names like p1</td>
 <td>112</td></tr>
 <tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>114</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>114</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>114</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>115&#x2013;116</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>115&#x2013;116</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>115&#x2013;116</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>115&#x2013;116</td></tr>
+<tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>115&#x2013;116</td></tr>
+<tr class="a">
 <td>Avoid variables with short names like p2</td>
-<td>112</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>112</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>114</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>114</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>114</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>115&#x2013;116</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>115&#x2013;116</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>115&#x2013;116</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>115&#x2013;116</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>115&#x2013;116</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>116</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>116</td></tr>
 <tr class="a">
-<td>Avoid variables with short names like p2</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>116</td></tr>
 <tr class="b">
 <td>Avoid variables with short names like p1</td>
@@ -3308,32 +3326,32 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>124&#x2013;125</td></tr>
 <tr class="b">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>124&#x2013;125</td></tr>
+<tr class="a">
+<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>124&#x2013;125</td></tr>
+<tr class="b">
 <td>Do not add empty strings</td>
 <td>124</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>124&#x2013;125</td></tr>
+<td>125</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>124&#x2013;125</td></tr>
+<td>125</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>125</td></tr>
+<td>127&#x2013;128</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>125</td></tr>
+<td>127&#x2013;128</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>127&#x2013;128</td></tr>
 <tr class="b">
 <td>Do not add empty strings</td>
 <td>127</td></tr>
-<tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>127&#x2013;128</td></tr>
-<tr class="b">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
-<td>127&#x2013;128</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>128</td></tr>
@@ -3351,16 +3369,7 @@
 <td>142</td></tr>
 <tr class="b">
 <td>Found 'DD'-anomaly for variable 'update' (lines '145'-'145').</td>
-<td>145</td></tr></table></div>
-<div class="section">
-<h3>esa/s1pdgs/cpoc/jobgenerator/utils/DateUtils.java<a name="esas1pdgscpocjobgeneratorutilsDateUtils.java"></a></h3>
-<table border="0" class="bodyTable">
-<tr class="a">
-<th>Violation</th>
-<th>Ligne</th></tr>
-<tr class="b">
-<td>When instantiating a SimpleDateFormat object, specify a Locale</td>
-<td>47</td></tr></table></div></div>
+<td>145</td></tr></table></div></div>
       </div>
     </div>
     <div class="clear">

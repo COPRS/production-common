@@ -73,6 +73,7 @@ public abstract class AbstractGenericConsumer<T> {
         GenericMessageDto<T> message = null;
         try {
             message = mqiService.next();
+            appStatus.setWaiting();
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [code {}] {}", ace.getCode().getCode(),
                     ace.getLogMessage());

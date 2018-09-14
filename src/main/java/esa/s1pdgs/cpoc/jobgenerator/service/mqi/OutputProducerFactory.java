@@ -19,12 +19,12 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
  * @author Viveris Technologies
  */
 @Service
-public class OutputProcuderFactory {
+public class OutputProducerFactory {
 
     /**
      * Logger
      */
-    protected static final Logger LOGGER = LogManager.getLogger(OutputProcuderFactory.class);
+    protected static final Logger LOGGER = LogManager.getLogger(OutputProducerFactory.class);
 
     /**
      * MQI client for LEVEL_JOBS
@@ -43,7 +43,7 @@ public class OutputProcuderFactory {
      * @param senderReports
      */
     @Autowired
-    public OutputProcuderFactory(
+    public OutputProducerFactory(
             @Qualifier("mqiServiceForLevelJobs") final GenericMqiService<LevelJobDto> senderJobs,
             @Qualifier("mqiServiceForErrors") final ErrorService senderErrors) {
         this.senderJobs = senderJobs;

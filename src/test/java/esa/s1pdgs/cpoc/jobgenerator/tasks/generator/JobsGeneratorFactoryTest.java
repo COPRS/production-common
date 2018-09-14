@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
-import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
@@ -61,7 +61,7 @@ public class JobsGeneratorFactoryTest {
     private JobGeneratorSettings jobGeneratorSettings;
 
     @Mock
-    private OutputProcuderFactory JobsSender;
+    private OutputProducerFactory JobsSender;
 
     @Mock
     private AbstractAppCatalogJobService<EdrsSessionDto> appDataEService;

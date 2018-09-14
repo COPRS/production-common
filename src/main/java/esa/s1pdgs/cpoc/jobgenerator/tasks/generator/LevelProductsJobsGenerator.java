@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
-import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 
@@ -42,7 +42,7 @@ public class LevelProductsJobsGenerator
             final MetadataService metadataService,
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
-            final OutputProcuderFactory outputFactory,
+            final OutputProducerFactory outputFactory,
             final AbstractAppCatalogJobService<LevelProductDto> appDataService) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);

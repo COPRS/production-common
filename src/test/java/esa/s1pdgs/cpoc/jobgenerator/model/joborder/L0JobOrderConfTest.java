@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.jobgenerator.model.joborder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -59,6 +60,7 @@ public class L0JobOrderConfTest {
 		assertEquals(obj.getProcParams().get(1), clone.getProcParams().get(1));
 		assertTrue(clone.getConfigFiles().size() == 3);
 		assertEquals(obj.getConfigFiles().get(1), clone.getConfigFiles().get(1));
+		assertFalse(obj.isBreakPointEnable());
 		
 		obj.setSensingTime(null);
 		obj.setProcParams(new ArrayList<>());

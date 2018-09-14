@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
-import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 
@@ -42,14 +42,14 @@ public class JobsGeneratorFactory {
     /**
      * Producer in topic
      */
-    private final OutputProcuderFactory outputFactory;
+    private final OutputProducerFactory outputFactory;
 
     @Autowired
     public JobsGeneratorFactory(final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings jobGeneratorSettings,
             final XmlConverter xmlConverter,
             final MetadataService metadataService,
-            final OutputProcuderFactory outputFactory) {
+            final OutputProducerFactory outputFactory) {
         this.l0ProcessSettings = l0ProcessSettings;
         this.jobGeneratorSettings = jobGeneratorSettings;
         this.xmlConverter = xmlConverter;

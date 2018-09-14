@@ -282,17 +282,6 @@ public abstract class AbstractJobOrderConf {
 	/**
 	 * @see java.lang.Object#toString()
 	 */
-	@Override
-	public String toString() {
-		return String.format(
-				"{processorName: %s, version: %s, stdoutLogLevel: %s, stderrLogLevel: %s, test: %s, breakPointEnable: %s, processingStation: %s, sensingTime: %s, configFiles: %s}",
-				processorName, version, stdoutLogLevel, stderrLogLevel, test, breakPointEnable, processingStation,
-				sensingTime, configFiles);
-	}
-
-	/**
-	 * @see java.lang.Object#toString()
-	 */
 	public String toAbstractString() {
 		return String.format(
 				"processorName: %s, version: %s, stdoutLogLevel: %s, stderrLogLevel: %s, test: %s, breakPointEnable: %s, processingStation: %s, sensingTime: %s, configFiles: %s",

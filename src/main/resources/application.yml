@@ -7,68 +7,68 @@ logging:
   config: log4j2.yml
  
 metadata:
-  host: ${catalog_rest_host:metadata-catalog-svc:8080}
-  rest-api_nb-retry: 3
-  rest-api_tempo-retry-ms: 1000
+  host: ${catalog_rest_host:metadata-catalog-svc:8080}             # 
+  rest-api_nb-retry: 3                                             #  
+  rest-api_tempo-retry-ms: 1000                                    # 
   
 job-generator:
-  diroftasktables: /app/l0_config/task_tables/
-  maxnboftasktable: 1
-  jobgenfixedrate: 100
-  waitprimarycheck:
+  diroftasktables: /app/config/task_tables/                        # Directory where the task tables are located
+  maxnboftasktable: 1                                              # Maximal number of task tables in memory. The application will not start in there are more than this number tasktables in the directory
+  jobgenfixedrate: 100                                             # (Fixed delay) Period between 2 generations
+  waitprimarycheck:                                                # Minimal time between two execution of the following method: checking the requirements to generate a job specific to the level
     tempo: 30000
-  waitmetadatainput:
+  waitmetadatainput:                                               # Minimal time between two execution of the following method: checking the global requirements to generate a job
     tempo: 60000
-  defaultfamily: BLANK
-  outputfamiliesstr: ${products_family-per-type}
-  type-overlap:
+  defaultfamily: BLANK                                             # Default family of a output defined in the task table
+  outputfamiliesstr: ${products_family-per-type}            # !!!!  Family assignation of a specific output
+  type-overlap:                                             # !!!!  Overlap per acquiqition: map {acquisition -> overloap}
     EW: 8.2F
     IW: 7.4F
     SM: 7.7F
     WM: 0.0F
-  type-slice-length:
+  type-slice-length:                                         # !!!! Slice length per acquiqition: map {acquisition -> slice length}
     EW: 60.0F
     IW: 25.0F
     SM: 25.0F
     WM: 0.0F
-  map-type-meta: 
+  map-type-meta:                                             # !!!!  
     AUX_RES: AUX_RESORB
     
 status:
-  delete-fixed-delay-ms: 1800000
-  max-error-counter-processing: 3
-  max-error-counter-mqi: 30
+  delete-fixed-delay-ms: 1800000                                   # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
+  max-error-counter-processing: 3                                  # the number of consecutive processing errors leading to the state FATALERROR
+  max-error-counter-mqi: 30                                        # the number of consecutive MQI errors leading to the state FATALERROR
 
 process:
-  level: ${job_process_level}
-  hostname: ${HOSTNAME}
-  mode: PROD
-  params: 
-    Processing_Mode: NRT
-    Timeout: 300
-  loglevelstdout: INFO
-  loglevelstderr: INFO
-  processingstation: WILE
-  outputregexps: 
-    SM_RAW__0S: ^S1[A-B]_S[1-6]_RAW__0S.*$
-    AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$
-    ZS_RAW__0S: ^S1[A-B]_Z[1-6]_RAW__0S.*$
-    REP_L0PSA_: ^S1[A|B|_]_OPER_REP_ACQ.*$
-    REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$
+  level: L0                                                        # Level for job generator 
+  hostname: ${HOSTNAME}                                            # Hostname 
+  mode: PROD                                                       #  
+  params:                                                    # !!!!  Use to configured the dynamic processing parameters in the generated jobOrder. Format map: key: value
+    Processing_Mode: NRT                      
+    Timeout: 300                     
+  loglevelstdout: INFO                                       # !!!!  Use to configured the LogLevelStdout in the generated jobOrder
+  loglevelstderr: INFO                                       # !!!!  Use to configured the LogLevelStderr in the generated jobOrder 
+  processingstation: WILE                                    # !!!!  Use to configured the ProcessingStation in the generated jobOrder
+  outputregexps:                                             # !!!!  Use to specify the regular expression to use for the output in the wrapper.
+    SM_RAW__0S: ^S1[A-B]_S[1-6]_RAW__0S.*$                          
+    AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$                          
+    ZS_RAW__0S: ^S1[A-B]_Z[1-6]_RAW__0S.*$                          
+    REP_L0PSA_: ^S1[A|B|_]_OPER_REP_ACQ.*$                          
+    REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$                      
   mqi:
-    host-uri: http://localhost:8081
-    max-retries: 3
-    tempo-retry-ms: 1000
+    host-uri: http://localhost:8081                                # URI of the MQI server APIs
+    max-retries: 3                                                 # Nb Max of retry to connect API REST
+    tempo-retry-ms: 1000                                           # Tempo before a retry to connect API REST
   appcatalog:
-    host-uri: http://app-catalog-svc:8080
-    max-retries: 3
-    tempo-retry-ms: 1000
-    tm-connect-ms: 5000
-  fixed-delay-ms: 200
-  initial-delay-ms: 5000
+    host-uri: http://app-catalog-svc:8080                          # URI of the applicative data catalog APIs
+    max-retries: 3                                                 # Nb Max of retry to connect API 
+    tempo-retry-ms: 1000                                           # Tempo before a retry to connect API  
+    tm-connect-ms: 5000                                            # Timeout of connections to the API  
+  fixed-delay-ms: 200                                              # (Fixed delay) Dealy in milliseconds between 2 next messages
+  initial-delay-ms: 5000                                           # Initial delay in missliseconds before the first next message
     
 level0:
-  dir-extractor-sessions: /data/sessions/
+  dir-extractor-sessions: /data/sessions/                          # Local directory where the EDRS session file are temporarly uploaded to extract the raws list of the session
   
 level1:
   pathroutingxmlfile: /app/l1_config/routing.xml

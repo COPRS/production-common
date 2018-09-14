@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
-import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
@@ -26,7 +26,7 @@ public class EdrsSessionsJobsGenerator
     public EdrsSessionsJobsGenerator(XmlConverter xmlConverter,
             MetadataService metadataService, ProcessSettings l0ProcessSettings,
             JobGeneratorSettings taskTablesSettings,
-            final OutputProcuderFactory outputFactory,
+            final OutputProducerFactory outputFactory,
             final AbstractAppCatalogJobService<EdrsSessionDto> appDataService) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
