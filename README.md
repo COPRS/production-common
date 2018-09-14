@@ -68,6 +68,9 @@ kafka.topics.slices                              | the list of topics of level p
 kafka.topics.reports                             | the list of topics of level reports (separated by comma)
 kafka.enable-consumer.slice                      | true if the archive shall consume level products, false else
 kafka.enable-consumer.report                     | true if the archive shall consume level reports, false else
+status.delete-fixed-delay-ms                     | (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
+status.max-error-counter-slices                  | the number of consecutive processing errors for slices leading to the state FATALERROR
+status.max-error-counter-reports                 | the number of consecutive processing errors for reports leading to the state FATALERROR
 file.slices.local-directory                      | the directory of the FTP server for level products (MUST CONTAIN THE LAST '/' CHARACTER)
 file.reports.poll-fixed-delay                    | the directory of the FTP server for level reports (MUST CONTAIN THE LAST '/' CHARACTER)
-dev.activations.download-manifest					| true if the archive shall download only manifest.safe file for level products, if false dowload all files of the product
+dev.activations.download-all     					| false if the archive shall download only manifest.safe file for level products, if true dowload all files of the product
