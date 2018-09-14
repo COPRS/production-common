@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AbstractMetadata.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.es.model</a> &gt; <span class="el_source">AbstractMetadata.java</span></div><h1>AbstractMetadata.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.es.model;
+
+/**
+ * Class describing the metdata of a file
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public abstract class AbstractMetadata {
+
+	/**
+	 * Product name
+	 */
+	protected String productName;
+
+	/**
+	 * Product type
+	 */
+	protected String productType;
+
+	/**
+	 * Key in object storage
+	 */
+	protected String keyObjectStorage;
+
+	/**
+	 * Validity start time
+	 */
+	protected String validityStart;
+
+	/**
+	 * Validity stop time
+	 */
+	protected String validityStop;
+
+	/**
+	 * Constrcutor using fields
+	 * 
+	 * @param productName
+	 * @param productType
+	 * @param keyObjectStorage
+	 * @param validityStart
+	 * @param validityStop
+	 */
+	public AbstractMetadata() {
+<span class="fc" id="L46">		super();</span>
+<span class="fc" id="L47">	}</span>
+
+	/**
+	 * @return the productName
+	 */
+	public String getProductName() {
+<span class="fc" id="L53">		return productName;</span>
+	}
+
+	/**
+	 * @param productName
+	 *            the productName to set
+	 */
+	public void setProductName(String productName) {
+<span class="fc" id="L61">		this.productName = productName;</span>
+<span class="fc" id="L62">	}</span>
+
+	/**
+	 * @return the keyObjectStorage
+	 */
+	public String getKeyObjectStorage() {
+<span class="fc" id="L68">		return keyObjectStorage;</span>
+	}
+
+	/**
+	 * @param keyObjectStorage
+	 *            the keyObjectStorage to set
+	 */
+	public void setKeyObjectStorage(String keyObjectStorage) {
+<span class="fc" id="L76">		this.keyObjectStorage = keyObjectStorage;</span>
+<span class="fc" id="L77">	}</span>
+
+	/**
+	 * @return the validityStart
+	 */
+	public String getValidityStart() {
+<span class="fc" id="L83">		return validityStart;</span>
+	}
+
+	/**
+	 * @param validityStart
+	 *            the validityStart to set
+	 */
+	public void setValidityStart(String validityStart) {
+<span class="fc" id="L91">		this.validityStart = validityStart;</span>
+<span class="fc" id="L92">	}</span>
+
+	/**
+	 * @return the validityStop
+	 */
+	public String getValidityStop() {
+<span class="fc" id="L98">		return validityStop;</span>
+	}
+
+	/**
+	 * @param validityStop
+	 *            the validityStop to set
+	 */
+	public void setValidityStop(String validityStop) {
+<span class="fc" id="L106">		this.validityStop = validityStop;</span>
+<span class="fc" id="L107">	}</span>
+
+	/**
+	 * @return the productType
+	 */
+	public String getProductType() {
+<span class="fc" id="L113">		return productType;</span>
+	}
+
+	/**
+	 * @param productType
+	 *            the productType to set
+	 */
+	public void setProductType(String productType) {
+<span class="fc" id="L121">		this.productType = productType;</span>
+<span class="fc" id="L122">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L129">		return &quot;AbstractMetadata [productName= &quot; + productName + &quot;, productType= &quot; + productType + &quot;, keyObjectStorage= &quot;</span>
+				+ keyObjectStorage + &quot;, validityStart= &quot; + validityStart + &quot;, validityStop= &quot; + validityStop + &quot;]&quot;;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L138">		final int prime = 31;</span>
+<span class="fc" id="L139">		int result = 1;</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">		result = prime * result + ((productName == null) ? 0 : productName.hashCode());</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">		result = prime * result + ((productType == null) ? 0 : productType.hashCode());</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">		result = prime * result + ((validityStart == null) ? 0 : validityStart.hashCode());</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">		result = prime * result + ((validityStop == null) ? 0 : validityStop.hashCode());</span>
+<span class="fc" id="L145">		return result;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+<span class="fc bfc" id="L153" title="All 2 branches covered.">		if (this == obj)</span>
+<span class="fc" id="L154">			return true;</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">		if (obj == null)</span>
+<span class="fc" id="L156">			return false;</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">		if (getClass() != obj.getClass())</span>
+<span class="fc" id="L158">			return false;</span>
+<span class="fc" id="L159">		AbstractMetadata other = (AbstractMetadata) obj;</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">		if (keyObjectStorage == null) {</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">			if (other.keyObjectStorage != null)</span>
+<span class="fc" id="L162">				return false;</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">		} else if (!keyObjectStorage.equals(other.keyObjectStorage))</span>
+<span class="fc" id="L164">			return false;</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">		if (productName == null) {</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">			if (other.productName != null)</span>
+<span class="fc" id="L167">				return false;</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">		} else if (!productName.equals(other.productName))</span>
+<span class="fc" id="L169">			return false;</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">		if (productType == null) {</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">			if (other.productType != null)</span>
+<span class="fc" id="L172">				return false;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">		} else if (!productType.equals(other.productType))</span>
+<span class="fc" id="L174">			return false;</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">		if (validityStart == null) {</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">			if (other.validityStart != null)</span>
+<span class="fc" id="L177">				return false;</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">		} else if (!validityStart.equals(other.validityStart))</span>
+<span class="fc" id="L179">			return false;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">		if (validityStop == null) {</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">			if (other.validityStop != null)</span>
+<span class="fc" id="L182">				return false;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">		} else if (!validityStop.equals(other.validityStop))</span>
+<span class="fc" id="L184">			return false;</span>
+<span class="fc" id="L185">		return true;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

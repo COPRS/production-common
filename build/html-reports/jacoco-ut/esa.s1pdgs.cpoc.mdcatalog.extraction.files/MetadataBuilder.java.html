@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MetadataBuilder.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.extraction.files</a> &gt; <span class="el_source">MetadataBuilder.java</span></div><h1>MetadataBuilder.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.extraction.files;
+
+import java.io.File;
+
+import org.json.JSONObject;
+
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.MetadataExtractorConfig;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+
+/**
+ * Class to build metadata for configuration and ERDS session files
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class MetadataBuilder {
+
+	/**
+	 * Metadata extractor
+	 */
+	private ExtractMetadata extractor;
+
+	/**
+	 * Default constructor
+	 */
+	public MetadataBuilder(MetadataExtractorConfig extractorConfig) {
+<span class="fc" id="L31">		this(new ExtractMetadata(extractorConfig.getTypeOverlap(), extractorConfig.getTypeSliceLength(),</span>
+<span class="fc" id="L32">				extractorConfig.getXsltDirectory()));</span>
+<span class="fc" id="L33">	}</span>
+
+	/**
+	 * Constructor with an existing metadata extractor
+	 * 
+	 * @param extractor
+	 */
+<span class="fc" id="L40">	public MetadataBuilder(ExtractMetadata extractor) {</span>
+<span class="fc" id="L41">		this.extractor = extractor;</span>
+<span class="fc" id="L42">	}</span>
+
+	/**
+	 * Build metadata from configuration files
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildConfigFileMetadata(ConfigFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+<span class="fc" id="L56">		JSONObject metadataToIndex = new JSONObject();</span>
+<span class="pc bfc" id="L57" title="All 4 branches covered.">		switch (descriptor.getExtension()) {</span>
+		case EOF:
+<span class="fc bfc" id="L59" title="All 2 branches covered.">			if (descriptor.getProductType().equals(&quot;AUX_RESORB&quot;)) {</span>
+<span class="fc" id="L60">				metadataToIndex = extractor.processEOFFileWithoutNamespace(descriptor, file);</span>
+			} else {
+<span class="fc" id="L62">				metadataToIndex = extractor.processEOFFile(descriptor, file);</span>
+			}
+<span class="fc" id="L64">			break;</span>
+		case SAFE:
+<span class="fc" id="L66">			metadataToIndex = extractor.processSAFEFile(descriptor, file);</span>
+<span class="fc" id="L67">			break;</span>
+		case XML:
+<span class="fc" id="L69">			metadataToIndex = extractor.processXMLFile(descriptor, file);</span>
+<span class="fc" id="L70">			break;</span>
+		default:
+<span class="fc" id="L72">			throw new MetadataExtractionException(new Exception(&quot;Invalid extension&quot;));</span>
+		}
+<span class="fc" id="L74">		return metadataToIndex;</span>
+	}
+
+	/**
+	 * Build metadata for ERDS session files
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildEdrsSessionFileMetadata(EdrsSessionFileDescriptor descriptor)
+			throws MetadataExtractionException {
+<span class="fc" id="L89">		JSONObject metadataToIndex = new JSONObject();</span>
+<span class="pc bpc" id="L90" title="1 of 3 branches missed.">		switch (descriptor.getProductType()) {</span>
+		case RAW:
+<span class="fc" id="L92">			metadataToIndex = extractor.processRAWFile(descriptor);</span>
+<span class="fc" id="L93">			break;</span>
+		case SESSION:
+<span class="fc" id="L95">			metadataToIndex = extractor.processSESSIONFile(descriptor);</span>
+<span class="fc" id="L96">			break;</span>
+		default:
+<span class="nc" id="L98">			throw new MetadataExtractionException(new Exception(&quot;Invalid extension&quot;));</span>
+		}
+<span class="fc" id="L100">		return metadataToIndex;</span>
+	}
+
+	/**
+	 * Build metadata for L0 Slice
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL0SliceOutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+<span class="fc" id="L115">		JSONObject metadataToIndex = new JSONObject();</span>
+<span class="fc" id="L116">		metadataToIndex = extractor.processL0SliceProd(descriptor, file);</span>
+<span class="fc" id="L117">		return metadataToIndex;</span>
+	}
+
+	/**
+	 * Build metadata for L0 ACN
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL0AcnOutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+<span class="fc" id="L132">		JSONObject metadataToIndex = new JSONObject();</span>
+<span class="fc" id="L133">		metadataToIndex = extractor.processL0AcnProd(descriptor, file);</span>
+<span class="fc" id="L134">		return metadataToIndex;</span>
+	}
+
+	/**
+	 * Build metadata for L0 Slice
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL1SliceOutputFileMetadata(L1OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+<span class="fc" id="L149">		JSONObject metadataToIndex = new JSONObject();</span>
+<span class="fc" id="L150">		metadataToIndex = extractor.processL1SliceProd(descriptor, file);</span>
+<span class="fc" id="L151">		return metadataToIndex;</span>
+	}
+
+	/**
+	 * Build metadata for L0 Annotations
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL1AcnOutputFileMetadata(L1OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+<span class="fc" id="L166">		JSONObject metadataToIndex = new JSONObject();</span>
+<span class="fc" id="L167">		metadataToIndex = extractor.processL1AProd(descriptor, file);</span>
+<span class="fc" id="L168">		return metadataToIndex;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

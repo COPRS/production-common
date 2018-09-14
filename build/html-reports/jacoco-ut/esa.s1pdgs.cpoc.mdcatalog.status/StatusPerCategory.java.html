@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>StatusPerCategory.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.status</a> &gt; <span class="el_source">StatusPerCategory.java</span></div><h1>StatusPerCategory.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.status;
+
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.AppState;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+/**
+ * @author Viveris Technologies
+ */
+public class StatusPerCategory {
+
+    /**
+     * State
+     */
+    private AppState state;
+
+    /**
+     * Category
+     */
+    private final ProductCategory category;
+
+    /**
+     * Date of the last change of the status (old status != new status)
+     */
+    private long dateLastChangeMs;
+
+    /**
+     * Number of consecutive errors for processing
+     */
+    private int errorCounterProcessing;
+    
+    /**
+     * Number of consecutive errors for next message
+     */
+    private int errorCounterNextMessage;
+
+    /**
+     * Processing message identifier
+     */
+    private long processingMsgId;
+
+    /**
+     * Constructor
+     */
+<span class="fc" id="L46">    public StatusPerCategory(final ProductCategory category) {</span>
+<span class="fc" id="L47">        this.state = AppState.WAITING;</span>
+<span class="fc" id="L48">        this.errorCounterProcessing = 0;</span>
+<span class="fc" id="L49">        this.errorCounterNextMessage = 0;</span>
+<span class="fc" id="L50">        this.dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L51">        this.category = category;</span>
+<span class="fc" id="L52">        this.processingMsgId = 0;</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * @return the category
+     */
+    public ProductCategory getCategory() {
+<span class="fc" id="L59">        return category;</span>
+    }
+
+    /**
+     * @return the processingMsgId
+     */
+    public long getProcessingMsgId() {
+<span class="fc" id="L66">        return processingMsgId;</span>
+    }
+
+    /**
+     * @return the status
+     */
+    public AppState getState() {
+<span class="fc" id="L73">        return state;</span>
+    }
+
+    /**
+     * @return the timeSinceLastChange
+     */
+    public long getDateLastChangeMs() {
+<span class="fc" id="L80">        return dateLastChangeMs;</span>
+    }
+
+    /**
+     * @return the errorCounter
+     */
+    public int getErrorCounterProcessing() {
+<span class="fc" id="L87">        return errorCounterProcessing;</span>
+    }
+
+    /**
+     * @return the errorCounterNextMessage
+     */
+    public int getErrorCounterNextMessage() {
+<span class="fc" id="L94">        return errorCounterNextMessage;</span>
+    }
+
+
+    /**
+     * Set status WAITING
+     */
+    public void setWaiting() {
+<span class="fc" id="L102">        this.processingMsgId = 0;</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (!isFatalError()) {</span>
+<span class="fc" id="L104">            state = AppState.WAITING;</span>
+<span class="fc" id="L105">            dateLastChangeMs = System.currentTimeMillis();</span>
+        }
+<span class="fc" id="L107">    }</span>
+
+    /**
+     * Set status PROCESSING
+     */
+    public void setProcessing(final long processingMsgId) {
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (!isFatalError()) {</span>
+<span class="fc" id="L114">            state = AppState.PROCESSING;</span>
+<span class="fc" id="L115">            this.processingMsgId = processingMsgId;</span>
+<span class="fc" id="L116">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L117">            errorCounterProcessing = 0;</span>
+<span class="fc" id="L118">            errorCounterNextMessage = 0;</span>
+        }
+<span class="fc" id="L120">    }</span>
+
+    /**
+     * Set status ERROR
+     */
+    public void setErrorProcessing(final int maxErrorCounter) {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (!isFatalError()) {</span>
+<span class="fc" id="L127">            state = AppState.ERROR;</span>
+<span class="fc" id="L128">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L129">            errorCounterProcessing++;</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (errorCounterProcessing &gt;= maxErrorCounter) {</span>
+<span class="fc" id="L131">                setFatalError();</span>
+            }
+        }
+<span class="fc" id="L134">    }</span>
+    
+    /**
+     * @param errorCounterNextMessage the errorCounterNextMessage to set
+     */
+    public void setErrorNextMessage(final int maxErrorCounterNextMessage) {
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (!isFatalError()) {</span>
+<span class="fc" id="L141">            state = AppState.ERROR;</span>
+<span class="fc" id="L142">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L143">            errorCounterNextMessage++;</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">            if (errorCounterNextMessage &gt;= maxErrorCounterNextMessage) {</span>
+<span class="nc" id="L145">                setFatalError();</span>
+            }
+        }
+<span class="fc" id="L148">    }</span>
+
+    /**
+     * Set status FATALERROR
+     */
+    public void setFatalError() {
+<span class="fc" id="L154">        state = AppState.FATALERROR;</span>
+<span class="fc" id="L155">        dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L156">    }</span>
+
+    /**
+     * Indicate if state is waiting
+     * 
+     * @return
+     */
+    public boolean isWaiting() {
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        return state == AppState.WAITING;</span>
+    }
+
+    /**
+     * Indicate if state is PROCESSING
+     * 
+     * @return
+     */
+    public boolean isProcessing() {
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        return state == AppState.PROCESSING;</span>
+    }
+
+    /**
+     * Indicate if state is ERROR
+     * 
+     * @return
+     */
+    public boolean isError() {
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        return state == AppState.ERROR;</span>
+    }
+
+    /**
+     * Indicate if state is FATALERROR
+     * 
+     * @return
+     */
+    public boolean isFatalError() {
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        return state == AppState.FATALERROR;</span>
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L199">        return String.format(</span>
+                &quot;{state: %s, category: %s, dateLastChangeMs: %s, errorCounterProcessing: %s, &quot;
+                + &quot;errorCounterNextMessage: %s, processingMsgId: %s}&quot;,
+<span class="nc" id="L202">                state, category, dateLastChangeMs, errorCounterProcessing,</span>
+<span class="nc" id="L203">                errorCounterNextMessage, processingMsgId);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L211">        return Objects.hash(state, category, dateLastChangeMs, errorCounterProcessing,</span>
+<span class="fc" id="L212">                errorCounterNextMessage, processingMsgId);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L221" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L222">            ret = true;</span>
+<span class="fc bfc" id="L223" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L224">            ret = false;</span>
+        } else {
+<span class="fc" id="L226">            StatusPerCategory other = (StatusPerCategory) obj;</span>
+            // field comparison
+<span class="fc bfc" id="L228" title="All 2 branches covered.">            ret = Objects.equals(state, other.state)</span>
+<span class="fc bfc" id="L229" title="All 10 branches covered.">                    &amp;&amp; Objects.equals(category, other.category)</span>
+                    &amp;&amp; dateLastChangeMs == other.dateLastChangeMs
+                    &amp;&amp; errorCounterProcessing == other.errorCounterProcessing
+                    &amp;&amp; errorCounterNextMessage == other.errorCounterNextMessage
+                    &amp;&amp; processingMsgId == other.processingMsgId;
+        }
+<span class="fc" id="L235">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

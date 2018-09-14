@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SearchMetadataController.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.rest</a> &gt; <span class="el_source">SearchMetadataController.java</span></div><h1>SearchMetadataController.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.rest;
+
+import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
+import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.mdcatalog.rest.dto.SearchMetadataDto;
+
+@RestController
+@RequestMapping(path = &quot;/metadata&quot;)
+public class SearchMetadataController {
+
+<span class="fc" id="L28">	private static final Logger LOGGER = LogManager.getLogger(SearchMetadataController.class);</span>
+
+	private final EsServices esServices;
+
+	@Autowired
+<span class="fc" id="L33">	public SearchMetadataController(final EsServices esServices) {</span>
+<span class="fc" id="L34">		this.esServices = esServices;</span>
+<span class="fc" id="L35">	}</span>
+
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = &quot;/search&quot;)
+	public ResponseEntity&lt;SearchMetadataDto&gt; search(@RequestParam(name = &quot;productType&quot;) String productType,
+			@RequestParam(name = &quot;mode&quot;) String mode, @RequestParam(name = &quot;satellite&quot;) String satellite,
+			@RequestParam(name = &quot;t0&quot;) String startDate, @RequestParam(name = &quot;t1&quot;) String stopDate,
+			@RequestParam(name = &quot;insConfId&quot;, defaultValue = &quot;-1&quot;) int insConfId,
+			@RequestParam(value = &quot;dt0&quot;, defaultValue = &quot;0.0&quot;) double dt0,
+			@RequestParam(value = &quot;dt1&quot;, defaultValue = &quot;0.0&quot;) double dt1) {
+		try {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">			if (mode.equals(&quot;LatestValCover&quot;)) {</span>
+<span class="fc" id="L46">				SearchMetadata f = esServices.lastValCover(productType,</span>
+<span class="fc" id="L47">						convertDateForSearch(startDate, -dt0,</span>
+<span class="fc" id="L48">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.999999&quot;)),</span>
+<span class="fc" id="L49">						convertDateForSearch(stopDate, dt1,</span>
+<span class="fc" id="L50">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.000000&quot;)),</span>
+						satellite, insConfId);
+<span class="fc" id="L52">				SearchMetadataDto response = null;</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">				if (f != null) {</span>
+<span class="fc" id="L54">					response = new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),</span>
+<span class="fc" id="L55">							f.getValidityStart(), f.getValidityStop());</span>
+				}
+<span class="fc" id="L57">				return new ResponseEntity&lt;SearchMetadataDto&gt;(response, HttpStatus.OK);</span>
+			} else {
+<span class="fc" id="L59">				LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg Unknown mode]&quot;, productType,</span>
+<span class="fc" id="L60">						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);</span>
+<span class="fc" id="L61">				return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.BAD_REQUEST);</span>
+			}
+<span class="fc" id="L63">		} catch (AbstractCodedException e) {</span>
+<span class="fc" id="L64">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] {}&quot;, productType, e.getCode().getCode(), mode,</span>
+<span class="fc" id="L65">					e.getLogMessage());</span>
+<span class="fc" id="L66">			return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L67">		} catch (Exception e) {</span>
+<span class="fc" id="L68">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg {}]&quot;, productType,</span>
+<span class="fc" id="L69">					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());</span>
+<span class="fc" id="L70">			return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+
+	}
+
+	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter)
+			throws ParseException {
+
+<span class="fc" id="L78">		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);</span>
+<span class="fc" id="L79">		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));</span>
+<span class="fc" id="L80">		return timePlus.format(outFormatter);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
