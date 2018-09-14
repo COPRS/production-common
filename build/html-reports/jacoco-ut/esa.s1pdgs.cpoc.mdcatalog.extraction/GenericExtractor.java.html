@@ -107,70 +107,71 @@ public abstract class GenericExtractor&lt;T&gt; {
 <span class="fc" id="L107">        GenericMessageDto&lt;T&gt; message = null;</span>
         try {
 <span class="fc" id="L109">            message = mqiService.next();</span>
-<span class="fc" id="L110">        } catch (AbstractCodedException ace) {</span>
-<span class="fc" id="L111">            LOGGER.error(&quot;[MONITOR] [step 0] [{}] [code {}] {}&quot;, category,</span>
-<span class="fc" id="L112">                    ace.getCode().getCode(), ace.getLogMessage());</span>
-<span class="fc" id="L113">            message = null;</span>
-<span class="fc" id="L114">            appStatus.setError(category, &quot;NEXT_MESSAGE&quot;);</span>
-<span class="fc" id="L115">        }</span>
-<span class="pc bpc" id="L116" title="1 of 4 branches missed.">        if (message == null || message.getBody() == null) {</span>
-<span class="fc" id="L117">            LOGGER.trace(</span>
+<span class="fc" id="L110">            appStatus.setWaiting(category);</span>
+<span class="fc" id="L111">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L112">            LOGGER.error(&quot;[MONITOR] [step 0] [{}] [code {}] {}&quot;, category,</span>
+<span class="fc" id="L113">                    ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L114">            message = null;</span>
+<span class="fc" id="L115">            appStatus.setError(category, &quot;NEXT_MESSAGE&quot;);</span>
+<span class="fc" id="L116">        }</span>
+<span class="pc bpc" id="L117" title="1 of 4 branches missed.">        if (message == null || message.getBody() == null) {</span>
+<span class="fc" id="L118">            LOGGER.trace(</span>
                     &quot;[MONITOR] [step 0] [{}] No message received: continue&quot;,
                     category);
-<span class="fc" id="L120">            return;</span>
+<span class="fc" id="L121">            return;</span>
         }
 
         // ----------------------------------------------------------
         // Process Message
         // ----------------------------------------------------------
-<span class="nc" id="L126">        T dto = message.getBody();</span>
-<span class="nc" id="L127">        LOGGER.info(</span>
+<span class="nc" id="L127">        T dto = message.getBody();</span>
+<span class="nc" id="L128">        LOGGER.info(</span>
                 &quot;[REPORT] [Step 0] [{}] [s1pdgsTask MetadataExtraction] [START] [productName {}] Starting metadata extraction&quot;,
-<span class="nc" id="L129">                category, extractProductNameFromDto(dto));</span>
-<span class="nc" id="L130">        appStatus.setProcessing(category, message.getIdentifier());</span>
+<span class="nc" id="L130">                category, extractProductNameFromDto(dto));</span>
+<span class="nc" id="L131">        appStatus.setProcessing(category, message.getIdentifier());</span>
 
         try {
-<span class="nc" id="L133">            JSONObject metadata = extractMetadata(message);</span>
+<span class="nc" id="L134">            JSONObject metadata = extractMetadata(message);</span>
 
             // Publish metadata
-<span class="nc" id="L136">            LOGGER.info(</span>
+<span class="nc" id="L137">            LOGGER.info(</span>
                     &quot;[MONITOR] [step 4] [{}] [productName {}] Publishing metadata&quot;,
-<span class="nc" id="L138">                    category, extractProductNameFromDto(dto));</span>
-<span class="nc bnc" id="L139" title="All 2 branches missed.">            if (!esServices.isMetadataExist(metadata)) {</span>
-<span class="nc" id="L140">                esServices.createMetadata(metadata);</span>
+<span class="nc" id="L139">                    category, extractProductNameFromDto(dto));</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">            if (!esServices.isMetadataExist(metadata)) {</span>
+<span class="nc" id="L141">                esServices.createMetadata(metadata);</span>
             }
 
             // Acknowledge
-<span class="nc" id="L144">            ackPositively(message);</span>
+<span class="nc" id="L145">            ackPositively(message);</span>
 
-<span class="nc" id="L146">        } catch (AbstractCodedException e1) {</span>
-<span class="nc" id="L147">            String errorMessage = String.format(</span>
+<span class="nc" id="L147">        } catch (AbstractCodedException e1) {</span>
+<span class="nc" id="L148">            String errorMessage = String.format(</span>
                     &quot;[MONITOR] [%s] [productName %s] [code %s] %s&quot;, category,
-<span class="nc" id="L149">                    extractProductNameFromDto(dto), e1.getCode().getCode(),</span>
-<span class="nc" id="L150">                    e1.getLogMessage());</span>
-<span class="nc" id="L151">            ackNegatively(message, errorMessage);</span>
-<span class="nc" id="L152">        } catch (Exception e) {</span>
-<span class="nc" id="L153">            String errorMessage = String.format(</span>
+<span class="nc" id="L150">                    extractProductNameFromDto(dto), e1.getCode().getCode(),</span>
+<span class="nc" id="L151">                    e1.getLogMessage());</span>
+<span class="nc" id="L152">            ackNegatively(message, errorMessage);</span>
+<span class="nc" id="L153">        } catch (Exception e) {</span>
+<span class="nc" id="L154">            String errorMessage = String.format(</span>
                     &quot;[MONITOR] [%s] [productName %s] [code %s] [msg %s]&quot;,
-<span class="nc" id="L155">                    category, extractProductNameFromDto(dto),</span>
-<span class="nc" id="L156">                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());</span>
-<span class="nc" id="L157">            ackNegatively(message, errorMessage);</span>
+<span class="nc" id="L156">                    category, extractProductNameFromDto(dto),</span>
+<span class="nc" id="L157">                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());</span>
+<span class="nc" id="L158">            ackNegatively(message, errorMessage);</span>
         } finally {
-<span class="nc" id="L159">            this.cleanProcessing(message);</span>
-<span class="nc" id="L160">        }</span>
+<span class="nc" id="L160">            this.cleanProcessing(message);</span>
+<span class="nc" id="L161">        }</span>
 
-<span class="nc" id="L162">        LOGGER.info(</span>
+<span class="nc" id="L163">        LOGGER.info(</span>
                 &quot;[MONITOR] [step 6] [{}] [productName {}] Checking status consumer&quot;,
-<span class="nc" id="L164">                category, extractProductNameFromDto(dto));</span>
-<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (appStatus.isFatalError()) {</span>
-<span class="nc" id="L166">            System.exit(-1);</span>
+<span class="nc" id="L165">                category, extractProductNameFromDto(dto));</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (appStatus.isFatalError()) {</span>
+<span class="nc" id="L167">            System.exit(-1);</span>
         } else {
-<span class="nc" id="L168">            appStatus.setWaiting(category);</span>
+<span class="nc" id="L169">            appStatus.setWaiting(category);</span>
         }
 
-<span class="nc" id="L171">        LOGGER.info(&quot;[MONITOR] [step 0] [{}] [productName {}] End&quot;, category,</span>
-<span class="nc" id="L172">                extractProductNameFromDto(dto));</span>
-<span class="nc" id="L173">    }</span>
+<span class="nc" id="L172">        LOGGER.info(&quot;[MONITOR] [step 0] [{}] [productName {}] End&quot;, category,</span>
+<span class="nc" id="L173">                extractProductNameFromDto(dto));</span>
+<span class="nc" id="L174">    }</span>
 
     /**
      * Acknowledge negatively the message processing and set app status in error
@@ -180,21 +181,21 @@ public abstract class GenericExtractor&lt;T&gt; {
      */
     protected void ackNegatively(final GenericMessageDto&lt;T&gt; message,
             final String errorMessage) {
-<span class="fc" id="L183">        LOGGER.info(</span>
+<span class="fc" id="L184">        LOGGER.info(</span>
                 &quot;[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP KO] [productName {}] Acknowledging negatively&quot;,
-<span class="fc" id="L185">                category, extractProductNameFromDto(message.getBody()));</span>
-<span class="fc" id="L186">        LOGGER.error(errorMessage);</span>
+<span class="fc" id="L186">                category, extractProductNameFromDto(message.getBody()));</span>
+<span class="fc" id="L187">        LOGGER.error(errorMessage);</span>
         try {
-<span class="fc" id="L188">            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR,</span>
+<span class="fc" id="L189">            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR,</span>
                     errorMessage, false));
-<span class="fc" id="L190">        } catch (AbstractCodedException ace) {</span>
-<span class="fc" id="L191">            LOGGER.error(</span>
+<span class="fc" id="L191">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L192">            LOGGER.error(</span>
                     &quot;[MONITOR] [step 5] [{}] [productName {}] [code {}] {}&quot;,
-<span class="fc" id="L193">                    category, extractProductNameFromDto(message.getBody()),</span>
-<span class="fc" id="L194">                    ace.getCode().getCode(), ace.getLogMessage());</span>
-<span class="fc" id="L195">        }</span>
-<span class="fc" id="L196">        appStatus.setError(category, &quot;PROCESSING&quot;);</span>
-<span class="fc" id="L197">    }</span>
+<span class="fc" id="L194">                    category, extractProductNameFromDto(message.getBody()),</span>
+<span class="fc" id="L195">                    ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L196">        }</span>
+<span class="fc" id="L197">        appStatus.setError(category, &quot;PROCESSING&quot;);</span>
+<span class="fc" id="L198">    }</span>
 
     /**
      * Acknowledge positively the message processing
@@ -202,20 +203,20 @@ public abstract class GenericExtractor&lt;T&gt; {
      * @param dto
      */
     protected void ackPositively(final GenericMessageDto&lt;T&gt; message) {
-<span class="fc" id="L205">        LOGGER.info(</span>
+<span class="fc" id="L206">        LOGGER.info(</span>
                 &quot;[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP OK] [productName {}] Acknowledging positively&quot;,
-<span class="fc" id="L207">                category, extractProductNameFromDto(message.getBody()));</span>
+<span class="fc" id="L208">                category, extractProductNameFromDto(message.getBody()));</span>
         try {
-<span class="fc" id="L209">            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK,</span>
+<span class="fc" id="L210">            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK,</span>
                     null, false));
-<span class="fc" id="L211">        } catch (AbstractCodedException ace) {</span>
-<span class="fc" id="L212">            LOGGER.error(</span>
+<span class="fc" id="L212">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L213">            LOGGER.error(</span>
                     &quot;[MONITOR] [step 5] [{}] [productName {}] [code {}] {}&quot;,
-<span class="fc" id="L214">                    category, extractProductNameFromDto(message.getBody()),</span>
-<span class="fc" id="L215">                    ace.getCode().getCode(), ace.getLogMessage());</span>
-<span class="fc" id="L216">            appStatus.setError(category, &quot;PROCESSING&quot;);</span>
-<span class="fc" id="L217">        }</span>
-<span class="fc" id="L218">    }</span>
+<span class="fc" id="L215">                    category, extractProductNameFromDto(message.getBody()),</span>
+<span class="fc" id="L216">                    ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L217">            appStatus.setError(category, &quot;PROCESSING&quot;);</span>
+<span class="fc" id="L218">        }</span>
+<span class="fc" id="L219">    }</span>
 
     /**
      * Extract product name from the DTO

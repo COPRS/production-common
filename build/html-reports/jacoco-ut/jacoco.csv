@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.status,StatusPerCategory,42,248,3,35,4,56,4,34,1,18
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.status,StatusPerCategory,42,251,3,35,4,57,4,34,1,18
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.status,StatusRestController,0,86,0,6,0,18,0,7,0,4
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.status,AppStatus,0,177,4,24,0,45,4,18,0,8
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.status.dto,StatusPerCategoryDto,0,152,0,14,0,32,0,20,0,13
@@ -39,7 +39,7 @@ S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest.dto,L0SliceM
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest.dto,SearchMetadataDto,0,21,0,0,0,5,0,2,0,2
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.mqi,MqiConfiguration,0,68,0,0,0,13,0,5,0,5
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,MetadataExtractorConfig,0,24,0,0,0,11,0,7,0,7
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,GenericExtractor,154,178,5,3,30,46,3,6,0,5
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,GenericExtractor,154,183,5,3,30,47,3,6,0,5
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,AuxiliaryFilesExtractor,0,144,0,6,0,32,0,10,0,7
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,LevelProductsExtractor.new Object() {...},4,29,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,EdrsSessionsExtractor,4,58,0,0,3,13,2,4,2,4

@@ -103,57 +103,58 @@ public class StatusPerCategory {
 <span class="fc bfc" id="L103" title="All 2 branches covered.">        if (!isFatalError()) {</span>
 <span class="fc" id="L104">            state = AppState.WAITING;</span>
 <span class="fc" id="L105">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L106">            errorCounterNextMessage = 0;</span>
         }
-<span class="fc" id="L107">    }</span>
+<span class="fc" id="L108">    }</span>
 
     /**
      * Set status PROCESSING
      */
     public void setProcessing(final long processingMsgId) {
-<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (!isFatalError()) {</span>
-<span class="fc" id="L114">            state = AppState.PROCESSING;</span>
-<span class="fc" id="L115">            this.processingMsgId = processingMsgId;</span>
-<span class="fc" id="L116">            dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L117">            errorCounterProcessing = 0;</span>
-<span class="fc" id="L118">            errorCounterNextMessage = 0;</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (!isFatalError()) {</span>
+<span class="fc" id="L115">            state = AppState.PROCESSING;</span>
+<span class="fc" id="L116">            this.processingMsgId = processingMsgId;</span>
+<span class="fc" id="L117">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L118">            errorCounterProcessing = 0;</span>
+<span class="fc" id="L119">            errorCounterNextMessage = 0;</span>
         }
-<span class="fc" id="L120">    }</span>
+<span class="fc" id="L121">    }</span>
 
     /**
      * Set status ERROR
      */
     public void setErrorProcessing(final int maxErrorCounter) {
-<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (!isFatalError()) {</span>
-<span class="fc" id="L127">            state = AppState.ERROR;</span>
-<span class="fc" id="L128">            dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L129">            errorCounterProcessing++;</span>
-<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (errorCounterProcessing &gt;= maxErrorCounter) {</span>
-<span class="fc" id="L131">                setFatalError();</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (!isFatalError()) {</span>
+<span class="fc" id="L128">            state = AppState.ERROR;</span>
+<span class="fc" id="L129">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L130">            errorCounterProcessing++;</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            if (errorCounterProcessing &gt;= maxErrorCounter) {</span>
+<span class="fc" id="L132">                setFatalError();</span>
             }
         }
-<span class="fc" id="L134">    }</span>
+<span class="fc" id="L135">    }</span>
     
     /**
      * @param errorCounterNextMessage the errorCounterNextMessage to set
      */
     public void setErrorNextMessage(final int maxErrorCounterNextMessage) {
-<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (!isFatalError()) {</span>
-<span class="fc" id="L141">            state = AppState.ERROR;</span>
-<span class="fc" id="L142">            dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L143">            errorCounterNextMessage++;</span>
-<span class="pc bpc" id="L144" title="1 of 2 branches missed.">            if (errorCounterNextMessage &gt;= maxErrorCounterNextMessage) {</span>
-<span class="nc" id="L145">                setFatalError();</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        if (!isFatalError()) {</span>
+<span class="fc" id="L142">            state = AppState.ERROR;</span>
+<span class="fc" id="L143">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L144">            errorCounterNextMessage++;</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">            if (errorCounterNextMessage &gt;= maxErrorCounterNextMessage) {</span>
+<span class="nc" id="L146">                setFatalError();</span>
             }
         }
-<span class="fc" id="L148">    }</span>
+<span class="fc" id="L149">    }</span>
 
     /**
      * Set status FATALERROR
      */
     public void setFatalError() {
-<span class="fc" id="L154">        state = AppState.FATALERROR;</span>
-<span class="fc" id="L155">        dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L156">    }</span>
+<span class="fc" id="L155">        state = AppState.FATALERROR;</span>
+<span class="fc" id="L156">        dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L157">    }</span>
 
     /**
      * Indicate if state is waiting
@@ -161,7 +162,7 @@ public class StatusPerCategory {
      * @return
      */
     public boolean isWaiting() {
-<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        return state == AppState.WAITING;</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        return state == AppState.WAITING;</span>
     }
 
     /**
@@ -170,7 +171,7 @@ public class StatusPerCategory {
      * @return
      */
     public boolean isProcessing() {
-<span class="fc bfc" id="L173" title="All 2 branches covered.">        return state == AppState.PROCESSING;</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        return state == AppState.PROCESSING;</span>
     }
 
     /**
@@ -179,7 +180,7 @@ public class StatusPerCategory {
      * @return
      */
     public boolean isError() {
-<span class="fc bfc" id="L182" title="All 2 branches covered.">        return state == AppState.ERROR;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        return state == AppState.ERROR;</span>
     }
 
     /**
@@ -188,7 +189,7 @@ public class StatusPerCategory {
      * @return
      */
     public boolean isFatalError() {
-<span class="fc bfc" id="L191" title="All 2 branches covered.">        return state == AppState.FATALERROR;</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        return state == AppState.FATALERROR;</span>
     }
 
     /**
@@ -196,11 +197,11 @@ public class StatusPerCategory {
      */
     @Override
     public String toString() {
-<span class="nc" id="L199">        return String.format(</span>
+<span class="nc" id="L200">        return String.format(</span>
                 &quot;{state: %s, category: %s, dateLastChangeMs: %s, errorCounterProcessing: %s, &quot;
                 + &quot;errorCounterNextMessage: %s, processingMsgId: %s}&quot;,
-<span class="nc" id="L202">                state, category, dateLastChangeMs, errorCounterProcessing,</span>
-<span class="nc" id="L203">                errorCounterNextMessage, processingMsgId);</span>
+<span class="nc" id="L203">                state, category, dateLastChangeMs, errorCounterProcessing,</span>
+<span class="nc" id="L204">                errorCounterNextMessage, processingMsgId);</span>
     }
 
     /**
@@ -208,8 +209,8 @@ public class StatusPerCategory {
      */
     @Override
     public int hashCode() {
-<span class="fc" id="L211">        return Objects.hash(state, category, dateLastChangeMs, errorCounterProcessing,</span>
-<span class="fc" id="L212">                errorCounterNextMessage, processingMsgId);</span>
+<span class="fc" id="L212">        return Objects.hash(state, category, dateLastChangeMs, errorCounterProcessing,</span>
+<span class="fc" id="L213">                errorCounterNextMessage, processingMsgId);</span>
     }
 
     /**
@@ -218,21 +219,21 @@ public class StatusPerCategory {
     @Override
     public boolean equals(final Object obj) {
         boolean ret;
-<span class="fc bfc" id="L221" title="All 2 branches covered.">        if (this == obj) {</span>
-<span class="fc" id="L222">            ret = true;</span>
-<span class="fc bfc" id="L223" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L224">            ret = false;</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L223">            ret = true;</span>
+<span class="fc bfc" id="L224" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L225">            ret = false;</span>
         } else {
-<span class="fc" id="L226">            StatusPerCategory other = (StatusPerCategory) obj;</span>
+<span class="fc" id="L227">            StatusPerCategory other = (StatusPerCategory) obj;</span>
             // field comparison
-<span class="fc bfc" id="L228" title="All 2 branches covered.">            ret = Objects.equals(state, other.state)</span>
-<span class="fc bfc" id="L229" title="All 10 branches covered.">                    &amp;&amp; Objects.equals(category, other.category)</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">            ret = Objects.equals(state, other.state)</span>
+<span class="fc bfc" id="L230" title="All 10 branches covered.">                    &amp;&amp; Objects.equals(category, other.category)</span>
                     &amp;&amp; dateLastChangeMs == other.dateLastChangeMs
                     &amp;&amp; errorCounterProcessing == other.errorCounterProcessing
                     &amp;&amp; errorCounterNextMessage == other.errorCounterNextMessage
                     &amp;&amp; processingMsgId == other.processingMsgId;
         }
-<span class="fc" id="L235">        return ret;</span>
+<span class="fc" id="L236">        return ret;</span>
     }
 
 }

@@ -107,6 +107,7 @@ public abstract class GenericExtractor<T> {
         GenericMessageDto<T> message = null;
         try {
             message = mqiService.next();
+            appStatus.setWaiting(category);
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step 0] [{}] [code {}] {}", category,
                     ace.getCode().getCode(), ace.getLogMessage());
