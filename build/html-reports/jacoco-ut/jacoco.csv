@@ -11,7 +11,7 @@ S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.process,PoolExecutorCall
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.process,StreamGobbler,0,22,0,0,0,7,0,2,0,2
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.process,PoolProcessor,39,194,5,13,7,49,5,10,0,6
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.mqi,MqiConfiguration,0,82,0,0,0,15,0,6,0,6
-S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.mqi,OutputProcuderFactory,11,61,0,0,5,17,1,4,1,4
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.mqi,OutputProcuderFactory,0,72,0,0,0,22,0,5,0,5
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.obs,S3CustomObject,0,96,0,10,0,17,0,12,0,7
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.obs,S3DownloadFile,0,80,0,10,0,16,0,10,0,5
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.obs,S3UploadFile,0,80,0,10,0,15,0,10,0,5

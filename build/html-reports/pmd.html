@@ -377,11 +377,11 @@
 <td>Found 'UR'-anomaly for variable 'line' (lines '159'-'170').</td>
 <td>159&#x2013;170</td></tr>
 <tr class="a">
-<td>Found 'DU'-anomaly for variable 'filePath' (lines '171'-'217').</td>
-<td>171&#x2013;217</td></tr>
-<tr class="b">
 <td>Found 'DD'-anomaly for variable 'filePath' (lines '171'-'171').</td>
 <td>171</td></tr>
+<tr class="b">
+<td>Found 'DU'-anomaly for variable 'filePath' (lines '171'-'217').</td>
+<td>171&#x2013;217</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
 <td>181</td></tr>
@@ -407,13 +407,13 @@
 <td>Found 'DD'-anomaly for variable 'productName' (lines '228'-'231').</td>
 <td>228&#x2013;231</td></tr>
 <tr class="a">
-<td>When doing a String.toLowerCase()/toUpperCase() call, use a Locale</td>
-<td>234</td></tr>
-<tr class="b">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>234</td></tr>
-<tr class="a">
+<tr class="b">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
+<td>234</td></tr>
+<tr class="a">
+<td>When doing a String.toLowerCase()/toUpperCase() call, use a Locale</td>
 <td>234</td></tr>
 <tr class="b">
 <td>Potential violation of Law of Demeter (object not created locally)</td>
@@ -467,10 +467,10 @@
 <td>Found 'DD'-anomaly for variable 'listoutputs' (lines '312'-'314').</td>
 <td>312&#x2013;314</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Prefer StringBuffer over += for concatenating strings</td>
 <td>314</td></tr>
 <tr class="b">
-<td>Prefer StringBuffer over += for concatenating strings</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>314</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -587,17 +587,17 @@
 <td>Avoid excessively long variable names like stopAllProcessCall</td>
 <td>100</td></tr>
 <tr class="b">
-<td>Found 'DD'-anomaly for variable 'stopAllProcessCall' (lines '100'-'125').</td>
-<td>100&#x2013;125</td></tr>
-<tr class="a">
 <td>Found 'DD'-anomaly for variable 'stopAllProcessCall' (lines '100'-'117').</td>
 <td>100&#x2013;117</td></tr>
-<tr class="b">
-<td>Found 'DU'-anomaly for variable 'j' (lines '102'-'144').</td>
-<td>102&#x2013;144</td></tr>
 <tr class="a">
+<td>Found 'DD'-anomaly for variable 'stopAllProcessCall' (lines '100'-'125').</td>
+<td>100&#x2013;125</td></tr>
+<tr class="b">
 <td>Avoid variables with short names like j</td>
 <td>102</td></tr>
+<tr class="a">
+<td>Found 'DU'-anomaly for variable 'j' (lines '102'-'144').</td>
+<td>102&#x2013;144</td></tr>
 <tr class="b">
 <td>Avoid instantiating new objects inside loops</td>
 <td>109&#x2013;110</td></tr>
@@ -653,26 +653,26 @@
 <td>To be compliant to J2EE, a webapp should not use any thread.</td>
 <td>8</td></tr>
 <tr class="a">
-<td>fieldCommentRequirement Required</td>
-<td>9</td></tr>
-<tr class="b">
 <td>Private field 'inputStream' could be made final; it is only initialized in the declaration or constructor.</td>
 <td>9</td></tr>
-<tr class="a">
-<td>fieldCommentRequirement Required</td>
-<td>10</td></tr>
 <tr class="b">
+<td>fieldCommentRequirement Required</td>
+<td>9</td></tr>
+<tr class="a">
 <td>Private field 'consumer' could be made final; it is only initialized in the declaration or constructor.</td>
 <td>10</td></tr>
-<tr class="a">
-<td>Parameter 'consumer' is not assigned and could be declared final</td>
-<td>12</td></tr>
 <tr class="b">
-<td>Parameter 'inputStream' is not assigned and could be declared final</td>
-<td>12</td></tr>
+<td>fieldCommentRequirement Required</td>
+<td>10</td></tr>
 <tr class="a">
 <td>publicMethodCommentRequirement Required</td>
 <td>12&#x2013;15</td></tr>
+<tr class="b">
+<td>Parameter 'consumer' is not assigned and could be declared final</td>
+<td>12</td></tr>
+<tr class="a">
+<td>Parameter 'inputStream' is not assigned and could be declared final</td>
+<td>12</td></tr>
 <tr class="b">
 <td>publicMethodCommentRequirement Required</td>
 <td>18&#x2013;21</td></tr></table></div>
@@ -692,11 +692,11 @@
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>64&#x2013;65</td></tr>
 <tr class="a">
-<td>Avoid variables with short names like r</td>
-<td>67</td></tr>
-<tr class="b">
 <td>Found 'DD'-anomaly for variable 'r' (lines '67'-'82').</td>
 <td>67&#x2013;82</td></tr>
+<tr class="b">
+<td>Avoid variables with short names like r</td>
+<td>67</td></tr>
 <tr class="a">
 <td>Found 'DD'-anomaly for variable 'process' (lines '69'-'75').</td>
 <td>69&#x2013;75</td></tr>
@@ -824,16 +824,16 @@
 <td>Using equalsIgnoreCase() is cleaner than using toUpperCase/toLowerCase().equals().</td>
 <td>92</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>Potential violation of Law of Demeter (static property access)</td>
 <td>92</td></tr>
 <tr class="b">
-<td>Potential violation of Law of Demeter (static property access)</td>
+<td>When doing a String.toLowerCase()/toUpperCase() call, use a Locale</td>
 <td>92</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>92</td></tr>
 <tr class="b">
-<td>When doing a String.toLowerCase()/toUpperCase() call, use a Locale</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>92</td></tr></table></div>
 <div class="section">
 <h3>esa/s1pdgs/cpoc/wrapper/status/dto/WrapperStatusDto.java<a name="esas1pdgscpocwrapperstatusdtoWrapperStatusDto.java"></a></h3>
