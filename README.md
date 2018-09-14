@@ -56,6 +56,9 @@ kafka.poll-timeout                               | the bootstrap servers for KAF
 kafka.producer-retries                           | the maximal number of retries when publishing a message = parameter "retries" of KAFKA producer configuration
 kafka.topic.auxiliary-files                      | the name of the topic used for the auxiliary files
 kafka.topic.edrs-sessions                        | the name of the topic used for EDRS sessions
+status.delete-fixed-delay-ms                     | (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
+status.max-error-counter-aux                     | the number of consecutive processing errors for auxiliary files leading to the state FATALERROR
+status.max-error-counter-ses                     | the number of consecutive processing errors for EDRS session leading to the state FATALERROR
 file.auxiliary-files.local-directory             | the directory of the FTP server for auxiliary files (MUST CONTAIN THE LAST '/' CHARACTER)
 file.auxiliary-files.poll-fixed-delay            | (fixed delay) period in milliseconds between 2 poll "max-msg-per-poll" files in the local directory for auxiliary files 
 file.auxiliary-files.max-msg-per-poll            | the maximal number of files to get at each poll
