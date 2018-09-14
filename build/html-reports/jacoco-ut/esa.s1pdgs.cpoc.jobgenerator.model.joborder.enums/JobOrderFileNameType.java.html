@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>JobOrderFileNameType.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums</a> &gt; <span class="el_source">JobOrderFileNameType.java</span></div><h1>JobOrderFileNameType.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums;
+
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlType;
+
+/**
+ * Available file name type in the job Order
+ * @author Cyrielle Gailliard
+ *
+ */
+<span class="pc" id="L12">@XmlType(name = &quot;File_Name_Type&quot;)</span>
+@XmlEnum
+public enum JobOrderFileNameType {
+
+<span class="fc" id="L16">	@XmlEnumValue(&quot;Physical&quot;)</span>
+	PHYSICAL(&quot;Physical&quot;),
+
+<span class="fc" id="L19">	@XmlEnumValue(&quot;Directory&quot;)</span>
+	DIRECTORY(&quot;Directory&quot;),
+
+<span class="fc" id="L22">	@XmlEnumValue(&quot;Regexp&quot;)</span>
+	REGEXP(&quot;Regexp&quot;),
+
+<span class="fc" id="L25">	@XmlEnumValue(&quot;&quot;)</span>
+	BLANK(&quot;&quot;);
+
+	/**
+	 * Value in XML file
+	 */
+	private final String value;
+
+	/**
+	 * 
+	 * @param v
+	 */
+<span class="fc" id="L37">	JobOrderFileNameType(final String val) {</span>
+<span class="fc" id="L38">		value = val;</span>
+<span class="fc" id="L39">	}</span>
+	
+	String getValue() {
+<span class="nc" id="L42">		return value;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

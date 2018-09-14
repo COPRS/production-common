@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>JobOrderProc.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.joborder</a> &gt; <span class="el_source">JobOrderProc.java</span></div><h1>JobOrderProc.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.joborder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.eclipse.persistence.oxm.annotations.XmlPath;
+
+/**
+ * Class describing a processor
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+@XmlRootElement(name = &quot;Ipf_Proc&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class JobOrderProc {
+
+	/**
+	 * Task name
+	 */
+	@XmlElement(name = &quot;Task_Name&quot;)
+	private String taskName;
+
+	/**
+	 * Task version
+	 */
+	@XmlElement(name = &quot;Task_Version&quot;)
+	private String taskVersion;
+
+	/**
+	 * Breakpoints
+	 */
+	@XmlElement(name = &quot;Breakpoint&quot;)
+	private JobOrderBreakpoint breakpoint;
+
+	/**
+	 * Inputs
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Inputs&quot;)
+	@XmlElement(name = &quot;Input&quot;)
+	private List&lt;JobOrderInput&gt; inputs;
+
+	/**
+	 * Number of inputs. Automatically filled.
+	 */
+	@XmlPath(&quot;List_of_Inputs/@count&quot;)
+	private int nbInputs;
+
+	/**
+	 * Outputs
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Outputs&quot;)
+	@XmlElement(name = &quot;Output&quot;)
+	private List&lt;JobOrderOutput&gt; outputs;
+
+	/**
+	 * Number of outputs. Automatically filled.
+	 */
+	@XmlPath(&quot;List_of_Outputs/@count&quot;)
+	private int nbOutputs;
+
+	/**
+	 * Default constructor
+	 */
+	public JobOrderProc() {
+<span class="fc" id="L74">		super();</span>
+<span class="fc" id="L75">		this.inputs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L76">		this.outputs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L77">		this.nbInputs = 0;</span>
+<span class="fc" id="L78">		this.nbOutputs = 0;</span>
+<span class="fc" id="L79">	}</span>
+
+	/**
+	 * Clone
+	 * 
+	 * @param obj
+	 */
+	public JobOrderProc(final JobOrderProc obj) {
+<span class="fc" id="L87">		this();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">		this.inputs.addAll(obj.getInputs().stream().filter(item -&gt; item != null).map(item -&gt; new JobOrderInput(item))</span>
+<span class="fc" id="L89">				.collect(Collectors.toList()));</span>
+<span class="fc" id="L90">		this.nbInputs = this.inputs.size();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">		this.outputs.addAll(obj.getOutputs().stream().filter(item -&gt; item != null).map(item -&gt; new JobOrderOutput(item))</span>
+<span class="fc" id="L92">				.collect(Collectors.toList()));</span>
+<span class="fc" id="L93">		this.nbOutputs = this.outputs.size();</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">		if (obj.getBreakpoint() != null) {</span>
+<span class="fc" id="L95">			this.breakpoint = new JobOrderBreakpoint(obj.getBreakpoint());</span>
+		}
+<span class="fc" id="L97">		this.taskName = obj.getTaskName();</span>
+<span class="fc" id="L98">		this.taskVersion = obj.getTaskVersion();</span>
+<span class="fc" id="L99">	}</span>
+
+	/**
+	 * @return the taskName
+	 */
+	public String getTaskName() {
+<span class="fc" id="L105">		return taskName;</span>
+	}
+
+	/**
+	 * @param taskName
+	 *            the taskName to set
+	 */
+	public void setTaskName(final String taskName) {
+<span class="fc" id="L113">		this.taskName = taskName;</span>
+<span class="fc" id="L114">	}</span>
+
+	/**
+	 * @return the taskVersion
+	 */
+	public String getTaskVersion() {
+<span class="fc" id="L120">		return taskVersion;</span>
+	}
+
+	/**
+	 * @param taskVersion
+	 *            the taskVersion to set
+	 */
+	public void setTaskVersion(final String taskVersion) {
+<span class="fc" id="L128">		this.taskVersion = taskVersion;</span>
+<span class="fc" id="L129">	}</span>
+
+	/**
+	 * @return the breakpoint
+	 */
+	public JobOrderBreakpoint getBreakpoint() {
+<span class="fc" id="L135">		return breakpoint;</span>
+	}
+
+	/**
+	 * @param breakpoint
+	 *            the breakpoint to set
+	 */
+	public void setBreakpoint(final JobOrderBreakpoint breakpoint) {
+<span class="fc" id="L143">		this.breakpoint = breakpoint;</span>
+<span class="fc" id="L144">	}</span>
+
+	/**
+	 * @return the inputs
+	 */
+	public List&lt;JobOrderInput&gt; getInputs() {
+<span class="fc" id="L150">		return inputs;</span>
+	}
+
+	public void addInput(final JobOrderInput input) {
+<span class="fc" id="L154">		this.inputs.add(input);</span>
+<span class="fc" id="L155">		this.nbInputs++;</span>
+<span class="fc" id="L156">	}</span>
+
+	/**
+	 * @param inputs
+	 *            the inputs to set
+	 */
+	public void setInputs(final List&lt;JobOrderInput&gt; inputs) {
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">		if (inputs != null) {</span>
+<span class="fc" id="L164">			this.inputs = inputs;</span>
+<span class="fc" id="L165">			this.nbInputs = inputs.size();</span>
+		} else {
+<span class="nc" id="L167">			this.inputs = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L168">			this.nbInputs = 0;</span>
+		}
+<span class="fc" id="L170">	}</span>
+
+	/**
+	 * @return the outputs
+	 */
+	public List&lt;JobOrderOutput&gt; getOutputs() {
+<span class="fc" id="L176">		return outputs;</span>
+	}
+
+	/**
+	 * @param outputs
+	 *            the outputs to set
+	 */
+	public void addOutput(final JobOrderOutput output) {
+<span class="fc" id="L184">		this.outputs.add(output);</span>
+<span class="fc" id="L185">		this.nbOutputs++;</span>
+<span class="fc" id="L186">	}</span>
+
+	/**
+	 * @param outputs
+	 *            the outputs to set
+	 */
+	public void addOutputs(final List&lt;JobOrderOutput&gt; outputs) {
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">		if (outputs != null) {</span>
+<span class="fc" id="L194">			this.outputs.addAll(outputs);</span>
+<span class="fc" id="L195">			this.nbOutputs += outputs.size();</span>
+		}
+<span class="fc" id="L197">	}</span>
+
+	/**
+	 * @param outputs
+	 *            the outputs to set
+	 */
+	public void setOutputs(final List&lt;JobOrderOutput&gt; outputs) {
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">		if (outputs != null) {</span>
+<span class="fc" id="L205">			this.outputs = outputs;</span>
+<span class="fc" id="L206">			this.nbOutputs = outputs.size();</span>
+		} else {
+<span class="nc" id="L208">			this.outputs = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L209">			this.nbOutputs = 0;</span>
+		}
+<span class="fc" id="L211">	}</span>
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L218">		return String.format(</span>
+				&quot;{taskName: %s, taskVersion: %s, breakpoint: %s, inputs: %s, nbInputs: %s, outputs: %s, nbOutputs: %s}&quot;,
+<span class="fc" id="L220">				taskName, taskVersion, breakpoint, inputs, nbInputs, outputs, nbOutputs);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L228">		return Objects.hash(taskName, taskVersion, breakpoint, inputs, nbInputs, outputs, nbOutputs);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L237" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L238">			ret = true;</span>
+<span class="fc bfc" id="L239" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L240">			ret = false;</span>
+		} else {
+<span class="fc" id="L242">			JobOrderProc other = (JobOrderProc) obj;</span>
+<span class="fc bfc" id="L243" title="All 4 branches covered.">			ret = Objects.equals(taskName, other.taskName) &amp;&amp; Objects.equals(taskVersion, other.taskVersion)</span>
+<span class="fc bfc" id="L244" title="All 6 branches covered.">					&amp;&amp; Objects.equals(breakpoint, other.breakpoint) &amp;&amp; Objects.equals(inputs, other.inputs)</span>
+<span class="fc bfc" id="L245" title="All 4 branches covered.">					&amp;&amp; nbInputs == other.nbInputs &amp;&amp; Objects.equals(outputs, other.outputs)</span>
+					&amp;&amp; nbOutputs == other.nbOutputs;
+		}
+<span class="fc" id="L248">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

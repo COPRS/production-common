@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>EdrsSessionJobDispatcher.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.tasks.dispatcher</a> &gt; <span class="el_source">EdrsSessionJobDispatcher.java</span></div><h1>EdrsSessionJobDispatcher.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.tasks.dispatcher;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Service;
+
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+
+/**
+ * Dispatcher of EdrsSession product&lt;br/&gt;
+ * Only one task table
+ * 
+ * @author Cyrielle Gailliard
+ */
+@Service
+@ConditionalOnProperty(name = &quot;process.level&quot;, havingValue = &quot;L0&quot;)
+public class EdrsSessionJobDispatcher
+        extends AbstractJobsDispatcher&lt;EdrsSessionDto&gt; {
+
+    /**
+     * Task table
+     */
+    private static final String TASK_TABLE_NAME = &quot;TaskTable.AIOP.xml&quot;;
+
+    /**
+     * Constructor
+     * 
+     * @param taskTablesSettings
+     * @param jobsGeneratorFactory
+     * @param jobGenerationTaskScheduler
+     */
+    @Autowired
+    public EdrsSessionJobDispatcher(final JobGeneratorSettings settings,
+            final ProcessSettings processSettings,
+            final JobsGeneratorFactory factory,
+            final ThreadPoolTaskScheduler taskScheduler,
+            @Qualifier(&quot;appCatalogServiceForEdrsSessions&quot;) final AbstractAppCatalogJobService&lt;EdrsSessionDto&gt; appDataService) {
+<span class="fc" id="L53">        super(settings, processSettings, factory, taskScheduler,</span>
+                appDataService);
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Initialization
+     * 
+     * @throws AbstractCodedException
+     */
+    @PostConstruct
+    public void initialize() throws AbstractCodedException {
+        // Init job generators from task tables
+<span class="fc" id="L65">        super.initTaskTables();</span>
+<span class="fc" id="L66">    }</span>
+
+    /**
+     * 
+     */
+    @Override
+    protected AbstractJobsGenerator&lt;EdrsSessionDto&gt; createJobGenerator(
+            final File xmlFile) throws AbstractCodedException {
+<span class="fc" id="L74">        return this.factory.createJobGeneratorForEdrsSession(xmlFile, appDataService);</span>
+    }
+
+    /**
+     * Get task tables to generate for given job
+     */
+    @Override
+    protected List&lt;String&gt; getTaskTables(
+            final AppDataJobDto&lt;EdrsSessionDto&gt; job) {
+<span class="fc" id="L83">        return Arrays.asList(TASK_TABLE_NAME);</span>
+    }
+
+    @Override
+    protected String getTaskForFunctionalLog() {
+<span class="nc" id="L88">        return &quot;L0JobGeneration&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

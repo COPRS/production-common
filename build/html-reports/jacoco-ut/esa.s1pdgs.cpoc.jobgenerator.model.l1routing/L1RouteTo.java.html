@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L1RouteTo.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.l1routing</a> &gt; <span class="el_source">L1RouteTo.java</span></div><h1>L1RouteTo.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.l1routing;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * Class used the to route&lt;br/&gt;
+ * Used for mapping the file routing.xml in java objects
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+@XmlRootElement(name = &quot;l1_to&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class L1RouteTo {
+
+	/**
+	 * List of task tables (XML filenames)
+	 */
+	@XmlElementWrapper(name = &quot;task_tables&quot;)
+	@XmlElement(name = &quot;task_table&quot;)
+	private List&lt;String&gt; taskTables;
+
+	/**
+	 * Default constructor
+	 */
+<span class="fc" id="L35">	public L1RouteTo() {</span>
+<span class="fc" id="L36">		this.taskTables = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L37">	}</span>
+
+	/**
+	 * Constructor using fields
+	 * @param taskTables
+	 */
+	public L1RouteTo(final Collection&lt;String&gt; taskTables) {
+<span class="fc" id="L44">		this();</span>
+<span class="fc" id="L45">		this.taskTables.addAll(taskTables);</span>
+<span class="fc" id="L46">	}</span>
+
+	/**
+	 * @return the taskTables
+	 */
+	public List&lt;String&gt; getTaskTables() {
+<span class="fc" id="L52">		return taskTables;</span>
+	}
+
+	/**
+	 * @param taskTables the taskTables to set
+	 */
+	public void setTaskTables(final List&lt;String&gt; taskTables) {
+<span class="fc" id="L59">		this.taskTables = taskTables;</span>
+<span class="fc" id="L60">	}</span>
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L67">		return String.format(&quot;{taskTables: %s}&quot;, taskTables);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L75">		return Objects.hash(taskTables);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L84" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L85">			ret = true;</span>
+<span class="fc bfc" id="L86" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L87">			ret = false;</span>
+		} else {
+<span class="fc" id="L89">			L1RouteTo other = (L1RouteTo) obj;</span>
+<span class="fc" id="L90">			ret = Objects.equals(taskTables, other.taskTables);</span>
+		}
+<span class="fc" id="L92">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

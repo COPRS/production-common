@@ -95,8 +95,6 @@ public class L0SliceJobsDispatcher
      */
     @PostConstruct
     public void initialize() throws AbstractCodedException {
-        // Init job generators from task tables
-        super.initTaskTables();
 
         // Init the routing map from XML file located in the task table folder
         try {
@@ -116,6 +114,9 @@ public class L0SliceJobsDispatcher
                             this.pathRoutingXmlFile),
                     e);
         }
+        
+        // Init job generators from task tables
+        super.initTaskTables();
     }
 
     /**

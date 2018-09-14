@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TaskTable.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.tasktable</a> &gt; <span class="el_source">TaskTable.java</span></div><h1>TaskTable.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.tasktable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableTestEnum;
+
+/**
+ * Class describing the content of a file taskTable.xml
+ * 
+ * @author Cyrielle
+ *
+ */
+@XmlRootElement(name = &quot;Ipf_Task_Table&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class TaskTable {
+
+	/**
+	 * Processor name
+	 */
+	@XmlElement(name = &quot;Processor_Name&quot;)
+	private String processorName;
+
+	/**
+	 * Version
+	 */
+	@XmlElement(name = &quot;Version&quot;)
+	private String version;
+
+	/**
+	 * Configuration files
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Cfg_Files&quot;)
+	@XmlElement(name = &quot;Cfg_Files&quot;)
+	private List&lt;TaskTableCfgFile&gt; cfgFiles;
+
+	/**
+	 * Dynamic processors parameters
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Dyn_ProcParam&quot;)
+	@XmlElement(name = &quot;Dyn_ProcParam&quot;)
+	private List&lt;TaskTableDynProcParam&gt; dynProcParams;
+
+	/**
+	 * Pools
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Pools&quot;)
+	@XmlElement(name = &quot;Pool&quot;)
+	private List&lt;TaskTablePool&gt; pools;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Test&quot;)
+	private TaskTableTestEnum test;
+
+	/**
+	 * 
+	 */
+	private ApplicationLevel level;
+
+	/**
+	 * 
+	 */
+	public TaskTable() {
+<span class="fc" id="L74">		super();</span>
+<span class="fc" id="L75">		this.dynProcParams = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L76">		this.cfgFiles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L77">		this.pools = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L78">		this.test = TaskTableTestEnum.BLANK;</span>
+<span class="fc" id="L79">		this.level = ApplicationLevel.L0;</span>
+<span class="fc" id="L80">	}</span>
+
+	/**
+	 * @return the processorName
+	 */
+	public String getProcessorName() {
+<span class="fc" id="L86">		return processorName;</span>
+	}
+
+	/**
+	 * @param processorName
+	 *            the processorName to set
+	 */
+	public void setProcessorName(final String processorName) {
+<span class="fc" id="L94">		this.processorName = processorName;</span>
+<span class="fc" id="L95">	}</span>
+
+	/**
+	 * @return the version
+	 */
+	public String getVersion() {
+<span class="fc" id="L101">		return version;</span>
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(final String version) {
+<span class="fc" id="L109">		this.version = version;</span>
+<span class="fc" id="L110">	}</span>
+
+	/**
+	 * @return the cfgFiles
+	 */
+	public List&lt;TaskTableCfgFile&gt; getCfgFiles() {
+<span class="fc" id="L116">		return cfgFiles;</span>
+	}
+
+	/**
+	 * @param cfgFiles
+	 *            the cfgFiles to set
+	 */
+	public void setCfgFiles(final List&lt;TaskTableCfgFile&gt; cfgFiles) {
+<span class="nc" id="L124">		this.cfgFiles = cfgFiles;</span>
+<span class="nc" id="L125">	}</span>
+
+	/**
+	 * @param cfgFiles
+	 *            the cfgFiles to set
+	 */
+	public void addCfgFile(final TaskTableCfgFile cfgFile) {
+<span class="fc" id="L132">		this.cfgFiles.add(cfgFile);</span>
+<span class="fc" id="L133">	}</span>
+
+	/**
+	 * @return the dynProcParam
+	 */
+	public List&lt;TaskTableDynProcParam&gt; getDynProcParams() {
+<span class="fc" id="L139">		return dynProcParams;</span>
+	}
+
+	/**
+	 * @param dynProcParam
+	 *            the dynProcParam to set
+	 */
+	public void addDynProcParam(final TaskTableDynProcParam dynProcParam) {
+<span class="fc" id="L147">		this.dynProcParams.add(dynProcParam);</span>
+<span class="fc" id="L148">	}</span>
+
+	/**
+	 * @return the pools
+	 */
+	public List&lt;TaskTablePool&gt; getPools() {
+<span class="fc" id="L154">		return pools;</span>
+	}
+
+	/**
+	 * @param pools
+	 *            the pools to set
+	 */
+	public void setPools(final List&lt;TaskTablePool&gt; pools) {
+<span class="nc" id="L162">		this.pools = pools;</span>
+<span class="nc" id="L163">	}</span>
+
+	/**
+	 * @param pools
+	 *            the pools to set
+	 */
+	public void addPool(final TaskTablePool pool) {
+<span class="fc" id="L170">		this.pools.add(pool);</span>
+<span class="fc" id="L171">	}</span>
+
+	/**
+	 * @return the test
+	 */
+	public TaskTableTestEnum getTest() {
+<span class="fc" id="L177">		return test;</span>
+	}
+
+	/**
+	 * @param test
+	 *            the test to set
+	 */
+	public void setTest(final TaskTableTestEnum test) {
+<span class="fc" id="L185">		this.test = test;</span>
+<span class="fc" id="L186">	}</span>
+
+	/**
+	 * @return the level
+	 */
+	public ApplicationLevel getLevel() {
+<span class="fc" id="L192">		return level;</span>
+	}
+
+	/**
+	 * @param level
+	 *            the level to set
+	 */
+	public void setLevel(final ApplicationLevel level) {
+<span class="fc" id="L200">		this.level = level;</span>
+<span class="fc" id="L201">	}</span>
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L208">		return Objects.hash(processorName, version, cfgFiles, dynProcParams, pools, test, level);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L217" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L218">			ret = true;</span>
+<span class="fc bfc" id="L219" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L220">			ret = false;</span>
+		} else {
+<span class="fc" id="L222">			TaskTable other = (TaskTable) obj;</span>
+<span class="fc bfc" id="L223" title="All 4 branches covered.">			ret = Objects.equals(processorName, other.processorName) &amp;&amp; Objects.equals(version, other.version)</span>
+<span class="fc bfc" id="L224" title="All 4 branches covered.">					&amp;&amp; Objects.equals(cfgFiles, other.cfgFiles) &amp;&amp; Objects.equals(dynProcParams, other.dynProcParams)</span>
+<span class="fc bfc" id="L225" title="All 4 branches covered.">					&amp;&amp; Objects.equals(pools, other.pools) &amp;&amp; Objects.equals(test, other.test)</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">					&amp;&amp; Objects.equals(level, other.level);</span>
+		}
+<span class="fc" id="L228">		return ret;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

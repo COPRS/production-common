@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TaskTableOuput.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.tasktable</a> &gt; <span class="el_source">TaskTableOuput.java</span></div><h1>TaskTableOuput.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.tasktable;
+
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableFileNameType;
+import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum;
+import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableOutputDestination;
+
+/**
+ * 
+ */
+@XmlRootElement(name = &quot;Output&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class TaskTableOuput {
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Destination&quot;)
+	private TaskTableOutputDestination destination;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Mandatory&quot;)
+	private TaskTableMandatoryEnum mandatory;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Type&quot;)
+	private String type;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;File_Name_Type&quot;)
+	private TaskTableFileNameType fileNameType;
+
+	/**
+	 * 
+	 */
+	public TaskTableOuput() {
+<span class="fc" id="L49">		super();</span>
+<span class="fc" id="L50">		this.destination = TaskTableOutputDestination.BLANK;</span>
+<span class="fc" id="L51">		this.mandatory = TaskTableMandatoryEnum.NO;</span>
+<span class="fc" id="L52">		this.fileNameType = TaskTableFileNameType.BLANK;</span>
+<span class="fc" id="L53">	}</span>
+
+	/**
+	 * @param destination
+	 * @param mandatory
+	 * @param type
+	 * @param fileNameType
+	 */
+	public TaskTableOuput(final TaskTableOutputDestination destination, final TaskTableMandatoryEnum mandatory,
+			final String type, final TaskTableFileNameType fileNameType) {
+<span class="fc" id="L63">		this();</span>
+<span class="fc" id="L64">		this.destination = destination;</span>
+<span class="fc" id="L65">		this.mandatory = mandatory;</span>
+<span class="fc" id="L66">		this.type = type;</span>
+<span class="fc" id="L67">		this.fileNameType = fileNameType;</span>
+<span class="fc" id="L68">	}</span>
+
+	/**
+	 * @return the destination
+	 */
+	public TaskTableOutputDestination getDestination() {
+<span class="fc" id="L74">		return destination;</span>
+	}
+
+	/**
+	 * @param destination
+	 *            the destination to set
+	 */
+	public void setDestination(final TaskTableOutputDestination destination) {
+<span class="nc" id="L82">		this.destination = destination;</span>
+<span class="nc" id="L83">	}</span>
+
+	/**
+	 * @return the mandatory
+	 */
+	public TaskTableMandatoryEnum getMandatory() {
+<span class="fc" id="L89">		return mandatory;</span>
+	}
+
+	/**
+	 * @param mandatory
+	 *            the mandatory to set
+	 */
+	public void setMandatory(final TaskTableMandatoryEnum mandatory) {
+<span class="nc" id="L97">		this.mandatory = mandatory;</span>
+<span class="nc" id="L98">	}</span>
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+<span class="fc" id="L104">		return type;</span>
+	}
+
+	/**
+	 * @param type
+	 *            the type to set
+	 */
+	public void setType(final String type) {
+<span class="nc" id="L112">		this.type = type;</span>
+<span class="nc" id="L113">	}</span>
+
+	/**
+	 * @return the fileNameType
+	 */
+	public TaskTableFileNameType getFileNameType() {
+<span class="fc" id="L119">		return fileNameType;</span>
+	}
+
+	/**
+	 * @param fileNameType
+	 *            the fileNameType to set
+	 */
+	public void setFileNameType(final TaskTableFileNameType fileNameType) {
+<span class="nc" id="L127">		this.fileNameType = fileNameType;</span>
+<span class="nc" id="L128">	}</span>
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L135">		return Objects.hash(destination, mandatory, type, fileNameType);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L144" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L145">			ret = true;</span>
+<span class="fc bfc" id="L146" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L147">			ret = false;</span>
+		} else {
+<span class="fc" id="L149">			TaskTableOuput other = (TaskTableOuput) obj;</span>
+<span class="fc bfc" id="L150" title="All 4 branches covered.">			ret = Objects.equals(destination, other.destination) &amp;&amp; Objects.equals(mandatory, other.mandatory)</span>
+<span class="fc bfc" id="L151" title="All 4 branches covered.">					&amp;&amp; Objects.equals(type, other.type) &amp;&amp; Objects.equals(fileNameType, other.fileNameType);</span>
+		}
+<span class="fc" id="L153">		return ret;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TaskTablePool.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.tasktable</a> &gt; <span class="el_source">TaskTablePool.java</span></div><h1>TaskTablePool.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.tasktable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * 
+ */
+@XmlRootElement(name = &quot;Pool&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class TaskTablePool {
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Detached&quot;)
+	private boolean detached;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Killing_Signal&quot;)
+	private int killingSignal;
+
+	/**
+	 * 
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Tasks&quot;)
+	@XmlElement(name = &quot;Task&quot;)
+	private List&lt;TaskTableTask&gt; tasks;
+
+	/**
+	 * 
+	 */
+	public TaskTablePool() {
+<span class="fc" id="L43">		super();</span>
+<span class="fc" id="L44">		detached = false;</span>
+<span class="fc" id="L45">		killingSignal = 9;</span>
+<span class="fc" id="L46">		this.tasks = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L47">	}</span>
+
+	/**
+	 * @return the detached
+	 */
+	public boolean isDetached() {
+<span class="fc" id="L53">		return detached;</span>
+	}
+
+	/**
+	 * @param detached
+	 *            the detached to set
+	 */
+	public void setDetached(final boolean detached) {
+<span class="fc" id="L61">		this.detached = detached;</span>
+<span class="fc" id="L62">	}</span>
+
+	/**
+	 * @return the killingSignal
+	 */
+	public int getKillingSignal() {
+<span class="fc" id="L68">		return killingSignal;</span>
+	}
+
+	/**
+	 * @param killingSignal
+	 *            the killingSignal to set
+	 */
+	public void setKillingSignal(final int killingSignal) {
+<span class="fc" id="L76">		this.killingSignal = killingSignal;</span>
+<span class="fc" id="L77">	}</span>
+
+	/**
+	 * @return the tasks
+	 */
+	public List&lt;TaskTableTask&gt; getTasks() {
+<span class="fc" id="L83">		return tasks;</span>
+	}
+
+	/**
+	 * @param tasks
+	 *            the tasks to set
+	 */
+	public void setTasks(final List&lt;TaskTableTask&gt; tasks) {
+<span class="nc" id="L91">		this.tasks = tasks;</span>
+<span class="nc" id="L92">	}</span>
+
+	/**
+	 * @param tasks
+	 *            the tasks to set
+	 */
+	public void addTask(final TaskTableTask task) {
+<span class="fc" id="L99">		this.tasks.add(task);</span>
+<span class="fc" id="L100">	}</span>
+
+	/**
+	 * @param tasks
+	 *            the tasks to set
+	 */
+	public void addTasks(final List&lt;TaskTableTask&gt; tasks) {
+<span class="nc" id="L107">		this.tasks.addAll(tasks);</span>
+<span class="nc" id="L108">	}</span>
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L115">		return Objects.hash(detached, killingSignal, tasks);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L124" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L125">			ret = true;</span>
+<span class="fc bfc" id="L126" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L127">			ret = false;</span>
+		} else {
+<span class="fc" id="L129">			TaskTablePool other = (TaskTablePool) obj;</span>
+<span class="fc bfc" id="L130" title="All 4 branches covered.">			ret = detached == other.detached &amp;&amp; killingSignal == other.killingSignal</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">					&amp;&amp; Objects.equals(tasks, other.tasks);</span>
+		}
+<span class="fc" id="L133">		return ret;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

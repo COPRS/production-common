@@ -9,485 +9,386 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * Extraction class of "tasktables" configuration properties
  * 
  * @author Cyrielle Gailliard
- *
  */
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "job-generator")
 public class JobGeneratorSettings {
 
-	/**
-	 * Separator use to seperate the elements of a map in a string format
-	 */
-	protected static final String MAP_ELM_SEP = "\\|\\|";
+    /**
+     * Separator use to seperate the elements of a map in a string format
+     */
+    protected static final String MAP_ELM_SEP = "\\|\\|";
 
-	/**
-	 * Separator use to separate the key and the value of a map element in a string
-	 * format
-	 */
-	protected static final String MAP_KEY_VAL_SEP = ":";
+    /**
+     * Separator use to separate the key and the value of a map element in a
+     * string format
+     */
+    protected static final String MAP_KEY_VAL_SEP = ":";
 
-	/**
-	 * Maximal number of task tables
-	 */
-	private int maxnboftasktable;
+    /**
+     * Maximal number of task tables
+     */
+    private int maxnboftasktable;
 
-	/**
-	 * Maximal number of jobs waiting to be sent
-	 */
-	private int maxnumberofjobs;
+    /**
+     * Maximal number of jobs waiting to be sent
+     */
+    private int maxnumberofjobs;
 
-	/**
-	 * Delay configuration between 2 check of raw metadata presence for a session
-	 */
-	private WaitTempo waitprimarycheck;
+    /**
+     * Delay configuration between 2 check of raw metadata presence for a
+     * session
+     */
+    private WaitTempo waitprimarycheck;
 
-	/**
-	 * Delay configuration between 2 check of inputs metadata search for a job
-	 */
-	private WaitTempo waitmetadatainput;
+    /**
+     * Delay configuration between 2 check of inputs metadata search for a job
+     */
+    private WaitTempo waitmetadatainput;
 
-	/**
-	 * Location of task table XML files
-	 */
-	private String diroftasktables;
+    /**
+     * Location of task table XML files
+     */
+    private String diroftasktables;
 
-	/**
-	 * Period (fixed rate)
-	 */
-	private int jobgenfixedrate;
+    /**
+     * Period (fixed rate)
+     */
+    private int jobgenfixedrate;
 
-	/**
-	 * Default family of products
-	 */
-	private String defaultfamily;
+    /**
+     * Default family of products
+     */
+    private String defaultfamily;
 
-	/**
-	 * Map between output product type and product family in string format.<br/>
-	 * Format: {type_1}:{family_1}||{type_2}:{family_2}||...||{type_n}:{family_n}
-	 */
-	private String outputfamiliesstr;
+    /**
+     * Map between output product type and product family in string format.<br/>
+     * Format:
+     * {type_1}:{family_1}||{type_2}:{family_2}||...||{type_n}:{family_n}
+     */
+    private String outputfamiliesstr;
 
-	/**
-	 * Map between output product type and product family
-	 */
-	private Map<String, ProductFamily> outputfamilies;
+    /**
+     * Map between output product type and product family
+     */
+    private Map<String, ProductFamily> outputfamilies;
 
-	/**
-	 * Map of all the overlap for the different slice type.<br/>
-	 * Format: {acquisition_1:overloap_1}||...||{acquisition_n:overloap_n}
-	 */
-	private String typeoverlapstr;
+    /**
+     * Map of all the overlap for the different slice type
+     */
+    private Map<String, Float> typeOverlap;
 
-	/**
-	 * Map of all the overlap for the different slice type
-	 */
-	private Map<String, Float> typeOverlap;
+    /**
+     * Map of all the length for the different slice type<br/>
+     * Format: acquisition in IW, EW, SM, EM
+     */
+    private Map<String, Float> typeSliceLength;
 
-	/**
-	 * Map of all the length for the different slice type.<br/>
-	 * Format:
-	 * {acquisition_1:slice_length_1}||...||{acquisition_n:slice_length_n}<br/>
-	 * Format: acquisition in IW, EW, SM, EM
-	 */
-	private String typeslicelenstr;
+    /**
+     * Map product type and corresponding metadata index in case of the product
+     * type in lowercase in not the metadata index (example: aux_resorb use
+     * aux_res)<br/>
+     * Format: acquisition in IW, EW, SM, EM
+     */
+    private Map<String, String> mapTypeMeta;
 
-	/**
-	 * Map of all the length for the different slice type<br/>
-	 * Format: acquisition in IW, EW, SM, EM
-	 */
-	private Map<String, Float> typeSliceLength;
+    /**
+     * Default constructors
+     */
+    public JobGeneratorSettings() {
+        this.outputfamilies = new HashMap<>();
+    }
 
-	/**
-	 * Map product type and corresponding metadata index in case of the product type
-	 * in lowercase in not the metadata index (example: aux_resorb use aux_res)
-	 * Format: {type_1}:{index_1}||{type_2}:{index_2}||...||{type_n}:{index_n}<br/>
-	 * Format: acquisition in IW, EW, SM, EM
-	 */
-	private String mapTypeMetaStr;
+    /**
+     * Initialization function:
+     * <li>Build maps by splitting the corresponding string (note: we cannot map
+     * configuration parameter directly in a map due to the use of K8S
+     * configuration map)</li>
+     */
+    @PostConstruct
+    public void initMaps() {
+        extractMapProductTypeFamily();
+    }
 
-	/**
-	 * Map product type and corresponding metadata index in case of the product type
-	 * in lowercase in not the metadata index (example: aux_resorb use aux_res)<br/>
-	 * Format: acquisition in IW, EW, SM, EM
-	 */
-	private Map<String, String> mapTypeMeta;
+    /**
+     * Extract map product type family from the string
+     */
+    private void extractMapProductTypeFamily() {
+        if (StringUtils.isEmpty(outputfamiliesstr)) {
+            return;
+        }
+        String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);
+        for (int i = 0; i < paramsTmp.length; i++) {
+            String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
+            if (tmp != null && tmp.length == 2) {
+                String key = tmp[0];
+                String valStr = tmp[1];
+                outputfamilies.put(key, ProductFamily.fromValue(valStr));
+            }
+        }
+    }
 
-	/**
-	 * Default constructors
-	 */
-	public JobGeneratorSettings() {
-		this.outputfamilies = new HashMap<>();
-		this.typeOverlap = new HashMap<>();
-		this.typeSliceLength = new HashMap<>();
-		this.mapTypeMeta = new HashMap<>();
-	}
+    /**
+     * Class of delay configuration
+     * 
+     * @author Cyrielle Gailliard
+     */
+    public static class WaitTempo {
+        /**
+         * Delay between 2 retries
+         */
+        private int tempo;
 
-	/**
-	 * Initialization function:
-	 * <li>Build maps by splitting the corresponding string (note: we cannot map
-	 * configuration parameter directly in a map due to the use of K8S configuration
-	 * map)</li>
-	 */
-	@PostConstruct
-	public void initMaps() {
-		extractMapProductTypeFamily();
-		extractMapAcqOverload();
-		extractMapAcqSliceLen();
-		extractMapProductTypeMetaIndex();
-	}
+        /**
+         * Number of maximal retries
+         */
+        private int retries;
 
-	/**
-	 * Extract map product type family from the string
-	 */
-	private void extractMapProductTypeFamily() {
-		if (StringUtils.isEmpty(outputfamiliesstr)) {
-			return;
-		}
-		String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);
-		for (int i = 0; i < paramsTmp.length; i++) {
-			String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
-			if (tmp != null && tmp.length == 2) {
-				String key = tmp[0];
-				String valStr = tmp[1];
-				outputfamilies.put(key, ProductFamily.fromValue(valStr));
-			}
-		}
-	}
+        /**
+         * Default constructor
+         */
+        public WaitTempo() {
+            this.tempo = 0;
+            this.retries = 0;
+        }
 
-	/**
-	 * Extract map product type family from the string
-	 */
-	private void extractMapAcqOverload() {
-		if (StringUtils.isEmpty(typeoverlapstr)) {
-			return;
-		}
-		String[] paramsTmp = typeoverlapstr.split(MAP_ELM_SEP);
-		for (int i = 0; i < paramsTmp.length; i++) {
-			String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
-			if (tmp != null && tmp.length == 2) {
-				String key = tmp[0];
-				String valStr = tmp[1];
-				typeOverlap.put(key, Float.valueOf(valStr));
-			}
-		}
-	}
+        /**
+         * Constructor using field
+         * 
+         * @param tempo
+         * @param retries
+         */
+        public WaitTempo(final int tempo, final int retries) {
+            this.tempo = tempo;
+            this.retries = retries;
+        }
 
-	/**
-	 * Extract map product type family from the string
-	 */
-	private void extractMapAcqSliceLen() {
-		if (StringUtils.isEmpty(typeslicelenstr)) {
-			return;
-		}
-		String[] paramsTmp = typeslicelenstr.split(MAP_ELM_SEP);
-		for (int i = 0; i < paramsTmp.length; i++) {
-			String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
-			if (tmp != null && tmp.length == 2) {
-				String key = tmp[0];
-				String valStr = tmp[1];
-				typeSliceLength.put(key, Float.valueOf(valStr));
-			}
-		}
-	}
+        /**
+         * @return the tempo
+         */
+        public int getTempo() {
+            return tempo;
+        }
 
-	/**
-	 * Extract map product type family from the string
-	 */
-	private void extractMapProductTypeMetaIndex() {
-		if (StringUtils.isEmpty(mapTypeMetaStr)) {
-			return;
-		}
-		String[] paramsTmp = mapTypeMetaStr.split(MAP_ELM_SEP);
-		for (int i = 0; i < paramsTmp.length; i++) {
-			String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
-			if (tmp != null && tmp.length == 2) {
-				String key = tmp[0];
-				String val = tmp[1];
-				mapTypeMeta.put(key, val);
-			}
-		}
-	}
+        /**
+         * @param tempo
+         *            the tempo to set
+         */
+        public void setTempo(final int tempo) {
+            this.tempo = tempo;
+        }
 
-	/**
-	 * Class of delay configuration
-	 * 
-	 * @author Cyrielle Gailliard
-	 *
-	 */
-	public static class WaitTempo {
-		/**
-		 * Delay between 2 retries
-		 */
-		private int tempo;
+        /**
+         * @return the retries
+         */
+        public int getRetries() {
+            return retries;
+        }
 
-		/**
-		 * Number of maximal retries
-		 */
-		private int retries;
-		
-		/**
-		 * Default constructor
-		 */
-		public WaitTempo() {
-			this.tempo = 0;
-			this.retries = 0;
-		}
+        /**
+         * @param retries
+         *            the retries to set
+         */
+        public void setRetries(final int retries) {
+            this.retries = retries;
+        }
 
-		/**
-		 * Constructor using field
-		 * @param tempo
-		 * @param retries
-		 */
-		public WaitTempo(final int tempo, final int retries) {
-			this.tempo = tempo;
-			this.retries = retries;
-		}
+    }
 
-		/**
-		 * @return the tempo
-		 */
-		public int getTempo() {
-			return tempo;
-		}
+    /**
+     * @return the maxnboftasktable
+     */
+    public int getMaxnboftasktable() {
+        return maxnboftasktable;
+    }
 
-		/**
-		 * @param tempo
-		 *            the tempo to set
-		 */
-		public void setTempo(final int tempo) {
-			this.tempo = tempo;
-		}
+    /**
+     * @param maxnboftasktable
+     *            the maxnboftasktable to set
+     */
+    public void setMaxnboftasktable(final int maxnboftasktable) {
+        this.maxnboftasktable = maxnboftasktable;
+    }
 
-		/**
-		 * @return the retries
-		 */
-		public int getRetries() {
-			return retries;
-		}
+    /**
+     * @return the waitprimarycheck
+     */
+    public WaitTempo getWaitprimarycheck() {
+        return waitprimarycheck;
+    }
 
-		/**
-		 * @param retries
-		 *            the retries to set
-		 */
-		public void setRetries(final int retries) {
-			this.retries = retries;
-		}
+    /**
+     * @param waitprimarycheck
+     *            the waitprimarycheck to set
+     */
+    public void setWaitprimarycheck(final WaitTempo waitprimarycheck) {
+        this.waitprimarycheck = waitprimarycheck;
+    }
 
-	}
+    /**
+     * @return the waitmetadatainput
+     */
+    public WaitTempo getWaitmetadatainput() {
+        return waitmetadatainput;
+    }
 
-	/**
-	 * @return the maxnboftasktable
-	 */
-	public int getMaxnboftasktable() {
-		return maxnboftasktable;
-	}
+    /**
+     * @param waitmetadatainput
+     *            the waitmetadatainput to set
+     */
+    public void setWaitmetadatainput(final WaitTempo waitmetadatainput) {
+        this.waitmetadatainput = waitmetadatainput;
+    }
 
-	/**
-	 * @param maxnboftasktable
-	 *            the maxnboftasktable to set
-	 */
-	public void setMaxnboftasktable(final int maxnboftasktable) {
-		this.maxnboftasktable = maxnboftasktable;
-	}
+    /**
+     * @return the diroftasktables
+     */
+    public String getDiroftasktables() {
+        return diroftasktables;
+    }
 
-	/**
-	 * @return the waitprimarycheck
-	 */
-	public WaitTempo getWaitprimarycheck() {
-		return waitprimarycheck;
-	}
+    /**
+     * @param diroftasktables
+     *            the diroftasktables to set
+     */
+    public void setDiroftasktables(final String diroftasktables) {
+        this.diroftasktables = diroftasktables;
+    }
 
-	/**
-	 * @param waitprimarycheck
-	 *            the waitprimarycheck to set
-	 */
-	public void setWaitprimarycheck(final WaitTempo waitprimarycheck) {
-		this.waitprimarycheck = waitprimarycheck;
-	}
+    /**
+     * @return the maxnumberofjobs
+     */
+    public int getMaxnumberofjobs() {
+        return maxnumberofjobs;
+    }
 
-	/**
-	 * @return the waitmetadatainput
-	 */
-	public WaitTempo getWaitmetadatainput() {
-		return waitmetadatainput;
-	}
+    /**
+     * @param maxnumberofjobs
+     *            the maxnumberofjobs to set
+     */
+    public void setMaxnumberofjobs(final int maxnumberofjobs) {
+        this.maxnumberofjobs = maxnumberofjobs;
+    }
 
-	/**
-	 * @param waitmetadatainput
-	 *            the waitmetadatainput to set
-	 */
-	public void setWaitmetadatainput(final WaitTempo waitmetadatainput) {
-		this.waitmetadatainput = waitmetadatainput;
-	}
+    /**
+     * @return the jobgenfixedrate
+     */
+    public int getJobgenfixedrate() {
+        return jobgenfixedrate;
+    }
 
-	/**
-	 * @return the diroftasktables
-	 */
-	public String getDiroftasktables() {
-		return diroftasktables;
-	}
+    /**
+     * @param jobgenfixedrate
+     *            the jobgenfixedrate to set
+     */
+    public void setJobgenfixedrate(final int jobgenfixedrate) {
+        this.jobgenfixedrate = jobgenfixedrate;
+    }
 
-	/**
-	 * @param diroftasktables
-	 *            the diroftasktables to set
-	 */
-	public void setDiroftasktables(final String diroftasktables) {
-		this.diroftasktables = diroftasktables;
-	}
+    /**
+     * @return the defaultfamily
+     */
+    public String getDefaultfamily() {
+        return defaultfamily;
+    }
 
-	/**
-	 * @return the maxnumberofjobs
-	 */
-	public int getMaxnumberofjobs() {
-		return maxnumberofjobs;
-	}
+    /**
+     * @param defaultfamily
+     *            the defaultfamily to set
+     */
+    public void setDefaultfamily(final String defaultfamily) {
+        this.defaultfamily = defaultfamily;
+    }
 
-	/**
-	 * @param maxnumberofjobs
-	 *            the maxnumberofjobs to set
-	 */
-	public void setMaxnumberofjobs(final int maxnumberofjobs) {
-		this.maxnumberofjobs = maxnumberofjobs;
-	}
+    /**
+     * @return the outputfamiliesstr
+     */
+    public String getOutputfamiliesstr() {
+        return outputfamiliesstr;
+    }
 
-	/**
-	 * @return the jobgenfixedrate
-	 */
-	public int getJobgenfixedrate() {
-		return jobgenfixedrate;
-	}
+    /**
+     * @param outputfamiliesstr
+     *            the outputfamiliesstr to set
+     */
+    public void setOutputfamiliesstr(final String outputfamiliesstr) {
+        this.outputfamiliesstr = outputfamiliesstr;
+    }
 
-	/**
-	 * @param jobgenfixedrate
-	 *            the jobgenfixedrate to set
-	 */
-	public void setJobgenfixedrate(final int jobgenfixedrate) {
-		this.jobgenfixedrate = jobgenfixedrate;
-	}
+    /**
+     * @return the outputfamilies
+     */
+    public Map<String, ProductFamily> getOutputfamilies() {
+        return outputfamilies;
+    }
 
-	/**
-	 * @return the defaultfamily
-	 */
-	public String getDefaultfamily() {
-		return defaultfamily;
-	}
+    /**
+     * @return the typeOverlap
+     */
+    public Map<String, Float> getTypeOverlap() {
+        return typeOverlap;
+    }
 
-	/**
-	 * @param defaultfamily
-	 *            the defaultfamily to set
-	 */
-	public void setDefaultfamily(final String defaultfamily) {
-		this.defaultfamily = defaultfamily;
-	}
+    /**
+     * @return the typeSliceLength
+     */
+    public Map<String, Float> getTypeSliceLength() {
+        return typeSliceLength;
+    }
 
-	/**
-	 * @return the outputfamiliesstr
-	 */
-	public String getOutputfamiliesstr() {
-		return outputfamiliesstr;
-	}
+    /**
+     * @return the mapTypeMeta
+     */
+    public Map<String, String> getMapTypeMeta() {
+        return mapTypeMeta;
+    }
 
-	/**
-	 * @param outputfamiliesstr
-	 *            the outputfamiliesstr to set
-	 */
-	public void setOutputfamiliesstr(final String outputfamiliesstr) {
-		this.outputfamiliesstr = outputfamiliesstr;
-	}
+    /**
+     * 
+     * @param typeOverlap
+     */
+    public void setTypeOverlap(final Map<String, Float> typeOverlap) {
+        this.typeOverlap = typeOverlap;
+    }
 
-	/**
-	 * @return the outputfamilies
-	 */
-	public Map<String, ProductFamily> getOutputfamilies() {
-		return outputfamilies;
-	}
+    /**
+     * 
+     * @param typeSliceLength
+     */
+    public void setTypeSliceLength(final Map<String, Float> typeSliceLength) {
+        this.typeSliceLength = typeSliceLength;
+    }
 
-	/**
-	 * @return the typeoverlapstr
-	 */
-	public String getTypeoverlapstr() {
-		return typeoverlapstr;
-	}
+    /**
+     * 
+     * @param mapTypeMeta
+     */
+    public void setMapTypeMeta(final Map<String, String> mapTypeMeta) {
+        this.mapTypeMeta = mapTypeMeta;
+    }
 
-	/**
-	 * @param typeoverlapstr
-	 *            the typeoverlapstr to set
-	 */
-	public void setTypeoverlapstr(final String typeoverlapstr) {
-		this.typeoverlapstr = typeoverlapstr;
-	}
-
-	/**
-	 * @return the typeOverlap
-	 */
-	public Map<String, Float> getTypeOverlap() {
-		return typeOverlap;
-	}
-
-	/**
-	 * @return the typeslicelenstr
-	 */
-	public String getTypeslicelenstr() {
-		return typeslicelenstr;
-	}
-
-	/**
-	 * @param typeslicelenstr
-	 *            the typeslicelenstr to set
-	 */
-	public void setTypeslicelenstr(final String typeslicelenstr) {
-		this.typeslicelenstr = typeslicelenstr;
-	}
-
-	/**
-	 * @return the typeSliceLength
-	 */
-	public Map<String, Float> getTypeSliceLength() {
-		return typeSliceLength;
-	}
-
-	/**
-	 * @return the mapTypeMetaStr
-	 */
-	public String getMapTypeMetaStr() {
-		return mapTypeMetaStr;
-	}
-
-	/**
-	 * @param mapTypeMetaStr
-	 *            the mapTypeMetaStr to set
-	 */
-	public void setMapTypeMetaStr(final String mapTypeMetaStr) {
-		this.mapTypeMetaStr = mapTypeMetaStr;
-	}
-
-	/**
-	 * @return the mapTypeMeta
-	 */
-	public Map<String, String> getMapTypeMeta() {
-		return mapTypeMeta;
-	}
-
-	/**
-	 * Display object in JSON format
-	 */
-	@Override
-	public String toString() {
-		return "{maxnboftasktable: " + maxnboftasktable + ", maxnumberofjobs: " + maxnumberofjobs
-				+ ", waitprimarycheck: " + waitprimarycheck + ", waitmetadatainput: " + waitmetadatainput
-				+ ", diroftasktables: " + diroftasktables + ", jobgenfixedrate: " + jobgenfixedrate
-				+ ", defaultfamily: " + defaultfamily + ", outputfamiliesstr: " + outputfamiliesstr
-				+ ", outputfamilies: " + outputfamilies + ", typeoverlapstr: " + typeoverlapstr + ", typeOverlap: "
-				+ typeOverlap + ", typeslicelenstr: " + typeslicelenstr + ", typeSliceLength: " + typeSliceLength
-				+ ", mapTypeMetaStr: " + mapTypeMetaStr + ", mapTypeMeta: "
-				+ mapTypeMeta + "}";
-	}
+    /**
+     * Display object in JSON format
+     */
+    @Override
+    public String toString() {
+        return "{maxnboftasktable: " + maxnboftasktable + ", maxnumberofjobs: "
+                + maxnumberofjobs + ", waitprimarycheck: " + waitprimarycheck
+                + ", waitmetadatainput: " + waitmetadatainput
+                + ", diroftasktables: " + diroftasktables
+                + ", jobgenfixedrate: " + jobgenfixedrate + ", defaultfamily: "
+                + defaultfamily + ", outputfamiliesstr: " + outputfamiliesstr
+                + ", outputfamilies: " + outputfamilies + ", typeOverlap: "
+                + typeOverlap + ", typeSliceLength: " + typeSliceLength
+                + ", mapTypeMeta: " + mapTypeMeta + "}";
+    }
 
 }

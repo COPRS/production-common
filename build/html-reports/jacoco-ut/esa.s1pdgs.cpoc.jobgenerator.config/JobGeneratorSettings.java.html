@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>JobGeneratorSettings.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.config</a> &gt; <span class="el_source">JobGeneratorSettings.java</span></div><h1>JobGeneratorSettings.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.config;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+/**
+ * Extraction class of &quot;tasktables&quot; configuration properties
+ * 
+ * @author Cyrielle Gailliard
+ */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;job-generator&quot;)
+public class JobGeneratorSettings {
+
+    /**
+     * Separator use to seperate the elements of a map in a string format
+     */
+    protected static final String MAP_ELM_SEP = &quot;\\|\\|&quot;;
+
+    /**
+     * Separator use to separate the key and the value of a map element in a
+     * string format
+     */
+    protected static final String MAP_KEY_VAL_SEP = &quot;:&quot;;
+
+    /**
+     * Maximal number of task tables
+     */
+    private int maxnboftasktable;
+
+    /**
+     * Maximal number of jobs waiting to be sent
+     */
+    private int maxnumberofjobs;
+
+    /**
+     * Delay configuration between 2 check of raw metadata presence for a
+     * session
+     */
+    private WaitTempo waitprimarycheck;
+
+    /**
+     * Delay configuration between 2 check of inputs metadata search for a job
+     */
+    private WaitTempo waitmetadatainput;
+
+    /**
+     * Location of task table XML files
+     */
+    private String diroftasktables;
+
+    /**
+     * Period (fixed rate)
+     */
+    private int jobgenfixedrate;
+
+    /**
+     * Default family of products
+     */
+    private String defaultfamily;
+
+    /**
+     * Map between output product type and product family in string format.&lt;br/&gt;
+     * Format:
+     * {type_1}:{family_1}||{type_2}:{family_2}||...||{type_n}:{family_n}
+     */
+    private String outputfamiliesstr;
+
+    /**
+     * Map between output product type and product family
+     */
+    private Map&lt;String, ProductFamily&gt; outputfamilies;
+
+    /**
+     * Map of all the overlap for the different slice type
+     */
+    private Map&lt;String, Float&gt; typeOverlap;
+
+    /**
+     * Map of all the length for the different slice type&lt;br/&gt;
+     * Format: acquisition in IW, EW, SM, EM
+     */
+    private Map&lt;String, Float&gt; typeSliceLength;
+
+    /**
+     * Map product type and corresponding metadata index in case of the product
+     * type in lowercase in not the metadata index (example: aux_resorb use
+     * aux_res)&lt;br/&gt;
+     * Format: acquisition in IW, EW, SM, EM
+     */
+    private Map&lt;String, String&gt; mapTypeMeta;
+
+    /**
+     * Default constructors
+     */
+<span class="fc" id="L106">    public JobGeneratorSettings() {</span>
+<span class="fc" id="L107">        this.outputfamilies = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L108">    }</span>
+
+    /**
+     * Initialization function:
+     * &lt;li&gt;Build maps by splitting the corresponding string (note: we cannot map
+     * configuration parameter directly in a map due to the use of K8S
+     * configuration map)&lt;/li&gt;
+     */
+    @PostConstruct
+    public void initMaps() {
+<span class="fc" id="L118">        extractMapProductTypeFamily();</span>
+<span class="fc" id="L119">    }</span>
+
+    /**
+     * Extract map product type family from the string
+     */
+    private void extractMapProductTypeFamily() {
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if (StringUtils.isEmpty(outputfamiliesstr)) {</span>
+<span class="fc" id="L126">            return;</span>
+        }
+<span class="fc" id="L128">        String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        for (int i = 0; i &lt; paramsTmp.length; i++) {</span>
+<span class="fc" id="L130">            String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);</span>
+<span class="pc bpc" id="L131" title="1 of 4 branches missed.">            if (tmp != null &amp;&amp; tmp.length == 2) {</span>
+<span class="fc" id="L132">                String key = tmp[0];</span>
+<span class="fc" id="L133">                String valStr = tmp[1];</span>
+<span class="fc" id="L134">                outputfamilies.put(key, ProductFamily.fromValue(valStr));</span>
+            }
+        }
+<span class="fc" id="L137">    }</span>
+
+    /**
+     * Class of delay configuration
+     * 
+     * @author Cyrielle Gailliard
+     */
+    public static class WaitTempo {
+        /**
+         * Delay between 2 retries
+         */
+        private int tempo;
+
+        /**
+         * Number of maximal retries
+         */
+        private int retries;
+
+        /**
+         * Default constructor
+         */
+<span class="fc" id="L158">        public WaitTempo() {</span>
+<span class="fc" id="L159">            this.tempo = 0;</span>
+<span class="fc" id="L160">            this.retries = 0;</span>
+<span class="fc" id="L161">        }</span>
+
+        /**
+         * Constructor using field
+         * 
+         * @param tempo
+         * @param retries
+         */
+<span class="nc" id="L169">        public WaitTempo(final int tempo, final int retries) {</span>
+<span class="nc" id="L170">            this.tempo = tempo;</span>
+<span class="nc" id="L171">            this.retries = retries;</span>
+<span class="nc" id="L172">        }</span>
+
+        /**
+         * @return the tempo
+         */
+        public int getTempo() {
+<span class="fc" id="L178">            return tempo;</span>
+        }
+
+        /**
+         * @param tempo
+         *            the tempo to set
+         */
+        public void setTempo(final int tempo) {
+<span class="fc" id="L186">            this.tempo = tempo;</span>
+<span class="fc" id="L187">        }</span>
+
+        /**
+         * @return the retries
+         */
+        public int getRetries() {
+<span class="fc" id="L193">            return retries;</span>
+        }
+
+        /**
+         * @param retries
+         *            the retries to set
+         */
+        public void setRetries(final int retries) {
+<span class="fc" id="L201">            this.retries = retries;</span>
+<span class="fc" id="L202">        }</span>
+
+    }
+
+    /**
+     * @return the maxnboftasktable
+     */
+    public int getMaxnboftasktable() {
+<span class="fc" id="L210">        return maxnboftasktable;</span>
+    }
+
+    /**
+     * @param maxnboftasktable
+     *            the maxnboftasktable to set
+     */
+    public void setMaxnboftasktable(final int maxnboftasktable) {
+<span class="fc" id="L218">        this.maxnboftasktable = maxnboftasktable;</span>
+<span class="fc" id="L219">    }</span>
+
+    /**
+     * @return the waitprimarycheck
+     */
+    public WaitTempo getWaitprimarycheck() {
+<span class="fc" id="L225">        return waitprimarycheck;</span>
+    }
+
+    /**
+     * @param waitprimarycheck
+     *            the waitprimarycheck to set
+     */
+    public void setWaitprimarycheck(final WaitTempo waitprimarycheck) {
+<span class="fc" id="L233">        this.waitprimarycheck = waitprimarycheck;</span>
+<span class="fc" id="L234">    }</span>
+
+    /**
+     * @return the waitmetadatainput
+     */
+    public WaitTempo getWaitmetadatainput() {
+<span class="fc" id="L240">        return waitmetadatainput;</span>
+    }
+
+    /**
+     * @param waitmetadatainput
+     *            the waitmetadatainput to set
+     */
+    public void setWaitmetadatainput(final WaitTempo waitmetadatainput) {
+<span class="fc" id="L248">        this.waitmetadatainput = waitmetadatainput;</span>
+<span class="fc" id="L249">    }</span>
+
+    /**
+     * @return the diroftasktables
+     */
+    public String getDiroftasktables() {
+<span class="fc" id="L255">        return diroftasktables;</span>
+    }
+
+    /**
+     * @param diroftasktables
+     *            the diroftasktables to set
+     */
+    public void setDiroftasktables(final String diroftasktables) {
+<span class="fc" id="L263">        this.diroftasktables = diroftasktables;</span>
+<span class="fc" id="L264">    }</span>
+
+    /**
+     * @return the maxnumberofjobs
+     */
+    public int getMaxnumberofjobs() {
+<span class="fc" id="L270">        return maxnumberofjobs;</span>
+    }
+
+    /**
+     * @param maxnumberofjobs
+     *            the maxnumberofjobs to set
+     */
+    public void setMaxnumberofjobs(final int maxnumberofjobs) {
+<span class="fc" id="L278">        this.maxnumberofjobs = maxnumberofjobs;</span>
+<span class="fc" id="L279">    }</span>
+
+    /**
+     * @return the jobgenfixedrate
+     */
+    public int getJobgenfixedrate() {
+<span class="fc" id="L285">        return jobgenfixedrate;</span>
+    }
+
+    /**
+     * @param jobgenfixedrate
+     *            the jobgenfixedrate to set
+     */
+    public void setJobgenfixedrate(final int jobgenfixedrate) {
+<span class="fc" id="L293">        this.jobgenfixedrate = jobgenfixedrate;</span>
+<span class="fc" id="L294">    }</span>
+
+    /**
+     * @return the defaultfamily
+     */
+    public String getDefaultfamily() {
+<span class="fc" id="L300">        return defaultfamily;</span>
+    }
+
+    /**
+     * @param defaultfamily
+     *            the defaultfamily to set
+     */
+    public void setDefaultfamily(final String defaultfamily) {
+<span class="fc" id="L308">        this.defaultfamily = defaultfamily;</span>
+<span class="fc" id="L309">    }</span>
+
+    /**
+     * @return the outputfamiliesstr
+     */
+    public String getOutputfamiliesstr() {
+<span class="fc" id="L315">        return outputfamiliesstr;</span>
+    }
+
+    /**
+     * @param outputfamiliesstr
+     *            the outputfamiliesstr to set
+     */
+    public void setOutputfamiliesstr(final String outputfamiliesstr) {
+<span class="fc" id="L323">        this.outputfamiliesstr = outputfamiliesstr;</span>
+<span class="fc" id="L324">    }</span>
+
+    /**
+     * @return the outputfamilies
+     */
+    public Map&lt;String, ProductFamily&gt; getOutputfamilies() {
+<span class="fc" id="L330">        return outputfamilies;</span>
+    }
+
+    /**
+     * @return the typeOverlap
+     */
+    public Map&lt;String, Float&gt; getTypeOverlap() {
+<span class="fc" id="L337">        return typeOverlap;</span>
+    }
+
+    /**
+     * @return the typeSliceLength
+     */
+    public Map&lt;String, Float&gt; getTypeSliceLength() {
+<span class="fc" id="L344">        return typeSliceLength;</span>
+    }
+
+    /**
+     * @return the mapTypeMeta
+     */
+    public Map&lt;String, String&gt; getMapTypeMeta() {
+<span class="fc" id="L351">        return mapTypeMeta;</span>
+    }
+
+    /**
+     * 
+     * @param typeOverlap
+     */
+    public void setTypeOverlap(final Map&lt;String, Float&gt; typeOverlap) {
+<span class="fc" id="L359">        this.typeOverlap = typeOverlap;</span>
+<span class="fc" id="L360">    }</span>
+
+    /**
+     * 
+     * @param typeSliceLength
+     */
+    public void setTypeSliceLength(final Map&lt;String, Float&gt; typeSliceLength) {
+<span class="fc" id="L367">        this.typeSliceLength = typeSliceLength;</span>
+<span class="fc" id="L368">    }</span>
+
+    /**
+     * 
+     * @param mapTypeMeta
+     */
+    public void setMapTypeMeta(final Map&lt;String, String&gt; mapTypeMeta) {
+<span class="fc" id="L375">        this.mapTypeMeta = mapTypeMeta;</span>
+<span class="fc" id="L376">    }</span>
+
+    /**
+     * Display object in JSON format
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L383">        return &quot;{maxnboftasktable: &quot; + maxnboftasktable + &quot;, maxnumberofjobs: &quot;</span>
+                + maxnumberofjobs + &quot;, waitprimarycheck: &quot; + waitprimarycheck
+                + &quot;, waitmetadatainput: &quot; + waitmetadatainput
+                + &quot;, diroftasktables: &quot; + diroftasktables
+                + &quot;, jobgenfixedrate: &quot; + jobgenfixedrate + &quot;, defaultfamily: &quot;
+                + defaultfamily + &quot;, outputfamiliesstr: &quot; + outputfamiliesstr
+                + &quot;, outputfamilies: &quot; + outputfamilies + &quot;, typeOverlap: &quot;
+                + typeOverlap + &quot;, typeSliceLength: &quot; + typeSliceLength
+                + &quot;, mapTypeMeta: &quot; + mapTypeMeta + &quot;}&quot;;
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

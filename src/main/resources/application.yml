@@ -4,59 +4,74 @@ spring:
     
 # Logging
 logging:
-  config: ${job_logging_config:log4j2.yml}
+  config: log4j2.yml
  
 metadata:
   host: ${catalog_rest_host:metadata-catalog-svc:8080}
-  rest-api_nb-retry: ${job_rest-api_nb-retry:3}
-  rest-api_tempo-retry-ms: ${job_rest-api_tempo-retry-ms:1000}
+  rest-api_nb-retry: 3
+  rest-api_tempo-retry-ms: 1000
   
 job-generator:
-  diroftasktables: ${job_directoryoftasktables}
-  maxnboftasktable: ${job_maxnumberoftasktables}
-  maxnumberofjobs: ${job_maxnumberoftasktables}
-  jobgenfixedrate: ${job_scheduledfixedrate:500}
+  diroftasktables: /app/l0_config/task_tables/
+  maxnboftasktable: 1
+  jobgenfixedrate: 100
   waitprimarycheck:
-    tempo: ${job_waitprimarycheck_tempo:30000}
+    tempo: 30000
   waitmetadatainput:
-    tempo: ${job_waitmetadatainput_tempo:60000}
-  defaultfamily: ${products_default-family}
+    tempo: 60000
+  defaultfamily: BLANK
   outputfamiliesstr: ${products_family-per-type}
-  typeoverlapstr: ${products_overlap-per-acq}
-  typeslicelenstr: ${products_slice-length-per-acq}
-  map-type-meta-str: ${products_link-producttype-metadataindex}
+  type-overlap:
+    EW: 8.2F
+    IW: 7.4F
+    SM: 7.7F
+    WM: 0.0F
+  type-slice-length:
+    EW: 60.0F
+    IW: 25.0F
+    SM: 25.0F
+    WM: 0.0F
+  map-type-meta: 
+    AUX_RES: AUX_RESORB
     
 status:
-  delete-fixed-delay-ms: ${job_status_delete-fixed-delay-ms:3000}
-  max-error-counter-processing: ${job_status_max-error-counter-processing:3}
-  max-error-counter-mqi: ${job_status_max-error-counter-mqi:30}
+  delete-fixed-delay-ms: 1800000
+  max-error-counter-processing: 3
+  max-error-counter-mqi: 30
 
 process:
   level: ${job_process_level}
   hostname: ${HOSTNAME}
-  mode: ${job_process_mode:PROD}
-  paramstr: ${job_process_params:Processing_Mode:NRT||Timeout:300}
-  loglevelstdout: ${job_process_loglevelstdout:INFO}
-  loglevelstderr: ${job_process_loglevelstderr:INFO}
-  processingstation: ${job_process_processingstation:WILE}
-  outputregexpstr: ${job_process_outputregexps:SM_RAW__0S:^S1[A-B]_S[1-6]_RAW__0S.*$||AN_RAW__0S:^S1[A-B]_N[1-6]_RAW__0S.*$||ZS_RAW__0S:^S1[A-B]_Z[1-6]_RAW__0S.*$||REP_L0PSA_:^S1[A|B|_]_OPER_REP_ACQ.*$||REP_EFEP_:^S1[A|B|_]_OPER_REP_PASS.*.EOF$}
+  mode: PROD
+  params: 
+    Processing_Mode: NRT
+    Timeout: 300
+  loglevelstdout: INFO
+  loglevelstderr: INFO
+  processingstation: WILE
+  outputregexps: 
+    SM_RAW__0S: ^S1[A-B]_S[1-6]_RAW__0S.*$
+    AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$
+    ZS_RAW__0S: ^S1[A-B]_Z[1-6]_RAW__0S.*$
+    REP_L0PSA_: ^S1[A|B|_]_OPER_REP_ACQ.*$
+    REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$
   mqi:
-    host-uri: ${job_process_mqi_host-uri:http://localhost:8081}
-    max-retries: ${job_process_mqi_max-retries:3}
-    tempo-retry-ms: ${job_process_mqi_tempo-retry:1000}
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempo-retry-ms: 1000
   appcatalog:
-    host-uri: ${job_process_appcatalog_host-uri:http://app-catalog-svc:8080}
-    max-retries: ${job_process_appcatalog_max-retries:3}
-    tempo-retry-ms: ${job_process_appcatalog_tempo-retry:1000}
-    tm-connect-ms: ${job_process_appcatalog_tm-connect-ms:5000}
-  fixed-delay-ms: ${job_process_fixed-delay-ms:200}
-  initial-delay-ms: ${job_process_initial-delay-ms:5000}
+    host-uri: http://app-catalog-svc:8080
+    max-retries: 3
+    tempo-retry-ms: 1000
+    tm-connect-ms: 5000
+  fixed-delay-ms: 200
+  initial-delay-ms: 5000
     
 level0:
-  dir-extractor-sessions: ${l0_dir-extractor-sessions:/data/sessions/}
+  dir-extractor-sessions: /data/sessions/
   
 level1:
-  pathroutingxmlfile: ${l1_pathroutingxmlfile:/app/l1_config/routing.xml}
+  pathroutingxmlfile: /app/l1_config/routing.xml
   
 pattern-l0-slices:
   regexp: ${pattern-l0-slices_regexp:^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$}
