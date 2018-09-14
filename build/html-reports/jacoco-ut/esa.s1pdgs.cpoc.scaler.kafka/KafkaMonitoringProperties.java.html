@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>KafkaMonitoringProperties.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.kafka</a> &gt; <span class="el_source">KafkaMonitoringProperties.java</span></div><h1>KafkaMonitoringProperties.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.kafka;
+
+import java.util.Map;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+import esa.s1pdgs.cpoc.scaler.kafka.model.SpdgsTopic;
+
+/**
+ * Properties used for monitoring KAFKA
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;kafka&quot;)
+<span class="fc" id="L20">public class KafkaMonitoringProperties {</span>
+
+	/**
+	 * Client identifier
+	 */
+	private String clientId;
+
+	/**
+	 * Bootstrap servers
+	 */
+	private String bootstrapServers;
+
+	/**
+	 * Consumer session timeout in milliseconds
+	 */
+	private int sessionTimeoutMs;
+
+	/**
+	 * Administration requests timeout in milliseconds
+	 */
+	private int requestTimeoutMs;
+
+	/**
+	 * Client connection max idle
+	 */
+	private long cnxMaxIdlMs;
+
+	/**
+	 * Topic names
+	 */
+	private Map&lt;SpdgsTopic, String&gt; topics;
+
+	/**
+	 * Groups identifier per topics
+	 */
+	private Map&lt;SpdgsTopic, String&gt; groupIdPerTopic;
+
+	/**
+	 * @return the clientId
+	 */
+	public String getClientId() {
+<span class="fc" id="L61">		return clientId;</span>
+	}
+
+	/**
+	 * @param clientId
+	 *            the clientId to set
+	 */
+	public void setClientId(final String clientId) {
+<span class="fc" id="L69">		this.clientId = clientId;</span>
+<span class="fc" id="L70">	}</span>
+
+	/**
+	 * @return the bootstrapServers
+	 */
+	public String getBootstrapServers() {
+<span class="fc" id="L76">		return bootstrapServers;</span>
+	}
+
+	/**
+	 * @param bootstrapServers
+	 *            the bootstrapServers to set
+	 */
+	public void setBootstrapServers(final String bootstrapServers) {
+<span class="fc" id="L84">		this.bootstrapServers = bootstrapServers;</span>
+<span class="fc" id="L85">	}</span>
+
+	/**
+	 * @return the sessionTimeoutMs
+	 */
+	public int getSessionTimeoutMs() {
+<span class="fc" id="L91">		return sessionTimeoutMs;</span>
+	}
+
+	/**
+	 * @param sessionTimeoutMs
+	 *            the sessionTimeoutMs to set
+	 */
+	public void setSessionTimeoutMs(final int sessionTimeoutMs) {
+<span class="fc" id="L99">		this.sessionTimeoutMs = sessionTimeoutMs;</span>
+<span class="fc" id="L100">	}</span>
+
+	/**
+	 * @return the requestTimeoutMs
+	 */
+	public int getRequestTimeoutMs() {
+<span class="fc" id="L106">		return requestTimeoutMs;</span>
+	}
+
+	/**
+	 * @param requestTimeoutMs
+	 *            the requestTimeoutMs to set
+	 */
+	public void setRequestTimeoutMs(final int requestTimeoutMs) {
+<span class="fc" id="L114">		this.requestTimeoutMs = requestTimeoutMs;</span>
+<span class="fc" id="L115">	}</span>
+
+	/**
+	 * @return the cnxMaxIdlMs
+	 */
+	public long getCnxMaxIdlMs() {
+<span class="fc" id="L121">		return cnxMaxIdlMs;</span>
+	}
+
+	/**
+	 * @param cnxMaxIdlMs
+	 *            the cnxMaxIdlMs to set
+	 */
+	public void setCnxMaxIdlMs(final long cnxMaxIdlMs) {
+<span class="fc" id="L129">		this.cnxMaxIdlMs = cnxMaxIdlMs;</span>
+<span class="fc" id="L130">	}</span>
+
+	/**
+	 * @return the topics
+	 */
+	public Map&lt;SpdgsTopic, String&gt; getTopics() {
+<span class="fc" id="L136">		return topics;</span>
+	}
+
+	/**
+	 * @param topics
+	 *            the topics to set
+	 */
+	public void setTopics(final Map&lt;SpdgsTopic, String&gt; topics) {
+<span class="fc" id="L144">		this.topics = topics;</span>
+<span class="fc" id="L145">	}</span>
+
+	/**
+	 * @return the groupIdPerTopic
+	 */
+	public Map&lt;SpdgsTopic, String&gt; getGroupIdPerTopic() {
+<span class="fc" id="L151">		return groupIdPerTopic;</span>
+	}
+
+	/**
+	 * @param groupIdPerTopic
+	 *            the groupIdPerTopic to set
+	 */
+	public void setGroupIdPerTopic(final Map&lt;SpdgsTopic, String&gt; groupIdPerTopic) {
+<span class="fc" id="L159">		this.groupIdPerTopic = groupIdPerTopic;</span>
+<span class="fc" id="L160">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ServerService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.openstack.services</a> &gt; <span class="el_source">ServerService.java</span></div><h1>ServerService.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.openstack.services;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.openstack4j.api.Builders;
+import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.model.common.ActionResponse;
+import org.openstack4j.model.compute.InterfaceAttachment;
+import org.openstack4j.model.compute.Server;
+import org.openstack4j.model.compute.ServerCreate;
+import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
+import org.openstack4j.model.compute.builder.ServerCreateBuilder;
+import org.openstack4j.model.network.NetFloatingIP;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityInternaloErrorException;
+import esa.s1pdgs.cpoc.common.errors.os.OsFloatingIpNotActiveException;
+import esa.s1pdgs.cpoc.common.errors.os.OsServerNotActiveException;
+import esa.s1pdgs.cpoc.common.errors.os.OsServerNotDeletedException;
+import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc;
+
+@Service
+public class ServerService {
+
+<span class="fc" id="L33">    private static final Logger LOGGER =</span>
+<span class="fc" id="L34">            LogManager.getLogger(ServerService.class);</span>
+    private final int serverMaxWaitMs;
+    final int deletionMaxLoop;
+    final int deletionTempoLoopMs;
+    private final int fipMaxLoop;
+    private final int fipTempoLoopMs;
+
+    @Autowired
+    public ServerService(
+            @Value(&quot;${openstack.service.floating-ip.creation.max-loop}&quot;) final int fipMaxLoop,
+            @Value(&quot;${openstack.service.server.deletion.max-loop}&quot;) final int deletionMaxLoop,
+            @Value(&quot;${openstack.service.server.deletion.tempo-loop-ms}&quot;) final int deletionTempoLoopMs,
+            @Value(&quot;${openstack.service.floating-ip.creation.tempo-loop-ms}&quot;) final int fipTempoLoopMs,
+<span class="fc" id="L47">            @Value(&quot;${openstack.service.server.creation.max-wait-ms}&quot;) final int serverMaxWaitMs) {</span>
+<span class="fc" id="L48">        this.fipMaxLoop = fipMaxLoop;</span>
+<span class="fc" id="L49">        this.deletionMaxLoop = deletionMaxLoop;</span>
+<span class="fc" id="L50">        this.deletionTempoLoopMs = deletionTempoLoopMs;</span>
+<span class="fc" id="L51">        this.fipTempoLoopMs = fipTempoLoopMs;</span>
+<span class="fc" id="L52">        this.serverMaxWaitMs = serverMaxWaitMs;</span>
+<span class="fc" id="L53">    }</span>
+
+    public String createAndBootServer(OSClientV3 osClient, ServerDesc desc)
+            throws OsServerNotActiveException {
+
+<span class="fc" id="L58">        ServerCreateBuilder builder = Builders.server().name(desc.getName())</span>
+<span class="fc" id="L59">                .flavor(desc.getFlavor()).keypairName(desc.getKeySecurity())</span>
+<span class="fc" id="L60">                .networks(desc.getNetworks())</span>
+<span class="fc" id="L61">                .availabilityZone(desc.getAvailableZone());</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (!CollectionUtils.isEmpty(desc.getSecurityGroups())) {</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">            for (String g : desc.getSecurityGroups()) {</span>
+<span class="fc" id="L64">                builder = builder.addSecurityGroup(g);</span>
+<span class="fc" id="L65">            }</span>
+        }
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (desc.isBootableOnVolume()) {</span>
+            // Link volume to boot index
+            BlockDeviceMappingBuilder blockDeviceMappingBuilder =
+<span class="fc" id="L70">                    Builders.blockDeviceMapping().uuid(desc.getBootVolume())</span>
+<span class="fc" id="L71">                            .deviceName(desc.getBootDeviceName()).bootIndex(0);</span>
+<span class="fc" id="L72">            builder = builder.blockDevice(blockDeviceMappingBuilder.build());</span>
+<span class="fc" id="L73">        } else {</span>
+            // Add image ref for server
+<span class="fc" id="L75">            builder.image(desc.getImageRef());</span>
+        }
+
+        // Create server
+<span class="fc" id="L79">        ServerCreate serverCreate = builder.build();</span>
+<span class="fc" id="L80">        Server server = osClient.compute().servers()</span>
+<span class="fc" id="L81">                .bootAndWaitActive(serverCreate, serverMaxWaitMs);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (server.getStatus() != Server.Status.ACTIVE) {</span>
+<span class="fc" id="L83">            throw new OsServerNotActiveException(server.getId(), String</span>
+<span class="fc" id="L84">                    .format(&quot;Server not created after %d ms&quot;, serverMaxWaitMs));</span>
+        }
+<span class="fc" id="L86">        return server.getId();</span>
+    }
+
+    public void createFloatingIp(OSClientV3 osClient, String serverId,
+            String floatingNetworkId) throws OsEntityException {
+<span class="fc" id="L91">        List&lt;? extends InterfaceAttachment&gt; nicID =</span>
+<span class="fc" id="L92">                osClient.compute().servers().interfaces().list(serverId);</span>
+<span class="fc" id="L93">        String portid = nicID.get(0).getPortId();</span>
+<span class="fc" id="L94">        NetFloatingIP fip = osClient.networking().floatingip()</span>
+<span class="fc" id="L95">                .create(Builders.netFloatingIP()</span>
+<span class="fc" id="L96">                        .floatingNetworkId(floatingNetworkId).portId(portid)</span>
+<span class="fc" id="L97">                        .build());</span>
+
+        // judge fip is created succeffuly
+<span class="fc" id="L100">        int count = 1;</span>
+<span class="fc" id="L101">        boolean createFlat = false;</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        while (count &lt; fipMaxLoop) {</span>
+<span class="fc" id="L103">            if (osClient.networking().floatingip().get(fip.getId()).getStatus()</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">                    .toUpperCase().equals(&quot;ACTIVE&quot;)) {</span>
+<span class="fc" id="L105">                createFlat = true;</span>
+<span class="fc" id="L106">                break;</span>
+            }
+<span class="fc" id="L108">            count++;</span>
+            try {
+<span class="fc" id="L110">                Thread.sleep(fipTempoLoopMs);</span>
+<span class="nc" id="L111">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L112">                throw new OsEntityInternaloErrorException(&quot;serverId&quot;, serverId,</span>
+<span class="nc" id="L113">                        String.format(</span>
+                                &quot;Cannot create floating IP for network %s: %s&quot;,
+<span class="nc" id="L115">                                floatingNetworkId, e.getMessage()),</span>
+                        e);
+<span class="fc" id="L117">            }</span>
+        }
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (!createFlat) {</span>
+<span class="fc" id="L120">            throw new OsFloatingIpNotActiveException(serverId,</span>
+<span class="fc" id="L121">                    String.format(&quot;Floating IP not active after for %d ms&quot;,</span>
+<span class="fc" id="L122">                            fipMaxLoop * fipTempoLoopMs));</span>
+        }
+<span class="fc" id="L124">    }</span>
+
+    public void deleteFloatingIp(OSClientV3 osClient, String floatingIpId) {
+<span class="fc" id="L127">        osClient.networking().floatingip().delete(floatingIpId);</span>
+<span class="fc" id="L128">    }</span>
+
+    public void delete(OSClientV3 osClient, String serverId)
+            throws OsEntityException {
+<span class="fc" id="L132">        ActionResponse deleteRespone =</span>
+<span class="fc" id="L133">                osClient.compute().servers().delete(serverId);</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        if (deleteRespone.isSuccess()) {</span>
+<span class="fc" id="L135">            LOGGER.debug(&quot;[serverId {}] Server is deleted&quot;, serverId);</span>
+        }
+<span class="fc" id="L137">        boolean deleteServerStatus = false;</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">        for (int i = 0; i &lt; deletionMaxLoop; i++) {</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            if (osClient.compute().servers().get(serverId) == null) {</span>
+<span class="fc" id="L140">                deleteServerStatus = true;</span>
+<span class="fc" id="L141">                LOGGER.debug(&quot;[serverId {}] Server is deleted&quot;, serverId);</span>
+<span class="fc" id="L142">                break;</span>
+            }
+            try {
+<span class="fc" id="L145">                Thread.sleep(deletionTempoLoopMs);</span>
+<span class="nc" id="L146">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L147">                throw new OsEntityInternaloErrorException(&quot;serverId&quot;, serverId,</span>
+<span class="nc" id="L148">                        String.format(&quot;Fail to sleep: %s&quot;, e.getMessage()), e);</span>
+<span class="fc" id="L149">            }</span>
+        }
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        if (!deleteServerStatus) {</span>
+<span class="fc" id="L152">            throw new OsServerNotDeletedException(serverId,</span>
+                    &quot;Fail to delete server&quot;);
+        }
+
+<span class="fc" id="L156">    }</span>
+
+    public Server get(OSClientV3 osClient, String serverId) {
+<span class="fc" id="L159">        return osClient.compute().servers().get(serverId);</span>
+    }
+
+    public String getFloatingIpIdForServer(final OSClientV3 osClient,
+            final String serverId) {
+<span class="fc" id="L164">        List&lt;? extends InterfaceAttachment&gt; nicID =</span>
+<span class="fc" id="L165">                osClient.compute().servers().interfaces().list(serverId);</span>
+<span class="fc" id="L166">        String portid = nicID.get(0).getPortId();</span>
+<span class="fc" id="L167">        List&lt;? extends NetFloatingIP&gt; fips =</span>
+<span class="fc" id="L168">                osClient.networking().floatingip().list();</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        for (NetFloatingIP netFloatingIP : fips) {</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">            if (netFloatingIP.getPortId() != null</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                    &amp;&amp; netFloatingIP.getPortId().equals(portid)) {</span>
+<span class="fc" id="L172">                return netFloatingIP.getId();</span>
+            }
+<span class="fc" id="L174">        }</span>
+<span class="fc" id="L175">        return &quot;&quot;;</span>
+    }
+
+    public Map&lt;String, String&gt; getServerIds(final OSClientV3 osClient,
+            final String prefix, final String status) {
+<span class="fc" id="L180">        Map&lt;String, String&gt; ret = new HashMap&lt;String, String&gt;();</span>
+<span class="fc" id="L181">        Map&lt;String, String&gt; filter = new HashMap&lt;String, String&gt;();</span>
+<span class="fc" id="L182">        filter.put(&quot;status&quot;, status);</span>
+<span class="fc" id="L183">        filter.put(&quot;name&quot;, &quot;^&quot; + prefix + &quot;*&quot;);</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        for (Server server : osClient.compute().servers().list(filter)) {</span>
+<span class="fc" id="L185">            ret.put(server.getId(), server.getName());</span>
+<span class="fc" id="L186">        }</span>
+<span class="fc" id="L187">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

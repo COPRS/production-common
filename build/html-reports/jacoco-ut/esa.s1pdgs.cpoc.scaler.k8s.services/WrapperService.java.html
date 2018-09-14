@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>WrapperService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.k8s.services</a> &gt; <span class="el_source">WrapperService.java</span></div><h1>WrapperService.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.k8s.services;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStatusException;
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStopException;
+import esa.s1pdgs.cpoc.scaler.k8s.model.PodLogicalStatus;
+import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperDesc;
+import esa.s1pdgs.cpoc.scaler.k8s.model.dto.WrapperStatusDto;
+
+@Service
+public class WrapperService {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L27">    private static final Logger LOGGER =</span>
+<span class="fc" id="L28">            LogManager.getLogger(WrapperService.class);</span>
+
+    private final RestTemplate restTemplate;
+
+    private final int port;
+
+    private int nbretry;
+
+    private int temporetryms;
+
+    @Autowired
+    public WrapperService(
+            @Qualifier(&quot;restWrapperTemplate&quot;) final RestTemplate restTemplate,
+            @Value(&quot;${wrapper.rest-api.port}&quot;) final int port,
+            @Value(&quot;${wrapper.rest-api.tempo-retry-ms}&quot;) final int temporetryms,
+<span class="fc" id="L43">            @Value(&quot;${wrapper.rest-api.nb-retry}&quot;) final int nbretry) {</span>
+<span class="fc" id="L44">        this.restTemplate = restTemplate;</span>
+<span class="fc" id="L45">        this.port = port;</span>
+<span class="fc" id="L46">        this.nbretry = nbretry;</span>
+<span class="fc" id="L47">        this.temporetryms = temporetryms;</span>
+<span class="fc" id="L48">    }</span>
+
+    public WrapperDesc getWrapperStatus(String podName, String podIp)
+            throws WrapperStatusException {
+<span class="fc" id="L52">        int retries = -1;</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        while (retries &lt; nbretry) {</span>
+<span class="fc" id="L54">            retries++;</span>
+            try {
+<span class="fc" id="L56">                String uri =</span>
+                        &quot;http://&quot; + podIp + &quot;:&quot; + this.port + &quot;/app/status&quot;;
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">                if (LOGGER.isDebugEnabled()) {</span>
+<span class="nc" id="L59">                    LOGGER.debug(&quot;Call rest api: {}&quot;, uri);</span>
+                }
+
+<span class="fc" id="L62">                ResponseEntity&lt;WrapperStatusDto&gt; response =</span>
+<span class="fc" id="L63">                        this.restTemplate.exchange(uri, HttpMethod.GET, null,</span>
+                                WrapperStatusDto.class);
+<span class="fc bfc" id="L65" title="All 2 branches covered.">                if (response.getStatusCode() == HttpStatus.OK) {</span>
+<span class="fc" id="L66">                    return buildWrapperDescFromDto(response.getBody(), podName,</span>
+                            podIp);
+                } else {
+<span class="fc" id="L69">                    waitOrThrowError(retries,</span>
+                            new WrapperStatusException(podIp, podName,
+<span class="fc" id="L71">                                    String.format(&quot;Query failed with code %s&quot;,</span>
+<span class="fc" id="L72">                                            response.getStatusCode())));</span>
+                }
+<span class="fc" id="L74">            } catch (RestClientException e) {</span>
+<span class="fc" id="L75">                waitOrThrowError(retries,</span>
+                        new WrapperStatusException(podIp, podName, String
+<span class="fc" id="L77">                                .format(&quot;Query failed: %s&quot;, e.getMessage()),</span>
+                                e));
+<span class="fc" id="L79">            }</span>
+        }
+
+<span class="fc" id="L82">        throw new WrapperStatusException(podIp, podName,</span>
+                &quot;Timeout on query execution&quot;);
+    }
+
+    protected WrapperDesc buildWrapperDescFromDto(WrapperStatusDto dto,
+            String podName, String podIp) throws WrapperStatusException {
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (dto == null) {</span>
+<span class="fc" id="L89">            throw new WrapperStatusException(podIp, podName, &quot;Null object&quot;);</span>
+        }
+<span class="fc" id="L91">        WrapperDesc r = new WrapperDesc(podName);</span>
+<span class="fc" id="L92">        r.setTimeSinceLastChange(dto.getTimeSinceLastChange());</span>
+<span class="fc" id="L93">        r.setErrorCounter(dto.getErrorCounter());</span>
+<span class="pc bpc" id="L94" title="1 of 5 branches missed.">        switch (dto.getStatus()) {</span>
+            case PROCESSING:
+<span class="fc" id="L96">                r.setStatus(PodLogicalStatus.PROCESSING);</span>
+<span class="fc" id="L97">                break;</span>
+            case STOPPING:
+<span class="fc" id="L99">                r.setStatus(PodLogicalStatus.STOPPING);</span>
+<span class="fc" id="L100">                break;</span>
+            case ERROR:
+<span class="fc" id="L102">                r.setStatus(PodLogicalStatus.ERROR);</span>
+<span class="fc" id="L103">                break;</span>
+            case FATALERROR:
+<span class="nc" id="L105">                r.setStatus(PodLogicalStatus.FATALERROR);</span>
+<span class="nc" id="L106">                break;</span>
+            default:
+<span class="fc" id="L108">                r.setStatus(PodLogicalStatus.WAITING);</span>
+                break;
+        }
+<span class="fc" id="L111">        return r;</span>
+    }
+
+    private void waitOrThrowError(int retries, WrapperStatusException raise)
+            throws WrapperStatusException {
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        if (retries &lt; this.nbretry) {</span>
+<span class="fc" id="L117">            LOGGER.warn(&quot;Call rest api failed: Attempt : {} / {}&quot;, retries,</span>
+<span class="fc" id="L118">                    this.nbretry);</span>
+            try {
+<span class="fc" id="L120">                Thread.sleep(this.temporetryms);</span>
+<span class="nc" id="L121">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L122">                throw raise;</span>
+<span class="fc" id="L123">            }</span>
+        } else {
+<span class="fc" id="L125">            throw raise;</span>
+        }
+<span class="fc" id="L127">    }</span>
+
+    private void waitOrThrowError(int retries, WrapperStopException raise)
+            throws WrapperStopException {
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (retries &lt; this.nbretry) {</span>
+<span class="fc" id="L132">            LOGGER.warn(&quot;Call rest api failed: Attempt : {} / {}&quot;, retries,</span>
+<span class="fc" id="L133">                    this.nbretry);</span>
+            try {
+<span class="fc" id="L135">                Thread.sleep(this.temporetryms);</span>
+<span class="nc" id="L136">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L137">                throw raise;</span>
+<span class="fc" id="L138">            }</span>
+        } else {
+<span class="fc" id="L140">            throw raise;</span>
+        }
+<span class="fc" id="L142">    }</span>
+
+    public void stopWrapper(String ip) throws WrapperStopException {
+<span class="fc" id="L145">        int retries = -1;</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        while (retries &lt; nbretry) {</span>
+<span class="fc" id="L147">            retries++;</span>
+            try {
+<span class="fc" id="L149">                String uri = &quot;http://&quot; + ip + &quot;:&quot; + this.port + &quot;/app/stop&quot;;</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">                if (LOGGER.isDebugEnabled()) {</span>
+<span class="nc" id="L151">                    LOGGER.debug(&quot;Call rest api: {}, retries: {}&quot;, uri,</span>
+<span class="nc" id="L152">                            retries);</span>
+                }
+
+<span class="fc" id="L155">                ResponseEntity&lt;String&gt; response = this.restTemplate</span>
+<span class="fc" id="L156">                        .exchange(uri, HttpMethod.POST, null, String.class);</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">                if (response.getStatusCode() == HttpStatus.OK) {</span>
+<span class="fc" id="L158">                    return;</span>
+                } else {
+<span class="fc" id="L160">                    waitOrThrowError(retries,</span>
+                            new WrapperStopException(ip,
+<span class="fc" id="L162">                                    String.format(&quot;Query failed with code %s&quot;,</span>
+<span class="fc" id="L163">                                            response.getStatusCode())));</span>
+                }
+<span class="fc" id="L165">            } catch (RestClientException e) {</span>
+<span class="fc" id="L166">                waitOrThrowError(retries, new WrapperStopException(ip,</span>
+<span class="fc" id="L167">                        String.format(&quot;Query failed: %s&quot;, e.getMessage()), e));</span>
+<span class="fc" id="L168">            }</span>
+        }
+
+<span class="fc" id="L171">        throw new WrapperStopException(ip, &quot;Timeout on query execution&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

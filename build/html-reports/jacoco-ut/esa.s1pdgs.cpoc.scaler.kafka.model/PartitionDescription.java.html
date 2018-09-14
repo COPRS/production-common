@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>PartitionDescription.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.kafka.model</a> &gt; <span class="el_source">PartitionDescription.java</span></div><h1>PartitionDescription.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.kafka.model;
+
+import java.util.Objects;
+
+/**
+ * Description of a partition for a given consumer
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class PartitionDescription {
+
+	/**
+	 * Identifier
+	 */
+	private int id;
+
+	/**
+	 * Topic name
+	 */
+	private String topicName;
+
+	/**
+	 * Connected consumer identifier if link to a ConsumerDescription
+	 */
+	private String consumerId;
+
+	/**
+	 * Current offset
+	 */
+	private long currentOffset;
+
+	/**
+	 * Last offset published
+	 */
+	private long logEndOffset;
+
+	/**
+	 * Lag = logEndOffset - currentOffset
+	 */
+	private long lag;
+
+	/**
+	 * @param id
+	 * @param topicName
+	 * @param consumerId
+	 * @param currentOffset
+	 * @param logEndOffset
+	 * @param lag
+	 */
+	public PartitionDescription(final int id, final String topicName, final String consumerId, final long currentOffset,
+			final long logEndOffset, final long lag) {
+<span class="fc" id="L53">		super();</span>
+<span class="fc" id="L54">		this.id = id;</span>
+<span class="fc" id="L55">		this.topicName = topicName;</span>
+<span class="fc" id="L56">		this.consumerId = consumerId;</span>
+<span class="fc" id="L57">		this.currentOffset = currentOffset;</span>
+<span class="fc" id="L58">		this.logEndOffset = logEndOffset;</span>
+<span class="fc" id="L59">		this.lag = lag;</span>
+<span class="fc" id="L60">	}</span>
+
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+<span class="fc" id="L66">		return id;</span>
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(final int id) {
+<span class="fc" id="L74">		this.id = id;</span>
+<span class="fc" id="L75">	}</span>
+
+	/**
+	 * @return the topicName
+	 */
+	public String getTopicName() {
+<span class="fc" id="L81">		return topicName;</span>
+	}
+
+	/**
+	 * @param topicName
+	 *            the topicName to set
+	 */
+	public void setTopicName(final String topicName) {
+<span class="fc" id="L89">		this.topicName = topicName;</span>
+<span class="fc" id="L90">	}</span>
+
+	/**
+	 * @return the consumerId
+	 */
+	public String getConsumerId() {
+<span class="fc" id="L96">		return consumerId;</span>
+	}
+
+	/**
+	 * @param consumerId
+	 *            the consumerId to set
+	 */
+	public void setConsumerId(final String consumerId) {
+<span class="fc" id="L104">		this.consumerId = consumerId;</span>
+<span class="fc" id="L105">	}</span>
+
+	/**
+	 * @return the currentOffset
+	 */
+	public long getCurrentOffset() {
+<span class="fc" id="L111">		return currentOffset;</span>
+	}
+
+	/**
+	 * @param currentOffset
+	 *            the currentOffset to set
+	 */
+	public void setCurrentOffset(final long currentOffset) {
+<span class="fc" id="L119">		this.currentOffset = currentOffset;</span>
+<span class="fc" id="L120">	}</span>
+
+	/**
+	 * @return the logEndOffset
+	 */
+	public long getLogEndOffset() {
+<span class="fc" id="L126">		return logEndOffset;</span>
+	}
+
+	/**
+	 * @param logEndOffset
+	 *            the logEndOffset to set
+	 */
+	public void setLogEndOffset(final long logEndOffset) {
+<span class="fc" id="L134">		this.logEndOffset = logEndOffset;</span>
+<span class="fc" id="L135">	}</span>
+
+	/**
+	 * @return the lag
+	 */
+	public long getLag() {
+<span class="fc" id="L141">		return lag;</span>
+	}
+
+	/**
+	 * @param lag
+	 *            the lag to set
+	 */
+	public void setLag(final long lag) {
+<span class="fc" id="L149">		this.lag = lag;</span>
+<span class="fc" id="L150">	}</span>
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L157">		return String.format(&quot;{id: %s, topicName: %s, consumerId: %s, currentOffset: %s, logEndOffset: %s, lag: %s}&quot;,</span>
+<span class="fc" id="L158">				id, topicName, consumerId, currentOffset, logEndOffset, lag);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L166">		return Objects.hash(id, topicName, consumerId, currentOffset, logEndOffset, lag);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L175" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L176">			ret = true;</span>
+<span class="fc bfc" id="L177" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L178">			ret = false;</span>
+		} else {
+<span class="fc" id="L180">			final PartitionDescription other = (PartitionDescription) obj;</span>
+<span class="fc bfc" id="L181" title="All 4 branches covered.">			ret = id == other.id &amp;&amp; Objects.equals(topicName, other.topicName)</span>
+<span class="fc bfc" id="L182" title="All 8 branches covered.">					&amp;&amp; Objects.equals(consumerId, other.consumerId) &amp;&amp; currentOffset == other.currentOffset</span>
+					&amp;&amp; logEndOffset == other.logEndOffset &amp;&amp; lag == other.lag;
+		}
+<span class="fc" id="L185">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

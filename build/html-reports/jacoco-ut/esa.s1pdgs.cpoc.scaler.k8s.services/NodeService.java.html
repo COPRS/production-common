@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>NodeService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.k8s.services</a> &gt; <span class="el_source">NodeService.java</span></div><h1>NodeService.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.k8s.services;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import esa.s1pdgs.cpoc.scaler.k8s.model.NodeDesc;
+import esa.s1pdgs.cpoc.scaler.k8s.model.converter.K8SNodeToNodeDesc;
+import io.fabric8.kubernetes.api.model.NodeList;
+import io.fabric8.kubernetes.client.KubernetesClient;
+
+@Service
+public class NodeService {
+
+	private final KubernetesClient k8sClient;
+
+	private final K8SNodeToNodeDesc nodeConverter;
+
+	@Autowired
+<span class="fc" id="L24">	public NodeService(final KubernetesClient k8sClient) {</span>
+<span class="fc" id="L25">		this.k8sClient = k8sClient;</span>
+<span class="fc" id="L26">		this.nodeConverter = new K8SNodeToNodeDesc();</span>
+<span class="fc" id="L27">	}</span>
+
+	/**
+	 * Get nodes with labels
+	 * 
+	 * @param labels
+	 * @return
+	 */
+	public List&lt;NodeDesc&gt; getNodesWithLabels(Map&lt;String, String&gt; labels) {
+<span class="fc" id="L36">		List&lt;NodeDesc&gt; r = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L37">		NodeList nodes = k8sClient.nodes().withLabels(labels).list();</span>
+<span class="fc bfc" id="L38" title="All 4 branches covered.">		if (nodes != null &amp;&amp; !CollectionUtils.isEmpty(nodes.getItems())) {</span>
+<span class="fc" id="L39">			nodes.getItems().forEach(node -&gt; {</span>
+<span class="fc" id="L40">				r.add(this.nodeConverter.apply(node));</span>
+<span class="fc" id="L41">			});</span>
+		}
+<span class="fc" id="L43">		return r;</span>
+	}
+
+	/**
+	 * Get nodes with labels
+	 * 
+	 * @param labels
+	 * @return
+	 */
+	public List&lt;NodeDesc&gt; getNodesWithLabel(String label, String value) {
+<span class="fc" id="L53">		List&lt;NodeDesc&gt; r = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L54">		NodeList nodes = k8sClient.nodes().withLabel(label, value).list();</span>
+<span class="fc bfc" id="L55" title="All 4 branches covered.">		if (nodes != null &amp;&amp; !CollectionUtils.isEmpty(nodes.getItems())) {</span>
+<span class="fc" id="L56">			nodes.getItems().forEach(node -&gt; {</span>
+<span class="fc" id="L57">				r.add(this.nodeConverter.apply(node));</span>
+<span class="fc" id="L58">			});</span>
+		}
+<span class="fc" id="L60">		return r;</span>
+	}
+
+	public void editLabelToNode(String nodeName, String label, String value) {
+<span class="fc" id="L64">		k8sClient.nodes().withName(nodeName).edit().editMetadata().removeFromLabels(label).addToLabels(label, value)</span>
+<span class="fc" id="L65">				.endMetadata().done();</span>
+<span class="fc" id="L66">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

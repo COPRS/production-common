@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>OpenStackServerProperties.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.openstack</a> &gt; <span class="el_source">OpenStackServerProperties.java</span></div><h1>OpenStackServerProperties.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.openstack;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * OpenStack configuration
+ * 
+ * @author Viveris Technologies
+ */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;openstack.server&quot;)
+public class OpenStackServerProperties {
+
+    // -------------------------
+    // Authentication
+    // -------------------------
+    private String endpoint;
+    private String domainId;
+    private String projectId;
+    private String credentialUsername;
+    private String credentialPassword;
+
+    // -------------------------
+    // Volumes
+    // -------------------------
+    private VolumeProperties volumeWrapper;
+    private ServerProperties serverWrapper;
+
+    /**
+     * 
+     */
+    public OpenStackServerProperties() {
+<span class="fc" id="L39">        super();</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * @return the endpoint
+     */
+    public String getEndpoint() {
+<span class="fc" id="L46">        return endpoint;</span>
+    }
+
+    /**
+     * @param endpoint
+     *            the endpoint to set
+     */
+    public void setEndpoint(final String endpoint) {
+<span class="fc" id="L54">        this.endpoint = endpoint;</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * @return the domainId
+     */
+    public String getDomainId() {
+<span class="fc" id="L61">        return domainId;</span>
+    }
+
+    /**
+     * @param domainId
+     *            the domainId to set
+     */
+    public void setDomainId(final String domainId) {
+<span class="fc" id="L69">        this.domainId = domainId;</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * @return the projectId
+     */
+    public String getProjectId() {
+<span class="fc" id="L76">        return projectId;</span>
+    }
+
+    /**
+     * @param projectId
+     *            the projectId to set
+     */
+    public void setProjectId(final String projectId) {
+<span class="fc" id="L84">        this.projectId = projectId;</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     * @return the credentialUsername
+     */
+    public String getCredentialUsername() {
+<span class="fc" id="L91">        return credentialUsername;</span>
+    }
+
+    /**
+     * @param credentialUsername
+     *            the credentialUsername to set
+     */
+    public void setCredentialUsername(final String credentialUsername) {
+<span class="fc" id="L99">        this.credentialUsername = credentialUsername;</span>
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * @return the credentialPassword
+     */
+    public String getCredentialPassword() {
+<span class="fc" id="L106">        return credentialPassword;</span>
+    }
+
+    /**
+     * @param credentialPassword
+     *            the credentialPassword to set
+     */
+    public void setCredentialPassword(final String credentialPassword) {
+<span class="fc" id="L114">        this.credentialPassword = credentialPassword;</span>
+<span class="fc" id="L115">    }</span>
+
+    /**
+     * @return the volumeWrapper
+     */
+    public VolumeProperties getVolumeWrapper() {
+<span class="fc" id="L121">        return volumeWrapper;</span>
+    }
+
+    /**
+     * @param volumeWrapper
+     *            the volumeWrapper to set
+     */
+    public void setVolumeWrapper(final VolumeProperties volumeWrapper) {
+<span class="fc" id="L129">        this.volumeWrapper = volumeWrapper;</span>
+<span class="fc" id="L130">    }</span>
+
+    /**
+     * @return the serverWrapper
+     */
+    public ServerProperties getServerWrapper() {
+<span class="fc" id="L136">        return serverWrapper;</span>
+    }
+
+    /**
+     * @param serverWrapper
+     *            the serverWrapper to set
+     */
+    public void setServerWrapper(final ServerProperties serverWrapper) {
+<span class="fc" id="L144">        this.serverWrapper = serverWrapper;</span>
+<span class="fc" id="L145">    }</span>
+
+    /**
+     * 
+     */
+    public static class VolumeProperties {
+
+        /**
+         * 
+         */
+        private String prefixName;
+
+        /**
+         * 
+         */
+        private String description;
+
+        /**
+         * 
+         */
+        private String volumeType;
+
+        /**
+         * 
+         */
+        private String zone;
+
+        /**
+         * 
+         */
+        private int size;
+
+        /**
+         * 
+         */
+        public VolumeProperties() {
+<span class="fc" id="L181">            super();</span>
+<span class="fc" id="L182">        }</span>
+
+        /**
+         * @return the prefixName
+         */
+        public String getPrefixName() {
+<span class="fc" id="L188">            return prefixName;</span>
+        }
+
+        /**
+         * @param prefixName
+         *            the prefixName to set
+         */
+        public void setPrefixName(final String prefixName) {
+<span class="fc" id="L196">            this.prefixName = prefixName;</span>
+<span class="fc" id="L197">        }</span>
+
+        /**
+         * @return the description
+         */
+        public String getDescription() {
+<span class="fc" id="L203">            return description;</span>
+        }
+
+        /**
+         * @param description
+         *            the description to set
+         */
+        public void setDescription(final String description) {
+<span class="fc" id="L211">            this.description = description;</span>
+<span class="fc" id="L212">        }</span>
+
+        /**
+         * @return the volumeType
+         */
+        public String getVolumeType() {
+<span class="fc" id="L218">            return volumeType;</span>
+        }
+
+        /**
+         * @param volumeType
+         *            the volumeType to set
+         */
+        public void setVolumeType(final String volumeType) {
+<span class="fc" id="L226">            this.volumeType = volumeType;</span>
+<span class="fc" id="L227">        }</span>
+
+        /**
+         * @return the zone
+         */
+        public String getZone() {
+<span class="fc" id="L233">            return zone;</span>
+        }
+
+        /**
+         * @param zone
+         *            the zone to set
+         */
+        public void setZone(final String zone) {
+<span class="fc" id="L241">            this.zone = zone;</span>
+<span class="fc" id="L242">        }</span>
+
+        /**
+         * @return the size
+         */
+        public int getSize() {
+<span class="fc" id="L248">            return size;</span>
+        }
+
+        /**
+         * @param size
+         *            the size to set
+         */
+        public void setSize(final int size) {
+<span class="fc" id="L256">            this.size = size;</span>
+<span class="fc" id="L257">        }</span>
+
+    }
+
+    /**
+     * 
+     */
+    public static class ServerProperties {
+
+        /**
+         * 
+         */
+        private String prefixName;
+
+        /**
+         * 
+         */
+        private String bootDeviceName;
+
+        /**
+         * 
+         */
+        private String flavor;
+
+        /**
+         * 
+         */
+        private String keySecurity;
+
+        /**
+         * 
+         */
+        private List&lt;String&gt; securityGroups;
+
+        /**
+         * 
+         */
+        private List&lt;String&gt; networks;
+
+        /**
+         * 
+         */
+        private String availableZone;
+
+        /**
+         * 
+         */
+        private boolean floatActivation;
+
+        /**
+         * 
+         */
+        private String floatingNetwork;
+
+        /**
+         * 
+         */
+        private boolean bootableOnVolume;
+
+        /**
+         * 
+         */
+        private String imageRef;
+
+        /**
+         * 
+         */
+<span class="fc" id="L324">        public ServerProperties() {</span>
+<span class="fc" id="L325">            networks = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L326">            securityGroups = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L327">        }</span>
+
+        /**
+         * @return the prefixName
+         */
+        public String getPrefixName() {
+<span class="fc" id="L333">            return prefixName;</span>
+        }
+
+        /**
+         * @param prefixName
+         *            the prefixName to set
+         */
+        public void setPrefixName(final String prefixName) {
+<span class="fc" id="L341">            this.prefixName = prefixName;</span>
+<span class="fc" id="L342">        }</span>
+
+        /**
+         * @return the imageRef
+         */
+        public String getImageRef() {
+<span class="fc" id="L348">            return imageRef;</span>
+        }
+
+        /**
+         * @param imageRef
+         *            the imageRef to set
+         */
+        public void setImageRef(final String imageRef) {
+<span class="fc" id="L356">            this.imageRef = imageRef;</span>
+<span class="fc" id="L357">        }</span>
+
+        /**
+         * @return the bootDeviceName
+         */
+        public String getBootDeviceName() {
+<span class="fc" id="L363">            return bootDeviceName;</span>
+        }
+
+        /**
+         * @param bootDeviceName
+         *            the bootDeviceName to set
+         */
+        public void setBootDeviceName(final String bootDeviceName) {
+<span class="fc" id="L371">            this.bootDeviceName = bootDeviceName;</span>
+<span class="fc" id="L372">        }</span>
+
+        /**
+         * @return the flavor
+         */
+        public String getFlavor() {
+<span class="fc" id="L378">            return flavor;</span>
+        }
+
+        /**
+         * @param flavor
+         *            the flavor to set
+         */
+        public void setFlavor(final String flavor) {
+<span class="fc" id="L386">            this.flavor = flavor;</span>
+<span class="fc" id="L387">        }</span>
+
+        /**
+         * @return the keySecurity
+         */
+        public String getKeySecurity() {
+<span class="fc" id="L393">            return keySecurity;</span>
+        }
+
+        /**
+         * @param keySecurity
+         *            the keySecurity to set
+         */
+        public void setKeySecurity(final String keySecurity) {
+<span class="fc" id="L401">            this.keySecurity = keySecurity;</span>
+<span class="fc" id="L402">        }</span>
+
+        /**
+         * @return the securityGroup
+         */
+        public List&lt;String&gt; getSecurityGroups() {
+<span class="fc" id="L408">            return securityGroups;</span>
+        }
+
+        /**
+         * @param securityGroup
+         *            the securityGroup to set
+         */
+        public void setSecurityGroups(final List&lt;String&gt; securityGroups) {
+<span class="fc" id="L416">            this.securityGroups = securityGroups;</span>
+<span class="fc" id="L417">        }</span>
+
+        /**
+         * @return the networks
+         */
+        public List&lt;String&gt; getNetworks() {
+<span class="fc" id="L423">            return networks;</span>
+        }
+
+        /**
+         * @param networks
+         *            the networks to set
+         */
+        public void setNetworks(final List&lt;String&gt; networks) {
+<span class="fc" id="L431">            this.networks = networks;</span>
+<span class="fc" id="L432">        }</span>
+
+        /**
+         * @return the availableZone
+         */
+        public String getAvailableZone() {
+<span class="fc" id="L438">            return availableZone;</span>
+        }
+
+        /**
+         * @param availableZone
+         *            the availableZone to set
+         */
+        public void setAvailableZone(final String availableZone) {
+<span class="fc" id="L446">            this.availableZone = availableZone;</span>
+<span class="fc" id="L447">        }</span>
+
+        /**
+         * @return the floatingActivation
+         */
+        public boolean isFloatActivation() {
+<span class="fc" id="L453">            return floatActivation;</span>
+        }
+
+        /**
+         * @param floatActivation
+         *            the floatActivation to set
+         */
+        public void setFloatActivation(final boolean floatActivation) {
+<span class="fc" id="L461">            this.floatActivation = floatActivation;</span>
+<span class="fc" id="L462">        }</span>
+
+        /**
+         * @return the floatingNetwork
+         */
+        public String getFloatingNetwork() {
+<span class="fc" id="L468">            return floatingNetwork;</span>
+        }
+
+        /**
+         * @param floatingNetwork
+         *            the floatingNetwork to set
+         */
+        public void setFloatingNetwork(final String floatingNetwork) {
+<span class="fc" id="L476">            this.floatingNetwork = floatingNetwork;</span>
+<span class="fc" id="L477">        }</span>
+
+        /**
+         * @return the bootableOnVolume
+         */
+        public boolean isBootableOnVolume() {
+<span class="fc" id="L483">            return bootableOnVolume;</span>
+        }
+
+        /**
+         * @param bootableOnVolume
+         *            the bootableOnVolume to set
+         */
+        public void setBootableOnVolume(final boolean bootableOnVolume) {
+<span class="fc" id="L491">            this.bootableOnVolume = bootableOnVolume;</span>
+<span class="fc" id="L492">        }</span>
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
