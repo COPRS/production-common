@@ -49,11 +49,8 @@ wrapper:
     min-threshold-s: 900.0
     max-threshold-s: 1800.0
   tempo-pooling-ms: 500
-  tempo-scaling-s: 600
   tempo-integrity-volumeserver-ms: 21600000
   tempo-initial-delay-ms: 500
-  tempo-delete-resources-s: 600
-  wait-pod-deletion-ms: 10000
   rest-api:
     port: 8080
     nb-retry: 3

@@ -35,9 +35,6 @@ public class WrapperProperties {
 	// -------------------------
 	private TimeProperties executionTime;
 	private long tempoPoolingMs;
-	private long tempoScalingS;
-	private long tempoDeleteResourcesS;
-	private long waitPodDeletionMs;
 
 	// -------------------------
 	// REST API configuration
@@ -205,48 +202,6 @@ public class WrapperProperties {
 	 */
 	public void setTempoPoolingMs(long tempoPoolingMs) {
 		this.tempoPoolingMs = tempoPoolingMs;
-	}
-
-	/**
-	 * @return the tempoScalingS
-	 */
-	public long getTempoScalingS() {
-		return tempoScalingS;
-	}
-
-	/**
-	 * @param tempoScalingS the tempoScalingS to set
-	 */
-	public void setTempoScalingS(long tempoScalingS) {
-		this.tempoScalingS = tempoScalingS;
-	}
-
-	/**
-	 * @return the tempoDeleteResourcesS
-	 */
-	public long getTempoDeleteResourcesS() {
-		return tempoDeleteResourcesS;
-	}
-
-	/**
-	 * @param tempoDeleteResourcesS the tempoDeleteResourcesS to set
-	 */
-	public void setTempoDeleteResourcesS(long tempoDeleteResourcesS) {
-		this.tempoDeleteResourcesS = tempoDeleteResourcesS;
-	}
-
-	/**
-	 * @return the waitPodDeletionMs
-	 */
-	public long getWaitPodDeletionMs() {
-		return waitPodDeletionMs;
-	}
-
-	/**
-	 * @param waitPodDeletionMs the waitPodDeletionMs to set
-	 */
-	public void setWaitPodDeletionMs(long waitPodDeletionMs) {
-		this.waitPodDeletionMs = waitPodDeletionMs;
 	}
 
 	/**

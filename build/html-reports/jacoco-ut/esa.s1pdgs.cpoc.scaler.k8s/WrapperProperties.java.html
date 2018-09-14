@@ -35,24 +35,21 @@ public class WrapperProperties {
 	// -------------------------
 	private TimeProperties executionTime;
 	private long tempoPoolingMs;
-	private long tempoScalingS;
-	private long tempoDeleteResourcesS;
-	private long waitPodDeletionMs;
 
 	// -------------------------
 	// REST API configuration
 	// -------------------------
 	private RestApiProperties restApi;
 
-<span class="fc" id="L47">	public WrapperProperties() {</span>
+<span class="fc" id="L44">	public WrapperProperties() {</span>
 
-<span class="fc" id="L49">	}</span>
+<span class="fc" id="L46">	}</span>
 
 	/**
 	 * @return the labelWrapperConfig
 	 */
 	public LabelKubernetes getLabelWrapperConfig() {
-<span class="fc" id="L55">		return labelWrapperConfig;</span>
+<span class="fc" id="L52">		return labelWrapperConfig;</span>
 	}
 
 	/**
@@ -60,14 +57,14 @@ public class WrapperProperties {
 	 *            the labelWrapperConfig to set
 	 */
 	public void setLabelWrapperConfig(LabelKubernetes labelWrapperConfig) {
-<span class="fc" id="L63">		this.labelWrapperConfig = labelWrapperConfig;</span>
-<span class="fc" id="L64">	}</span>
+<span class="fc" id="L60">		this.labelWrapperConfig = labelWrapperConfig;</span>
+<span class="fc" id="L61">	}</span>
 
 	/**
 	 * @return the labelWrapperStateUsed
 	 */
 	public LabelKubernetes getLabelWrapperStateUsed() {
-<span class="fc" id="L70">		return labelWrapperStateUsed;</span>
+<span class="fc" id="L67">		return labelWrapperStateUsed;</span>
 	}
 
 	/**
@@ -75,14 +72,14 @@ public class WrapperProperties {
 	 *            the labelWrapperStateUsed to set
 	 */
 	public void setLabelWrapperStateUsed(LabelKubernetes labelWrapperStateUsed) {
-<span class="fc" id="L78">		this.labelWrapperStateUsed = labelWrapperStateUsed;</span>
-<span class="fc" id="L79">	}</span>
+<span class="fc" id="L75">		this.labelWrapperStateUsed = labelWrapperStateUsed;</span>
+<span class="fc" id="L76">	}</span>
 
 	/**
 	 * @return the labelWrapperStateUnused
 	 */
 	public LabelKubernetes getLabelWrapperStateUnused() {
-<span class="fc" id="L85">		return labelWrapperStateUnused;</span>
+<span class="fc" id="L82">		return labelWrapperStateUnused;</span>
 	}
 
 	/**
@@ -90,14 +87,14 @@ public class WrapperProperties {
 	 *            the labelWrapperStateUnused to set
 	 */
 	public void setLabelWrapperStateUnused(LabelKubernetes labelWrapperStateUnused) {
-<span class="fc" id="L93">		this.labelWrapperStateUnused = labelWrapperStateUnused;</span>
-<span class="fc" id="L94">	}</span>
+<span class="fc" id="L90">		this.labelWrapperStateUnused = labelWrapperStateUnused;</span>
+<span class="fc" id="L91">	}</span>
 
 	/**
 	 * @return the labelWrapperApp
 	 */
 	public LabelKubernetes getLabelWrapperApp() {
-<span class="fc" id="L100">		return labelWrapperApp;</span>
+<span class="fc" id="L97">		return labelWrapperApp;</span>
 	}
 
 	/**
@@ -105,84 +102,84 @@ public class WrapperProperties {
 	 *            the labelWrapperApp to set
 	 */
 	public void setLabelWrapperApp(LabelKubernetes labelWrapperApp) {
-<span class="fc" id="L108">		this.labelWrapperApp = labelWrapperApp;</span>
-<span class="fc" id="L109">	}</span>
+<span class="fc" id="L105">		this.labelWrapperApp = labelWrapperApp;</span>
+<span class="fc" id="L106">	}</span>
 
 	/**
 	 * @return the nbPoolingPods
 	 */
 	public int getNbPoolingPods() {
-<span class="fc" id="L115">		return nbPoolingPods;</span>
+<span class="fc" id="L112">		return nbPoolingPods;</span>
 	}
 
 	/**
 	 * @param nbPoolingPods the nbPoolingPods to set
 	 */
 	public void setNbPoolingPods(int nbPoolingPods) {
-<span class="fc" id="L122">		this.nbPoolingPods = nbPoolingPods;</span>
-<span class="fc" id="L123">	}</span>
+<span class="fc" id="L119">		this.nbPoolingPods = nbPoolingPods;</span>
+<span class="fc" id="L120">	}</span>
 
 	/**
 	 * @return the nbMinServers
 	 */
 	public int getNbMinServers() {
-<span class="fc" id="L129">		return nbMinServers;</span>
+<span class="fc" id="L126">		return nbMinServers;</span>
 	}
 
 	/**
 	 * @param nbMinServers the nbMinServers to set
 	 */
 	public void setNbMinServers(int nbMinServers) {
-<span class="fc" id="L136">		this.nbMinServers = nbMinServers;</span>
-<span class="fc" id="L137">	}</span>
+<span class="fc" id="L133">		this.nbMinServers = nbMinServers;</span>
+<span class="fc" id="L134">	}</span>
 
 	/**
 	 * @return the nbMaxServers
 	 */
 	public int getNbMaxServers() {
-<span class="fc" id="L143">		return nbMaxServers;</span>
+<span class="fc" id="L140">		return nbMaxServers;</span>
 	}
 
 	/**
 	 * @param nbMaxServers the nbMaxServers to set
 	 */
 	public void setNbMaxServers(int nbMaxServers) {
-<span class="fc" id="L150">		this.nbMaxServers = nbMaxServers;</span>
-<span class="fc" id="L151">	}</span>
+<span class="fc" id="L147">		this.nbMaxServers = nbMaxServers;</span>
+<span class="fc" id="L148">	}</span>
 
 	/**
 	 * @return the nbPodsPerServer
 	 */
 	public int getNbPodsPerServer() {
-<span class="fc" id="L157">		return nbPodsPerServer;</span>
+<span class="fc" id="L154">		return nbPodsPerServer;</span>
 	}
 
 	/**
 	 * @param nbPodsPerServer the nbPodsPerServer to set
 	 */
 	public void setNbPodsPerServer(int nbPodsPerServer) {
-<span class="fc" id="L164">		this.nbPodsPerServer = nbPodsPerServer;</span>
-<span class="fc" id="L165">	}</span>
+<span class="fc" id="L161">		this.nbPodsPerServer = nbPodsPerServer;</span>
+<span class="fc" id="L162">	}</span>
 
 	/**
 	 * @return the podTemplateFile
 	 */
 	public String getPodTemplateFile() {
-<span class="fc" id="L171">		return podTemplateFile;</span>
+<span class="fc" id="L168">		return podTemplateFile;</span>
 	}
 
 	/**
 	 * @param podTemplateFile the podTemplateFile to set
 	 */
 	public void setPodTemplateFile(String podTemplateFile) {
-<span class="fc" id="L178">		this.podTemplateFile = podTemplateFile;</span>
-<span class="fc" id="L179">	}</span>
+<span class="fc" id="L175">		this.podTemplateFile = podTemplateFile;</span>
+<span class="fc" id="L176">	}</span>
 
 	/**
 	 * @return the executionTime
 	 */
 	public TimeProperties getExecutionTime() {
-<span class="fc" id="L185">		return executionTime;</span>
+<span class="fc" id="L182">		return executionTime;</span>
 	}
 
 	/**
@@ -190,70 +187,28 @@ public class WrapperProperties {
 	 *            the executionTime to set
 	 */
 	public void setExecutionTime(TimeProperties executionTime) {
-<span class="fc" id="L193">		this.executionTime = executionTime;</span>
-<span class="fc" id="L194">	}</span>
+<span class="fc" id="L190">		this.executionTime = executionTime;</span>
+<span class="fc" id="L191">	}</span>
 
 	/**
 	 * @return the tempoPoolingMs
 	 */
 	public long getTempoPoolingMs() {
-<span class="fc" id="L200">		return tempoPoolingMs;</span>
+<span class="fc" id="L197">		return tempoPoolingMs;</span>
 	}
 
 	/**
 	 * @param tempoPoolingMs the tempoPoolingMs to set
 	 */
 	public void setTempoPoolingMs(long tempoPoolingMs) {
-<span class="fc" id="L207">		this.tempoPoolingMs = tempoPoolingMs;</span>
-<span class="fc" id="L208">	}</span>
-
-	/**
-	 * @return the tempoScalingS
-	 */
-	public long getTempoScalingS() {
-<span class="fc" id="L214">		return tempoScalingS;</span>
-	}
-
-	/**
-	 * @param tempoScalingS the tempoScalingS to set
-	 */
-	public void setTempoScalingS(long tempoScalingS) {
-<span class="fc" id="L221">		this.tempoScalingS = tempoScalingS;</span>
-<span class="fc" id="L222">	}</span>
-
-	/**
-	 * @return the tempoDeleteResourcesS
-	 */
-	public long getTempoDeleteResourcesS() {
-<span class="fc" id="L228">		return tempoDeleteResourcesS;</span>
-	}
-
-	/**
-	 * @param tempoDeleteResourcesS the tempoDeleteResourcesS to set
-	 */
-	public void setTempoDeleteResourcesS(long tempoDeleteResourcesS) {
-<span class="fc" id="L235">		this.tempoDeleteResourcesS = tempoDeleteResourcesS;</span>
-<span class="fc" id="L236">	}</span>
-
-	/**
-	 * @return the waitPodDeletionMs
-	 */
-	public long getWaitPodDeletionMs() {
-<span class="fc" id="L242">		return waitPodDeletionMs;</span>
-	}
-
-	/**
-	 * @param waitPodDeletionMs the waitPodDeletionMs to set
-	 */
-	public void setWaitPodDeletionMs(long waitPodDeletionMs) {
-<span class="fc" id="L249">		this.waitPodDeletionMs = waitPodDeletionMs;</span>
-<span class="fc" id="L250">	}</span>
+<span class="fc" id="L204">		this.tempoPoolingMs = tempoPoolingMs;</span>
+<span class="fc" id="L205">	}</span>
 
 	/**
 	 * @return the restApi
 	 */
 	public RestApiProperties getRestApi() {
-<span class="fc" id="L256">		return restApi;</span>
+<span class="fc" id="L211">		return restApi;</span>
 	}
 
 	/**
@@ -261,27 +216,27 @@ public class WrapperProperties {
 	 *            the restApi to set
 	 */
 	public void setRestApi(RestApiProperties restApi) {
-<span class="fc" id="L264">		this.restApi = restApi;</span>
-<span class="fc" id="L265">	}</span>
+<span class="fc" id="L219">		this.restApi = restApi;</span>
+<span class="fc" id="L220">	}</span>
 
 	public static class LabelKubernetes {
 		private String label;
 		private String value;
 
-<span class="fc" id="L271">		public LabelKubernetes() {</span>
+<span class="fc" id="L226">		public LabelKubernetes() {</span>
 
-<span class="fc" id="L273">		}</span>
+<span class="fc" id="L228">		}</span>
 
-<span class="fc" id="L275">		public LabelKubernetes(String label, String value) {</span>
-<span class="fc" id="L276">			this.label = label;</span>
-<span class="fc" id="L277">			this.value = value;</span>
-<span class="fc" id="L278">		}</span>
+<span class="fc" id="L230">		public LabelKubernetes(String label, String value) {</span>
+<span class="fc" id="L231">			this.label = label;</span>
+<span class="fc" id="L232">			this.value = value;</span>
+<span class="fc" id="L233">		}</span>
 
 		/**
 		 * @return the label
 		 */
 		public String getLabel() {
-<span class="fc" id="L284">			return label;</span>
+<span class="fc" id="L239">			return label;</span>
 		}
 
 		/**
@@ -289,14 +244,14 @@ public class WrapperProperties {
 		 *            the label to set
 		 */
 		public void setLabel(String label) {
-<span class="fc" id="L292">			this.label = label;</span>
-<span class="fc" id="L293">		}</span>
+<span class="fc" id="L247">			this.label = label;</span>
+<span class="fc" id="L248">		}</span>
 
 		/**
 		 * @return the value
 		 */
 		public String getValue() {
-<span class="fc" id="L299">			return value;</span>
+<span class="fc" id="L254">			return value;</span>
 		}
 
 		/**
@@ -304,23 +259,23 @@ public class WrapperProperties {
 		 *            the value to set
 		 */
 		public void setValue(String value) {
-<span class="fc" id="L307">			this.value = value;</span>
-<span class="fc" id="L308">		}</span>
+<span class="fc" id="L262">			this.value = value;</span>
+<span class="fc" id="L263">		}</span>
 
 	}
 
 	public static class RestApiProperties {
 		private int port;
 
-<span class="fc" id="L315">		public RestApiProperties() {</span>
+<span class="fc" id="L270">		public RestApiProperties() {</span>
 
-<span class="fc" id="L317">		}</span>
+<span class="fc" id="L272">		}</span>
 
 		/**
 		 * @return the port
 		 */
 		public int getPort() {
-<span class="fc" id="L323">			return port;</span>
+<span class="fc" id="L278">			return port;</span>
 		}
 
 		/**
@@ -328,8 +283,8 @@ public class WrapperProperties {
 		 *            the port to set
 		 */
 		public void setPort(int port) {
-<span class="fc" id="L331">			this.port = port;</span>
-<span class="fc" id="L332">		}</span>
+<span class="fc" id="L286">			this.port = port;</span>
+<span class="fc" id="L287">		}</span>
 	}
 
 	public static class TimeProperties {
@@ -337,51 +292,51 @@ public class WrapperProperties {
 		private double minThresholdS;
 		private double maxThresholdS;
 
-<span class="fc" id="L340">		public TimeProperties() {</span>
+<span class="fc" id="L295">		public TimeProperties() {</span>
 
-<span class="fc" id="L342">		}</span>
+<span class="fc" id="L297">		}</span>
 
 		/**
 		 * @return the averageS
 		 */
 		public long getAverageS() {
-<span class="fc" id="L348">			return averageS;</span>
+<span class="fc" id="L303">			return averageS;</span>
 		}
 
 		/**
 		 * @param averageS the averageS to set
 		 */
 		public void setAverageS(long averageS) {
-<span class="fc" id="L355">			this.averageS = averageS;</span>
-<span class="fc" id="L356">		}</span>
+<span class="fc" id="L310">			this.averageS = averageS;</span>
+<span class="fc" id="L311">		}</span>
 
 		/**
 		 * @return the minThresholdS
 		 */
 		public double getMinThresholdS() {
-<span class="fc" id="L362">			return minThresholdS;</span>
+<span class="fc" id="L317">			return minThresholdS;</span>
 		}
 
 		/**
 		 * @param minThresholdS the minThresholdS to set
 		 */
 		public void setMinThresholdS(double minThresholdS) {
-<span class="fc" id="L369">			this.minThresholdS = minThresholdS;</span>
-<span class="fc" id="L370">		}</span>
+<span class="fc" id="L324">			this.minThresholdS = minThresholdS;</span>
+<span class="fc" id="L325">		}</span>
 
 		/**
 		 * @return the maxThresholdS
 		 */
 		public double getMaxThresholdS() {
-<span class="fc" id="L376">			return maxThresholdS;</span>
+<span class="fc" id="L331">			return maxThresholdS;</span>
 		}
 
 		/**
 		 * @param maxThresholdS the maxThresholdS to set
 		 */
 		public void setMaxThresholdS(double maxThresholdS) {
-<span class="fc" id="L383">			this.maxThresholdS = maxThresholdS;</span>
-<span class="fc" id="L384">		}</span>
+<span class="fc" id="L338">			this.maxThresholdS = maxThresholdS;</span>
+<span class="fc" id="L339">		}</span>
 
 	}
 }

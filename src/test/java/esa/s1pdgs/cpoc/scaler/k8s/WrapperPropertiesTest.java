@@ -39,9 +39,6 @@ public class WrapperPropertiesTest {
 		assertEquals("Invalid Label Wrapper ExecutionTime MinThreshold S", 900.0, wrapperProperties.getExecutionTime().getMinThresholdS(), 0.0);
 		assertEquals("Invalid Label Wrapper ExecutionTime MaxThreshold S", 1800.0, wrapperProperties.getExecutionTime().getMaxThresholdS(), 0.0);
 		assertEquals("Invalid Label Wrapper TempoPooling Ms", 500, wrapperProperties.getTempoPoolingMs());
-		assertEquals("Invalid Label Wrapper TempoScaling S", 600, wrapperProperties.getTempoScalingS());
-		assertEquals("Invalid Label Wrapper TempoDeleteResources S", 600, wrapperProperties.getTempoDeleteResourcesS());
-		assertEquals("Invalid Label Wrapper WaitPodDeletion Ms", 10000, wrapperProperties.getWaitPodDeletionMs());
 		assertEquals("Invalid Label Wrapper RestApi Port", 8080, wrapperProperties.getRestApi().getPort());
 	}
 	
