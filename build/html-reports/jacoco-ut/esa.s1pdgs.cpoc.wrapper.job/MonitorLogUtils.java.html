@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MonitorLogUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Wrapper</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.wrapper.job</a> &gt; <span class="el_source">MonitorLogUtils.java</span></div><h1>MonitorLogUtils.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.wrapper.job;
+
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+
+<span class="nc" id="L5">public final class MonitorLogUtils {</span>
+
+    /**
+     * Identifier for default monitor logs
+     */
+    public static final String LOG_DFT = &quot;default&quot;;
+    /**
+     * Identifier for end monitor logs
+     */
+    public static final String LOG_BEGIN = &quot;begin&quot;;
+    /**
+     * Identifier for end monitor logs
+     */
+    public static final String LOG_READ = &quot;read&quot;;
+    /**
+     * Identifier for processes execution monitor logs
+     */
+    public static final String LOG_PROCESS = &quot;process&quot;;
+    /**
+     * Identifier for input download monitor logs
+     */
+    public static final String LOG_INPUT = &quot;input&quot;;
+    /**
+     * Identifier for output processing monitor logs
+     */
+    public static final String LOG_OUTPUT = &quot;output&quot;;
+    /**
+     * Identifier for erasing monitor logs
+     */
+    public static final String LOG_ERASE = &quot;erase&quot;;
+    /**
+     * Identifier for resuming monitor logs
+     */
+    public static final String LOG_ACK = &quot;ack&quot;;
+    /**
+     * Identifier for status monitor logs
+     */
+    public static final String LOG_STATUS = &quot;status&quot;;
+    /**
+     * Identifier for end monitor logs
+     */
+    public static final String LOG_END = &quot;end&quot;;
+    /**
+     * Identifier for error monitor logs
+     */
+    public static final String LOG_ERROR = &quot;error&quot;;
+
+    /**
+     * Get the prefix for monitor logs according the step
+     * 
+     * @param step
+     * @return
+     */
+    public static String getPrefixMonitorLog(final String step,
+            final LevelJobDto job) {
+        String ret;
+<span class="fc bfc" id="L61" title="All 11 branches covered.">        switch (step) {</span>
+            case LOG_ERROR:
+<span class="fc" id="L63">                ret = String.format(&quot;[productName %s] [workDir %s]&quot;,</span>
+<span class="fc" id="L64">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L65">                break;</span>
+            case LOG_BEGIN:
+<span class="fc" id="L67">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 0] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L69">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L70">                break;</span>
+            case LOG_READ:
+<span class="fc" id="L72">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 1] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L74">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L75">                break;</span>
+            case LOG_PROCESS:
+<span class="fc" id="L77">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 3] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L79">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L80">                break;</span>
+            case LOG_INPUT:
+<span class="fc" id="L82">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 2] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L84">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L85">                break;</span>
+            case LOG_OUTPUT:
+<span class="fc" id="L87">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 4] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L89">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L90">                break;</span>
+            case LOG_ACK:
+<span class="fc" id="L92">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 6] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L94">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L95">                break;</span>
+            case LOG_ERASE:
+<span class="fc" id="L97">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 5] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L99">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L100">                break;</span>
+            case LOG_STATUS:
+<span class="fc" id="L102">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 7] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L104">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L105">                break;</span>
+            case LOG_END:
+<span class="fc" id="L107">                ret = String.format(</span>
+                        &quot;[MONITOR] [step 0] [productName %s] [workDir %s]&quot;,
+<span class="fc" id="L109">                        job.getProductIdentifier(), job.getWorkDirectory());</span>
+<span class="fc" id="L110">                break;</span>
+            default:
+<span class="fc" id="L112">                ret = &quot;[MONITOR]&quot;;</span>
+                break;
+        }
+<span class="fc" id="L115">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

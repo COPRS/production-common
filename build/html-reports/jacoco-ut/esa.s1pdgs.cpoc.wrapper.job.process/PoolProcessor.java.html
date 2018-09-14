@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PoolProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Wrapper</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.wrapper.job.process</a> &gt; <span class="el_source">PoolProcessor.java</span></div><h1>PoolProcessor.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.wrapper.job.process;
+
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessExecutionException;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+
+/**
+ * Launch tasks in parallel of a job pool
+ */
+public class PoolProcessor {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L28">    private static final Logger LOGGER =</span>
+<span class="fc" id="L29">            LogManager.getLogger(PoolProcessor.class);</span>
+
+    /**
+     * List of pool
+     */
+    private final LevelJobPoolDto pool;
+
+    /**
+     * Tasks executor service
+     */
+    private final ExecutorService execSrv;
+
+    /**
+     * Tasks completion service
+     */
+    private final CompletionService&lt;TaskResult&gt; completionSrv;
+
+    /**
+     * Number of task in the pool
+     */
+    private final int nbTasks;
+
+    /**
+     * Path of the job order to given in argument of each tasks
+     */
+    private final String jobOrderPath;
+
+    /**
+     * Working directory: directory for launching tasks
+     */
+    private final String workDirectory;
+
+    /**
+     * Prefix for monitor logs
+     */
+    private final String prefixLogs;
+
+    /**
+     * Timeout for processing one tasks. After this time the tasks is considered
+     * as failed and all tasks are shutdown
+     */
+    private final long tmProcessOneTaskS;
+
+    /**
+     * @param pool
+     * @param jobOrderPath
+     * @param workDirectory
+     * @param prefixMonitorLogs
+     * @param timeoutProcessOneTaskS
+     */
+    public PoolProcessor(final LevelJobPoolDto pool, final String jobOrderPath,
+            final String workDirectory, final String prefixLogs,
+<span class="fc" id="L81">            final long tmProcessOneTaskS) {</span>
+<span class="fc" id="L82">        this.pool = pool;</span>
+<span class="fc" id="L83">        this.nbTasks = pool.getTasks().size();</span>
+<span class="fc" id="L84">        this.execSrv = Executors.newFixedThreadPool(this.nbTasks);</span>
+<span class="fc" id="L85">        this.completionSrv = new ExecutorCompletionService&lt;&gt;(execSrv);</span>
+<span class="fc" id="L86">        this.jobOrderPath = jobOrderPath;</span>
+<span class="fc" id="L87">        this.workDirectory = workDirectory;</span>
+<span class="fc" id="L88">        this.prefixLogs = prefixLogs;</span>
+<span class="fc" id="L89">        this.tmProcessOneTaskS = tmProcessOneTaskS;</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * Launch all tasks and wait for the completion of each tasks. &lt;br/&gt;
+     * W&gt;hen one fails (exit code &gt; 127 or exception raised), all the other
+     * running tasks are shutdown and an exception is raised
+     * 
+     * @throws AbstractCodedException
+     */
+    public void process() throws AbstractCodedException {
+<span class="fc" id="L100">        boolean stopAllProcessCall = false;</span>
+        String prefixReport;
+<span class="fc" id="L102">        int j=0;</span>
+        try {
+            try {
+<span class="fc" id="L105">                LOGGER.info(&quot;{} 1 - Submitting tasks {}&quot;, prefixLogs,</span>
+<span class="fc" id="L106">                        pool.getTasks());</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">                for (LevelJobTaskDto task : pool.getTasks()) {</span>
+<span class="fc" id="L108">                	prefixReport= &quot;[REPORT] &quot; + prefixLogs + &quot;[subTask processing] [taskCounter &quot; + j + &quot;]&quot;;</span>
+<span class="fc" id="L109">                    completionSrv.submit(new TaskCallable(task.getBinaryPath(),</span>
+                            jobOrderPath, workDirectory, prefixReport));
+<span class="fc" id="L111">                    j++;</span>
+<span class="fc" id="L112">                }</span>
+<span class="fc" id="L113">                LOGGER.info(&quot;{} 2 - Waiting for tasks execution&quot;, prefixLogs);</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">                for (int i = 0; i &lt; nbTasks; i++) {</span>
+                    // Check if interrupted
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">                    if (isInterrupted()) {</span>
+<span class="nc" id="L117">                        stopAllProcessCall = true;</span>
+<span class="nc" id="L118">                        throw new InternalErrorException(</span>
+                                &quot;Pool Processing thread has been interrupted&quot;);
+                    }
+                    // Wait for a task
+<span class="fc" id="L122">                    waitNextTaskResult();</span>
+                }
+<span class="fc" id="L124">            } catch (InterruptedException | TimeoutException e) {</span>
+<span class="fc" id="L125">                stopAllProcessCall = true;</span>
+<span class="fc" id="L126">                throw new InternalErrorException(e.getMessage(), e);</span>
+<span class="fc" id="L127">            } catch (ExecutionException e) {</span>
+<span class="fc" id="L128">                stopAllProcessCall = true;</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">                if (e.getCause() instanceof AbstractCodedException) {</span>
+<span class="fc" id="L130">                    throw (AbstractCodedException) e.getCause();</span>
+                } else {
+<span class="nc" id="L132">                    throw new InternalErrorException(e.getMessage(), e);</span>
+                }
+            } finally {
+<span class="fc bfc" id="L135" title="All 2 branches covered.">                if (stopAllProcessCall) {</span>
+
+<span class="fc" id="L137">                    this.stopAllTasks();</span>
+
+                }
+            }
+<span class="nc" id="L141">        } catch (InterruptedException ie) {</span>
+<span class="nc" id="L142">            throw new InternalErrorException(ie.getMessage(), ie);</span>
+<span class="fc" id="L143">        }</span>
+<span class="fc" id="L144">    }</span>
+
+    /**
+     * Return if thread is interrupted
+     * 
+     * @return
+     */
+    private boolean isInterrupted() {
+<span class="fc" id="L152">        return Thread.currentThread().isInterrupted();</span>
+    }
+
+    /**
+     * Wait for the result of the next completed task:&lt;br/&gt;
+     * if code = 0 =&gt; OK &lt;br/&gt;
+     * if 0 &lt; code &lt;= 127 =&gt; warning &lt;br/&gt;
+     * if 127 &lt; code =&gt; raise exception
+     * 
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws TimeoutException
+     * @throws WrapperProcessExecutionException
+     */
+    private void waitNextTaskResult() throws InterruptedException,
+            ExecutionException, TimeoutException, WrapperProcessExecutionException {
+<span class="fc" id="L168">        TaskResult r = completionSrv.take().get(this.tmProcessOneTaskS,</span>
+                TimeUnit.SECONDS);
+<span class="fc" id="L170">        int exitCode = r.getExitCode();</span>
+<span class="fc" id="L171">        String task = r.getBinary();</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        if (exitCode == 0) {</span>
+<span class="fc" id="L173">            LOGGER.info(&quot;{} 2 - Task {} successfully executed&quot;, this.prefixLogs,</span>
+                    task);
+<span class="pc bpc" id="L175" title="2 of 4 branches missed.">        } else if (exitCode &gt;= 0 &amp;&amp; exitCode &lt; 128) {</span>
+<span class="fc" id="L176">            LOGGER.warn(&quot;{} 2 - Task {} exit with warning code {}&quot;,</span>
+<span class="fc" id="L177">                    this.prefixLogs, task, exitCode);</span>
+        } else {
+<span class="nc" id="L179">            this.stopAllTasks();</span>
+<span class="nc" id="L180">            throw new WrapperProcessExecutionException(exitCode,</span>
+                    &quot;Task &quot; + task + &quot; failed&quot;);
+        }
+<span class="fc" id="L183">    }</span>
+
+    /**
+     * Stop all tasks
+     * @throws InterruptedException
+     */
+    private void stopAllTasks() throws InterruptedException {
+<span class="fc" id="L190">        this.execSrv.shutdownNow();</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        if (!this.execSrv.awaitTermination(this.tmProcessOneTaskS,</span>
+                TimeUnit.SECONDS)) {
+            // TODO send kill
+        }
+<span class="fc" id="L195">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

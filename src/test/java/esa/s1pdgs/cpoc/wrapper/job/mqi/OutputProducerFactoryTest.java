@@ -87,7 +87,7 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(
                         new FileQueueMessage(ProductFamily.L0_REPORT,
-                                "test.txt", new File("./test/data/report.txt")),
+                                "test.txt", new File("./build/data/report.txt")),
                         inputMessage);
         verify(this.senderProducts, never()).publish(Mockito.any());
         GenericPublicationMessageDto<LevelReportDto> message =
@@ -143,7 +143,7 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(
                         new FileQueueMessage(ProductFamily.L1_REPORT,
-                                "test.txt", new File("./test/data/report.txt")),
+                                "test.txt", new File("./build/data/report.txt")),
                         inputMessage);
         GenericPublicationMessageDto<LevelReportDto> message =
                 new GenericPublicationMessageDto<LevelReportDto>(123,

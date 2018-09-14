@@ -101,19 +101,19 @@ public class ObsServiceTest {
 
         doThrow(new ObsServiceException("error 1 message")).when(client)
                 .downloadObject(Mockito.eq(new ObsDownloadObject("error-key",
-                        ObsFamily.AUXILIARY_FILE, "test/")));
+                        ObsFamily.AUXILIARY_FILE, "build/")));
         doThrow(new SdkClientException("error 2 message")).when(client)
                 .downloadObject(Mockito.eq(new ObsDownloadObject("error-key",
-                        ObsFamily.EDRS_SESSION, "test/")));
+                        ObsFamily.EDRS_SESSION, "build/")));
         doReturn(0).when(client)
                 .downloadObject(Mockito.eq(new ObsDownloadObject("test-key",
-                        ObsFamily.AUXILIARY_FILE, "test/")));
+                        ObsFamily.AUXILIARY_FILE, "build/")));
         doReturn(1).when(client)
                 .downloadObject(Mockito.eq(new ObsDownloadObject("test-key",
-                        ObsFamily.EDRS_SESSION, "test/")));
+                        ObsFamily.EDRS_SESSION, "build/")));
         doReturn(2).when(client).downloadObject(
                 Mockito.eq(new ObsDownloadObject("test-key/key2",
-                        ObsFamily.EDRS_SESSION, "test/")));
+                        ObsFamily.EDRS_SESSION, "build/")));
 
         service = new ObsService(client);
     }
@@ -268,7 +268,7 @@ public class ObsServiceTest {
         thrown.expectMessage("error 1 message");
         thrown.expectCause(isA(ObsServiceException.class));
 
-        service.downloadFile(ProductFamily.AUXILIARY_FILE, "error-key", "test/");
+        service.downloadFile(ProductFamily.AUXILIARY_FILE, "error-key", "build/");
     }
 
     /**
@@ -286,7 +286,7 @@ public class ObsServiceTest {
         thrown.expectMessage("error 2 message");
         thrown.expectCause(isA(SdkClientException.class));
 
-        service.downloadFile(ProductFamily.EDRS_SESSION, "error-key", "test/");
+        service.downloadFile(ProductFamily.EDRS_SESSION, "error-key", "build/");
     }
 
     /**
@@ -317,20 +317,20 @@ public class ObsServiceTest {
     public void testNominalDownload() throws ObsException,
             ObsServiceException, SdkClientException, ObsUnknownObject {
         File upload1 =
-                service.downloadFile(ProductFamily.EDRS_SESSION, "test-key", "test/");
+                service.downloadFile(ProductFamily.EDRS_SESSION, "test-key", "build/");
         verify(client, times(1))
                 .downloadObject(Mockito.eq(new ObsDownloadObject("test-key",
-                        ObsFamily.EDRS_SESSION, "test/")));
+                        ObsFamily.EDRS_SESSION, "build/")));
         assertEquals("test-key", upload1.getName());
-        assertEquals("test", upload1.getParentFile().getName());
+        assertEquals("build", upload1.getParentFile().getName());
 
         File upload2 = service.downloadFile(ProductFamily.EDRS_SESSION, "test-key/key2",
-                "test/");
+                "build/");
         verify(client, times(1)).downloadObject(
                 Mockito.eq(new ObsDownloadObject("test-key/key2",
-                        ObsFamily.EDRS_SESSION, "test/")));
+                        ObsFamily.EDRS_SESSION, "build/")));
         assertEquals("key2", upload2.getName());
-        assertEquals("test", upload2.getParentFile().getName());
+        assertEquals("build", upload2.getParentFile().getName());
     }
 
     /**

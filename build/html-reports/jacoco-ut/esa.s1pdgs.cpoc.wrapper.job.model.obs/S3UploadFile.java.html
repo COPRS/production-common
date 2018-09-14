@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>S3UploadFile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Wrapper</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.wrapper.job.model.obs</a> &gt; <span class="el_source">S3UploadFile.java</span></div><h1>S3UploadFile.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.wrapper.job.model.obs;
+
+import java.io.File;
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+/**
+ * @author Viveris Technologies
+ */
+public class S3UploadFile extends S3CustomObject {
+
+    /**
+     * File to upload
+     */
+    private final File file;
+
+    /**
+     * @param family
+     * @param key
+     * @param file
+     */
+    public S3UploadFile(final ProductFamily family, final String key,
+            final File file) {
+<span class="fc" id="L25">        super(family, key);</span>
+<span class="fc" id="L26">        this.file = file;</span>
+<span class="fc" id="L27">    }</span>
+
+    /**
+     * @return the file
+     */
+    public File getFile() {
+<span class="fc" id="L33">        return file;</span>
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L41">        String superStr = super.toStringForExtendedClasses();</span>
+<span class="fc" id="L42">        return String.format(&quot;{%s, file: %s}&quot;, superStr, file);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L50">        int superHash = super.hashCode();</span>
+<span class="fc" id="L51">        return Objects.hash(superHash, file);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L61">            ret = true;</span>
+<span class="fc bfc" id="L62" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L63">            ret = false;</span>
+        } else {
+<span class="fc" id="L65">            S3UploadFile other = (S3UploadFile) obj;</span>
+            // field comparison
+<span class="fc bfc" id="L67" title="All 4 branches covered.">            ret = super.equals(other) &amp;&amp; Objects.equals(file, other.file);</span>
+        }
+<span class="fc" id="L69">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
