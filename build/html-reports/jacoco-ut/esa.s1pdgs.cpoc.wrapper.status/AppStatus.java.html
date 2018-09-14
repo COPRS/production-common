@@ -213,66 +213,67 @@ public class AppStatus {
 <span class="fc bfc" id="L213" title="All 4 branches covered.">            if (!isStopping() &amp;&amp; !isFatalError()) {</span>
 <span class="fc" id="L214">                state = AppState.WAITING;</span>
 <span class="fc" id="L215">                dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L216">                errorCounterNextMessage = 0;</span>
             }
-<span class="fc" id="L217">        }</span>
+<span class="fc" id="L218">        }</span>
 
         /**
          * Set status PROCESSING
          */
         public void setProcessing() {
-<span class="fc bfc" id="L223" title="All 4 branches covered.">            if (!isStopping() &amp;&amp; !isFatalError()) {</span>
-<span class="fc" id="L224">                state = AppState.PROCESSING;</span>
-<span class="fc" id="L225">                dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L226">                errorCounterProcessing = 0;</span>
-<span class="fc" id="L227">                errorCounterNextMessage = 0;</span>
+<span class="fc bfc" id="L224" title="All 4 branches covered.">            if (!isStopping() &amp;&amp; !isFatalError()) {</span>
+<span class="fc" id="L225">                state = AppState.PROCESSING;</span>
+<span class="fc" id="L226">                dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L227">                errorCounterProcessing = 0;</span>
+<span class="fc" id="L228">                errorCounterNextMessage = 0;</span>
             }
-<span class="fc" id="L229">        }</span>
+<span class="fc" id="L230">        }</span>
 
         /**
          * Set status STOPPING
          */
         public void setStopping() {
-<span class="fc" id="L235">            state = AppState.STOPPING;</span>
-<span class="fc" id="L236">            dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L237">            errorCounterProcessing = 0;</span>
-<span class="fc" id="L238">            errorCounterNextMessage = 0;</span>
-<span class="fc" id="L239">        }</span>
+<span class="fc" id="L236">            state = AppState.STOPPING;</span>
+<span class="fc" id="L237">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L238">            errorCounterProcessing = 0;</span>
+<span class="fc" id="L239">            errorCounterNextMessage = 0;</span>
+<span class="fc" id="L240">        }</span>
 
         /**
          * Set status ERROR
          */
         public void setErrorCounterProcessing(final int maxErrorCounter) {
-<span class="fc bfc" id="L245" title="All 2 branches covered.">            if (!isStopping()) {</span>
-<span class="fc" id="L246">                state = AppState.ERROR;</span>
-<span class="fc" id="L247">                dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L248">                errorCounterProcessing++;</span>
-<span class="fc bfc" id="L249" title="All 2 branches covered.">                if (errorCounterProcessing &gt;= maxErrorCounter) {</span>
-<span class="fc" id="L250">                    setFatalError();</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">            if (!isStopping()) {</span>
+<span class="fc" id="L247">                state = AppState.ERROR;</span>
+<span class="fc" id="L248">                dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L249">                errorCounterProcessing++;</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">                if (errorCounterProcessing &gt;= maxErrorCounter) {</span>
+<span class="fc" id="L251">                    setFatalError();</span>
                 }
             }
-<span class="fc" id="L253">        }</span>
+<span class="fc" id="L254">        }</span>
         
         /**
          * @param errorCounterNextMessage the errorCounterNextMessage to set
          */
         public void setErrorCounterNextMessage(final int maxErrorCounterNextMessage) {
-<span class="pc bpc" id="L259" title="1 of 2 branches missed.">            if (!isStopping()) {</span>
-<span class="fc" id="L260">                state = AppState.ERROR;</span>
-<span class="fc" id="L261">                dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L262">                errorCounterNextMessage++;</span>
-<span class="pc bpc" id="L263" title="1 of 2 branches missed.">                if (errorCounterNextMessage &gt;= maxErrorCounterNextMessage) {</span>
-<span class="nc" id="L264">                    setFatalError();</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">            if (!isStopping()) {</span>
+<span class="fc" id="L261">                state = AppState.ERROR;</span>
+<span class="fc" id="L262">                dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L263">                errorCounterNextMessage++;</span>
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">                if (errorCounterNextMessage &gt;= maxErrorCounterNextMessage) {</span>
+<span class="nc" id="L265">                    setFatalError();</span>
                 }
             }
-<span class="fc" id="L267">        }</span>
+<span class="fc" id="L268">        }</span>
 
         /**
          * Set status FATALERROR
          */
         public void setFatalError() {
-<span class="fc" id="L273">            state = AppState.FATALERROR;</span>
-<span class="fc" id="L274">            dateLastChangeMs = System.currentTimeMillis();</span>
-<span class="fc" id="L275">        }</span>
+<span class="fc" id="L274">            state = AppState.FATALERROR;</span>
+<span class="fc" id="L275">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L276">        }</span>
 
         /**
          * Indicate if state is waiting
@@ -280,7 +281,7 @@ public class AppStatus {
          * @return
          */
         public boolean isWaiting() {
-<span class="fc bfc" id="L283" title="All 2 branches covered.">            return state == AppState.WAITING;</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">            return state == AppState.WAITING;</span>
         }
 
         /**
@@ -289,7 +290,7 @@ public class AppStatus {
          * @return
          */
         public boolean isProcessing() {
-<span class="fc bfc" id="L292" title="All 2 branches covered.">            return state == AppState.PROCESSING;</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">            return state == AppState.PROCESSING;</span>
         }
 
         /**
@@ -298,7 +299,7 @@ public class AppStatus {
          * @return
          */
         public boolean isStopping() {
-<span class="fc bfc" id="L301" title="All 2 branches covered.">            return state == AppState.STOPPING;</span>
+<span class="fc bfc" id="L302" title="All 2 branches covered.">            return state == AppState.STOPPING;</span>
         }
 
         /**
@@ -307,7 +308,7 @@ public class AppStatus {
          * @return
          */
         public boolean isError() {
-<span class="fc bfc" id="L310" title="All 2 branches covered.">            return state == AppState.ERROR;</span>
+<span class="fc bfc" id="L311" title="All 2 branches covered.">            return state == AppState.ERROR;</span>
         }
 
         /**
@@ -316,7 +317,7 @@ public class AppStatus {
          * @return
          */
         public boolean isFatalError() {
-<span class="fc bfc" id="L319" title="All 2 branches covered.">            return state == AppState.FATALERROR;</span>
+<span class="fc bfc" id="L320" title="All 2 branches covered.">            return state == AppState.FATALERROR;</span>
         }
 
     }
@@ -326,14 +327,14 @@ public class AppStatus {
      */
     @Scheduled(fixedDelayString = &quot;${status.delete-fixed-delay-ms}&quot;)
     public void forceStopping() {
-<span class="pc bpc" id="L329" title="1 of 2 branches missed.">        if (this.isShallBeStopped()) {</span>
+<span class="pc bpc" id="L330" title="1 of 2 branches missed.">        if (this.isShallBeStopped()) {</span>
             try {
-<span class="nc" id="L331">                mqiStatusService.stop();</span>
-<span class="nc" id="L332">            } catch (AbstractCodedException ace) {</span>
-<span class="nc" id="L333">                LOGGER.error(ace.getLogMessage());</span>
-<span class="nc" id="L334">            }</span>
-<span class="nc" id="L335">            System.exit(0);</span>
+<span class="nc" id="L332">                mqiStatusService.stop();</span>
+<span class="nc" id="L333">            } catch (AbstractCodedException ace) {</span>
+<span class="nc" id="L334">                LOGGER.error(ace.getLogMessage());</span>
+<span class="nc" id="L335">            }</span>
+<span class="nc" id="L336">            System.exit(0);</span>
         }
-<span class="fc" id="L337">    }</span>
+<span class="fc" id="L338">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

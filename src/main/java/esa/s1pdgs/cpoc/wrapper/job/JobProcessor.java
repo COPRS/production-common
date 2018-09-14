@@ -140,6 +140,7 @@ public class JobProcessor {
         GenericMessageDto<LevelJobDto> message = null;
         try {
             message = mqiService.next();
+            this.appStatus.setWaiting();
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step 0] [code {}] {}",
                     ace.getCode().getCode(), ace.getLogMessage());
