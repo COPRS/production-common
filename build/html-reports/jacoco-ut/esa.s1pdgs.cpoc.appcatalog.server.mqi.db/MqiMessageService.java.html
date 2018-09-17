@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MqiMessageService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server.mqi.db</a> &gt; <span class="el_source">MqiMessageService.java</span></div><h1>MqiMessageService.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package esa.s1pdgs.cpoc.appcatalog.server.mqi.db;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+/**
+ * Services to access mongoDB data
+ * 
+ * @author Viveris Technologies
+ */
+@Service
+public class MqiMessageService {
+
+    /**
+     * 
+     */
+    public static final String MQI_MSG_SEQ_KEY = &quot;mqiMessage&quot;;
+
+    /**
+     * DAO for mongoDB
+     */
+    private final MqiMessageDao mongoDBDAO;
+
+    /**
+     * DAO for mongoDB
+     */
+    private final SequenceDao sequenceDao;
+
+    /**
+     * Constructor for the Services
+     * 
+     * @param mongoDBDAO
+     */
+    @Autowired
+    public MqiMessageService(final MqiMessageDao mongoDBDAO,
+<span class="fc" id="L47">            final SequenceDao sequenceDao) {</span>
+<span class="fc" id="L48">        this.mongoDBDAO = mongoDBDAO;</span>
+<span class="fc" id="L49">        this.sequenceDao = sequenceDao;</span>
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * Return a list of message which contains the right topic, partition,
+     * offset and group
+     * 
+     * @param topic
+     * @param partition
+     * @param offset
+     * @param group
+     * @return the list of message
+     */
+    public List&lt;MqiMessage&gt; searchByTopicPartitionOffsetGroup(
+            final String topic, final int partition, final long offset,
+            final String group) {
+<span class="fc" id="L65">        return mongoDBDAO.searchByTopicPartitionOffsetGroup(topic, partition,</span>
+                offset, group);
+    }
+
+    /**
+     * Return a list of message which contains the right topic, partition and
+     * group
+     * 
+     * @param topic
+     * @param partition
+     * @param group
+     * @return the list of message
+     */
+    public List&lt;MqiMessage&gt; searchByTopicPartitionGroup(final String topic,
+            final int partition, final String group,
+            final Set&lt;MqiStateMessageEnum&gt; states) {
+<span class="fc" id="L81">        return mongoDBDAO.searchByTopicPartitionGroup(topic, partition, group,</span>
+                states);
+    }
+
+    /**
+     * Return a list of message which contains the right pod name, product
+     * category but its not in the states
+     * 
+     * @param pod
+     * @param category
+     * @param states
+     * @return the list of message
+     */
+    public List&lt;MqiMessage&gt; searchByPodStateCategory(final String pod,
+            final ProductCategory category,
+            final Set&lt;MqiStateMessageEnum&gt; states) {
+<span class="fc" id="L97">        return mongoDBDAO.searchByPodStateCategory(pod, category, states);</span>
+    }
+
+    /**
+     * Return a list of message which contains the right pod name, product
+     * category but its not in the states
+     * 
+     * @param pod
+     * @param category
+     * @param states
+     * @return the list of message
+     */
+    public int countReadingMessages(final String pod, final String topic) {
+<span class="fc" id="L110">        return mongoDBDAO.countReadingMessages(pod, topic);</span>
+    }
+
+    /**
+     * Return a list of message which contains the right ID
+     * 
+     * @param messageID
+     * @return the list of message
+     */
+    public List&lt;MqiMessage&gt; searchByID(final long messageID) {
+<span class="fc" id="L120">        return mongoDBDAO.searchByID(messageID);</span>
+    }
+
+    /**
+     * Function which insert new message to the database
+     * 
+     * @param messageToInsert
+     */
+    public void insertMqiMessage(final MqiMessage messageToInsert) {
+<span class="fc" id="L129">        long sequence = sequenceDao.getNextSequenceId(MQI_MSG_SEQ_KEY);</span>
+<span class="fc" id="L130">        messageToInsert.setIdentifier(sequence);</span>
+<span class="fc" id="L131">        mongoDBDAO.insert(messageToInsert);</span>
+<span class="fc" id="L132">    }</span>
+
+    /**
+     * Function which update a MqiMessage
+     * 
+     * @param messageID
+     * @param updateMap
+     */
+    public void updateByID(final long messageID,
+            final Map&lt;String, Object&gt; updateMap) {
+<span class="fc" id="L142">        mongoDBDAO.updateByID(messageID, updateMap);</span>
+<span class="fc" id="L143">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

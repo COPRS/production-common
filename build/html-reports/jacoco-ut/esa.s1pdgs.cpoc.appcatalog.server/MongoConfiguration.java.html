@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MongoConfiguration.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server</a> &gt; <span class="el_source">MongoConfiguration.java</span></div><h1>MongoConfiguration.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package esa.s1pdgs.cpoc.appcatalog.server;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+
+import com.mongodb.MongoClient;
+import com.mongodb.ServerAddress;
+
+/**
+ * Configuration for the MongoDB client
+ * 
+ * @author Viveris Technologies
+ */
+@Configuration
+@EnableMongoRepositories
+<span class="fc" id="L28">public class MongoConfiguration {</span>
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L33">    private static final Logger LOGGER =</span>
+<span class="fc" id="L34">            LogManager.getLogger(MongoConfiguration.class);</span>
+
+    @Value(&quot;${mongodb.host}&quot;)
+    private List&lt;String&gt; mongoDBHost;
+
+    @Value(&quot;${mongodb.port}&quot;)
+    private int mongoDBPort;
+    
+    @Value(&quot;${mongodb.database}&quot;)
+    private String mongoDBDatabase;
+    
+    public @Bean MongoClient mongoClient() {
+<span class="fc" id="L46">        LOGGER.info(&quot;New constructor&quot;);</span>
+<span class="fc" id="L47">        List&lt;ServerAddress&gt; servers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L48">        mongoDBHost.forEach(host -&gt; {</span>
+<span class="fc" id="L49">            servers.add(new ServerAddress(host, mongoDBPort));</span>
+<span class="fc" id="L50">        });</span>
+<span class="fc" id="L51">        return new MongoClient(servers);</span>
+    }
+
+    public @Bean MongoTemplate mongoTemplate() {
+<span class="fc" id="L55">        return new MongoTemplate(mongoClient(), mongoDBDatabase);</span>
+    }  
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

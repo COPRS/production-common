@@ -33,7 +33,7 @@ public class AppCatalogJobGenerationTerminatedException extends AbstractAppDataE
      */
     public AppCatalogJobGenerationTerminatedException(final String productName,
             final List<Object> mqiMessages) {
-        super(ErrorCode.JOB_GENERATION_TERMINATED, "Invalid job generation state");
+        super(ErrorCode.JOB_GENERATION_TERMINATED, "Job generation forcely terminated");
         this.productName = productName;
         this.mqiMessages = mqiMessages;
     }

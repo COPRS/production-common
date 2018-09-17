@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>CleaningOldestJob.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server.job.tasks</a> &gt; <span class="el_source">CleaningOldestJob.java</span></div><h1>CleaningOldestJob.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.server.job.tasks;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import esa.s1pdgs.cpoc.appcatalog.server.job.JobsProperties;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobService;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+@Component
+public class CleaningOldestJob {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L25">    private static final Logger LOGGER =</span>
+<span class="fc" id="L26">            LogManager.getLogger(CleaningOldestJob.class);</span>
+
+    /**
+     * Job service
+     */
+    private final AppDataJobService appDataJobService;
+
+    /**
+     * Maximal job age per status
+     */
+    private final Map&lt;String, Long&gt; maxAgeJobsLevelProducts;
+
+    /**
+     * Maximal job age per status
+     */
+    private final Map&lt;String, Long&gt; maxAgeJobsEdrsSessions;
+
+    /**
+     * @param appDataJobService
+     * @param category
+     * @param maxAgeJobs
+     * @param maxNbErrorsGenerations
+     */
+    @Autowired
+    public CleaningOldestJob(final AppDataJobService appDataJobService,
+<span class="fc" id="L51">            final JobsProperties jobsProperties) {</span>
+<span class="fc" id="L52">        this.appDataJobService = appDataJobService;</span>
+<span class="fc" id="L53">        this.maxAgeJobsLevelProducts =</span>
+<span class="fc" id="L54">                jobsProperties.getEdrsSessions().getMaxAgeJobMs();</span>
+<span class="fc" id="L55">        this.maxAgeJobsEdrsSessions =</span>
+<span class="fc" id="L56">                jobsProperties.getLevelProducts().getMaxAgeJobMs();</span>
+<span class="fc" id="L57">    }</span>
+
+    /**
+     * Clean job terminated after x times (to avoid being done twice)
+     */
+    @Scheduled(fixedDelayString = &quot;${jobs.cleaning-jobs-terminated-fixed-rate-ms}&quot;)
+    public void cleanJobInGeneratedState() {
+        // EDRS sessions
+<span class="fc" id="L65">        Date dateCompareE =</span>
+<span class="fc" id="L66">                new Date(System.currentTimeMillis() - maxAgeJobsEdrsSessions</span>
+<span class="fc" id="L67">                        .get(AppDataJobState.TERMINATED.name().toLowerCase()));</span>
+<span class="fc" id="L68">        List&lt;AppDataJob&gt; jobsE = appDataJobService</span>
+<span class="fc" id="L69">                .findByStateAndCategoryAndLastUpdateDateLessThan(</span>
+                        AppDataJobState.TERMINATED,
+                        ProductCategory.EDRS_SESSIONS, dateCompareE);
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        for (AppDataJob jobE : jobsE) {</span>
+<span class="nc" id="L73">            LOGGER.info(</span>
+                    &quot;[productName {}] [level {}] Remove terminated job for enough time&quot;,
+<span class="nc" id="L75">                    jobE.getProduct().getProductName(),</span>
+<span class="nc" id="L76">                    ProductCategory.EDRS_SESSIONS, jobE.getLevel());</span>
+<span class="nc" id="L77">            appDataJobService.deleteJob(jobE.getIdentifier());</span>
+<span class="nc" id="L78">        }</span>
+        // Level products
+<span class="fc" id="L80">        Date dateCompareP =</span>
+<span class="fc" id="L81">                new Date(System.currentTimeMillis() - maxAgeJobsLevelProducts</span>
+<span class="fc" id="L82">                        .get(AppDataJobState.TERMINATED.name().toLowerCase()));</span>
+<span class="fc" id="L83">        List&lt;AppDataJob&gt; jobsP = appDataJobService</span>
+<span class="fc" id="L84">                .findByStateAndCategoryAndLastUpdateDateLessThan(</span>
+                        AppDataJobState.TERMINATED,
+                        ProductCategory.LEVEL_PRODUCTS, dateCompareP);
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        for (AppDataJob jobP : jobsP) {</span>
+<span class="nc" id="L88">            LOGGER.info(</span>
+                    &quot;[productName {}] [level {}] Remove terminated job for enough time&quot;,
+<span class="nc" id="L90">                    jobP.getProduct().getProductName(), jobP.getLevel());</span>
+<span class="nc" id="L91">            appDataJobService.deleteJob(jobP.getIdentifier());</span>
+<span class="nc" id="L92">        }</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * Remove jobs in transitory state for too long
+     */
+    @Scheduled(fixedDelayString = &quot;${jobs.cleaning-jobs-invalid-fixed-rate-ms}&quot;)
+    public void cleanJobInWaitingForTooLong() {
+<span class="fc" id="L100">        this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.WAITING);</span>
+<span class="fc" id="L101">        this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.DISPATCHING);</span>
+<span class="fc" id="L102">        this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.GENERATING);</span>
+<span class="fc" id="L103">    }</span>
+
+    /**
+     * @param state
+     */
+    private void deleteJobsInTemporarlyStateForTooLong(AppDataJobState state) {
+        // EDRS sessions
+<span class="fc" id="L110">        Date dateCompareE = new Date(System.currentTimeMillis()</span>
+<span class="fc" id="L111">                - maxAgeJobsEdrsSessions.get(state.name().toLowerCase()));</span>
+<span class="fc" id="L112">        List&lt;AppDataJob&gt; jobsE = appDataJobService</span>
+<span class="fc" id="L113">                .findByStateAndCategoryAndLastUpdateDateLessThan(state,</span>
+                        ProductCategory.EDRS_SESSIONS, dateCompareE);
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        for (AppDataJob jobE : jobsE) {</span>
+<span class="nc" id="L116">            LOGGER.info(</span>
+                    &quot;[category {}] [productName {}] [level {}] [state {}] Remove transitory job for long time&quot;,
+                    ProductCategory.EDRS_SESSIONS,
+<span class="nc" id="L119">                    jobE.getProduct().getProductName(), jobE.getLevel(), state);</span>
+<span class="nc" id="L120">            appDataJobService.deleteJob(jobE.getIdentifier());</span>
+<span class="nc" id="L121">        }</span>
+        // Level products
+<span class="fc" id="L123">        Date dateCompareP = new Date(System.currentTimeMillis()</span>
+<span class="fc" id="L124">                - maxAgeJobsEdrsSessions.get(state.name().toLowerCase()));</span>
+<span class="fc" id="L125">        List&lt;AppDataJob&gt; jobsP = appDataJobService</span>
+<span class="fc" id="L126">                .findByStateAndCategoryAndLastUpdateDateLessThan(state,</span>
+                        ProductCategory.LEVEL_PRODUCTS, dateCompareP);
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        for (AppDataJob jobP : jobsP) {</span>
+<span class="nc" id="L129">            LOGGER.error(</span>
+                    &quot;[category {}] [productName {}] [level {}] [state {}] Remove transitory job for long time&quot;,
+                    ProductCategory.LEVEL_PRODUCTS,
+<span class="nc" id="L132">                    jobP.getProduct().getProductName(), jobP.getLevel(), state);</span>
+<span class="nc" id="L133">            appDataJobService.deleteJob(jobP.getIdentifier());</span>
+<span class="nc" id="L134">        }</span>
+<span class="fc" id="L135">    }</span>
+
+    // TODO add clean for job generations
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

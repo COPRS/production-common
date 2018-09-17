@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ErrorResponse.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server.common.rest</a> &gt; <span class="el_source">ErrorResponse.java</span></div><h1>ErrorResponse.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.server.common.rest;
+
+/**
+ * Generic error response
+ * @author Viveris Technologies
+ *
+ */
+public class ErrorResponse {
+    
+    /**
+     * HTTP status
+     */
+    private int status;
+
+    /**
+     * Internal error code
+     */
+    private int code;
+
+    /**
+     * Message
+     */
+	private String message;
+
+    /**
+     * @param error
+     * @param message
+     * @param code
+     */
+    public ErrorResponse(final int status, final String message, final int code) {
+<span class="fc" id="L31">        super();</span>
+<span class="fc" id="L32">        this.status = status;</span>
+<span class="fc" id="L33">        this.message = message;</span>
+<span class="fc" id="L34">        this.code = code;</span>
+<span class="fc" id="L35">    }</span>
+
+    /**
+     * @return the status
+     */
+    public int getStatus() {
+<span class="fc" id="L41">        return status;</span>
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(final int status) {
+<span class="fc" id="L48">        this.status = status;</span>
+<span class="fc" id="L49">    }</span>
+
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+<span class="fc" id="L55">        return message;</span>
+    }
+
+    /**
+     * @param message the message to set
+     */
+    public void setMessage(final String message) {
+<span class="fc" id="L62">        this.message = message;</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * @return the code
+     */
+    public int getCode() {
+<span class="fc" id="L69">        return code;</span>
+    }
+
+    /**
+     * @param code the code to set
+     */
+    public void setCode(final int code) {
+<span class="fc" id="L76">        this.code = code;</span>
+<span class="fc" id="L77">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
