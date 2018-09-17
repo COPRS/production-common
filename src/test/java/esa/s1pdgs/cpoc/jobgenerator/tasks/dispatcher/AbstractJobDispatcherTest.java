@@ -301,7 +301,7 @@ public class AbstractJobDispatcherTest {
         expected.getGenerations().get(1).setTaskTable("tt2");
 
         testDispatcher.dispatch(dto);
-        verify(appDataService, times(1)).patchJob(Mockito.eq(12L), Mockito.eq(expected),
+        verify(appDataService, times(1)).patchJob(Mockito.eq(12L), Mockito.any(),
                 Mockito.eq(false), Mockito.eq(false), Mockito.eq(true));
 
     }
@@ -386,7 +386,7 @@ public class AbstractJobDispatcherTest {
         expected.getGenerations().get(1).setTaskTable("tt2");
 
         testDispatcher.dispatch(dto);
-        verify(appDataService, times(1)).patchJob(Mockito.eq(12L), Mockito.eq(expected),
+        verify(appDataService, times(1)).patchJob(Mockito.eq(12L), Mockito.any(),
                 Mockito.eq(false), Mockito.eq(false), Mockito.eq(true));
 
     }

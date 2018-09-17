@@ -71,7 +71,7 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
     /**
      * Periodic function for processing messages
      */
-    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString="${process.initial-delay-ms}")
+    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {
         // First, consume message
         GenericMessageDto<LevelProductDto> mqiMessage = readMessage();
@@ -100,9 +100,11 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
             LOGGER.info(
                     "[MONITOR] [step 2] [productName {}] Dispatching product",
                     getProductName(mqiMessage));
-            appDataJob.setState(AppDataJobDtoState.DISPATCHING);
-            appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
-                    appDataJob, false, false, false);
+            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
+                appDataJob.setState(AppDataJobDtoState.DISPATCHING);
+                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
+                        appDataJob, false, false, false);
+            }
             jobsDispatcher.dispatch(appDataJob);
 
             // Ack
@@ -168,7 +170,7 @@ public class L0SlicesConsumer extends AbstractGenericConsumer<LevelProductDto> {
             productDto.setStopTime(DateUtils
                     .convertWithSimpleDateFormat(stopTime, DATE_FORMAT));
             jobDto.setProduct(productDto);
-            
+
             LOGGER.info(
                     "[REPORT] [MONITOR] [s1pdgsTask L1JobGeneration] [START] [productName {}] Starting job generation",
                     jobDto.getProduct().getProductName());
