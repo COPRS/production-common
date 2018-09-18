@@ -4,13 +4,13 @@
 	<groupId>spdgs-sdk</groupId>
 	<artifactId>mqi-server</artifactId>
 	<version>1.0.0</version>
-	<name>MQI server</name>
+	<name>S1-PDGS Cloud POC - Message queue interface server</name>
 
 	<properties>
 		<java.version>1.8</java.version>
 
-		<version.spdgs.commons>1.0.1</version.spdgs.commons>
-		<version.spdgs.obs>1.0.1</version.spdgs.obs>
+		<version.spdgs.commons>1.0.2</version.spdgs.commons>
+		<version.spdgs.app-catalog-client>1.1.1</version.spdgs.app-catalog-client>
 
 		<version.equals>2.4.6</version.equals>
 
@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>app-catalog-client</artifactId>
-			<version>1.0.0</version>
+			<version>${version.spdgs.app-catalog-client}</version>
 		</dependency>
 
 		<!-- Tests -->
@@ -135,6 +135,17 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>build/html-reports</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -177,11 +188,12 @@
 				<version>${version.mvn-pmd}</version>
 				<configuration>
 					<rulesets>
-						<ruleset>${basedir}/dev/PmdJavaRuleset.xml</ruleset>
+						<ruleset>${basedir}/build/PmdJavaRuleset.xml</ruleset>
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
 					<includeTests>false</includeTests>
+					<outputDirectory>build/html-reports</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>
@@ -231,7 +243,7 @@
 							<!-- Sets the path to the file which contains the execution data. -->
 							<dataFile>target/jacoco.exec</dataFile>
 							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>target/jacoco-ut</outputDirectory>
+							<outputDirectory>build/html-reports/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>

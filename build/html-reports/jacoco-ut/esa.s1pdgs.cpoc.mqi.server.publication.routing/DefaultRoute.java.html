@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultRoute.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">MQI server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server.publication.routing</a> &gt; <span class="el_source">DefaultRoute.java</span></div><h1>DefaultRoute.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server.publication.routing;
+
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+/**
+ * Default route to use for a given family
+ * 
+ * @author Viveris Technologies
+ */
+@XmlRootElement(name = &quot;default_route&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class DefaultRoute {
+
+    /**
+     * Product family
+     */
+    @XmlElement(name = &quot;family&quot;)
+    private ProductFamily family;
+
+    /**
+     * Route to
+     */
+    @XmlElement(name = &quot;route_to&quot;)
+    private RouteTo routeTo;
+
+    /**
+     * Default constructor
+     */
+<span class="fc" id="L36">    public DefaultRoute() {</span>
+<span class="fc" id="L37">        this.family = ProductFamily.BLANK;</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * @return the family
+     */
+    public ProductFamily getFamily() {
+<span class="fc" id="L44">        return family;</span>
+    }
+
+    /**
+     * @param family
+     *            the family to set
+     */
+    public void setFamily(final ProductFamily family) {
+<span class="fc" id="L52">        this.family = family;</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * @return the routeTo
+     */
+    public RouteTo getRouteTo() {
+<span class="fc" id="L59">        return routeTo;</span>
+    }
+
+    /**
+     * @param routeTo
+     *            the routeTo to set
+     */
+    public void setRouteTo(final RouteTo routeTo) {
+<span class="fc" id="L67">        this.routeTo = routeTo;</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L75">        return String.format(&quot;{family: %s, routeTo: %s}&quot;, family, routeTo);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L83">        return Objects.hash(family, routeTo);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L93">            ret = true;</span>
+<span class="fc bfc" id="L94" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L95">            ret = false;</span>
+        } else {
+<span class="fc" id="L97">            DefaultRoute other = (DefaultRoute) obj;</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">            ret = Objects.equals(family, other.family)</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(routeTo, other.routeTo);</span>
+        }
+<span class="fc" id="L101">        return ret;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

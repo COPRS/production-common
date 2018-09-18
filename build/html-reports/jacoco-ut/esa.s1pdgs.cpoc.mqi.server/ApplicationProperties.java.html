@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApplicationProperties.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">MQI server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server</a> &gt; <span class="el_source">ApplicationProperties.java</span></div><h1>ApplicationProperties.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
+
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+/**
+ * Configuration of the application: product cagtegories
+ * 
+ * @author Viveris Technologies
+ */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;application&quot;)
+public class ApplicationProperties {
+
+    /**
+     * Hostname.
+     */
+    private String hostname;
+    
+    /**
+     * Time to wait before getting next message when API is called
+     */
+    private int waitNextMs;
+
+    /**
+     * Properties per product categories
+     */
+    private Map&lt;ProductCategory, ProductCategoryProperties&gt; productCategories;
+
+    /**
+     * Constructor
+     */
+    public ApplicationProperties() {
+<span class="fc" id="L44">        super();</span>
+<span class="fc" id="L45">        this.productCategories = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L46">    }</span>
+    
+    @PostConstruct
+    public void initMaps() {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        for(ProductCategory keyCat : this.productCategories.keySet()) {</span>
+<span class="fc" id="L51">            ProductCategoryProperties cat = productCategories.get(keyCat);</span>
+<span class="fc" id="L52">            cat.getConsumption().setTopicsWithPriority(new HashMap&lt;&gt;());</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">            if (!StringUtils.isEmpty(cat.getConsumption().getTopicswithprioritystr())) {</span>
+<span class="fc" id="L54">                    String[] paramsTmp = cat.getConsumption().getTopicswithprioritystr().split(&quot;\\|\\|&quot;);</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">                    for (int i=0; i&lt;paramsTmp.length; i++) {</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">                        if (!StringUtils.isEmpty(paramsTmp[i])) {</span>
+<span class="fc" id="L57">                            String[] tmp = paramsTmp[i].split(&quot;:&quot;, 2);</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">                            if (tmp.length == 2) {</span>
+<span class="fc" id="L59">                                cat.getConsumption().getTopicsWithPriority().put(tmp[0], Integer.valueOf(tmp[1]));</span>
+                            }
+                        }
+                    }
+                }
+<span class="fc" id="L64">        }</span>
+        
+<span class="fc" id="L66">    }</span>
+
+    /**
+     * @return the hostname
+     */
+    public String getHostname() {
+<span class="fc" id="L72">        return hostname;</span>
+    }
+
+    /**
+     * @param hostname the hostname to set
+     */
+    public void setHostname(final String hostname) {
+<span class="fc" id="L79">        this.hostname = hostname;</span>
+<span class="fc" id="L80">    }</span>
+
+    /**
+     * @return the waitNextMs
+     */
+    public int getWaitNextMs() {
+<span class="fc" id="L86">        return waitNextMs;</span>
+    }
+
+    /**
+     * @param waitNextMs the waitNextMs to set
+     */
+    public void setWaitNextMs(final int waitNextMs) {
+<span class="fc" id="L93">        this.waitNextMs = waitNextMs;</span>
+<span class="fc" id="L94">    }</span>
+
+    /**
+     * @return the productCategories
+     */
+    public Map&lt;ProductCategory, ProductCategoryProperties&gt; getProductCategories() {
+<span class="fc" id="L100">        return productCategories;</span>
+    }
+
+    /**
+     * @param productCategories
+     *            the productCategories to set
+     */
+    public void setProductCategories(
+            final Map&lt;ProductCategory, ProductCategoryProperties&gt; productCategories) {
+<span class="fc" id="L109">        this.productCategories = productCategories;</span>
+<span class="fc" id="L110">    }</span>
+
+    /**
+     * Properties of a product category
+     * consumption
+     * @author Viveris Technologies
+     */
+    public static class ProductCategoryProperties {
+
+        /**
+         * Consumption properties
+         */
+        private ProductCategoryConsumptionProperties consumption;
+
+        /**
+         * Publication properties
+         */
+        private ProductCategoryPublicationProperties publication;
+
+        /**
+         * Constructor
+         */
+        public ProductCategoryProperties() {
+<span class="fc" id="L133">            super();</span>
+<span class="fc" id="L134">            this.consumption = new ProductCategoryConsumptionProperties();</span>
+<span class="fc" id="L135">            this.publication = new ProductCategoryPublicationProperties();</span>
+<span class="fc" id="L136">        }</span>
+
+        /**
+         * Constructor
+         */
+        public ProductCategoryProperties(
+                final ProductCategoryConsumptionProperties consumption,
+                final ProductCategoryPublicationProperties publication) {
+<span class="fc" id="L144">            super();</span>
+<span class="fc" id="L145">            this.consumption = consumption;</span>
+<span class="fc" id="L146">            this.publication = publication;</span>
+<span class="fc" id="L147">        }</span>
+
+        /**
+         * @return the consumption
+         */
+        public ProductCategoryConsumptionProperties getConsumption() {
+<span class="fc" id="L153">            return consumption;</span>
+        }
+
+        /**
+         * @param consumption
+         *            the consumption to set
+         */
+        public void setConsumption(
+                final ProductCategoryConsumptionProperties consumption) {
+<span class="fc" id="L162">            this.consumption = consumption;</span>
+<span class="fc" id="L163">        }</span>
+
+        /**
+         * @return the publication
+         */
+        public ProductCategoryPublicationProperties getPublication() {
+<span class="fc" id="L169">            return publication;</span>
+        }
+
+        /**
+         * @param publication
+         *            the publication to set
+         */
+        public void setPublication(
+                final ProductCategoryPublicationProperties publication) {
+<span class="fc" id="L178">            this.publication = publication;</span>
+<span class="fc" id="L179">        }</span>
+    }
+
+    /**
+     * Consumption properties for a product category
+     * 
+     * @author Viveris Technologies
+     */
+    public static class ProductCategoryConsumptionProperties {
+
+        /**
+         * True if the category is enable for the service
+         */
+        private boolean enable;
+
+        private String topicswithprioritystr;
+        
+        /**
+         * The topic to consume for this category
+         */
+        private Map&lt;String, Integer&gt; topicsWithPriority;
+
+        /**
+         * Constructor
+         */
+        public ProductCategoryConsumptionProperties() {
+<span class="fc" id="L205">            super();</span>
+<span class="fc" id="L206">            this.enable = false;</span>
+<span class="fc" id="L207">        }</span>
+
+        /**
+         * Constructor
+         */
+        public ProductCategoryConsumptionProperties(final boolean enable) {
+<span class="fc" id="L213">            super();</span>
+<span class="fc" id="L214">            this.enable = enable;</span>
+<span class="fc" id="L215">            this.topicsWithPriority = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L216">        }</span>
+
+        /**
+         * @return the enable
+         */
+        public boolean isEnable() {
+<span class="fc" id="L222">            return enable;</span>
+        }
+
+        /**
+         * @param enable
+         *            the enable to set
+         */
+        public void setEnable(final boolean enable) {
+<span class="fc" id="L230">            this.enable = enable;</span>
+<span class="fc" id="L231">        }</span>
+
+        /**
+         * @return the topic
+         */
+        public Map&lt;String, Integer&gt; getTopicsWithPriority() {
+<span class="fc" id="L237">            return topicsWithPriority;</span>
+        }
+
+        /**
+         * @param topics
+         *            the topics to set
+         */
+        public void setTopicsWithPriority(final Map&lt;String, Integer&gt; topicsWithPriority) {
+<span class="fc" id="L245">            this.topicsWithPriority = topicsWithPriority;</span>
+<span class="fc" id="L246">        }</span>
+
+        /**
+         * @return the topicswithprioritystr
+         */
+        public String getTopicswithprioritystr() {
+<span class="fc" id="L252">            return topicswithprioritystr;</span>
+        }
+
+        /**
+         * @param topicswithprioritystr the topicswithprioritystr to set
+         */
+        public void setTopicswithprioritystr(String topicswithprioritystr) {
+<span class="fc" id="L259">            this.topicswithprioritystr = topicswithprioritystr;</span>
+<span class="fc" id="L260">        }</span>
+    }
+
+    /**
+     * Publication properties for a product category
+     * 
+     * @author Viveris Technologies
+     */
+    public static class ProductCategoryPublicationProperties {
+
+        /**
+         * True if the category is enable for the service
+         */
+        private boolean enable;
+
+        /**
+         * The path of the routing file
+         */
+        private String routingFile;
+
+        /**
+         * Constructor
+         */
+        public ProductCategoryPublicationProperties() {
+<span class="fc" id="L284">            super();</span>
+<span class="fc" id="L285">            this.enable = false;</span>
+<span class="fc" id="L286">        }</span>
+
+        /**
+         * Constructor
+         */
+        public ProductCategoryPublicationProperties(final boolean enable,
+                final String routingFile) {
+<span class="fc" id="L293">            super();</span>
+<span class="fc" id="L294">            this.enable = enable;</span>
+<span class="fc" id="L295">            this.routingFile = routingFile;</span>
+<span class="fc" id="L296">        }</span>
+
+        /**
+         * @return the enable
+         */
+        public boolean isEnable() {
+<span class="fc" id="L302">            return enable;</span>
+        }
+
+        /**
+         * @param enable
+         *            the enable to set
+         */
+        public void setEnable(final boolean enable) {
+<span class="fc" id="L310">            this.enable = enable;</span>
+<span class="fc" id="L311">        }</span>
+
+        /**
+         * @return the routingFile
+         */
+        public String getRoutingFile() {
+<span class="fc" id="L317">            return routingFile;</span>
+        }
+
+        /**
+         * @param routingFile
+         *            the routingFile to set
+         */
+        public void setRoutingFile(final String routingFile) {
+<span class="fc" id="L325">            this.routingFile = routingFile;</span>
+<span class="fc" id="L326">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

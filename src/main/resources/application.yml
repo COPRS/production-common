@@ -3,79 +3,79 @@ spring:
     name: s1pdgs-mqi-app
     
 logging:
-  config: ${mqi_log2j_file:log4j2.yml}
+  config: log4j2.yml
   
 # Kafka
 kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
-  hostname: ${HOSTNAME}
-  client-id: ${HOSTNAME}
-  error-topic: ${kafka_topic_errors:t-pdgs-errors}
+  bootstrap-servers: ${kafka_bootstrap-servers}                                         # host:port to use for establishing the initial connection to the Kafka cluster
+  hostname: ${HOSTNAME}                                                                 # Hostname
+  client-id: ${HOSTNAME}                                                                # ID to pass to the server when making 
+  error-topic: ${kafka_topic_errors}                                                    # Topic name for the errors
   consumer:
-    group-id: ${mqi_kafka_consumer_group:l0-wrappers}
-    max-poll-records: ${mqi_kafka_consumer_max-poll-records:1}
-    max-poll-interval-ms: ${mqi_kafka_consumer_max-poll-interval-ms:3600000}
-    heartbeat-intv-ms: ${mqi_kafka_consumer_heartbeat-interval-ms:3000}
-    session-timeout-ms: ${mqi_kafka_consumer_session-timeout-ms:10000}
-    auto-offset-reset: ${mqi_kafka_consumer_auto-offset-reset:latest}
-    offset-dft-mode: ${mqi_kafka_consumer_offset-dft-mode:-3}
+    group-id: ${mqi_kafka_consumer_group:l0-wrappers}                                   # Unique string that identifies the consumer group to which this consumer belongs
+    max-poll-records: 1                                                                 # Maximum number of records returned in a single call to poll().
+    max-poll-interval-ms: 3600000                                                       #
+    heartbeat-intv-ms: 3000                                                             # Expected time between heartbeats to the consumer coordinator.
+    session-timeout-ms: 10000                                                           #
+    auto-offset-reset: latest                                                           # What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server (e.g. because that data has been deleted): earliest: automatically reset the offset to the earliest offset, latest: automatically reset the offset to the latest offset, none: throw exception to the consumer if no previous offset is found for the consumer's group,anything else: throw exception to the consumer.
+    offset-dft-mode: -3                                                                 # Default offset seek mode when rebalance: -2: let the consumer, -1: start to the beginning offset, -0: start to the end offset
   listener:
-    poll-timeout-ms: ${mqi_kafka_listener_poll-timeout-ms:500}
+    poll-timeout-ms: 500                                                                # Timeout to use when polling the consumer.
   producer:
-    max-retries: ${mqi_kafka_producer_max-retries:5}
+    max-retries: 5                                                                      # When greater than zero, enables retrying of failed sends.
     
 # Configuration per categories of products
 application:
-  hostname: ${HOSTNAME}
-  max-error-counter: ${mqi_app_max-error-counter:3}
-  stop-fixed-delay-ms: ${mqi_app_stop-fixed-delay-ms:3000}
-  wait-next-ms: ${mqi_app_wait-next-ms:1000}
+  hostname: ${HOSTNAME}                                                                 # Hostname
+  max-error-counter: 3                                                                  # 
+  stop-fixed-delay-ms: 3000                                                             # 
+  wait-next-ms: 1000                                                                    # Time to wait before getting next message when API is called
   product-categories:
     auxiliary-files:
       consumption:
-        enable: ${mqi_auxiliary-files_consumption_enable:false}
-        topicswithprioritystr: ${mqi_auxiliary-files_consumption_topics}
+        enable: ${mqi_auxiliary-files_consumption_enable:false}                         # True if the category is enable for the service
+        topicswithprioritystr: ${mqi_auxiliary-files_consumption_topics}                # List of topics with priority
       publication:
-        enable: ${mqi_auxiliary-files_publication_enable:false}
-        routing-file: ${mqi_auxiliary-files_publication_routing-file:routing-files/auxiliary-files.xml}
+        enable: ${mqi_auxiliary-files_publication_enable:false}                         # True if the category is enable for the service
+        routing-file: routing-files/auxiliary-files.xml                                 # Location of the routing file
     edrs-sessions:
       consumption:
-        enable: ${mqi_edrs-sessions_consumption_enable:false}
-        topicswithprioritystr: ${mqi_edrs-sessions_consumption_topics}
+        enable: ${mqi_edrs-sessions_consumption_enable:false}                           #
+        topicswithprioritystr: ${mqi_edrs-sessions_consumption_topics}                  #
       publication:
-        enable: ${mqi_edrs-sessions_publication_enable:false}
-        routing-file: ${mqi_edrs-sessions_publication_routing-file:routing-files/edrs-sessions.xml}
+        enable: ${mqi_edrs-sessions_publication_enable:false}                           #
+        routing-file: routing-files/edrs-sessions.xml                                   #
     level-products:
       consumption:
-        enable: ${mqi_level-products_consumption_enable:false}
-        topicswithprioritystr: ${mqi_level-products_consumption_topics}
+        enable: ${mqi_level-products_consumption_enable:false}                          #
+        topicswithprioritystr: ${mqi_level-products_consumption_topics}                 #
       publication:
-        enable: ${mqi_level-products_publication_enable:false}
-        routing-file: ${mqi_level-products_publication_routing-file:routing-files/level-products.xml}
+        enable: ${mqi_level-products_publication_enable:false}                          #
+        routing-file: routing-files/level-products.xml                                  #
     level-reports:
       consumption:
-        enable: ${mqi_level-reports_consumption_enable:false}
-        topicswithprioritystr: ${mqi_level-reports_consumption_topics}
+        enable: ${mqi_level-reports_consumption_enable:false}                           #
+        topicswithprioritystr: ${mqi_level-reports_consumption_topics}                  #
       publication:
-        enable: ${mqi_level-reports_publication_enable:false}
-        routing-file: ${mqi_level-reports_publication_routing-file:routing-files/level-reports.xml}
+        enable: ${mqi_level-reports_publication_enable:false}                           #
+        routing-file: routing-files/level-reports.xml                                   #
     level-jobs:
       consumption:
-        enable: ${mqi_level-jobs_consumption_enable:false}
-        topicswithprioritystr: ${mqi_level-jobs_consumption_topics}
+        enable: ${mqi_level-jobs_consumption_enable:false}                              #
+        topicswithprioritystr: ${mqi_level-jobs_consumption_topics}                     #
       publication:
-        enable: ${mqi_level-jobs_publication_enable:false}
-        routing-file: ${mqi_level-jobs_publication_routing-file:routing-files/level-jobs.xml}
+        enable: ${mqi_level-jobs_publication_enable:false}                              #
+        routing-file: routing-files/level-jobs.xml                                      #
     
 # REST controller
 server:
-  port: ${mqi_rest_server_port:8081}
+  port: 8081                                                                            #
   
 # App catlog
 persistence:
-  host-uri-catalog: ${mqi_persistence_host-uri-catalog:http://app-catalog-svc:8080}
-  port-uri-other-app: ${mqi_persistence_port-uri-other-app:8080}
-  max-retries: ${mqi_persistence_max-retries:3}
-  tempo-retry-ms: ${mqi_persistence_tempo-retry-ms:500}
+  host-uri-catalog: http://app-catalog-svc:8080                                         #
+  port-uri-other-app: 8080                                                              #
+  max-retries: 3                                                                        #
+  tempo-retry-ms: 500                                                                   #
   other-app:
-    suffix-uri: ${mqi_persistence_other-app_suffix-uri:.l1-wrapper-svc}
+    suffix-uri: ${mqi_persistence_other-app_suffix-uri:.l0-wrapper-svc}                 #
