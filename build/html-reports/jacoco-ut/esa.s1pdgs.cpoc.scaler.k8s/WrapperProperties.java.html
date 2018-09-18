@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>WrapperProperties.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.k8s</a> &gt; <span class="el_source">WrapperProperties.java</span></div><h1>WrapperProperties.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.k8s;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;wrapper&quot;)
+public class WrapperProperties {
+
+	// -------------------------
+	// Nodes configuration
+	// -------------------------
+	private LabelKubernetes labelWrapperConfig;
+	private LabelKubernetes labelWrapperStateUsed;
+	private LabelKubernetes labelWrapperStateUnused;
+
+	// -------------------------
+	// Pods configuration
+	// nbPoolingPods shall be a multiple of nbPodsPerServer
+	// (nbMinServers * nbPodsPerServer) / nbPoolingPods shall be int
+	// (nbMaxServers * nbPodsPerServer) / nbPoolingPods shall be int
+	// nbMinServers * nbPodsPerServer &gt;= nbPoolingPods
+	// -------------------------
+	private LabelKubernetes labelWrapperApp;
+	private int nbPoolingPods;
+	private int nbMinServers;
+	private int nbMaxServers;
+	private int nbPodsPerServer;
+	private String podTemplateFile;
+
+	// -------------------------
+	// Pods configuration
+	// -------------------------
+	private TimeProperties executionTime;
+	private long tempoPoolingMs;
+
+	// -------------------------
+	// REST API configuration
+	// -------------------------
+	private RestApiProperties restApi;
+
+<span class="fc" id="L44">	public WrapperProperties() {</span>
+
+<span class="fc" id="L46">	}</span>
+
+	/**
+	 * @return the labelWrapperConfig
+	 */
+	public LabelKubernetes getLabelWrapperConfig() {
+<span class="fc" id="L52">		return labelWrapperConfig;</span>
+	}
+
+	/**
+	 * @param labelWrapperConfig
+	 *            the labelWrapperConfig to set
+	 */
+	public void setLabelWrapperConfig(LabelKubernetes labelWrapperConfig) {
+<span class="fc" id="L60">		this.labelWrapperConfig = labelWrapperConfig;</span>
+<span class="fc" id="L61">	}</span>
+
+	/**
+	 * @return the labelWrapperStateUsed
+	 */
+	public LabelKubernetes getLabelWrapperStateUsed() {
+<span class="fc" id="L67">		return labelWrapperStateUsed;</span>
+	}
+
+	/**
+	 * @param labelWrapperStateUsed
+	 *            the labelWrapperStateUsed to set
+	 */
+	public void setLabelWrapperStateUsed(LabelKubernetes labelWrapperStateUsed) {
+<span class="fc" id="L75">		this.labelWrapperStateUsed = labelWrapperStateUsed;</span>
+<span class="fc" id="L76">	}</span>
+
+	/**
+	 * @return the labelWrapperStateUnused
+	 */
+	public LabelKubernetes getLabelWrapperStateUnused() {
+<span class="fc" id="L82">		return labelWrapperStateUnused;</span>
+	}
+
+	/**
+	 * @param labelWrapperStateUnused
+	 *            the labelWrapperStateUnused to set
+	 */
+	public void setLabelWrapperStateUnused(LabelKubernetes labelWrapperStateUnused) {
+<span class="fc" id="L90">		this.labelWrapperStateUnused = labelWrapperStateUnused;</span>
+<span class="fc" id="L91">	}</span>
+
+	/**
+	 * @return the labelWrapperApp
+	 */
+	public LabelKubernetes getLabelWrapperApp() {
+<span class="fc" id="L97">		return labelWrapperApp;</span>
+	}
+
+	/**
+	 * @param labelWrapperApp
+	 *            the labelWrapperApp to set
+	 */
+	public void setLabelWrapperApp(LabelKubernetes labelWrapperApp) {
+<span class="fc" id="L105">		this.labelWrapperApp = labelWrapperApp;</span>
+<span class="fc" id="L106">	}</span>
+
+	/**
+	 * @return the nbPoolingPods
+	 */
+	public int getNbPoolingPods() {
+<span class="fc" id="L112">		return nbPoolingPods;</span>
+	}
+
+	/**
+	 * @param nbPoolingPods the nbPoolingPods to set
+	 */
+	public void setNbPoolingPods(int nbPoolingPods) {
+<span class="fc" id="L119">		this.nbPoolingPods = nbPoolingPods;</span>
+<span class="fc" id="L120">	}</span>
+
+	/**
+	 * @return the nbMinServers
+	 */
+	public int getNbMinServers() {
+<span class="fc" id="L126">		return nbMinServers;</span>
+	}
+
+	/**
+	 * @param nbMinServers the nbMinServers to set
+	 */
+	public void setNbMinServers(int nbMinServers) {
+<span class="fc" id="L133">		this.nbMinServers = nbMinServers;</span>
+<span class="fc" id="L134">	}</span>
+
+	/**
+	 * @return the nbMaxServers
+	 */
+	public int getNbMaxServers() {
+<span class="fc" id="L140">		return nbMaxServers;</span>
+	}
+
+	/**
+	 * @param nbMaxServers the nbMaxServers to set
+	 */
+	public void setNbMaxServers(int nbMaxServers) {
+<span class="fc" id="L147">		this.nbMaxServers = nbMaxServers;</span>
+<span class="fc" id="L148">	}</span>
+
+	/**
+	 * @return the nbPodsPerServer
+	 */
+	public int getNbPodsPerServer() {
+<span class="fc" id="L154">		return nbPodsPerServer;</span>
+	}
+
+	/**
+	 * @param nbPodsPerServer the nbPodsPerServer to set
+	 */
+	public void setNbPodsPerServer(int nbPodsPerServer) {
+<span class="fc" id="L161">		this.nbPodsPerServer = nbPodsPerServer;</span>
+<span class="fc" id="L162">	}</span>
+
+	/**
+	 * @return the podTemplateFile
+	 */
+	public String getPodTemplateFile() {
+<span class="fc" id="L168">		return podTemplateFile;</span>
+	}
+
+	/**
+	 * @param podTemplateFile the podTemplateFile to set
+	 */
+	public void setPodTemplateFile(String podTemplateFile) {
+<span class="fc" id="L175">		this.podTemplateFile = podTemplateFile;</span>
+<span class="fc" id="L176">	}</span>
+
+	/**
+	 * @return the executionTime
+	 */
+	public TimeProperties getExecutionTime() {
+<span class="fc" id="L182">		return executionTime;</span>
+	}
+
+	/**
+	 * @param executionTime
+	 *            the executionTime to set
+	 */
+	public void setExecutionTime(TimeProperties executionTime) {
+<span class="fc" id="L190">		this.executionTime = executionTime;</span>
+<span class="fc" id="L191">	}</span>
+
+	/**
+	 * @return the tempoPoolingMs
+	 */
+	public long getTempoPoolingMs() {
+<span class="fc" id="L197">		return tempoPoolingMs;</span>
+	}
+
+	/**
+	 * @param tempoPoolingMs the tempoPoolingMs to set
+	 */
+	public void setTempoPoolingMs(long tempoPoolingMs) {
+<span class="fc" id="L204">		this.tempoPoolingMs = tempoPoolingMs;</span>
+<span class="fc" id="L205">	}</span>
+
+	/**
+	 * @return the restApi
+	 */
+	public RestApiProperties getRestApi() {
+<span class="fc" id="L211">		return restApi;</span>
+	}
+
+	/**
+	 * @param restApi
+	 *            the restApi to set
+	 */
+	public void setRestApi(RestApiProperties restApi) {
+<span class="fc" id="L219">		this.restApi = restApi;</span>
+<span class="fc" id="L220">	}</span>
+
+	public static class LabelKubernetes {
+		private String label;
+		private String value;
+
+<span class="fc" id="L226">		public LabelKubernetes() {</span>
+
+<span class="fc" id="L228">		}</span>
+
+<span class="fc" id="L230">		public LabelKubernetes(String label, String value) {</span>
+<span class="fc" id="L231">			this.label = label;</span>
+<span class="fc" id="L232">			this.value = value;</span>
+<span class="fc" id="L233">		}</span>
+
+		/**
+		 * @return the label
+		 */
+		public String getLabel() {
+<span class="fc" id="L239">			return label;</span>
+		}
+
+		/**
+		 * @param label
+		 *            the label to set
+		 */
+		public void setLabel(String label) {
+<span class="fc" id="L247">			this.label = label;</span>
+<span class="fc" id="L248">		}</span>
+
+		/**
+		 * @return the value
+		 */
+		public String getValue() {
+<span class="fc" id="L254">			return value;</span>
+		}
+
+		/**
+		 * @param value
+		 *            the value to set
+		 */
+		public void setValue(String value) {
+<span class="fc" id="L262">			this.value = value;</span>
+<span class="fc" id="L263">		}</span>
+
+	}
+
+	public static class RestApiProperties {
+		private int port;
+
+<span class="fc" id="L270">		public RestApiProperties() {</span>
+
+<span class="fc" id="L272">		}</span>
+
+		/**
+		 * @return the port
+		 */
+		public int getPort() {
+<span class="fc" id="L278">			return port;</span>
+		}
+
+		/**
+		 * @param port
+		 *            the port to set
+		 */
+		public void setPort(int port) {
+<span class="fc" id="L286">			this.port = port;</span>
+<span class="fc" id="L287">		}</span>
+	}
+
+	public static class TimeProperties {
+		private long averageS;
+		private double minThresholdS;
+		private double maxThresholdS;
+
+<span class="fc" id="L295">		public TimeProperties() {</span>
+
+<span class="fc" id="L297">		}</span>
+
+		/**
+		 * @return the averageS
+		 */
+		public long getAverageS() {
+<span class="fc" id="L303">			return averageS;</span>
+		}
+
+		/**
+		 * @param averageS the averageS to set
+		 */
+		public void setAverageS(long averageS) {
+<span class="fc" id="L310">			this.averageS = averageS;</span>
+<span class="fc" id="L311">		}</span>
+
+		/**
+		 * @return the minThresholdS
+		 */
+		public double getMinThresholdS() {
+<span class="fc" id="L317">			return minThresholdS;</span>
+		}
+
+		/**
+		 * @param minThresholdS the minThresholdS to set
+		 */
+		public void setMinThresholdS(double minThresholdS) {
+<span class="fc" id="L324">			this.minThresholdS = minThresholdS;</span>
+<span class="fc" id="L325">		}</span>
+
+		/**
+		 * @return the maxThresholdS
+		 */
+		public double getMaxThresholdS() {
+<span class="fc" id="L331">			return maxThresholdS;</span>
+		}
+
+		/**
+		 * @param maxThresholdS the maxThresholdS to set
+		 */
+		public void setMaxThresholdS(double maxThresholdS) {
+<span class="fc" id="L338">			this.maxThresholdS = maxThresholdS;</span>
+<span class="fc" id="L339">		}</span>
+
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

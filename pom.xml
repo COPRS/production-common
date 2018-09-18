@@ -7,7 +7,7 @@
 	<artifactId>s1pdgs-scaler</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<name>Spring Boot Docker For S1-PDGS scaler</name>
+	<name>S1-PDGS Cloud POC - Scaler</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -126,12 +126,12 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>commons</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>app-catalog-client</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.1</version>
 		</dependency>
 
 		<dependency>
@@ -184,6 +184,17 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>build/html-reports</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
@@ -225,11 +236,12 @@
 				<version>3.8</version>
 				<configuration>
 					<rulesets>
-						<ruleset>${basedir}/dev/PmdJavaRuleset.xml</ruleset>
+						<ruleset>${basedir}/build/PmdJavaRuleset.xml</ruleset>
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
 					<includeTests>false</includeTests>
+					<outputDirectory>build/html-reports</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>
@@ -279,7 +291,7 @@
 							<!-- Sets the path to the file which contains the execution data. -->
 							<dataFile>target/jacoco.exec</dataFile>
 							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>target/jacoco-ut</outputDirectory>
+							<outputDirectory>build/html-reports/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -291,6 +303,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<description>Template java application with Spring Boot and Docker</description>
 </project>
