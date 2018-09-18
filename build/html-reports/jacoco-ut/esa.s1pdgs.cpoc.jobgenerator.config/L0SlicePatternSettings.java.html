@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L0SlicePatternSettings.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.config</a> &gt; <span class="el_source">L0SlicePatternSettings.java</span></div><h1>L0SlicePatternSettings.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Properties around the extraction of the L0 slices information
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;pattern-l0-slices&quot;)
+public class L0SlicePatternSettings {
+
+	/**
+	 * The regular expression in Java format
+	 */
+	private String regexp;
+
+	/**
+	 * The id of the matcher.group for the satellite identifier according the
+	 * regexp.
+	 */
+	private int mGroupSatId;
+
+	/**
+	 * The id of the matcher.group for the mission identifier according the regexp.
+	 */
+	private int mGroupMissionId;
+
+	/**
+	 * The id of the matcher.group for the acquisition according the regexp.
+	 */
+	private int mGroupAcquisition;
+
+	/**
+	 * The id of the matcher.group for the start time according the regexp.
+	 */
+	private int mGroupStartTime;
+
+	/**
+	 * The id of the matcher.group for the stop time according the regexp.
+	 */
+	private int mGroupStopTime;
+
+	/**
+	 * Default constructor
+	 */
+<span class="fc" id="L52">	public L0SlicePatternSettings() {</span>
+<span class="fc" id="L53">		mGroupSatId = 0;</span>
+<span class="fc" id="L54">		mGroupMissionId = 0;</span>
+<span class="fc" id="L55">		mGroupAcquisition = 0;</span>
+<span class="fc" id="L56">		mGroupStartTime = 0;</span>
+<span class="fc" id="L57">		mGroupStopTime = 0;</span>
+<span class="fc" id="L58">	}</span>
+
+	/**
+	 * @return the regexp
+	 */
+	public String getRegexp() {
+<span class="fc" id="L64">		return regexp;</span>
+	}
+
+	/**
+	 * @param regexp
+	 *            the regexp to set
+	 */
+	public void setRegexp(final String regexp) {
+<span class="fc" id="L72">		this.regexp = regexp;</span>
+<span class="fc" id="L73">	}</span>
+
+	/**
+	 * @return the mGroupSatId
+	 */
+	public int getMGroupSatId() {
+<span class="fc" id="L79">		return mGroupSatId;</span>
+	}
+
+	/**
+	 * @param mGroupSatId
+	 *            the mGroupSatId to set
+	 */
+	public void setMGroupSatId(final int mGroupSatId) {
+<span class="fc" id="L87">		this.mGroupSatId = mGroupSatId;</span>
+<span class="fc" id="L88">	}</span>
+
+	/**
+	 * @return the mGroupMissionId
+	 */
+	public int getMGroupMissionId() {
+<span class="fc" id="L94">		return mGroupMissionId;</span>
+	}
+
+	/**
+	 * @param mGroupMissionId
+	 *            the mGroupMissionId to set
+	 */
+	public void setMGroupMissionId(final int mGroupMissionId) {
+<span class="fc" id="L102">		this.mGroupMissionId = mGroupMissionId;</span>
+<span class="fc" id="L103">	}</span>
+
+	/**
+	 * @return the getMGroupAcquisition
+	 */
+	public int getMGroupAcquisition() {
+<span class="fc" id="L109">		return mGroupAcquisition;</span>
+	}
+
+	/**
+	 * @param mGroupAcquisition
+	 *            the mGroupAcquisition to set
+	 */
+	public void setMGroupAcquisition(final int mGroupAcquisition) {
+<span class="fc" id="L117">		this.mGroupAcquisition = mGroupAcquisition;</span>
+<span class="fc" id="L118">	}</span>
+
+	/**
+	 * @return the mGroupStartTime
+	 */
+	public int getMGroupStartTime() {
+<span class="fc" id="L124">		return mGroupStartTime;</span>
+	}
+
+	/**
+	 * @param mGroupStartTime
+	 *            the mGroupStartTime to set
+	 */
+	public void setMGroupStartTime(final int mGroupStartTime) {
+<span class="fc" id="L132">		this.mGroupStartTime = mGroupStartTime;</span>
+<span class="fc" id="L133">	}</span>
+
+	/**
+	 * @return the mGroupStopTime
+	 */
+	public int getMGroupStopTime() {
+<span class="fc" id="L139">		return mGroupStopTime;</span>
+	}
+
+	/**
+	 * @param mGroupStopTime
+	 *            the mGroupStopTime to set
+	 */
+	public void setMGroupStopTime(final int mGroupStopTime) {
+<span class="fc" id="L147">		this.mGroupStopTime = mGroupStopTime;</span>
+<span class="fc" id="L148">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

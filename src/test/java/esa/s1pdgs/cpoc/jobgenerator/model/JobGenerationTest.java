@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.jobgenerator.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -28,6 +29,13 @@ import nl.jqno.equalsverifier.Warning;
  * @author Cyrielle Gailliard
  */
 public class JobGenerationTest {
+    
+    /**
+     * 
+     */
+    public void testUpdateDataJob() {
+        
+    }
 
     /**
      * Test toString
@@ -77,6 +85,11 @@ public class JobGenerationTest {
         assertEquals(gen3, job.getGeneration());
 
         appDataJob.setGenerations(new ArrayList<>());
+        job.updateAppDataJob(appDataJob, "TaskTable.AIOP.3.xml");
+        assertNotEquals(gen3, job.getGeneration());
+        assertEquals("TaskTable.AIOP.3.xml", job.getGeneration().getTaskTable());
+        assertEquals(AppDataJobGenerationDtoState.INITIAL, job.getGeneration().getState());
+        
         job = new JobGeneration<>(appDataJob, "TaskTable.AIOP.3.xml");
         assertEquals("TaskTable.AIOP.3.xml",
                 job.getGeneration().getTaskTable());

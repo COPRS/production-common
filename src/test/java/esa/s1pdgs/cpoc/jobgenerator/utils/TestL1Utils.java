@@ -11,11 +11,11 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Route;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1RouteFrom;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1RouteTo;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Routing;
-import esa.s1pdgs.cpoc.jobgenerator.utils.DateUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 

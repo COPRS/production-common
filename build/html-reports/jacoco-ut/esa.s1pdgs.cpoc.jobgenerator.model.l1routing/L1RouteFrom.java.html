@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L1RouteFrom.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.l1routing</a> &gt; <span class="el_source">L1RouteFrom.java</span></div><h1>L1RouteFrom.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.l1routing;
+
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * Class used the from route&lt;br/&gt;
+ * Used for mapping the file routing.xml in java objects
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+@XmlRootElement(name = &quot;l1_from&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class L1RouteFrom {
+
+	/**
+	 * Acquisition (IW, EW, SM, EM)
+	 */
+	@XmlElement(name = &quot;acquisition&quot;)
+	private String acquisition;
+
+	/**
+	 * Satellite identifier (S1A, S1B)
+	 */
+	@XmlElement(name = &quot;satellite_id&quot;)
+	private String satelliteId;
+
+	/**
+	 * Default constructor
+	 */
+	public L1RouteFrom() {
+<span class="fc" id="L37">		super();</span>
+<span class="fc" id="L38">	}</span>
+
+	/**
+	 * Constructor using field
+	 * 
+	 * @param acquisition
+	 * @param satelliteId
+	 */
+	public L1RouteFrom(final String acquisition, final String satelliteId) {
+<span class="fc" id="L47">		this();</span>
+<span class="fc" id="L48">		this.acquisition = acquisition;</span>
+<span class="fc" id="L49">		this.satelliteId = satelliteId;</span>
+<span class="fc" id="L50">	}</span>
+
+	/**
+	 * @return the acquisition
+	 */
+	public String getAcquisition() {
+<span class="fc" id="L56">		return acquisition;</span>
+	}
+
+	/**
+	 * @param acquisition
+	 *            the acquisition to set
+	 */
+	public void setAcquisition(final String acquisition) {
+<span class="fc" id="L64">		this.acquisition = acquisition;</span>
+<span class="fc" id="L65">	}</span>
+
+	/**
+	 * @return the satelliteId
+	 */
+	public String getSatelliteId() {
+<span class="fc" id="L71">		return satelliteId;</span>
+	}
+
+	/**
+	 * @param satelliteId
+	 *            the satelliteId to set
+	 */
+	public void setSatelliteId(final String satelliteId) {
+<span class="fc" id="L79">		this.satelliteId = satelliteId;</span>
+<span class="fc" id="L80">	}</span>
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L87">		return String.format(&quot;{acquisition: %s, satelliteId: %s}&quot;, acquisition, satelliteId);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L95">		return Objects.hash(acquisition, satelliteId);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L104" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L105">			ret = true;</span>
+<span class="fc bfc" id="L106" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L107">			ret = false;</span>
+		} else {
+<span class="fc" id="L109">			L1RouteFrom other = (L1RouteFrom) obj;</span>
+<span class="fc bfc" id="L110" title="All 4 branches covered.">			ret = Objects.equals(acquisition, other.acquisition) &amp;&amp; Objects.equals(satelliteId, other.satelliteId);</span>
+		}
+<span class="fc" id="L112">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

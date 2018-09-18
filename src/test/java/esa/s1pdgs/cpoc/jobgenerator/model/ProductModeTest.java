@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.model;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -14,6 +15,15 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableInputMode;
  *
  */
 public class ProductModeTest {
+    
+    @Test
+    public void testBasic() {
+        assertEquals(4, ProductMode.values().length);
+        assertEquals(ProductMode.ALWAYS, ProductMode.valueOf("ALWAYS"));
+        assertEquals(ProductMode.BLANK, ProductMode.valueOf("BLANK"));
+        assertEquals(ProductMode.NON_SLICING, ProductMode.valueOf("NON_SLICING"));
+        assertEquals(ProductMode.SLICING, ProductMode.valueOf("SLICING"));
+    }
 	
 	/**
 	 * Test the function isCompatibleWithTaskTableMode

@@ -56,7 +56,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
-import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -84,7 +84,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     /**
      * Producer in topic
      */
-    private final OutputProcuderFactory outputFactory;
+    private final OutputProducerFactory outputFactory;
 
     /**
      * XML converter
@@ -144,7 +144,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
             final MetadataService metadataService,
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
-            final OutputProcuderFactory outputFactory,
+            final OutputProducerFactory outputFactory,
             final AbstractAppCatalogJobService<T> appDataService) {
         this.xmlConverter = xmlConverter;
         this.metadataService = metadataService;

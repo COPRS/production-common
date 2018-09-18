@@ -73,6 +73,7 @@ public abstract class AbstractGenericConsumer<T> {
         GenericMessageDto<T> message = null;
         try {
             message = mqiService.next();
+            appStatus.setWaiting();
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [code {}] {}", ace.getCode().getCode(),
                     ace.getLogMessage());
@@ -101,6 +102,7 @@ public abstract class AbstractGenericConsumer<T> {
         }
 
         // Check status
+        //TODO remove
         LOGGER.info(
                 "[MONITOR] [step 3] [productName {}] Checking status application",
                 getProductName(dto));

@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TaskTableInputAlternative.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.tasktable</a> &gt; <span class="el_source">TaskTableInputAlternative.java</span></div><h1>TaskTableInputAlternative.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.tasktable;
+
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableFileNameType;
+import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableInputOrigin;
+
+/**
+ * 
+ */
+@XmlRootElement(name = &quot;Alternative&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class TaskTableInputAlternative {
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Order&quot;)
+	private int order;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Origin&quot;)
+	private TaskTableInputOrigin origin;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Retrieval_Mode&quot;)
+	private String retrievalMode;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;T0&quot;)
+	private double deltaTime0;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;T1&quot;)
+	private double deltaTime1;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;File_Type&quot;)
+	private String fileType;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;File_Name_Type&quot;)
+	private TaskTableFileNameType fileNameType;
+
+	/**
+	 * Used to distinct queries according the natural key
+	 */
+	private int idSearchMetadataQuery;
+
+	/**
+	 * 
+	 */
+	public TaskTableInputAlternative() {
+<span class="fc" id="L71">		super();</span>
+<span class="fc" id="L72">		this.origin = TaskTableInputOrigin.BLANK;</span>
+<span class="fc" id="L73">		this.order = 1;</span>
+<span class="fc" id="L74">		this.deltaTime0 = 0.0;</span>
+<span class="fc" id="L75">		this.deltaTime1 = 0.0;</span>
+<span class="fc" id="L76">		this.fileNameType = TaskTableFileNameType.BLANK;</span>
+<span class="fc" id="L77">		this.idSearchMetadataQuery = 0;</span>
+<span class="fc" id="L78">	}</span>
+
+	/**
+	 * @param order
+	 * @param origin
+	 * @param retrievalMode
+	 * @param deltaTime0
+	 * @param deltaTime1
+	 * @param fileType
+	 * @param fileNameType
+	 */
+	public TaskTableInputAlternative(final int order, final TaskTableInputOrigin origin, final String retrievalMode,
+			final double deltaTime0, final double deltaTime1, final String fileType,
+			final TaskTableFileNameType fileNameType) {
+<span class="fc" id="L92">		this();</span>
+<span class="fc" id="L93">		this.order = order;</span>
+<span class="fc" id="L94">		this.origin = origin;</span>
+<span class="fc" id="L95">		this.retrievalMode = retrievalMode;</span>
+<span class="fc" id="L96">		this.deltaTime0 = deltaTime0;</span>
+<span class="fc" id="L97">		this.deltaTime1 = deltaTime1;</span>
+<span class="fc" id="L98">		this.fileType = fileType;</span>
+<span class="fc" id="L99">		this.fileNameType = fileNameType;</span>
+<span class="fc" id="L100">	}</span>
+
+	/**
+	 * @return the order
+	 */
+	public int getOrder() {
+<span class="fc" id="L106">		return order;</span>
+	}
+
+	/**
+	 * @return the origin
+	 */
+	public TaskTableInputOrigin getOrigin() {
+<span class="fc" id="L113">		return origin;</span>
+	}
+
+	/**
+	 * @return the retrievalMode
+	 */
+	public String getRetrievalMode() {
+<span class="fc" id="L120">		return retrievalMode;</span>
+	}
+
+	/**
+	 * @return the deltaTime0
+	 */
+	public double getDeltaTime0() {
+<span class="fc" id="L127">		return deltaTime0;</span>
+	}
+
+	/**
+	 * @return the deltaTime1
+	 */
+	public double getDeltaTime1() {
+<span class="fc" id="L134">		return deltaTime1;</span>
+	}
+
+	/**
+	 * @return the fileType
+	 */
+	public String getFileType() {
+<span class="fc" id="L141">		return fileType;</span>
+	}
+
+	/**
+	 * @return the fileNameType
+	 */
+	public TaskTableFileNameType getFileNameType() {
+<span class="fc" id="L148">		return fileNameType;</span>
+	}
+
+	/**
+	 * @return the idSearchMetadataQuery
+	 */
+	public int getIdSearchMetadataQuery() {
+<span class="fc" id="L155">		return idSearchMetadataQuery;</span>
+	}
+
+	/**
+	 * @param idSearchMetadataQuery
+	 *            the idSearchMetadataQuery to set
+	 */
+	public void setIdSearchMetadataQuery(final int idSearchMetadataQuery) {
+<span class="fc" id="L163">		this.idSearchMetadataQuery = idSearchMetadataQuery;</span>
+<span class="fc" id="L164">	}</span>
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L171">		return Objects.hash(order, origin, retrievalMode, deltaTime0, deltaTime1, fileType, fileNameType,</span>
+<span class="fc" id="L172">				idSearchMetadataQuery);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L181" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L182">			ret = true;</span>
+<span class="fc bfc" id="L183" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L184">			ret = false;</span>
+		} else {
+<span class="fc" id="L186">			TaskTableInputAlternative other = (TaskTableInputAlternative) obj;</span>
+<span class="fc bfc" id="L187" title="All 4 branches covered.">			ret = order == other.order &amp;&amp; Objects.equals(origin, other.origin)</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">					&amp;&amp; Objects.equals(retrievalMode, other.retrievalMode)</span>
+<span class="fc bfc" id="L189" title="All 4 branches covered.">					&amp;&amp; Objects.equals(deltaTime0, other.deltaTime0) &amp;&amp; Objects.equals(deltaTime1, other.deltaTime1)</span>
+<span class="fc bfc" id="L190" title="All 6 branches covered.">					&amp;&amp; Objects.equals(fileType, other.fileType) &amp;&amp; Objects.equals(fileNameType, other.fileNameType)</span>
+					&amp;&amp; idSearchMetadataQuery == other.idSearchMetadataQuery;
+		}
+<span class="fc" id="L193">		return ret;</span>
+	}
+
+	public TaskTableInputAltKey getTaskTableInputAltKey() {
+<span class="fc" id="L197">		return new TaskTableInputAltKey(retrievalMode, deltaTime0, deltaTime1, fileType);</span>
+	}
+
+	/**
+	 * Natural identifier of a task input
+	 */
+	public static class TaskTableInputAltKey {
+
+		/**
+		 * 
+		 */
+		private final String retrievalMode;
+
+		/**
+		 * 
+		 */
+		private final double deltaTime0;
+
+		/**
+		 * 
+		 */
+		private final double deltaTime1;
+
+		/**
+		 * 
+		 */
+		private final String fileType;
+
+		/**
+		 * 
+		 * @param retrievalMode
+		 * @param deltaTime0
+		 * @param deltaTime1
+		 * @param fileType
+		 */
+		public TaskTableInputAltKey(final String retrievalMode, final double deltaTime0, final double deltaTime1,
+<span class="fc" id="L233">				final String fileType) {</span>
+<span class="fc" id="L234">			this.retrievalMode = retrievalMode;</span>
+<span class="fc" id="L235">			this.deltaTime0 = deltaTime0;</span>
+<span class="fc" id="L236">			this.deltaTime1 = deltaTime1;</span>
+<span class="fc" id="L237">			this.fileType = fileType;</span>
+<span class="fc" id="L238">		}</span>
+
+		/**
+		 * @return the retrievalMode
+		 */
+		public String getRetrievalMode() {
+<span class="fc" id="L244">			return retrievalMode;</span>
+		}
+
+		/**
+		 * @return the deltaTime0
+		 */
+		public double getDeltaTime0() {
+<span class="fc" id="L251">			return deltaTime0;</span>
+		}
+
+		/**
+		 * @return the deltaTime1
+		 */
+		public double getDeltaTime1() {
+<span class="fc" id="L258">			return deltaTime1;</span>
+		}
+
+		/**
+		 * @return the fileType
+		 */
+		public String getFileType() {
+<span class="fc" id="L265">			return fileType;</span>
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+<span class="fc" id="L273">			return Objects.hash(retrievalMode, deltaTime0, deltaTime1, fileType);</span>
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(final Object obj) {
+			boolean ret;
+<span class="fc bfc" id="L282" title="All 2 branches covered.">			if (this == obj) {</span>
+<span class="fc" id="L283">				ret = true;</span>
+<span class="fc bfc" id="L284" title="All 4 branches covered.">			} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L285">				ret = false;</span>
+			} else {
+<span class="fc" id="L287">				TaskTableInputAltKey other = (TaskTableInputAltKey) obj;</span>
+<span class="fc bfc" id="L288" title="All 4 branches covered.">				ret = Objects.equals(retrievalMode, other.retrievalMode) &amp;&amp; Objects.equals(deltaTime0, other.deltaTime0)</span>
+<span class="fc bfc" id="L289" title="All 4 branches covered.">						&amp;&amp; Objects.equals(deltaTime1, other.deltaTime1) &amp;&amp; Objects.equals(fileType, other.fileType);</span>
+			}
+<span class="fc" id="L291">			return ret;</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

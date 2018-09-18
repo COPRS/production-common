@@ -34,20 +34,37 @@ job-generator:
     retries: 5
   defaultfamily: L0_ACN
   outputfamiliesstr: "SM_RAW__0S:L0_PRODUCT||IW_RAW__0S:L0_PRODUCT||EW_RAW__0S:L0_PRODUCT||WV_RAW__0S:L0_PRODUCT||RF_RAW__0S:L0_PRODUCT||AN_RAW__0S:L0_PRODUCT||EN_RAW__0S:L0_PRODUCT||ZS_RAW__0S:L0_PRODUCT||ZE_RAW__0S:L0_PRODUCT||ZI_RAW__0S:L0_PRODUCT||ZW_RAW__0S:L0_PRODUCT||GP_RAW__0_:BLANK||HK_RAW__0_:BLANK||REP_ACQNR:L0_REPORT||REP_L0PSA_:L0_REPORT||REP_EFEP_:L0_REPORT||IW_GRDH_1S:L1_PRODUCT||IW_GRDH_1A:L1_ACN"
-  typeoverlapstr: "EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"
-  typeslicelenstr: "EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"
-  map-type-meta-str: "AUX_RES:AUX_RESORB||AUX_TUTU:AUX_TUT"
+  type-overlap: 
+    EW: 8.2F
+    IW: 7.4F
+    SM: 7.7F
+    WM: 0.0F
+  type-slice-length: 
+    EW: 60.0F
+    IW: 25.0F
+    SM: 25.0F
+    WM: 0.0F
+  map-type-meta: 
+    AUX_RES: AUX_RESORB
+    AUX_TUTU: AUX_TUT
 
 # L0 Process configuration
 process:
   level: "L0"
   hostname: "hostname"
   mode: "TEST"
-  paramstr: "Processing_Mode:NRT||Timeout:10"
+  params: 
+    Processing_Mode: NRT
+    Timeout: 10
   loglevelstdout: DEBUG
   loglevelstderr: INFO
   processingstation: WILE
-  outputregexpstr: "SM_RAW__0S:^S1[A-B]_S[1-6]_RAW__0S.*$||AN_RAW__0S:^S1[A-B]_N[1-6]_RAW__0S.*$||ZS_RAW__0S:^S1[A-B]_Z[1-6]_RAW__0S.*$||REP_L0PSA_:^S1[A|B|_]_OPER_REP_ACQ.*$||REP_EFEP_:^S1[A|B|_]_OPER_REP_PASS.*.EOF$"
+  outputregexps: 
+    SM_RAW__0S: ^S1[A-B]_S[1-6]_RAW__0S.*$
+    AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$
+    ZS_RAW__0S: ^S1[A-B]_Z[1-6]_RAW__0S.*$
+    REP_L0PSA_: ^S1[A|B|_]_OPER_REP_ACQ.*$
+    REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$
   mqi:
     host-uri: http://localhost:8081
     max-retries: 3

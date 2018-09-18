@@ -87,24 +87,8 @@ public class TaskTablePool {
 	 * @param tasks
 	 *            the tasks to set
 	 */
-	public void setTasks(final List<TaskTableTask> tasks) {
-		this.tasks = tasks;
-	}
-
-	/**
-	 * @param tasks
-	 *            the tasks to set
-	 */
 	public void addTask(final TaskTableTask task) {
 		this.tasks.add(task);
-	}
-
-	/**
-	 * @param tasks
-	 *            the tasks to set
-	 */
-	public void addTasks(final List<TaskTableTask> tasks) {
-		this.tasks.addAll(tasks);
 	}
 
 	/**

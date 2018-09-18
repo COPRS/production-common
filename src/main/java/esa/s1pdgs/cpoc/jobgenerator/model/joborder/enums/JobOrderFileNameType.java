@@ -38,7 +38,7 @@ public enum JobOrderFileNameType {
 		value = val;
 	}
 	
-	String getValue() {
+	public String getValue() {
 		return value;
 	}
 }

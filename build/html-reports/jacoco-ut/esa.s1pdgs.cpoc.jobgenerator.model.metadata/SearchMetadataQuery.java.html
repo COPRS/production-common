@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SearchMetadataQuery.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.metadata</a> &gt; <span class="el_source">SearchMetadataQuery.java</span></div><h1>SearchMetadataQuery.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
+
+import java.util.Objects;
+
+/**
+ * Class describing a search query for metadata
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class SearchMetadataQuery {
+
+	/**
+	 * Identify the query
+	 */
+	private int identifier;
+
+	/**
+	 * Retrieval mode
+	 */
+	private String retrievalMode;
+
+	/**
+	 * Delta time to apply to the validity start time
+	 */
+	private double deltaTime0;
+
+	/**
+	 * Delta time to apply to the validity stop time
+	 */
+	private double deltaTime1;
+
+	/**
+	 * Wanted product type
+	 */
+	private String productType;
+
+	/**
+	 * Default constructor
+	 */
+	public SearchMetadataQuery() {
+<span class="fc" id="L42">		super();</span>
+<span class="fc" id="L43">	}</span>
+
+	/**
+	 * Constructor using fields
+	 * 
+	 * @param identifier
+	 * @param retrievalMode
+	 * @param deltaTime0
+	 * @param deltaTime1
+	 * @param fileType
+	 */
+	public SearchMetadataQuery(final int identifier, final String retrievalMode, final double deltaTime0,
+			final double deltaTime1, final String productType) {
+<span class="fc" id="L56">		this();</span>
+<span class="fc" id="L57">		this.identifier = identifier;</span>
+<span class="fc" id="L58">		this.retrievalMode = retrievalMode;</span>
+<span class="fc" id="L59">		this.deltaTime0 = deltaTime0;</span>
+<span class="fc" id="L60">		this.deltaTime1 = deltaTime1;</span>
+<span class="fc" id="L61">		this.productType = productType;</span>
+<span class="fc" id="L62">	}</span>
+
+	/**
+	 * Clone
+	 * 
+	 * @param obj
+	 */
+	public SearchMetadataQuery(final SearchMetadataQuery obj) {
+<span class="fc" id="L70">		this(obj.getIdentifier(), obj.getRetrievalMode(), obj.getDeltaTime0(), obj.getDeltaTime1(),</span>
+<span class="fc" id="L71">				obj.getProductType());</span>
+<span class="fc" id="L72">	}</span>
+
+	/**
+	 * @return the identifier
+	 */
+	public int getIdentifier() {
+<span class="fc" id="L78">		return identifier;</span>
+	}
+
+	/**
+	 * @param identifier
+	 *            the identifier to set
+	 */
+	public void setIdentifier(final int identifier) {
+<span class="fc" id="L86">		this.identifier = identifier;</span>
+<span class="fc" id="L87">	}</span>
+
+	/**
+	 * @return the retrievalMode
+	 */
+	public String getRetrievalMode() {
+<span class="fc" id="L93">		return retrievalMode;</span>
+	}
+
+	/**
+	 * @param retrievalMode
+	 *            the retrievalMode to set
+	 */
+	public void setRetrievalMode(final String retrievalMode) {
+<span class="fc" id="L101">		this.retrievalMode = retrievalMode;</span>
+<span class="fc" id="L102">	}</span>
+
+	/**
+	 * @return the deltaTime0
+	 */
+	public double getDeltaTime0() {
+<span class="fc" id="L108">		return deltaTime0;</span>
+	}
+
+	/**
+	 * @param deltaTime0
+	 *            the deltaTime0 to set
+	 */
+	public void setDeltaTime0(final double deltaTime0) {
+<span class="fc" id="L116">		this.deltaTime0 = deltaTime0;</span>
+<span class="fc" id="L117">	}</span>
+
+	/**
+	 * @return the deltaTime1
+	 */
+	public double getDeltaTime1() {
+<span class="fc" id="L123">		return deltaTime1;</span>
+	}
+
+	/**
+	 * @param deltaTime1
+	 *            the deltaTime1 to set
+	 */
+	public void setDeltaTime1(final double deltaTime1) {
+<span class="fc" id="L131">		this.deltaTime1 = deltaTime1;</span>
+<span class="fc" id="L132">	}</span>
+
+	/**
+	 * @return the productType
+	 */
+	public String getProductType() {
+<span class="fc" id="L138">		return productType;</span>
+	}
+
+	/**
+	 * @param productType
+	 *            the productType to set
+	 */
+	public void setProductType(final String productType) {
+<span class="fc" id="L146">		this.productType = productType;</span>
+<span class="fc" id="L147">	}</span>
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L154">		return String.format(&quot;{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s}&quot;,</span>
+<span class="fc" id="L155">				identifier, retrievalMode, deltaTime0, deltaTime1, productType);</span>
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public String toLogMessage() {
+<span class="fc" id="L163">		return identifier + &quot;|&quot; + retrievalMode + &quot;|&quot; + deltaTime0 + &quot;|&quot; + deltaTime1 + &quot;|&quot; + productType;</span>
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L171">		return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1, productType);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L180" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L181">			ret = true;</span>
+<span class="fc bfc" id="L182" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L183">			ret = false;</span>
+		} else {
+<span class="fc" id="L185">			SearchMetadataQuery other = (SearchMetadataQuery) obj;</span>
+<span class="fc bfc" id="L186" title="All 4 branches covered.">			ret = identifier == other.identifier &amp;&amp; Objects.equals(retrievalMode, other.retrievalMode)</span>
+<span class="fc bfc" id="L187" title="All 4 branches covered.">					&amp;&amp; Objects.equals(deltaTime0, other.deltaTime0) &amp;&amp; Objects.equals(deltaTime1, other.deltaTime1)</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">					&amp;&amp; Objects.equals(productType, other.productType);</span>
+		}
+<span class="fc" id="L190">		return ret;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

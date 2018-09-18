@@ -24,8 +24,6 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 @DirtiesContext
 public class JobGeneratorSettingsTest {
 
-
-
 	/**
 	 * Job generator settings
 	 */
@@ -65,20 +63,14 @@ public class JobGeneratorSettingsTest {
 				jobGenSettings.getOutputfamilies().get("IW_GRDH_1S"));
 		assertEquals("Invalid directory", ProductFamily.L1_ACN, jobGenSettings.getOutputfamilies().get("IW_GRDH_1A"));
 		// Test map acquisition / overloap
-		assertEquals("Invalid value of typeoverlapstr", "EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F",
-				jobGenSettings.getTypeoverlapstr());
 		assertEquals("Invalid size of output familiestype overlap", 4, jobGenSettings.getTypeOverlap().size());
 		assertEquals("Invalid value of output familiestype overlap", 7.4F,
 				jobGenSettings.getTypeOverlap().get("IW").floatValue(), 0);
 		// Test map acquisition / slice length
-		assertEquals("Invalid value of typeslicelenstr", "EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F",
-				jobGenSettings.getTypeslicelenstr());
 		assertEquals("Invalid size of output typeslicelength overlap", 4, jobGenSettings.getTypeSliceLength().size());
 		assertEquals("Invalid value of output familiestype overlap", 0.0F,
 				jobGenSettings.getTypeSliceLength().get("WM").floatValue(), 0);
 		// Test map product type / index type
-		assertEquals("Invalid value of mapTypeMetaStr", "AUX_RES:AUX_RESORB||AUX_TUTU:AUX_TUT",
-				jobGenSettings.getMapTypeMetaStr());
 		assertEquals("Invalid size of mapTypeMeta", 2, jobGenSettings.getMapTypeMeta().size());
 		assertEquals("Invalid value of mapTypeMeta", "AUX_TUT", jobGenSettings.getMapTypeMeta().get("AUX_TUTU"));
 
@@ -90,16 +82,10 @@ public class JobGeneratorSettingsTest {
 		
 		// Test map product type / family: Force str to null
 		settings.setOutputfamiliesstr(null);
-		settings.setTypeoverlapstr("");
-		settings.setTypeslicelenstr(null);
-		settings.setMapTypeMetaStr("");
 		
 		// Reinit maps
 		settings.initMaps();
 		assertTrue("Map outputfamilies should be empty", settings.getOutputfamilies().size() == 0);
-		assertTrue("Map typeOverlap should be empty", settings.getTypeOverlap().size() == 0);
-		assertTrue("Map typeSliceLength should be empty", settings.getTypeSliceLength().size() == 0);
-		assertTrue("Map mapTypeMeta should be empty", settings.getMapTypeMeta().size() == 0);
 	}
 
 	@Test
@@ -108,16 +94,10 @@ public class JobGeneratorSettingsTest {
 		
 		// Test map when invalid key value separator
 		settings.setOutputfamiliesstr("o1:f1||o2");
-		settings.setTypeoverlapstr("EW:8.2F||IW:7.4F||SM7.7F||WM:0.0:F");
-		settings.setTypeslicelenstr("EW0.0F||IW25.0F||SM:25.0F||WM:0:0F");
-		settings.setMapTypeMetaStr("AUX_RESAUX_RESORB||AUX_TUTU:AUX_TUT");
 		
 		// Reinit maps
 		settings.initMaps();
 		assertTrue("Map outputfamilies should be empty", settings.getOutputfamilies().size() == 1);
-		assertTrue("Map typeOverlap should be empty", settings.getTypeOverlap().size() == 2);
-		assertTrue("Map typeSliceLength should be empty", settings.getTypeSliceLength().size() == 1);
-		assertTrue("Map mapTypeMeta should be empty", settings.getMapTypeMeta().size() == 1);
 	}
 	
 	@Test
@@ -132,12 +112,8 @@ public class JobGeneratorSettingsTest {
 		assertTrue("Should contain defaultfamily", settings.contains("defaultfamily"));
 		assertTrue("Should contain outputfamiliesstr", settings.contains("outputfamiliesstr"));
 		assertTrue("Should contain outputfamilies", settings.contains("outputfamilies"));
-		assertTrue("Should contain typeoverlapstr", settings.contains("typeoverlapstr"));
 		assertTrue("Should contain typeOverlap", settings.contains("typeOverlap"));
-		assertTrue("Should contain typeslicelenstr", settings.contains("typeslicelenstr"));
-		assertTrue("", settings.contains("EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"));
 		assertTrue("Should contain typeSliceLength", settings.contains("typeSliceLength"));
-		assertTrue("Should contain mapTypeMetaStr", settings.contains("mapTypeMetaStr"));
 		assertTrue("Should contain mapTypeMeta", settings.contains("mapTypeMeta"));
 	}
 }

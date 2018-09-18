@@ -161,7 +161,7 @@ public class L0SlicesConsumerTest {
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
         verify(appStatus, times(1)).setProcessing(Mockito.eq(2L));
-        verify(appStatus, times(1)).setWaiting();
+        verify(appStatus, times(2)).setWaiting();
     }
 
     @Test
@@ -175,7 +175,7 @@ public class L0SlicesConsumerTest {
 
         verify(l0SliceJobsDispatcher, times(1)).dispatch(Mockito.any());
         verify(appStatus, times(1)).setProcessing(Mockito.eq(1L));
-        verify(appStatus, times(1)).setWaiting();
+        verify(appStatus, times(2)).setWaiting();
     }
 
 }

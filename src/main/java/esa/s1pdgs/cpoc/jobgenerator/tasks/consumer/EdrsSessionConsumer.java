@@ -93,10 +93,12 @@ public class EdrsSessionConsumer
                     LOGGER.info(
                             "[MONITOR] [step 2] [productName {}] Dispatching product",
                             getProductName(mqiMessage));
-                    appDataJob.setState(AppDataJobDtoState.DISPATCHING);
-                    appDataJob =
-                            appDataService.patchJob(appDataJob.getIdentifier(),
-                                    appDataJob, false, false, false);
+                    if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
+                        appDataJob.setState(AppDataJobDtoState.DISPATCHING);
+                        appDataJob =
+                                appDataService.patchJob(appDataJob.getIdentifier(),
+                                        appDataJob, false, false, false);
+                    }
                     jobsDispatcher.dispatch(appDataJob);
                 }
 

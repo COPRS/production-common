@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AbstractJobsDispatcher.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.tasks.dispatcher</a> &gt; <span class="el_source">AbstractJobsDispatcher.java</span></div><h1>AbstractJobsDispatcher.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.tasks.dispatcher;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.CollectionUtils;
+
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
+import esa.s1pdgs.cpoc.common.ApplicationMode;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
+import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.JobsGeneratorFactory;
+
+/**
+ * Job dispatcher&lt;br/&gt;
+ * &lt;ul&gt;
+ * At application starting:
+ * &lt;li&gt;a job generator is initialized per task tables present in a
+ * directory&lt;/li&gt;
+ * &lt;li&gt;for each current generating job for this pod (in applicative data), their
+ * message is dispatched again to consider any modification done on the list of
+ * task tables&lt;/li&gt;
+ * &lt;li&gt;the job generator initialized are started&lt;/li&gt;
+ * &lt;/ul&gt;
+ * When a message is read and can be processing, it will be dispatch to one or
+ * several task tables according the product category (the list of task tables
+ * is given by the abstract method {@link #getTaskTables(AppDataJobDto)}
+ * 
+ * @param &lt;T&gt;
+ */
+public abstract class AbstractJobsDispatcher&lt;T&gt; {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L49">    private static final Logger LOGGER =</span>
+<span class="fc" id="L50">            LogManager.getLogger(AbstractJobsDispatcher.class);</span>
+
+    /**
+     * Job Generator settings
+     */
+    protected final JobGeneratorSettings settings;
+
+    /**
+     * Process settings
+     */
+    protected final ProcessSettings processSettings;
+
+    /**
+     * Available job generators (one per task tables)
+     */
+    protected Map&lt;String, AbstractJobsGenerator&lt;T&gt;&gt; generators;
+
+    /**
+     * Scheduler containing the job generation processors
+     */
+    protected final ThreadPoolTaskScheduler taskScheduler;
+
+    /**
+     * Job generator factory
+     */
+    protected final JobsGeneratorFactory factory;
+
+    /**
+     * Applicative data service
+     */
+    protected final AbstractAppCatalogJobService&lt;T&gt; appDataService;
+
+    /**
+     * Constructor
+     * 
+     * @param settings
+     * @param factory
+     * @param taskScheduler
+     */
+    public AbstractJobsDispatcher(final JobGeneratorSettings settings,
+            final ProcessSettings processSettings,
+            final JobsGeneratorFactory factory,
+            final ThreadPoolTaskScheduler taskScheduler,
+<span class="fc" id="L93">            final AbstractAppCatalogJobService&lt;T&gt; appDataService) {</span>
+<span class="fc" id="L94">        this.factory = factory;</span>
+<span class="fc" id="L95">        this.settings = settings;</span>
+<span class="fc" id="L96">        this.processSettings = processSettings;</span>
+<span class="fc" id="L97">        this.generators = new HashMap&lt;&gt;(this.settings.getMaxnboftasktable());</span>
+<span class="fc" id="L98">        this.taskScheduler = taskScheduler;</span>
+<span class="fc" id="L99">        this.appDataService = appDataService;</span>
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * Initialize the task table processors
+     * &lt;li&gt;a job generator is initialized per task tables present in a
+     * directory&lt;/li&gt;
+     * &lt;li&gt;for each current generating job for this pod (in applicative data),
+     * their message is dispatched again to consider any modification done on
+     * the list of task tables&lt;/li&gt;
+     * &lt;li&gt;the job generator initialized are started&lt;/li&gt;
+     * 
+     * @throws AbstractCodedException
+     */
+    protected void initTaskTables() throws AbstractCodedException {
+        // Retrieve list of XML files in the directory
+<span class="fc" id="L115">        File directoryXml = new File(this.settings.getDiroftasktables());</span>
+<span class="pc bpc" id="L116" title="2 of 4 branches missed.">        if (directoryXml != null &amp;&amp; directoryXml.isDirectory()) {</span>
+<span class="fc" id="L117">            File[] taskTableFiles =</span>
+<span class="fc" id="L118">                    directoryXml.listFiles(parameter -&gt; parameter.isFile());</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">            if (taskTableFiles != null) {</span>
+<span class="fc" id="L120">                if (taskTableFiles.length &gt; this.settings</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">                        .getMaxnboftasktable()) {</span>
+<span class="fc" id="L122">                    throw new JobGenMaxNumberTaskTablesReachException(</span>
+<span class="fc" id="L123">                            String.format(&quot;Too much task tables %d&quot;,</span>
+<span class="fc" id="L124">                                    taskTableFiles.length));</span>
+                }
+<span class="fc bfc" id="L126" title="All 2 branches covered.">                for (File taskTableFile : taskTableFiles) {</span>
+<span class="fc" id="L127">                    AbstractJobsGenerator&lt;T&gt; jobGenerator =</span>
+<span class="fc" id="L128">                            this.createJobGenerator(taskTableFile);</span>
+<span class="fc" id="L129">                    generators.put(taskTableFile.getName(), jobGenerator);</span>
+                }
+            }
+        }
+
+        // Dispatch existing job with current task table configuration
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (processSettings.getMode() != ApplicationMode.TEST) {</span>
+<span class="fc" id="L136">            List&lt;AppDataJobDto&lt;T&gt;&gt; generatingJobs = appDataService</span>
+<span class="fc" id="L137">                    .findByPodAndState(processSettings.getHostname(),</span>
+                            AppDataJobDtoState.GENERATING);
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">            if (!CollectionUtils.isEmpty(generatingJobs)) {</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">                for (AppDataJobDto&lt;T&gt; generation : generatingJobs) {</span>
+                    // TODO ask if bypass error
+<span class="fc" id="L142">                    dispatch(generation);</span>
+<span class="fc" id="L143">                }</span>
+            }
+        }
+
+        // Launch generators
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        for (String taskTable : generators.keySet()) {</span>
+<span class="fc" id="L149">            taskScheduler.scheduleWithFixedDelay(generators.get(taskTable),</span>
+<span class="fc" id="L150">                    settings.getJobgenfixedrate());</span>
+<span class="fc" id="L151">        }</span>
+<span class="fc" id="L152">    }</span>
+
+    /**
+     * Create a job generator from the task table XML file
+     * 
+     * @param xmlFile
+     * @return
+     * @throws AbstractCodedException
+     */
+    protected abstract AbstractJobsGenerator&lt;T&gt; createJobGenerator(
+            final File xmlFile) throws AbstractCodedException;
+
+    /**
+     * Dispatch a job to one or several task tables &lt;br/&gt;
+     * A generation per task table will be created/update/removed in the
+     * applicative data catalog for this job
+     * 
+     * @param job
+     * @throws AbstractCodedException
+     */
+    public void dispatch(final AppDataJobDto&lt;T&gt; job)
+            throws AbstractCodedException {
+<span class="fc" id="L174">        String productName = job.getProduct().getProductName();</span>
+        try {
+<span class="fc" id="L176">            LOGGER.info(</span>
+                    &quot;[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [START] Dispatching product&quot;,
+                    productName,
+<span class="fc" id="L179">                    getTaskForFunctionalLog());</span>
+
+<span class="fc" id="L181">            List&lt;String&gt; taskTables = getTaskTables(job);</span>
+<span class="fc" id="L182">            List&lt;String&gt; notDealTaskTables = new ArrayList&lt;&gt;(taskTables);</span>
+<span class="fc" id="L183">            List&lt;AppDataJobGenerationDto&gt; jobGens = job.getGenerations();</span>
+
+            // Build the new job generations
+<span class="fc" id="L186">            boolean needUpdate = false;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">            if (CollectionUtils.isEmpty(jobGens)) {</span>
+                // No current generation, add the new ones
+<span class="fc bfc" id="L189" title="All 2 branches covered.">                for (String table : taskTables) {</span>
+<span class="fc" id="L190">                    needUpdate = true;</span>
+<span class="fc" id="L191">                    AppDataJobGenerationDto jobGen =</span>
+                            new AppDataJobGenerationDto();
+<span class="fc" id="L193">                    jobGen.setTaskTable(table);</span>
+<span class="fc" id="L194">                    job.getGenerations().add(jobGen);</span>
+<span class="fc" id="L195">                }</span>
+            } else {
+                // Some generation already exists, update or delete the useless
+                // ones
+<span class="fc" id="L199">                for (Iterator&lt;AppDataJobGenerationDto&gt; iterator =</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">                        jobGens.iterator(); iterator.hasNext();) {</span>
+<span class="fc" id="L201">                    AppDataJobGenerationDto jobGen = iterator.next();</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">                    if (taskTables.contains(jobGen.getTaskTable())) {</span>
+<span class="fc" id="L203">                        notDealTaskTables.remove(jobGen.getTaskTable());</span>
+                    } else {
+<span class="fc" id="L205">                        needUpdate = true;</span>
+<span class="fc" id="L206">                        iterator.remove();</span>
+                    }
+<span class="fc" id="L208">                }</span>
+                // Create the new ones
+<span class="fc bfc" id="L210" title="All 2 branches covered.">                for (String taskTable : notDealTaskTables) {</span>
+<span class="fc" id="L211">                    needUpdate = true;</span>
+<span class="fc" id="L212">                    AppDataJobGenerationDto jobGen =</span>
+                            new AppDataJobGenerationDto();
+<span class="fc" id="L214">                    jobGen.setTaskTable(taskTable);</span>
+<span class="fc" id="L215">                    job.getGenerations().add(jobGen);</span>
+<span class="fc" id="L216">                }</span>
+            }
+
+            // Update task tables
+<span class="fc bfc" id="L220" title="All 2 branches covered.">            if (needUpdate) {</span>
+<span class="fc" id="L221">                job.setState(AppDataJobDtoState.GENERATING);</span>
+<span class="fc" id="L222">                appDataService.patchJob(job.getIdentifier(), job, false, false,</span>
+                        true);
+            }
+
+<span class="fc" id="L226">            LOGGER.info(</span>
+                    &quot;[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [STOP OK] [outputs {}] Product dispatched&quot;,
+                    productName,
+<span class="fc" id="L229">                    getTaskForFunctionalLog(), taskTables);</span>
+
+<span class="fc" id="L231">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L232">            LOGGER.error(</span>
+                    &quot;[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [STOP KO] {} Dispatching product failed &quot;,
+                    productName,
+<span class="fc" id="L235">                    getTaskForFunctionalLog(), ace.getLogMessage());</span>
+<span class="fc" id="L236">            throw ace;</span>
+<span class="fc" id="L237">        }</span>
+<span class="fc" id="L238">    }</span>
+
+    /**
+     * Get task tables to generate for given job
+     */
+    protected abstract List&lt;String&gt; getTaskTables(final AppDataJobDto&lt;T&gt; job)
+            throws AbstractCodedException;
+
+    protected abstract String getTaskForFunctionalLog();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

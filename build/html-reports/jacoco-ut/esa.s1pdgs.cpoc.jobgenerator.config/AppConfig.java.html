@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AppConfig.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.config</a> &gt; <span class="el_source">AppConfig.java</span></div><h1>AppConfig.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.config;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+
+import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
+
+/**
+ * General application configuration
+ * @author Cyrielle Gailliard
+ *
+ */
+@Configuration
+<span class="fc" id="L18">public class AppConfig {</span>
+
+	/**
+	 * XML converter
+	 * @return
+	 */
+	@Bean
+	public XmlConverter xmlConverter() {
+<span class="fc" id="L26">		XmlConverter xmlConverter = new XmlConverter();</span>
+<span class="fc" id="L27">		xmlConverter.setMarshaller(jaxb2Marshaller());</span>
+<span class="fc" id="L28">		xmlConverter.setUnmarshaller(jaxb2Marshaller());</span>
+		
+<span class="fc" id="L30">		return xmlConverter;</span>
+	}
+
+	/**
+	 * JAXb2 marshaller
+	 * @return
+	 */
+	@Bean
+	public Jaxb2Marshaller jaxb2Marshaller() {
+<span class="fc" id="L39">		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();</span>
+<span class="fc" id="L40">		jaxb2Marshaller.setPackagesToScan(&quot;esa.s1pdgs.cpoc.jobgenerator.model&quot;);</span>
+<span class="fc" id="L41">		Map&lt;String, Object&gt; map = new ConcurrentHashMap&lt;String, Object&gt;();</span>
+<span class="fc" id="L42">		map.put(&quot;jaxb.formatted.output&quot;, true);</span>
+<span class="fc" id="L43">		map.put(&quot;jaxb.encoding&quot;, &quot;UTF-8&quot;);</span>
+<span class="fc" id="L44">		jaxb2Marshaller.setMarshallerProperties(map);</span>
+<span class="fc" id="L45">		return jaxb2Marshaller;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

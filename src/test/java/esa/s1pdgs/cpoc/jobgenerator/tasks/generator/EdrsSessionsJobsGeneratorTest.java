@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
-import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.EdrsSessionsJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.generator.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
@@ -65,7 +65,7 @@ public class EdrsSessionsJobsGeneratorTest {
 	private JobGeneratorSettings jobGeneratorSettings;
 
 	@Mock
-	private OutputProcuderFactory JobsSender;
+	private OutputProducerFactory JobsSender;
 	
 	@Mock
 	private AbstractAppCatalogJobService<EdrsSessionDto> appDataService;
@@ -267,7 +267,7 @@ public class EdrsSessionsJobsGeneratorTest {
 			}
 		});
 
-        AppDataJobDto<EdrsSessionDto> appDataJob1 = TestL0Utils.buildAppDataEdrsSession(false, "S2");
+        AppDataJobDto<EdrsSessionDto> appDataJob1 = TestL0Utils.buildAppDataEdrsSession(false, "S2", true, true);
         JobGeneration<EdrsSessionDto> job1 = new JobGeneration<>(appDataJob1, "TaskTable.AIOP.xml");
 		job1.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 		generator.customJobOrder(job1);

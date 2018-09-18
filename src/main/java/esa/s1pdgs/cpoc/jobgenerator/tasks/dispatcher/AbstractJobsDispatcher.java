@@ -136,7 +136,7 @@ public abstract class AbstractJobsDispatcher<T> {
             List<AppDataJobDto<T>> generatingJobs = appDataService
                     .findByPodAndState(processSettings.getHostname(),
                             AppDataJobDtoState.GENERATING);
-            if (CollectionUtils.isEmpty(generatingJobs)) {
+            if (!CollectionUtils.isEmpty(generatingJobs)) {
                 for (AppDataJobDto<T> generation : generatingJobs) {
                     // TODO ask if bypass error
                     dispatch(generation);

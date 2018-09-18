@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -90,7 +91,8 @@ public class TestL0Utils {
         r.setSessionId("L20171109175634707000125");
         r.setStartTime(start1.getTime());
         r.setStopTime(stop1.getTime());
-        r.setRawNames(TestL0Utils.getEdrsSessionFileRawsChannel1(xmlOnlyForRaws));
+        r.setRawNames(
+                TestL0Utils.getEdrsSessionFileRawsChannel1(xmlOnlyForRaws));
         return r;
     }
 
@@ -106,31 +108,48 @@ public class TestL0Utils {
         r.setSessionId("L20171109175634707000125");
         r.setStartTime(start1.getTime());
         r.setStopTime(stop1.getTime());
-        r.setRawNames(TestL0Utils.getEdrsSessionFileRawsChannel2(xmlOnlyForRaws));
+        r.setRawNames(
+                TestL0Utils.getEdrsSessionFileRawsChannel2(xmlOnlyForRaws));
         return r;
     }
 
-    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSession(boolean xmlOnlyForRaws) {
-	    return buildAppDataEdrsSession(xmlOnlyForRaws, "S1");
-	}
+    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSession(
+            boolean xmlOnlyForRaws) {
+        return buildAppDataEdrsSession(xmlOnlyForRaws, "S1", true, true);
+    }
+
+    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSessionWithRaw2(
+            boolean xmlOnlyForRaws) {
+        return buildAppDataEdrsSession(xmlOnlyForRaws, "S1", false, true);
+    }
 
     public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSession(
-            boolean xmlOnlyForRaws, String missionId) {
+            boolean xmlOnlyForRaws, String missionId, boolean raw1,
+            boolean raw2) {
         AppDataJobDto<EdrsSessionDto> ret = new AppDataJobDto<>();
         ret.setIdentifier(123);
         ret.setState(AppDataJobDtoState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);
 
-        GenericMessageDto<EdrsSessionDto> message1 =
-                new GenericMessageDto<EdrsSessionDto>(1, "input-key",
-                        new EdrsSessionDto("obs1", 1,
-                                EdrsSessionFileType.SESSION, missionId, "A"));
-        GenericMessageDto<EdrsSessionDto> message2 =
-                new GenericMessageDto<EdrsSessionDto>(1, "input-key",
-                        new EdrsSessionDto("obs2", 2,
-                                EdrsSessionFileType.SESSION, missionId, "A"));
-        ret.setMessages(Arrays.asList(message1, message2));
+        List<GenericMessageDto<EdrsSessionDto>> messages = new ArrayList<>();
+        if (raw1) {
+            GenericMessageDto<EdrsSessionDto> message1 =
+                    new GenericMessageDto<EdrsSessionDto>(1, "input-key",
+                            new EdrsSessionDto("obs1", 1,
+                                    EdrsSessionFileType.SESSION, missionId,
+                                    "A"));
+            messages.add(message1);
+        }
+        if (raw2) {
+            GenericMessageDto<EdrsSessionDto> message2 =
+                    new GenericMessageDto<EdrsSessionDto>(1, "input-key",
+                            new EdrsSessionDto("obs2", 2,
+                                    EdrsSessionFileType.SESSION, missionId,
+                                    "A"));
+            messages.add(message2);
+        }
+        ret.setMessages(messages);
 
         Calendar start1 = Calendar.getInstance();
         start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
@@ -139,19 +158,23 @@ public class TestL0Utils {
         AppDataJobProductDto product = new AppDataJobProductDto();
         product.setMissionId(missionId);
         product.setProductName("L20171109175634707000125");
-        product.setRaws1(getRawsChannel1(xmlOnlyForRaws));
-        product.setRaws2(getRawsChannel2(xmlOnlyForRaws));
+        if (raw1) {
+            product.setRaws1(getRawsChannel1(xmlOnlyForRaws));
+        }
+        if (raw2) {
+            product.setRaws2(getRawsChannel2(xmlOnlyForRaws));
+        }
         product.setSessionId("L20171109175634707000125");
         product.setSatelliteId("A");
         product.setStartTime(start1.getTime());
         product.setStopTime(stop1.getTime());
         ret.setProduct(product);
-        
+
         AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();
         gen1.setTaskTable("TaskTable.AIOP.xml");
         gen1.setState(AppDataJobGenerationDtoState.INITIAL);
         ret.setGenerations(Arrays.asList(gen1));
-        
+
         return ret;
     }
 
