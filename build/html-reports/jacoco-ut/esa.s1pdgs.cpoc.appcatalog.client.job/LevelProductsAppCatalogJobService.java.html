@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LevelProductsAppCatalogJobService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Applicative data catalog client</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.client.job</a> &gt; <span class="el_source">LevelProductsAppCatalogJobService.java</span></div><h1>LevelProductsAppCatalogJobService.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.client.job;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
+
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+
+/**
+ * Implementation of job applicative data client for LEVEL_PRODUCTS product
+ * category
+ * 
+ * @author Viveris Technologies
+ */
+public class LevelProductsAppCatalogJobService
+        extends AbstractAppCatalogJobService&lt;LevelProductDto&gt; {
+
+    /**
+     * @param restTemplate
+     * @param hostUri
+     * @param maxRetries
+     * @param tempoRetryMs
+     */
+    public LevelProductsAppCatalogJobService(final RestTemplate restTemplate,
+            final String hostUri, final int maxRetries,
+            final int tempoRetryMs) {
+<span class="fc" id="L37">        super(restTemplate, hostUri, maxRetries, tempoRetryMs,</span>
+                ProductCategory.LEVEL_PRODUCTS);
+<span class="fc" id="L39">    }</span>
+
+    /**
+     * @see super{@link #internalExchangeSearch(URI)}
+     */
+    @Override
+    protected ResponseEntity&lt;List&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt;&gt; internalExchangeSearch(
+            final URI uri) {
+<span class="fc" id="L47">        ResponseEntity&lt;List&lt;LevelProductAppDataJobDto&gt;&gt; response =</span>
+<span class="fc" id="L48">                restTemplate.exchange(uri, HttpMethod.GET, null,</span>
+<span class="fc" id="L49">                        new ParameterizedTypeReference&lt;List&lt;LevelProductAppDataJobDto&gt;&gt;() {</span>
+                        });
+<span class="fc" id="L51">        List&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt; body = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L52">        List&lt;LevelProductAppDataJobDto&gt; responseBody = response.getBody();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (!CollectionUtils.isEmpty(responseBody)) {</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            for (LevelProductAppDataJobDto elt : responseBody) {</span>
+<span class="fc" id="L55">                body.add(elt);</span>
+<span class="fc" id="L56">            }</span>
+        }
+<span class="fc" id="L58">        return new ResponseEntity&lt;List&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt;&gt;(body,</span>
+<span class="fc" id="L59">                response.getStatusCode());</span>
+    }
+
+    /**
+     * @see super{@link #internalExchangeNewJob(String, AppDataJobDto)}
+     */
+    @Override
+    protected ResponseEntity&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt; internalExchangeNewJob(
+            final String uri, final AppDataJobDto&lt;LevelProductDto&gt; body) {
+<span class="fc" id="L68">        ResponseEntity&lt;LevelProductAppDataJobDto&gt; response =</span>
+<span class="fc" id="L69">                restTemplate.exchange(uri, HttpMethod.POST,</span>
+                        new HttpEntity&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt;(body),
+                        LevelProductAppDataJobDto.class);
+
+<span class="fc" id="L73">        return new ResponseEntity&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt;(</span>
+<span class="fc" id="L74">                response.getBody(), response.getStatusCode());</span>
+    }
+
+    /**
+     * @see super{@link #internalExchangePatchJob(String, AppDataJobDto)}
+     */
+    @Override
+    protected ResponseEntity&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt; internalExchangePatchJob(
+            final String uri, final AppDataJobDto&lt;LevelProductDto&gt; body) {
+<span class="fc" id="L83">        ResponseEntity&lt;LevelProductAppDataJobDto&gt; response =</span>
+<span class="fc" id="L84">                restTemplate.exchange(uri, HttpMethod.PATCH,</span>
+                        new HttpEntity&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt;(body),
+                        LevelProductAppDataJobDto.class);
+
+<span class="fc" id="L88">        return new ResponseEntity&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt;(</span>
+<span class="fc" id="L89">                response.getBody(), response.getStatusCode());</span>
+    }
+
+    /**
+     * @see super{@link #internalExchangePatchTaskTableOfJob(String, AppDataJobGenerationDto)}
+     */
+    @Override
+    protected ResponseEntity&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt; internalExchangePatchTaskTableOfJob(
+            final String uri, final AppDataJobGenerationDto body) {
+<span class="fc" id="L98">        ResponseEntity&lt;LevelProductAppDataJobDto&gt; response =</span>
+<span class="fc" id="L99">                restTemplate.exchange(uri, HttpMethod.PATCH,</span>
+                        new HttpEntity&lt;AppDataJobGenerationDto&gt;(body),
+                        LevelProductAppDataJobDto.class);
+
+<span class="fc" id="L103">        return new ResponseEntity&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt;(</span>
+<span class="fc" id="L104">                response.getBody(), response.getStatusCode());</span>
+    }
+
+}
+
+/**
+ * @author Viveris Technologies
+ */
+<span class="fc" id="L112">class LevelProductAppDataJobDto extends AppDataJobDto&lt;LevelProductDto&gt; {</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
