@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DevProperties.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Wrapper</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.wrapper.config</a> &gt; <span class="el_source">DevProperties.java</span></div><h1>DevProperties.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.wrapper.config;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * List the properties only used for developments
+ * 
+ * @author Viveris Technologies
+ */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;dev&quot;)
+public class DevProperties {
+
+    /**
+     * Activation of each step of job processing
+     */
+    private Map&lt;String, Boolean&gt; stepsActivation;
+
+    /**
+     * Constructors
+     */
+<span class="fc" id="L28">    public DevProperties() {</span>
+<span class="fc" id="L29">        stepsActivation = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * @return the devStepsActivation
+     */
+    public Map&lt;String, Boolean&gt; getStepsActivation() {
+<span class="fc" id="L36">        return stepsActivation;</span>
+    }
+
+    /**
+     * @param devStepsActivation
+     *            the devStepsActivation to set
+     */
+    public void setStepsActivation(final Map&lt;String, Boolean&gt; stepsActivation) {
+<span class="fc" id="L44">        this.stepsActivation = stepsActivation;</span>
+<span class="fc" id="L45">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JobProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Wrapper</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.wrapper.job</a> &gt; <span class="el_source">JobProcessor.java</span></div><h1>JobProcessor.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.wrapper.job;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
+import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
+import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
+import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
+import esa.s1pdgs.cpoc.wrapper.job.file.OutputProcessor;
+import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
+import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
+import esa.s1pdgs.cpoc.wrapper.status.AppStatus;
+
+/**
+ * Process a jobs
+ * &lt;li&gt;Launch in a thread the processes execution which will wait for being
+ * active once the minimal inputs are download&lt;/li&gt;
+ * &lt;li&gt;Create necessary directories and files, download inputs and inform
+ * process executor when it can start&lt;/li&gt;
+ * &lt;li&gt;Wait for processes execution end&lt;/li&gt;
+ * &lt;li&gt;Process outputs&lt;/li&gt;
+ * 
+ * @author Viveris Technologies
+ */
+@Service
+public class JobProcessor {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L60">    private static final Logger LOGGER =</span>
+<span class="fc" id="L61">            LogManager.getLogger(JobProcessor.class);</span>
+
+    /**
+     * Application status
+     */
+    private final AppStatus appStatus;
+
+    /**
+     * Development properties
+     */
+    private final DevProperties devProperties;
+
+    /**
+     * Application properties
+     */
+    private final ApplicationProperties properties;
+
+    /**
+     * Output processsor
+     */
+    private final OutputProcuderFactory procuderFactory;
+
+    /**
+     * Output processsor
+     */
+    private final ObsService obsService;
+
+    /**
+     * MQI service for reading message
+     */
+    private final GenericMqiService&lt;LevelJobDto&gt; mqiService;
+
+    /**
+     * MQI service for stopping the MQI
+     */
+    private final StatusService mqiStatusService;
+
+    /**
+     * @param job
+     * @param appStatus
+     * @param properties
+     * @param devProperties
+     * @param kafkaContainerId
+     * @param kafkaRegistry
+     * @param obsService
+     * @param procuderFactory
+     * @param outputListFile
+     */
+    @Autowired
+    public JobProcessor(final AppStatus appStatus,
+            final ApplicationProperties properties,
+            final DevProperties devProperties, final ObsService obsService,
+            final OutputProcuderFactory procuderFactory,
+            @Qualifier(&quot;mqiServiceForLevelJobs&quot;) final GenericMqiService&lt;LevelJobDto&gt; mqiService,
+<span class="fc" id="L115">            @Qualifier(&quot;mqiServiceForStatus&quot;) final StatusService mqiStatusService) {</span>
+<span class="fc" id="L116">        this.appStatus = appStatus;</span>
+<span class="fc" id="L117">        this.devProperties = devProperties;</span>
+<span class="fc" id="L118">        this.properties = properties;</span>
+<span class="fc" id="L119">        this.obsService = obsService;</span>
+<span class="fc" id="L120">        this.procuderFactory = procuderFactory;</span>
+<span class="fc" id="L121">        this.mqiService = mqiService;</span>
+<span class="fc" id="L122">        this.mqiStatusService = mqiStatusService;</span>
+<span class="fc" id="L123">    }</span>
+
+    /**
+     * Consume and execute jobs
+     */
+    @Scheduled(fixedDelayString = &quot;${process.fixed-delay-ms}&quot;, initialDelayString = &quot;${process.init-delay-poll-ms}&quot;)
+    public void processJob() {
+
+        // ----------------------------------------------------------
+        // Read Message
+        // ----------------------------------------------------------
+<span class="fc" id="L134">        LOGGER.trace(&quot;[MONITOR] [step 0] Waiting message&quot;);</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (appStatus.isShallBeStopped()) {</span>
+<span class="fc" id="L136">            LOGGER.info(&quot;[MONITOR] [step 0] The wrapper shall be stopped&quot;);</span>
+<span class="fc" id="L137">            this.appStatus.forceStopping();</span>
+<span class="fc" id="L138">            return;</span>
+        }
+<span class="fc" id="L140">        GenericMessageDto&lt;LevelJobDto&gt; message = null;</span>
+        try {
+<span class="fc" id="L142">            message = mqiService.next();</span>
+<span class="fc" id="L143">            this.appStatus.setWaiting();</span>
+<span class="fc" id="L144">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L145">            LOGGER.error(&quot;[MONITOR] [step 0] [code {}] {}&quot;,</span>
+<span class="fc" id="L146">                    ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L147">            message = null;</span>
+<span class="fc" id="L148">            this.appStatus.setError(&quot;NEXT_MESSAGE&quot;);</span>
+<span class="fc" id="L149">        }</span>
+<span class="pc bpc" id="L150" title="1 of 4 branches missed.">        if (message == null || message.getBody() == null) {</span>
+<span class="fc" id="L151">            LOGGER.trace(&quot;[MONITOR] [step 0] No message received: continue&quot;);</span>
+<span class="fc" id="L152">            return;</span>
+        }
+<span class="fc" id="L154">        appStatus.setProcessing(message.getIdentifier());</span>
+<span class="fc" id="L155">        LOGGER.info(&quot;Initializing job processing {}&quot;, message);</span>
+
+        // ----------------------------------------------------------
+        // Initialize processing
+        // ------------------------------------------------------
+<span class="fc" id="L160">        LevelJobDto job = message.getBody();</span>
+<span class="fc" id="L161">        LOGGER.info(&quot;[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [START] Start L0 Job generation&quot;,</span>
+<span class="fc" id="L162">        		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_READ, job), job.getProductIdentifier());</span>
+<span class="fc" id="L163">        File workdir = new File(job.getWorkDirectory());</span>
+        // Remove working directory if exist
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (workdir.exists()) {</span>
+<span class="fc" id="L166">            this.eraseDirectory(job);</span>
+        }
+        // Build output list
+<span class="fc" id="L169">        String outputListFile =</span>
+<span class="fc" id="L170">                job.getWorkDirectory() + workdir.getName() + &quot;.LIST&quot;;</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if (properties.getLevel() == ApplicationLevel.L0) {</span>
+<span class="fc" id="L172">            outputListFile = job.getWorkDirectory() + &quot;AIOProc.LIST&quot;;</span>
+        }
+        // Initialize the pool processor executor
+<span class="fc" id="L175">        PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties,</span>
+<span class="fc" id="L176">                job, getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());</span>
+<span class="fc" id="L177">        ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();</span>
+<span class="fc" id="L178">        ExecutorCompletionService&lt;Boolean&gt; procCompletionSrv =</span>
+                new ExecutorCompletionService&lt;&gt;(procExecutorSrv);
+        // Initialize the input downloader
+<span class="fc" id="L181">        InputDownloader inputDownloader =</span>
+<span class="fc" id="L182">                new InputDownloader(obsService, job.getWorkDirectory(),</span>
+<span class="fc" id="L183">                        job.getInputs(), this.properties.getSizeBatchDownload(),</span>
+<span class="fc" id="L184">                        getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),</span>
+<span class="fc" id="L185">                        procExecutor, this.properties.getLevel());</span>
+        // Initiliaze the output processor
+<span class="fc" id="L187">        OutputProcessor outputProcessor =</span>
+                new OutputProcessor(obsService, procuderFactory, message,
+<span class="fc" id="L189">                        outputListFile, this.properties.getSizeBatchUpload(),</span>
+<span class="fc" id="L190">                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), this.properties.getLevel());</span>
+
+        // ----------------------------------------------------------
+        // Process message
+        // ----------------------------------------------------------
+<span class="fc" id="L195">        processJob(message, inputDownloader, outputProcessor, procExecutorSrv,</span>
+                procCompletionSrv, procExecutor);
+
+<span class="fc" id="L198">        LOGGER.info(&quot;[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [STOP OK] End L0 job generation&quot;,</span>
+<span class="fc" id="L199">        		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_END, job), job.getProductIdentifier());</span>
+
+<span class="fc" id="L201">    }</span>
+
+    /**
+     * Get the prefix for monitor logs according the step for this class
+     * instance
+     * 
+     * @param step
+     * @return
+     */
+    protected String getPrefixMonitorLog(final String step,
+            final LevelJobDto job) {
+<span class="fc" id="L212">        return MonitorLogUtils.getPrefixMonitorLog(step, job);</span>
+    }
+
+    /**
+     * @param job
+     * @param inputDownloader
+     * @param outputProcessor
+     * @param procExecutorSrv
+     * @param procCompletionSrv
+     * @param procExecutor
+     */
+    protected void processJob(final GenericMessageDto&lt;LevelJobDto&gt; message,
+            final InputDownloader inputDownloader,
+            final OutputProcessor outputProcessor,
+            final ExecutorService procExecutorSrv,
+            final ExecutorCompletionService&lt;Boolean&gt; procCompletionSrv,
+            final PoolExecutorCallable procExecutor) {
+<span class="fc" id="L229">        boolean poolProcessing = false;</span>
+<span class="fc" id="L230">        LevelJobDto job = message.getBody();</span>
+<span class="fc" id="L231">        int step = 0;</span>
+<span class="fc" id="L232">        boolean ackOk = false;</span>
+<span class="fc" id="L233">        String errorMessage = &quot;&quot;;</span>
+        try {
+<span class="fc" id="L235">            step = 3;</span>
+<span class="fc" id="L236">            LOGGER.info(&quot;{} Starting process executor&quot;,</span>
+<span class="fc" id="L237">                    getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));</span>
+<span class="fc" id="L238">            procCompletionSrv.submit(procExecutor);</span>
+<span class="fc" id="L239">            poolProcessing = true;</span>
+
+<span class="fc" id="L241">            step = 2;</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">            if (devProperties.getStepsActivation().get(&quot;download&quot;)) {</span>
+<span class="fc" id="L243">                checkThreadInterrupted();</span>
+<span class="fc" id="L244">                LOGGER.info(&quot;{} Preparing local working directory&quot;,</span>
+<span class="fc" id="L245">                        getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));</span>
+<span class="fc" id="L246">                inputDownloader.processInputs();</span>
+            } else {
+<span class="fc" id="L248">                LOGGER.info(&quot;{} Preparing local working directory bypassed&quot;,</span>
+<span class="fc" id="L249">                        getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));</span>
+            }
+
+<span class="fc" id="L252">            step = 3;</span>
+<span class="fc" id="L253">            this.waitForPoolProcessesEnding(procCompletionSrv);</span>
+<span class="fc" id="L254">            poolProcessing = false;</span>
+
+<span class="fc" id="L256">            step = 4;</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">            if (devProperties.getStepsActivation().get(&quot;upload&quot;)) {</span>
+<span class="fc" id="L258">                checkThreadInterrupted();</span>
+<span class="fc" id="L259">                LOGGER.info(&quot;{} Processing l0 outputs&quot;,</span>
+<span class="fc" id="L260">                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));</span>
+<span class="fc" id="L261">                outputProcessor.processOutput();</span>
+            } else {
+<span class="fc" id="L263">                LOGGER.info(&quot;{} Processing l0 outputs bypasssed&quot;,</span>
+<span class="fc" id="L264">                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));</span>
+            }
+<span class="fc" id="L266">            ackOk = true;</span>
+
+<span class="fc" id="L268">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L269">            ackOk = false;</span>
+<span class="fc" id="L270">            errorMessage = String.format(&quot;[REPORT] [s1pdgsTask %sProcessing] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s&quot;,</span>
+<span class="fc" id="L271">            		properties.getLevel(),</span>
+<span class="fc" id="L272">                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,</span>
+<span class="fc" id="L273">                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),</span>
+<span class="fc" id="L274">                    ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="nc" id="L275">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L276">            ackOk = false;</span>
+<span class="nc" id="L277">            errorMessage = String.format(</span>
+                    &quot;[REPORT] %s [step %d] %s [code %d] [s1pdgsTask %sProcessing] [STOP KO] [subTask processing] [msg interrupted exception]&quot;,
+<span class="nc" id="L279">                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,</span>
+<span class="nc" id="L280">                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),</span>
+<span class="nc" id="L281">                    ErrorCode.INTERNAL_ERROR.getCode(),</span>
+<span class="nc" id="L282">                    properties.getLevel());</span>
+        } finally {
+<span class="fc" id="L284">            cleanJobProcessing(job, poolProcessing, procExecutorSrv);</span>
+        }
+
+        // Ack and check if application shall stopped
+<span class="fc" id="L288">        ackProcessing(message, ackOk, errorMessage);</span>
+<span class="fc" id="L289">    }</span>
+
+    /**
+     * Check if thread interrupted
+     * 
+     * @throws InterruptedException
+     */
+    protected void checkThreadInterrupted() throws InterruptedException {
+<span class="pc bpc" id="L297" title="1 of 2 branches missed.">        if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L298">            throw new InterruptedException(&quot;Current thread is interrupted&quot;);</span>
+        }
+<span class="fc" id="L300">    }</span>
+
+    /**
+     * Wait for the processes execution completion
+     * 
+     * @throws InterruptedException
+     * @throws AbstractCodedException
+     */
+    protected void waitForPoolProcessesEnding(
+            final ExecutorCompletionService&lt;Boolean&gt; procCompletionSrv)
+            throws InterruptedException, AbstractCodedException {
+<span class="fc" id="L311">        checkThreadInterrupted();</span>
+        try {
+<span class="fc" id="L313">            procCompletionSrv.take().get(properties.getTmProcAllTasksS(),</span>
+                    TimeUnit.SECONDS);
+<span class="fc" id="L315">        } catch (ExecutionException e) {</span>
+<span class="fc bfc" id="L316" title="All 2 branches covered.">            if (e.getCause() instanceof AbstractCodedException) {</span>
+<span class="fc" id="L317">                throw (AbstractCodedException) e.getCause();</span>
+            } else {
+<span class="fc" id="L319">                throw new InternalErrorException(e.getMessage(), e);</span>
+            }
+<span class="nc" id="L321">        } catch (TimeoutException e) {</span>
+<span class="nc" id="L322">            throw new InternalErrorException(e.getMessage(), e);</span>
+<span class="fc" id="L323">        }</span>
+<span class="fc" id="L324">    }</span>
+
+    /**
+     * @param job
+     * @param poolProcessing
+     * @param procExecutorSrv
+     */
+    protected void cleanJobProcessing(final LevelJobDto job,
+            final boolean poolProcessing,
+            final ExecutorService procExecutorSrv) {
+<span class="fc bfc" id="L334" title="All 2 branches covered.">        if (poolProcessing) {</span>
+<span class="fc" id="L335">            procExecutorSrv.shutdownNow();</span>
+            try {
+<span class="fc" id="L337">                procExecutorSrv.awaitTermination(properties.getTmProcStopS(),</span>
+                        TimeUnit.SECONDS);
+                // TODO send kill if fails
+<span class="nc" id="L340">            } catch (InterruptedException e) {</span>
+                // Conserves the interruption
+<span class="nc" id="L342">                Thread.currentThread().interrupt();</span>
+<span class="fc" id="L343">            }</span>
+        }
+<span class="fc" id="L345">        this.eraseDirectory(job);</span>
+<span class="fc" id="L346">    }</span>
+    
+    private void eraseDirectory(final LevelJobDto job) {
+<span class="fc bfc" id="L349" title="All 2 branches covered.">        if (devProperties.getStepsActivation().get(&quot;erasing&quot;)) {</span>
+            try {
+<span class="fc" id="L351">                LOGGER.info(&quot;{} Erasing local working directory&quot;,</span>
+<span class="fc" id="L352">                        getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));</span>
+<span class="fc" id="L353">                Path p = Paths.get(job.getWorkDirectory());</span>
+<span class="fc" id="L354">                Files.walk(p, FileVisitOption.FOLLOW_LINKS)</span>
+<span class="fc" id="L355">                        .sorted(Comparator.reverseOrder()).map(Path::toFile)</span>
+<span class="fc" id="L356">                        .peek(System.out::println).forEach(File::delete);</span>
+<span class="nc" id="L357">            } catch (IOException e) {</span>
+<span class="nc" id="L358">                LOGGER.error(</span>
+                        &quot;{} [code {}] Failed to erase local working directory&quot;,
+<span class="nc" id="L360">                        getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job),</span>
+<span class="nc" id="L361">                        ErrorCode.INTERNAL_ERROR.getCode());</span>
+<span class="nc" id="L362">                this.appStatus.setError(&quot;PROCESSING&quot;);</span>
+<span class="pc" id="L363">            }</span>
+        } else {
+<span class="fc" id="L365">            LOGGER.info(&quot;{} Erasing local working directory bypassed&quot;,</span>
+<span class="fc" id="L366">                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));</span>
+        }
+<span class="fc" id="L368">    }</span>
+
+    /**
+     * Ack job processing and stop app if needed
+     * @param dto
+     * @param ackOk
+     * @param errorMessage
+     */
+    protected void ackProcessing(final GenericMessageDto&lt;LevelJobDto&gt; dto,
+            final boolean ackOk, final String errorMessage) {
+<span class="fc" id="L378">        boolean stopping = appStatus.getStatus().isStopping();</span>
+
+        // Ack
+<span class="fc bfc" id="L381" title="All 2 branches covered.">        if (ackOk) {</span>
+<span class="fc" id="L382">            ackPositively(stopping, dto);</span>
+        } else {
+<span class="fc" id="L384">            ackNegatively(stopping, dto, errorMessage);</span>
+        }
+
+        // Check status
+<span class="fc" id="L388">        LOGGER.info(&quot;{} Checking status consumer&quot;,</span>
+<span class="fc" id="L389">                getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, dto.getBody()));</span>
+<span class="pc bpc" id="L390" title="1 of 2 branches missed.">        if (appStatus.getStatus().isStopping()) {</span>
+            // TODO send stop to the MQI
+            try {
+<span class="nc" id="L393">                mqiStatusService.stop();</span>
+<span class="nc" id="L394">            } catch (AbstractCodedException ace) {</span>
+<span class="nc" id="L395">                LOGGER.error(&quot;{} {} Checking status consumer&quot;,</span>
+<span class="nc" id="L396">                        getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS,</span>
+<span class="nc" id="L397">                                dto.getBody()),</span>
+<span class="nc" id="L398">                        ace.getLogMessage());</span>
+<span class="nc" id="L399">            }</span>
+<span class="nc" id="L400">            System.exit(0);</span>
+<span class="pc bpc" id="L401" title="1 of 2 branches missed.">        } else if (appStatus.getStatus().isFatalError()) {</span>
+<span class="nc" id="L402">            System.exit(-1);</span>
+        } else {
+<span class="fc" id="L404">            appStatus.setWaiting();</span>
+        }
+<span class="fc" id="L406">    }</span>
+
+    /**
+     * @param dto
+     * @param errorMessage
+     */
+    protected void ackNegatively(final boolean stop,
+            final GenericMessageDto&lt;LevelJobDto&gt; dto,
+            final String errorMessage) {
+<span class="fc" id="L415">        LOGGER.info(&quot;{} Acknowledging negatively&quot;,</span>
+<span class="fc" id="L416">                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));</span>
+<span class="fc" id="L417">        LOGGER.error(errorMessage);</span>
+        try {
+<span class="fc" id="L419">            mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,</span>
+                    errorMessage, stop));
+<span class="fc" id="L421">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L422">            LOGGER.error(&quot;{} [step 5] {} [code {}] {}&quot;,</span>
+<span class="fc" id="L423">                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),</span>
+<span class="fc" id="L424">                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,</span>
+<span class="fc" id="L425">                            dto.getBody()),</span>
+<span class="fc" id="L426">                    ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L427">        }</span>
+<span class="fc" id="L428">        appStatus.setError(&quot;PROCESSING&quot;);</span>
+<span class="fc" id="L429">    }</span>
+
+    protected void ackPositively(final boolean stop,
+            final GenericMessageDto&lt;LevelJobDto&gt; dto) {
+<span class="fc" id="L433">        LOGGER.info(&quot;{} Acknowledging positively&quot;,</span>
+<span class="fc" id="L434">                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));</span>
+        try {
+<span class="fc" id="L436">            mqiService.ack(</span>
+<span class="fc" id="L437">                    new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));</span>
+<span class="fc" id="L438">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L439">            LOGGER.error(&quot;{} [step 5] {} [code {}] {}&quot;,</span>
+<span class="fc" id="L440">                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),</span>
+<span class="fc" id="L441">                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,</span>
+<span class="fc" id="L442">                            dto.getBody()),</span>
+<span class="fc" id="L443">                    ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L444">            appStatus.setError(&quot;PROCESSING&quot;);</span>
+<span class="fc" id="L445">        }</span>
+<span class="fc" id="L446">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

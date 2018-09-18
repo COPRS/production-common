@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OutputProcuderFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Wrapper</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.wrapper.job.mqi</a> &gt; <span class="el_source">OutputProcuderFactory.java</span></div><h1>OutputProcuderFactory.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.wrapper.job.mqi;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.mqi.client.ErrorService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
+import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
+
+/**
+ * Service for publishing in KAFKA topics
+ * 
+ * @author Viveris Technologies
+ */
+@Service
+public class OutputProcuderFactory {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L32">    protected static final Logger LOGGER = LogManager.getLogger(OutputProcuderFactory.class);</span>
+
+    /**
+     * MQI client for LEVEL_PRODUCTS
+     */
+    private final GenericMqiService&lt;LevelProductDto&gt; senderProducts;
+
+    /**
+     * MQI client for LEVEL_REPORTS
+     */
+    private final GenericMqiService&lt;LevelReportDto&gt; senderReports;
+
+    /**
+     * MQI client for errors
+     */
+    private final ErrorService senderErrors;
+
+    /**
+     * Constructor
+     * 
+     * @param senderProducts
+     * @param senderReports
+     */
+    @Autowired
+    public OutputProcuderFactory(
+            @Qualifier(&quot;mqiServiceForLevelProducts&quot;) final GenericMqiService&lt;LevelProductDto&gt; senderProducts,
+            @Qualifier(&quot;mqiServiceForLevelReports&quot;) final GenericMqiService&lt;LevelReportDto&gt; senderReports,
+<span class="fc" id="L59">            @Qualifier(&quot;mqiServiceForErrors&quot;) final ErrorService senderErrors) {</span>
+<span class="fc" id="L60">        this.senderProducts = senderProducts;</span>
+<span class="fc" id="L61">        this.senderReports = senderReports;</span>
+<span class="fc" id="L62">        this.senderErrors = senderErrors;</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * Send an output in right topic according its family
+     * 
+     * @param msg
+     * @throws AbstractCodedException
+     */
+    public void sendOutput(final FileQueueMessage msg,
+            GenericMessageDto&lt;LevelJobDto&gt; inputMessage)
+            throws AbstractCodedException {
+<span class="fc" id="L74">        LevelReportDto dtoReport = new LevelReportDto(msg.getProductName(),</span>
+<span class="fc" id="L75">                FileUtils.readFile(msg.getFile()), msg.getFamily());</span>
+<span class="fc" id="L76">        senderReports.publish(new GenericPublicationMessageDto&lt;LevelReportDto&gt;(</span>
+<span class="fc" id="L77">                inputMessage.getIdentifier(), msg.getFamily(), dtoReport));</span>
+<span class="fc" id="L78">    }</span>
+
+    /**
+     * Send an output in right topic according its family
+     * 
+     * @param msg
+     * @throws AbstractCodedException
+     */
+    public void sendOutput(final ObsQueueMessage msg,
+            GenericMessageDto&lt;LevelJobDto&gt; inputMessage)
+            throws AbstractCodedException {
+<span class="fc" id="L89">        LevelProductDto dtoProduct = new LevelProductDto(msg.getProductName(),</span>
+<span class="fc" id="L90">                msg.getKeyObs(), msg.getFamily());</span>
+<span class="fc" id="L91">        senderProducts</span>
+<span class="fc" id="L92">                .publish(new GenericPublicationMessageDto&lt;LevelProductDto&gt;(</span>
+<span class="fc" id="L93">                        inputMessage.getIdentifier(), msg.getFamily(),</span>
+                        dtoProduct));
+<span class="fc" id="L95">    }</span>
+    
+    /**
+     * Publish a error
+     * @param message
+     */
+    public void sendError(final String message) {
+        try {
+<span class="fc" id="L103">            senderErrors.publish(message);</span>
+<span class="fc" id="L104">        } catch (AbstractCodedException e) {</span>
+<span class="fc" id="L105">            LOGGER.error(e.getLogMessage());</span>
+<span class="fc" id="L106">        }</span>
+<span class="fc" id="L107">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

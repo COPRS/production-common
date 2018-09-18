@@ -3,7 +3,7 @@ spring:
     name: s1pdgs-wrapper-app
     
 logging:
-  config: ${wrapper_logging_config:./test/log4j2-test.yml}
+  config: ${wrapper_logging_config:./build/log4j2-test.yml}
     
 server:
   port: ${wrapper_rest_server_port:8080}

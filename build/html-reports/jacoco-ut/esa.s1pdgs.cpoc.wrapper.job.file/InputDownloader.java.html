@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InputDownloader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Wrapper</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.wrapper.job.file</a> &gt; <span class="el_source">InputDownloader.java</span></div><h1>InputDownloader.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.wrapper.job.file;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
+import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
+import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
+
+/**
+ * Class which create the local working directory and download all the inputs
+ * files
+ * 
+ * @author Viveris Technologies
+ */
+public class InputDownloader {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L32">    private static final Logger LOGGER =</span>
+<span class="fc" id="L33">            LogManager.getLogger(InputDownloader.class);</span>
+
+    /**
+     * Status ongoing
+     */
+    protected static final String STATUS_CREATION = &quot;ONGOING&quot;;
+
+    /**
+     * Status ongoing
+     */
+    protected static final String STATUS_COMPLETION = &quot;COMPLETED&quot;;
+
+    /**
+     * Factory for accessing to the object storage
+     */
+    private final ObsService obsService;
+
+    /**
+     * Path to the local working directory
+     */
+    private final String localWorkingDir;
+
+    /**
+     * List of all the inputs
+     */
+    private final List&lt;LevelJobInputDto&gt; inputs;
+
+    /**
+     * Batch size for downloading inputs from OBS
+     */
+    private final int sizeDownBatch;
+
+    /**
+     * Prefix to concatene to monitor logs
+     */
+    private final String prefixMonitorLogs;
+
+    /**
+     * Executor which executes processes. Shall be informed when all inputs are
+     * download
+     */
+    private final PoolExecutorCallable poolProcExecutor;
+
+    /**
+     * Application level
+     */
+    private final ApplicationLevel appLevel;
+
+    /**
+     * Constructor
+     * 
+     * @param obsService
+     * @param localWorkingDir
+     * @param inputs
+     * @param sizeS3DownloadBatch
+     * @param prefixMonitorLogs
+     * @param poolProcessorExecutor
+     * @param appLevel
+     */
+    public InputDownloader(final ObsService obsService,
+            final String localWorkingDir, final List&lt;LevelJobInputDto&gt; inputs,
+            final int sizeDownBatch, final String prefixMonitorLogs,
+            final PoolExecutorCallable poolProcExecutor,
+<span class="fc" id="L96">            final ApplicationLevel appLevel) {</span>
+<span class="fc" id="L97">        this.obsService = obsService;</span>
+<span class="fc" id="L98">        this.localWorkingDir = localWorkingDir;</span>
+<span class="fc" id="L99">        this.inputs = inputs;</span>
+<span class="fc" id="L100">        this.sizeDownBatch = sizeDownBatch;</span>
+<span class="fc" id="L101">        this.poolProcExecutor = poolProcExecutor;</span>
+<span class="fc" id="L102">        this.appLevel = appLevel;</span>
+<span class="fc" id="L103">        this.prefixMonitorLogs = prefixMonitorLogs;</span>
+<span class="fc" id="L104">    }</span>
+
+    /**
+     * Prepare the working directory by downloading all needed inputs
+     * 
+     * @throws AbstractCodedException
+     */
+    public void processInputs() throws AbstractCodedException {
+
+        // Initialize
+<span class="fc" id="L114">        initializeDownload();</span>
+
+        // Create necessary directories and download input with content in
+        // message
+<span class="fc" id="L118">        List&lt;S3DownloadFile&gt; downloadToBatch = sortInputs();</span>
+
+        // Download input from object storage in batch
+<span class="fc" id="L121">        downloadInputs(downloadToBatch);</span>
+
+        // Complete download
+<span class="fc" id="L124">        completeDownload();</span>
+<span class="fc" id="L125">    }</span>
+
+    /**
+     * Create the working directory and the status file
+     * 
+     * @throws InternalErrorException
+     */
+    private void initializeDownload() throws InternalErrorException {
+<span class="fc" id="L133">        LOGGER.info(&quot;{} 1 - Creating working directory&quot;, prefixMonitorLogs);</span>
+<span class="fc" id="L134">        File workingDir = new File(localWorkingDir);</span>
+<span class="fc" id="L135">        workingDir.mkdirs();</span>
+
+<span class="fc" id="L137">        LOGGER.info(&quot;{} 2 - Creating status.txt file with ONGOING&quot;,</span>
+                prefixMonitorLogs);
+<span class="fc" id="L139">        this.writeStatusFile(STATUS_CREATION);</span>
+<span class="fc" id="L140">    }</span>
+
+    /**
+     * Update the status file with status COMPLETED and inform process executor
+     * its finished
+     * 
+     * @throws InternalErrorException
+     */
+    protected void completeDownload() throws InternalErrorException {
+<span class="fc" id="L149">        LOGGER.info(&quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [STOP OK] 5 - Updating status.txt file with COMPLETED&quot;,</span>
+                prefixMonitorLogs, this.appLevel);
+<span class="fc" id="L151">        this.writeStatusFile(STATUS_COMPLETION);</span>
+<span class="fc" id="L152">        poolProcExecutor.setActive(true);</span>
+<span class="fc" id="L153">    }</span>
+
+    /**
+     * Write in status file
+     * 
+     * @param status
+     * @throws InternalErrorException
+     */
+    private void writeStatusFile(final String status)
+            throws InternalErrorException {
+<span class="fc" id="L163">        FileUtils.writeFile(localWorkingDir + &quot;Status.txt&quot;, status);</span>
+<span class="fc" id="L164">    }</span>
+
+    /**
+     * Sort inputs: - if JOB =&gt; create the file - if RAW / CONFIG / L0_PRODUCT /
+     * L0_ACN =&gt; convert into S3DownloadFile - if BLANK =&gt; ignore - else =&gt;
+     * throw exception
+     * 
+     * @return
+     * @throws InternalErrorException
+     * @throws UnknownFamilyException
+     */
+    protected List&lt;S3DownloadFile&gt; sortInputs()
+            throws InternalErrorException, UnknownFamilyException {
+<span class="fc" id="L177">        LOGGER.info(&quot;{} 3 - Starting organizing inputs&quot;, prefixMonitorLogs);</span>
+
+<span class="fc" id="L179">        List&lt;S3DownloadFile&gt; downloadToBatch = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L181" title="All 2 branches covered.">        for (LevelJobInputDto input : inputs) {</span>
+            // Check if a directory shall be created
+<span class="fc" id="L183">            File parent = (new File(input.getLocalPath())).getParentFile();</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">            if (!parent.exists()) {</span>
+<span class="fc" id="L185">                parent.mkdirs();</span>
+            }
+            // Upload input if in message else wait to list all input and
+            // download them from
+            // object storage per batch
+<span class="fc bfc" id="L190" title="All 4 branches covered.">            switch (input.getFamily()) {</span>
+                case &quot;JOB_ORDER&quot;:
+<span class="fc" id="L192">                    LOGGER.info(&quot;Job order will be stored in {}&quot;,</span>
+<span class="fc" id="L193">                            input.getLocalPath());</span>
+<span class="fc" id="L194">                    FileUtils.writeFile(input.getLocalPath(),</span>
+<span class="fc" id="L195">                            input.getContentRef());</span>
+<span class="fc" id="L196">                    break;</span>
+                case &quot;EDRS_SESSION&quot;:
+                case &quot;AUXILIARY_FILE&quot;:
+                case &quot;L0_PRODUCT&quot;:
+                case &quot;L0_ACN&quot;:
+<span class="fc" id="L201">                    LOGGER.info(&quot;Input {}-{} will be stored in {}&quot;,</span>
+<span class="fc" id="L202">                            input.getFamily(), input.getContentRef(),</span>
+<span class="fc" id="L203">                            input.getLocalPath());</span>
+<span class="fc" id="L204">                    downloadToBatch.add(new S3DownloadFile(</span>
+<span class="fc" id="L205">                            ProductFamily.fromValue(input.getFamily()),</span>
+<span class="fc" id="L206">                            input.getContentRef(),</span>
+<span class="fc" id="L207">                            (new File(input.getLocalPath()).getParent())));</span>
+<span class="fc" id="L208">                    break;</span>
+                case &quot;BLANK&quot;:
+<span class="fc" id="L210">                    LOGGER.info(&quot;Input {} will be ignored&quot;,</span>
+<span class="fc" id="L211">                            input.getContentRef());</span>
+<span class="fc" id="L212">                    break;</span>
+                default:
+<span class="fc" id="L214">                    throw new UnknownFamilyException(</span>
+                            &quot;Family not managed in input downloader &quot;,
+<span class="fc" id="L216">                            input.getFamily());</span>
+            }
+
+<span class="fc" id="L219">        }</span>
+<span class="fc" id="L220">        return downloadToBatch;</span>
+    }
+
+    /**
+     * Download input from OBS per batch. If we have download 2 raw, the
+     * processor executor can start launch proceses
+     * 
+     * @param downloadToBatch
+     * @throws AbstractCodedException
+     */
+    protected void downloadInputs(final List&lt;S3DownloadFile&gt; downloadToBatch)
+            throws AbstractCodedException {
+<span class="fc" id="L232">        double size = Double.valueOf(downloadToBatch.size());</span>
+<span class="fc" id="L233">        String listinputs=&quot;&quot;;</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">        for (int i = 0; i &lt; size; i++) {</span>
+<span class="fc" id="L235">        	listinputs =  listinputs + &quot; &quot; + downloadToBatch.get(i).getKey();</span>
+        }
+<span class="fc" id="L237">        LOGGER.info(&quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [START] 4 - Starting downloading inputs from object storage [inputs {}]&quot;,</span>
+                prefixMonitorLogs, this.appLevel, listinputs);
+<span class="fc" id="L239">        double nbPool = Math.ceil(size / sizeDownBatch);</span>
+<span class="fc" id="L240">        int nbUploadedRaw = 0;</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        for (int i = 0; i &lt; nbPool; i++) {</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L243">                throw new InternalErrorException(</span>
+                        &quot;The current thread as been interrupted&quot;);
+            } else {
+<span class="fc" id="L246">                LOGGER.info(&quot;{} 4 - Starting downloading batch {}&quot;,</span>
+<span class="fc" id="L247">                        prefixMonitorLogs, i);</span>
+<span class="fc" id="L248">                int lastIndex = Math.min((i + 1) * sizeDownBatch,</span>
+<span class="fc" id="L249">                        downloadToBatch.size());</span>
+<span class="fc" id="L250">                List&lt;S3DownloadFile&gt; subListS3 =</span>
+<span class="fc" id="L251">                        downloadToBatch.subList(i * sizeDownBatch, lastIndex);</span>
+<span class="fc" id="L252">                this.obsService.downloadFilesPerBatch(subListS3);</span>
+<span class="fc bfc" id="L253" title="All 4 branches covered.">                if (appLevel == ApplicationLevel.L0 &amp;&amp; nbUploadedRaw &lt; 2) {</span>
+<span class="fc" id="L254">                    nbUploadedRaw += subListS3.stream().filter(</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">                            file -&gt; file.getFamily() == ProductFamily.EDRS_SESSION)</span>
+<span class="fc" id="L256">                            .count();</span>
+<span class="pc bpc" id="L257" title="1 of 2 branches missed.">                    if (nbUploadedRaw &gt;= 2) {</span>
+                        // On suppose l'ordre de traitement des input:
+                        // les 2 preemiers RAW sont le raw1
+                        // du channel 1 et le raw 1 du channel 2
+<span class="fc" id="L261">                        LOGGER.info(&quot;{} 4 - Setting process executor as active&quot;,</span>
+                                prefixMonitorLogs);
+<span class="fc" id="L263">                        poolProcExecutor.setActive(true);</span>
+                    }
+
+                }
+            }
+        }
+<span class="fc" id="L269">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

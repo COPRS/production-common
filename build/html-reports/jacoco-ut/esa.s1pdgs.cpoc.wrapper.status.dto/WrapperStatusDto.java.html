@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WrapperStatusDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Wrapper</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.wrapper.status.dto</a> &gt; <span class="el_source">WrapperStatusDto.java</span></div><h1>WrapperStatusDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.wrapper.status.dto;
+
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.AppState;
+
+/**
+ * @author Viveris Technologies
+ */
+public class WrapperStatusDto {
+
+    /**
+     * Status
+     */
+    private AppState status;
+
+    /**
+     * Number of milliseconds passed for the last modification
+     */
+    private long timeSinceLastChange;
+
+    /**
+     * Number of error for the last modification of status
+     */
+    private int errorCounter;
+    
+    /**
+     * Constrcutor
+     */
+<span class="fc" id="L30">    public WrapperStatusDto() {</span>
+<span class="fc" id="L31">        timeSinceLastChange = 0;</span>
+<span class="fc" id="L32">        errorCounter = 0;</span>
+<span class="fc" id="L33">    }</span>
+
+    /**
+     * @param state
+     * @param lastChange
+     * @param errorCounter
+     */
+    public WrapperStatusDto(final AppState state, final long timeLastChange,
+            final int errorCounter) {
+<span class="fc" id="L42">        super();</span>
+<span class="fc" id="L43">        this.status = state;</span>
+<span class="fc" id="L44">        this.timeSinceLastChange = timeLastChange;</span>
+<span class="fc" id="L45">        this.errorCounter = errorCounter;</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * @return the status
+     */
+    public AppState getStatus() {
+<span class="fc" id="L52">        return status;</span>
+    }
+
+    /**
+     * @param status
+     *            the status to set
+     */
+    public void setStatus(final AppState status) {
+<span class="fc" id="L60">        this.status = status;</span>
+<span class="fc" id="L61">    }</span>
+
+    /**
+     * @return the timeSinceLastChange
+     */
+    public long getTimeSinceLastChange() {
+<span class="fc" id="L67">        return timeSinceLastChange;</span>
+    }
+
+    /**
+     * @param timeLastChange
+     *            the timeLastChange to set
+     */
+    public void setTimeSinceLastChange(final long timeLastChange) {
+<span class="fc" id="L75">        this.timeSinceLastChange = timeLastChange;</span>
+<span class="fc" id="L76">    }</span>
+
+    /**
+     * @return the errorCounter
+     */
+    public int getErrorCounter() {
+<span class="fc" id="L82">        return errorCounter;</span>
+    }
+
+    /**
+     * @param errorCounter
+     *            the errorCounter to set
+     */
+    public void setErrorCounter(final int errorCounter) {
+<span class="fc" id="L90">        this.errorCounter = errorCounter;</span>
+<span class="fc" id="L91">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L98">        return String.format(</span>
+                &quot;{status: %s, timeSinceLastChange: %d, errorCounter: %d}&quot;,
+<span class="fc" id="L100">                status, timeSinceLastChange, errorCounter);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L108">        return Objects.hash(status, timeSinceLastChange, errorCounter);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L118">            ret = true;</span>
+<span class="fc bfc" id="L119" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L120">            ret = false;</span>
+        } else {
+<span class="fc" id="L122">            WrapperStatusDto other = (WrapperStatusDto) obj;</span>
+            // field comparison
+<span class="fc bfc" id="L124" title="All 6 branches covered.">            ret = Objects.equals(status, other.status)</span>
+                    &amp;&amp; timeSinceLastChange == other.timeSinceLastChange
+                    &amp;&amp; errorCounter == other.errorCounter;
+        }
+<span class="fc" id="L128">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

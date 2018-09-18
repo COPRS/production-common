@@ -213,6 +213,7 @@ public class AppStatus {
             if (!isStopping() && !isFatalError()) {
                 state = AppState.WAITING;
                 dateLastChangeMs = System.currentTimeMillis();
+                errorCounterNextMessage = 0;
             }
         }
 

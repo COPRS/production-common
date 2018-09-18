@@ -1,38 +1,38 @@
 spring:
   application:
-    name: s1pdgs-wrapper-app
+    name: s1pdgs-l1-wrapper-app 
     
 logging:
-  config: ${wrapper_logging_config:log4j2.yml}
+  config: log4j2.yml
     
 # REST controller
 server:
-  port: ${wrapper_rest_server_port:8080}
+  port: 8080                              # port used for publishing REST API around wrapper status
     
 process:
-  level: ${wrapper_process_level}
-  fixed-delay-ms: ${wrapper_process_fixed-delay:500}
-  init-delay-poll-ms: ${wrapper_process_poll-ms:1000}
-  tm-proc-one-task-s: ${wrapper_process_timeout-process-one-task-s:600}
-  tm-proc-all-tasks-s: ${wrapper_process_timeout-process-all-tasks-s:1800}
-  tm-proc-stop-s: ${wrapper_process_timeout-process-stop-s:300}
-  tm-proc-check-stop-s: ${wrapper_process_timeout-process-check-stop-s:60}
-  size-batch-upload:  ${wrapper_process_size-batch-s3-upload:10}
-  size-batch-download: ${wrapper_process_size-batch-s3-download:10}
-  wap-nb-max-loop: ${wrapper_process_wait-active-process-nb-max-loop:12}
-  wap-tempo-s: ${wrapper_process_wait-active-process-tempo-s:10}
+  level: L0                               # application level (L0/L1)
+  fixed-delay-ms: 500                     # (fixed delay) period in milliseconds between 2 polls of next message
+  init-delay-poll-ms: 1000                # the initial delay to apply before consuming messages
+  tm-proc-one-task-s: 600                 # Timeout in second for stopping task of pool's task execution
+  tm-proc-all-tasks-s: 1800               # Timeout in second for stopping task of pool execution
+  tm-proc-stop-s: 300                     # Timeout in second for stopping task of pool execution
+  tm-proc-check-stop-s: 60                # Timeout in second for stopping the task of waiting for required inputs before starting processing
+  size-batch-upload:  10            # !!!!! the size of the batch used for uploading outputs
+  size-batch-download: 10           # !!!!! the size of the batch used for downloading inputs
+  wap-nb-max-loop: 12                     # the maximal number of loop when waiting for required inputs before starting processing
+  wap-tempo-s: 10                         # the temporisation (in second) applied between 2 loops when waiting for required inputs before starting processing
   mqi:
-    host-uri: ${wrapper_process_mqi_host-uri:http://localhost:8081}
-    max-retries: ${wrapper_process_mqi_max-retries:3}
-    tempo-retry-ms: ${wrapper_process_mqi_tempo-retry:1000}
+    host-uri: http://localhost:8081       # the host and port for querying MQI server
+    max-retries: 3                        # the maximal number of consecutive retries following a MQI request error 
+    tempo-retry-ms: 1000                  #
 
 status:
-  delete-fixed-delay-ms: ${wrapper_status_delete-fixed-delay-ms:3000}
-  max-error-counter-processing: ${wrapper_status_max-error-counter-processing:3}
-  max-error-counter-mqi: ${wrapper_status_max-error-counter-mqi:30}
+  delete-fixed-delay-ms: 3000             # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
+  max-error-counter-processing: 3         # the number of consecutive processing errors leading to the state FATALERROR
+  max-error-counter-mqi: 30               # the number of consecutive MQI errors leading to the state FATALERROR
 
 dev:
   steps-activation:
-    download: ${wrapper_process_dev-steps-activation_download:true}
-    upload: ${wrapper_process_dev-steps-activation_upload:true}
-    erasing: ${wrapper_process_dev-steps-activation_erasing:true}
+    download: true                        # if false, the wrapper ignores the step around input downloading
+    upload: true                          # if false, the wrapper ignores the step around outputs processing
+    erasing: true                         # if false, the wrapper ignores the step around working directory cleaning

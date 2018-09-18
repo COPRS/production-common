@@ -1,0 +1,29 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper,Application,0,8,0,0,0,3,0,2,0,2
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.obs,ObsService,0,213,1,14,0,61,1,18,0,9
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.obs,ObsService.new Object() {...},6,41,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.obs,ObsConfig,0,5,0,0,0,2,0,2,0,2
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job,MonitorLogUtils,3,172,0,11,1,33,1,11,1,1
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job,JobProcessor,93,619,6,22,26,160,6,20,0,12
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.process,TaskResult,8,85,0,10,4,16,2,11,2,6
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.process,TaskCallable,0,146,0,2,0,33,0,4,0,3
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.process,PoolExecutorCallable,8,181,3,13,2,42,3,11,0,6
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.process,StreamGobbler,0,22,0,0,0,7,0,2,0,2
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.process,PoolProcessor,39,194,5,13,7,49,5,10,0,6
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.mqi,MqiConfiguration,0,82,0,0,0,15,0,6,0,6
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.mqi,OutputProcuderFactory,0,72,0,0,0,22,0,5,0,5
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.obs,S3CustomObject,0,96,0,10,0,17,0,12,0,7
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.obs,S3DownloadFile,0,80,0,10,0,16,0,10,0,5
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.obs,S3UploadFile,0,80,0,10,0,15,0,10,0,5
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status.dto,WrapperStatusDto,0,127,0,12,0,28,0,17,0,11
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.mqi,ObsQueueMessage,0,80,0,10,0,15,0,10,0,5
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.mqi,FileQueueMessage,0,80,0,10,0,16,0,10,0,5
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.model.mqi,QueueMessage,0,96,0,10,0,17,0,12,0,7
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.config,ApplicationProperties,0,66,0,0,0,29,0,19,0,19
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.config,DevProperties,0,15,0,0,0,6,0,3,0,3
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,WrapperRestController,0,87,0,6,0,25,0,8,0,5
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,AppStatus.WrapperStatus,2,167,2,24,1,47,2,27,0,16
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,AppStatus,11,90,2,6,5,31,2,13,0,11
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,InputDownloader,5,313,2,20,1,79,2,19,0,9
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor,42,519,4,36,8,118,4,28,0,11
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor.new Object() {...},7,47,0,0,0,1,0,1,0,1
