@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>S3ObsServices.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Object storage client</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.obs_sdk.s3</a> &gt; <span class="el_source">S3ObsServices.java</span></div><h1>S3ObsServices.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.obs_sdk.s3;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.util.CollectionUtils;
+
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+
+/**
+ * Provides services to manage objects in the object storage wia the AmazonS3
+ * APIs
+ * 
+ * @author Viveris Technologies
+ */
+public class S3ObsServices {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L29">    private static final Log LOGGER = LogFactory.getLog(S3ObsServices.class);</span>
+
+    /**
+     * Amazon S3 client
+     */
+    protected final AmazonS3 s3client;
+    
+    /**
+     * Nomber of retry for client error
+     */
+    private final int nbRetry;
+    
+    /**
+     * Delay before retriing
+     */
+    private final int retryDelay;
+
+    /**
+     * @param s3client
+     */
+    public S3ObsServices(final AmazonS3 s3client,
+            final int nbRetry,
+<span class="fc" id="L51">            final int retryDelay) {</span>
+<span class="fc" id="L52">        this.s3client = s3client;</span>
+<span class="fc" id="L53">        this.nbRetry = nbRetry;</span>
+<span class="fc" id="L54">        this.retryDelay = retryDelay;</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Internal function to log messages
+     * 
+     * @param message
+     */
+    private void log(final String message) {
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (LOGGER.isDebugEnabled()) {</span>
+<span class="nc" id="L64">            LOGGER.debug(message);</span>
+        }
+<span class="fc" id="L66">    }</span>
+
+    /**
+     * Check if object with such key in bucket exists
+     * 
+     * @param bucketName
+     * @param keyName
+     * @return
+     * @throws SdkClientException
+     */
+    public boolean exist(final String bucketName, final String keyName)
+            throws S3ObsServiceException, S3SdkClientException {
+<span class="fc" id="L78">        for(int nbretry = 1;;nbretry++) {</span>
+            try {
+<span class="fc" id="L80">                return s3client.doesObjectExist(bucketName, keyName);</span>
+<span class="fc" id="L81">            } catch (com.amazonaws.AmazonServiceException ase) {</span>
+<span class="fc" id="L82">                throw new S3ObsServiceException(bucketName, keyName,</span>
+<span class="fc" id="L83">                        String.format(&quot;Checking object existance fails: %s&quot;,</span>
+<span class="fc" id="L84">                                ase.getMessage()),</span>
+                        ase);
+<span class="fc" id="L86">            } catch (com.amazonaws.SdkClientException sce) {</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                if(nbretry &lt;= nbRetry) {</span>
+<span class="fc" id="L88">                    LOGGER.warn(String.format(&quot;Checking object existance %s failed: Attempt : %d / %d&quot;, keyName, nbretry, nbRetry));</span>
+                    try {
+<span class="fc" id="L90">                        Thread.sleep(retryDelay);</span>
+<span class="nc" id="L91">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L92">                        throw new S3SdkClientException(bucketName, keyName,</span>
+<span class="nc" id="L93">                                String.format(&quot;Checking object existance fails: %s&quot;,</span>
+<span class="nc" id="L94">                                        sce.getMessage()),</span>
+                                sce);
+<span class="fc" id="L96">                    }</span>
+<span class="fc" id="L97">                    continue;</span>
+                } else {
+<span class="fc" id="L99">                    throw new S3SdkClientException(bucketName, keyName,</span>
+<span class="fc" id="L100">                            String.format(&quot;Checking object existance fails: %s&quot;,</span>
+<span class="fc" id="L101">                                    sce.getMessage()),</span>
+                            sce);
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the number of objects in the bucket whose key matches with prefix
+     * 
+     * @param bucketName
+     * @param prefixKey
+     * @return
+     * @throws SdkClientException
+     */
+    public int getNbObjects(final String bucketName, final String prefixKey)
+            throws S3ObsServiceException, S3SdkClientException {
+        int nbObj;
+<span class="fc" id="L119">        for(int nbretry = 1;;nbretry++) {</span>
+<span class="fc" id="L120">            nbObj = 0;</span>
+            try {
+<span class="fc" id="L122">                ObjectListing objectListing =</span>
+<span class="fc" id="L123">                        s3client.listObjects(bucketName, prefixKey);</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">                if (objectListing != null &amp;&amp; !CollectionUtils</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">                        .isEmpty(objectListing.getObjectSummaries())) {</span>
+<span class="fc" id="L126">                    nbObj = objectListing.getObjectSummaries().size();</span>
+                }
+<span class="fc" id="L128">                return nbObj;</span>
+<span class="fc" id="L129">            } catch (com.amazonaws.AmazonServiceException ase) {</span>
+<span class="fc" id="L130">                throw new S3ObsServiceException(bucketName, prefixKey,</span>
+<span class="fc" id="L131">                        String.format(&quot;Getting number of objects fails: %s&quot;,</span>
+<span class="fc" id="L132">                                ase.getMessage()),</span>
+                        ase);
+<span class="fc" id="L134">            } catch (com.amazonaws.SdkClientException sce) {</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">                if(nbretry &lt;= nbRetry) {</span>
+<span class="fc" id="L136">                    LOGGER.warn(String.format(&quot;Getting number of objects %s failed: Attempt : %d / %d&quot;, prefixKey, nbretry, nbRetry));</span>
+                    try {
+<span class="fc" id="L138">                        Thread.sleep(retryDelay);</span>
+<span class="nc" id="L139">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L140">                        throw new S3SdkClientException(bucketName, prefixKey,</span>
+<span class="nc" id="L141">                                String.format(&quot;Getting number of objects fails: %s&quot;,</span>
+<span class="nc" id="L142">                                        sce.getMessage()),</span>
+                                sce);
+<span class="fc" id="L144">                    }</span>
+<span class="fc" id="L145">                    continue;</span>
+                } else {
+<span class="fc" id="L147">                    throw new S3SdkClientException(bucketName, prefixKey,</span>
+<span class="fc" id="L148">                            String.format(&quot;Getting number of objects fails: %s&quot;,</span>
+<span class="fc" id="L149">                                    sce.getMessage()),</span>
+                            sce);
+                }
+            }
+        }
+    }
+
+    /**
+     * Download objects of the given bucket with a key matching the prefix
+     * 
+     * @param bucketName
+     * @param prefixKey
+     * @param directoryPath
+     * @return the number of download objects
+     * @throws SdkClientException
+     * @throws ObsServiceException
+     */
+    public int downloadObjectsWithPrefix(final String bucketName,
+            final String prefixKey, final String directoryPath,
+            final boolean ignoreFolders)
+            throws S3ObsServiceException, S3SdkClientException {
+        int nbObj;
+<span class="fc" id="L171">        log(String.format(</span>
+                &quot;Downloading objects with prefix %s from bucket %s in %s&quot;,
+                prefixKey, bucketName, directoryPath));
+
+<span class="fc" id="L175">        for(int nbretry = 1;;nbretry++) {</span>
+<span class="fc" id="L176">            nbObj = 0;</span>
+            // List all objects with given prefix
+            try {
+<span class="fc" id="L179">                ObjectListing objectListing =</span>
+<span class="fc" id="L180">                        s3client.listObjects(bucketName, prefixKey);</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">                if (objectListing != null &amp;&amp; !CollectionUtils</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">                        .isEmpty(objectListing.getObjectSummaries())) {</span>
+                    // Download each object
+<span class="fc bfc" id="L184" title="All 2 branches covered.">                    for (S3ObjectSummary objectSummary : objectListing</span>
+<span class="fc" id="L185">                            .getObjectSummaries()) {</span>
+                        // Build temporarly filename
+<span class="fc" id="L187">                        String key = objectSummary.getKey();</span>
+<span class="fc" id="L188">                        String targetDir = directoryPath;</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">                        if (!targetDir.endsWith(File.separator)) {</span>
+<span class="fc" id="L190">                            targetDir += File.separator;</span>
+                        }
+<span class="fc" id="L192">                        String localFilePath = targetDir + key;</span>
+                        // Download object
+<span class="fc" id="L194">                        log(String.format(</span>
+                                &quot;Downloading object %s from bucket %s in %s&quot;, key,
+                                bucketName, localFilePath));
+<span class="fc" id="L197">                        File localFile = new File(localFilePath);</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">                        if (localFile.getParentFile() != null) {</span>
+<span class="fc" id="L199">                            localFile.getParentFile().mkdirs();</span>
+                        }
+                        try {
+<span class="fc" id="L202">                            localFile.createNewFile();</span>
+<span class="nc" id="L203">                        } catch (IOException ioe) {</span>
+<span class="nc" id="L204">                            throw new S3ObsServiceException(bucketName, key,</span>
+                                    &quot;Directory creation fails for &quot; + localFilePath,
+                                    ioe);
+<span class="fc" id="L207">                        }</span>
+<span class="fc" id="L208">                        s3client.getObject(new GetObjectRequest(bucketName, key),</span>
+                                localFile);
+                        // If needed move in the target directory
+<span class="fc bfc" id="L211" title="All 2 branches covered.">                        if (ignoreFolders) {</span>
+<span class="fc" id="L212">                            String filename = key;</span>
+<span class="fc" id="L213">                            int lastIndex = key.lastIndexOf('/');</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">                            if (lastIndex != -1) {</span>
+<span class="fc" id="L215">                                filename = key.substring(lastIndex + 1);</span>
+                            }
+<span class="fc bfc" id="L217" title="All 2 branches covered.">                            if (!key.equals(filename)) {</span>
+<span class="fc" id="L218">                                File fTo = new File(targetDir + filename);</span>
+<span class="fc" id="L219">                                localFile.renameTo(fTo);</span>
+                            }
+                        }
+<span class="fc" id="L222">                        nbObj++;</span>
+<span class="fc" id="L223">                    }</span>
+                }
+    
+<span class="fc" id="L226">                log(String.format(</span>
+                        &quot;Download %d objects with prefix %s from bucket %s in %s succeeded&quot;,
+<span class="fc" id="L228">                        nbObj, prefixKey, bucketName, directoryPath));</span>
+<span class="fc" id="L229">                return nbObj;</span>
+<span class="fc" id="L230">            } catch (com.amazonaws.AmazonServiceException ase) {</span>
+<span class="fc" id="L231">                throw new S3ObsServiceException(bucketName, prefixKey,</span>
+<span class="fc" id="L232">                        String.format(&quot;Download in %s fails: %s&quot;, directoryPath,</span>
+<span class="fc" id="L233">                                ase.getMessage()),</span>
+                        ase);
+<span class="fc" id="L235">            } catch (com.amazonaws.SdkClientException ase) {</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">                if(nbretry &lt;= nbRetry) {</span>
+<span class="fc" id="L237">                    LOGGER.warn(String.format(&quot;Download objects with prefix %s from bucket %s failed: Attempt : %d / %d&quot;, prefixKey, bucketName, nbretry, nbRetry));</span>
+                    try {
+<span class="fc" id="L239">                        Thread.sleep(retryDelay);</span>
+<span class="nc" id="L240">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L241">                        throw new S3SdkClientException(bucketName, prefixKey,</span>
+<span class="nc" id="L242">                                String.format(&quot;Download in %s fails: %s&quot;, directoryPath,</span>
+<span class="nc" id="L243">                                        ase.getMessage()),</span>
+                                ase);
+<span class="fc" id="L245">                    }</span>
+<span class="fc" id="L246">                    continue;</span>
+                } else {
+<span class="fc" id="L248">                    throw new S3SdkClientException(bucketName, prefixKey,</span>
+<span class="fc" id="L249">                            String.format(&quot;Download in %s fails: %s&quot;, directoryPath,</span>
+<span class="fc" id="L250">                                    ase.getMessage()),</span>
+                            ase);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param bucketName
+     * @param keyName
+     * @param uploadFile
+     * @throws S3SdkClientException
+     */
+    public void uploadFile(final String bucketName, final String keyName,
+            final File uploadFile)
+            throws S3ObsServiceException, S3SdkClientException {
+<span class="fc" id="L266">        for(int nbretry=1;;nbretry++) {</span>
+            try {
+<span class="fc" id="L268">                log(String.format(&quot;Uploading object %s in bucket %s&quot;, keyName,</span>
+                        bucketName));
+    
+<span class="fc" id="L271">                s3client.putObject(bucketName, keyName, uploadFile);</span>
+<span class="fc" id="L272">                log(String.format(&quot;Upload object %s in bucket %s succeeded&quot;,</span>
+                        keyName, bucketName));
+<span class="fc" id="L274">                break;</span>
+<span class="fc" id="L275">            } catch (com.amazonaws.AmazonServiceException ase) {</span>
+<span class="fc" id="L276">                throw new S3ObsServiceException(bucketName, keyName,</span>
+<span class="fc" id="L277">                        String.format(&quot;Upload fails: %s&quot;, ase.getMessage()), ase);</span>
+<span class="fc" id="L278">            } catch (com.amazonaws.SdkClientException sce) {</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">                if(nbretry &lt;= nbRetry) {</span>
+<span class="fc" id="L280">                    LOGGER.warn(String.format(&quot;Upload object %s from bucket %s failed: Attempt : %d / %d&quot;, keyName, bucketName, nbretry, nbRetry));</span>
+                    try {
+<span class="fc" id="L282">                        Thread.sleep(retryDelay);</span>
+<span class="nc" id="L283">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L284">                        throw new S3SdkClientException(bucketName, keyName,</span>
+<span class="nc" id="L285">                                String.format(&quot;Upload fails: %s&quot;, sce.getMessage()), sce);</span>
+<span class="fc" id="L286">                    }</span>
+<span class="fc" id="L287">                    continue;</span>
+                } else {
+<span class="fc" id="L289">                    throw new S3SdkClientException(bucketName, keyName,</span>
+<span class="fc" id="L290">                            String.format(&quot;Upload fails: %s&quot;, sce.getMessage()), sce);</span>
+                }
+            }
+        }
+<span class="fc" id="L294">    }</span>
+
+    /**
+     * @param bucketName
+     * @param keyName
+     * @param uploadDirectory
+     * @return
+     * @throws S3ObsServiceException
+     * @throws S3SdkClientException
+     */
+    public int uploadDirectory(final String bucketName, final String keyName,
+            final File uploadDirectory)
+            throws S3ObsServiceException, S3SdkClientException {
+<span class="fc" id="L307">        int ret = 0;</span>
+<span class="fc bfc" id="L308" title="All 2 branches covered.">        if (uploadDirectory.isDirectory()) {</span>
+<span class="fc" id="L309">            File[] childs = uploadDirectory.listFiles();</span>
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">            if (childs != null) {</span>
+<span class="fc bfc" id="L311" title="All 2 branches covered.">                for (File child : childs) {</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">                    if (child.isDirectory()) {</span>
+<span class="fc" id="L313">                        ret += this.uploadDirectory(bucketName,</span>
+<span class="fc" id="L314">                                keyName + File.separator + child.getName(),</span>
+                                child);
+                    } else {
+<span class="fc" id="L317">                        this.uploadFile(bucketName,</span>
+<span class="fc" id="L318">                                keyName + File.separator + child.getName(),</span>
+                                child);
+<span class="fc" id="L320">                        ret += 1;</span>
+                    }
+                }
+            }
+<span class="fc" id="L324">        } else {</span>
+<span class="fc" id="L325">            this.uploadFile(bucketName, keyName, uploadDirectory);</span>
+<span class="fc" id="L326">            ret = 1;</span>
+        }
+<span class="fc" id="L328">        return ret;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

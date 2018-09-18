@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>S3ObsClient.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Object storage client</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.obs_sdk.s3</a> &gt; <span class="el_source">S3ObsClient.java</span></div><h1>S3ObsClient.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.obs_sdk.s3;
+
+import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+
+/**
+ * &lt;p&gt;
+ * Implement of the object storage client using AmazonS3
+ * &lt;/p&gt;
+ * To configure, use the file {@link S3Configuration#CONFIG_FILE}
+ * 
+ * @author Viveris Technologies
+ */
+public class S3ObsClient extends AbstractObsClient {
+
+    /**
+     * Configuration
+     */
+    protected final S3Configuration configuration;
+
+    /**
+     * Amazon S3 client
+     */
+    protected final S3ObsServices s3Services;
+
+    /**
+     * Default constructor
+     * 
+     * @throws ObsServiceException
+     */
+    public S3ObsClient() throws ObsServiceException {
+<span class="fc" id="L37">        super();</span>
+<span class="fc" id="L38">        configuration = new S3Configuration();</span>
+<span class="fc" id="L39">        s3Services = new S3ObsServices(configuration.defaultS3Client(), </span>
+<span class="fc" id="L40">                configuration.getConfiguration().getInt(&quot;retry-policy.condition.max-retries&quot;),</span>
+<span class="fc" id="L41">                configuration.getConfiguration().getInt(&quot;retry-policy.backoff.throttled-base-delay-ms&quot;));</span>
+<span class="fc" id="L42">    }</span>
+
+    /**
+     * Constructor using fields
+     * 
+     * @param configuration
+     * @param s3Services
+     * @throws ObsServiceException
+     */
+    protected S3ObsClient(final S3Configuration configuration,
+            final S3ObsServices s3Services) throws ObsServiceException {
+<span class="fc" id="L53">        super();</span>
+<span class="fc" id="L54">        this.configuration = configuration;</span>
+<span class="fc" id="L55">        this.s3Services = s3Services;</span>
+<span class="fc" id="L56">    }</span>
+
+    /**
+     * @see ObsClient#doesObjectExist(ObsObject)
+     */
+    @Override
+    public boolean doesObjectExist(final ObsObject object)
+            throws SdkClientException, ObsServiceException {
+<span class="fc" id="L64">        return s3Services.exist(</span>
+<span class="fc" id="L65">                configuration.getBucketForFamily(object.getFamily()),</span>
+<span class="fc" id="L66">                object.getKey());</span>
+    }
+
+    /**
+     * @see ObsClient#doesPrefixExist(ObsObject)
+     */
+    @Override
+    public boolean doesPrefixExist(final ObsObject object)
+            throws SdkClientException, ObsServiceException {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        return s3Services.getNbObjects(</span>
+<span class="fc" id="L76">                configuration.getBucketForFamily(object.getFamily()),</span>
+<span class="fc" id="L77">                object.getKey()) &gt; 0 ? true : false;</span>
+    }
+
+    /**
+     * @see ObsClient#downloadObject(ObsDownloadObject)
+     */
+    @Override
+    public int downloadObject(final ObsDownloadObject object)
+            throws SdkClientException, ObsServiceException {
+<span class="fc" id="L86">        return s3Services.downloadObjectsWithPrefix(</span>
+<span class="fc" id="L87">                configuration.getBucketForFamily(object.getFamily()),</span>
+<span class="fc" id="L88">                object.getKey(), object.getTargetDir(),</span>
+<span class="fc" id="L89">                object.isIgnoreFolders());</span>
+    }
+
+    /**
+     * @see ObsClient#doesObjectExist(ObsObject)
+     */
+    @Override
+    public int uploadObject(final ObsUploadObject object)
+            throws SdkClientException, ObsServiceException {
+        int nbUpload;
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (object.getFile().isDirectory()) {</span>
+<span class="fc" id="L100">            nbUpload = s3Services.uploadDirectory(</span>
+<span class="fc" id="L101">                    configuration.getBucketForFamily(object.getFamily()),</span>
+<span class="fc" id="L102">                    object.getKey(), object.getFile());</span>
+        } else {
+<span class="fc" id="L104">            s3Services.uploadFile(</span>
+<span class="fc" id="L105">                    configuration.getBucketForFamily(object.getFamily()),</span>
+<span class="fc" id="L106">                    object.getKey(), object.getFile());</span>
+<span class="fc" id="L107">            nbUpload = 1;</span>
+        }
+<span class="fc" id="L109">        return nbUpload;</span>
+    }
+
+    /**
+     * @see ObsClient#getShutdownTimeoutS()
+     */
+    @Override
+    public int getShutdownTimeoutS() throws ObsServiceException {
+<span class="fc" id="L117">        return configuration</span>
+<span class="fc" id="L118">                .getIntOfConfiguration(S3Configuration.TM_S_SHUTDOWN);</span>
+    }
+
+    /**
+     * @see ObsClient#getDownloadExecutionTimeoutS()
+     */
+    @Override
+    public int getDownloadExecutionTimeoutS() throws ObsServiceException {
+<span class="fc" id="L126">        return configuration</span>
+<span class="fc" id="L127">                .getIntOfConfiguration(S3Configuration.TM_S_DOWN_EXEC);</span>
+    }
+
+    /**
+     * @see ObsClient#getUploadExecutionTimeoutS()
+     */
+    @Override
+    public int getUploadExecutionTimeoutS() throws ObsServiceException {
+<span class="fc" id="L135">        return configuration</span>
+<span class="fc" id="L136">                .getIntOfConfiguration(S3Configuration.TM_S_UP_EXEC);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
