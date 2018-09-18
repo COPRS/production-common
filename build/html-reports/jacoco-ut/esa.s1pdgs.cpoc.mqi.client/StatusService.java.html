@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>StatusService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Message queue interface client</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.client</a> &gt; <span class="el_source">StatusService.java</span></div><h1>StatusService.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.client;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiStatusApiError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiStopApiError;
+import esa.s1pdgs.cpoc.mqi.model.rest.StatusDto;
+
+/**
+ * @author Viveris Technologies
+ */
+public class StatusService {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L24">    private static final Log LOGGER = LogFactory.getLog(StatusService.class);</span>
+
+    /**
+     * Rest template
+     */
+    private final RestTemplate restTemplate;
+
+    /**
+     * Host URI. Example: http://localhost:8081
+     */
+    private final String hostUri;
+
+    /**
+     * Maximal number of retries
+     */
+    protected final int maxRetries;
+
+    /**
+     * Temporisation in ms betwenn 2 retries
+     */
+    private final int tempoRetryMs;
+
+    /**
+     * Constructor
+     * 
+     * @param restTemplate
+     * @param category
+     * @param hostUri
+     * @param maxRetries
+     * @param tempoRetryMs
+     */
+    public StatusService(final RestTemplate restTemplate, final String hostUri,
+<span class="fc" id="L56">            final int maxRetries, final int tempoRetryMs) {</span>
+<span class="fc" id="L57">        this.restTemplate = restTemplate;</span>
+<span class="fc" id="L58">        this.hostUri = hostUri;</span>
+<span class="fc bfc" id="L59" title="All 4 branches covered.">        if (maxRetries &lt; 0 || maxRetries &gt; 20) {</span>
+<span class="fc" id="L60">            this.maxRetries = 0;</span>
+        } else {
+<span class="fc" id="L62">            this.maxRetries = maxRetries;</span>
+        }
+<span class="fc" id="L64">        this.tempoRetryMs = tempoRetryMs;</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * Wait or throw an error according the number of retries
+     * 
+     * @param retries
+     * @param cause
+     * @throws AbstractCodedException
+     */
+    private void waitOrThrow(final int retries,
+            final AbstractCodedException cause, final String api)
+            throws AbstractCodedException {
+<span class="fc" id="L77">        LOGGER.debug(String.format(&quot;[api %s] %s Retry %d/%d&quot;, api,</span>
+<span class="fc" id="L78">                cause.getLogMessage(), retries, maxRetries));</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (retries &lt; maxRetries) {</span>
+            try {
+<span class="fc" id="L81">                Thread.sleep(tempoRetryMs);</span>
+<span class="nc" id="L82">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L83">                throw cause;</span>
+<span class="fc" id="L84">            }</span>
+        } else {
+<span class="fc" id="L86">            throw cause;</span>
+        }
+<span class="fc" id="L88">    }</span>
+
+    /**
+     * Publish a message
+     * 
+     * @param message
+     * @throws AbstractCodedException
+     */
+    public StatusDto status() throws AbstractCodedException {
+<span class="fc" id="L97">        int retries = 0;</span>
+        while (true) {
+<span class="fc" id="L99">            retries++;</span>
+<span class="fc" id="L100">            String uri = hostUri + &quot;/app/status&quot;;</span>
+            try {
+<span class="fc" id="L102">                ResponseEntity&lt;StatusDto&gt; response = restTemplate.exchange(uri,</span>
+                        HttpMethod.GET, null, StatusDto.class);
+<span class="fc bfc" id="L104" title="All 2 branches covered.">                if (response.getStatusCode() == HttpStatus.OK) {</span>
+<span class="fc" id="L105">                    return response.getBody();</span>
+                } else {
+<span class="fc" id="L107">                    waitOrThrow(retries, new MqiStatusApiError(</span>
+<span class="fc" id="L108">                            &quot;HTTP status code &quot; + response.getStatusCode()),</span>
+                            &quot;publish&quot;);
+                }
+<span class="fc" id="L111">            } catch (RestClientException rce) {</span>
+<span class="fc" id="L112">                waitOrThrow(retries, new MqiStatusApiError(</span>
+<span class="fc" id="L113">                        &quot;RestClientException occurred: &quot; + rce.getMessage(),</span>
+                        rce), &quot;publish&quot;);
+<span class="fc" id="L115">            }</span>
+<span class="fc" id="L116">        }</span>
+    }
+
+    /**
+     * Publish a message
+     * 
+     * @param message
+     * @throws AbstractCodedException
+     */
+    public void stop() throws AbstractCodedException {
+<span class="fc" id="L126">        int retries = 0;</span>
+        while (true) {
+<span class="fc" id="L128">            retries++;</span>
+<span class="fc" id="L129">            String uri = hostUri + &quot;/app/stop&quot;;</span>
+            try {
+<span class="fc" id="L131">                ResponseEntity&lt;String&gt; response = restTemplate.exchange(uri,</span>
+                        HttpMethod.POST, null, String.class);
+<span class="fc bfc" id="L133" title="All 2 branches covered.">                if (response.getStatusCode() == HttpStatus.OK) {</span>
+<span class="fc" id="L134">                    return;</span>
+                } else {
+<span class="fc" id="L136">                    waitOrThrow(retries, new MqiStopApiError(</span>
+<span class="fc" id="L137">                            &quot;HTTP status code &quot; + response.getStatusCode()),</span>
+                            &quot;publish&quot;);
+                }
+<span class="fc" id="L140">            } catch (RestClientException rce) {</span>
+<span class="fc" id="L141">                waitOrThrow(retries, new MqiStopApiError(</span>
+<span class="fc" id="L142">                        &quot;RestClientException occurred: &quot; + rce.getMessage(),</span>
+                        rce), &quot;publish&quot;);
+<span class="fc" id="L144">            }</span>
+<span class="fc" id="L145">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

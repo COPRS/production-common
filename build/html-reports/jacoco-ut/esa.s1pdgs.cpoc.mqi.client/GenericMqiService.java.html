@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>GenericMqiService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Message queue interface client</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.client</a> &gt; <span class="el_source">GenericMqiService.java</span></div><h1>GenericMqiService.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.client;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+
+/**
+ * @author Viveris Technologies
+ * @param &lt;T&gt;
+ */
+public abstract class GenericMqiService&lt;T&gt; {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L30">    protected static final Log LOGGER =</span>
+<span class="fc" id="L31">            LogFactory.getLog(GenericMqiService.class);</span>
+
+    /**
+     * Rest template
+     */
+    protected final RestTemplate restTemplate;
+
+    /**
+     * Product category
+     */
+    protected final ProductCategory category;
+
+    /**
+     * Host URI. Example: http://localhost:8081
+     */
+    protected final String hostUri;
+
+    /**
+     * Maximal number of retries
+     */
+    protected final int maxRetries;
+
+    /**
+     * Temporisation in ms betwenn 2 retries
+     */
+    protected final int tempoRetryMs;
+
+    /**
+     * Constructor
+     * 
+     * @param restTemplate
+     * @param category
+     * @param hostUri
+     * @param maxRetries
+     * @param tempoRetryMs
+     */
+    public GenericMqiService(final RestTemplate restTemplate,
+            final ProductCategory category, final String hostUri,
+<span class="fc" id="L69">            final int maxRetries, final int tempoRetryMs) {</span>
+<span class="fc" id="L70">        this.restTemplate = restTemplate;</span>
+<span class="fc" id="L71">        this.category = category;</span>
+<span class="fc" id="L72">        this.hostUri = hostUri;</span>
+<span class="fc bfc" id="L73" title="All 4 branches covered.">        if (maxRetries &lt; 0 || maxRetries &gt; 20) {</span>
+<span class="fc" id="L74">            this.maxRetries = 0;</span>
+        } else {
+<span class="fc" id="L76">            this.maxRetries = maxRetries;</span>
+        }
+<span class="fc" id="L78">        this.tempoRetryMs = tempoRetryMs;</span>
+<span class="fc" id="L79">    }</span>
+
+    /**
+     * Wait or throw an error according the number of retries
+     * 
+     * @param retries
+     * @param cause
+     * @throws AbstractCodedException
+     */
+    protected void waitOrThrow(final int retries,
+            final AbstractCodedException cause, final String api)
+            throws AbstractCodedException {
+<span class="fc" id="L91">        LOGGER.debug(String.format(&quot;[api %s] %s Retry %d/%d&quot;, api,</span>
+<span class="fc" id="L92">                cause.getLogMessage(), retries, maxRetries));</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (retries &lt; maxRetries) {</span>
+            try {
+<span class="fc" id="L95">                Thread.sleep(tempoRetryMs);</span>
+<span class="nc" id="L96">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L97">                throw cause;</span>
+<span class="fc" id="L98">            }</span>
+        } else {
+<span class="fc" id="L100">            throw cause;</span>
+        }
+<span class="fc" id="L102">    }</span>
+
+    /**
+     * Get the next message to proceed
+     * 
+     * @return
+     * @throws AbstractCodedException
+     */
+    public abstract GenericMessageDto&lt;T&gt; next() throws AbstractCodedException;
+
+    /**
+     * Ack a message
+     * 
+     * @param identifier
+     * @param ack
+     * @param message
+     * @return
+     * @throws AbstractCodedException
+     */
+    public boolean ack(final AckMessageDto ack) throws AbstractCodedException {
+<span class="fc" id="L122">        int retries = 0;</span>
+        while (true) {
+<span class="fc" id="L124">            retries++;</span>
+<span class="fc" id="L125">            String uri = hostUri + &quot;/messages/&quot; + category.name().toLowerCase()</span>
+                    + &quot;/ack&quot;;
+<span class="fc" id="L127">            LogUtils.traceLog(LOGGER,</span>
+<span class="fc" id="L128">                    String.format(&quot;[uri %s] [body %s]&quot;, uri, ack));</span>
+            try {
+<span class="fc" id="L130">                ResponseEntity&lt;Boolean&gt; response = restTemplate.exchange(uri,</span>
+                        HttpMethod.POST, new HttpEntity&lt;AckMessageDto&gt;(ack),
+                        Boolean.class);
+<span class="fc bfc" id="L133" title="All 2 branches covered.">                if (response.getStatusCode() == HttpStatus.OK) {</span>
+<span class="fc" id="L134">                    Boolean ret = response.getBody();</span>
+<span class="fc" id="L135">                    LogUtils.traceLog(LOGGER, String.format(</span>
+                            &quot;[uri %s] [body %s] [ret %s]&quot;, uri, ack, ret));
+<span class="fc bfc" id="L137" title="All 2 branches covered.">                    if (ret == null) {</span>
+<span class="fc" id="L138">                        return false;</span>
+                    } else {
+<span class="fc" id="L140">                        return ret.booleanValue();</span>
+                    }
+                } else {
+<span class="fc" id="L143">                    waitOrThrow(retries, new MqiAckApiError(category,</span>
+<span class="fc" id="L144">                            ack.getMessageId(),</span>
+<span class="fc" id="L145">                            ack.getAck().name() + &quot; &quot; + ack.getMessage(),</span>
+<span class="fc" id="L146">                            &quot;HTTP status code &quot; + response.getStatusCode()),</span>
+                            &quot;ack&quot;);
+                }
+<span class="fc" id="L149">            } catch (RestClientException rce) {</span>
+<span class="fc" id="L150">                waitOrThrow(retries, new MqiAckApiError(category,</span>
+<span class="fc" id="L151">                        ack.getMessageId(),</span>
+<span class="fc" id="L152">                        ack.getAck().name() + &quot; &quot; + ack.getMessage(),</span>
+<span class="fc" id="L153">                        &quot;RestClientException occurred: &quot; + rce.getMessage(),</span>
+                        rce), &quot;ack&quot;);
+<span class="fc" id="L155">            }</span>
+<span class="fc" id="L156">        }</span>
+    }
+
+    /**
+     * Publish a message
+     * 
+     * @param message
+     * @throws AbstractCodedException
+     */
+    public void publish(final GenericPublicationMessageDto&lt;T&gt; message)
+            throws AbstractCodedException {
+<span class="fc" id="L167">        int retries = 0;</span>
+        while (true) {
+<span class="fc" id="L169">            retries++;</span>
+<span class="fc" id="L170">            String uri = hostUri + &quot;/messages/&quot; + category.name().toLowerCase()</span>
+                    + &quot;/publish&quot;;
+<span class="fc" id="L172">            LogUtils.traceLog(LOGGER,</span>
+<span class="fc" id="L173">                    String.format(&quot;[uri %s] [body %s]&quot;, uri, message));</span>
+            try {
+<span class="fc" id="L175">                ResponseEntity&lt;Void&gt; response =</span>
+<span class="fc" id="L176">                        restTemplate.exchange(uri, HttpMethod.POST,</span>
+                                new HttpEntity&lt;GenericPublicationMessageDto&lt;T&gt;&gt;(
+                                        message),
+                                Void.class);
+<span class="fc bfc" id="L180" title="All 2 branches covered.">                if (response.getStatusCode() == HttpStatus.OK) {</span>
+<span class="fc" id="L181">                    LogUtils.traceLog(LOGGER, String.format(</span>
+                            &quot;[uri %s] [body %s] [ret OK]&quot;, uri, message));
+<span class="fc" id="L183">                    return;</span>
+                } else {
+<span class="fc" id="L185">                    waitOrThrow(retries,</span>
+                            new MqiPublishApiError(category, message,
+                                    &quot;HTTP status code &quot;
+<span class="fc" id="L188">                                            + response.getStatusCode()),</span>
+                            &quot;publish&quot;);
+                }
+<span class="fc" id="L191">            } catch (RestClientException rce) {</span>
+<span class="fc" id="L192">                waitOrThrow(retries, new MqiPublishApiError(category, message,</span>
+<span class="fc" id="L193">                        &quot;RestClientException occurred: &quot; + rce.getMessage(),</span>
+                        rce), &quot;publish&quot;);
+<span class="fc" id="L195">            }</span>
+<span class="fc" id="L196">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
