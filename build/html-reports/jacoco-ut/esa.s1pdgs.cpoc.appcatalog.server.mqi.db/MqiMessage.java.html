@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MqiMessage.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server.mqi.db</a> &gt; <span class="el_source">MqiMessage.java</span></div><h1>MqiMessage.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.server.mqi.db;
+
+import java.util.Date;
+
+import org.springframework.data.annotation.Id;
+
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+/**
+ * Object Stored in the database
+ * 
+ * @author Viveris Technologies
+ */
+public class MqiMessage {
+    
+    /**
+     * Category of the product
+     */
+    private ProductCategory category;
+    /**
+     * Identifier of the message
+     */
+    @Id
+    private long identifier;
+    /**
+     * Topic name
+     */
+    private String topic;
+    /**
+     * Partition number
+     */
+    private int partition;
+    /**
+     * Offset of the message
+     */
+    private long offset;
+    /**
+     * Group of the message
+     */
+    private String group;
+    /**
+     * State of the message
+     */
+    private MqiStateMessageEnum state;
+    /**
+     * Pod who read the message
+     */
+    private String readingPod;
+    /**
+     * Date where the pod read the message
+     */
+    private Date lastReadDate;
+    /**
+     * Pod who send the message
+     */
+    private String sendingPod;
+    /**
+     * Date whe the pod last send the message
+     */
+    private Date lastSendDate;
+    /**
+     * Date where the message was last acknowledge
+     */
+    private Date lastAckDate;
+    /**
+     * Number of retries
+     */
+    private int nbRetries;
+    /**
+     * Dto of the message
+     */
+    private Object dto;
+    
+    /**
+     * Date of the insertion in MongoDB
+     */
+    private Date creationDate;
+    
+    /**
+     * Default Constructor
+     */
+<span class="fc" id="L83">    public MqiMessage() {</span>
+        
+<span class="fc" id="L85">    }</span>
+    
+    /**
+     * @param category
+     * @param identifier
+     * @param topic
+     * @param partition
+     * @param offset
+     * @param group
+     * @param state
+     * @param readingPod
+     * @param lastReadDate
+     * @param sendingPod
+     * @param lastSendDate
+     * @param lastAckDate
+     * @param nbRetries
+     * @param dto
+     */
+    public MqiMessage(ProductCategory category, String topic,
+            int partition, long offset, String group, MqiStateMessageEnum state,
+            String readingPod, Date lastReadDate, String sendingPod,
+            Date lastSendDate, Date lastAckDate, int nbRetries, Object dto,
+            Date creationDate) {
+<span class="fc" id="L108">        super();</span>
+<span class="fc" id="L109">        this.category = category;</span>
+<span class="fc" id="L110">        this.topic = topic;</span>
+<span class="fc" id="L111">        this.partition = partition;</span>
+<span class="fc" id="L112">        this.offset = offset;</span>
+<span class="fc" id="L113">        this.group = group;</span>
+<span class="fc" id="L114">        this.state = state;</span>
+<span class="fc" id="L115">        this.readingPod = readingPod;</span>
+<span class="fc" id="L116">        this.lastReadDate = lastReadDate;</span>
+<span class="fc" id="L117">        this.sendingPod = sendingPod;</span>
+<span class="fc" id="L118">        this.lastSendDate = lastSendDate;</span>
+<span class="fc" id="L119">        this.lastAckDate = lastAckDate;</span>
+<span class="fc" id="L120">        this.nbRetries = nbRetries;</span>
+<span class="fc" id="L121">        this.dto = dto;</span>
+<span class="fc" id="L122">        this.creationDate = creationDate;</span>
+<span class="fc" id="L123">    }</span>
+    
+    
+    /**
+     * @return the category
+     */
+    public ProductCategory getCategory() {
+<span class="fc" id="L130">        return category;</span>
+    }
+    /**
+     * @param category the category to set
+     */
+    public void setCategory(ProductCategory category) {
+<span class="fc" id="L136">        this.category = category;</span>
+<span class="fc" id="L137">    }</span>
+    /**
+     * @return the identifier
+     */
+    public long getIdentifier() {
+<span class="fc" id="L142">        return identifier;</span>
+    }
+    /**
+	 * @param identifier the identifier to set
+	 */
+	public void setIdentifier(long identifier) {
+<span class="fc" id="L148">		this.identifier = identifier;</span>
+<span class="fc" id="L149">	}</span>
+
+	/**
+     * @return the topic
+     */
+    public String getTopic() {
+<span class="fc" id="L155">        return topic;</span>
+    }
+    /**
+     * @param topic the topic to set
+     */
+    public void setTopic(String topic) {
+<span class="fc" id="L161">        this.topic = topic;</span>
+<span class="fc" id="L162">    }</span>
+    /**
+     * @return the partition
+     */
+    public int getPartition() {
+<span class="fc" id="L167">        return partition;</span>
+    }
+    /**
+     * @param partition the partition to set
+     */
+    public void setPartition(int partition) {
+<span class="fc" id="L173">        this.partition = partition;</span>
+<span class="fc" id="L174">    }</span>
+    /**
+     * @return the offset
+     */
+    public long getOffset() {
+<span class="fc" id="L179">        return offset;</span>
+    }
+    /**
+     * @param offset the offset to set
+     */
+    public void setOffset(long offset) {
+<span class="fc" id="L185">        this.offset = offset;</span>
+<span class="fc" id="L186">    }</span>
+    /**
+     * @return the group
+     */
+    public String getGroup() {
+<span class="fc" id="L191">        return group;</span>
+    }
+    /**
+     * @param group the group to set
+     */
+    public void setGroup(String group) {
+<span class="fc" id="L197">        this.group = group;</span>
+<span class="fc" id="L198">    }</span>
+    /**
+     * @return the state
+     */
+    public MqiStateMessageEnum getState() {
+<span class="fc" id="L203">        return state;</span>
+    }
+    /**
+     * @param state the state to set
+     */
+    public void setState(MqiStateMessageEnum state) {
+<span class="fc" id="L209">        this.state = state;</span>
+<span class="fc" id="L210">    }</span>
+    /**
+     * @return the readingPod
+     */
+    public String getReadingPod() {
+<span class="fc" id="L215">        return readingPod;</span>
+    }
+    /**
+     * @param readingPod the readingPod to set
+     */
+    public void setReadingPod(String readingPod) {
+<span class="fc" id="L221">        this.readingPod = readingPod;</span>
+<span class="fc" id="L222">    }</span>
+    /**
+     * @return the lastReadDate
+     */
+    public Date getLastReadDate() {
+<span class="fc" id="L227">        return lastReadDate;</span>
+    }
+    /**
+     * @param lastReadDate the lastReadDate to set
+     */
+    public void setLastReadDate(Date lastReadDate) {
+<span class="fc" id="L233">        this.lastReadDate = lastReadDate;</span>
+<span class="fc" id="L234">    }</span>
+    /**
+     * @return the sendingPod
+     */
+    public String getSendingPod() {
+<span class="fc" id="L239">        return sendingPod;</span>
+    }
+    /**
+     * @param sendingPod the sendingPod to set
+     */
+    public void setSendingPod(String sendingPod) {
+<span class="fc" id="L245">        this.sendingPod = sendingPod;</span>
+<span class="fc" id="L246">    }</span>
+    /**
+     * @return the lastSendDate
+     */
+    public Date getLastSendDate() {
+<span class="fc" id="L251">        return lastSendDate;</span>
+    }
+    /**
+     * @param lastSendDate the lastSendDate to set
+     */
+    public void setLastSendDate(Date lastSendDate) {
+<span class="fc" id="L257">        this.lastSendDate = lastSendDate;</span>
+<span class="fc" id="L258">    }</span>
+    /**
+     * @return the lastAckDate
+     */
+    public Date getLastAckDate() {
+<span class="fc" id="L263">        return lastAckDate;</span>
+    }
+    /**
+     * @param lastAckDate the lastAckDate to set
+     */
+    public void setLastAckDate(Date lastAckDate) {
+<span class="fc" id="L269">        this.lastAckDate = lastAckDate;</span>
+<span class="fc" id="L270">    }</span>
+    /**
+     * @return the nbRetries
+     */
+    public int getNbRetries() {
+<span class="fc" id="L275">        return nbRetries;</span>
+    }
+    /**
+     * @param nbRetries the nbRetries to set
+     */
+    public void setNbRetries(int nbRetries) {
+<span class="fc" id="L281">        this.nbRetries = nbRetries;</span>
+<span class="fc" id="L282">    }</span>
+    /**
+     * @return the dto
+     */
+    public Object getDto() {
+<span class="fc" id="L287">        return dto;</span>
+    }
+    /**
+     * @param dto the dto to set
+     */
+    public void setDto(Object dto) {
+<span class="fc" id="L293">        this.dto = dto;</span>
+<span class="fc" id="L294">    }</span>
+
+
+    /**
+     * @return the creationDate
+     */
+    public Date getCreationDate() {
+<span class="fc" id="L301">        return creationDate;</span>
+    }
+
+    /**
+     * @param creationDate the creationDate to set
+     */
+    public void setCreationDate(Date creationDate) {
+<span class="fc" id="L308">        this.creationDate = creationDate;</span>
+<span class="fc" id="L309">    }</span>
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L316">        return &quot;{\&quot;category\&quot;:\&quot;&quot; + category + &quot;\&quot;, \&quot;identifier\&quot;:\&quot;&quot; + identifier</span>
+                + &quot;\&quot;, \&quot;topic\&quot;:\&quot;&quot; + topic + &quot;\&quot;, \&quot;partition\&quot;:\&quot;&quot; + partition + &quot;\&quot;, \&quot;offset\&quot;:\&quot;&quot;
+                + offset + &quot;\&quot;, \&quot;group\&quot;:\&quot;&quot; + group + &quot;\&quot;, \&quot;state\&quot;:\&quot;&quot; + state
+                + &quot;\&quot;, \&quot;readingPod\&quot;:\&quot;&quot; + readingPod + &quot;\&quot;, \&quot;lastReadDate\&quot;:\&quot;&quot;
+                + lastReadDate + &quot;\&quot;, \&quot;sendingPod\&quot;:\&quot;&quot; + sendingPod + &quot;\&quot;, \&quot;lastSendDate\&quot;:\&quot;&quot;
+                + lastSendDate + &quot;\&quot;, \&quot;lastAckDate\&quot;:\&quot;&quot; + lastAckDate + &quot;\&quot;, \&quot;nbRetries\&quot;:\&quot;&quot;
+                + nbRetries + &quot;\&quot;, \&quot;dto\&quot;:\&quot;&quot; + dto + &quot;\&quot; , \&quot;creationDate\&quot;:\&quot;&quot; + creationDate + &quot;\&quot;}&quot;;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L330">        final int prime = 31;</span>
+<span class="fc" id="L331">        int result = 1;</span>
+<span class="fc bfc" id="L332" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L333">                + ((category == null) ? 0 : category.hashCode());</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L335">                + ((creationDate == null) ? 0 : creationDate.hashCode());</span>
+<span class="fc bfc" id="L336" title="All 2 branches covered.">        result = prime * result + ((dto == null) ? 0 : dto.hashCode());</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">        result = prime * result + ((group == null) ? 0 : group.hashCode());</span>
+<span class="fc" id="L338">        result = prime * result + (int) (identifier ^ (identifier &gt;&gt;&gt; 32));</span>
+<span class="fc bfc" id="L339" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L340">                + ((lastAckDate == null) ? 0 : lastAckDate.hashCode());</span>
+<span class="fc bfc" id="L341" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L342">                + ((lastReadDate == null) ? 0 : lastReadDate.hashCode());</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L344">                + ((lastSendDate == null) ? 0 : lastSendDate.hashCode());</span>
+<span class="fc" id="L345">        result = prime * result + nbRetries;</span>
+<span class="fc" id="L346">        result = prime * result + (int) (offset ^ (offset &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L347">        result = prime * result + partition;</span>
+<span class="fc bfc" id="L348" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L349">                + ((readingPod == null) ? 0 : readingPod.hashCode());</span>
+<span class="fc bfc" id="L350" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L351">                + ((sendingPod == null) ? 0 : sendingPod.hashCode());</span>
+<span class="fc bfc" id="L352" title="All 2 branches covered.">        result = prime * result + ((state == null) ? 0 : state.hashCode());</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">        result = prime * result + ((topic == null) ? 0 : topic.hashCode());</span>
+<span class="fc" id="L354">        return result;</span>
+    }
+
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L363" title="All 2 branches covered.">        if (this == obj)</span>
+<span class="fc" id="L364">            return true;</span>
+<span class="fc bfc" id="L365" title="All 2 branches covered.">        if (obj == null)</span>
+<span class="fc" id="L366">            return false;</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        if (getClass() != obj.getClass())</span>
+<span class="fc" id="L368">            return false;</span>
+<span class="fc" id="L369">        MqiMessage other = (MqiMessage) obj;</span>
+<span class="fc bfc" id="L370" title="All 2 branches covered.">        if (category != other.category)</span>
+<span class="fc" id="L371">            return false;</span>
+<span class="fc bfc" id="L372" title="All 2 branches covered.">        if (creationDate == null) {</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">            if (other.creationDate != null)</span>
+<span class="fc" id="L374">                return false;</span>
+<span class="fc bfc" id="L375" title="All 2 branches covered.">        } else if (!creationDate.equals(other.creationDate))</span>
+<span class="fc" id="L376">            return false;</span>
+<span class="fc bfc" id="L377" title="All 2 branches covered.">        if (dto == null) {</span>
+<span class="fc bfc" id="L378" title="All 2 branches covered.">            if (other.dto != null)</span>
+<span class="fc" id="L379">                return false;</span>
+<span class="fc bfc" id="L380" title="All 2 branches covered.">        } else if (!dto.equals(other.dto))</span>
+<span class="fc" id="L381">            return false;</span>
+<span class="fc bfc" id="L382" title="All 2 branches covered.">        if (group == null) {</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">            if (other.group != null)</span>
+<span class="fc" id="L384">                return false;</span>
+<span class="fc bfc" id="L385" title="All 2 branches covered.">        } else if (!group.equals(other.group))</span>
+<span class="fc" id="L386">            return false;</span>
+<span class="fc bfc" id="L387" title="All 2 branches covered.">        if (identifier != other.identifier)</span>
+<span class="fc" id="L388">            return false;</span>
+<span class="fc bfc" id="L389" title="All 2 branches covered.">        if (lastAckDate == null) {</span>
+<span class="fc bfc" id="L390" title="All 2 branches covered.">            if (other.lastAckDate != null)</span>
+<span class="fc" id="L391">                return false;</span>
+<span class="fc bfc" id="L392" title="All 2 branches covered.">        } else if (!lastAckDate.equals(other.lastAckDate))</span>
+<span class="fc" id="L393">            return false;</span>
+<span class="fc bfc" id="L394" title="All 2 branches covered.">        if (lastReadDate == null) {</span>
+<span class="fc bfc" id="L395" title="All 2 branches covered.">            if (other.lastReadDate != null)</span>
+<span class="fc" id="L396">                return false;</span>
+<span class="fc bfc" id="L397" title="All 2 branches covered.">        } else if (!lastReadDate.equals(other.lastReadDate))</span>
+<span class="fc" id="L398">            return false;</span>
+<span class="fc bfc" id="L399" title="All 2 branches covered.">        if (lastSendDate == null) {</span>
+<span class="fc bfc" id="L400" title="All 2 branches covered.">            if (other.lastSendDate != null)</span>
+<span class="fc" id="L401">                return false;</span>
+<span class="fc bfc" id="L402" title="All 2 branches covered.">        } else if (!lastSendDate.equals(other.lastSendDate))</span>
+<span class="fc" id="L403">            return false;</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">        if (nbRetries != other.nbRetries)</span>
+<span class="fc" id="L405">            return false;</span>
+<span class="fc bfc" id="L406" title="All 2 branches covered.">        if (offset != other.offset)</span>
+<span class="fc" id="L407">            return false;</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">        if (partition != other.partition)</span>
+<span class="fc" id="L409">            return false;</span>
+<span class="fc bfc" id="L410" title="All 2 branches covered.">        if (readingPod == null) {</span>
+<span class="fc bfc" id="L411" title="All 2 branches covered.">            if (other.readingPod != null)</span>
+<span class="fc" id="L412">                return false;</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">        } else if (!readingPod.equals(other.readingPod))</span>
+<span class="fc" id="L414">            return false;</span>
+<span class="fc bfc" id="L415" title="All 2 branches covered.">        if (sendingPod == null) {</span>
+<span class="fc bfc" id="L416" title="All 2 branches covered.">            if (other.sendingPod != null)</span>
+<span class="fc" id="L417">                return false;</span>
+<span class="fc bfc" id="L418" title="All 2 branches covered.">        } else if (!sendingPod.equals(other.sendingPod))</span>
+<span class="fc" id="L419">            return false;</span>
+<span class="fc bfc" id="L420" title="All 2 branches covered.">        if (state != other.state)</span>
+<span class="fc" id="L421">            return false;</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">        if (topic == null) {</span>
+<span class="fc bfc" id="L423" title="All 2 branches covered.">            if (other.topic != null)</span>
+<span class="fc" id="L424">                return false;</span>
+<span class="fc bfc" id="L425" title="All 2 branches covered.">        } else if (!topic.equals(other.topic))</span>
+<span class="fc" id="L426">            return false;</span>
+<span class="fc" id="L427">        return true;</span>
+    }
+
+
+    
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.appcatalog.server.job.converter;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Date;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,6 +15,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobInvalidStateException;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 
@@ -38,7 +41,38 @@ public class JobConverterTest {
 
     @Before
     public void init() {
+        
+        Date creationDate = new Date(System.currentTimeMillis() - 152000);
+        Date lastUpdateDate = new Date();
 
+        jobDb = new AppDataJob();
+        jobDb.setCategory(ProductCategory.EDRS_SESSIONS);
+        jobDb.setCreationDate(creationDate);
+        jobDb.setIdentifier(1123L);
+        jobDb.setLevel(ApplicationLevel.L0);
+        jobDb.setPod("pod-name");
+        jobDb.setLastUpdateDate(lastUpdateDate);
+        jobDb.setState(AppDataJobState.GENERATING);
+        
+        jobDto = new AppDataJobDto<>();
+        jobDto.setCreationDate(creationDate);
+        jobDto.setIdentifier(1123L);
+        jobDto.setLevel(ApplicationLevel.L0);
+        jobDto.setPod("pod-name");
+        jobDto.setLastUpdateDate(lastUpdateDate);
+        jobDto.setState(AppDataJobDtoState.GENERATING);
+    }
+    
+    @Test
+    public void testConvertDbToDto() throws AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException {
+        AppDataJobDto<EdrsSessionDto> resultDto = converter.convertJobFromDbToDto(jobDb);
+        assertEquals(jobDto, resultDto);
+    }
+    
+    @Test
+    public void testConvertDtoToDb() throws AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException {
+        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto);
+        assertEquals(jobDb, resultDb);
     }
 
     /**

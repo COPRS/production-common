@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MqiMessageDao.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server.mqi.db</a> &gt; <span class="el_source">MqiMessageDao.java</span></div><h1>MqiMessageDao.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package esa.s1pdgs.cpoc.appcatalog.server.mqi.db;
+
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
+
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+/**
+ * Service to access to MQI messages in mongo db
+ * 
+ * @author Viveris Technologies
+ */
+@Service
+public class MqiMessageDao {
+
+    /**
+     * Mongo DB client
+     */
+    private final MongoTemplate mongoClient;
+
+    /**
+     * @param mongoClient
+     */
+    @Autowired
+<span class="fc" id="L41">    public MqiMessageDao(final MongoTemplate mongoClient) {</span>
+<span class="fc" id="L42">        this.mongoClient = mongoClient;</span>
+<span class="fc" id="L43">    }</span>
+
+    /**
+     * Find messages
+     * 
+     * @param query
+     * @return
+     */
+    private List&lt;MqiMessage&gt; find(final Query query) {
+<span class="fc" id="L52">        return mongoClient.find(query, MqiMessage.class);</span>
+    }
+
+    /**
+     * Return a list of message which contains the right topic, partition,
+     * offset and group
+     * 
+     * @param topic
+     * @param partition
+     * @param offset
+     * @param group
+     * @return the list of message
+     */
+    public List&lt;MqiMessage&gt; searchByTopicPartitionOffsetGroup(
+            final String topic, final int partition, final long offset,
+            final String group) {
+<span class="fc" id="L68">        Query query = query(where(&quot;topic&quot;).is(topic).and(&quot;partition&quot;)</span>
+<span class="fc" id="L69">                .is(partition).and(&quot;offset&quot;).is(offset).and(&quot;group&quot;).is(group));</span>
+<span class="fc" id="L70">        return find(query);</span>
+    }
+
+    /**
+     * Return a list of message which contains the right topic, partition and
+     * group
+     * 
+     * @param topic
+     * @param partition
+     * @param group
+     * @return the list of message
+     */
+    public List&lt;MqiMessage&gt; searchByTopicPartitionGroup(final String topic,
+            final int partition, final String group,
+            final Set&lt;MqiStateMessageEnum&gt; states) {
+<span class="fc" id="L85">        Query query = query(where(&quot;topic&quot;).is(topic).and(&quot;partition&quot;)</span>
+<span class="fc" id="L86">                .is(partition).and(&quot;group&quot;).is(group).and(&quot;state&quot;).nin(states));</span>
+<span class="fc" id="L87">        query.with(new Sort(Direction.ASC, &quot;lastReadDate&quot;));</span>
+<span class="fc" id="L88">        return find(query);</span>
+    }
+
+    /**
+     * Return a list of message which contains the right pod name, product
+     * category but its not in the states
+     * 
+     * @param pod
+     * @param category
+     * @param states
+     * @return the list of message
+     */
+    public List&lt;MqiMessage&gt; searchByPodStateCategory(final String pod,
+            final ProductCategory category,
+            final Set&lt;MqiStateMessageEnum&gt; states) {
+<span class="fc" id="L103">        Query query = query(where(&quot;readingPod&quot;).is(pod).and(&quot;state&quot;).nin(states)</span>
+<span class="fc" id="L104">                .and(&quot;category&quot;).is(category));</span>
+<span class="fc" id="L105">        query.with(new Sort(Direction.ASC, &quot;creationDate&quot;));</span>
+<span class="fc" id="L106">        return find(query);</span>
+    }
+
+    /**
+     * Return a list of message which contains the right pod name, product
+     * category but its not in the states
+     * 
+     * @param pod
+     * @param category
+     * @param states
+     * @return the list of message
+     */
+    public int countReadingMessages(final String pod, final String topic) {
+<span class="fc" id="L119">        Query query = query(where(&quot;readingPod&quot;).is(pod).and(&quot;state&quot;)</span>
+<span class="fc" id="L120">                .is(MqiStateMessageEnum.READ).and(&quot;topic&quot;).is(topic));</span>
+<span class="fc" id="L121">        query.with(new Sort(Direction.ASC, &quot;creationDate&quot;));</span>
+<span class="fc" id="L122">        return find(query).size();</span>
+    }
+
+    /**
+     * Return a list of message which contains the right ID
+     * 
+     * @param messageID
+     * @return the list of message
+     */
+    public List&lt;MqiMessage&gt; searchByID(final long messageID) {
+<span class="fc" id="L132">        Query query = query(where(&quot;identifier&quot;).is(messageID));</span>
+<span class="fc" id="L133">        return find(query);</span>
+    }
+
+    /**
+     * Insert a MQI message
+     * 
+     * @param messageToInsert
+     */
+    public void insert(final MqiMessage messageToInsert) {
+<span class="fc" id="L142">        mongoClient.insert(messageToInsert);</span>
+<span class="fc" id="L143">    }</span>
+
+    /**
+     * @param query
+     * @param update
+     */
+    private void updateFirst(final Query query, final Update update) {
+<span class="fc" id="L150">        mongoClient.updateFirst(query, update, MqiMessage.class);</span>
+<span class="fc" id="L151">    }</span>
+
+    /**
+     * Function which update a MqiMessage
+     * 
+     * @param messageID
+     * @param updateMap
+     */
+    public void updateByID(final long messageID,
+            final Map&lt;String, Object&gt; updateMap) {
+<span class="fc" id="L161">        Query query = query(where(&quot;identifier&quot;).is(messageID));</span>
+<span class="fc" id="L162">        Update update = new Update();</span>
+<span class="pc" id="L163">        updateMap.forEach((k, v) -&gt; update.set(k, v));</span>
+<span class="fc" id="L164">        updateFirst(query, update);</span>
+<span class="fc" id="L165">    }</span>
+
+    /**
+     * @param query
+     */
+    public void findAllAndRemove(final Query query) {
+<span class="fc" id="L171">        mongoClient.findAllAndRemove(query, MqiMessage.class);</span>
+<span class="fc" id="L172">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

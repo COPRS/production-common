@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AppCatalogJobGenerationInvalidTransitionStateException.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server.job.exception</a> &gt; <span class="el_source">AppCatalogJobGenerationInvalidTransitionStateException.java</span></div><h1>AppCatalogJobGenerationInvalidTransitionStateException.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.server.job.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+/**
+ * @author Viveris Technologies
+ */
+@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = &quot;Invalid job generation state transition&quot;)
+public class AppCatalogJobGenerationInvalidTransitionStateException
+        extends AbstractAppDataException {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5220416714429436808L;
+
+    /**
+     * State
+     */
+    private final String stateBefore;
+
+    /**
+     * Type of job: db or dto
+     */
+    private final String stateAfter;
+
+    /**
+     * Constructor
+     * 
+     * @param id
+     */
+    public AppCatalogJobGenerationInvalidTransitionStateException(
+            final String stateBefore, final String stateAfter) {
+<span class="nc" id="L35">        super(ErrorCode.JOB_GENERATION_INVALID_STATE_TRANSITION,</span>
+                &quot;Invalid job generation state transition&quot;);
+<span class="nc" id="L37">        this.stateBefore = stateBefore;</span>
+<span class="nc" id="L38">        this.stateAfter = stateAfter;</span>
+<span class="nc" id="L39">    }</span>
+
+    /**
+     * @return the state
+     */
+    public String getStateBefore() {
+<span class="nc" id="L45">        return stateBefore;</span>
+    }
+
+    /**
+     * @return the type
+     */
+    public String getStateAfter() {
+<span class="nc" id="L52">        return stateAfter;</span>
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public String getLogMessage() {
+<span class="nc" id="L60">        return String.format(&quot;[stateBefore %s] [stateAfter %s] [msg %s]&quot;,</span>
+<span class="nc" id="L61">                stateBefore, stateAfter, getMessage());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

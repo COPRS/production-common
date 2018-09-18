@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SequenceDaoImp.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server.sequence.db</a> &gt; <span class="el_source">SequenceDaoImp.java</span></div><h1>SequenceDaoImp.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.server.sequence.db;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
+
+/**
+ * 
+ * @author Viveris Technologies
+ *
+ */
+@Service
+public class SequenceDaoImp implements SequenceDao {
+
+    /**
+     * Mongo client
+     */
+    private final MongoTemplate mongoClient;
+    
+    /**
+     * Constructor
+     * @param mongoClient
+     */
+    @Autowired
+<span class="fc" id="L29">    public SequenceDaoImp(final MongoTemplate mongoClient) {</span>
+<span class="fc" id="L30">        this.mongoClient = mongoClient;</span>
+<span class="fc" id="L31">    }</span>
+
+    /**
+     * Get the next sequence id for the given key
+     */
+    @Override
+	public long getNextSequenceId(final String key) throws SequenceException {
+		
+	  //get sequence id
+<span class="fc" id="L40">	  Query query = new Query(Criteria.where(&quot;_id&quot;).is(key));</span>
+
+	  //increase sequence id by 1
+<span class="fc" id="L43">	  Update update = new Update();</span>
+<span class="fc" id="L44">	  update.inc(&quot;seq&quot;, 1);</span>
+
+	  //return new increased id
+<span class="fc" id="L47">	  FindAndModifyOptions options = new FindAndModifyOptions();</span>
+<span class="fc" id="L48">	  options.returnNew(true);</span>
+
+	  //this is the magic happened.
+<span class="fc" id="L51">	  SequenceId seqId = </span>
+<span class="fc" id="L52">			  mongoClient.findAndModify(query, update, options, SequenceId.class);</span>
+
+	  //if no id, throws SequenceException
+          //optional, just a way to tell user when the sequence id is failed to generate.
+<span class="fc bfc" id="L56" title="All 2 branches covered.">	  if (seqId == null) {</span>
+<span class="fc" id="L57">		throw new SequenceException(&quot;Unable to get sequence id for key : &quot; + key);</span>
+	  }
+
+<span class="fc" id="L60">	  return seqId.getSeq();</span>
+
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

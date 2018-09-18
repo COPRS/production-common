@@ -19,6 +19,11 @@ mongodb:
 mqi:
   max-retries: ${appcatalog_mqi_max_retries:3}
   
+status:
+  delete-fixed-delay-ms: ${job_status_delete-fixed-delay-ms:3000}
+  max-error-counter-mqi: 3
+  max-error-counter-job: 3
+  
 # job
 jobs:
   cleaning-jobs-terminated-fixed-rate-ms: 600000

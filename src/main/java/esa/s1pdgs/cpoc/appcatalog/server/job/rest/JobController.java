@@ -112,7 +112,8 @@ public class JobController<T> {
      * @param appDataJobService
      */
     public JobController(final AppDataJobService appDataJobService,
-            final JobConverter<T> jobConverter, final ProductCategory category) {
+            final JobConverter<T> jobConverter,
+            final ProductCategory category) {
         this.appDataJobService = appDataJobService;
         this.jobConverter = jobConverter;
         this.category = category;
@@ -290,8 +291,8 @@ public class JobController<T> {
                                     generation),
                             maxNbErrors.get(generation.getState())));
         } catch (AppCatalogJobGenerationTerminatedException e) {
-            LOGGER.error("[jobId {}] [taskTable {}] {}", jobId, taskTable,
-                    e.getLogMessage());
+            LOGGER.error("[jobId {}] [taskTable {}] [code {}] {}", jobId,
+                    taskTable, e.getCode().getCode(), e.getLogMessage());
             // TODO publish error message in kafka
         }
         return ret;

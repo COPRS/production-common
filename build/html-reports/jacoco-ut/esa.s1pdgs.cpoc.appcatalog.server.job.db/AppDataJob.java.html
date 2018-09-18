@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AppDataJob.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">s1pdgs-applicative-catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.server.job.db</a> &gt; <span class="el_source">AppDataJob.java</span></div><h1>AppDataJob.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.server.job.db;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+/**
+ * Class used for exchanging applicative data of a job
+ * 
+ * @author Viveris Technologies
+ */
+@Document(collection = &quot;jobs&quot;)
+public class AppDataJob {
+
+    /**
+     * Job identifier
+     */
+    @Id
+    private long identifier;
+
+    /**
+     * Product category
+     */
+    private ProductCategory category;
+
+    /**
+     * Application Level: L0 or L1
+     */
+    private ApplicationLevel level;
+
+    /**
+     * Name of the pod generating the jobs
+     */
+    private String pod;
+
+    /**
+     * Global state of the job (aggregation of the states of all its job
+     * generations)
+     */
+    private AppDataJobState state;
+
+    /**
+     * Date when the job is created
+     */
+    private Date creationDate;
+
+    /**
+     * Date of the last modification done on the job
+     */
+    private Date lastUpdateDate;
+
+    /**
+     * MQI messages linked to this job
+     */
+    private List&lt;Object&gt; messages;
+
+    /**
+     * Product of this job
+     */
+    private AppDataJobProduct product;
+
+    /**
+     * Generations of the job
+     */
+    private List&lt;AppDataJobGeneration&gt; generations;
+
+    /**
+     * 
+     */
+    public AppDataJob() {
+<span class="fc" id="L78">        super();</span>
+<span class="fc" id="L79">        this.state = AppDataJobState.WAITING;</span>
+<span class="fc" id="L80">        this.messages = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L81">        this.generations = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L82">    }</span>
+
+    /**
+     * @return the identifier
+     */
+    public long getIdentifier() {
+<span class="fc" id="L88">        return identifier;</span>
+    }
+
+    /**
+     * @param identifier
+     *            the identifier to set
+     */
+    public void setIdentifier(final long identifier) {
+<span class="fc" id="L96">        this.identifier = identifier;</span>
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * @return the category
+     */
+    public ProductCategory getCategory() {
+<span class="fc" id="L103">        return category;</span>
+    }
+
+    /**
+     * @param category
+     *            the category to set
+     */
+    public void setCategory(ProductCategory category) {
+<span class="fc" id="L111">        this.category = category;</span>
+<span class="fc" id="L112">    }</span>
+
+    /**
+     * @return the level
+     */
+    public ApplicationLevel getLevel() {
+<span class="fc" id="L118">        return level;</span>
+    }
+
+    /**
+     * @param level
+     *            the level to set
+     */
+    public void setLevel(final ApplicationLevel level) {
+<span class="fc" id="L126">        this.level = level;</span>
+<span class="fc" id="L127">    }</span>
+
+    /**
+     * @return the pod
+     */
+    public String getPod() {
+<span class="fc" id="L133">        return pod;</span>
+    }
+
+    /**
+     * @param pod
+     *            the pod to set
+     */
+    public void setPod(final String pod) {
+<span class="fc" id="L141">        this.pod = pod;</span>
+<span class="fc" id="L142">    }</span>
+
+    /**
+     * @return the state
+     */
+    public AppDataJobState getState() {
+<span class="fc" id="L148">        return state;</span>
+    }
+
+    /**
+     * @param state
+     *            the state to set
+     */
+    public void setState(final AppDataJobState state) {
+<span class="fc" id="L156">        this.state = state;</span>
+<span class="fc" id="L157">    }</span>
+
+    /**
+     * @return the creationDate
+     */
+    public Date getCreationDate() {
+<span class="fc" id="L163">        return creationDate;</span>
+    }
+
+    /**
+     * @param creationDate
+     *            the creationDate to set
+     */
+    public void setCreationDate(final Date creationDate) {
+<span class="fc" id="L171">        this.creationDate = creationDate;</span>
+<span class="fc" id="L172">    }</span>
+
+    /**
+     * @return the lastUpdateDate
+     */
+    public Date getLastUpdateDate() {
+<span class="fc" id="L178">        return lastUpdateDate;</span>
+    }
+
+    /**
+     * @param lastUpdateDate
+     *            the lastUpdateDate to set
+     */
+    public void setLastUpdateDate(final Date lastUpdateDate) {
+<span class="fc" id="L186">        this.lastUpdateDate = lastUpdateDate;</span>
+<span class="fc" id="L187">    }</span>
+
+    /**
+     * @return the messages
+     */
+    public List&lt;Object&gt; getMessages() {
+<span class="fc" id="L193">        return messages;</span>
+    }
+
+    /**
+     * @param messages
+     *            the messages to set
+     */
+    public void setMessages(final List&lt;Object&gt; messages) {
+<span class="fc" id="L201">        this.messages = messages;</span>
+<span class="fc" id="L202">    }</span>
+
+    /**
+     * @return the product
+     */
+    public AppDataJobProduct getProduct() {
+<span class="fc" id="L208">        return product;</span>
+    }
+
+    /**
+     * @param product
+     *            the product to set
+     */
+    public void setProduct(final AppDataJobProduct product) {
+<span class="fc" id="L216">        this.product = product;</span>
+<span class="fc" id="L217">    }</span>
+
+    /**
+     * @return the generations
+     */
+    public List&lt;AppDataJobGeneration&gt; getGenerations() {
+<span class="fc" id="L223">        return generations;</span>
+    }
+
+    /**
+     * @param generations
+     *            the generations to set
+     */
+    public void setGenerations(final List&lt;AppDataJobGeneration&gt; generations) {
+<span class="fc" id="L231">        this.generations = generations;</span>
+<span class="fc" id="L232">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L239">        return String.format(</span>
+                &quot;{identifier: %s, category: %s, level: %s, pod: %s, state: %s, creationDate: %s, lastUpdateDate: %s, messages: %s, product: %s, generations: %s}&quot;,
+<span class="fc" id="L241">                identifier, category, level, pod, state, creationDate,</span>
+                lastUpdateDate, messages, product, generations);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L250">        return Objects.hash(identifier, category, level, pod, state,</span>
+                creationDate, lastUpdateDate, messages, product, generations);
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L260" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L261">            ret = true;</span>
+<span class="fc bfc" id="L262" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L263">            ret = false;</span>
+        } else {
+<span class="fc" id="L265">            AppDataJob other = (AppDataJob) obj;</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">            ret = identifier == other.identifier</span>
+<span class="fc bfc" id="L267" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(category, other.category)</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(level, other.level)</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(pod, other.pod)</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(state, other.state)</span>
+<span class="fc bfc" id="L271" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(creationDate, other.creationDate)</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(lastUpdateDate, other.lastUpdateDate)</span>
+<span class="fc bfc" id="L273" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(messages, other.messages)</span>
+<span class="fc bfc" id="L274" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(product, other.product)</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(generations, other.generations);</span>
+        }
+<span class="fc" id="L277">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -37,6 +37,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.RestControllerTest;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.rest.MqiLevelJobController;
+import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -51,6 +52,9 @@ public class MqiLevelJobControllerTest extends RestControllerTest {
 
     @Value("${mqi.max-retries}")
     private int maxRetries;
+    
+    @Mock
+    private AppStatus appStatus;
 
     private MqiLevelJobController controller;
 
@@ -59,7 +63,8 @@ public class MqiLevelJobControllerTest extends RestControllerTest {
         MockitoAnnotations.initMocks(this);
 
         this.controller =
-                new MqiLevelJobController(mongoDBServices, maxRetries);
+                new MqiLevelJobController(mongoDBServices, maxRetries,
+                        appStatus);
         this.initMockMvc(this.controller);
     }
 
