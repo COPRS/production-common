@@ -10,8 +10,8 @@ Configuration:
         Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-ingestor-app:1.0.0 %-5level: %msg [%thread] %n"
     RollingFile:
       name: FILE
-      fileName: ${env:ingestor_logging_file:-./s1pdgs-ingestor.log}
-      filePattern: "${env:ingestor_logging_file:-./s1pdgs-ingestor.log}.%d{yyyy-MM-dd-hh-mm}.gz"
+      fileName: ./s1pdgs-ingestor.log
+      filePattern: "./s1pdgs-ingestor.log.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
         Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-ingestor-app:1.0.0 %-5level: %msg [%thread] %n"
       Policies:
@@ -21,8 +21,8 @@ Configuration:
         max: 30
     RollingFile:
       name: FILE
-      fileName: ${env:ingestor_logging_file:-./s1pdgs-ingestor.log}
-      filePattern: "${env:ingestor_logging_file:-./s1pdgs-ingestor.log}.%d{yyyy-MM-dd-hh-mm}.gz"
+      fileName: ./s1pdgs-ingestor.log
+      filePattern: "./s1pdgs-ingestor.log.%d{yyyy-MM-dd-hh-mm}.gz"
       PatternLayout:
         Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-ingestor-app:1.0.0 %-5level: %msg [%thread] %n"
       Policies:
@@ -44,37 +44,37 @@ Configuration:
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc
-        level: ${env:ingestor_logging_level_esa-s1pdgs-cpoc:-info}
+        level: info
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
           - ref: KAFKA_ERROR
       - name: org.springframework
-        level: ${env:ingestor_logging_level_orgspringframework:-error}
+        level: error
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: kafka
-        level: ${env:ingestor_logging_level_kafka:-warn}
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: org.apache
-        level: ${env:ingestor_logging_level_orgapache:-warn}
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
       - name: com.amazonaws
-        level: ${env:ingestor_logging_level_amazonaws:-warn}
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
     Root:
-      level: ${env:ingestor_logging_level_root:-error}
+      level: error
       AppenderRef:
         ref: STDOUT

@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.EdrsSessionFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaSessionProducer;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 
 public class EdrsSessionProcessorTest {
@@ -33,6 +34,13 @@ public class EdrsSessionProcessorTest {
      */
     @Mock
     private EdrsSessionFileDescriptorService extractor;
+    
+
+    /**
+     * Application status
+     */
+    @Mock
+    private AppStatus appStatus;
 
     /**
      * Service to test
@@ -45,7 +53,7 @@ public class EdrsSessionProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new SessionFilesProcessor(obsService, publisher, extractor);
+        service = new SessionFilesProcessor(obsService, publisher, extractor, appStatus);
     }
 
     /**

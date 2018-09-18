@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 
 public class AbstractFileProcessorTest {
 
@@ -54,6 +55,13 @@ public class AbstractFileProcessorTest {
      */
     @Mock
     private AbstractFileDescriptorService extractor;
+    
+
+    /**
+     * Application status
+     */
+    @Mock
+    private AppStatus appStatus;
 
     /**
      * Service to test
@@ -90,7 +98,7 @@ public class AbstractFileProcessorTest {
 
         doReturn(file).when(message).getPayload();
 
-        service = new FileProcessorImpl(obsService, publisher, extractor);
+        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus);
     }
 
     /**
@@ -293,8 +301,9 @@ class FileProcessorImpl extends AbstractFileProcessor<String> {
      */
     public FileProcessorImpl(final ObsService obsService,
             final PublicationServices<String> publisher,
-            final AbstractFileDescriptorService extractor) {
-        super(obsService, publisher, extractor, ProductFamily.BLANK);
+            final AbstractFileDescriptorService extractor,
+            final AppStatus appStatus) {
+        super(obsService, publisher, extractor, ProductFamily.BLANK, appStatus);
     }
 
     /**

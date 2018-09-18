@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 
 public class AuxiliaryFilesProcessorTest {
@@ -33,6 +34,12 @@ public class AuxiliaryFilesProcessorTest {
      */
     @Mock
     private AuxiliaryFileDescriptorService extractor;
+    
+    /**
+     * Application status
+     */
+    @Mock
+    private AppStatus appStatus;
 
     /**
      * Service to test
@@ -45,7 +52,7 @@ public class AuxiliaryFilesProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new AuxiliaryFilesProcessor(obsService, publisher, extractor);
+        service = new AuxiliaryFilesProcessor(obsService, publisher, extractor, appStatus);
     }
 
     /**

@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 
 /**
@@ -25,8 +26,9 @@ public class AuxiliaryFilesProcessor
     @Autowired
     public AuxiliaryFilesProcessor(final ObsService obsService,
             final KafkaConfigFileProducer publisher,
-            final AuxiliaryFileDescriptorService extractor) {
-        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE);
+            final AuxiliaryFileDescriptorService extractor,
+            final AppStatus appStatus) {
+        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE, appStatus);
     }
 
     /**

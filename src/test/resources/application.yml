@@ -1,11 +1,10 @@
-#TODO: figure out why I need this here and in bootstrap.yml
 spring:
   application:
     name: s1pdgs-ingestor
     
 # Logging
 logging:
-  config: ./test/log4j2-test.yml
+  config: ./src/test/resources/log4j2-test.yml
 
 # KAFKA
 kafka:
@@ -17,30 +16,16 @@ kafka:
     auxiliary-files: t-pdgs-auxiliary-files
     edrs-sessions: t-pdgs-edrs-sessions
 
-#FTP
-ftp:
-  host: 172.17.50.10
-  port: 21
-  username: user
-  password: passwd
-  client-mode: 2
-  local-directory: /data/local-ingestor/
-  command-options:
-    mget: -P -R -D
-  auxiliary-files:
-    remote-directory: /auxiliary_files/
-    upload-fixed-rate: 3000
-    cache-max-capacity: 10
-  session-files:
-    remote-directory: /erds_sessions/
-    upload-fixed-rate: 5000
-    cache-max-capacity: 70
+#Status
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-aux: 3
+  max-error-counter-ses: 3
  
 # File
 file:
   auxiliary-files:
     local-directory: /data/local-ingestor/auxiliary_files/ # Must contains the last /
-    read-fixed-rate: 1000
     poll-fixed-delay: 1000
     max-msg-per-poll: 5
     executor-pool-size: 5
@@ -49,7 +34,6 @@ file:
     cache-max-capacity: 10
   session-files:
     local-directory: /data/local-ingestor/erds_sessions/
-    read-fixed-rate: 1000
     poll-fixed-delay: 1000
     max-msg-per-poll: 5
     executor-pool-size: 5

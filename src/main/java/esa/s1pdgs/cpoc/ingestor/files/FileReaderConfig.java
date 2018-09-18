@@ -103,8 +103,6 @@ public class FileReaderConfig {
 	 * @return a message per file/directory
 	 */
 	@Bean(name = "sessionFileReadingMessageSource")
-	// @InboundChannelAdapter(value = "sessionFileChannel", poller =
-	// @Poller(fixedRate = "${file.session-files.read-fixed-rate}"))
 	public MessageSource<File> sessionFileReadingMessageSource() {
 		ChainFileListFilter<File> filter = new ChainFileListFilter<File>();
 		filter.addFilter(
@@ -160,8 +158,6 @@ public class FileReaderConfig {
 	 * @return a message per file/directory
 	 */
 	@Bean(name = "configFileReadingMessageSource")
-	// @InboundChannelAdapter(value = "configFileChannel", poller =
-	// @Poller(fixedRate = "${file.auxiliary-files.read-fixed-rate}"))
 	public MessageSource<File> configFileReadingMessageSource() {
 		ChainFileListFilter<File> filter = new ChainFileListFilter<File>();
 		filter.addFilter(
