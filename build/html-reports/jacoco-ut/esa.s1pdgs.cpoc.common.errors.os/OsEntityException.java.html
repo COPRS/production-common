@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>OsEntityException.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.common.errors.os</a> &gt; <span class="el_source">OsEntityException.java</span></div><h1>OsEntityException.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.common.errors.os;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+
+/**
+ * @author Viveris Technologies
+ */
+public class OsEntityException extends AbstractCodedException {
+
+    private static final long serialVersionUID = 1302470342554468202L;
+
+    /**
+     * Entity identifier
+     */
+    private final String identifier;
+
+    /**
+     * Type of the entity
+     */
+    private final String type;
+
+    /**
+     * @param type
+     * @param id
+     * @param code
+     * @param message
+     */
+    public OsEntityException(final String type, final String identifier,
+            final ErrorCode code, final String message) {
+<span class="fc" id="L30">        super(code, message);</span>
+<span class="fc" id="L31">        this.type = type;</span>
+<span class="fc" id="L32">        this.identifier = identifier;</span>
+<span class="fc" id="L33">    }</span>
+
+    /**
+     * @param type
+     * @param id
+     * @param code
+     * @param message
+     * @param cause
+     */
+    public OsEntityException(final String type, final String identifier,
+            final ErrorCode code, final String message, final Throwable cause) {
+<span class="fc" id="L44">        super(code, message, cause);</span>
+<span class="fc" id="L45">        this.type = type;</span>
+<span class="fc" id="L46">        this.identifier = identifier;</span>
+<span class="fc" id="L47">    }</span>
+
+    /**
+     * 
+     */
+    @Override
+    public String getLogMessage() {
+<span class="fc" id="L54">        return String.format(&quot;[%s %s] [msg %s]&quot;, type, identifier,</span>
+<span class="fc" id="L55">                getMessage());</span>
+    }
+
+    /**
+     * @return the id
+     */
+    public String getIdentifier() {
+<span class="fc" id="L62">        return identifier;</span>
+    }
+
+    /**
+     * @return the type
+     */
+    public String getType() {
+<span class="fc" id="L69">        return type;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

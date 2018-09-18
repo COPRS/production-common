@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>GenericMessageDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.model.rest</a> &gt; <span class="el_source">GenericMessageDto.java</span></div><h1>GenericMessageDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.model.rest;
+
+import java.util.Objects;
+
+/**
+ * Exchanged message for consumption
+ * 
+ * @author Viveris Technologies
+ * @param &lt;T&gt;
+ *            the message
+ */
+public class GenericMessageDto&lt;T&gt; {
+
+    /**
+     * Message identifier
+     */
+    private long identifier;
+
+    /**
+     * Input key
+     */
+    private String inputKey;
+
+    /**
+     * Message body
+     */
+    private T body;
+
+    /**
+     * Default constructor
+     */
+    public GenericMessageDto() {
+<span class="fc" id="L33">        super();</span>
+<span class="fc" id="L34">    }</span>
+
+    /**
+     * Constructor using fields
+     * 
+     * @param identifier
+     * @param body
+     */
+    public GenericMessageDto(final long identifier, final String inputKey,
+            final T body) {
+<span class="fc" id="L44">        this();</span>
+<span class="fc" id="L45">        this.identifier = identifier;</span>
+<span class="fc" id="L46">        this.inputKey = inputKey;</span>
+<span class="fc" id="L47">        this.body = body;</span>
+<span class="fc" id="L48">    }</span>
+
+    /**
+     * @return the identifier
+     */
+    public long getIdentifier() {
+<span class="fc" id="L54">        return identifier;</span>
+    }
+
+    /**
+     * @param identifier
+     *            the identifier to set
+     */
+    public void setIdentifier(final long identifier) {
+<span class="fc" id="L62">        this.identifier = identifier;</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * @return the inputKey
+     */
+    public String getInputKey() {
+<span class="fc" id="L69">        return inputKey;</span>
+    }
+
+    /**
+     * @param inputKey
+     *            the inputKey to set
+     */
+    public void setInputKey(final String inputKey) {
+<span class="fc" id="L77">        this.inputKey = inputKey;</span>
+<span class="fc" id="L78">    }</span>
+
+    /**
+     * @return the body
+     */
+    public T getBody() {
+<span class="fc" id="L84">        return body;</span>
+    }
+
+    /**
+     * @param body
+     *            the body to set
+     */
+    public void setBody(final T body) {
+<span class="fc" id="L92">        this.body = body;</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L100">        return String.format(&quot;{identifier: %s, inputKey: %s, body: %s}&quot;,</span>
+<span class="fc" id="L101">                identifier, inputKey, body);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L109">        return Objects.hash(identifier, inputKey, body);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L119">            ret = true;</span>
+<span class="fc bfc" id="L120" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L121">            ret = false;</span>
+        } else {
+<span class="fc" id="L123">            GenericMessageDto&lt;?&gt; other = (GenericMessageDto&lt;?&gt;) obj;</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            ret = identifier == other.identifier</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(inputKey, other.inputKey)</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(body, other.body);</span>
+        }
+<span class="fc" id="L128">        return ret;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

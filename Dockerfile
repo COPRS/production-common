@@ -3,11 +3,11 @@ WORKDIR /app
 COPY pom.xml /app
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY src/ /app/src/
-COPY dev/ /app/dev/
+COPY build/ /app/build/
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
 FROM openjdk:8-jre-alpine
-RUN mkdir -p /app/libs/spdgs-sdk/commons/1.0.1
-COPY --from=build /app/pom.xml /app/libs/spdgs-sdk/commons/1.0.1/commons-1.0.1.pom
-COPY --from=build /app/target/commons-1.0.1.jar /app/libs/spdgs-sdk/commons/1.0.1/commons-1.0.1.jar
+RUN mkdir -p /app/libs/spdgs-sdk/commons/1.0.2
+COPY --from=build /app/pom.xml /app/libs/spdgs-sdk/commons/1.0.2/commons-1.0.2.pom
+COPY --from=build /app/target/commons-1.0.2.jar /app/libs/spdgs-sdk/commons/1.0.2/commons-1.0.2.jar
 ENTRYPOINT /bin/sh

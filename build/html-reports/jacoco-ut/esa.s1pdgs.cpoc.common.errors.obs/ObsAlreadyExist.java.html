@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ObsAlreadyExist.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.common.errors.obs</a> &gt; <span class="el_source">ObsAlreadyExist.java</span></div><h1>ObsAlreadyExist.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.common.errors.obs;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+/**
+ * Exception raised when object already exist in object storage
+ */
+public class ObsAlreadyExist extends ObsException {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5331517744542218021L;
+
+    /**
+     * Custom message
+     */
+    private static final String MESSAGE =
+            &quot;Object already exists in object storage&quot;;
+
+    /**
+     * @param productName
+     * @param cause
+     */
+    public ObsAlreadyExist(final ProductFamily family, final String key,
+            final Throwable cause) {
+<span class="fc" id="L27">        super(ErrorCode.OBS_ALREADY_EXIST, family, key,</span>
+<span class="fc" id="L28">                MESSAGE + &quot;: &quot; + cause.getMessage(), cause);</span>
+<span class="fc" id="L29">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

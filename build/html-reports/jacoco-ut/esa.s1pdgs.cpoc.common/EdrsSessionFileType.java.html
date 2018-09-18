@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>EdrsSessionFileType.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.common</a> &gt; <span class="el_source">EdrsSessionFileType.java</span></div><h1>EdrsSessionFileType.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.common;
+
+/**
+ * Enumeration for ERDS session file type
+ * @author Viveris Technologies
+ *
+ */
+<span class="pc" id="L8">public enum EdrsSessionFileType {</span>
+<span class="fc" id="L9">	RAW, SESSION;</span>
+	
+	/**
+	 * Determinate value from an extension
+	 * @param extension
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public static EdrsSessionFileType valueFromExtension(final FileExtension extension) throws IllegalArgumentException {
+		EdrsSessionFileType ret;
+<span class="pc bfc" id="L19" title="All 3 branches covered.">		switch (extension) {</span>
+		case XML:
+<span class="fc" id="L21">			ret = SESSION;</span>
+<span class="fc" id="L22">			break;</span>
+		case RAW:
+<span class="fc" id="L24">			ret = RAW;</span>
+<span class="fc" id="L25">			break;</span>
+		default:
+<span class="fc" id="L27">			throw new IllegalArgumentException(&quot;Cannot retrieve ERDS session file type from extension &quot; + extension);</span>
+		}
+<span class="fc" id="L29">		return ret;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

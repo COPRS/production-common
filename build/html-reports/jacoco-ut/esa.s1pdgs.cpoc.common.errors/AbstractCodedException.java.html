@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AbstractCodedException.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.common.errors</a> &gt; <span class="el_source">AbstractCodedException.java</span></div><h1>AbstractCodedException.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.common.errors;
+
+/**
+ * Abstract custom exception
+ * 
+ * @author Viveris Technologies
+ */
+public abstract class AbstractCodedException extends Exception {
+
+    /**
+     * UUID
+     */
+    private static final long serialVersionUID = -3674800585523293639L;
+
+    /**
+     * Code identified the error
+     */
+    private final ErrorCode code;
+
+    /**
+     * Constructor
+     * 
+     * @param code
+     * @param message
+     */
+    public AbstractCodedException(final ErrorCode code, final String message) {
+<span class="fc" id="L27">        super(message);</span>
+<span class="fc" id="L28">        this.code = code;</span>
+<span class="fc" id="L29">    }</span>
+
+    /**
+     * Constructor
+     * 
+     * @param code
+     * @param message
+     * @param e
+     */
+    public AbstractCodedException(final ErrorCode code, final String message,
+            final Throwable cause) {
+<span class="fc" id="L40">        super(message, cause);</span>
+<span class="fc" id="L41">        this.code = code;</span>
+<span class="fc" id="L42">    }</span>
+
+    /**
+     * @return the code
+     */
+    public ErrorCode getCode() {
+<span class="fc" id="L48">        return code;</span>
+    }
+
+    /**
+     * The available error codes
+     */
+<span class="fc" id="L54">    public enum ErrorCode {</span>
+
+<span class="fc" id="L56">        INTERNAL_ERROR(1), UNKNOWN_FAMILY(2), INVALID_PRODUCT_FORMAT(3),</span>
+
+<span class="fc" id="L58">        OBS_UNKOWN_OBJ(50), OBS_ERROR(51), OBS_ALREADY_EXIST(52),</span>
+<span class="fc" id="L59">        OBS_PARALLEL_ACCESS(53),</span>
+
+<span class="fc" id="L61">        MQI_PUBLICATION_ERROR(70), MQI_CATEGORY_NOT_AVAILABLE(71),</span>
+<span class="fc" id="L62">        MQI_NEXT_API_ERROR(72), MQI_ACK_API_ERROR(73),</span>
+<span class="fc" id="L63">        MQI_PUBLISH_API_ERROR(74), MQI_PUBLISH_ERROR(75),</span>
+<span class="fc" id="L64">        MQI_STATUS_API_ERROR(76), MQI_STOP_API_ERROR(77),</span>
+<span class="fc" id="L65">        MQI_ROUTE_NOT_AVAILABLE(78),</span>
+
+<span class="fc" id="L67">        ES_CREATION_ERROR(90), ES_NOT_PRESENT_ERROR(91),</span>
+<span class="fc" id="L68">        ES_INVALID_SEARCH_MODE(92),</span>
+
+<span class="fc" id="L70">        OS_SERVER_NOT_ACTIVE(110), OS_FLOATING_IP_NOT_ACTIVE(111),</span>
+<span class="fc" id="L71">        OS_SERVER_NOT_DELETED(112), OS_VOLUME_NOT_CREATED(113),</span>
+
+<span class="fc" id="L73">        K8S_UNKNOWN_RESOURCE(130), K8S_NO_TEMPLATE_POD(131),</span>
+<span class="fc" id="L74">        K8S_WRAPPER_STATUS_ERROR(132), K8S_WRAPPER_STOP_ERROR(133),</span>
+
+<span class="fc" id="L76">        INGESTOR_IGNORE_FILE(200), INGESTOR_INVALID_PATH(201),</span>
+<span class="fc" id="L77">        INGESTOR_CLEAN(202),</span>
+
+<span class="fc" id="L79">        MAX_NUMBER_CACHED_JOB_REACH(270), MAX_NUMBER_TASKTABLE_REACH(271),</span>
+<span class="fc" id="L80">        MAX_NUMBER_CACHED_SESSIONS_REACH(272), MAX_AGE_CACHED_JOB_REACH(273),</span>
+<span class="fc" id="L81">        MAX_AGE_CACHED_SESSIONS_REACH(274), MISSING_ROUTING_ENTRY(275),</span>
+<span class="fc" id="L82">        JOB_GENERATOR_INIT_FAILED(276), MISSING_INPUT(277),</span>
+<span class="fc" id="L83">        JOB_GEN_METADATA_ERROR(278), </span>
+
+<span class="fc" id="L85">        PROCESS_EXIT_ERROR(290), PROCESS_TIMEOUT(291),</span>
+
+<span class="fc" id="L87">        METADATA_IGNORE_FILE(310), METADATA_FILE_PATH(311),</span>
+<span class="fc" id="L88">        METADATA_FILE_EXTENSION(312), METADATA_MALFORMED_ERROR(313),</span>
+<span class="fc" id="L89">        METADATA_EXTRACTION_ERROR(313),</span>
+
+<span class="fc" id="L91">        APPCATALOG_MQI_READ_API_ERROR(330), APPCATALOG_MQI_NEXT_API_ERROR(331),</span>
+<span class="fc" id="L92">        APPCATALOG_MQI_SEND_API_ERROR(332), APPCATALOG_MQI_ACK_API_ERROR(333),</span>
+<span class="fc" id="L93">        APPCATALOG_MQI_GET_OFFSET_API_ERROR(334), APPCATALOG_MQI_GET_API_ERROR(335),</span>
+<span class="fc" id="L94">        APPCATALOG_MQI_NB_READ_API_ERROR(336), APPCATALOG_JOB_SEARCH_API_ERROR(337),</span>
+<span class="fc" id="L95">        APPCATALOG_MQI_JOB_ONE_API_ERROR(338), APPCATALOG_JOB_NEW_API_ERROR(339),</span>
+<span class="fc" id="L96">        APPCATALOG_JOB_DELETE_API_ERROR(340), APPCATALOG_JOB_PATCH_API_ERROR(341),</span>
+<span class="fc" id="L97">        APPCATALOG_JOB_PATCH_GEN_API_ERROR(342),</span>
+        
+<span class="fc" id="L99">        STATUS_PROCESSING_API_ERROR(350);</span>
+
+        /**
+         * code
+         */
+        private final int code;
+
+        /**
+         * constructor
+         * 
+         * @param code
+         */
+<span class="fc" id="L111">        private ErrorCode(final int code) {</span>
+<span class="fc" id="L112">            this.code = code;</span>
+<span class="fc" id="L113">        }</span>
+
+        /**
+         * @return
+         */
+        public int getCode() {
+<span class="fc" id="L119">            return this.code;</span>
+        }
+    }
+
+    /**
+     * Display exception details (except code) in a specific format: [fieldname1
+     * fieldvalue1]... [fieldnamen fieldvaluen] [msg msg]
+     * 
+     * @return
+     */
+    public abstract String getLogMessage();
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

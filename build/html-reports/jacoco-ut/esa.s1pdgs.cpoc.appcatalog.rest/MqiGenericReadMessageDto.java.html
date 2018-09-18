@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MqiGenericReadMessageDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.rest</a> &gt; <span class="el_source">MqiGenericReadMessageDto.java</span></div><h1>MqiGenericReadMessageDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.rest;
+
+import java.util.Objects;
+
+/**
+ * Object used by the applciative catalog when reading a message
+ * 
+ * @author Viveris Technologies
+ */
+public class MqiGenericReadMessageDto&lt;T&gt; {
+
+    /**
+     * Group
+     */
+    private String group;
+
+    /**
+     * Pod
+     */
+    private String pod;
+
+    /**
+     * If true, the pod is the new reader of the message even if its is
+     * processing by another
+     */
+    private boolean force;
+
+    /**
+     * Read dto
+     */
+    private T dto;
+
+    /**
+     * Default constructor
+     */
+    public MqiGenericReadMessageDto() {
+<span class="fc" id="L37">        super();</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * @param group
+     * @param pod
+     * @param force
+     * @param dto
+     */
+    public MqiGenericReadMessageDto(final String group, final String pod,
+            final boolean force, final T dto) {
+<span class="fc" id="L48">        super();</span>
+<span class="fc" id="L49">        this.group = group;</span>
+<span class="fc" id="L50">        this.pod = pod;</span>
+<span class="fc" id="L51">        this.force = force;</span>
+<span class="fc" id="L52">        this.dto = dto;</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * @return the group
+     */
+    public String getGroup() {
+<span class="fc" id="L59">        return group;</span>
+    }
+
+    /**
+     * @param group
+     *            the group to set
+     */
+    public void setGroup(final String group) {
+<span class="fc" id="L67">        this.group = group;</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * @return the pod
+     */
+    public String getPod() {
+<span class="fc" id="L74">        return pod;</span>
+    }
+
+    /**
+     * @param pod
+     *            the pod to set
+     */
+    public void setPod(final String pod) {
+<span class="fc" id="L82">        this.pod = pod;</span>
+<span class="fc" id="L83">    }</span>
+
+    /**
+     * @return the force
+     */
+    public boolean isForce() {
+<span class="fc" id="L89">        return force;</span>
+    }
+
+    /**
+     * @param force
+     *            the force to set
+     */
+    public void setForce(final boolean force) {
+<span class="fc" id="L97">        this.force = force;</span>
+<span class="fc" id="L98">    }</span>
+
+    /**
+     * @return the dto
+     */
+    public T getDto() {
+<span class="fc" id="L104">        return dto;</span>
+    }
+
+    /**
+     * @param dto
+     *            the dto to set
+     */
+    public void setDto(final T dto) {
+<span class="fc" id="L112">        this.dto = dto;</span>
+<span class="fc" id="L113">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L120">        return String.format(&quot;{group: %s, pod: %s, force: %s, dto: %s}&quot;, group,</span>
+<span class="fc" id="L121">                pod, force, dto);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L129">        return Objects.hash(group, pod, force, dto);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L138" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L139">            ret = true;</span>
+<span class="fc bfc" id="L140" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L141">            ret = false;</span>
+        } else {
+<span class="fc" id="L143">            MqiGenericReadMessageDto&lt;?&gt; other = (MqiGenericReadMessageDto&lt;?&gt;) obj;</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            ret = Objects.equals(group, other.group)</span>
+<span class="fc bfc" id="L145" title="All 4 branches covered.">                    &amp;&amp; Objects.equals(pod, other.pod) &amp;&amp; force == other.force</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(dto, other.dto);</span>
+        }
+<span class="fc" id="L148">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AppDataJobGenerationDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.appcatalog.common.rest.model.job</a> &gt; <span class="el_source">AppDataJobGenerationDto.java</span></div><h1>AppDataJobGenerationDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.appcatalog.common.rest.model.job;
+
+import java.util.Date;
+import java.util.Objects;
+
+/**
+ * Object used for persisting data around job generation per task table
+ * 
+ * @author Viveris Technologies
+ */
+public class AppDataJobGenerationDto {
+
+    /**
+     * Date of the creation of the job generation
+     */
+    private Date creationDate;
+
+    /**
+     * Date of the last modification done on the job generation
+     */
+    private Date lastUpdateDate;
+
+    /**
+     * Name of the task table (= filename)
+     */
+    private String taskTable;
+
+    /**
+     * State of the job generation
+     */
+    private AppDataJobGenerationDtoState state;
+
+    /**
+     * Number of consecutive errors
+     */
+    private int nbErrors;
+
+    /**
+     * 
+     */
+    public AppDataJobGenerationDto() {
+<span class="fc" id="L42">        super();</span>
+<span class="fc" id="L43">        this.state = AppDataJobGenerationDtoState.INITIAL;</span>
+<span class="fc" id="L44">        this.creationDate = new Date();</span>
+<span class="fc" id="L45">        this.nbErrors = 0;</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * @return the creationDate
+     */
+    public Date getCreationDate() {
+<span class="fc" id="L52">        return creationDate;</span>
+    }
+
+    /**
+     * @param creationDate
+     *            the creationDate to set
+     */
+    public void setCreationDate(final Date creationDate) {
+<span class="fc" id="L60">        this.creationDate = creationDate;</span>
+<span class="fc" id="L61">    }</span>
+
+    /**
+     * @return the lastUpdateDate
+     */
+    public Date getLastUpdateDate() {
+<span class="fc" id="L67">        return lastUpdateDate;</span>
+    }
+
+    /**
+     * @param lastUpdateDate
+     *            the lastUpdateDate to set
+     */
+    public void setLastUpdateDate(final Date lastUpdateDate) {
+<span class="fc" id="L75">        this.lastUpdateDate = lastUpdateDate;</span>
+<span class="fc" id="L76">    }</span>
+
+    /**
+     * @return the taskTable
+     */
+    public String getTaskTable() {
+<span class="fc" id="L82">        return taskTable;</span>
+    }
+
+    /**
+     * @param taskTable
+     *            the taskTable to set
+     */
+    public void setTaskTable(final String taskTable) {
+<span class="fc" id="L90">        this.taskTable = taskTable;</span>
+<span class="fc" id="L91">    }</span>
+
+    /**
+     * @return the state
+     */
+    public AppDataJobGenerationDtoState getState() {
+<span class="fc" id="L97">        return state;</span>
+    }
+
+    /**
+     * @param state
+     *            the state to set
+     */
+    public void setState(final AppDataJobGenerationDtoState state) {
+<span class="fc" id="L105">        this.state = state;</span>
+<span class="fc" id="L106">    }</span>
+
+    /**
+     * @return the nbErrors
+     */
+    public int getNbErrors() {
+<span class="fc" id="L112">        return nbErrors;</span>
+    }
+
+    /**
+     * @param nbErrors
+     *            the nbErrors to set
+     */
+    public void setNbErrors(final int nbErrors) {
+<span class="fc" id="L120">        this.nbErrors = nbErrors;</span>
+<span class="fc" id="L121">    }</span>
+
+    /**
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L130">        return String.format(</span>
+                &quot;{creationDate: %s, lastUpdateDate: %s, taskTable: %s, state: %s, nbErrors: %s}&quot;,
+<span class="fc" id="L132">                creationDate, lastUpdateDate, taskTable, state, nbErrors);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L140">        return Objects.hash(creationDate, lastUpdateDate, taskTable, state,</span>
+<span class="fc" id="L141">                nbErrors);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L151">            ret = true;</span>
+<span class="fc bfc" id="L152" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L153">            ret = false;</span>
+        } else {
+<span class="fc" id="L155">            AppDataJobGenerationDto other = (AppDataJobGenerationDto) obj;</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">            ret = Objects.equals(creationDate, other.creationDate)</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(lastUpdateDate, other.lastUpdateDate)</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(taskTable, other.taskTable)</span>
+<span class="fc bfc" id="L159" title="All 4 branches covered.">                    &amp;&amp; Objects.equals(state, other.state)</span>
+                    &amp;&amp; nbErrors == other.nbErrors;
+        }
+<span class="fc" id="L162">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
