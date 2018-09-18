@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MetadataExtractorConfig.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.extraction</a> &gt; <span class="el_source">MetadataExtractorConfig.java</span></div><h1>MetadataExtractorConfig.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.extraction;
+
+import java.util.Map;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @author Olivier Bex-Chauvet
+ */
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = &quot;mdextractor&quot;)
+public class MetadataExtractorConfig {
+    /**
+     * Map of all the overlap for the different slice type
+     */
+    private Map&lt;String, Float&gt; typeOverlap;
+
+    /**
+     * Map of all the length for the different slice type
+     */
+    private Map&lt;String, Float&gt; typeSliceLength;
+
+    private String xsltDirectory;
+
+<span class="fc" id="L28">    public MetadataExtractorConfig() {</span>
+<span class="fc" id="L29">    }</span>
+
+    /**
+     * @return the typeOverlap
+     */
+    public Map&lt;String, Float&gt; getTypeOverlap() {
+<span class="fc" id="L35">        return typeOverlap;</span>
+    }
+
+    /**
+     * @param typeOverlap
+     *            the typeOverlap to set
+     */
+    public void setTypeOverlap(Map&lt;String, Float&gt; typeOverlap) {
+<span class="fc" id="L43">        this.typeOverlap = typeOverlap;</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * @return the typeSliceLength
+     */
+    public Map&lt;String, Float&gt; getTypeSliceLength() {
+<span class="fc" id="L50">        return typeSliceLength;</span>
+    }
+
+    /**
+     * @param typeSliceLength
+     *            the typeSliceLength to set
+     */
+    public void setTypeSliceLength(Map&lt;String, Float&gt; typeSliceLength) {
+<span class="fc" id="L58">        this.typeSliceLength = typeSliceLength;</span>
+<span class="fc" id="L59">    }</span>
+
+    /**
+     * @return the xsltDirectory
+     */
+    public String getXsltDirectory() {
+<span class="fc" id="L65">        return xsltDirectory;</span>
+    }
+
+    /**
+     * @param xsltDirectory
+     *            the xsltDirectory to set
+     */
+    public void setXsltDirectory(String xsltDirectory) {
+<span class="fc" id="L73">        this.xsltDirectory = xsltDirectory;</span>
+<span class="fc" id="L74">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

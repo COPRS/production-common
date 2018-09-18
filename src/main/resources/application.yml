@@ -5,50 +5,58 @@ spring:
     
 # Logging
 logging:
-  config: ${catalog_logging_config:log4j2.yml}
+  config: log4j2.yml
     
 # Elastic Search
 elasticsearch:
-  host: ${elastic_host:es-svc}
-  port: ${elastic_port:25000}
-  index-type: ${elastic_index-type:metadata}
-  connect-timeout-ms: ${elastic_connect_timeout_ms:2000}
-  socket-timeout-ms: ${elastic_socket_timeout_ms:10000}
-  max-retry-timeout-ms: ${elastic_max_retry_timeout_ms:30000}
+  host: ${elastic_host}                                           # Host of Elasticsearch cluster
+  port: ${elastic_port}                                           # Port of Elasticsearch cluster
+  index-type: ${elastic_index-type}                               # Elasticsearch index type used for metadata
+  connect-timeout-ms: ${elastic_connect_timeout_ms}               # Timeout in milliseconds of connection to the cluster
+  socket-timeout-ms: ${elastic_socket_timeout_ms}                 # Timeout in milliseconds of the socket to the cluster
+  max-retry-timeout-ms: ${elastic_max_retry_timeout_ms}           # Timeout in milliseconds of connection to the cluster
     
 # File
 file:
-  file-with-manifest-ext: ${catalog_file-with-manifest-ext:.safe}
-  manifest-filename: ${catalog_manifest-filename:manifest.safe}
+  file-with-manifest-ext: .safe                                   # Extension of the SAFE files
+  manifest-filename: manifest.safe                                # Name of the manifest (with extension)
   mqi:
-    host-uri: ${catalog_mqi_host-uri:http://localhost:8081}
-    max-retries: ${catalog_mqi_max-retries:3}
-    tempo-retry-ms: ${catalog_mqi_tempo-retry-ms:1000}
+    host-uri: http://localhost:8081                               # the host and port for querying MQI server
+    max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
+    tempo-retry-ms: 1000                                          # 
   product-categories:
     auxiliary-files:
-      local-directory: ${catalog_auxiliary-files_local-directory:/data/local-catalog/auxiliary_files/} # Must contains the last /
-      fixed-delay-ms: ${catalog_auxiliary-files_fixed-delay-ms:500}
-      init-delay-poll-ms: ${catalog_auxiliary-files_init-delay-poll-ms:2000}
+      local-directory: /data/local-catalog/auxiliary_files/       # Local directory of file downloading (Must contains the last /)
+      fixed-delay-ms: 500                                         # (fixed delay) Period in milliseconds between 2 polls of next message
+      init-delay-poll-ms: 2000                                    # Initial delay in milliseconds before starting consuming message
     edrs-sessions:
-      local-directory: ${catalog_edrs-sessions_local-directory:/data/local-catalog/edrs_sessions/} # Must contains the last /
-      fixed-delay-ms: ${catalog_edrs-sessions_fixed-delay-ms:500}
-      init-delay-poll-ms: ${catalog_edrs-sessions_init-delay-poll-ms:2000}
+      local-directory: /data/local-catalog/edrs_sessions/         # Must contains the last /
+      fixed-delay-ms: 500                                         # 
+      init-delay-poll-ms: 2000                                    # 
     level-products:
-      local-directory: ${catalog_level-products_local-directory:/data/local-catalog/level_products/} # Must contains the last /
-      fixed-delay-ms: ${catalog_level-products_fixed-delay-ms:500}
-      init-delay-poll-ms: ${catalog_level-products_init-delay-poll-ms:2000}
+      local-directory: /data/local-catalog/level_products/        # Must contains the last /
+      fixed-delay-ms: 500                                         # 
+      init-delay-poll-ms: 2000                                    # 
     
 # REST controller
 server:
-  port: ${catalog_rest_server_port:8080}
+  port: 8080                                                      # port used for publishing REST API
   
 # Metadata Extractor
 mdextractor:
-  typeoverlapstr: ${products_overlap-per-acq}
-  typeslicelengthstr: ${products_slice-length-per-acq}
-  xslt-directory: ${catalog_xslt-directory:xsltDir/} # Must contains the last /
+  type-overlap:                                             # !!!! Overlap per acquisition
+    EW: 8.2F
+    IW: 7.4F
+    SM: 7.7F
+    WM: 0.0F
+  type-slice-length:                                        # !!!!! Slice length per acquisition
+    EW: 60.0F
+    IW: 25.0F
+    SM: 25.0F
+    WM: 0.0F
+  xslt-directory: xsltDir/                                        # Directory where the XSLT are locatede (Must contains the last /)
   
 status:
-  max-error-counter-processing: ${catalog_status_max-error-counter-processing:3}
-  max-error-counter-mqi: ${catalog_status_max-error-counter-mqi:30}
+  max-error-counter-processing: 3                                 # the number of consecutive processing errors leading to the state FATALERROR
+  max-error-counter-mqi: 30                                       # the number of consecutive MQI errors leading to the state FATALERROR
   

@@ -3,7 +3,7 @@ WORKDIR /app
 COPY pom.xml /app
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY src/ /app/src/
-COPY dev/ /app/dev/
+COPY build/ /app/build/
 COPY test/ /app/test/
 COPY config/ /app/config/
 RUN mkdir tmp && mvn -B -s /usr/share/maven/ref/settings-docker.xml package

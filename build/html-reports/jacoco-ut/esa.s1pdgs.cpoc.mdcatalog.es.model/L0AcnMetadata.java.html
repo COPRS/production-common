@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L0AcnMetadata.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.es.model</a> &gt; <span class="el_source">L0AcnMetadata.java</span></div><h1>L0AcnMetadata.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.es.model;
+
+public class L0AcnMetadata extends AbstractMetadata {
+	
+	private int instrumentConfigurationId;
+	
+	private int numberOfSlices;
+	
+	private String datatakeId;
+
+	public L0AcnMetadata() {
+<span class="fc" id="L12">		super();</span>
+<span class="fc" id="L13">	}</span>
+
+	/**
+	 * @return the instrumentConfigurationId
+	 */
+	public int getInstrumentConfigurationId() {
+<span class="fc" id="L19">		return instrumentConfigurationId;</span>
+	}
+
+	/**
+	 * @param instrumentConfigurationId the instrumentConfigurationId to set
+	 */
+	public void setInstrumentConfigurationId(int instrumentConfigurationId) {
+<span class="fc" id="L26">		this.instrumentConfigurationId = instrumentConfigurationId;</span>
+<span class="fc" id="L27">	}</span>
+	
+
+	/**
+	 * @return the numberOfSlices
+	 */
+	public int getNumberOfSlices() {
+<span class="fc" id="L34">		return numberOfSlices;</span>
+	}
+
+	/**
+	 * @param numberOfSlices the numberOfSlices to set
+	 */
+	public void setNumberOfSlices(int numberOfSlices) {
+<span class="fc" id="L41">		this.numberOfSlices = numberOfSlices;</span>
+<span class="fc" id="L42">	}</span>
+
+	/**
+	 * @return the datatakeId
+	 */
+	public String getDatatakeId() {
+<span class="fc" id="L48">		return datatakeId;</span>
+	}
+
+	/**
+	 * @param datatakeId the datatakeId to set
+	 */
+	public void setDatatakeId(String datatakeId) {
+<span class="fc" id="L55">		this.datatakeId = datatakeId;</span>
+<span class="fc" id="L56">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L63">		final int prime = 31;</span>
+<span class="fc" id="L64">		int result = super.hashCode();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">		result = prime * result + ((datatakeId == null) ? 0 : datatakeId.hashCode());</span>
+<span class="fc" id="L66">		result = prime * result + instrumentConfigurationId;</span>
+<span class="fc" id="L67">		result = prime * result + numberOfSlices;</span>
+<span class="fc" id="L68">		return result;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L76">		return &quot;L0AcnMetadata [instrumentConfigurationId= &quot; + instrumentConfigurationId + &quot;, numberOfSlices= &quot;</span>
+				+ numberOfSlices + &quot;, datatakeId= &quot; + datatakeId + &quot;, productName= &quot; + productName + &quot;, productType= &quot;
+				+ productType + &quot;, keyObjectStorage= &quot; + keyObjectStorage + &quot;, validityStart= &quot; + validityStart
+				+ &quot;, validityStop= &quot; + validityStop + &quot;]&quot;;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+<span class="fc bfc" id="L87" title="All 2 branches covered.">		if (this == obj)</span>
+<span class="fc" id="L88">			return true;</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">		if (!super.equals(obj))</span>
+<span class="fc" id="L90">			return false;</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">		if (getClass() != obj.getClass())</span>
+<span class="nc" id="L92">			return false;</span>
+<span class="fc" id="L93">		L0AcnMetadata other = (L0AcnMetadata) obj;</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">		if (datatakeId == null) {</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">			if (other.datatakeId != null)</span>
+<span class="fc" id="L96">				return false;</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">		} else if (!datatakeId.equals(other.datatakeId))</span>
+<span class="fc" id="L98">			return false;</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		if (instrumentConfigurationId != other.instrumentConfigurationId)</span>
+<span class="fc" id="L100">			return false;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">		if (numberOfSlices != other.numberOfSlices)</span>
+<span class="fc" id="L102">			return false;</span>
+<span class="fc" id="L103">		return true;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -103,6 +103,7 @@ public class StatusPerCategory {
         if (!isFatalError()) {
             state = AppState.WAITING;
             dateLastChangeMs = System.currentTimeMillis();
+            errorCounterNextMessage = 0;
         }
     }
 

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L0OutputFileDescriptor.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.extraction.model</a> &gt; <span class="el_source">L0OutputFileDescriptor.java</span></div><h1>L0OutputFileDescriptor.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package esa.s1pdgs.cpoc.mdcatalog.extraction.model;
+
+
+/**
+ * Class describing a L0 output file
+ * 
+ * @author Olivier Bex-Chauvet
+ *
+ */
+public class L0OutputFileDescriptor extends AbstractFileDescriptor {
+	
+	/**
+	 * Product type
+	 */
+	private String productType;
+
+	/**
+	 * File class
+	 */
+	private String productClass;
+	
+	/**
+	 * Resolution
+	 */
+	private String resolution;
+	
+	/**
+	 * Swathtype
+	 */
+	private String swathtype;
+	
+	/**
+	 * Polarisation
+	 */
+	private String polarisation;
+	
+	/**
+	 * DataTakeId
+	 */
+	private String dataTakeId;
+	
+	/**
+	 * Default Constructor
+	 */
+<span class="fc" id="L48">	public L0OutputFileDescriptor() {</span>
+<span class="fc" id="L49">	}</span>
+
+
+	/**
+	 * @return the productType
+	 */
+	public String getProductType() {
+<span class="fc" id="L56">		return productType;</span>
+	}
+
+	/**
+	 * @param productType the productType to set
+	 */
+	public void setProductType(String productType) {
+<span class="fc" id="L63">		this.productType = productType;</span>
+<span class="fc" id="L64">	}</span>
+
+	/**
+	 * @return the productClass
+	 */
+	public String getProductClass() {
+<span class="fc" id="L70">		return productClass;</span>
+	}
+
+	/**
+	 * @param productClass the productClass to set
+	 */
+	public void setProductClass(String productClass) {
+<span class="fc" id="L77">		this.productClass = productClass;</span>
+<span class="fc" id="L78">	}</span>
+
+	/**
+	 * @return the resolution
+	 */
+	public String getResolution() {
+<span class="fc" id="L84">		return resolution;</span>
+	}
+
+	/**
+	 * @param resolution the resolution to set
+	 */
+	public void setResolution(String resolution) {
+<span class="fc" id="L91">		this.resolution = resolution;</span>
+<span class="fc" id="L92">	}</span>
+
+	/**
+	 * @return the swathtype
+	 */
+	public String getSwathtype() {
+<span class="fc" id="L98">		return swathtype;</span>
+	}
+
+	/**
+	 * @param swathtype the swathtype to set
+	 */
+	public void setSwathtype(String swathtype) {
+<span class="fc" id="L105">		this.swathtype = swathtype;</span>
+<span class="fc" id="L106">	}</span>
+
+	/**
+	 * @return the polarisation
+	 */
+	public String getPolarisation() {
+<span class="fc" id="L112">		return polarisation;</span>
+	}
+
+	/**
+	 * @param polarisation the polarisation to set
+	 */
+	public void setPolarisation(String polarisation) {
+<span class="fc" id="L119">		this.polarisation = polarisation;</span>
+<span class="fc" id="L120">	}</span>
+	
+	/**
+	 * @return the dataTakeId
+	 */
+	public String getDataTakeId() {
+<span class="fc" id="L126">		return dataTakeId;</span>
+	}
+
+	/**
+	 * @param dataTakeId the dataTakeId to set
+	 */
+	public void setDataTakeId(String dataTakeId) {
+<span class="fc" id="L133">		this.dataTakeId = dataTakeId;</span>
+<span class="fc" id="L134">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L141">		return &quot;L0OutputFileDescriptor [productType=&quot; + productType + &quot;, productClass=&quot; + productClass + &quot;, resolution=&quot;</span>
+				+ resolution + &quot;, swathtype=&quot; + swathtype + &quot;, polarisation=&quot; + polarisation + &quot;, dataTakeId=&quot;
+				+ dataTakeId + &quot;, relativePath=&quot; + relativePath + &quot;, filename=&quot; + filename + &quot;, extension=&quot; + extension
+				+ &quot;, productName=&quot; + productName + &quot;, missionId=&quot; + missionId + &quot;, satelliteId=&quot; + satelliteId
+				+ &quot;, keyObjectStorage=&quot; + keyObjectStorage + &quot;]&quot;;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+<span class="fc bfc" id="L153" title="All 2 branches covered.">		if (this == obj)</span>
+<span class="fc" id="L154">			return true;</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">		if (!super.equals(obj))</span>
+<span class="fc" id="L156">			return false;</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">		if (getClass() != obj.getClass())</span>
+<span class="nc" id="L158">			return false;</span>
+<span class="fc" id="L159">		L0OutputFileDescriptor other = (L0OutputFileDescriptor) obj;</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">		if (dataTakeId == null) {</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">			if (other.dataTakeId != null)</span>
+<span class="fc" id="L162">				return false;</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">		} else if (!dataTakeId.equals(other.dataTakeId))</span>
+<span class="fc" id="L164">			return false;</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">		if (polarisation == null) {</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">			if (other.polarisation != null)</span>
+<span class="fc" id="L167">				return false;</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">		} else if (!polarisation.equals(other.polarisation))</span>
+<span class="fc" id="L169">			return false;</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">		if (productClass == null) {</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">			if (other.productClass != null)</span>
+<span class="fc" id="L172">				return false;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">		} else if (!productClass.equals(other.productClass))</span>
+<span class="fc" id="L174">			return false;</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">		if (productType == null) {</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">			if (other.productType != null)</span>
+<span class="fc" id="L177">				return false;</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">		} else if (!productType.equals(other.productType))</span>
+<span class="fc" id="L179">			return false;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">		if (resolution == null) {</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">			if (other.resolution != null)</span>
+<span class="fc" id="L182">				return false;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">		} else if (!resolution.equals(other.resolution))</span>
+<span class="fc" id="L184">			return false;</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">		if (swathtype == null) {</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">			if (other.swathtype != null)</span>
+<span class="fc" id="L187">				return false;</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">		} else if (!swathtype.equals(other.swathtype))</span>
+<span class="fc" id="L189">			return false;</span>
+<span class="fc" id="L190">		return true;</span>
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L198">		final int prime = 31;</span>
+<span class="fc" id="L199">		int result = super.hashCode();</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">		result = prime * result + ((dataTakeId == null) ? 0 : dataTakeId.hashCode());</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">		result = prime * result + ((polarisation == null) ? 0 : polarisation.hashCode());</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">		result = prime * result + ((productClass == null) ? 0 : productClass.hashCode());</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">		result = prime * result + ((productType == null) ? 0 : productType.hashCode());</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">		result = prime * result + ((resolution == null) ? 0 : resolution.hashCode());</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">		result = prime * result + ((swathtype == null) ? 0 : swathtype.hashCode());</span>
+<span class="fc" id="L206">		return result;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

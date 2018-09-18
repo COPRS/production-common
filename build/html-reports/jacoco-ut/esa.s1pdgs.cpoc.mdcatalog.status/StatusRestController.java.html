@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>StatusRestController.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.status</a> &gt; <span class="el_source">StatusRestController.java</span></div><h1>StatusRestController.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.status;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mdcatalog.status.dto.GlobalStatusDto;
+import esa.s1pdgs.cpoc.mdcatalog.status.dto.StatusPerCategoryDto;
+
+/**
+ * @author Viveris Technologies
+ */
+@RestController
+@RequestMapping(path = &quot;/app&quot;)
+public class StatusRestController {
+
+	/**
+	 * Logger
+	 */
+<span class="fc" id="L27">	protected static final Logger LOGGER = LogManager.getLogger(StatusRestController.class);</span>
+
+	/**
+	 * Application status
+	 */
+	private final AppStatus appStatus;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param appStatus
+	 */
+	@Autowired
+<span class="fc" id="L40">	public StatusRestController(final AppStatus appStatus) {</span>
+<span class="fc" id="L41">		this.appStatus = appStatus;</span>
+<span class="fc" id="L42">	}</span>
+
+	/**
+	 * Get application status
+	 * 
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.GET, path = &quot;/status&quot;)
+	public ResponseEntity&lt;GlobalStatusDto&gt; getStatusRest() {
+<span class="fc" id="L51">		GlobalStatusDto globalStatus = new GlobalStatusDto(appStatus.getGlobalAppState());</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">		for (StatusPerCategory catStatus : appStatus.getStatus().values()) {</span>
+<span class="fc" id="L53">			long currentTimestamp = System.currentTimeMillis();</span>
+<span class="fc" id="L54">			long timeSinceLastChange = currentTimestamp - catStatus.getDateLastChangeMs();</span>
+<span class="fc" id="L55">			globalStatus.addStatusPerCategory(new StatusPerCategoryDto(catStatus.getState(), timeSinceLastChange,</span>
+<span class="fc" id="L56">					catStatus.getErrorCounterProcessing(), catStatus.getCategory()));</span>
+<span class="fc" id="L57">		}</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">		if (appStatus.isFatalError()) {</span>
+<span class="fc" id="L59">			return new ResponseEntity&lt;GlobalStatusDto&gt;(globalStatus, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+<span class="fc" id="L61">		return new ResponseEntity&lt;GlobalStatusDto&gt;(globalStatus, HttpStatus.OK);</span>
+	}
+
+	/**
+	 * True if the application is processing the message for the given category,
+	 * false else
+	 * 
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.GET, path = &quot;/{category}/process/{messageId}&quot;)
+	public ResponseEntity&lt;Boolean&gt; isProcessing(@PathVariable(name = &quot;category&quot;) final String category,
+			@PathVariable(name = &quot;messageId&quot;) final long messageId) {
+<span class="fc" id="L73">		boolean ret = false;</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">		if (appStatus.getProcessingMsgId(ProductCategory.valueOf(category.toUpperCase())) == messageId) {</span>
+<span class="fc" id="L75">			ret = true;</span>
+		}
+<span class="fc" id="L77">		return new ResponseEntity&lt;Boolean&gt;(ret, HttpStatus.OK);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
