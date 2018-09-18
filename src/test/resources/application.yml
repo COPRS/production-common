@@ -20,6 +20,11 @@ kafka:
   enable-consumer:
     slice: true
     report: false
+    
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-slices: 3
+  max-error-counter-reports: 3
 
     
 # File
@@ -31,5 +36,5 @@ file:
 
 dev:
   activations:
-    download-manifest : true
+    download-all : false
     

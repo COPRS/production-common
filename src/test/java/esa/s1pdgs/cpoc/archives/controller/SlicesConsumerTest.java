@@ -19,12 +19,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.archives.DevProperties;
-import esa.s1pdgs.cpoc.archives.controller.SlicesConsumer;
-import esa.s1pdgs.cpoc.archives.controller.dto.SliceDto;
-import esa.s1pdgs.cpoc.archives.model.ProductFamily;
-import esa.s1pdgs.cpoc.archives.model.exception.ObjectStorageException;
-import esa.s1pdgs.cpoc.archives.model.exception.ObsUnknownObjectException;
 import esa.s1pdgs.cpoc.archives.services.ObsService;
+import esa.s1pdgs.cpoc.archives.status.AppStatus;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 
 public class SlicesConsumerTest {
 
@@ -33,6 +33,10 @@ public class SlicesConsumerTest {
     
     @Mock
     private DevProperties devProperties;
+    
+
+    @Mock
+    private AppStatus appStatus;
     
     /**
      * Acknowledgement
@@ -43,153 +47,188 @@ public class SlicesConsumerTest {
     @Before
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mockDevProperties(true);
+        mockDevProperties(false);
     }
     
     private void mockDevProperties(boolean act) {
         Map<String, Boolean> activations = new HashMap<>();
-        activations.put("download-manifest", act);
+        activations.put("download-all", act);
         doReturn(activations).when(devProperties).getActivations();
     }
 
     private void mockSliceDownloadFiles(File result)
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         doReturn(result).when(obsService).downloadFile(
                 Mockito.any(ProductFamily.class), Mockito.anyString(),
                 Mockito.anyString());
     }
 
     private void mockSliceObjectStorageException()
-            throws ObjectStorageException, ObsUnknownObjectException {
-        doThrow(new ObjectStorageException(ProductFamily.L0_PRODUCT, "kobs",
+            throws ObsException, ObsUnknownObject {
+        doThrow(new ObsException(ProductFamily.L0_PRODUCT, "kobs",
                 new Throwable())).when(obsService).downloadFile(
                         Mockito.any(ProductFamily.class), Mockito.anyString(),
                         Mockito.anyString());
     }
 
     private void mockSliceObsUnknownObjectException()
-            throws ObsUnknownObjectException, ObjectStorageException {
-        doThrow(new ObsUnknownObjectException(ProductFamily.UNKNOWN, "kobs"))
+            throws ObsUnknownObject, ObsException {
+        doThrow(new ObsUnknownObject(ProductFamily.BLANK, "kobs"))
                 .when(obsService).downloadFile(Mockito.any(ProductFamily.class),
                         Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
     public void testReceiveL0Slice()
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
+        File expectedResult =
+                new File("test/data/slices/l0_product/productName");
+        mockDevProperties(true);
+        this.mockSliceDownloadFiles(expectedResult);
+        doNothing().when(ack).acknowledge();
+        consumer.receive(
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                ack, "topic");
+        verify(ack, times(1)).acknowledge();
+        verify(obsService, times(1)).downloadFile(
+                Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("kobs"),
+                Mockito.eq("test/data/slices/l0_product"));
+    }
+
+    @Test
+    public void testReceiveL0SliceOnlyManifest()
+            throws ObsException, ObsUnknownObject {
+        SlicesConsumer consumer =
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         File expectedResult =
                 new File("test/data/slices/l0_product/productName");
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
+        verify(obsService, times(1)).downloadFile(
+                Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("kobs/manifest.safe"),
+                Mockito.eq("test/data/slices/l0_product"));
     }
 
     @Test
     public void testReceiveL0SliceObjectStorageException()
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
 
     @Test
     public void testReceiveL0SliceObsUnknownObjectException()
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
     
     @Test
     public void testReceiveL0SliceAckException()
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         File expectedResult =
                 new File("test/data/slices/l0_product/productName");
         this.mockSliceDownloadFiles(expectedResult);
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }
 
     @Test
     public void testReceiveL1Slice()
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         File expectedResult =
                 new File("test/data/slices/l1_product/productName");
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L1_PRODUCT),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
+        verify(obsService, times(1)).downloadFile(
+                Mockito.eq(ProductFamily.L1_PRODUCT), Mockito.eq("kobs/manifest.safe"),
+                Mockito.eq("test/data/slices/l1_product"));
     }
 
     @Test
     public void testReceiveL1SliceObjectStorageException()
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L1_PRODUCT),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
 
     @Test
     public void testReceiveL1SliceObsUnknownObjectException()
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L1_PRODUCT),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
     
     @Test
     public void testReceiveL1SliceAckException()
-            throws ObjectStorageException, ObsUnknownObjectException {
+            throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         File expectedResult =
                 new File("test/data/slices/l1_product/productName");
         this.mockSliceDownloadFiles(expectedResult);
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L1_PRODUCT),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }
 
     @Test
-    public void testReceiveUnknownSlice() throws ObjectStorageException {
+    public void testReceiveUnknownSlice() throws ObsException {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/slices", devProperties);
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
         consumer.receive(
-                new SliceDto("productName", "kobs", ProductFamily.BLANK),
+                new LevelProductDto("productName", "kobs", ProductFamily.BLANK),
                 ack, "topic");
     }
 

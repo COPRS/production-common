@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.archives;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +33,7 @@ public class DevPropertiesTest {
     public void testInit() {
         // Check global properties
         assertEquals(1, properties.getActivations().size());
-        assertTrue(properties.getActivations().get("download-manifest"));
+        assertFalse(properties.getActivations().get("download-all"));
     }
 
 }
