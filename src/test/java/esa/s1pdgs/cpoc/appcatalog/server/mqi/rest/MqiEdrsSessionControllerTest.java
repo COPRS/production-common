@@ -64,7 +64,7 @@ public class MqiEdrsSessionControllerTest extends RestControllerTest {
 
         this.controller =
                 new MqiEdrsSessionController(mongoDBServices, maxRetries,
-                        appStatus);
+                        appStatus, -3);
         this.initMockMvc(this.controller);
     }
 

@@ -28,9 +28,9 @@ public class MqiLevelProductController
     @Autowired
     public MqiLevelProductController(final MqiMessageService mongoDBServices,
             @Value("${mqi.max-retries}") final int maxRetries,
-            final AppStatus appStatus) {
+            final AppStatus appStatus, @Value("${mqi.dft-offset}") final int dftOffset) {
         super(mongoDBServices, maxRetries, ProductCategory.LEVEL_PRODUCTS,
-                appStatus);
+                appStatus, dftOffset);
     }
 
 }

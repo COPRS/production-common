@@ -11,6 +11,7 @@ mongodb:
   clean-cron: 0 0 0 * * *
 mqi:
   max-retries: 3
+  dft-offset: -2
 status:
   delete-fixed-delay-ms: 3000
   max-error-counter-mqi: 3

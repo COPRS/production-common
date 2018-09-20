@@ -76,7 +76,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
 
         this.controller =
                 new MqiAuxiliaryFileController(mongoDBServices, maxRetries,
-                        appStatus);
+                        appStatus, -3);
         this.initMockMvc(this.controller);
     }
 

@@ -31,9 +31,10 @@ public class MqiEdrsSessionController
     @Autowired
     public MqiEdrsSessionController(final MqiMessageService mongoDBServices,
             @Value(&quot;${mqi.max-retries}&quot;) final int maxRetries,
-            final AppStatus appStatus) {
-<span class="fc" id="L35">        super(mongoDBServices, maxRetries, ProductCategory.EDRS_SESSIONS, </span>
-                appStatus);
-<span class="fc" id="L37">    }</span>
+            final AppStatus appStatus,
+            @Value(&quot;${mqi.dft-offset}&quot;) final int dftOffset) {
+<span class="fc" id="L36">        super(mongoDBServices, maxRetries, ProductCategory.EDRS_SESSIONS,</span>
+                appStatus, dftOffset);
+<span class="fc" id="L38">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

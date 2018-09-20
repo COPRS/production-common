@@ -61,6 +61,11 @@ public class GenericMqiController<T> {
      * Application status
      */
     protected final AppStatus appStatus;
+    
+    /**
+     * Dft KAFKA offset
+     */
+    protected final int dftOffset;
 
     /**
      * Constructor
@@ -71,12 +76,13 @@ public class GenericMqiController<T> {
      */
     public GenericMqiController(final MqiMessageService mongoDBServices,
             final int maxRetries, final ProductCategory category,
-            final AppStatus appStatus) {
+            final AppStatus appStatus, final int dftOffset) {
         this.mongoDBServices = mongoDBServices;
         this.maxRetries = maxRetries;
         this.category = category;
         this.appStatus = appStatus;
         this.appStatus.setWaiting("MQI");
+        this.dftOffset = dftOffset;
     }
 
     /**
@@ -523,7 +529,7 @@ public class GenericMqiController<T> {
                         "[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning default Strategy",
                         topic, partition, group));
                 this.appStatus.setWaiting("MQI");
-                return new ResponseEntity<Long>(Long.valueOf(0), HttpStatus.OK);
+                return new ResponseEntity<Long>(Long.valueOf(dftOffset), HttpStatus.OK);
             } else {
                 log(String.format(
                         "[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning earlist offset",

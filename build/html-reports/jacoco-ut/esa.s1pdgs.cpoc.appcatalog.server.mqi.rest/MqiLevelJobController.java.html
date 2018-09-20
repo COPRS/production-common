@@ -27,10 +27,11 @@ public class MqiLevelJobController extends GenericMqiController&lt;LevelJobDto&g
     @Autowired
     public MqiLevelJobController(final MqiMessageService mongoDBServices,
             @Value(&quot;${mqi.max-retries}&quot;) final int maxRetries,
-            final AppStatus appStatus) {
-<span class="fc" id="L31">        super(mongoDBServices, maxRetries, ProductCategory.LEVEL_JOBS,</span>
-                appStatus);
+            final AppStatus appStatus,
+            @Value(&quot;${mqi.dft-offset}&quot;) final int dftOffset) {
+<span class="fc" id="L32">        super(mongoDBServices, maxRetries, ProductCategory.LEVEL_JOBS,</span>
+                appStatus, dftOffset);
 
-<span class="fc" id="L34">    }</span>
+<span class="fc" id="L35">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
