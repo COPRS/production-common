@@ -78,7 +78,7 @@ public class LevelProductDistributionControllerTest extends RestControllerTest {
         MockitoAnnotations.initMocks(this);
 
         LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L1_ACN);
+                ProductFamily.L1_ACN, "NRT");
         consumedMessage =
                 new GenericMessageDto<LevelProductDto>(123, "input-key", dto);
 
@@ -160,9 +160,9 @@ public class LevelProductDistributionControllerTest extends RestControllerTest {
     public void testPublishMessageUri() throws Exception {
         doNothing().when(publication).publish(Mockito.any(), Mockito.any());
         GenericPublicationMessageDto<LevelProductDto> dto =
-                new GenericPublicationMessageDto<>(ProductFamily.L0_PRODUCT,
+                new GenericPublicationMessageDto<>(ProductFamily.L0_SLICE,
                         new LevelProductDto("product-name", "key-test",
-                                ProductFamily.L0_PRODUCT));
+                                ProductFamily.L0_SLICE, "NRT"));
         String convertedObj = GenericKafkaUtils.convertObjectToJsonString(dto);
         request(post("/messages/level_products/publish")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

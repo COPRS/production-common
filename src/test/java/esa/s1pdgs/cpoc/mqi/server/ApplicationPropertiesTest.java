@@ -53,7 +53,7 @@ public class ApplicationPropertiesTest {
     @Test
     public void testInitialization() {
         assertEquals("wrapper-0", properties.getHostname());
-        assertEquals(5, properties.getProductCategories().size());
+        assertEquals(6, properties.getProductCategories().size());
         assertEquals(500, properties.getWaitNextMs());
 
         // Check consumption
@@ -90,6 +90,10 @@ public class ApplicationPropertiesTest {
         assertFalse(properties.getProductCategories()
                 .get(ProductCategory.LEVEL_PRODUCTS).getConsumption()
                 .isEnable());
+        // Level segments
+        assertFalse(properties.getProductCategories()
+                .get(ProductCategory.LEVEL_SEGMENTS).getConsumption()
+                .isEnable());
 
         // Check publication
 
@@ -120,6 +124,9 @@ public class ApplicationPropertiesTest {
                 properties.getProductCategories()
                         .get(ProductCategory.LEVEL_PRODUCTS).getPublication()
                         .getRoutingFile());
+        // Level segments
+        assertFalse(properties.getProductCategories()
+                .get(ProductCategory.LEVEL_SEGMENTS).getPublication().isEnable());
     }
 
     /**

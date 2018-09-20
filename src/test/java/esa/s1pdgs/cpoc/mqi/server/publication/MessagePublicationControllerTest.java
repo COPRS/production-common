@@ -45,6 +45,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryPublicationProperties;
@@ -69,7 +70,8 @@ public class MessagePublicationControllerTest {
             GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
             GenericKafkaUtils.TOPIC_L1_ACNS, GenericKafkaUtils.TOPIC_L1_REPORTS,
             GenericKafkaUtils.TOPIC_L0_JOBS, GenericKafkaUtils.TOPIC_L1_JOBS,
-            GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
+            GenericKafkaUtils.TOPIC_EDRS_SESSIONS,
+            GenericKafkaUtils.TOPIC_L0_SEGMENTS);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -101,6 +103,8 @@ public class MessagePublicationControllerTest {
 
     private GenericKafkaUtils<AuxiliaryFileDto> kafkaUtilsAux;
 
+    private GenericKafkaUtils<LevelSegmentDto> kafkaUtilsSegments;
+
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
@@ -117,6 +121,8 @@ public class MessagePublicationControllerTest {
         kafkaUtilsJobs = new GenericKafkaUtils<LevelJobDto>(embeddedKafka);
 
         kafkaUtilsAux = new GenericKafkaUtils<AuxiliaryFileDto>(embeddedKafka);
+
+        kafkaUtilsSegments = new GenericKafkaUtils<LevelSegmentDto>(embeddedKafka);
 
     }
 
@@ -150,6 +156,9 @@ public class MessagePublicationControllerTest {
         map.put(ProductCategory.LEVEL_REPORTS, new ProductCategoryProperties(
                 null, new ProductCategoryPublicationProperties(true,
                         "./src/test/resources/routing-files/level-reports.xml")));
+        map.put(ProductCategory.LEVEL_SEGMENTS, new ProductCategoryProperties(
+                null, new ProductCategoryPublicationProperties(true,
+                        "./src/test/resources/routing-files/level-segments.xml")));
         doReturn(map).when(appProperties).getProductCategories();
 
         customController = new MessagePublicationController(appProperties,
@@ -172,7 +181,7 @@ public class MessagePublicationControllerTest {
                         .getDefaultRoute(ProductFamily.L1_ACN));
         assertNotNull(
                 autowiredController.routing.get(ProductCategory.LEVEL_PRODUCTS)
-                        .getDefaultRoute(ProductFamily.L0_PRODUCT));
+                        .getDefaultRoute(ProductFamily.L0_SLICE));
         assertEquals(2, autowiredController.routing
                 .get(ProductCategory.LEVEL_REPORTS).getDefaultRoutes().size());
         assertNotNull(
@@ -223,8 +232,7 @@ public class MessagePublicationControllerTest {
         thrown.expect(MqiRouteNotAvailable.class);
         thrown.expect(
                 hasProperty("category", is(ProductCategory.EDRS_SESSIONS)));
-        thrown.expect(
-                hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
+        thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 
         customController.getTopic(ProductCategory.EDRS_SESSIONS,
                 ProductFamily.AUXILIARY_FILE);
@@ -305,7 +313,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelProducts() throws Exception {
         LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L0_PRODUCT);
+                ProductFamily.L0_SLICE, "FAST");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto);
@@ -319,7 +327,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelProducts1() throws Exception {
         LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L1_ACN);
+                ProductFamily.L1_ACN, "FAST");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto);
@@ -334,7 +342,7 @@ public class MessagePublicationControllerTest {
     public void publishLevelProductsNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
         LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L0_PRODUCT);
+                ProductFamily.L0_SLICE, "FAST");
         initCustomControllerForNoPublication();
 
         thrown.expect(MqiCategoryNotAvailable.class);
@@ -343,6 +351,35 @@ public class MessagePublicationControllerTest {
         thrown.expect(hasProperty("type", is("publisher")));
 
         customController.publishLevelProducts(dto);
+    }
+
+    @Test
+    public void publishLevelSegments() throws Exception {
+        LevelSegmentDto dto = new LevelSegmentDto("product-name", "key-obs",
+                ProductFamily.L0_SEGMENT, "FAST");
+        initCustomControllerForAllPublication();
+
+        customController.publish(ProductCategory.LEVEL_SEGMENTS, dto);
+
+        ConsumerRecord<String, LevelSegmentDto> record = kafkaUtilsSegments
+                .getReceivedRecordSegments(GenericKafkaUtils.TOPIC_L0_SEGMENTS);
+
+        assertEquals(dto, record.value());
+    }
+
+    @Test
+    public void publishLevelSegmentsNoCat() throws MqiPublicationError,
+            MqiCategoryNotAvailable, MqiRouteNotAvailable {
+        LevelSegmentDto dto = new LevelSegmentDto("product-name", "key-obs",
+                ProductFamily.L0_SEGMENT, "FAST");
+        initCustomControllerForNoPublication();
+
+        thrown.expect(MqiCategoryNotAvailable.class);
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_SEGMENTS)));
+        thrown.expect(hasProperty("type", is("publisher")));
+
+        customController.publishLevelSegments(dto);
     }
 
     @Test

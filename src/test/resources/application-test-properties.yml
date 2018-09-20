@@ -58,6 +58,11 @@ application:
         topicswithprioritystr: "t-pdgs-l0-jobs:100"   
       publication:
         enable: false
+    level-segments:
+      consumption:
+        enable: false
+      publication:
+        enable: false
 server:
   port: 8080
 persistence:

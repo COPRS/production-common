@@ -66,6 +66,13 @@ application:
       publication:
         enable: ${mqi_level-jobs_publication_enable:false}                              #
         routing-file: routing-files/level-jobs.xml                                      #
+    level-segments:
+      consumption:
+        enable: ${mqi_level-segments_consumption_enable:false}                          #
+        topicswithprioritystr: ${mqi_level-segments_consumption_topics}                 #
+      publication:
+        enable: ${mqi_level-segments_publication_enable:false}                          #
+        routing-file: routing-files/level-segments.xml                                  #
     
 # REST controller
 server:
