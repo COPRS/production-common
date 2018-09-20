@@ -1,12 +1,17 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,EdrsSessionsAppCatalogJobService.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelSegmentsAppCatalogJobService,0,115,0,4,0,24,0,7,0,5
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,EdrsSessionsAppCatalogJobService,0,115,0,4,0,24,0,7,0,5
+S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelSegmentsAppCatalogJobService.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,AbstractAppCatalogJobService,16,710,0,22,5,148,1,26,1,15
+S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelSegmentAppDataJobDto,0,3,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelProductsAppCatalogJobService,0,115,0,4,0,24,0,7,0,5
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,EdrsSessionAppDataJobDto,0,3,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelProductAppDataJobDto,0,3,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelProductsAppCatalogJobService.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.mqi,AppCatalogMqiLevelSegmentsService.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.mqi,GenericAppCatalogMqiService,5,732,1,25,3,132,1,24,0,12
+S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.mqi,AppCatalogMqiLevelSegmentsService,0,247,0,8,0,46,0,7,0,3
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.mqi,AppCatalogMqiLevelReportsService.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.mqi,AppCatalogMqiLevelJobsService,0,247,0,8,0,46,0,7,0,3
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.mqi,AppCatalogMqiAuxiliaryFilesService,0,247,0,8,0,46,0,7,0,3
