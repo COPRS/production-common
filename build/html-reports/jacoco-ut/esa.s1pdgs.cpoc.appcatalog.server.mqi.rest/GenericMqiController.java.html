@@ -61,6 +61,11 @@ public class GenericMqiController&lt;T&gt; {
      * Application status
      */
     protected final AppStatus appStatus;
+    
+    /**
+     * Dft KAFKA offset
+     */
+    protected final int dftOffset;
 
     /**
      * Constructor
@@ -71,13 +76,14 @@ public class GenericMqiController&lt;T&gt; {
      */
     public GenericMqiController(final MqiMessageService mongoDBServices,
             final int maxRetries, final ProductCategory category,
-<span class="fc" id="L74">            final AppStatus appStatus) {</span>
-<span class="fc" id="L75">        this.mongoDBServices = mongoDBServices;</span>
-<span class="fc" id="L76">        this.maxRetries = maxRetries;</span>
-<span class="fc" id="L77">        this.category = category;</span>
-<span class="fc" id="L78">        this.appStatus = appStatus;</span>
-<span class="fc" id="L79">        this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L80">    }</span>
+<span class="fc" id="L79">            final AppStatus appStatus, final int dftOffset) {</span>
+<span class="fc" id="L80">        this.mongoDBServices = mongoDBServices;</span>
+<span class="fc" id="L81">        this.maxRetries = maxRetries;</span>
+<span class="fc" id="L82">        this.category = category;</span>
+<span class="fc" id="L83">        this.appStatus = appStatus;</span>
+<span class="fc" id="L84">        this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L85">        this.dftOffset = dftOffset;</span>
+<span class="fc" id="L86">    }</span>
 
     /**
      * Internal function to log messages
@@ -85,10 +91,10 @@ public class GenericMqiController&lt;T&gt; {
      * @param message
      */
     private void log(final String message) {
-<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (LOGGER.isDebugEnabled()) {</span>
-<span class="nc" id="L89">            LOGGER.debug(message);</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (LOGGER.isDebugEnabled()) {</span>
+<span class="nc" id="L95">            LOGGER.debug(message);</span>
         }
-<span class="fc" id="L91">    }</span>
+<span class="fc" id="L97">    }</span>
 
     /**
      * @param topic
@@ -105,187 +111,187 @@ public class GenericMqiController&lt;T&gt; {
             @RequestBody final MqiGenericReadMessageDto&lt;T&gt; body) {
         try {
             
-<span class="fc" id="L108">            log(String.format(</span>
+<span class="fc" id="L114">            log(String.format(</span>
                     &quot;[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Searching MqiMessage&quot;,
-<span class="fc" id="L110">                    topic, partition, offset, body.getGroup()));</span>
-<span class="fc" id="L111">            List&lt;MqiMessage&gt; responseFromDB =</span>
-<span class="fc" id="L112">                    mongoDBServices.searchByTopicPartitionOffsetGroup(topic,</span>
-<span class="fc" id="L113">                            partition, offset, body.getGroup());</span>
+<span class="fc" id="L116">                    topic, partition, offset, body.getGroup()));</span>
+<span class="fc" id="L117">            List&lt;MqiMessage&gt; responseFromDB =</span>
+<span class="fc" id="L118">                    mongoDBServices.searchByTopicPartitionOffsetGroup(topic,</span>
+<span class="fc" id="L119">                            partition, offset, body.getGroup());</span>
 
             
             // Si un objet n'existe pas dans la BDD avec topic / partition /
             // offset
             // / group
-<span class="fc bfc" id="L119" title="All 2 branches covered.">            if (responseFromDB.isEmpty()) {</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">            if (responseFromDB.isEmpty()) {</span>
                 // On créer le message dans la BDD
-<span class="fc" id="L121">                log(String.format(</span>
+<span class="fc" id="L127">                log(String.format(</span>
                         &quot;[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Inserting new MqiMessage&quot;,
-<span class="fc" id="L123">                        topic, partition, offset, body.getGroup()));</span>
-<span class="fc" id="L124">                Date now = new Date();</span>
-<span class="fc" id="L125">                MqiMessage messageToInsert = new MqiMessage(category, topic,</span>
-<span class="fc" id="L126">                        partition, offset, body.getGroup(),</span>
-<span class="fc" id="L127">                        MqiStateMessageEnum.READ, body.getPod(), now,</span>
-<span class="fc" id="L128">                        null, null, null, 0, body.getDto(), now);</span>
-<span class="fc" id="L129">                mongoDBServices.insertMqiMessage(messageToInsert);</span>
+<span class="fc" id="L129">                        topic, partition, offset, body.getGroup()));</span>
+<span class="fc" id="L130">                Date now = new Date();</span>
+<span class="fc" id="L131">                MqiMessage messageToInsert = new MqiMessage(category, topic,</span>
+<span class="fc" id="L132">                        partition, offset, body.getGroup(),</span>
+<span class="fc" id="L133">                        MqiStateMessageEnum.READ, body.getPod(), now,</span>
+<span class="fc" id="L134">                        null, null, null, 0, body.getDto(), now);</span>
+<span class="fc" id="L135">                mongoDBServices.insertMqiMessage(messageToInsert);</span>
 
                 // On renvoie le message que l'on vient de créer
-<span class="fc" id="L132">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L133">                return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
-<span class="fc" id="L134">                        transformMqiMessageToMqiLightMessage(messageToInsert),</span>
+<span class="fc" id="L138">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L139">                return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
+<span class="fc" id="L140">                        transformMqiMessageToMqiLightMessage(messageToInsert),</span>
                         HttpStatus.OK);
             } else { // Sinon on récupère le premier de la liste
-<span class="fc" id="L137">                log(String.format(</span>
+<span class="fc" id="L143">                log(String.format(</span>
                         &quot;[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Found MqiMessage&quot;,
-<span class="fc" id="L139">                        topic, partition, offset, body.getGroup()));</span>
-<span class="fc" id="L140">                MqiMessage messageFromDB = responseFromDB.get(0);</span>
+<span class="fc" id="L145">                        topic, partition, offset, body.getGroup()));</span>
+<span class="fc" id="L146">                MqiMessage messageFromDB = responseFromDB.get(0);</span>
 
-<span class="pc bfc" id="L142" title="All 3 branches covered.">                switch (messageFromDB.getState()) {</span>
+<span class="pc bfc" id="L148" title="All 3 branches covered.">                switch (messageFromDB.getState()) {</span>
                     case ACK_KO:
                     case ACK_OK:
                     case ACK_WARN:
                         // on renvoie l’objet
-<span class="fc" id="L147">                        log(String.format(</span>
+<span class="fc" id="L153">                        log(String.format(</span>
                                 &quot;[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is Acknowledge&quot;,
-<span class="fc" id="L149">                                topic, partition, offset, body.getGroup()));</span>
-<span class="fc" id="L150">                        this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L151">                        return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
-<span class="fc" id="L152">                                transformMqiMessageToMqiLightMessage(</span>
+<span class="fc" id="L155">                                topic, partition, offset, body.getGroup()));</span>
+<span class="fc" id="L156">                        this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L157">                        return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
+<span class="fc" id="L158">                                transformMqiMessageToMqiLightMessage(</span>
                                         messageFromDB),
                                 HttpStatus.OK);
                     case SEND:
-<span class="fc bfc" id="L156" title="All 2 branches covered.">                        if (body.isForce()) {</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">                        if (body.isForce()) {</span>
 
-<span class="fc" id="L158">                            log(String.format(</span>
+<span class="fc" id="L164">                            log(String.format(</span>
                                     &quot;[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Force is true&quot;,
-<span class="fc" id="L160">                                    topic, partition, offset, body.getGroup()));</span>
-<span class="fc" id="L161">                            HashMap&lt;String, Object&gt; updateMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L166">                                    topic, partition, offset, body.getGroup()));</span>
+<span class="fc" id="L167">                            HashMap&lt;String, Object&gt; updateMap = new HashMap&lt;&gt;();</span>
                             //  on incrémente nb_retry
-<span class="fc" id="L163">                            messageFromDB.setNbRetries(</span>
-<span class="fc" id="L164">                                    messageFromDB.getNbRetries() + 1);</span>
-<span class="fc" id="L165">                            updateMap.put(&quot;nbRetries&quot;,</span>
-<span class="fc" id="L166">                                    messageFromDB.getNbRetries());</span>
-<span class="fc bfc" id="L167" title="All 2 branches covered.">                            if (messageFromDB.getNbRetries() &gt;= maxRetries) {</span>
+<span class="fc" id="L169">                            messageFromDB.setNbRetries(</span>
+<span class="fc" id="L170">                                    messageFromDB.getNbRetries() + 1);</span>
+<span class="fc" id="L171">                            updateMap.put(&quot;nbRetries&quot;,</span>
+<span class="fc" id="L172">                                    messageFromDB.getNbRetries());</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">                            if (messageFromDB.getNbRetries() &gt;= maxRetries) {</span>
                                 // on publie un message d’erreur dans queue (via
                                 // mqi du
                                 // catalogue)
                                 // TODO
-<span class="fc" id="L172">                                LOGGER.error(</span>
+<span class="fc" id="L178">                                LOGGER.error(</span>
                                         &quot;[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] Number of retries is reached&quot;,
-<span class="fc" id="L174">                                        topic, partition, offset,</span>
-<span class="fc" id="L175">                                        body.getGroup());</span>
+<span class="fc" id="L180">                                        topic, partition, offset,</span>
+<span class="fc" id="L181">                                        body.getGroup());</span>
                                 // on met status = ACK_KO
-<span class="fc" id="L177">                                messageFromDB</span>
-<span class="fc" id="L178">                                        .setState(MqiStateMessageEnum.ACK_KO);</span>
-<span class="fc" id="L179">                                updateMap.put(&quot;state&quot;,</span>
-<span class="fc" id="L180">                                        messageFromDB.getState());</span>
+<span class="fc" id="L183">                                messageFromDB</span>
+<span class="fc" id="L184">                                        .setState(MqiStateMessageEnum.ACK_KO);</span>
+<span class="fc" id="L185">                                updateMap.put(&quot;state&quot;,</span>
+<span class="fc" id="L186">                                        messageFromDB.getState());</span>
                                 // on met à jour les éventuelles dates
-<span class="fc" id="L182">                                Date now = new Date();</span>
-<span class="fc" id="L183">                                messageFromDB.setLastAckDate(now);</span>
-<span class="fc" id="L184">                                updateMap.put(&quot;lastAckDate&quot;, now);</span>
+<span class="fc" id="L188">                                Date now = new Date();</span>
+<span class="fc" id="L189">                                messageFromDB.setLastAckDate(now);</span>
+<span class="fc" id="L190">                                updateMap.put(&quot;lastAckDate&quot;, now);</span>
                                 // Modifier l'objet dans la bdd
-<span class="fc" id="L186">                                mongoDBServices.updateByID(</span>
-<span class="fc" id="L187">                                        messageFromDB.getIdentifier(),</span>
+<span class="fc" id="L192">                                mongoDBServices.updateByID(</span>
+<span class="fc" id="L193">                                        messageFromDB.getIdentifier(),</span>
                                         updateMap);
                                 // on renvoie l’objet
-<span class="fc" id="L190">                                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L191">                                return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
-<span class="fc" id="L192">                                        transformMqiMessageToMqiLightMessage(</span>
+<span class="fc" id="L196">                                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L197">                                return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
+<span class="fc" id="L198">                                        transformMqiMessageToMqiLightMessage(</span>
                                                 messageFromDB),
                                         HttpStatus.OK);
                             } else {
-<span class="fc" id="L196">                                log(String.format(</span>
+<span class="fc" id="L202">                                log(String.format(</span>
                                         &quot;[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] Number of retries is not reached&quot;,
-<span class="fc" id="L198">                                        topic, partition, offset,</span>
-<span class="fc" id="L199">                                        body.getGroup()));</span>
+<span class="fc" id="L204">                                        topic, partition, offset,</span>
+<span class="fc" id="L205">                                        body.getGroup()));</span>
                                 // on met status = READ
-<span class="fc" id="L201">                                messageFromDB</span>
-<span class="fc" id="L202">                                        .setState(MqiStateMessageEnum.READ);</span>
-<span class="fc" id="L203">                                updateMap.put(&quot;state&quot;,</span>
-<span class="fc" id="L204">                                        messageFromDB.getState());</span>
+<span class="fc" id="L207">                                messageFromDB</span>
+<span class="fc" id="L208">                                        .setState(MqiStateMessageEnum.READ);</span>
+<span class="fc" id="L209">                                updateMap.put(&quot;state&quot;,</span>
+<span class="fc" id="L210">                                        messageFromDB.getState());</span>
                                 // on met le reading_pod au pod recu
-<span class="fc" id="L206">                                messageFromDB.setReadingPod(body.getPod());</span>
-<span class="fc" id="L207">                                updateMap.put(&quot;readingPod&quot;,</span>
-<span class="fc" id="L208">                                        messageFromDB.getReadingPod());</span>
+<span class="fc" id="L212">                                messageFromDB.setReadingPod(body.getPod());</span>
+<span class="fc" id="L213">                                updateMap.put(&quot;readingPod&quot;,</span>
+<span class="fc" id="L214">                                        messageFromDB.getReadingPod());</span>
                                 // on met le processing_pod à null
-<span class="fc" id="L210">                                messageFromDB.setSendingPod(null);</span>
-<span class="fc" id="L211">                                updateMap.put(&quot;sendingPod&quot;,</span>
-<span class="fc" id="L212">                                        messageFromDB.getSendingPod());</span>
+<span class="fc" id="L216">                                messageFromDB.setSendingPod(null);</span>
+<span class="fc" id="L217">                                updateMap.put(&quot;sendingPod&quot;,</span>
+<span class="fc" id="L218">                                        messageFromDB.getSendingPod());</span>
                                 // on met à jour les éventuelles dates
-<span class="fc" id="L214">                                Date now = new Date();</span>
-<span class="fc" id="L215">                                messageFromDB.setLastSendDate(now);</span>
-<span class="fc" id="L216">                                messageFromDB.setLastReadDate(now);</span>
-<span class="fc" id="L217">                                updateMap.put(&quot;lastSendDate&quot;, now);</span>
-<span class="fc" id="L218">                                updateMap.put(&quot;lastReadDate&quot;, now);</span>
+<span class="fc" id="L220">                                Date now = new Date();</span>
+<span class="fc" id="L221">                                messageFromDB.setLastSendDate(now);</span>
+<span class="fc" id="L222">                                messageFromDB.setLastReadDate(now);</span>
+<span class="fc" id="L223">                                updateMap.put(&quot;lastSendDate&quot;, now);</span>
+<span class="fc" id="L224">                                updateMap.put(&quot;lastReadDate&quot;, now);</span>
                                 // Modifier l'objet dans la bdd
-<span class="fc" id="L220">                                mongoDBServices.updateByID(</span>
-<span class="fc" id="L221">                                        messageFromDB.getIdentifier(),</span>
+<span class="fc" id="L226">                                mongoDBServices.updateByID(</span>
+<span class="fc" id="L227">                                        messageFromDB.getIdentifier(),</span>
                                         updateMap);
                                 // on renvoie l’objet
-<span class="fc" id="L224">                                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L225">                                return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
-<span class="fc" id="L226">                                        transformMqiMessageToMqiLightMessage(</span>
+<span class="fc" id="L230">                                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L231">                                return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
+<span class="fc" id="L232">                                        transformMqiMessageToMqiLightMessage(</span>
                                                 messageFromDB),
                                         HttpStatus.OK);
                             }
                         } else {
-<span class="fc" id="L231">                            HashMap&lt;String, Object&gt; updateMap = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L232">                            log(String.format(</span>
+<span class="fc" id="L237">                            HashMap&lt;String, Object&gt; updateMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L238">                            log(String.format(</span>
                                     &quot;[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State SEND&quot;,
-<span class="fc" id="L234">                                    topic, partition, offset, body.getGroup()));</span>
+<span class="fc" id="L240">                                    topic, partition, offset, body.getGroup()));</span>
                             // on met à jour les éventuelles dates et le
                             // reading_pod
-<span class="fc" id="L237">                            Date now = new Date();</span>
-<span class="fc" id="L238">                            messageFromDB.setLastReadDate(now);</span>
-<span class="fc" id="L239">                            updateMap.put(&quot;lastReadDate&quot;, now);</span>
-<span class="fc" id="L240">                            messageFromDB.setReadingPod(body.getPod());</span>
-<span class="fc" id="L241">                            updateMap.put(&quot;readingPod&quot;,</span>
-<span class="fc" id="L242">                                    messageFromDB.getReadingPod());</span>
+<span class="fc" id="L243">                            Date now = new Date();</span>
+<span class="fc" id="L244">                            messageFromDB.setLastReadDate(now);</span>
+<span class="fc" id="L245">                            updateMap.put(&quot;lastReadDate&quot;, now);</span>
+<span class="fc" id="L246">                            messageFromDB.setReadingPod(body.getPod());</span>
+<span class="fc" id="L247">                            updateMap.put(&quot;readingPod&quot;,</span>
+<span class="fc" id="L248">                                    messageFromDB.getReadingPod());</span>
                             // Modifier l'objet dans la bdd
-<span class="fc" id="L244">                            mongoDBServices.updateByID(</span>
-<span class="fc" id="L245">                                    messageFromDB.getIdentifier(), updateMap);</span>
+<span class="fc" id="L250">                            mongoDBServices.updateByID(</span>
+<span class="fc" id="L251">                                    messageFromDB.getIdentifier(), updateMap);</span>
                             // on renvoie l’objet
-<span class="fc" id="L247">                            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L248">                            return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
-<span class="fc" id="L249">                                    transformMqiMessageToMqiLightMessage(</span>
+<span class="fc" id="L253">                            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L254">                            return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
+<span class="fc" id="L255">                                    transformMqiMessageToMqiLightMessage(</span>
                                             messageFromDB),
                                     HttpStatus.OK);
                         }
                         
                     default:
-<span class="fc" id="L255">                        HashMap&lt;String, Object&gt; updateMap = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L256">                        if (messageFromDB.getState()</span>
-<span class="pc bpc" id="L257" title="1 of 2 branches missed.">                                .equals(MqiStateMessageEnum.READ)) {</span>
-<span class="fc" id="L258">                            log(String.format(</span>
+<span class="fc" id="L261">                        HashMap&lt;String, Object&gt; updateMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L262">                        if (messageFromDB.getState()</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">                                .equals(MqiStateMessageEnum.READ)) {</span>
+<span class="fc" id="L264">                            log(String.format(</span>
                                     &quot;[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State READ&quot;,
-<span class="fc" id="L260">                                    topic, partition, offset, body.getGroup()));</span>
+<span class="fc" id="L266">                                    topic, partition, offset, body.getGroup()));</span>
                             // on met à jour les éventuelles dates et le reading_pod
-<span class="fc" id="L262">                            Date now = new Date();</span>
-<span class="fc" id="L263">                            messageFromDB.setLastReadDate(now);</span>
-<span class="fc" id="L264">                            updateMap.put(&quot;lastReadDate&quot;, now);</span>
-<span class="fc" id="L265">                            messageFromDB.setReadingPod(body.getPod());</span>
-<span class="fc" id="L266">                            updateMap.put(&quot;readingPod&quot;,</span>
-<span class="fc" id="L267">                                    messageFromDB.getReadingPod());</span>
+<span class="fc" id="L268">                            Date now = new Date();</span>
+<span class="fc" id="L269">                            messageFromDB.setLastReadDate(now);</span>
+<span class="fc" id="L270">                            updateMap.put(&quot;lastReadDate&quot;, now);</span>
+<span class="fc" id="L271">                            messageFromDB.setReadingPod(body.getPod());</span>
+<span class="fc" id="L272">                            updateMap.put(&quot;readingPod&quot;,</span>
+<span class="fc" id="L273">                                    messageFromDB.getReadingPod());</span>
                             // Modifier l'objet dans la bdd
-<span class="fc" id="L269">                            mongoDBServices.updateByID(</span>
-<span class="fc" id="L270">                                    messageFromDB.getIdentifier(), updateMap);</span>
+<span class="fc" id="L275">                            mongoDBServices.updateByID(</span>
+<span class="fc" id="L276">                                    messageFromDB.getIdentifier(), updateMap);</span>
                             // on renvoie l’objet
-<span class="fc" id="L272">                            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L273">                            return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
-<span class="fc" id="L274">                                    transformMqiMessageToMqiLightMessage(</span>
+<span class="fc" id="L278">                            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L279">                            return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
+<span class="fc" id="L280">                                    transformMqiMessageToMqiLightMessage(</span>
                                             messageFromDB),
                                     HttpStatus.OK);
                         }
                 }
             }
-<span class="nc" id="L280">            LOGGER.error(</span>
+<span class="nc" id="L286">            LOGGER.error(</span>
                     &quot;[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] ERROR&quot;,
-<span class="nc" id="L282">                    topic, partition, offset, body.getGroup());</span>
-<span class="nc" id="L283">            this.appStatus.setError(&quot;MQI&quot;);</span>
-<span class="fc" id="L284">        } catch (Exception exc) {</span>
-<span class="fc" id="L285">            LOGGER.error(&quot;[read] {}&quot;, exc.getMessage());</span>
-<span class="fc" id="L286">            this.appStatus.setError(&quot;MQI&quot;);            </span>
-<span class="nc" id="L287">        }</span>
-<span class="fc" id="L288">        return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
+<span class="nc" id="L288">                    topic, partition, offset, body.getGroup());</span>
+<span class="nc" id="L289">            this.appStatus.setError(&quot;MQI&quot;);</span>
+<span class="fc" id="L290">        } catch (Exception exc) {</span>
+<span class="fc" id="L291">            LOGGER.error(&quot;[read] {}&quot;, exc.getMessage());</span>
+<span class="fc" id="L292">            this.appStatus.setError(&quot;MQI&quot;);            </span>
+<span class="nc" id="L293">        }</span>
+<span class="fc" id="L294">        return new ResponseEntity&lt;MqiLightMessageDto&gt;(</span>
                 HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
@@ -294,34 +300,34 @@ public class GenericMqiController&lt;T&gt; {
     public ResponseEntity&lt;List&lt;MqiGenericMessageDto&lt;T&gt;&gt;&gt; next(
             @RequestParam(&quot;pod&quot;) final String pod) {
         try {
-<span class="fc" id="L297">            Set&lt;MqiStateMessageEnum&gt; ackStates = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L298">            ackStates.add(MqiStateMessageEnum.ACK_KO);</span>
-<span class="fc" id="L299">            ackStates.add(MqiStateMessageEnum.ACK_OK);</span>
-<span class="fc" id="L300">            ackStates.add(MqiStateMessageEnum.ACK_WARN);</span>
-<span class="fc" id="L301">            List&lt;MqiMessage&gt; mqiMessages = mongoDBServices</span>
-<span class="fc" id="L302">                    .searchByPodStateCategory(pod, category, ackStates);</span>
-<span class="fc bfc" id="L303" title="All 2 branches covered.">            if (mqiMessages.isEmpty()) {</span>
-<span class="fc" id="L304">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L305">                return new ResponseEntity&lt;List&lt;MqiGenericMessageDto&lt;T&gt;&gt;&gt;(</span>
+<span class="fc" id="L303">            Set&lt;MqiStateMessageEnum&gt; ackStates = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L304">            ackStates.add(MqiStateMessageEnum.ACK_KO);</span>
+<span class="fc" id="L305">            ackStates.add(MqiStateMessageEnum.ACK_OK);</span>
+<span class="fc" id="L306">            ackStates.add(MqiStateMessageEnum.ACK_WARN);</span>
+<span class="fc" id="L307">            List&lt;MqiMessage&gt; mqiMessages = mongoDBServices</span>
+<span class="fc" id="L308">                    .searchByPodStateCategory(pod, category, ackStates);</span>
+<span class="fc bfc" id="L309" title="All 2 branches covered.">            if (mqiMessages.isEmpty()) {</span>
+<span class="fc" id="L310">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L311">                return new ResponseEntity&lt;List&lt;MqiGenericMessageDto&lt;T&gt;&gt;&gt;(</span>
                         new ArrayList&lt;MqiGenericMessageDto&lt;T&gt;&gt;(),
                         HttpStatus.OK);
             } else {
-<span class="fc" id="L309">                log(String.format(</span>
+<span class="fc" id="L315">                log(String.format(</span>
                         &quot;[Next] [Pod %s] [Product Category %s] Returning list of found MqiMessage&quot;,
                         pod, category));
-<span class="fc" id="L312">                List&lt;MqiGenericMessageDto&lt;T&gt;&gt; messagesToReturn =</span>
+<span class="fc" id="L318">                List&lt;MqiGenericMessageDto&lt;T&gt;&gt; messagesToReturn =</span>
                         new ArrayList&lt;&gt;();
-<span class="fc" id="L314">                mqiMessages.forEach(x -&gt; messagesToReturn</span>
-<span class="fc" id="L315">                        .add(transformMqiMessageToDtoGenericMessage(x)));</span>
-<span class="fc" id="L316">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L317">                return new ResponseEntity&lt;List&lt;MqiGenericMessageDto&lt;T&gt;&gt;&gt;(</span>
+<span class="fc" id="L320">                mqiMessages.forEach(x -&gt; messagesToReturn</span>
+<span class="fc" id="L321">                        .add(transformMqiMessageToDtoGenericMessage(x)));</span>
+<span class="fc" id="L322">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L323">                return new ResponseEntity&lt;List&lt;MqiGenericMessageDto&lt;T&gt;&gt;&gt;(</span>
                         messagesToReturn, HttpStatus.OK);
             }
-<span class="fc" id="L320">        } catch (Exception exc) {</span>
-<span class="fc" id="L321">            LOGGER.error(&quot;[next] {}&quot;, exc.getMessage());</span>
-<span class="fc" id="L322">            this.appStatus.setError(&quot;MQI&quot;);            </span>
+<span class="fc" id="L326">        } catch (Exception exc) {</span>
+<span class="fc" id="L327">            LOGGER.error(&quot;[next] {}&quot;, exc.getMessage());</span>
+<span class="fc" id="L328">            this.appStatus.setError(&quot;MQI&quot;);            </span>
         }
-<span class="fc" id="L324">        return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L330">        return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
     }
 
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = &quot;/{messageID}/send&quot;)
@@ -329,99 +335,99 @@ public class GenericMqiController&lt;T&gt; {
             @PathVariable(name = &quot;messageID&quot;) final long messageID,
             @RequestBody final MqiSendMessageDto body) {
         try {
-<span class="fc" id="L332">            log(String.format(</span>
+<span class="fc" id="L338">            log(String.format(</span>
                     &quot;[Send Message] [MessageID %d] Searching MqiMessage&quot;,
-<span class="fc" id="L334">                    messageID));</span>
-<span class="fc" id="L335">            List&lt;MqiMessage&gt; responseFromDB =</span>
-<span class="fc" id="L336">                    mongoDBServices.searchByID(messageID);</span>
+<span class="fc" id="L340">                    messageID));</span>
+<span class="fc" id="L341">            List&lt;MqiMessage&gt; responseFromDB =</span>
+<span class="fc" id="L342">                    mongoDBServices.searchByID(messageID);</span>
 
-<span class="fc bfc" id="L338" title="All 2 branches covered.">            if (responseFromDB.isEmpty()) {</span>
-<span class="fc" id="L339">                LOGGER.error(</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">            if (responseFromDB.isEmpty()) {</span>
+<span class="fc" id="L345">                LOGGER.error(</span>
                         &quot;[Send Message] [MessageID {}] No MqiMessage found&quot;,
-<span class="fc" id="L341">                        messageID);</span>
-<span class="fc" id="L342">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L343">                return new ResponseEntity&lt;Boolean&gt;(HttpStatus.NOT_FOUND);</span>
+<span class="fc" id="L347">                        messageID);</span>
+<span class="fc" id="L348">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L349">                return new ResponseEntity&lt;Boolean&gt;(HttpStatus.NOT_FOUND);</span>
             } else { // Si le message existe
-<span class="fc" id="L345">                MqiMessage messageFromDB = responseFromDB.get(0);</span>
-<span class="fc" id="L346">                Date now = new Date();</span>
-<span class="fc bfc" id="L347" title="All 3 branches covered.">                switch (messageFromDB.getState()) {</span>
+<span class="fc" id="L351">                MqiMessage messageFromDB = responseFromDB.get(0);</span>
+<span class="fc" id="L352">                Date now = new Date();</span>
+<span class="fc bfc" id="L353" title="All 3 branches covered.">                switch (messageFromDB.getState()) {</span>
                     case ACK_KO:
                     case ACK_OK:
                     case ACK_WARN:
-<span class="fc" id="L351">                        log(String.format(</span>
+<span class="fc" id="L357">                        log(String.format(</span>
                                 &quot;[Send Message] [MessageID %d] MqiMessage found is at state ACK&quot;,
-<span class="fc" id="L353">                                messageID));</span>
-<span class="fc" id="L354">                        this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L355">                        return new ResponseEntity&lt;Boolean&gt;(false,</span>
+<span class="fc" id="L359">                                messageID));</span>
+<span class="fc" id="L360">                        this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L361">                        return new ResponseEntity&lt;Boolean&gt;(false,</span>
                                 HttpStatus.OK);
                     case READ:
-<span class="fc" id="L358">                        HashMap&lt;String, Object&gt; updateMap1 = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L364">                        HashMap&lt;String, Object&gt; updateMap1 = new HashMap&lt;&gt;();</span>
                         // on met status à SEND et son processing_pod
-<span class="fc" id="L360">                        messageFromDB.setState(MqiStateMessageEnum.SEND);</span>
-<span class="fc" id="L361">                        messageFromDB.setSendingPod(body.getPod());</span>
-<span class="fc" id="L362">                        updateMap1.put(&quot;state&quot;, messageFromDB.getState());</span>
-<span class="fc" id="L363">                        updateMap1.put(&quot;sendingPod&quot;,</span>
-<span class="fc" id="L364">                                messageFromDB.getSendingPod());</span>
+<span class="fc" id="L366">                        messageFromDB.setState(MqiStateMessageEnum.SEND);</span>
+<span class="fc" id="L367">                        messageFromDB.setSendingPod(body.getPod());</span>
+<span class="fc" id="L368">                        updateMap1.put(&quot;state&quot;, messageFromDB.getState());</span>
+<span class="fc" id="L369">                        updateMap1.put(&quot;sendingPod&quot;,</span>
+<span class="fc" id="L370">                                messageFromDB.getSendingPod());</span>
                         // on met à jour les éventuelles dates
-<span class="fc" id="L366">                        messageFromDB.setLastSendDate(now);</span>
-<span class="fc" id="L367">                        updateMap1.put(&quot;lastSendDate&quot;, now);</span>
-<span class="fc" id="L368">                        mongoDBServices.updateByID(messageID, updateMap1);</span>
-<span class="fc" id="L369">                        log(String.format(</span>
+<span class="fc" id="L372">                        messageFromDB.setLastSendDate(now);</span>
+<span class="fc" id="L373">                        updateMap1.put(&quot;lastSendDate&quot;, now);</span>
+<span class="fc" id="L374">                        mongoDBServices.updateByID(messageID, updateMap1);</span>
+<span class="fc" id="L375">                        log(String.format(</span>
                                 &quot;[Send Message] [MessageID %d] MqiMessage found is at state READ&quot;,
-<span class="fc" id="L371">                                messageID));</span>
-<span class="fc" id="L372">                        this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L373">                        return new ResponseEntity&lt;Boolean&gt;(true,</span>
+<span class="fc" id="L377">                                messageID));</span>
+<span class="fc" id="L378">                        this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L379">                        return new ResponseEntity&lt;Boolean&gt;(true,</span>
                                 HttpStatus.OK);
                     default:
-<span class="fc" id="L376">                        HashMap&lt;String, Object&gt; updateMap2 = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L382">                        HashMap&lt;String, Object&gt; updateMap2 = new HashMap&lt;&gt;();</span>
                         //  on incrémente nb_retry
-<span class="fc" id="L378">                        messageFromDB</span>
-<span class="fc" id="L379">                                .setNbRetries(messageFromDB.getNbRetries() + 1);</span>
-<span class="fc" id="L380">                        updateMap2.put(&quot;nbRetries&quot;,</span>
-<span class="fc" id="L381">                                messageFromDB.getNbRetries());</span>
-<span class="fc bfc" id="L382" title="All 2 branches covered.">                        if (messageFromDB.getNbRetries() &gt;= maxRetries) {</span>
+<span class="fc" id="L384">                        messageFromDB</span>
+<span class="fc" id="L385">                                .setNbRetries(messageFromDB.getNbRetries() + 1);</span>
+<span class="fc" id="L386">                        updateMap2.put(&quot;nbRetries&quot;,</span>
+<span class="fc" id="L387">                                messageFromDB.getNbRetries());</span>
+<span class="fc bfc" id="L388" title="All 2 branches covered.">                        if (messageFromDB.getNbRetries() &gt;= maxRetries) {</span>
                             // on publie un message d’erreur dans queue (via mqi
                             // du
                             // catalogue)
                             // TODO
-<span class="fc" id="L387">                            LOGGER.error(</span>
+<span class="fc" id="L393">                            LOGGER.error(</span>
                                     &quot;[Send Message] [MessageID {}] Number of retries is not reached&quot;,
-<span class="fc" id="L389">                                    messageID);</span>
+<span class="fc" id="L395">                                    messageID);</span>
                             // on met status = ACK_KO
-<span class="fc" id="L391">                            messageFromDB.setState(MqiStateMessageEnum.ACK_KO);</span>
-<span class="fc" id="L392">                            updateMap2.put(&quot;state&quot;, messageFromDB.getState());</span>
+<span class="fc" id="L397">                            messageFromDB.setState(MqiStateMessageEnum.ACK_KO);</span>
+<span class="fc" id="L398">                            updateMap2.put(&quot;state&quot;, messageFromDB.getState());</span>
                             // on met à jour les éventuelles dates
-<span class="fc" id="L394">                            messageFromDB.setLastAckDate(now);</span>
-<span class="fc" id="L395">                            updateMap2.put(&quot;lastAckDate&quot;, now);</span>
-<span class="fc" id="L396">                            mongoDBServices.updateByID(messageID, updateMap2);</span>
-<span class="fc" id="L397">                            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L398">                            return new ResponseEntity&lt;Boolean&gt;(false,</span>
+<span class="fc" id="L400">                            messageFromDB.setLastAckDate(now);</span>
+<span class="fc" id="L401">                            updateMap2.put(&quot;lastAckDate&quot;, now);</span>
+<span class="fc" id="L402">                            mongoDBServices.updateByID(messageID, updateMap2);</span>
+<span class="fc" id="L403">                            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L404">                            return new ResponseEntity&lt;Boolean&gt;(false,</span>
                                     HttpStatus.OK);
                         } else {
                             // on met status = à SEND et son processing_pod
-<span class="fc" id="L402">                            messageFromDB.setState(MqiStateMessageEnum.SEND);</span>
-<span class="fc" id="L403">                            messageFromDB.setSendingPod(body.getPod());</span>
-<span class="fc" id="L404">                            updateMap2.put(&quot;state&quot;, messageFromDB.getState());</span>
-<span class="fc" id="L405">                            updateMap2.put(&quot;sendingPod&quot;,</span>
-<span class="fc" id="L406">                                    messageFromDB.getSendingPod());</span>
+<span class="fc" id="L408">                            messageFromDB.setState(MqiStateMessageEnum.SEND);</span>
+<span class="fc" id="L409">                            messageFromDB.setSendingPod(body.getPod());</span>
+<span class="fc" id="L410">                            updateMap2.put(&quot;state&quot;, messageFromDB.getState());</span>
+<span class="fc" id="L411">                            updateMap2.put(&quot;sendingPod&quot;,</span>
+<span class="fc" id="L412">                                    messageFromDB.getSendingPod());</span>
                             // on met à jour les éventuelles dates
-<span class="fc" id="L408">                            messageFromDB.setLastSendDate(now);</span>
-<span class="fc" id="L409">                            updateMap2.put(&quot;lastSendDate&quot;, now);</span>
-<span class="fc" id="L410">                            mongoDBServices.updateByID(messageID, updateMap2);</span>
-<span class="fc" id="L411">                            log(String.format(</span>
+<span class="fc" id="L414">                            messageFromDB.setLastSendDate(now);</span>
+<span class="fc" id="L415">                            updateMap2.put(&quot;lastSendDate&quot;, now);</span>
+<span class="fc" id="L416">                            mongoDBServices.updateByID(messageID, updateMap2);</span>
+<span class="fc" id="L417">                            log(String.format(</span>
                                     &quot;[Send Message] [MessageID %d] MqiMessage found state is set at SEND&quot;,
-<span class="fc" id="L413">                                    messageID));</span>
-<span class="fc" id="L414">                            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L415">                            return new ResponseEntity&lt;Boolean&gt;(true,</span>
+<span class="fc" id="L419">                                    messageID));</span>
+<span class="fc" id="L420">                            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L421">                            return new ResponseEntity&lt;Boolean&gt;(true,</span>
                                     HttpStatus.OK);
                         }
 
                 }
             }
-<span class="fc" id="L421">        } catch (Exception exc) {</span>
-<span class="fc" id="L422">            LOGGER.error(&quot;[send] {}&quot;, exc.getMessage());</span>
-<span class="fc" id="L423">            this.appStatus.setError(&quot;MQI&quot;);</span>
-<span class="fc" id="L424">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L427">        } catch (Exception exc) {</span>
+<span class="fc" id="L428">            LOGGER.error(&quot;[send] {}&quot;, exc.getMessage());</span>
+<span class="fc" id="L429">            this.appStatus.setError(&quot;MQI&quot;);</span>
+<span class="fc" id="L430">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
         }
     }
 
@@ -430,42 +436,42 @@ public class GenericMqiController&lt;T&gt; {
             @PathVariable(name = &quot;messageID&quot;) final long messageID,
             @RequestBody final Ack ack) {
         try {
-<span class="fc" id="L433">            HashMap&lt;String, Object&gt; updateMap = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L434" title="All 2 branches covered.">            if (ack.equals(Ack.OK)) {</span>
-<span class="fc" id="L435">                updateMap.put(&quot;state&quot;, MqiStateMessageEnum.ACK_OK);</span>
-<span class="fc bfc" id="L436" title="All 2 branches covered.">            } else if (ack.equals(Ack.ERROR)) {</span>
-<span class="fc" id="L437">                updateMap.put(&quot;state&quot;, MqiStateMessageEnum.ACK_KO);</span>
-<span class="pc bpc" id="L438" title="1 of 2 branches missed.">            } else if (ack.equals(Ack.WARN)) {</span>
-<span class="fc" id="L439">                updateMap.put(&quot;state&quot;, MqiStateMessageEnum.ACK_WARN);</span>
+<span class="fc" id="L439">            HashMap&lt;String, Object&gt; updateMap = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L440" title="All 2 branches covered.">            if (ack.equals(Ack.OK)) {</span>
+<span class="fc" id="L441">                updateMap.put(&quot;state&quot;, MqiStateMessageEnum.ACK_OK);</span>
+<span class="fc bfc" id="L442" title="All 2 branches covered.">            } else if (ack.equals(Ack.ERROR)) {</span>
+<span class="fc" id="L443">                updateMap.put(&quot;state&quot;, MqiStateMessageEnum.ACK_KO);</span>
+<span class="pc bpc" id="L444" title="1 of 2 branches missed.">            } else if (ack.equals(Ack.WARN)) {</span>
+<span class="fc" id="L445">                updateMap.put(&quot;state&quot;, MqiStateMessageEnum.ACK_WARN);</span>
             } else {
-<span class="nc" id="L441">                LOGGER.error(</span>
+<span class="nc" id="L447">                LOGGER.error(</span>
                         &quot;[Ack Message] [MessageID {}] [Ack {}] Ack is not valid&quot;,
-<span class="nc" id="L443">                        messageID, ack);</span>
-<span class="nc" id="L444">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="nc" id="L445">                return new ResponseEntity&lt;Boolean&gt;(HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L449">                        messageID, ack);</span>
+<span class="nc" id="L450">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="nc" id="L451">                return new ResponseEntity&lt;Boolean&gt;(HttpStatus.BAD_REQUEST);</span>
             }
-<span class="fc" id="L447">            Date now = new Date();</span>
-<span class="fc" id="L448">            updateMap.put(&quot;lastAckDate&quot;, now);</span>
+<span class="fc" id="L453">            Date now = new Date();</span>
+<span class="fc" id="L454">            updateMap.put(&quot;lastAckDate&quot;, now);</span>
 
-<span class="fc" id="L450">            mongoDBServices.updateByID(messageID, updateMap);</span>
-<span class="fc" id="L451">            List&lt;MqiMessage&gt; responseFromDB =</span>
-<span class="fc" id="L452">                    mongoDBServices.searchByID(messageID);</span>
+<span class="fc" id="L456">            mongoDBServices.updateByID(messageID, updateMap);</span>
+<span class="fc" id="L457">            List&lt;MqiMessage&gt; responseFromDB =</span>
+<span class="fc" id="L458">                    mongoDBServices.searchByID(messageID);</span>
             // on met le status à ak_ok ou ack_ko
 
-<span class="pc bpc" id="L455" title="1 of 2 branches missed.">            if (responseFromDB.isEmpty()) {</span>
-<span class="nc" id="L456">                LOGGER.error(</span>
+<span class="pc bpc" id="L461" title="1 of 2 branches missed.">            if (responseFromDB.isEmpty()) {</span>
+<span class="nc" id="L462">                LOGGER.error(</span>
                         &quot;[Ack Message] [MessageID {}] [Ack {}] No MqiMessage Found with MessageID&quot;,
-<span class="nc" id="L458">                        messageID, ack);</span>
-<span class="nc" id="L459">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="nc" id="L460">                return new ResponseEntity&lt;Boolean&gt;(false, HttpStatus.OK);</span>
+<span class="nc" id="L464">                        messageID, ack);</span>
+<span class="nc" id="L465">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="nc" id="L466">                return new ResponseEntity&lt;Boolean&gt;(false, HttpStatus.OK);</span>
             } else {
-<span class="fc" id="L462">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L463">                return new ResponseEntity&lt;Boolean&gt;(true, HttpStatus.OK);</span>
+<span class="fc" id="L468">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L469">                return new ResponseEntity&lt;Boolean&gt;(true, HttpStatus.OK);</span>
             }
-<span class="fc" id="L465">        } catch (Exception exc) {</span>
-<span class="fc" id="L466">            LOGGER.error(&quot;[ack] {}&quot;, exc.getMessage());</span>
-<span class="fc" id="L467">            this.appStatus.setError(&quot;MQI&quot;);</span>
-<span class="fc" id="L468">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L471">        } catch (Exception exc) {</span>
+<span class="fc" id="L472">            LOGGER.error(&quot;[ack] {}&quot;, exc.getMessage());</span>
+<span class="fc" id="L473">            this.appStatus.setError(&quot;MQI&quot;);</span>
+<span class="fc" id="L474">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
         }
     }
 
@@ -473,26 +479,26 @@ public class GenericMqiController&lt;T&gt; {
     public ResponseEntity&lt;MqiGenericMessageDto&lt;T&gt;&gt; getMessage(
             @PathVariable(name = &quot;messageID&quot;) final long messageID) {
         try {
-<span class="fc" id="L476">            List&lt;MqiMessage&gt; responseFromDB =</span>
-<span class="fc" id="L477">                    mongoDBServices.searchByID(messageID);</span>
-<span class="fc bfc" id="L478" title="All 2 branches covered.">            if (responseFromDB.isEmpty()) {</span>
-<span class="fc" id="L479">                LOGGER.error(</span>
+<span class="fc" id="L482">            List&lt;MqiMessage&gt; responseFromDB =</span>
+<span class="fc" id="L483">                    mongoDBServices.searchByID(messageID);</span>
+<span class="fc bfc" id="L484" title="All 2 branches covered.">            if (responseFromDB.isEmpty()) {</span>
+<span class="fc" id="L485">                LOGGER.error(</span>
                         &quot;[Get] [MessageID {}] No MqiMessage Found with MessageID&quot;,
-<span class="fc" id="L481">                        messageID);</span>
-<span class="fc" id="L482">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L483">                return new ResponseEntity&lt;MqiGenericMessageDto&lt;T&gt;&gt;(</span>
+<span class="fc" id="L487">                        messageID);</span>
+<span class="fc" id="L488">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L489">                return new ResponseEntity&lt;MqiGenericMessageDto&lt;T&gt;&gt;(</span>
                         HttpStatus.NOT_FOUND);
             } else {
-<span class="fc" id="L486">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L487">                return new ResponseEntity&lt;MqiGenericMessageDto&lt;T&gt;&gt;(</span>
-<span class="fc" id="L488">                        transformMqiMessageToDtoGenericMessage(</span>
-<span class="fc" id="L489">                                responseFromDB.get(0)),</span>
+<span class="fc" id="L492">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L493">                return new ResponseEntity&lt;MqiGenericMessageDto&lt;T&gt;&gt;(</span>
+<span class="fc" id="L494">                        transformMqiMessageToDtoGenericMessage(</span>
+<span class="fc" id="L495">                                responseFromDB.get(0)),</span>
                         HttpStatus.OK);
             }
-<span class="fc" id="L492">        } catch (Exception exc) {</span>
-<span class="fc" id="L493">            LOGGER.error(&quot;[Get] {}&quot;, exc.getMessage());</span>
-<span class="fc" id="L494">            this.appStatus.setError(&quot;MQI&quot;);</span>
-<span class="fc" id="L495">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L498">        } catch (Exception exc) {</span>
+<span class="fc" id="L499">            LOGGER.error(&quot;[Get] {}&quot;, exc.getMessage());</span>
+<span class="fc" id="L500">            this.appStatus.setError(&quot;MQI&quot;);</span>
+<span class="fc" id="L501">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
         }
     }
 
@@ -506,36 +512,36 @@ public class GenericMqiController&lt;T&gt; {
             // message avec status != ACK et la plus petite date de lecture (à
             // voir
             // si on prend le plus petit offset)
-<span class="fc" id="L509">            Set&lt;MqiStateMessageEnum&gt; ackStates = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L510">            ackStates.add(MqiStateMessageEnum.ACK_KO);</span>
-<span class="fc" id="L511">            ackStates.add(MqiStateMessageEnum.ACK_OK);</span>
-<span class="fc" id="L512">            ackStates.add(MqiStateMessageEnum.ACK_WARN);</span>
-<span class="fc" id="L513">            List&lt;MqiMessage&gt; responseFromDB =</span>
-<span class="fc" id="L514">                    mongoDBServices.searchByTopicPartitionGroup(topic,</span>
+<span class="fc" id="L515">            Set&lt;MqiStateMessageEnum&gt; ackStates = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L516">            ackStates.add(MqiStateMessageEnum.ACK_KO);</span>
+<span class="fc" id="L517">            ackStates.add(MqiStateMessageEnum.ACK_OK);</span>
+<span class="fc" id="L518">            ackStates.add(MqiStateMessageEnum.ACK_WARN);</span>
+<span class="fc" id="L519">            List&lt;MqiMessage&gt; responseFromDB =</span>
+<span class="fc" id="L520">                    mongoDBServices.searchByTopicPartitionGroup(topic,</span>
                             partition, group, ackStates);
-<span class="fc bfc" id="L516" title="All 2 branches covered.">            if (responseFromDB.isEmpty()) {</span>
+<span class="fc bfc" id="L522" title="All 2 branches covered.">            if (responseFromDB.isEmpty()) {</span>
                 // TODO define the strategy
                 // Si pas d’entrée, on renvoie valeur par défaut :
                 // -2 : on laisse le consumer faire ce qu’il veut
                 // -1 : on démarre à l’offset du début
                 // 0 : on démarre à l’offset de fin
-<span class="fc" id="L522">                log(String.format(</span>
-                        &quot;[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning default Strategy&quot;,
-<span class="fc" id="L524">                        topic, partition, group));</span>
-<span class="fc" id="L525">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L526">                return new ResponseEntity&lt;Long&gt;(Long.valueOf(0), HttpStatus.OK);</span>
-            } else {
 <span class="fc" id="L528">                log(String.format(</span>
-                        &quot;[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning earlist offset&quot;,
+                        &quot;[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning default Strategy&quot;,
 <span class="fc" id="L530">                        topic, partition, group));</span>
 <span class="fc" id="L531">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L532">                return new ResponseEntity&lt;Long&gt;(</span>
-<span class="fc" id="L533">                        responseFromDB.get(0).getOffset(), HttpStatus.OK);</span>
+<span class="fc" id="L532">                return new ResponseEntity&lt;Long&gt;(Long.valueOf(dftOffset), HttpStatus.OK);</span>
+            } else {
+<span class="fc" id="L534">                log(String.format(</span>
+                        &quot;[EarliestOffset] [Topic %s] [Partition %d] [Group %s] Returning earlist offset&quot;,
+<span class="fc" id="L536">                        topic, partition, group));</span>
+<span class="fc" id="L537">                this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L538">                return new ResponseEntity&lt;Long&gt;(</span>
+<span class="fc" id="L539">                        responseFromDB.get(0).getOffset(), HttpStatus.OK);</span>
             }
-<span class="fc" id="L535">        } catch (Exception exc) {</span>
-<span class="fc" id="L536">            LOGGER.error(&quot;[earliestOffset] {}&quot;, exc.getMessage());</span>
-<span class="fc" id="L537">            this.appStatus.setError(&quot;MQI&quot;);</span>
-<span class="fc" id="L538">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L541">        } catch (Exception exc) {</span>
+<span class="fc" id="L542">            LOGGER.error(&quot;[earliestOffset] {}&quot;, exc.getMessage());</span>
+<span class="fc" id="L543">            this.appStatus.setError(&quot;MQI&quot;);</span>
+<span class="fc" id="L544">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
         }
     }
 
@@ -549,60 +555,60 @@ public class GenericMqiController&lt;T&gt; {
             @PathVariable(name = &quot;topic&quot;) final String topic,
             @RequestParam(&quot;pod&quot;) final String pod) {
         try {
-<span class="fc" id="L552">            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
-<span class="fc" id="L553">            return new ResponseEntity&lt;Integer&gt;(</span>
-<span class="fc" id="L554">                    mongoDBServices.countReadingMessages(pod, topic),</span>
+<span class="fc" id="L558">            this.appStatus.setWaiting(&quot;MQI&quot;);</span>
+<span class="fc" id="L559">            return new ResponseEntity&lt;Integer&gt;(</span>
+<span class="fc" id="L560">                    mongoDBServices.countReadingMessages(pod, topic),</span>
                     HttpStatus.OK);
-<span class="fc" id="L556">        } catch (Exception exc) {</span>
-<span class="fc" id="L557">            LOGGER.error(&quot;[earliestOffset] {}&quot;, exc.getMessage());</span>
-<span class="fc" id="L558">            this.appStatus.setError(&quot;MQI&quot;);</span>
-<span class="fc" id="L559">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L562">        } catch (Exception exc) {</span>
+<span class="fc" id="L563">            LOGGER.error(&quot;[earliestOffset] {}&quot;, exc.getMessage());</span>
+<span class="fc" id="L564">            this.appStatus.setError(&quot;MQI&quot;);</span>
+<span class="fc" id="L565">            return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
         }
     }
 
     private MqiLightMessageDto transformMqiMessageToMqiLightMessage(
             final MqiMessage messageToTransform) {
-<span class="fc" id="L565">        MqiLightMessageDto messageTransformed = new MqiLightMessageDto();</span>
-<span class="fc" id="L566">        messageTransformed.setCategory(messageToTransform.getCategory());</span>
-<span class="fc" id="L567">        messageTransformed.setGroup(messageToTransform.getGroup());</span>
-<span class="fc" id="L568">        messageTransformed.setIdentifier(messageToTransform.getIdentifier());</span>
-<span class="fc" id="L569">        messageTransformed.setLastAckDate(messageToTransform.getLastAckDate());</span>
-<span class="fc" id="L570">        messageTransformed</span>
-<span class="fc" id="L571">                .setLastReadDate(messageToTransform.getLastReadDate());</span>
-<span class="fc" id="L572">        messageTransformed</span>
-<span class="fc" id="L573">                .setLastSendDate(messageToTransform.getLastSendDate());</span>
-<span class="fc" id="L574">        messageTransformed.setNbRetries(messageToTransform.getNbRetries());</span>
-<span class="fc" id="L575">        messageTransformed.setOffset(messageToTransform.getOffset());</span>
-<span class="fc" id="L576">        messageTransformed.setPartition(messageToTransform.getPartition());</span>
-<span class="fc" id="L577">        messageTransformed.setReadingPod(messageToTransform.getReadingPod());</span>
-<span class="fc" id="L578">        messageTransformed.setSendingPod(messageToTransform.getSendingPod());</span>
-<span class="fc" id="L579">        messageTransformed.setState(messageToTransform.getState());</span>
-<span class="fc" id="L580">        messageTransformed.setTopic(messageToTransform.getTopic());</span>
-<span class="fc" id="L581">        return messageTransformed;</span>
+<span class="fc" id="L571">        MqiLightMessageDto messageTransformed = new MqiLightMessageDto();</span>
+<span class="fc" id="L572">        messageTransformed.setCategory(messageToTransform.getCategory());</span>
+<span class="fc" id="L573">        messageTransformed.setGroup(messageToTransform.getGroup());</span>
+<span class="fc" id="L574">        messageTransformed.setIdentifier(messageToTransform.getIdentifier());</span>
+<span class="fc" id="L575">        messageTransformed.setLastAckDate(messageToTransform.getLastAckDate());</span>
+<span class="fc" id="L576">        messageTransformed</span>
+<span class="fc" id="L577">                .setLastReadDate(messageToTransform.getLastReadDate());</span>
+<span class="fc" id="L578">        messageTransformed</span>
+<span class="fc" id="L579">                .setLastSendDate(messageToTransform.getLastSendDate());</span>
+<span class="fc" id="L580">        messageTransformed.setNbRetries(messageToTransform.getNbRetries());</span>
+<span class="fc" id="L581">        messageTransformed.setOffset(messageToTransform.getOffset());</span>
+<span class="fc" id="L582">        messageTransformed.setPartition(messageToTransform.getPartition());</span>
+<span class="fc" id="L583">        messageTransformed.setReadingPod(messageToTransform.getReadingPod());</span>
+<span class="fc" id="L584">        messageTransformed.setSendingPod(messageToTransform.getSendingPod());</span>
+<span class="fc" id="L585">        messageTransformed.setState(messageToTransform.getState());</span>
+<span class="fc" id="L586">        messageTransformed.setTopic(messageToTransform.getTopic());</span>
+<span class="fc" id="L587">        return messageTransformed;</span>
     }
 
     @SuppressWarnings(&quot;unchecked&quot;)
     private MqiGenericMessageDto&lt;T&gt; transformMqiMessageToDtoGenericMessage(
             final MqiMessage messageToTransform) {
-<span class="fc" id="L587">        MqiGenericMessageDto&lt;T&gt; messageTransformed =</span>
+<span class="fc" id="L593">        MqiGenericMessageDto&lt;T&gt; messageTransformed =</span>
                 new MqiGenericMessageDto&lt;T&gt;();
-<span class="fc" id="L589">        messageTransformed.setCategory(messageToTransform.getCategory());</span>
-<span class="fc" id="L590">        messageTransformed.setGroup(messageToTransform.getGroup());</span>
-<span class="fc" id="L591">        messageTransformed.setIdentifier(messageToTransform.getIdentifier());</span>
-<span class="fc" id="L592">        messageTransformed.setLastAckDate(messageToTransform.getLastAckDate());</span>
-<span class="fc" id="L593">        messageTransformed</span>
-<span class="fc" id="L594">                .setLastReadDate(messageToTransform.getLastReadDate());</span>
-<span class="fc" id="L595">        messageTransformed</span>
-<span class="fc" id="L596">                .setLastSendDate(messageToTransform.getLastSendDate());</span>
-<span class="fc" id="L597">        messageTransformed.setNbRetries(messageToTransform.getNbRetries());</span>
-<span class="fc" id="L598">        messageTransformed.setOffset(messageToTransform.getOffset());</span>
-<span class="fc" id="L599">        messageTransformed.setPartition(messageToTransform.getPartition());</span>
-<span class="fc" id="L600">        messageTransformed.setReadingPod(messageToTransform.getReadingPod());</span>
-<span class="fc" id="L601">        messageTransformed.setSendingPod(messageToTransform.getSendingPod());</span>
-<span class="fc" id="L602">        messageTransformed.setState(messageToTransform.getState());</span>
-<span class="fc" id="L603">        messageTransformed.setTopic(messageToTransform.getTopic());</span>
-<span class="fc" id="L604">        messageTransformed.setDto((T) messageToTransform.getDto());</span>
-<span class="fc" id="L605">        return messageTransformed;</span>
+<span class="fc" id="L595">        messageTransformed.setCategory(messageToTransform.getCategory());</span>
+<span class="fc" id="L596">        messageTransformed.setGroup(messageToTransform.getGroup());</span>
+<span class="fc" id="L597">        messageTransformed.setIdentifier(messageToTransform.getIdentifier());</span>
+<span class="fc" id="L598">        messageTransformed.setLastAckDate(messageToTransform.getLastAckDate());</span>
+<span class="fc" id="L599">        messageTransformed</span>
+<span class="fc" id="L600">                .setLastReadDate(messageToTransform.getLastReadDate());</span>
+<span class="fc" id="L601">        messageTransformed</span>
+<span class="fc" id="L602">                .setLastSendDate(messageToTransform.getLastSendDate());</span>
+<span class="fc" id="L603">        messageTransformed.setNbRetries(messageToTransform.getNbRetries());</span>
+<span class="fc" id="L604">        messageTransformed.setOffset(messageToTransform.getOffset());</span>
+<span class="fc" id="L605">        messageTransformed.setPartition(messageToTransform.getPartition());</span>
+<span class="fc" id="L606">        messageTransformed.setReadingPod(messageToTransform.getReadingPod());</span>
+<span class="fc" id="L607">        messageTransformed.setSendingPod(messageToTransform.getSendingPod());</span>
+<span class="fc" id="L608">        messageTransformed.setState(messageToTransform.getState());</span>
+<span class="fc" id="L609">        messageTransformed.setTopic(messageToTransform.getTopic());</span>
+<span class="fc" id="L610">        messageTransformed.setDto((T) messageToTransform.getDto());</span>
+<span class="fc" id="L611">        return messageTransformed;</span>
     }
 
 }

@@ -25,16 +25,16 @@ public class MqiAuxiliaryFileController
         extends GenericMqiController<AuxiliaryFileDto> {
 
     /**
-     * 
      * @param mongoDBServices
      * @param maxRetries
      */
     @Autowired
     public MqiAuxiliaryFileController(final MqiMessageService mongoDBServices,
             @Value("${mqi.max-retries}") final int maxRetries,
-            final AppStatus appStatus) {
+            final AppStatus appStatus,
+            @Value("${mqi.dft-offset}") final int dftOffset) {
         super(mongoDBServices, maxRetries, ProductCategory.AUXILIARY_FILES,
-                appStatus);
+                appStatus, dftOffset);
     }
 
 }

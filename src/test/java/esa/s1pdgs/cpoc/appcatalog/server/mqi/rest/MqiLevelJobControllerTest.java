@@ -64,7 +64,7 @@ public class MqiLevelJobControllerTest extends RestControllerTest {
 
         this.controller =
                 new MqiLevelJobController(mongoDBServices, maxRetries,
-                        appStatus);
+                        appStatus, -3);
         this.initMockMvc(this.controller);
     }
 

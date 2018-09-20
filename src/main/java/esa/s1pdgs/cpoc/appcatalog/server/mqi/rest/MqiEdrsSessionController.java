@@ -31,8 +31,9 @@ public class MqiEdrsSessionController
     @Autowired
     public MqiEdrsSessionController(final MqiMessageService mongoDBServices,
             @Value("${mqi.max-retries}") final int maxRetries,
-            final AppStatus appStatus) {
-        super(mongoDBServices, maxRetries, ProductCategory.EDRS_SESSIONS, 
-                appStatus);
+            final AppStatus appStatus,
+            @Value("${mqi.dft-offset}") final int dftOffset) {
+        super(mongoDBServices, maxRetries, ProductCategory.EDRS_SESSIONS,
+                appStatus, dftOffset);
     }
 }
