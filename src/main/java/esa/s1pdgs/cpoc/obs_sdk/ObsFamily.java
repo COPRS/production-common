@@ -6,5 +6,5 @@ package esa.s1pdgs.cpoc.obs_sdk;
  * @author Viveris Technologies
  */
 public enum ObsFamily {
-    AUXILIARY_FILE, EDRS_SESSION, L0_PRODUCT, L0_ACN, L1_PRODUCT, L1_ACN, UNKNOWN;
+    AUXILIARY_FILE, EDRS_SESSION, L0_SLICE, L0_ACN, L1_SLICE, L1_ACN, L0_SEGMENT, UNKNOWN;
 }

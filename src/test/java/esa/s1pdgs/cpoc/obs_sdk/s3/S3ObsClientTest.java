@@ -92,11 +92,11 @@ public class S3ObsClientTest {
         doReturn("edrs-sessions").when(configuration)
                 .getBucketForFamily(Mockito.eq(ObsFamily.EDRS_SESSION));
         doReturn("l0-slices").when(configuration)
-                .getBucketForFamily(Mockito.eq(ObsFamily.L0_PRODUCT));
+                .getBucketForFamily(Mockito.eq(ObsFamily.L0_SLICE));
         doReturn("l0-acns").when(configuration)
                 .getBucketForFamily(Mockito.eq(ObsFamily.L0_ACN));
         doReturn("l1-slices").when(configuration)
-                .getBucketForFamily(Mockito.eq(ObsFamily.L1_PRODUCT));
+                .getBucketForFamily(Mockito.eq(ObsFamily.L1_SLICE));
         doReturn("l1-acns").when(configuration)
                 .getBucketForFamily(Mockito.eq(ObsFamily.L1_ACN));
         doReturn(22).when(configuration).getIntOfConfiguration(
@@ -167,7 +167,7 @@ public class S3ObsClientTest {
         verify(service, times(1)).exist(Mockito.eq("l0-acns"), Mockito.eq("key-exist"));
 
         ret = client.doesObjectExist(
-                new ObsObject("key-not-exist", ObsFamily.L1_PRODUCT));
+                new ObsObject("key-not-exist", ObsFamily.L1_SLICE));
         assertFalse(ret);
         verify(service, times(1)).exist(Mockito.eq("l1-slices"),
                 Mockito.eq("key-not-exist"));
@@ -183,13 +183,13 @@ public class S3ObsClientTest {
     public void testDoesPrefixExist()
             throws ObsServiceException, SdkClientException {
         boolean ret = client.doesPrefixExist(
-                new ObsObject("key-exist", ObsFamily.L0_PRODUCT));
+                new ObsObject("key-exist", ObsFamily.L0_SLICE));
         assertTrue(ret);
         verify(service, times(1)).getNbObjects(Mockito.eq("l0-slices"),
                 Mockito.eq("key-exist"));
 
         ret = client.doesPrefixExist(
-                new ObsObject("key-not-exist", ObsFamily.L1_PRODUCT));
+                new ObsObject("key-not-exist", ObsFamily.L1_SLICE));
         assertFalse(ret);
         verify(service, times(1)).getNbObjects(Mockito.eq("l1-slices"),
                 Mockito.eq("key-not-exist"));
