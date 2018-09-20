@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -15,22 +15,22 @@ import nl.jqno.equalsverifier.Warning;
  * 
  * @author Viveris Technologies
  */
-public class LevelProductsMessageDtoTest {
+public class LevelSegmentsMessageDtoTest {
 
     /**
      * Test getters, setters and constructors
      */
     @Test
     public void testGettersSettersConstructors() {
-        LevelProductDto body = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L0_SLICE, "NRT");
-        LevelProductsMessageDto dto =
-                new LevelProductsMessageDto(123, "input-key", body);
+        LevelSegmentDto body = new LevelSegmentDto("product-name", "key-obs",
+                ProductFamily.L0_SEGMENT, "NRT");
+        LevelSegmentsMessageDto dto =
+                new LevelSegmentsMessageDto(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new LevelProductsMessageDto();
+        dto = new LevelSegmentsMessageDto();
         dto.setIdentifier(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -44,10 +44,10 @@ public class LevelProductsMessageDtoTest {
      */
     @Test
     public void testToString() {
-        LevelProductDto body = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L0_SLICE, "NRT");
-        LevelProductsMessageDto dto =
-                new LevelProductsMessageDto(123, "input-key", body);
+        LevelSegmentDto body = new LevelSegmentDto("product-name", "key-obs",
+                ProductFamily.L0_SEGMENT, "NRT");
+        LevelSegmentsMessageDto dto =
+                new LevelSegmentsMessageDto(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("identifier: 123"));
@@ -62,7 +62,7 @@ public class LevelProductsMessageDtoTest {
      */
     @Test
     public void checkEquals() {
-        EqualsVerifier.forClass(LevelProductsMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(LevelSegmentsMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

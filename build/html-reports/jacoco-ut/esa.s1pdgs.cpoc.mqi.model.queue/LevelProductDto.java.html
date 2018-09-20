@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LevelProductDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.model.queue</a> &gt; <span class="el_source">LevelProductDto.java</span></div><h1>LevelProductDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -27,30 +28,38 @@ public class LevelProductDto {
     private ProductFamily family;
 
     /**
+     * Mode
+     */
+    private String mode;
+
+    /**
      * Default constructor
      */
     public LevelProductDto() {
-<span class="fc" id="L33">        super();</span>
-<span class="fc" id="L34">        this.family = ProductFamily.BLANK;</span>
-<span class="fc" id="L35">    }</span>
+<span class="fc" id="L39">        super();</span>
+<span class="fc" id="L40">        this.family = ProductFamily.BLANK;</span>
+<span class="fc" id="L41">    }</span>
 
     /**
      * @param productName
      * @param keyObjectStorage
      */
-    public LevelProductDto(final String productName, final String keyObjectStorage,
-            final ProductFamily family) {
-<span class="fc" id="L43">        this();</span>
-<span class="fc" id="L44">        this.productName = productName;</span>
-<span class="fc" id="L45">        this.keyObjectStorage = keyObjectStorage;</span>
-<span class="fc" id="L46">        this.family = family;</span>
-<span class="fc" id="L47">    }</span>
+    public LevelProductDto(final String productName,
+            final String keyObjectStorage, final ProductFamily family, final String mode) {
+<span class="fc" id="L49">        this();</span>
+<span class="fc" id="L50">        this.productName = productName;</span>
+<span class="fc" id="L51">        this.keyObjectStorage = keyObjectStorage;</span>
+<span class="fc" id="L52">        this.family = family;</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (mode != null) {</span>
+<span class="fc" id="L54">            this.mode = mode.toUpperCase(Locale.FRANCE);</span>
+        }
+<span class="fc" id="L56">    }</span>
 
     /**
      * @return the productName
      */
     public String getProductName() {
-<span class="fc" id="L53">        return productName;</span>
+<span class="fc" id="L62">        return productName;</span>
     }
 
     /**
@@ -58,14 +67,14 @@ public class LevelProductDto {
      *            the productName to set
      */
     public void setProductName(final String productName) {
-<span class="fc" id="L61">        this.productName = productName;</span>
-<span class="fc" id="L62">    }</span>
+<span class="fc" id="L70">        this.productName = productName;</span>
+<span class="fc" id="L71">    }</span>
 
     /**
      * @return the keyObjectStorage
      */
     public String getKeyObjectStorage() {
-<span class="fc" id="L68">        return keyObjectStorage;</span>
+<span class="fc" id="L77">        return keyObjectStorage;</span>
     }
 
     /**
@@ -73,14 +82,14 @@ public class LevelProductDto {
      *            the keyObjectStorage to set
      */
     public void setKeyObjectStorage(final String keyObjectStorage) {
-<span class="fc" id="L76">        this.keyObjectStorage = keyObjectStorage;</span>
-<span class="fc" id="L77">    }</span>
+<span class="fc" id="L85">        this.keyObjectStorage = keyObjectStorage;</span>
+<span class="fc" id="L86">    }</span>
 
     /**
      * @return the family
      */
     public ProductFamily getFamily() {
-<span class="fc" id="L83">        return family;</span>
+<span class="fc" id="L92">        return family;</span>
     }
 
     /**
@@ -88,17 +97,35 @@ public class LevelProductDto {
      *            the familyName to set
      */
     public void setFamily(final ProductFamily family) {
-<span class="fc" id="L91">        this.family = family;</span>
-<span class="fc" id="L92">    }</span>
+<span class="fc" id="L100">        this.family = family;</span>
+<span class="fc" id="L101">    }</span>
+
+    /**
+     * @return
+     */
+    public String getMode() {
+<span class="fc" id="L107">        return mode;</span>
+    }
+
+    /**
+     * @param mode
+     */
+    public void setMode(final String mode) {
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (mode == null) {</span>
+<span class="nc" id="L115">            this.mode = mode;</span>
+        } else {
+<span class="fc" id="L117">            this.mode = mode.toUpperCase(Locale.FRANCE);</span>
+        }
+<span class="fc" id="L119">    }</span>
 
     /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-<span class="fc" id="L99">        return String.format(</span>
-                &quot;{productName: %s, keyObjectStorage: %s, family: %s}&quot;,
-                productName, keyObjectStorage, family);
+<span class="fc" id="L126">        return String.format(</span>
+                &quot;{productName: %s, keyObjectStorage: %s, family: %s, mode: %s}&quot;,
+                productName, keyObjectStorage, family, mode);
     }
 
     /**
@@ -106,7 +133,7 @@ public class LevelProductDto {
      */
     @Override
     public int hashCode() {
-<span class="fc" id="L109">        return Objects.hash(productName, keyObjectStorage, family);</span>
+<span class="fc" id="L136">        return Objects.hash(productName, keyObjectStorage, family, mode);</span>
     }
 
     /**
@@ -115,18 +142,19 @@ public class LevelProductDto {
     @Override
     public boolean equals(final Object obj) {
         boolean ret;
-<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (this == obj) {</span>
-<span class="fc" id="L119">            ret = true;</span>
-<span class="fc bfc" id="L120" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L121">            ret = false;</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L146">            ret = true;</span>
+<span class="fc bfc" id="L147" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L148">            ret = false;</span>
         } else {
-<span class="fc" id="L123">            LevelProductDto other = (LevelProductDto) obj;</span>
+<span class="fc" id="L150">            LevelProductDto other = (LevelProductDto) obj;</span>
             // field comparison
-<span class="fc bfc" id="L125" title="All 2 branches covered.">            ret = Objects.equals(productName, other.productName)</span>
-<span class="fc bfc" id="L126" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(keyObjectStorage, other.keyObjectStorage)</span>
-<span class="fc bfc" id="L127" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(family, other.family);</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">            ret = Objects.equals(productName, other.productName)</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(keyObjectStorage, other.keyObjectStorage)</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(family, other.family)</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(mode, other.mode);</span>
         }
-<span class="fc" id="L129">        return ret;</span>
+<span class="fc" id="L157">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

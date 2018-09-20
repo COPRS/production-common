@@ -10,17 +10,17 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
-public class LevelProductDto {
+public class LevelSegmentDto {
 
     /**
      * Product name of the metadata to index
      */
-    private String productName;
+    private String name;
 
     /**
      * ObjectkeyStorage of the metatdata to index
      */
-    private String keyObjectStorage;
+    private String keyObs;
 
     /**
      * Family name for L0 Slices
@@ -35,7 +35,7 @@ public class LevelProductDto {
     /**
      * Default constructor
      */
-    public LevelProductDto() {
+    public LevelSegmentDto() {
         super();
         this.family = ProductFamily.BLANK;
     }
@@ -44,11 +44,11 @@ public class LevelProductDto {
      * @param productName
      * @param keyObjectStorage
      */
-    public LevelProductDto(final String productName,
+    public LevelSegmentDto(final String productName,
             final String keyObjectStorage, final ProductFamily family, final String mode) {
         this();
-        this.productName = productName;
-        this.keyObjectStorage = keyObjectStorage;
+        this.name = productName;
+        this.keyObs = keyObjectStorage;
         this.family = family;
         if (mode != null) {
             this.mode = mode.toUpperCase(Locale.FRANCE);
@@ -56,33 +56,35 @@ public class LevelProductDto {
     }
 
     /**
-     * @return the productName
+     * 
+     * @return
      */
-    public String getProductName() {
-        return productName;
+    public String getName() {
+        return name;
     }
 
     /**
-     * @param productName
-     *            the productName to set
+     * 
+     * @param name
      */
-    public void setProductName(final String productName) {
-        this.productName = productName;
+    public void setName(final String name) {
+        this.name = name;
     }
 
     /**
-     * @return the keyObjectStorage
+     * 
+     * @return
      */
-    public String getKeyObjectStorage() {
-        return keyObjectStorage;
+    public String getKeyObs() {
+        return keyObs;
     }
 
     /**
-     * @param keyObjectStorage
-     *            the keyObjectStorage to set
+     * 
+     * @param keyObs
      */
-    public void setKeyObjectStorage(final String keyObjectStorage) {
-        this.keyObjectStorage = keyObjectStorage;
+    public void setKeyObs(final String keyObs) {
+        this.keyObs = keyObs;
     }
 
     /**
@@ -124,8 +126,8 @@ public class LevelProductDto {
     @Override
     public String toString() {
         return String.format(
-                "{productName: %s, keyObjectStorage: %s, family: %s, mode: %s}",
-                productName, keyObjectStorage, family, mode);
+                "{name: %s, keyObs: %s, family: %s, mode: %s}",
+                name, keyObs, family, mode);
     }
 
     /**
@@ -133,7 +135,7 @@ public class LevelProductDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(productName, keyObjectStorage, family, mode);
+        return Objects.hash(name, keyObs, family, mode);
     }
 
     /**
@@ -147,10 +149,10 @@ public class LevelProductDto {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            LevelProductDto other = (LevelProductDto) obj;
+            LevelSegmentDto other = (LevelSegmentDto) obj;
             // field comparison
-            ret = Objects.equals(productName, other.productName)
-                    && Objects.equals(keyObjectStorage, other.keyObjectStorage)
+            ret = Objects.equals(name, other.name)
+                    && Objects.equals(keyObs, other.keyObs)
                     && Objects.equals(family, other.family)
                     && Objects.equals(mode, other.mode);
         }

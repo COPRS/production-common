@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
  * @author Viveris Technologie
  */
 public enum ProductCategory {
-    AUXILIARY_FILES, EDRS_SESSIONS, LEVEL_JOBS, LEVEL_PRODUCTS, LEVEL_REPORTS;
+    AUXILIARY_FILES, EDRS_SESSIONS, LEVEL_JOBS, LEVEL_PRODUCTS, LEVEL_REPORTS, LEVEL_SEGMENTS;
 
     /**
      * Get the category for a given product family
@@ -33,17 +33,22 @@ public enum ProductCategory {
                 break;
             case L0_JOB:
             case L1_JOB:
+            case L0_ASP_JOB:
                 ret = ProductCategory.LEVEL_JOBS;
                 break;
             case L0_REPORT:
             case L1_REPORT:
+            case L0_ASP_REPORT:
                 ret = ProductCategory.LEVEL_REPORTS;
                 break;
             case L0_ACN:
-            case L0_PRODUCT:
+            case L0_SLICE:
             case L1_ACN:
-            case L1_PRODUCT:
+            case L1_SLICE:
                 ret = ProductCategory.LEVEL_PRODUCTS;
+                break;
+            case L0_SEGMENT:
+                ret = ProductCategory.LEVEL_SEGMENTS;
                 break;
             default:
                 throw new InternalErrorException(

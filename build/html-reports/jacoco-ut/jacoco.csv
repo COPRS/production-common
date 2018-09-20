@@ -12,12 +12,14 @@ S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.rest,MqiLevelReportM
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.rest,MqiAuxiliaryFileMessageDto,0,21,0,0,0,6,0,3,0,3
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.rest,MqiSendMessageDto,0,93,0,10,0,22,0,14,0,9
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.rest,MqiLightMessageDto,7,396,0,34,3,74,2,50,2,33
+S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.rest,MqiLevelSegmentMessageDto,0,21,0,0,0,6,0,3,0,3
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelJobOutputDto,0,92,0,10,0,22,0,14,0,9
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelJobInputDto,0,118,0,12,0,27,0,17,0,11
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelReportDto,0,118,0,12,0,27,0,17,0,11
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,EdrsSessionDto,0,171,0,16,0,37,0,23,0,15
-S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelProductDto,0,121,0,12,0,28,0,17,0,11
+S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelProductDto,4,155,1,17,1,35,1,21,0,13
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelJobDto,12,246,0,20,4,53,2,32,2,22
+S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelSegmentDto,4,155,1,17,1,35,1,21,0,13
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelJobTaskDto,0,62,0,6,0,17,0,10,0,7
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,AuxiliaryFileDto,0,92,0,10,0,22,0,14,0,9
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.queue,LevelJobPoolDto,0,67,0,6,0,17,0,10,0,7
@@ -74,13 +76,13 @@ S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common.errors.k8s,WrapperStopEx
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common.errors.k8s,PodResourceException,0,11,0,0,0,4,0,2,0,2
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common.errors.k8s,K8sEntityException,0,21,0,0,0,5,0,3,0,3
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common.errors.k8s,K8sUnknownResourceException,0,5,0,0,0,2,0,1,0,1
-S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ProductCategory,0,111,0,8,0,18,0,11,0,5
-S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ProductFamily,0,155,0,4,0,10,0,7,0,5
+S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ProductCategory,0,124,0,9,0,20,0,12,0,5
+S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ProductFamily,0,185,0,4,0,14,0,7,0,5
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,AppState,0,68,0,0,0,2,0,4,0,4
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ResumeDetails,0,81,0,10,0,15,0,11,0,6
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,FileExtension,0,101,0,0,0,8,0,5,0,5
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ApplicationMode,0,38,0,0,0,2,0,4,0,4
-S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ProductCategory.new Object() {...},10,65,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ProductCategory.new Object() {...},13,83,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,ApplicationLevel,0,38,0,0,0,2,0,4,0,4
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,EdrsSessionFileType,5,58,0,3,0,9,1,6,1,4
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common,EdrsSessionFileType.new Object() {...},2,17,0,0,0,1,0,1,0,1
@@ -102,6 +104,7 @@ S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.rest,LevelProductsMes
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.rest,StatusDto,0,127,0,12,0,28,0,17,0,11
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.rest,LevelReportsMessageDto,0,9,0,0,0,4,0,2,0,2
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.rest,LevelJobsMessageDto,0,9,0,0,0,4,0,2,0,2
+S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.rest,LevelSegmentsMessageDto,0,9,0,0,0,4,0,2,0,2
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.rest,EdrsSessionsMessageDto,0,9,0,0,0,4,0,2,0,2
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.rest,Ack,0,48,0,0,0,2,0,4,0,4
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.mqi.model.rest,GenericMessageDto,0,120,0,12,0,28,0,17,0,11

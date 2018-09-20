@@ -14,17 +14,17 @@ import nl.jqno.equalsverifier.Warning;
  * 
  * @author Viveris Technologies
  */
-public class LevelProductDtoTest {
+public class LevelSegmentDtoTest {
 
     /**
      * Test default cosntructor and getters
      */
     @Test
     public void testConstructor() {
-        LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
+        LevelSegmentDto dto = new LevelSegmentDto("product-name", "key-obs",
                 ProductFamily.L0_SLICE, "NRT");
-        assertEquals("product-name", dto.getProductName());
-        assertEquals("key-obs", dto.getKeyObjectStorage());
+        assertEquals("product-name", dto.getName());
+        assertEquals("key-obs", dto.getKeyObs());
         assertEquals(ProductFamily.L0_SLICE, dto.getFamily());
         assertEquals("NRT", dto.getMode());
     }
@@ -34,14 +34,14 @@ public class LevelProductDtoTest {
      */
     @Test
     public void testToStringAndSetters() {
-        LevelProductDto dto = new LevelProductDto();
-        dto.setProductName("product-name");
-        dto.setKeyObjectStorage("key-obs");
+        LevelSegmentDto dto = new LevelSegmentDto();
+        dto.setName("product-name");
+        dto.setKeyObs("key-obs");
         dto.setFamily(ProductFamily.L1_SLICE);
         dto.setMode("fast");
         String str = dto.toString();
-        assertTrue(str.contains("productName: product-name"));
-        assertTrue(str.contains("keyObjectStorage: key-obs"));
+        assertTrue(str.contains("name: product-name"));
+        assertTrue(str.contains("keyObs: key-obs"));
         assertTrue(str.contains("family: L1_SLICE"));
         assertTrue(str.contains("mode: FAST"));
     }
@@ -51,7 +51,7 @@ public class LevelProductDtoTest {
      */
     @Test
     public void equalsDto() {
-        EqualsVerifier.forClass(LevelProductDto.class).usingGetClass()
+        EqualsVerifier.forClass(LevelSegmentDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 }

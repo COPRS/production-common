@@ -6,8 +6,12 @@
  * @author Cyrielle Gailliard
  */
 <span class="fc" id="L8">public enum ProductFamily {</span>
-<span class="fc" id="L9">    EDRS_SESSION, JOB_ORDER, AUXILIARY_FILE, L0_ACN, L0_PRODUCT, L0_REPORT,</span>
-<span class="fc" id="L10">    L0_JOB, L1_ACN, L1_PRODUCT, L1_REPORT, L1_JOB, BLANK;</span>
+<span class="fc" id="L9">    EDRS_SESSION, AUXILIARY_FILE, </span>
+<span class="fc" id="L10">    L0_ACN, L0_SLICE, L1_ACN, L1_SLICE, </span>
+<span class="fc" id="L11">    L0_REPORT, L1_REPORT, L0_ASP_REPORT,</span>
+<span class="fc" id="L12">    L0_SEGMENT,</span>
+<span class="fc" id="L13">    L0_JOB, L1_JOB, L0_ASP_JOB,</span>
+<span class="fc" id="L14">    JOB_ORDER, BLANK;</span>
 
     /**
      * Get product family from value in string format
@@ -17,16 +21,16 @@
      */
     public static ProductFamily fromValue(final String value) {
         ProductFamily ret;
-<span class="fc bfc" id="L20" title="All 4 branches covered.">        if (value == null || value.length() == 0) {</span>
-<span class="fc" id="L21">            ret = ProductFamily.BLANK;</span>
+<span class="fc bfc" id="L24" title="All 4 branches covered.">        if (value == null || value.length() == 0) {</span>
+<span class="fc" id="L25">            ret = ProductFamily.BLANK;</span>
         } else {
             try {
-<span class="fc" id="L24">                ret = ProductFamily.valueOf(value);</span>
-<span class="fc" id="L25">            } catch (IllegalArgumentException ex) {</span>
-<span class="fc" id="L26">                ret = ProductFamily.BLANK;</span>
-<span class="fc" id="L27">            }</span>
+<span class="fc" id="L28">                ret = ProductFamily.valueOf(value);</span>
+<span class="fc" id="L29">            } catch (IllegalArgumentException ex) {</span>
+<span class="fc" id="L30">                ret = ProductFamily.BLANK;</span>
+<span class="fc" id="L31">            }</span>
         }
-<span class="fc" id="L29">        return ret;</span>
+<span class="fc" id="L33">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
