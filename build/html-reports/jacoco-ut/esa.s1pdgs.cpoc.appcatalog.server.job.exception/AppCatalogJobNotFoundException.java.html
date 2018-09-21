@@ -29,12 +29,16 @@ public class AppCatalogJobNotFoundException extends AbstractAppDataException {
 <span class="fc" id="L29">        this.jobId = jobId;</span>
 <span class="fc" id="L30">    }</span>
 
+    public long getJobId() {
+<span class="fc" id="L33">        return jobId;</span>
+    }
+
     /**
      * 
      */
     @Override
     public String getLogMessage() {
-<span class="fc" id="L37">        return String.format(&quot;[jobId %s] [msg %s]&quot;, jobId, getMessage());</span>
+<span class="fc" id="L41">        return String.format(&quot;[jobId %s] [msg %s]&quot;, jobId, getMessage());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

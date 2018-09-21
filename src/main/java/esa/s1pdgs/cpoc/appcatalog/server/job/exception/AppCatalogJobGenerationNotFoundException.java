@@ -32,7 +32,7 @@ public class AppCatalogJobGenerationNotFoundException
      */
     public AppCatalogJobGenerationNotFoundException(final long jobId,
             final String taskTable) {
-        super(ErrorCode.JOB_NOT_FOUND, "Job generation not found");
+        super(ErrorCode.JOB_GENERATION_NOT_FOUND, "Job generation not found");
         this.jobId = jobId;
         this.taskTable = taskTable;
     }

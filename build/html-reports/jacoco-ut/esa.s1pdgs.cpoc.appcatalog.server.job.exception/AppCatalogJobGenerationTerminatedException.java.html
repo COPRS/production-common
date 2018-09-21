@@ -33,23 +33,23 @@ public class AppCatalogJobGenerationTerminatedException extends AbstractAppDataE
      */
     public AppCatalogJobGenerationTerminatedException(final String productName,
             final List&lt;Object&gt; mqiMessages) {
-<span class="nc" id="L36">        super(ErrorCode.JOB_GENERATION_TERMINATED, &quot;Job generation forcely terminated&quot;);</span>
-<span class="nc" id="L37">        this.productName = productName;</span>
-<span class="nc" id="L38">        this.mqiMessages = mqiMessages;</span>
-<span class="nc" id="L39">    }</span>
+<span class="fc" id="L36">        super(ErrorCode.JOB_GENERATION_TERMINATED, &quot;Job generation forcely terminated&quot;);</span>
+<span class="fc" id="L37">        this.productName = productName;</span>
+<span class="fc" id="L38">        this.mqiMessages = mqiMessages;</span>
+<span class="fc" id="L39">    }</span>
 
     /**
      * @return the state
      */
     public String getProductName() {
-<span class="nc" id="L45">        return productName;</span>
+<span class="fc" id="L45">        return productName;</span>
     }
 
     /**
      * @return the type
      */
     public List&lt;Object&gt; getMqiMessages() {
-<span class="nc" id="L52">        return mqiMessages;</span>
+<span class="fc" id="L52">        return mqiMessages;</span>
     }
 
     /**
@@ -57,8 +57,8 @@ public class AppCatalogJobGenerationTerminatedException extends AbstractAppDataE
      */
     @Override
     public String getLogMessage() {
-<span class="nc" id="L60">        return String.format(&quot;[productName %s] [mqiMessages %s] [msg %s]&quot;, productName, mqiMessages,</span>
-<span class="nc" id="L61">                getMessage());</span>
+<span class="fc" id="L60">        return String.format(&quot;[productName %s] [mqiMessages %s] [msg %s]&quot;, productName, mqiMessages,</span>
+<span class="fc" id="L61">                getMessage());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

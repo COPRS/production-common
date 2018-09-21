@@ -29,6 +29,10 @@ public class AppCatalogJobNotFoundException extends AbstractAppDataException {
         this.jobId = jobId;
     }
 
+    public long getJobId() {
+        return jobId;
+    }
+
     /**
      * 
      */

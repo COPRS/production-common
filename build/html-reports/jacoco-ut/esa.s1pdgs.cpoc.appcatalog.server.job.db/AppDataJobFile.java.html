@@ -22,8 +22,8 @@ public class AppDataJobFile {
     /**
      */
     public AppDataJobFile() {
-<span class="nc" id="L25">        super();</span>
-<span class="nc" id="L26">    }</span>
+<span class="fc" id="L25">        super();</span>
+<span class="fc" id="L26">    }</span>
 
     /**
      * @param filename
@@ -37,30 +37,30 @@ public class AppDataJobFile {
      * @param filename
      */
     public AppDataJobFile(final String filename, final String keyObs) {
-<span class="nc" id="L40">        super();</span>
-<span class="nc" id="L41">        this.filename = filename;</span>
-<span class="nc" id="L42">        this.keyObs = keyObs;</span>
-<span class="nc" id="L43">    }</span>
+<span class="fc" id="L40">        super();</span>
+<span class="fc" id="L41">        this.filename = filename;</span>
+<span class="fc" id="L42">        this.keyObs = keyObs;</span>
+<span class="fc" id="L43">    }</span>
 
     /**
      * @return the filename
      */
     public String getFilename() {
-<span class="nc" id="L49">        return filename;</span>
+<span class="fc" id="L49">        return filename;</span>
     }
 
     /**
      * @param filename the filename to set
      */
     public void setFilename(String filename) {
-<span class="nc" id="L56">        this.filename = filename;</span>
-<span class="nc" id="L57">    }</span>
+<span class="fc" id="L56">        this.filename = filename;</span>
+<span class="fc" id="L57">    }</span>
 
     /**
      * @return the keyObs
      */
     public String getKeyObs() {
-<span class="nc" id="L63">        return keyObs;</span>
+<span class="fc" id="L63">        return keyObs;</span>
     }
 
     /**
@@ -68,8 +68,8 @@ public class AppDataJobFile {
      *            the keyObs to set
      */
     public void setKeyObs(final String keyObs) {
-<span class="nc" id="L71">        this.keyObs = keyObs;</span>
-<span class="nc" id="L72">    }</span>
+<span class="fc" id="L71">        this.keyObs = keyObs;</span>
+<span class="fc" id="L72">    }</span>
 
     /**
      * @see java.lang.Object#toString()
@@ -93,14 +93,14 @@ public class AppDataJobFile {
     @Override
     public boolean equals(final Object obj) {
         boolean ret;
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (this == obj) {</span>
-<span class="nc" id="L97">            ret = true;</span>
-<span class="pc bpc" id="L98" title="2 of 4 branches missed.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="nc" id="L99">            ret = false;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L97">            ret = true;</span>
+<span class="fc bfc" id="L98" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L99">            ret = false;</span>
         } else {
 <span class="fc" id="L101">            AppDataJobFile other = (AppDataJobFile) obj;</span>
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">            ret = Objects.equals(filename, other.filename)</span>
-<span class="pc bnc" id="L103" title="All 2 branches missed.">                    &amp;&amp; Objects.equals(keyObs, other.keyObs);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            ret = Objects.equals(filename, other.filename)</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(keyObs, other.keyObs);</span>
         }
 <span class="fc" id="L105">        return ret;</span>
     }
