@@ -12,4 +12,4 @@ WORKDIR /app
 RUN apk update && apk add wget
 COPY --from=build /app/target/s1pdgs-scaler-1.0.0.jar /app/s1pdgs-scaler.jar
 COPY /config/start.sh start.sh
-ENTRYPOINT "/bin/sh" "-c" "/app/start.sh"
+ENTRYPOINT "/app/start.sh"
