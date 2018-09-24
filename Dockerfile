@@ -16,4 +16,4 @@ RUN mkdir -p /data/sessions/
 RUN apk update && apk add wget
 COPY --from=build /app/target/s1pdgs-job-generator-2.0.0.jar s1pdgs-job-generator.jar
 COPY /config/start.sh start.sh
-ENTRYPOINT "/bin/sh" "-c" "/app/start.sh"
+ENTRYPOINT "/app/start.sh"
