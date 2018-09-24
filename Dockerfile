@@ -13,4 +13,4 @@ WORKDIR /app
 RUN apk update && apk add wget
 COPY --from=build /app/target/s1pdgs-archives-1.0.0.jar /app/s1pdgs-archives.jar
 COPY /config/start.sh start.sh
-ENTRYPOINT "/bin/sh" "-c" "/app/start.sh"
+ENTRYPOINT "/app/start.sh"
