@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
@@ -64,7 +65,13 @@ public class EsServices {
 	 */
 	public boolean isMetadataExist(JSONObject product) throws Exception {
 		try {
-			String productType = product.get("productType").toString().toLowerCase();
+		    String productType = null;
+            if(ProductFamily.AUXILIARY_FILE.equals(ProductFamily.valueOf(product.getString("productFamily"))) 
+                    || ProductFamily.EDRS_SESSION.equals(ProductFamily.valueOf(product.getString("productFamily")))) {
+                productType = product.getString("productType");
+            } else {
+                productType = product.getString("productFamily").toLowerCase();
+            }
 			String productName = product.getString("productName");
 
 			GetRequest getRequest = new GetRequest(productType, indexType, productName);
@@ -87,8 +94,14 @@ public class EsServices {
 	 */
 	public void createMetadata(JSONObject product) throws Exception {
 		try {
-			String productType = product.get("productType").toString().toLowerCase();
-			String productName = product.getString("productName");
+		    String productType = null;
+            if(ProductFamily.AUXILIARY_FILE.equals(ProductFamily.valueOf(product.getString("productFamily"))) 
+                    || ProductFamily.EDRS_SESSION.equals(ProductFamily.valueOf(product.getString("productFamily")))) {
+                productType = product.getString("productType");
+            } else {
+                productType = product.getString("productFamily").toLowerCase();
+            }
+            String productName = product.getString("productName");
 
 			IndexRequest request = new IndexRequest(productType, indexType, productName).source(product.toString(),
 					XContentType.JSON);
@@ -116,25 +129,33 @@ public class EsServices {
 	 * @return the key object storage of the chosen product
 	 * @throws Exception
 	 */
-	public SearchMetadata lastValCover(String productType, String beginDate, String endDate, String satelliteId,
-			int instrumentConfId) throws Exception {
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+	public SearchMetadata lastValCover(String productType, ProductFamily productFamily, String beginDate, 
+	        String endDate, String satelliteId,	int instrumentConfId) throws Exception {
+	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
 			sourceBuilder
 					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
 							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-							.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId)));
+							.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId))
+					        .must(QueryBuilders.termQuery("productFamily.keyword", productFamily.toString())));
 		} else {
 			sourceBuilder
 					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId)));
+							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+                            .must(QueryBuilders.termQuery("productFamily.keyword", productFamily.toString())));
 		}
+		String index = null;
+        if(ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
+            index = productType;
+        } else {
+            index = productFamily.toString().toLowerCase();
+        }
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 
-		SearchRequest searchRequest = new SearchRequest(productType.toLowerCase());
+		SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
@@ -172,7 +193,7 @@ public class EsServices {
 	 * @throws Exception
 	 */
 	public EdrsSessionMetadata getEdrsSession(String productType, String productName) throws Exception {
-		Map<String, Object> source = this.getRequest(productType, productName);
+		Map<String, Object> source = this.getRequest(productType.toLowerCase(), productName);
 		EdrsSessionMetadata r = new EdrsSessionMetadata();
 		r.setProductType(productType);
 		r.setProductName(productName);
@@ -189,25 +210,26 @@ public class EsServices {
 		return r;
 	}
 
-	public L0SliceMetadata getL0Slice(String productType, String productName) throws Exception{
-		Map<String, Object> source = this.getRequest(productType, productName);
-		return this.extractInfoForL0Slice(source, productType, productName);
+	public L0SliceMetadata getL0Slice(ProductFamily productFamily, String productName) throws Exception{
+		Map<String, Object> source = this.getRequest(productFamily.toString().toLowerCase(), productName);
+		return this.extractInfoForL0Slice(source, productFamily.toString().toLowerCase(), productName);
 	}
 
-	public L0AcnMetadata getL0Acn(String productType, String datatakeId) throws Exception {
+	public L0AcnMetadata getL0Acn(ProductFamily productFamily, String datatakeId, String type) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("dataTakeId.keyword", datatakeId)));
+		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("dataTakeId.keyword", datatakeId))
+		        .must(QueryBuilders.termQuery("productClass.keyword", type)));
 
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 
-		SearchRequest searchRequest = new SearchRequest(productType.toLowerCase());
+		SearchRequest searchRequest = new SearchRequest(productFamily.toString().toLowerCase());
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
 			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
-				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productType, datatakeId);
+				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productFamily.toString().toLowerCase(), datatakeId);
 			}
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());

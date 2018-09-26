@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.SearchMetadataDto;
@@ -34,8 +36,9 @@ public class SearchMetadataController {
 		this.esServices = esServices;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/search")
-	public ResponseEntity<SearchMetadataDto> search(@RequestParam(name = "productType") String productType,
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
+	public ResponseEntity<SearchMetadataDto> search(@PathVariable(name = "productFamily") String productFamily,
+	        @RequestParam(name = "productType") String productType,
 			@RequestParam(name = "mode") String mode, @RequestParam(name = "satellite") String satellite,
 			@RequestParam(name = "t0") String startDate, @RequestParam(name = "t1") String stopDate,
 			@RequestParam(name = "insConfId", defaultValue = "-1") int insConfId,
@@ -43,7 +46,7 @@ public class SearchMetadataController {
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
 		try {
 			if (mode.equals("LatestValCover")) {
-				SearchMetadata f = esServices.lastValCover(productType,
+				SearchMetadata f = esServices.lastValCover(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
 						convertDateForSearch(stopDate, dt1,

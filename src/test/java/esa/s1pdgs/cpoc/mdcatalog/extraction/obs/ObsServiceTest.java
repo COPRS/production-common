@@ -106,9 +106,10 @@ public class ObsServiceTest {
 		assertEquals(ObsFamily.AUXILIARY_FILE, service.getObsFamily(ProductFamily.AUXILIARY_FILE));
 		assertEquals(ObsFamily.EDRS_SESSION, service.getObsFamily(ProductFamily.EDRS_SESSION));
 		assertEquals(ObsFamily.L0_ACN, service.getObsFamily(ProductFamily.L0_ACN));
-		assertEquals(ObsFamily.L0_PRODUCT, service.getObsFamily(ProductFamily.L0_PRODUCT));
+		assertEquals(ObsFamily.L0_SLICE, service.getObsFamily(ProductFamily.L0_SLICE));
 		assertEquals(ObsFamily.L1_ACN, service.getObsFamily(ProductFamily.L1_ACN));
-		assertEquals(ObsFamily.L1_PRODUCT, service.getObsFamily(ProductFamily.L1_PRODUCT));
+		assertEquals(ObsFamily.L1_SLICE, service.getObsFamily(ProductFamily.L1_SLICE));
+        assertEquals(ObsFamily.L0_SEGMENT, service.getObsFamily(ProductFamily.L0_SEGMENT));
 	}
 
 	/**

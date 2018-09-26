@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
@@ -98,6 +99,7 @@ public class FileDescriptorBuilder {
 			configFile.setSatelliteId(m.group(2));
 			configFile.setProductClass(m.group(4));
 			configFile.setProductType(m.group(5));
+			configFile.setProductFamily(ProductFamily.AUXILIARY_FILE);
 			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));
 
 		} else {
@@ -147,6 +149,7 @@ public class FileDescriptorBuilder {
 			descriptor.setChannel(Integer.parseInt(m.group(7)));
 			descriptor.setSessionIdentifier(m.group(4));
 			descriptor.setKeyObjectStorage(relativePath);
+			descriptor.setProductFamily(ProductFamily.EDRS_SESSION);
 
 			return descriptor;
 		} else {
@@ -198,6 +201,11 @@ public class FileDescriptorBuilder {
 			l0Descriptor.setDataTakeId(m.group(12));
 			l0Descriptor.setKeyObjectStorage(productName);
 			l0Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));
+			if("S".equals(m.group(7))) {
+	            l0Descriptor.setProductFamily(ProductFamily.L0_SLICE);
+			} else {
+			    l0Descriptor.setProductFamily(ProductFamily.L0_ACN);
+			}
 
 		} else {
 			throw new MetadataFilePathException(relativePath, "L0_PRODUCT",
@@ -206,6 +214,59 @@ public class FileDescriptorBuilder {
 
 		return l0Descriptor;
 	}
+	
+	public L0OutputFileDescriptor buildL0SegmentFileDescriptor(File file)
+            throws MetadataFilePathException, MetadataIgnoredFileException {
+        // Extract relative path
+        String absolutePath = file.getAbsolutePath();
+        if (absolutePath.length() <= localDirectory.length()) {
+            throw new MetadataFilePathException(absolutePath, "L0_SEGMENT", "File is not in root directory");
+        }
+        String relativePath = absolutePath.substring(localDirectory.length());
+        relativePath = relativePath.replace("\\", "/");
+
+        // Ignored if directory
+        if (file.isDirectory()) {
+            throw new MetadataIgnoredFileException(file.getName());
+        }
+        L0OutputFileDescriptor l0Descriptor = null;
+        Matcher m = pattern.matcher(relativePath);
+        if (m.matches()) {
+            // Extract product name
+            String productName = relativePath;
+            int indexFirstSeparator = relativePath.indexOf("/");
+            if (indexFirstSeparator != -1) {
+                productName = relativePath.substring(0, indexFirstSeparator);
+            }
+            // Extract filename
+            String filename = relativePath;
+            int indexLastSeparator = relativePath.lastIndexOf("/");
+            if (indexFirstSeparator != -1) {
+                filename = relativePath.substring(indexLastSeparator + 1);
+            }
+            l0Descriptor = new L0OutputFileDescriptor();
+            l0Descriptor.setProductName(productName);
+            l0Descriptor.setRelativePath(relativePath);
+            l0Descriptor.setFilename(filename);
+            l0Descriptor.setMissionId(m.group(1));
+            l0Descriptor.setSatelliteId(m.group(2));
+            l0Descriptor.setSwathtype(m.group(3));
+            l0Descriptor.setResolution(m.group(5));
+            l0Descriptor.setProductClass(m.group(7));
+            l0Descriptor.setProductType(m.group(3) + "_" + m.group(4) + m.group(5) + "_" + m.group(6) + m.group(7));
+            l0Descriptor.setPolarisation(m.group(8));
+            l0Descriptor.setDataTakeId(m.group(12));
+            l0Descriptor.setKeyObjectStorage(productName);
+            l0Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));
+            l0Descriptor.setProductFamily(ProductFamily.L0_SEGMENT);
+
+        } else {
+            throw new MetadataFilePathException(relativePath, "L0_SEGMENT",
+                    "File does not match the configuration file pattern");
+        }
+
+        return l0Descriptor;
+    }
 
 	public L1OutputFileDescriptor buildL1OutputFileDescriptor(File file)
 			throws MetadataFilePathException, MetadataIgnoredFileException {
@@ -250,6 +311,11 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setDataTakeId(m.group(12));
 			l1Descriptor.setKeyObjectStorage(productName);
 			l1Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));
+			if("S".equals(m.group(7))) {
+                l1Descriptor.setProductFamily(ProductFamily.L1_SLICE);
+            } else {
+                l1Descriptor.setProductFamily(ProductFamily.L1_ACN);
+            }
 
 		} else {
 			throw new MetadataFilePathException(relativePath, "L1_PRODUCT",

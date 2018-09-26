@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.rest.L0SliceMetadataController;
@@ -43,35 +44,35 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 	}
 
 	private void mockGetL0Slice(L0SliceMetadata response) throws Exception {
-		doReturn(response).when(esServices).getL0Slice(Mockito.any(String.class), Mockito.any(String.class));
+		doReturn(response).when(esServices).getL0Slice(Mockito.any(ProductFamily.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetL0Acn(L0AcnMetadata response) throws Exception {
-		doReturn(response).when(esServices).getL0Acn(Mockito.any(String.class), Mockito.any(String.class));
+		doReturn(response).when(esServices).getL0Acn(Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetL0Acn3Responses(L0AcnMetadata response, L0AcnMetadata secondResponse, L0AcnMetadata thirdResponse) throws Exception {
-		doReturn(response, secondResponse, thirdResponse).when(esServices).getL0Acn(Mockito.any(String.class), Mockito.any(String.class));
+		doReturn(response, secondResponse, thirdResponse).when(esServices).getL0Acn(Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetL0SliceMetadataNotPresentException() throws Exception {
-		doThrow(new MetadataNotPresentException("name")).when(esServices).getL0Slice(Mockito.any(String.class), Mockito.any(String.class));
+		doThrow(new MetadataNotPresentException("name")).when(esServices).getL0Slice(Mockito.any(ProductFamily.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetL0SliceMetadataMalformedException() throws Exception {
-		doThrow(new MetadataMalformedException("url")).when(esServices).getL0Slice(Mockito.any(String.class), Mockito.any(String.class));
+		doThrow(new MetadataMalformedException("url")).when(esServices).getL0Slice(Mockito.any(ProductFamily.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetL0SliceException() throws Exception {
-		doThrow(new Exception()).when(esServices).getL0Slice(Mockito.any(String.class), Mockito.any(String.class));
+		doThrow(new Exception()).when(esServices).getL0Slice(Mockito.any(ProductFamily.class), Mockito.any(String.class));
 	}
 		
 	private void mockGetL0AcnMetadataMalformedException() throws Exception {
-		doThrow(new MetadataMalformedException("url")).when(esServices).getL0Acn(Mockito.any(String.class), Mockito.any(String.class));
+		doThrow(new MetadataMalformedException("url")).when(esServices).getL0Acn(Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class));
 	}
 	
 	private void mockGetL0AcnException() throws Exception {
-		doThrow(new Exception()).when(esServices).getL0Acn(Mockito.any(String.class), Mockito.any(String.class));
+		doThrow(new Exception()).when(esServices).getL0Acn(Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class));
 	}
 
 	@Test

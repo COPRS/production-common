@@ -116,19 +116,19 @@ public class LevelProductsExtractorTest {
 
         inputMessage = new GenericMessageDto<LevelProductDto>(123, "",
                 new LevelProductDto("product-name", "key-obs",
-                        ProductFamily.L0_ACN));
+                        ProductFamily.L0_ACN, "NRT"));
 
         inputMessageSafe = new GenericMessageDto<LevelProductDto>(123, "",
                 new LevelProductDto(
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
-                        ProductFamily.L0_ACN));
+                        ProductFamily.L0_ACN, "NRT"));
 
         inputMessageAux = new GenericMessageDto<LevelProductDto>(123, "",
                 new LevelProductDto(
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-                        ProductFamily.L0_ACN));
+                        ProductFamily.L0_ACN, "NRT"));
 
         extractor = new LevelProductsExtractor(esServices, obsService,
                 mqiService, appStatus, extractorConfig,
@@ -204,7 +204,7 @@ public class LevelProductsExtractorTest {
     }
 
     @Test
-    public void testExtractMetadataL0Product()
+    public void testExtractMetadataL0Slice()
             throws MetadataExtractionException, AbstractCodedException {
 
         File file = new File((new File("./test/workDir/")).getAbsolutePath()
@@ -216,7 +216,7 @@ public class LevelProductsExtractorTest {
                 new LevelProductDto(
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                        ProductFamily.L0_PRODUCT));
+                        ProductFamily.L0_SLICE, "NRT"));
 
         doReturn(file).when(obsService).downloadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.anyString());
@@ -250,7 +250,7 @@ public class LevelProductsExtractorTest {
         }
 
         verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L0_PRODUCT),
+                Mockito.eq(ProductFamily.L0_SLICE),
                 Mockito.eq(
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
                 Mockito.eq(extractor.localDirectory));
@@ -270,7 +270,7 @@ public class LevelProductsExtractorTest {
                 new LevelProductDto(
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                        ProductFamily.L0_ACN));
+                        ProductFamily.L0_ACN, "NRT"));
 
         doReturn(file).when(obsService).downloadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.anyString());
@@ -312,7 +312,7 @@ public class LevelProductsExtractorTest {
     }
 
     @Test
-    public void testExtractMetadataL1Product()
+    public void testExtractMetadataL1Slice()
             throws MetadataExtractionException, AbstractCodedException {
 
         File file = new File((new File("./test/workDir/")).getAbsolutePath()
@@ -324,7 +324,7 @@ public class LevelProductsExtractorTest {
                 new LevelProductDto(
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                        ProductFamily.L1_PRODUCT));
+                        ProductFamily.L1_SLICE, "NRT"));
 
         doReturn(file).when(obsService).downloadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.anyString());
@@ -354,7 +354,7 @@ public class LevelProductsExtractorTest {
         }
 
         verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L1_PRODUCT),
+                Mockito.eq(ProductFamily.L1_SLICE),
                 Mockito.eq(
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
                 Mockito.eq(extractor.localDirectory));
@@ -374,7 +374,7 @@ public class LevelProductsExtractorTest {
                 new LevelProductDto(
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                        ProductFamily.L1_ACN));
+                        ProductFamily.L1_ACN, "NRT"));
 
         doReturn(file).when(obsService).downloadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.anyString());

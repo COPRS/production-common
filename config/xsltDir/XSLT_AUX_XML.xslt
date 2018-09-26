@@ -3,13 +3,13 @@
 
     <xsl:template match="/">
     	<creationTime>
-			<xsl:copy-of select="//Creation_Time/text()"/>
+			<xsl:copy-of select="//*[local-name() = 'Creation_Time']/text()"/>
 		</creationTime>
 		<validityStartTime>
-			<xsl:copy-of select="//Validity_Start/text()"/>
+			<xsl:copy-of select="//*[local-name() = 'Validity_Start']/text()"/>
 		</validityStartTime>
 		<validityStopTime>
-			<xsl:copy-of select="//Validity_Stop/text()"/>
+			<xsl:copy-of select="//*[local-name() = 'Validity_Stop']/text()"/>
 		</validityStopTime>
 	</xsl:template>
 

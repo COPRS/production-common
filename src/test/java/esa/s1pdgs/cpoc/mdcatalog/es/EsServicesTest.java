@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdcatalog.es.ElasticsearchDAO;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
@@ -88,6 +89,7 @@ public class EsServicesTest{
 		JSONObject product = new JSONObject();
 		product.put("productName", "name");
 		product.put("productType", "type");
+		product.put("productFamily", "AUXILIARY_FILE");
 		
 		//Result with boolean at true for isExist
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, null, null);
@@ -110,6 +112,7 @@ public class EsServicesTest{
 		JSONObject product = new JSONObject();
 		product.put("productName", "name");
 		product.put("productType", "type");
+        product.put("productFamily", "L0_SLICE");
 		
 		//Result with boolean at false for isExist
 		GetResult getResult = new GetResult("index", "type", "id", 0, false, null, null);
@@ -162,6 +165,7 @@ public class EsServicesTest{
 		JSONObject product = new JSONObject();
 		product.put("productName", "name");
 		product.put("productType", "type");
+		product.put("productFamily", "L0_SLICE");
 		
 		//Result
 		IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
@@ -231,7 +235,8 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
-			SearchMetadata result = esServices.lastValCover("type", "beginDate", "endDate", "satelliteId", 6);
+			SearchMetadata result = esServices.lastValCover("type", ProductFamily.L0_ACN, 
+			        "beginDate", "endDate", "satelliteId", 6);
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -263,7 +268,8 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
-			SearchMetadata result = esServices.lastValCover("aux_res", "beginDate", "endDate", "satelliteId", -1);
+			SearchMetadata result = esServices.lastValCover("aux_res", ProductFamily.AUXILIARY_FILE, "beginDate", 
+			        "endDate", "satelliteId", -1);
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -273,7 +279,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void lastValCoverIOExceptionTest() throws Exception {
 		this.mockSearchRequestThrowIOException();
-		esServices.lastValCover("type", "beginDate", "endDate", "satelliteId", -1);
+		esServices.lastValCover("type", ProductFamily.BLANK, "beginDate", "endDate", "satelliteId", -1);
 	}
 	
 	@Test
@@ -293,7 +299,8 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
-			SearchMetadata result = esServices.lastValCover("type", "beginDate", "endDate", "satelliteId", 6);
+			SearchMetadata result = esServices.lastValCover("type", ProductFamily.L0_ACN, "beginDate", 
+			        "endDate", "satelliteId", 6);
 			assertEquals("Search metadata are not equals", null, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -353,7 +360,7 @@ public class EsServicesTest{
 		//Expected result
 		L0SliceMetadata expectedResult = new L0SliceMetadata();
 		expectedResult.setProductName("name");
-		expectedResult.setProductType("type");
+		expectedResult.setProductType("l0_slice");
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("validityStartTime");
 		expectedResult.setValidityStop("validityStopTime");
@@ -364,7 +371,8 @@ public class EsServicesTest{
 		//Response 
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, "
+		        + "\"dataTakeId\":\"datatakeId\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
@@ -372,7 +380,7 @@ public class EsServicesTest{
 		this.mockGetRequest(getResponse);
 		
 		try {
-			L0SliceMetadata result = esServices.getL0Slice("type", "name");
+			L0SliceMetadata result = esServices.getL0Slice(ProductFamily.L0_SLICE, "name");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -390,7 +398,7 @@ public class EsServicesTest{
 		//Mocking the get Request
 		this.mockGetRequest(getResponse);
 		
-		esServices.getL0Slice("type", "name");
+		esServices.getL0Slice(ProductFamily.L0_SLICE, "name");
 	}
 	
 	@Test
@@ -402,7 +410,7 @@ public class EsServicesTest{
 		GetResponse getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice(ProductFamily.L0_SLICE, "name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -416,7 +424,7 @@ public class EsServicesTest{
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice(ProductFamily.L0_SLICE, "name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -430,7 +438,7 @@ public class EsServicesTest{
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice(ProductFamily.L0_SLICE, "name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -444,7 +452,7 @@ public class EsServicesTest{
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice(ProductFamily.L0_SLICE, "name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -458,7 +466,7 @@ public class EsServicesTest{
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice(ProductFamily.L0_SLICE, "name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -472,7 +480,7 @@ public class EsServicesTest{
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice(ProductFamily.L0_SLICE, "name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -486,7 +494,7 @@ public class EsServicesTest{
 		//Expected result
 		L0AcnMetadata expectedResult = new L0AcnMetadata();
 		expectedResult.setProductName("name");
-		expectedResult.setProductType("type");
+		expectedResult.setProductType("l0_acn");
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("validityStartTime");
 		expectedResult.setValidityStop("validityStopTime");
@@ -496,20 +504,20 @@ public class EsServicesTest{
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\"}");
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, "
+                + "\"dataTakeId\":\"datatakeId\", \"productFamily\":\"l0_acn\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
 		SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
 		SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
-		
 		//Mocking the search request
 		this.mockSearchRequest(response);
 		
 		try {
-			L0AcnMetadata result = esServices.getL0Acn("type", "datatakeId");
+			L0AcnMetadata result = esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "A");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -532,7 +540,7 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
-			L0AcnMetadata result = esServices.getL0Acn("type", "datatakeId");
+			L0AcnMetadata result = esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "C");
 			assertEquals("Search metadata are not equals", null, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -542,7 +550,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void getL0AcnIOExceptionTest() throws Exception {
 		this.mockSearchRequestThrowIOException();
-		esServices.getL0Acn("type", "datatakeId");
+		esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "N");
 	}
 	
 	@Test
@@ -559,7 +567,7 @@ public class EsServicesTest{
 		SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+			esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "A");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -576,7 +584,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+			esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "C");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -594,7 +602,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+			esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "N");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -612,7 +620,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+			esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "A");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -630,7 +638,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+			esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "C");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -648,7 +656,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+			esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "N");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -666,7 +674,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+			esServices.getL0Acn(ProductFamily.L0_ACN, "datatakeId", "A");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",

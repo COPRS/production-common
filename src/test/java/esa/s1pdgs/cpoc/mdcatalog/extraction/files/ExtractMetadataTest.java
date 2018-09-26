@@ -148,8 +148,8 @@ public class ExtractMetadataTest {
 			
 			assertNotNull("JSON object should not be null", result);
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
-			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("validityStartTime").toString(),
-					result.get("validityStartTime").toString());
+			assertEquals("JSON object value validityStartTime are not equals", expectedResult.getString("validityStartTime"),
+					result.getString("validityStartTime"));
 		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
@@ -358,12 +358,14 @@ public class ExtractMetadataTest {
 			
 			assertNotNull("JSON object should not be null", result);
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
-			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("productConsolidation").toString(),
-					result.get("productConsolidation").toString());
+			assertEquals("JSON object value validityStartTime are not equals", expectedResult.getString("productConsolidation"),
+					result.getString("productConsolidation"));
 		} catch (AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
+	
+	
 	
 	
 	@Test(expected = AbstractCodedException.class)
@@ -390,10 +392,68 @@ public class ExtractMetadataTest {
 	}
 	
 	@Test
+    public void testProcessL0SegmentFile () {
+        
+        JSONObject expectedResult = new JSONObject(
+                "{\"missionDataTakeId\":72627,\"theoreticalSliceLength\":\"\",\"sliceCoordinates\":\"73.8984,-94.8783 67.6029,-98.2395 66.8368,-88.9623 72.8925,-82.4860 73.8984,-94.8783\",\"insertionTime\":\"2018-09-26T14:48:35\",\"creationTime\":\"2018-09-26T14:48:35\",\"polarisation\":\"DV\",\"sliceNumber\":\"\",\"absoluteStopOrbit\":9809,\"resolution\":\"_\",\"circulationFlag\":7,\"productName\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":9809,\"validityStopTime\":\"2018-02-27T12:53:00.422905Z\",\"instrumentConfigurationId\":1,\"relativeStopOrbit\":158,\"relativeStartOrbit\":158,\"startTime\":\"2018-02-27T12:51:14.794304Z\",\"stopTime\":\"2018-02-27T12:53:00.422905Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"DESCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":1849446.881,\"url\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"sliceOverlap\":\"\",\"startTimeANX\":1743818.281,\"validityStartTime\":\"2018-02-27T12:51:14.794304Z\"}");
+        
+        L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+        descriptor.setExtension(FileExtension.SAFE);
+        descriptor.setFilename("manifest.safe");
+        descriptor.setKeyObjectStorage("S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE");
+        descriptor.setMissionId("S1");
+        descriptor.setSatelliteId("B");
+        descriptor.setProductName("S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE");
+        descriptor.setRelativePath("S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE");
+        descriptor.setSwathtype("IW");
+        descriptor.setResolution("_");
+        descriptor.setProductClass("S");
+        descriptor.setProductType("IW_RAW__0S");
+        descriptor.setPolarisation("DV");
+        descriptor.setDataTakeId("021735");
+        
+        File file = new File("test/workDir/S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE/manifest.safe");
+
+        try {
+            JSONObject result = extractor.processL0Segment(descriptor, file);
+            
+            assertNotNull("JSON object should not be null", result);
+            assertEquals("JSON object are not equals", expectedResult.length(), result.length());
+            assertEquals("JSON object value validityStartTime are not equals", expectedResult.getString("productConsolidation"),
+                    result.getString("productConsolidation"));
+        } catch (AbstractCodedException fe) {
+            fail("Exception occurred: " + fe.getMessage());
+        }
+    }
+	
+	@Test(expected = AbstractCodedException.class)
+    public void testProcessL0SegmentMissingFileFail () throws MetadataExtractionException {
+        
+        L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+        descriptor.setExtension(FileExtension.SAFE);
+        descriptor.setFilename("manifest.safe");
+        descriptor.setKeyObjectStorage("S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE");
+        descriptor.setMissionId("S1");
+        descriptor.setSatelliteId("B");
+        descriptor.setProductName("S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE");
+        descriptor.setRelativePath("S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE");
+        descriptor.setSwathtype("IW");
+        descriptor.setResolution("_");
+        descriptor.setProductClass("S");
+        descriptor.setProductType("IW_RAW__0S");
+        descriptor.setPolarisation("DV");
+        descriptor.setDataTakeId("021735");
+        
+        File file = new File("test/workDir/S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DD.SAFE/manifest.safe");
+
+        extractor.processL0Segment(descriptor, file);
+    }
+	
+	@Test
 	public void testProcessL0ACNFile () {
 		
 		JSONObject expectedResult = new JSONObject(
-				"{\"missionDataTakeId\":137013,\"totalNumberOfSlice\":20,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"creationTime\":\"2018-05-31T15:43:33\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":19684,\"resolution\":\"_\",\"circulationFlag\":13,\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":19684,\"validityStopTime\":\"2017-12-13T12:19:47.264351Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":12,\"relativeStartOrbit\":12,\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"url\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe\",\"startTimeANX\":296088.912,\"validityStartTime\":\"2017-12-13T12:11:23.682488Z\"}");
+				"{\"missionDataTakeId\":137013,\"totalNumberOfSlice\":20,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"creationTime\":\"2018-05-31T15:43:33\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":19684,\"resolution\":\"_\",\"circulationFlag\":13,\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":19684,\"validityStopTime\":\"2017-12-13T12:19:47.264351Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":12,\"relativeStartOrbit\":12,\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"url\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe\",\"startTimeANX\":296088.912,\"validityStartTime\":\"2017-12-13T12:11:23.682488Z\",\"sliceNumber\":\"\",\"sliceOverlap\":\"\",\"theoreticalSliceLength\":\"\"}");
 		
 		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -414,7 +474,8 @@ public class ExtractMetadataTest {
 
 		try {
 			JSONObject result = extractor.processL0AcnProd(descriptor, file);
-			
+			System.out.println(expectedResult);
+            System.out.println(result);
 			assertNotNull("JSON object should not be null", result);
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
 			assertEquals("JSON object value validityStartTime are not equals", expectedResult.get("missionId").toString(),
@@ -424,7 +485,7 @@ public class ExtractMetadataTest {
 		}
 
 		expectedResult = new JSONObject(
-				"{\"missionDataTakeId\":146024,\"totalNumberOfSlice\":1,\"sliceCoordinates\":{\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-06-04T09:23:00\",\"creationTime\":\"2018-06-04T09:23:00\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0S\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\"}");
+				"{\"missionDataTakeId\":146024,\"totalNumberOfSlice\":1,\"sliceCoordinates\":{\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-06-04T09:23:00\",\"creationTime\":\"2018-06-04T09:23:00\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0S\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"sliceNumber\":\"\",\"sliceOverlap\":\"\",\"theoreticalSliceLength\":\"\"}");
 		
 		descriptor = new L0OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);

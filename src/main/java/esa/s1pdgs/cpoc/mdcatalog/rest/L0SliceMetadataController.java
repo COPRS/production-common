@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
@@ -41,11 +42,7 @@ public class L0SliceMetadataController {
 	public ResponseEntity<L0SliceMetadataDto> get(@PathVariable(name = "productType") String productType,
 			@PathVariable(name = "productName") String productName) {
 		try {
-			String l0sliceProductType = productType;
-			if ("blank".equalsIgnoreCase(productType)) {
-				l0sliceProductType = productName.substring(4, 14);
-			}
-			L0SliceMetadata f = esServices.getL0Slice(l0sliceProductType, productName);
+			L0SliceMetadata f = esServices.getL0Slice(ProductFamily.L0_SLICE, productName);
 
 			L0SliceMetadataDto response = new L0SliceMetadataDto(f.getProductName(), f.getProductType(),
 					f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
@@ -80,15 +77,10 @@ public class L0SliceMetadataController {
 				l0sliceProductType = productName.substring(4, 14);
 			}
 			
-			// Build product type for its ACN
-			String l0aProductType = l0sliceProductType.replaceAll("0S", "0A");
-			String l0cProductType = l0sliceProductType.replaceAll("0S", "0C");
-			String l0nProductType = l0sliceProductType.replaceAll("0S", "0N");
-
-			LOGGER.info("A {} C {} N {}", l0aProductType, l0cProductType, l0nProductType);
+			LOGGER.info("A {} C {} N {}", ProductFamily.L0_ACN, ProductFamily.L0_ACN, ProductFamily.L0_ACN);
 
 			// Retrieve slice
-			L0SliceMetadata f = esServices.getL0Slice(l0sliceProductType, productName);
+			L0SliceMetadata f = esServices.getL0Slice(ProductFamily.L0_SLICE, productName);
 			if (f == null) {
 				LOGGER.warn("[productType {}] [productName {}] Not found", l0sliceProductType, productName);
 				return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
@@ -97,8 +89,8 @@ public class L0SliceMetadataController {
 			// Retrieve ACN
 			List<L0AcnMetadataDto> r = new ArrayList<>();
 
-			LOGGER.info("Call getACN for {} {}", l0aProductType, f.getDatatakeId());
-			L0AcnMetadata l0a = esServices.getL0Acn(l0aProductType, f.getDatatakeId());
+			LOGGER.info("Call getACN for {} {} {}", ProductFamily.L0_ACN, f.getDatatakeId(), "A");
+			L0AcnMetadata l0a = esServices.getL0Acn(ProductFamily.L0_ACN, f.getDatatakeId(), "A");
 			if (l0a != null) {
 				L0AcnMetadataDto l0aDto = new L0AcnMetadataDto(l0a.getProductName(), l0a.getProductType(),
 						l0a.getKeyObjectStorage(), l0a.getValidityStart(), l0a.getValidityStop());
@@ -110,8 +102,8 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
-			LOGGER.info("Call getACN for {} {}", l0cProductType, f.getDatatakeId());
-			L0AcnMetadata l0c = esServices.getL0Acn(l0cProductType, f.getDatatakeId());
+			LOGGER.info("Call getACN for {} {} {}", ProductFamily.L0_ACN, f.getDatatakeId(), "C");
+			L0AcnMetadata l0c = esServices.getL0Acn(ProductFamily.L0_ACN, f.getDatatakeId(), "C");
 			if (l0c != null) {
 				L0AcnMetadataDto l0cDto = new L0AcnMetadataDto(l0c.getProductName(), l0c.getProductType(),
 						l0c.getKeyObjectStorage(), l0c.getValidityStart(), l0c.getValidityStop());
@@ -123,8 +115,8 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
-			LOGGER.info("Call getACN for {} {}", l0nProductType, f.getDatatakeId());
-			L0AcnMetadata l0n = esServices.getL0Acn(l0nProductType, f.getDatatakeId());
+			LOGGER.info("Call getACN for {} {} {}", ProductFamily.L0_ACN, f.getDatatakeId(), "N");
+			L0AcnMetadata l0n = esServices.getL0Acn(ProductFamily.L0_ACN, f.getDatatakeId(), "N");
 			if (l0n != null) {
 				L0AcnMetadataDto l0nDto = new L0AcnMetadataDto(l0n.getProductName(), l0n.getProductType(),
 						l0n.getKeyObjectStorage(), l0n.getValidityStart(), l0n.getValidityStop());

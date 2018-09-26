@@ -133,6 +133,24 @@ public class MetadataBuilder {
 		metadataToIndex = extractor.processL0AcnProd(descriptor, file);
 		return metadataToIndex;
 	}
+	
+	/**
+     * Build the metadata for L0 Segment
+     * 
+     * 
+     * @param descriptor
+     * @param file
+     * 
+     * @return the JSONObject containing the metadata to index
+     * 
+     * @throws MetadataExtractionException
+     */
+    public JSONObject buildL0SegmentOutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
+            throws MetadataExtractionException {
+        JSONObject metadataToIndex = new JSONObject();
+        metadataToIndex = extractor.processL0Segment(descriptor, file);
+        return metadataToIndex;
+    }
 
 	/**
 	 * Build metadata for L0 Slice
@@ -167,4 +185,6 @@ public class MetadataBuilder {
 		metadataToIndex = extractor.processL1AProd(descriptor, file);
 		return metadataToIndex;
 	}
+	
+	
 }

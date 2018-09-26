@@ -1,5 +1,6 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output omit-xml-declaration="yes" method="xml" encoding="utf-8" indent="yes" />
+    
     <xsl:template match="/">
     	<productConsolidation>
 			<xsl:copy-of select="//*[local-name() = 'productConsolidation']/text()"/>
@@ -28,15 +29,6 @@
 		<relativeStopOrbit>
 			<xsl:copy-of select="//*[local-name() = 'relativeOrbitNumber'][@*[local-name()='type' and .='stop']]/text()"/>
 		</relativeStopOrbit>
-		<sliceNumber>
-			<xsl:copy-of select="//*[local-name() = 'sliceNumber']/text()"/>
-		</sliceNumber>
-		<sliceOverlap>
-			<xsl:copy-of select="//*[local-name() = 'sliceOverlap']/text()"/>
-		</sliceOverlap>
-		<theoreticalSliceLength>
-			<xsl:copy-of select="//*[local-name() = 'theoreticalSliceLength']/text()"/>
-		</theoreticalSliceLength>
 		<startTime>
 			<xsl:copy-of select="//*[local-name() = 'startTime']/text()"/>
 		</startTime>
@@ -49,8 +41,9 @@
 		<stopTimeANX>
 			<xsl:copy-of select="//*[local-name() = 'stopTimeANX']/text()"/>
 		</stopTimeANX>
-		<sliceCoordinates>
+		<segmentCoordinates>
 			<xsl:copy-of select="//*[local-name() = 'coordinates']/text()"/>
-		</sliceCoordinates>
+		</segmentCoordinates>
 	</xsl:template>
+
 </xsl:stylesheet>

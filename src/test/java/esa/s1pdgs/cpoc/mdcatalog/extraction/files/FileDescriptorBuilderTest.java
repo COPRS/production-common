@@ -209,6 +209,45 @@ public class FileDescriptorBuilderTest {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
+    
+    @Test
+    public void testBuildL0SegmentFileDescriptor() {
+        L0OutputFileDescriptor expectedResult = new L0OutputFileDescriptor();
+        expectedResult.setExtension(FileExtension.SAFE);
+        expectedResult.setFilename("manifest.safe");
+        expectedResult.setKeyObjectStorage(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+        expectedResult.setMissionId("S1");
+        expectedResult.setSatelliteId("A");
+        expectedResult.setProductName(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+        expectedResult.setRelativePath(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+        expectedResult.setSwathtype("IW");
+        expectedResult.setResolution("_");
+        expectedResult.setProductClass("S");
+        expectedResult.setProductType("IW_RAW__0S");
+        expectedResult.setPolarisation("DV");
+        expectedResult.setDataTakeId("021735");
+
+        File file = new File(
+                "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+
+        fileDescriptorBuilder = new FileDescriptorBuilder(
+                Paths.get("").toAbsolutePath() + "/test/workDir/",
+                Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
+                        Pattern.CASE_INSENSITIVE));
+        try {
+            L0OutputFileDescriptor result =
+                    fileDescriptorBuilder.buildL0SegmentFileDescriptor(file);
+
+            assertNotNull("File descriptor should not be null", result);
+            assertEquals("File descriptor are not equals",
+                    expectedResult.toString(), result.toString());
+        } catch (AbstractCodedException fe) {
+            fail("Exception occurred: " + fe.getMessage());
+        }
+    }
 
     @Test
     public void testBuildL1OutputFileDescriptor() {
