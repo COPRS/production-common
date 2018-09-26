@@ -96,7 +96,7 @@ public class JobsGeneratorFactoryTest {
             Map<String, ProductFamily> r =
                     new HashMap<String, ProductFamily>(20);
             String families =
-                    "SM_RAW__0S:L0_PRODUCT||IW_RAW__0S:L0_PRODUCT||EW_RAW__0S:L0_PRODUCT||WV_RAW__0S:L0_PRODUCT||RF_RAW__0S:L0_PRODUCT||AN_RAW__0S:L0_PRODUCT||EN_RAW__0S:L0_PRODUCT||ZS_RAW__0S:L0_PRODUCT||ZE_RAW__0S:L0_PRODUCT||ZI_RAW__0S:L0_PRODUCT||ZW_RAW__0S:L0_PRODUCT||GP_RAW__0_:BLANK||HK_RAW__0_:BLANK||REP_ACQNR:L0_REPORT||REP_L0PSA_:L0_REPORT||REP_EFEP_:L0_REPORT||IW_GRDH_1S:L1_PRODUCT||IW_GRDH_1A:L1_ACN";
+                    "SM_RAW__0S:L0_SLICE||IW_RAW__0S:L0_SLICE||EW_RAW__0S:L0_SLICE||WV_RAW__0S:L0_SLICE||RF_RAW__0S:L0_SLICE||AN_RAW__0S:L0_SLICE||EN_RAW__0S:L0_SLICE||ZS_RAW__0S:L0_SLICE||ZE_RAW__0S:L0_SLICE||ZI_RAW__0S:L0_SLICE||ZW_RAW__0S:L0_SLICE||GP_RAW__0_:BLANK||HK_RAW__0_:BLANK||REP_ACQNR:L0_REPORT||REP_L0PSA_:L0_REPORT||REP_EFEP_:L0_REPORT||IW_GRDH_1S:L1_SLICE||IW_GRDH_1A:L1_ACN";
             if (!StringUtils.isEmpty(families)) {
                 String[] paramsTmp = families.split("\\|\\|");
                 for (int k = 0; k < paramsTmp.length; k++) {
@@ -236,7 +236,7 @@ public class JobsGeneratorFactoryTest {
         assertFalse("[Outputs] Invalid mandatory", oOutput2.isMandatory());
         assertTrue("[Outputs] Invalid filenametype",
                 oOutput2.getFileNameType() == JobOrderFileNameType.DIRECTORY);
-        assertEquals("[Outputs] Invalid family", ProductFamily.L0_PRODUCT,
+        assertEquals("[Outputs] Invalid family", ProductFamily.L0_SLICE,
                 oOutput2.getFamily());
         assertEquals("[Outputs] Invalid filetype", tOutput2.getType(),
                 oOutput2.getFileType());
@@ -261,7 +261,7 @@ public class JobsGeneratorFactoryTest {
                 oOutput15b.getFileNameType() == JobOrderFileNameType.REGEXP);
         assertEquals("[Outputs] Invalid filetype", tOutput15b.getType(),
                 oOutput15b.getFileType());
-        assertEquals("[Outputs] Invalid family", ProductFamily.L0_PRODUCT,
+        assertEquals("[Outputs] Invalid family", ProductFamily.L0_SLICE,
                 oOutput15b.getFamily());
         assertEquals("[Outputs] Invalid filename", "^S1[A-B]_N[1-6]_RAW__0S.*$",
                 oOutput15b.getFileName());
@@ -454,7 +454,7 @@ public class JobsGeneratorFactoryTest {
         assertEquals("[Outputs] Invalid filetype", tOutput0.getType(),
                 oOutput0.getFileType());
         assertEquals("[Outputs] Invalid filename", "", oOutput0.getFileName());
-        assertEquals("[Outputs] Invalid family", ProductFamily.L1_PRODUCT,
+        assertEquals("[Outputs] Invalid family", ProductFamily.L1_SLICE,
                 oOutput0.getFamily());
 
         JobOrderOutput oOutput1 = o.getProcs().get(3).getOutputs().get(1);

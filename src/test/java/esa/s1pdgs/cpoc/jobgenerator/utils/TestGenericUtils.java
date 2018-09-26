@@ -268,33 +268,33 @@ public class TestGenericUtils {
 
 			proc1.addOutput(new JobOrderOutput("SM_RAW__0S", JobOrderFileNameType.REGEXP,
 					"/data/localWD/564061776/^S1[A-B]_S[1-6]_RAW__0S.*$", JobOrderDestination.PROC, false,
-					ProductFamily.L0_PRODUCT));
+					ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("IW_RAW__0S", JobOrderFileNameType.DIRECTORY, "/data/localWD/564061776",
-					JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("EW_RAW__0S", JobOrderFileNameType.DIRECTORY, "/data/localWD/564061776",
-					JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("WV_RAW__0S", JobOrderFileNameType.DIRECTORY, "/data/localWD/564061776",
-					JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("RF_RAW__0S", JobOrderFileNameType.DIRECTORY, "/data/localWD/564061776",
-					JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("AN_RAW__0S", JobOrderFileNameType.REGEXP,
 					"/data/localWD/564061776/^S1[A-B]_N[1-6]_RAW__0S.*$", JobOrderDestination.PROC, false,
-					ProductFamily.L0_PRODUCT));
+					ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("EN_RAW__0S", JobOrderFileNameType.DIRECTORY, "/data/localWD/564061776",
-					JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("ZS_RAW__0S", JobOrderFileNameType.REGEXP,
 					"/data/localWD/564061776/^S1[A-B]_Z[1-6]_RAW__0S.*$", JobOrderDestination.PROC, false,
-					ProductFamily.L0_PRODUCT));
+					ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("ZE_RAW__0S", JobOrderFileNameType.REGEXP,
-					"/data/localWD/564061776/ZE_RAW__0S", JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					"/data/localWD/564061776/ZE_RAW__0S", JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("ZI_RAW__0S", JobOrderFileNameType.REGEXP,
-					"/data/localWD/564061776/ZI_RAW__0S", JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					"/data/localWD/564061776/ZI_RAW__0S", JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("ZW_RAW__0S", JobOrderFileNameType.REGEXP,
-					"/data/localWD/564061776/ZW_RAW__0S", JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					"/data/localWD/564061776/ZW_RAW__0S", JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("GP_RAW__0_", JobOrderFileNameType.DIRECTORY, "/data/localWD/564061776",
-					JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("HK_RAW__0_", JobOrderFileNameType.DIRECTORY, "/data/localWD/564061776",
-					JobOrderDestination.PROC, false, ProductFamily.L0_PRODUCT));
+					JobOrderDestination.PROC, false, ProductFamily.L0_SLICE));
 			proc1.addOutput(new JobOrderOutput("REP_ACQNR", JobOrderFileNameType.REGEXP,
 					"/data/localWD/564061776/REP_ACQNR", JobOrderDestination.PROC, false, ProductFamily.L0_REPORT));
 			proc1.addOutput(new JobOrderOutput("REP_L0PSA_", JobOrderFileNameType.REGEXP,

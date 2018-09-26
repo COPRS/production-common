@@ -84,17 +84,17 @@
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>mqi-client</artifactId>
-			<version>1.0.1</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>obs-clients</artifactId>
-			<version>1.0.2</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
 			<artifactId>commons</artifactId>
-			<version>1.0.2</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>spdgs-sdk</groupId>

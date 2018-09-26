@@ -270,11 +270,12 @@ public class MetadataService {
 	}
 
 	public SearchMetadata search(final SearchMetadataQuery query, final Date t0, final Date t1,
-			final String satelliteId, final int instrumentConfigurationId) throws JobGenMetadataException {
+			final String satelliteId, final int instrumentConfigurationId) 
+			        throws JobGenMetadataException {
 		for (int retries = 0;; retries++) {
 			try {
 				DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-				String uri = this.uriSearch + "/search";
+				String uri = this.uriSearch + "/" + query.getProductFamily().toString() + "/search";
 				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 						.queryParam("productType", query.getProductType()).queryParam("mode", query.getRetrievalMode())
 						.queryParam("t0", format.format(t0)).queryParam("t1", format.format(t1))

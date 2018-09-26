@@ -76,7 +76,7 @@ public class TestL1Utils {
                         new LevelProductDto(
                                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
                                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
-                                ProductFamily.L0_ACN));
+                                ProductFamily.L0_ACN, "NRT"));
         ret.setMessages(Arrays.asList(message1));
 
         Calendar start1 = Calendar.getInstance();

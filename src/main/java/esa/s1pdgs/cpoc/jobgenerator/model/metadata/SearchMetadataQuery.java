@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
 
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 /**
  * Class describing a search query for metadata
  * 
@@ -34,6 +36,11 @@ public class SearchMetadataQuery {
 	 * Wanted product type
 	 */
 	private String productType;
+	
+	/**
+	 * Product Family
+	 */
+	private ProductFamily productFamily;
 
 	/**
 	 * Default constructor
@@ -52,13 +59,14 @@ public class SearchMetadataQuery {
 	 * @param fileType
 	 */
 	public SearchMetadataQuery(final int identifier, final String retrievalMode, final double deltaTime0,
-			final double deltaTime1, final String productType) {
+			final double deltaTime1, final String productType, final ProductFamily productFamily) {
 		this();
 		this.identifier = identifier;
 		this.retrievalMode = retrievalMode;
 		this.deltaTime0 = deltaTime0;
 		this.deltaTime1 = deltaTime1;
 		this.productType = productType;
+		this.productFamily = productFamily;
 	}
 
 	/**
@@ -68,7 +76,7 @@ public class SearchMetadataQuery {
 	 */
 	public SearchMetadataQuery(final SearchMetadataQuery obj) {
 		this(obj.getIdentifier(), obj.getRetrievalMode(), obj.getDeltaTime0(), obj.getDeltaTime1(),
-				obj.getProductType());
+				obj.getProductType(), obj.getProductFamily());
 	}
 
 	/**
@@ -147,12 +155,26 @@ public class SearchMetadataQuery {
 	}
 
 	/**
+     * @return the productFamily
+     */
+    public ProductFamily getProductFamily() {
+        return productFamily;
+    }
+
+    /**
+     * @param productFamily the productFamily to set
+     */
+    public void setProductFamily(ProductFamily productFamily) {
+        this.productFamily = productFamily;
+    }
+
+    /**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s}",
-				identifier, retrievalMode, deltaTime0, deltaTime1, productType);
+		return String.format("{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s, productFamily: %s}",
+				identifier, retrievalMode, deltaTime0, deltaTime1, productType, productFamily);
 	}
 
 	/**
@@ -160,7 +182,7 @@ public class SearchMetadataQuery {
 	 * @return
 	 */
 	public String toLogMessage() {
-		return identifier + "|" + retrievalMode + "|" + deltaTime0 + "|" + deltaTime1 + "|" + productType;
+		return identifier + "|" + retrievalMode + "|" + deltaTime0 + "|" + deltaTime1 + "|" + productType + "|" + productFamily;
 	}
 
 	/**
@@ -168,7 +190,7 @@ public class SearchMetadataQuery {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1, productType);
+		return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1, productType, productFamily);
 	}
 
 	/**
@@ -185,7 +207,7 @@ public class SearchMetadataQuery {
 			SearchMetadataQuery other = (SearchMetadataQuery) obj;
 			ret = identifier == other.identifier && Objects.equals(retrievalMode, other.retrievalMode)
 					&& Objects.equals(deltaTime0, other.deltaTime0) && Objects.equals(deltaTime1, other.deltaTime1)
-					&& Objects.equals(productType, other.productType);
+					&& Objects.equals(productType, other.productType) && Objects.equals(productFamily, other.productFamily);
 		}
 		return ret;
 	}

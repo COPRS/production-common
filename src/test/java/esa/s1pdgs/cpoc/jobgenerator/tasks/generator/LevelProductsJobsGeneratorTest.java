@@ -155,9 +155,9 @@ public class LevelProductsJobsGeneratorTest {
     private void mockJobGeneratorSettings() {
         Mockito.doAnswer(i -> {
             Map<String, ProductFamily> r = new HashMap<>();
-            r.put("IW_GRDH_1S", ProductFamily.L1_PRODUCT);
+            r.put("IW_GRDH_1S", ProductFamily.L1_SLICE);
             r.put("IW_GRDH_1A", ProductFamily.L1_ACN);
-            r.put("IW_RAW__0S", ProductFamily.L0_PRODUCT);
+            r.put("IW_RAW__0S", ProductFamily.L0_SLICE);
             r.put("IW_RAW__0A", ProductFamily.L0_ACN);
             r.put("IW_RAW__0C", ProductFamily.L0_ACN);
             r.put("IW_RAW__0N", ProductFamily.L0_ACN);

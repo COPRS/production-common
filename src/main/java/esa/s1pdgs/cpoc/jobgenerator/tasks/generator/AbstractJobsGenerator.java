@@ -293,7 +293,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                     }
                     SearchMetadataQuery query = new SearchMetadataQuery(
                             counter.incrementAndGet(), k.getRetrievalMode(),
-                            k.getDeltaTime0(), k.getDeltaTime1(), fileType);
+                            k.getDeltaTime0(), k.getDeltaTime1(), fileType,
+                            this.jobGeneratorSettings.getOutputfamilies().get(fileType));
                     this.metadataSearchQueries.put(counter.get(), query);
                     v.forEach(alt -> {
                         alt.setIdSearchMetadataQuery(counter.get());

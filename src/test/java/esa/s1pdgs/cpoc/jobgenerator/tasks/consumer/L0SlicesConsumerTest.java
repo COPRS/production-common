@@ -63,11 +63,11 @@ public class L0SlicesConsumerTest {
     private LevelProductDto dtoMatch = new LevelProductDto(
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-            ProductFamily.L0_PRODUCT);
+            ProductFamily.L0_SLICE, "NRT");
     private LevelProductDto dtoNotMatch = new LevelProductDto(
             "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-            ProductFamily.L0_PRODUCT);
+            ProductFamily.L0_SLICE, "NRT");
     private GenericMessageDto<LevelProductDto> message1 =
             new GenericMessageDto<LevelProductDto>(1, "", dtoMatch);
     private GenericMessageDto<LevelProductDto> message2 =
