@@ -151,8 +151,6 @@ public class ExtractMetadata {
 			transformerMPL.transform(mplMetadataFile, new StreamResult(new File("tmp/output.xml")));
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-			System.out.println(metadataJSONObject);
-			System.out.println(metadataJSONObject.getString("validityStopTime"));
 			if (metadataJSONObject.getString("validityStopTime").equals("UTC=9999-99-99T99:99:99")) {
 				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
 			} else {
