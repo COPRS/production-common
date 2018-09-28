@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
@@ -87,7 +88,8 @@ public class OutputProcuderFactory {
             GenericMessageDto<LevelJobDto> inputMessage)
             throws AbstractCodedException {
         LevelProductDto dtoProduct = new LevelProductDto(msg.getProductName(),
-                msg.getKeyObs(), msg.getFamily());
+                msg.getKeyObs(), msg.getFamily(),
+                msg.getFamily().equals(ProductFamily.L0_SEGMENT) ? "FAST" : "NRT");
         senderProducts
                 .publish(new GenericPublicationMessageDto<LevelProductDto>(
                         inputMessage.getIdentifier(), msg.getFamily(),

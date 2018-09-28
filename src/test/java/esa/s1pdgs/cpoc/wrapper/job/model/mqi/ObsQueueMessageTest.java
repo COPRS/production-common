@@ -26,7 +26,7 @@ public class ObsQueueMessageTest {
                 "product-name", "key");
         assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
         assertEquals("product-name", obj.getProductName());
-        assertEquals("key", obj.getKeyObs());
+        assertEquals("key", obj.getKeyObs());    
     }
 
     /**

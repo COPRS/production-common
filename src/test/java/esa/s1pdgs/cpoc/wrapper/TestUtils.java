@@ -150,7 +150,7 @@ public class TestUtils {
     }
 
     public static LevelJobOutputDto buildProductOutputDto(String regexp) {
-        return new LevelJobOutputDto("L0_PRODUCT", regexp);
+        return new LevelJobOutputDto("L0_SLICE", regexp);
     }
 
     public static LevelJobOutputDto buildAcnOutputDto(String regexp) {

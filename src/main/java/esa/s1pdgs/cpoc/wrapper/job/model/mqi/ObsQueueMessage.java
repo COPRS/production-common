@@ -13,6 +13,7 @@ public class ObsQueueMessage extends QueueMessage {
      * Key in OBS
      */
     private final String keyObs;
+    
 
     /**
      * @param family

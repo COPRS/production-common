@@ -166,9 +166,13 @@ public class OutputProcessor {
 
         for (String line : lines) {
 
-            // Extract the product name, the complete filepath and job output
+            // Extract the product name, the complete filepath, job output and the mode
             String productName = getProductName(line);
             String filePath = getFilePath(line, productName);
+            String mode = "NONE";
+            if(line.contains("NRT")||line.contains("FAST")) {
+                mode = line.substring(0, line.indexOf(File.separator));
+            }
             LevelJobOutputDto matchOutput = getMatchOutput(productName);
 
             // If match process output
@@ -189,9 +193,31 @@ public class OutputProcessor {
                         reportToPublish.add(new FileQueueMessage(family,
                                 productName, new File(filePath)));
                         break;
-                    case L0_PRODUCT:
+                    case L0_SLICE:
+                        if("NRT".equals(mode)) {
+                            LOGGER.info(
+                                    "Output {} is considered as belonging to the family {}",
+                                    productName, matchOutput.getFamily());
+                            uploadBatch.add(new S3UploadFile(family, productName,
+                                    new File(filePath)));
+                            outputToPublish.add(new ObsQueueMessage(family,
+                                    productName, productName));
+                        } else if("FAST".equals(mode)) {
+                            LOGGER.info(
+                                    "Output {} is considered as belonging to the family {}",
+                                    productName, ProductFamily.L0_SEGMENT);
+                            uploadBatch.add(new S3UploadFile(ProductFamily.L0_SEGMENT, productName,
+                                    new File(filePath)));
+                            outputToPublish.add(new ObsQueueMessage(ProductFamily.L0_SEGMENT,
+                                    productName, productName));
+                        } else {
+                            LOGGER.warn(
+                                    "Output {} ignored because unknown mode",
+                                    productName);
+                        }
+                        break;
                     case L0_ACN:
-                    case L1_PRODUCT:
+                    case L1_SLICE:
                     case L1_ACN:
                         // If compatible object storage, put in a cache to
                         // upload per batch

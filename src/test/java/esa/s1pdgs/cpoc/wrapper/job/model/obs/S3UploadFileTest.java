@@ -42,9 +42,9 @@ public class S3UploadFileTest {
     @Test
     public void testToString() {
         S3UploadFile obj =
-                new S3UploadFile(ProductFamily.L0_PRODUCT, "key-obs", FILE);
+                new S3UploadFile(ProductFamily.L0_SLICE, "key-obs", FILE);
         String str = obj.toString();
-        assertTrue(str.contains("family: L0_PRODUCT"));
+        assertTrue(str.contains("family: L0_SLICE"));
         assertTrue(str.contains("key: key-obs"));
         assertTrue(str.contains("file: " + FILE));
     }

@@ -34,10 +34,10 @@ public class S3DownloadFileTest {
      */
     @Test
     public void testToString() {
-        S3DownloadFile obj = new S3DownloadFile(ProductFamily.L0_PRODUCT,
+        S3DownloadFile obj = new S3DownloadFile(ProductFamily.L0_SLICE,
                 "key-obs", "target-dir");
         String str = obj.toString();
-        assertTrue(str.contains("family: L0_PRODUCT"));
+        assertTrue(str.contains("family: L0_SLICE"));
         assertTrue(str.contains("key: key-obs"));
         assertTrue(str.contains("targetDir: target-dir"));
     }

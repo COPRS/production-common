@@ -108,13 +108,13 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendProduct() throws AbstractCodedException {
         this.outputProcuderFactory
-                .sendOutput(new ObsQueueMessage(ProductFamily.L0_PRODUCT,
+                .sendOutput(new ObsQueueMessage(ProductFamily.L0_SLICE,
                         "test.txt", "test.txt"), inputMessage);
         GenericPublicationMessageDto<LevelProductDto> message =
                 new GenericPublicationMessageDto<LevelProductDto>(123,
-                        ProductFamily.L0_PRODUCT,
+                        ProductFamily.L0_SLICE,
                         new LevelProductDto("test.txt", "test.txt",
-                                ProductFamily.L0_PRODUCT));
+                                ProductFamily.L0_SLICE, "NRT"));
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
@@ -131,7 +131,7 @@ public class OutputProducerFactoryTest {
         GenericPublicationMessageDto<LevelProductDto> message =
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L0_ACN, new LevelProductDto("test.txt",
-                                "test.txt", ProductFamily.L0_ACN));
+                                "test.txt", ProductFamily.L0_ACN, "NRT"));
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
@@ -164,13 +164,13 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendL1Product() throws AbstractCodedException {
         this.outputProcuderFactory
-                .sendOutput(new ObsQueueMessage(ProductFamily.L1_PRODUCT,
+                .sendOutput(new ObsQueueMessage(ProductFamily.L1_SLICE,
                         "test.txt", "test.txt"), inputMessage);
         GenericPublicationMessageDto<LevelProductDto> message =
                 new GenericPublicationMessageDto<LevelProductDto>(123,
-                        ProductFamily.L1_PRODUCT,
+                        ProductFamily.L1_SLICE,
                         new LevelProductDto("test.txt", "test.txt",
-                                ProductFamily.L1_PRODUCT));
+                                ProductFamily.L1_SLICE, "NRT"));
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
@@ -187,7 +187,7 @@ public class OutputProducerFactoryTest {
         GenericPublicationMessageDto<LevelProductDto> message =
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L1_ACN, new LevelProductDto("test.txt",
-                                "test.txt", ProductFamily.L1_ACN));
+                                "test.txt", ProductFamily.L1_ACN, "NRT"));
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }

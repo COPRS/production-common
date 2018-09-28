@@ -116,7 +116,7 @@ public class OutputProcessorTest {
 
         // Outputs product
         uploadBatch = new ArrayList<>();
-        uploadBatch.add(new S3UploadFile(ProductFamily.L0_PRODUCT, "o1",
+        uploadBatch.add(new S3UploadFile(ProductFamily.L0_SLICE, "o1",
                 new File("o1")));
         uploadBatch.add(
                 new S3UploadFile(ProductFamily.L1_ACN, "o2", new File("o2")));
@@ -124,7 +124,7 @@ public class OutputProcessorTest {
                 new S3UploadFile(ProductFamily.L0_ACN, "o3", new File("o3")));
         outputToPublish = new ArrayList<>();
         outputToPublish
-                .add(new ObsQueueMessage(ProductFamily.L0_PRODUCT, "p1", "o1"));
+                .add(new ObsQueueMessage(ProductFamily.L0_SLICE, "p1", "o1"));
         outputToPublish
                 .add(new ObsQueueMessage(ProductFamily.L1_ACN, "p2", "o2"));
         outputToPublish
@@ -311,7 +311,7 @@ public class OutputProcessorTest {
                 uploadBatch.get(0));
 
         assertEquals(2, outputToPublish.size());
-        assertEquals(new ObsQueueMessage(ProductFamily.L0_PRODUCT,
+        assertEquals(new ObsQueueMessage(ProductFamily.L0_SLICE,
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE"),
                 outputToPublish.get(1));
@@ -387,7 +387,7 @@ public class OutputProcessorTest {
         verify(procuderFactory, times(1))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(Mockito
-                .eq(new ObsQueueMessage(ProductFamily.L0_PRODUCT, "p1", "o1")),
+                .eq(new ObsQueueMessage(ProductFamily.L0_SLICE, "p1", "o1")),
                 Mockito.eq(inputMessage));
         assertEquals(2, outputToPublish.size());
     }
@@ -458,7 +458,7 @@ public class OutputProcessorTest {
         processor.processOutput();
 
         // check publication
-        verify(procuderFactory, times(4))
+        verify(procuderFactory, times(3))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         verify(procuderFactory, times(3))
                 .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
