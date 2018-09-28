@@ -286,14 +286,14 @@ public class MetadataServiceTest {
 		when(restTemplate.exchange(Mockito.any(), eq(HttpMethod.GET), eq(null), eq(SearchMetadata.class)))
 				.thenReturn(r);
 
-		this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE),
+		this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE,""),
 				format.parse("20171120_221516"), format.parse("20171220_101516"), "A", -1);
 
 		String uri = "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productType", "AUX_OBMEMC")
-				.queryParam("mode", "LatestValCover").queryParam("t0", "2017-11-20T22:15:16")
-				.queryParam("t1", "2017-12-20T10:15:16").queryParam("dt0", "1.0").queryParam("dt1", "2.0")
-				.queryParam("satellite", "A");
+				.queryParam("mode", "LatestValCover").queryParam("processMode", "")
+                .queryParam("t0", "2017-11-20T22:15:16").queryParam("t1", "2017-12-20T10:15:16")
+                .queryParam("dt0", "1.0").queryParam("dt1", "2.0").queryParam("satellite", "A");
 		verify(this.restTemplate, times(1)).exchange(eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
 				eq(SearchMetadata.class));
 	}
@@ -308,12 +308,12 @@ public class MetadataServiceTest {
 		when(restTemplate.exchange(Mockito.any(), eq(HttpMethod.GET), eq(null), eq(SearchMetadata.class)))
 				.thenReturn(r);
 
-		this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE),
+		this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE,""),
 				format.parse("20171120_221516"), format.parse("20171220_101516"), "A", 6);
 
 		String uri = "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productType", "AUX_OBMEMC")
-				.queryParam("mode", "LatestValCover").queryParam("t0", "2017-11-20T22:15:16")
+				.queryParam("mode", "LatestValCover").queryParam("processMode", "").queryParam("t0", "2017-11-20T22:15:16")
 				.queryParam("t1", "2017-12-20T10:15:16").queryParam("dt0", "1.0").queryParam("dt1", "2.0")
 				.queryParam("satellite", "A").queryParam("insConfId", 6);
 		verify(this.restTemplate, times(1)).exchange(eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
@@ -330,7 +330,7 @@ public class MetadataServiceTest {
 				.thenReturn(r);
 
 		SearchMetadata file = this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC"
-		        , ProductFamily.AUXILIARY_FILE), new Date(), new Date(), "A", -1);
+		        , ProductFamily.AUXILIARY_FILE,""), new Date(), new Date(), "A", -1);
 		assertEquals("MPL_ORBPRE", file.getProductType());
 		assertEquals("S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF", file.getProductName());
 		assertEquals("S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF", file.getKeyObjectStorage());
@@ -347,7 +347,7 @@ public class MetadataServiceTest {
 
 		thrown.expect(JobGenMetadataException.class);
 		thrown.expectMessage("nvalid HTTP statu");
-		this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE)
+		this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE,"")
 		        , new Date(), new Date(), "A", -1);
 	}
 
@@ -359,7 +359,7 @@ public class MetadataServiceTest {
 		thrown.expect(JobGenMetadataException.class);
 		thrown.expectMessage("rest exception");
 		thrown.expectCause(isA(RestClientException.class));
-		this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE)
+		this.service.search(new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE,"")
 		        , new Date(), new Date(), "A", -1);
 	}
 

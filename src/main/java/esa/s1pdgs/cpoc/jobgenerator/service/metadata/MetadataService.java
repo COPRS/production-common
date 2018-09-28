@@ -278,6 +278,7 @@ public class MetadataService {
 				String uri = this.uriSearch + "/" + query.getProductFamily().toString() + "/search";
 				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 						.queryParam("productType", query.getProductType()).queryParam("mode", query.getRetrievalMode())
+						.queryParam("processMode", query.getMode())
 						.queryParam("t0", format.format(t0)).queryParam("t1", format.format(t1))
 						.queryParam("dt0", query.getDeltaTime0()).queryParam("dt1", query.getDeltaTime1())
 						.queryParam("satellite", satelliteId);

@@ -41,6 +41,11 @@ public class SearchMetadataQuery {
 	 * Product Family
 	 */
 	private ProductFamily productFamily;
+	
+	/**
+	 * Process mode of the product
+	 */
+	private String mode;
 
 	/**
 	 * Default constructor
@@ -59,7 +64,8 @@ public class SearchMetadataQuery {
 	 * @param fileType
 	 */
 	public SearchMetadataQuery(final int identifier, final String retrievalMode, final double deltaTime0,
-			final double deltaTime1, final String productType, final ProductFamily productFamily) {
+			final double deltaTime1, final String productType, final ProductFamily productFamily,
+			final String mode) {
 		this();
 		this.identifier = identifier;
 		this.retrievalMode = retrievalMode;
@@ -67,6 +73,7 @@ public class SearchMetadataQuery {
 		this.deltaTime1 = deltaTime1;
 		this.productType = productType;
 		this.productFamily = productFamily;
+		this.mode = mode;
 	}
 
 	/**
@@ -76,7 +83,7 @@ public class SearchMetadataQuery {
 	 */
 	public SearchMetadataQuery(final SearchMetadataQuery obj) {
 		this(obj.getIdentifier(), obj.getRetrievalMode(), obj.getDeltaTime0(), obj.getDeltaTime1(),
-				obj.getProductType(), obj.getProductFamily());
+				obj.getProductType(), obj.getProductFamily(), obj.getMode());
 	}
 
 	/**
@@ -169,12 +176,26 @@ public class SearchMetadataQuery {
     }
 
     /**
+     * @return the mode
+     */
+    public String getMode() {
+        return mode;
+    }
+
+    /**
+     * @param mode the mode to set
+     */
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    /**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s, productFamily: %s}",
-				identifier, retrievalMode, deltaTime0, deltaTime1, productType, productFamily);
+		return String.format("{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s, productFamily: %s, mode: %s}",
+				identifier, retrievalMode, deltaTime0, deltaTime1, productType, productFamily, mode);
 	}
 
 	/**
@@ -182,7 +203,7 @@ public class SearchMetadataQuery {
 	 * @return
 	 */
 	public String toLogMessage() {
-		return identifier + "|" + retrievalMode + "|" + deltaTime0 + "|" + deltaTime1 + "|" + productType + "|" + productFamily;
+		return identifier + "|" + retrievalMode + "|" + deltaTime0 + "|" + deltaTime1 + "|" + productType + "|" + productFamily + "|" + mode;
 	}
 
 	/**
@@ -190,7 +211,7 @@ public class SearchMetadataQuery {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1, productType, productFamily);
+		return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1, productType, productFamily, mode);
 	}
 
 	/**
@@ -207,7 +228,8 @@ public class SearchMetadataQuery {
 			SearchMetadataQuery other = (SearchMetadataQuery) obj;
 			ret = identifier == other.identifier && Objects.equals(retrievalMode, other.retrievalMode)
 					&& Objects.equals(deltaTime0, other.deltaTime0) && Objects.equals(deltaTime1, other.deltaTime1)
-					&& Objects.equals(productType, other.productType) && Objects.equals(productFamily, other.productFamily);
+					&& Objects.equals(productType, other.productType) && Objects.equals(productFamily, other.productFamily)
+					&& Objects.equals(mode, other.mode);
 		}
 		return ret;
 	}
