@@ -203,6 +203,15 @@ public class MessageConsumptionController {
                                             prop.getTopicsWithPriority().get(topic),
                                             LevelProductDto.class));
                             break;
+                        case LEVEL_SEGMENTS:
+                            catConsumers.put(topic,
+                                    new GenericConsumer<LevelProductDto>(
+                                            kafkaProperties,
+                                            persistLevelProductsService,
+                                            otherAppService, appStatus, topic,
+                                            prop.getTopicsWithPriority().get(topic),
+                                            LevelProductDto.class));
+                            break;
                         case LEVEL_REPORTS:
                             catConsumers.put(topic,
                                     new GenericConsumer<LevelReportDto>(

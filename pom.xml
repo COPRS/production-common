@@ -9,7 +9,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 
-		<version.spdgs.commons>1.0.2</version.spdgs.commons>
+		<version.spdgs.commons>1.1.0</version.spdgs.commons>
 		<version.spdgs.app-catalog-client>1.1.1</version.spdgs.app-catalog-client>
 
 		<version.equals>2.4.6</version.equals>

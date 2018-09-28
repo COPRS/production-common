@@ -172,7 +172,7 @@ public class MessagePublicationControllerTest {
                         .getDefaultRoute(ProductFamily.L1_ACN));
         assertNotNull(
                 autowiredController.routing.get(ProductCategory.LEVEL_PRODUCTS)
-                        .getDefaultRoute(ProductFamily.L0_PRODUCT));
+                        .getDefaultRoute(ProductFamily.L0_SLICE));
         assertEquals(2, autowiredController.routing
                 .get(ProductCategory.LEVEL_REPORTS).getDefaultRoutes().size());
         assertNotNull(
@@ -305,7 +305,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelProducts() throws Exception {
         LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L0_PRODUCT);
+                ProductFamily.L0_SLICE, "NRT");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto);
@@ -319,7 +319,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelProducts1() throws Exception {
         LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L1_ACN);
+                ProductFamily.L1_ACN, "NRT");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto);
@@ -334,7 +334,7 @@ public class MessagePublicationControllerTest {
     public void publishLevelProductsNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
         LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L0_PRODUCT);
+                ProductFamily.L0_SLICE, "NRT");
         initCustomControllerForNoPublication();
 
         thrown.expect(MqiCategoryNotAvailable.class);

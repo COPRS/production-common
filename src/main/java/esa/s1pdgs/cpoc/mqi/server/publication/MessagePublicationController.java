@@ -137,6 +137,7 @@ public class MessagePublicationController {
                                 new LevelJobProducer(kafkaProperties));
                         break;
                     case LEVEL_PRODUCTS:
+                    case LEVEL_SEGMENTS:
                         producers.put(cat,
                                 new LevelProductProducer(kafkaProperties));
                         break;
@@ -187,6 +188,7 @@ public class MessagePublicationController {
                     publishLevelJobs((LevelJobDto) dto);
                     break;
                 case LEVEL_PRODUCTS:
+                case LEVEL_SEGMENTS:
                     publishLevelProducts((LevelProductDto) dto);
                     break;
                 case LEVEL_REPORTS:
