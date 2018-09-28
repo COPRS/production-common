@@ -58,6 +58,13 @@ application:
         topicswithprioritystr: "t-pdgs-l0-jobs:100"
       publication:
         enable: false
+    level-segments:
+      consumption:
+        enable: false
+        topicswithprioritystr: ""
+      publication:
+        enable: false
+        routing-file: ./src/test/resources/routing-files/level-segments.xml                                  
 server:
   port: 8080
 persistence:

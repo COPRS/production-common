@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -78,24 +79,29 @@ public class MessageConsumptionController {
     private final GenericAppCatalogMqiService<AuxiliaryFileDto> persistAuxiliaryFilesService;
 
     /**
-     * Service for AUXILIARY_FILES
+     * Service for EDRS_SESSIONS
      */
     private final GenericAppCatalogMqiService<EdrsSessionDto> persistEdrsSessionsService;
 
     /**
-     * Service for AUXILIARY_FILES
+     * Service for LEVEL_JOBS
      */
     private final GenericAppCatalogMqiService<LevelJobDto> persistLevelJobsService;
 
     /**
-     * Service for AUXILIARY_FILES
+     * Service for LEVEL_PRODUCTS
      */
     private final GenericAppCatalogMqiService<LevelProductDto> persistLevelProductsService;
 
     /**
-     * Service for AUXILIARY_FILES
+     * Service for LEVEL_REPORTS
      */
     private final GenericAppCatalogMqiService<LevelReportDto> persistLevelReportsService;
+
+    /**
+     * Service for LEVEL_SEGMENTS
+     */
+    private final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -122,6 +128,7 @@ public class MessageConsumptionController {
             @Qualifier("persistenceServiceForLevelJobs") final GenericAppCatalogMqiService<LevelJobDto> persistLevelJobsService,
             @Qualifier("persistenceServiceForLevelProducts") final GenericAppCatalogMqiService<LevelProductDto> persistLevelProductsService,
             @Qualifier("persistenceServiceForLevelReports") final GenericAppCatalogMqiService<LevelReportDto> persistLevelReportsService,
+            @Qualifier("persistenceServiceForLevelSegments") final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus) {
         this.consumers = new HashMap<>();
@@ -134,6 +141,7 @@ public class MessageConsumptionController {
         this.persistLevelJobsService = persistLevelJobsService;
         this.persistLevelProductsService = persistLevelProductsService;
         this.persistLevelReportsService = persistLevelReportsService;
+        this.persistLevelSegmentsService = persistLevelSegmentsService;
         this.persistServices.put(ProductCategory.AUXILIARY_FILES,
                 this.persistAuxiliaryFilesService);
         this.persistServices.put(ProductCategory.EDRS_SESSIONS,
@@ -144,6 +152,8 @@ public class MessageConsumptionController {
                 this.persistLevelProductsService);
         this.persistServices.put(ProductCategory.LEVEL_REPORTS,
                 this.persistLevelReportsService);
+        this.persistServices.put(ProductCategory.LEVEL_SEGMENTS,
+                this.persistLevelSegmentsService);
         this.appStatus = appStatus;
     }
 
@@ -203,15 +213,6 @@ public class MessageConsumptionController {
                                             prop.getTopicsWithPriority().get(topic),
                                             LevelProductDto.class));
                             break;
-                        case LEVEL_SEGMENTS:
-                            catConsumers.put(topic,
-                                    new GenericConsumer<LevelProductDto>(
-                                            kafkaProperties,
-                                            persistLevelProductsService,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            LevelProductDto.class));
-                            break;
                         case LEVEL_REPORTS:
                             catConsumers.put(topic,
                                     new GenericConsumer<LevelReportDto>(
@@ -220,6 +221,15 @@ public class MessageConsumptionController {
                                             otherAppService, appStatus, topic,
                                             prop.getTopicsWithPriority().get(topic),
                                             LevelReportDto.class));
+                            break;
+                        case LEVEL_SEGMENTS:
+                            catConsumers.put(topic,
+                                    new GenericConsumer<LevelSegmentDto>(
+                                            kafkaProperties,
+                                            persistLevelSegmentsService,
+                                            otherAppService, appStatus, topic,
+                                            prop.getTopicsWithPriority().get(topic),
+                                            LevelSegmentDto.class));
                             break;
                     }
                 }
@@ -260,6 +270,9 @@ public class MessageConsumptionController {
                     break;
                 case LEVEL_REPORTS:
                     message = nextLevelReportsMessage();
+                    break;
+                case LEVEL_SEGMENTS:
+                    message = nextLevelSegmentsMessage();
                     break;
                 default:
                     message = nextAuxiliaryFilesMessage();
@@ -455,6 +468,51 @@ public class MessageConsumptionController {
             }
         }
         return (GenericMessageDto<LevelProductDto>) convertToRestDto(result);
+    }
+
+    /**
+     * Get the next message for level segments
+     * 
+     * @return
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    protected GenericMessageDto<LevelSegmentDto> nextLevelSegmentsMessage()
+            throws AbstractCodedException {
+        List<MqiGenericMessageDto<LevelSegmentDto>> messages =
+                persistLevelSegmentsService.next(appProperties.getHostname());
+        MqiGenericMessageDto<LevelSegmentDto> result = null;
+        if (!CollectionUtils.isEmpty(messages)) {
+            messages.sort(new Comparator<MqiGenericMessageDto<LevelSegmentDto>>() {
+                @Override
+                public int compare(MqiGenericMessageDto<LevelSegmentDto> o1,
+                        MqiGenericMessageDto<LevelSegmentDto> o2) {
+                    if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() >
+                        consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
+                        return -1;
+                    } else if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() ==
+                            consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
+                        if(o1.getCreationDate()==null) {
+                            return 1;
+                        } else if(o2.getCreationDate()==null) {
+                            return -1;
+                        } else {
+                            return o1.getCreationDate().compareTo(o2.getCreationDate());
+                        }
+                    } else {
+                        return 1;
+                    }
+                }                
+            });
+            for (MqiGenericMessageDto<LevelSegmentDto> tmpMessage : messages) {
+                if (send(persistLevelSegmentsService,
+                        (MqiLightMessageDto) tmpMessage)) {
+                    result = tmpMessage;
+                    break;
+                }
+            }
+        }
+        return (GenericMessageDto<LevelSegmentDto>) convertToRestDto(result);
     }
 
     /**

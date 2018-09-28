@@ -12,12 +12,14 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiEdrsSessionsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelJobsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelProductsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelReportsService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelSegmentsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * Configuration of applicative catalog client for data persistence.<br/>
@@ -113,6 +115,20 @@ public class PersistenceConfiguration {
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new AppCatalogMqiLevelJobsService(template, hostUriCatalog,
+                maxRetries, tempoRetryMs);
+    }
+
+    /**
+     * Service for querying MQI for LEVEL_SEGMENTS category
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = "persistenceServiceForLevelSegments")
+    public GenericAppCatalogMqiService<LevelSegmentDto> persistenceServiceForLevelSegments(
+            final RestTemplateBuilder builder) {
+        RestTemplate template = builder.build();
+        return new AppCatalogMqiLevelSegmentsService(template, hostUriCatalog,
                 maxRetries, tempoRetryMs);
     }
 

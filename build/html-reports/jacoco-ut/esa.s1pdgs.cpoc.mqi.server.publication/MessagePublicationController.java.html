@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessagePublicationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">MQI server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server.publication</a> &gt; <span class="el_source">MessagePublicationController.java</span></div><h1>MessagePublicationController.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server.publication;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessagePublicationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Message queue interface server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server.publication</a> &gt; <span class="el_source">MessagePublicationController.java</span></div><h1>MessagePublicationController.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server.publication;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,10 +22,11 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryPublicationProperties;
+import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.converter.XmlConverter;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.AbstractGenericProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.AuxiliaryFileProducer;
@@ -34,6 +35,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.ErrorsProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelJobProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelProductProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelReportProducer;
+import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelSegmentProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.DefaultRoute;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.Routing;
 
@@ -48,8 +50,8 @@ public class MessagePublicationController {
     /**
      * Logger
      */
-<span class="fc" id="L51">    protected static final Logger LOGGER =</span>
-<span class="fc" id="L52">            LogManager.getLogger(MessagePublicationController.class);</span>
+<span class="fc" id="L53">    protected static final Logger LOGGER =</span>
+<span class="fc" id="L54">            LogManager.getLogger(MessagePublicationController.class);</span>
 
     /**
      * List of producers
@@ -92,14 +94,14 @@ public class MessagePublicationController {
             final ApplicationProperties appProperties,
             final KafkaProperties kafkaProperties,
             final XmlConverter xmlConverter,
-<span class="fc" id="L95">            final ErrorsProducer errorsProducer) {</span>
-<span class="fc" id="L96">        this.producers = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L97">        this.routing = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L98">        this.appProperties = appProperties;</span>
-<span class="fc" id="L99">        this.kafkaProperties = kafkaProperties;</span>
-<span class="fc" id="L100">        this.xmlConverter = xmlConverter;</span>
-<span class="fc" id="L101">        this.errorsProducer = errorsProducer;</span>
-<span class="fc" id="L102">    }</span>
+<span class="fc" id="L97">            final ErrorsProducer errorsProducer) {</span>
+<span class="fc" id="L98">        this.producers = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L99">        this.routing = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L100">        this.appProperties = appProperties;</span>
+<span class="fc" id="L101">        this.kafkaProperties = kafkaProperties;</span>
+<span class="fc" id="L102">        this.xmlConverter = xmlConverter;</span>
+<span class="fc" id="L103">        this.errorsProducer = errorsProducer;</span>
+<span class="fc" id="L104">    }</span>
 
     /**
      * Start consumers according the configuration
@@ -112,47 +114,51 @@ public class MessagePublicationController {
 
         // Init the list of consumers
 
-<span class="fc bfc" id="L115" title="All 2 branches covered.">        for (ProductCategory cat : appProperties.getProductCategories()</span>
-<span class="fc" id="L116">                .keySet()) {</span>
-<span class="fc" id="L117">            ProductCategoryProperties catProp =</span>
-<span class="fc" id="L118">                    appProperties.getProductCategories().get(cat);</span>
-<span class="fc" id="L119">            ProductCategoryPublicationProperties prop =</span>
-<span class="fc" id="L120">                    catProp.getPublication();</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        for (ProductCategory cat : appProperties.getProductCategories()</span>
+<span class="fc" id="L118">                .keySet()) {</span>
+<span class="fc" id="L119">            ProductCategoryProperties catProp =</span>
+<span class="fc" id="L120">                    appProperties.getProductCategories().get(cat);</span>
+<span class="fc" id="L121">            ProductCategoryPublicationProperties prop =</span>
+<span class="fc" id="L122">                    catProp.getPublication();</span>
 
-<span class="fc bfc" id="L122" title="All 2 branches covered.">            if (prop.isEnable()) {</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (prop.isEnable()) {</span>
 
                 // Create publisher
-<span class="fc" id="L125">                LOGGER.info(&quot;Creating publisher for category {}&quot;, cat);</span>
-<span class="pc bpc" id="L126" title="1 of 6 branches missed.">                switch (cat) {</span>
+<span class="fc" id="L127">                LOGGER.info(&quot;Creating publisher for category {}&quot;, cat);</span>
+<span class="pc bpc" id="L128" title="1 of 7 branches missed.">                switch (cat) {</span>
                     case AUXILIARY_FILES:
-<span class="fc" id="L128">                        producers.put(cat,</span>
+<span class="fc" id="L130">                        producers.put(cat,</span>
                                 new AuxiliaryFileProducer(kafkaProperties));
-<span class="fc" id="L130">                        break;</span>
+<span class="fc" id="L132">                        break;</span>
                     case EDRS_SESSIONS:
-<span class="fc" id="L132">                        producers.put(cat,</span>
+<span class="fc" id="L134">                        producers.put(cat,</span>
                                 new EdrsSessionsProducer(kafkaProperties));
-<span class="fc" id="L134">                        break;</span>
+<span class="fc" id="L136">                        break;</span>
                     case LEVEL_JOBS:
-<span class="fc" id="L136">                        producers.put(cat,</span>
+<span class="fc" id="L138">                        producers.put(cat,</span>
                                 new LevelJobProducer(kafkaProperties));
-<span class="fc" id="L138">                        break;</span>
+<span class="fc" id="L140">                        break;</span>
                     case LEVEL_PRODUCTS:
-<span class="fc" id="L140">                        producers.put(cat,</span>
+<span class="fc" id="L142">                        producers.put(cat,</span>
                                 new LevelProductProducer(kafkaProperties));
-<span class="fc" id="L142">                        break;</span>
+<span class="fc" id="L144">                        break;</span>
                     case LEVEL_REPORTS:
-<span class="fc" id="L144">                        producers.put(cat,</span>
+<span class="fc" id="L146">                        producers.put(cat,</span>
                                 new LevelReportProducer(kafkaProperties));
+<span class="fc" id="L148">                        break;</span>
+                    case LEVEL_SEGMENTS:
+<span class="fc" id="L150">                        producers.put(cat,</span>
+                                new LevelSegmentProducer(kafkaProperties));
                         break;
                 }
 
                 // Create routing map
-<span class="fc" id="L150">                LOGGER.info(&quot;Creating routing map for category {}&quot;, cat);</span>
-<span class="fc" id="L151">                routing.put(cat, (Routing) xmlConverter</span>
-<span class="fc" id="L152">                        .convertFromXMLToObject(prop.getRoutingFile()));</span>
+<span class="fc" id="L156">                LOGGER.info(&quot;Creating routing map for category {}&quot;, cat);</span>
+<span class="fc" id="L157">                routing.put(cat, (Routing) xmlConverter</span>
+<span class="fc" id="L158">                        .convertFromXMLToObject(prop.getRoutingFile()));</span>
             }
-<span class="fc" id="L154">        }</span>
-<span class="fc" id="L155">    }</span>
+<span class="fc" id="L160">        }</span>
+<span class="fc" id="L161">    }</span>
 
     /**
      * Publish a message in the topic of errors
@@ -160,7 +166,7 @@ public class MessagePublicationController {
      * @param message
      */
     public boolean publishError(final String message) {
-<span class="fc" id="L163">        return this.errorsProducer.send(message);</span>
+<span class="fc" id="L169">        return this.errorsProducer.send(message);</span>
     }
 
     /**
@@ -175,28 +181,31 @@ public class MessagePublicationController {
     public void publish(ProductCategory category, Object dto)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
-<span class="fc bfc" id="L178" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
-<span class="pc bpc" id="L179" title="1 of 6 branches missed.">            switch (category) {</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
+<span class="pc bpc" id="L185" title="1 of 7 branches missed.">            switch (category) {</span>
                 case AUXILIARY_FILES:
-<span class="fc" id="L181">                    publishAuxiliaryFiles((AuxiliaryFileDto) dto);</span>
-<span class="fc" id="L182">                    break;</span>
-                case EDRS_SESSIONS:
-<span class="fc" id="L184">                    publishEdrsSessions((EdrsSessionDto) dto);</span>
-<span class="fc" id="L185">                    break;</span>
-                case LEVEL_JOBS:
-<span class="fc" id="L187">                    publishLevelJobs((LevelJobDto) dto);</span>
+<span class="fc" id="L187">                    publishAuxiliaryFiles((AuxiliaryFileDto) dto);</span>
 <span class="fc" id="L188">                    break;</span>
-                case LEVEL_PRODUCTS:
-<span class="fc" id="L190">                    publishLevelProducts((LevelProductDto) dto);</span>
+                case EDRS_SESSIONS:
+<span class="fc" id="L190">                    publishEdrsSessions((EdrsSessionDto) dto);</span>
 <span class="fc" id="L191">                    break;</span>
-                case LEVEL_REPORTS:
-<span class="fc" id="L193">                    publishLevelReports((LevelReportDto) dto);</span>
+                case LEVEL_JOBS:
+<span class="fc" id="L193">                    publishLevelJobs((LevelJobDto) dto);</span>
 <span class="fc" id="L194">                    break;</span>
+                case LEVEL_PRODUCTS:
+<span class="fc" id="L196">                    publishLevelProducts((LevelProductDto) dto);</span>
+<span class="fc" id="L197">                    break;</span>
+                case LEVEL_REPORTS:
+<span class="fc" id="L199">                    publishLevelReports((LevelReportDto) dto);</span>
+<span class="fc" id="L200">                    break;</span>
+                case LEVEL_SEGMENTS:
+<span class="fc" id="L202">                    publishLevelSegments((LevelSegmentDto) dto);</span>
+<span class="fc" id="L203">                    break;</span>
             }
         } else {
-<span class="fc" id="L197">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
+<span class="fc" id="L206">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
         }
-<span class="fc" id="L199">    }</span>
+<span class="fc" id="L208">    }</span>
 
     /**
      * Get the topic to use for publication according the routing map
@@ -210,18 +219,18 @@ public class MessagePublicationController {
     protected String getTopic(final ProductCategory category,
             final ProductFamily family)
             throws MqiCategoryNotAvailable, MqiRouteNotAvailable {
-<span class="fc" id="L213">        String result = &quot;&quot;;</span>
-<span class="fc bfc" id="L214" title="All 2 branches covered.">        if (routing.containsKey(category)) {</span>
-<span class="fc" id="L215">            DefaultRoute dft = routing.get(category).getDefaultRoute(family);</span>
-<span class="fc bfc" id="L216" title="All 2 branches covered.">            if (dft == null) {</span>
-<span class="fc" id="L217">                throw new MqiRouteNotAvailable(category, family);</span>
+<span class="fc" id="L222">        String result = &quot;&quot;;</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">        if (routing.containsKey(category)) {</span>
+<span class="fc" id="L224">            DefaultRoute dft = routing.get(category).getDefaultRoute(family);</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">            if (dft == null) {</span>
+<span class="fc" id="L226">                throw new MqiRouteNotAvailable(category, family);</span>
             } else {
-<span class="fc" id="L219">                result = dft.getRouteTo().getTopic();</span>
+<span class="fc" id="L228">                result = dft.getRouteTo().getTopic();</span>
             }
-<span class="fc" id="L221">        } else {</span>
-<span class="fc" id="L222">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
+<span class="fc" id="L230">        } else {</span>
+<span class="fc" id="L231">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
         }
-<span class="fc" id="L224">        return result;</span>
+<span class="fc" id="L233">        return result;</span>
     }
 
     /**
@@ -235,16 +244,16 @@ public class MessagePublicationController {
     protected void publishAuxiliaryFiles(final AuxiliaryFileDto dto)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
-<span class="fc" id="L238">        ProductCategory category = ProductCategory.AUXILIARY_FILES;</span>
-<span class="fc bfc" id="L239" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
-<span class="fc" id="L240">            AuxiliaryFileProducer producer =</span>
-<span class="fc" id="L241">                    (AuxiliaryFileProducer) producers.get(category);</span>
-<span class="fc" id="L242">            producer.send(getTopic(category, ProductFamily.AUXILIARY_FILE),</span>
+<span class="fc" id="L247">        ProductCategory category = ProductCategory.AUXILIARY_FILES;</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
+<span class="fc" id="L249">            AuxiliaryFileProducer producer =</span>
+<span class="fc" id="L250">                    (AuxiliaryFileProducer) producers.get(category);</span>
+<span class="fc" id="L251">            producer.send(getTopic(category, ProductFamily.AUXILIARY_FILE),</span>
                     dto);
-<span class="fc" id="L244">        } else {</span>
-<span class="fc" id="L245">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
+<span class="fc" id="L253">        } else {</span>
+<span class="fc" id="L254">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
         }
-<span class="fc" id="L247">    }</span>
+<span class="fc" id="L256">    }</span>
 
     /**
      * Publish a message for the category EDRS_SESSIONS
@@ -257,15 +266,15 @@ public class MessagePublicationController {
     protected void publishEdrsSessions(final EdrsSessionDto dto)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
-<span class="fc" id="L260">        ProductCategory category = ProductCategory.EDRS_SESSIONS;</span>
-<span class="fc bfc" id="L261" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
-<span class="fc" id="L262">            EdrsSessionsProducer producer =</span>
-<span class="fc" id="L263">                    (EdrsSessionsProducer) producers.get(category);</span>
-<span class="fc" id="L264">            producer.send(getTopic(category, ProductFamily.EDRS_SESSION), dto);</span>
-<span class="fc" id="L265">        } else {</span>
-<span class="fc" id="L266">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
+<span class="fc" id="L269">        ProductCategory category = ProductCategory.EDRS_SESSIONS;</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
+<span class="fc" id="L271">            EdrsSessionsProducer producer =</span>
+<span class="fc" id="L272">                    (EdrsSessionsProducer) producers.get(category);</span>
+<span class="fc" id="L273">            producer.send(getTopic(category, ProductFamily.EDRS_SESSION), dto);</span>
+<span class="fc" id="L274">        } else {</span>
+<span class="fc" id="L275">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
         }
-<span class="fc" id="L268">    }</span>
+<span class="fc" id="L277">    }</span>
 
     /**
      * Publish a message for the category LEVEL_PRODUCTS
@@ -278,15 +287,36 @@ public class MessagePublicationController {
     protected void publishLevelProducts(final LevelProductDto dto)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
-<span class="fc" id="L281">        ProductCategory category = ProductCategory.LEVEL_PRODUCTS;</span>
-<span class="fc bfc" id="L282" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
-<span class="fc" id="L283">            LevelProductProducer producer =</span>
-<span class="fc" id="L284">                    (LevelProductProducer) producers.get(category);</span>
-<span class="fc" id="L285">            producer.send(getTopic(category, dto.getFamily()), dto);</span>
-<span class="fc" id="L286">        } else {</span>
-<span class="fc" id="L287">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
+<span class="fc" id="L290">        ProductCategory category = ProductCategory.LEVEL_PRODUCTS;</span>
+<span class="fc bfc" id="L291" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
+<span class="fc" id="L292">            LevelProductProducer producer =</span>
+<span class="fc" id="L293">                    (LevelProductProducer) producers.get(category);</span>
+<span class="fc" id="L294">            producer.send(getTopic(category, dto.getFamily()), dto);</span>
+<span class="fc" id="L295">        } else {</span>
+<span class="fc" id="L296">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
         }
-<span class="fc" id="L289">    }</span>
+<span class="fc" id="L298">    }</span>
+
+    /**
+     * Publish a message for the category LEVEL_SEGMENTS
+     * 
+     * @param dto
+     * @throws MqiPublicationError
+     * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
+     */
+    protected void publishLevelSegments(final LevelSegmentDto dto)
+            throws MqiPublicationError, MqiCategoryNotAvailable,
+            MqiRouteNotAvailable {
+<span class="fc" id="L311">        ProductCategory category = ProductCategory.LEVEL_SEGMENTS;</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
+<span class="fc" id="L313">            LevelSegmentProducer producer =</span>
+<span class="fc" id="L314">                    (LevelSegmentProducer) producers.get(category);</span>
+<span class="fc" id="L315">            producer.send(getTopic(category, dto.getFamily()), dto);</span>
+<span class="fc" id="L316">        } else {</span>
+<span class="fc" id="L317">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
+        }
+<span class="fc" id="L319">    }</span>
 
     /**
      * Publish a message for the category LEVEL_JOBS
@@ -299,15 +329,15 @@ public class MessagePublicationController {
     protected void publishLevelJobs(final LevelJobDto dto)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
-<span class="fc" id="L302">        ProductCategory category = ProductCategory.LEVEL_JOBS;</span>
-<span class="fc bfc" id="L303" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
-<span class="fc" id="L304">            LevelJobProducer producer =</span>
-<span class="fc" id="L305">                    (LevelJobProducer) producers.get(category);</span>
-<span class="fc" id="L306">            producer.send(getTopic(category, dto.getFamily()), dto);</span>
-<span class="fc" id="L307">        } else {</span>
-<span class="fc" id="L308">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
+<span class="fc" id="L332">        ProductCategory category = ProductCategory.LEVEL_JOBS;</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
+<span class="fc" id="L334">            LevelJobProducer producer =</span>
+<span class="fc" id="L335">                    (LevelJobProducer) producers.get(category);</span>
+<span class="fc" id="L336">            producer.send(getTopic(category, dto.getFamily()), dto);</span>
+<span class="fc" id="L337">        } else {</span>
+<span class="fc" id="L338">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
         }
-<span class="fc" id="L310">    }</span>
+<span class="fc" id="L340">    }</span>
 
     /**
      * Publish a message for the category LEVEL_REPORTS
@@ -320,15 +350,15 @@ public class MessagePublicationController {
     protected void publishLevelReports(final LevelReportDto dto)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
-<span class="fc" id="L323">        ProductCategory category = ProductCategory.LEVEL_REPORTS;</span>
-<span class="fc bfc" id="L324" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
-<span class="fc" id="L325">            LevelReportProducer producer =</span>
-<span class="fc" id="L326">                    (LevelReportProducer) producers.get(category);</span>
-<span class="fc" id="L327">            producer.send(getTopic(category, dto.getFamily()), dto);</span>
-<span class="fc" id="L328">        } else {</span>
-<span class="fc" id="L329">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
+<span class="fc" id="L353">        ProductCategory category = ProductCategory.LEVEL_REPORTS;</span>
+<span class="fc bfc" id="L354" title="All 2 branches covered.">        if (producers.containsKey(category)) {</span>
+<span class="fc" id="L355">            LevelReportProducer producer =</span>
+<span class="fc" id="L356">                    (LevelReportProducer) producers.get(category);</span>
+<span class="fc" id="L357">            producer.send(getTopic(category, dto.getFamily()), dto);</span>
+<span class="fc" id="L358">        } else {</span>
+<span class="fc" id="L359">            throw new MqiCategoryNotAvailable(category, &quot;publisher&quot;);</span>
         }
-<span class="fc" id="L331">    }</span>
+<span class="fc" id="L361">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

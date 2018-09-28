@@ -22,10 +22,11 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryPublicationProperties;
+import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.converter.XmlConverter;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.AbstractGenericProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.AuxiliaryFileProducer;
@@ -34,6 +35,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.ErrorsProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelJobProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelProductProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelReportProducer;
+import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelSegmentProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.DefaultRoute;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.Routing;
 
@@ -137,13 +139,16 @@ public class MessagePublicationController {
                                 new LevelJobProducer(kafkaProperties));
                         break;
                     case LEVEL_PRODUCTS:
-                    case LEVEL_SEGMENTS:
                         producers.put(cat,
                                 new LevelProductProducer(kafkaProperties));
                         break;
                     case LEVEL_REPORTS:
                         producers.put(cat,
                                 new LevelReportProducer(kafkaProperties));
+                        break;
+                    case LEVEL_SEGMENTS:
+                        producers.put(cat,
+                                new LevelSegmentProducer(kafkaProperties));
                         break;
                 }
 
@@ -188,11 +193,13 @@ public class MessagePublicationController {
                     publishLevelJobs((LevelJobDto) dto);
                     break;
                 case LEVEL_PRODUCTS:
-                case LEVEL_SEGMENTS:
                     publishLevelProducts((LevelProductDto) dto);
                     break;
                 case LEVEL_REPORTS:
                     publishLevelReports((LevelReportDto) dto);
+                    break;
+                case LEVEL_SEGMENTS:
+                    publishLevelSegments((LevelSegmentDto) dto);
                     break;
             }
         } else {
@@ -284,6 +291,27 @@ public class MessagePublicationController {
         if (producers.containsKey(category)) {
             LevelProductProducer producer =
                     (LevelProductProducer) producers.get(category);
+            producer.send(getTopic(category, dto.getFamily()), dto);
+        } else {
+            throw new MqiCategoryNotAvailable(category, "publisher");
+        }
+    }
+
+    /**
+     * Publish a message for the category LEVEL_SEGMENTS
+     * 
+     * @param dto
+     * @throws MqiPublicationError
+     * @throws MqiCategoryNotAvailable
+     * @throws MqiRouteNotAvailable
+     */
+    protected void publishLevelSegments(final LevelSegmentDto dto)
+            throws MqiPublicationError, MqiCategoryNotAvailable,
+            MqiRouteNotAvailable {
+        ProductCategory category = ProductCategory.LEVEL_SEGMENTS;
+        if (producers.containsKey(category)) {
+            LevelSegmentProducer producer =
+                    (LevelSegmentProducer) producers.get(category);
             producer.send(getTopic(category, dto.getFamily()), dto);
         } else {
             throw new MqiCategoryNotAvailable(category, "publisher");

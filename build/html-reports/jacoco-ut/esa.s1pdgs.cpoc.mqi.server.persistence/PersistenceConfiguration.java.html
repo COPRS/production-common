@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PersistenceConfiguration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">MQI server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server.persistence</a> &gt; <span class="el_source">PersistenceConfiguration.java</span></div><h1>PersistenceConfiguration.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server.persistence;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PersistenceConfiguration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Message queue interface server</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.server.persistence</a> &gt; <span class="el_source">PersistenceConfiguration.java</span></div><h1>PersistenceConfiguration.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.server.persistence;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,12 +12,14 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiEdrsSessionsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelJobsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelProductsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelReportsService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelSegmentsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * Configuration of applicative catalog client for data persistence.&lt;br/&gt;
@@ -66,13 +68,13 @@ public class PersistenceConfiguration {
             @Value(&quot;${persistence.port-uri-other-app}&quot;) final String portUriOtherApp,
             @Value(&quot;${persistence.max-retries}&quot;) final int maxRetries,
             @Value(&quot;${persistence.tempo-retry-ms}&quot;) final int tempoRetryMs,
-<span class="fc" id="L69">            @Value(&quot;${persistence.other-app.suffix-uri}&quot;) final String suffixUriOtherApp) {</span>
-<span class="fc" id="L70">        this.hostUriCatalog = hostUriCatalog;</span>
-<span class="fc" id="L71">        this.maxRetries = maxRetries;</span>
-<span class="fc" id="L72">        this.tempoRetryMs = tempoRetryMs;</span>
-<span class="fc" id="L73">        this.portUriOtherApp = portUriOtherApp;</span>
-<span class="fc" id="L74">        this.suffixUriOtherApp = suffixUriOtherApp;</span>
-<span class="fc" id="L75">    }</span>
+<span class="fc" id="L71">            @Value(&quot;${persistence.other-app.suffix-uri}&quot;) final String suffixUriOtherApp) {</span>
+<span class="fc" id="L72">        this.hostUriCatalog = hostUriCatalog;</span>
+<span class="fc" id="L73">        this.maxRetries = maxRetries;</span>
+<span class="fc" id="L74">        this.tempoRetryMs = tempoRetryMs;</span>
+<span class="fc" id="L75">        this.portUriOtherApp = portUriOtherApp;</span>
+<span class="fc" id="L76">        this.suffixUriOtherApp = suffixUriOtherApp;</span>
+<span class="fc" id="L77">    }</span>
 
     /**
      * Service for querying MQI for LEVEL_PRODUCT category
@@ -83,8 +85,8 @@ public class PersistenceConfiguration {
     @Bean(name = &quot;persistenceServiceForLevelProducts&quot;)
     public GenericAppCatalogMqiService&lt;LevelProductDto&gt; persistenceServiceForLevelProducts(
             final RestTemplateBuilder builder) {
-<span class="fc" id="L86">        RestTemplate template = builder.build();</span>
-<span class="fc" id="L87">        return new AppCatalogMqiLevelProductsService(template, hostUriCatalog,</span>
+<span class="fc" id="L88">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L89">        return new AppCatalogMqiLevelProductsService(template, hostUriCatalog,</span>
                 maxRetries, tempoRetryMs);
     }
 
@@ -97,8 +99,8 @@ public class PersistenceConfiguration {
     @Bean(name = &quot;persistenceServiceForLevelReports&quot;)
     public GenericAppCatalogMqiService&lt;LevelReportDto&gt; persistenceServiceForLevelReports(
             final RestTemplateBuilder builder) {
-<span class="fc" id="L100">        RestTemplate template = builder.build();</span>
-<span class="fc" id="L101">        return new AppCatalogMqiLevelReportsService(template, hostUriCatalog,</span>
+<span class="fc" id="L102">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L103">        return new AppCatalogMqiLevelReportsService(template, hostUriCatalog,</span>
                 maxRetries, tempoRetryMs);
     }
 
@@ -111,8 +113,22 @@ public class PersistenceConfiguration {
     @Bean(name = &quot;persistenceServiceForLevelJobs&quot;)
     public GenericAppCatalogMqiService&lt;LevelJobDto&gt; persistenceServiceForLevelJobs(
             final RestTemplateBuilder builder) {
-<span class="fc" id="L114">        RestTemplate template = builder.build();</span>
-<span class="fc" id="L115">        return new AppCatalogMqiLevelJobsService(template, hostUriCatalog,</span>
+<span class="fc" id="L116">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L117">        return new AppCatalogMqiLevelJobsService(template, hostUriCatalog,</span>
+                maxRetries, tempoRetryMs);
+    }
+
+    /**
+     * Service for querying MQI for LEVEL_SEGMENTS category
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = &quot;persistenceServiceForLevelSegments&quot;)
+    public GenericAppCatalogMqiService&lt;LevelSegmentDto&gt; persistenceServiceForLevelSegments(
+            final RestTemplateBuilder builder) {
+<span class="fc" id="L130">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L131">        return new AppCatalogMqiLevelSegmentsService(template, hostUriCatalog,</span>
                 maxRetries, tempoRetryMs);
     }
 
@@ -125,8 +141,8 @@ public class PersistenceConfiguration {
     @Bean(name = &quot;persistenceServiceForAuxiliaryFiles&quot;)
     public GenericAppCatalogMqiService&lt;AuxiliaryFileDto&gt; persistenceServiceForAuxiliaryFiles(
             final RestTemplateBuilder builder) {
-<span class="fc" id="L128">        RestTemplate template = builder.build();</span>
-<span class="fc" id="L129">        return new AppCatalogMqiAuxiliaryFilesService(template, hostUriCatalog,</span>
+<span class="fc" id="L144">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L145">        return new AppCatalogMqiAuxiliaryFilesService(template, hostUriCatalog,</span>
                 maxRetries, tempoRetryMs);
     }
 
@@ -139,8 +155,8 @@ public class PersistenceConfiguration {
     @Bean(name = &quot;persistenceServiceForEdrsSessions&quot;)
     public GenericAppCatalogMqiService&lt;EdrsSessionDto&gt; persistenceServiceForEdrsSessions(
             final RestTemplateBuilder builder) {
-<span class="fc" id="L142">        RestTemplate template = builder.build();</span>
-<span class="fc" id="L143">        return new AppCatalogMqiEdrsSessionsService(template, hostUriCatalog,</span>
+<span class="fc" id="L158">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L159">        return new AppCatalogMqiEdrsSessionsService(template, hostUriCatalog,</span>
                 maxRetries, tempoRetryMs);
     }
     
@@ -150,8 +166,8 @@ public class PersistenceConfiguration {
     @Bean(name = &quot;checkProcessingOtherApp&quot;)
     public OtherApplicationService checkProcessingOtherApp(
             final RestTemplateBuilder builder) {
-<span class="fc" id="L153">        RestTemplate template = builder.build();</span>
-<span class="fc" id="L154">        return new OtherApplicationService(template, portUriOtherApp,</span>
+<span class="fc" id="L169">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L170">        return new OtherApplicationService(template, portUriOtherApp,</span>
                 maxRetries, tempoRetryMs, suffixUriOtherApp);
     }
     

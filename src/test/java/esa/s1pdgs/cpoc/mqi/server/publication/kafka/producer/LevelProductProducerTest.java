@@ -72,7 +72,7 @@ public class LevelProductProducerTest {
         MockitoAnnotations.initMocks(this);
 
         dto = new LevelProductDto("product-name-1", "key-obs",
-                ProductFamily.L0_SLICE, "NRT");
+                ProductFamily.L0_SLICE, "FAST");
 
         producer = new LevelProductProducer(properties, template);
     }

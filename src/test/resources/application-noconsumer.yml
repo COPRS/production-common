@@ -55,6 +55,11 @@ application:
         enable: false
       publication:
         enable: false
+    level-segments:
+      consumption:
+        enable: false
+      publication:
+        enable: false
 server:
   port: 8081
 persistence:

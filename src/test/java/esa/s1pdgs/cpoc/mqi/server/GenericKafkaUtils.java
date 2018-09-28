@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 public class GenericKafkaUtils<T> {
 
@@ -41,6 +42,7 @@ public class GenericKafkaUtils<T> {
     public final static String TOPIC_L1_REPORTS = "t-pdgs-l1-reports";
     public final static String TOPIC_EDRS_SESSIONS = "t-pdgs-edrs-sessions";
     public final static String TOPIC_AUXILIARY_FILES = "t-pdgs-auxiliary-files";
+    public final static String TOPIC_L0_SEGMENTS = "t-pdgs-l0-segments";
 
     private final KafkaEmbedded embeddedKafka;
 
@@ -93,6 +95,16 @@ public class GenericKafkaUtils<T> {
                 new DefaultKafkaConsumerFactory<String, LevelProductDto>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(LevelProductDto.class)).createConsumer();
+        embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
+        return KafkaTestUtils.getSingleRecord(consumer, topic);
+    }
+
+    public ConsumerRecord<String, LevelSegmentDto> getReceivedRecordSegments(
+            String topic) throws Exception {
+        Consumer<String, LevelSegmentDto> consumer =
+                new DefaultKafkaConsumerFactory<String, LevelSegmentDto>(
+                        consumerProps(), new StringDeserializer(),
+                        new JsonDeserializer<>(LevelSegmentDto.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
