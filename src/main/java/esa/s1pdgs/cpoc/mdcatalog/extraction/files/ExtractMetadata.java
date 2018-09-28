@@ -432,6 +432,7 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("polarisation", descriptor.getPolarisation());
 	        metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 	        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+	        metadataJSONObject.put("processMode", "NRT");
 	        String dt = dateFormat.format(new Date());
 	        metadataJSONObject.put("insertionTime", dt);
 	        metadataJSONObject.put("creationTime", dt);
@@ -474,6 +475,7 @@ public class ExtractMetadata {
             metadataJSONObject.put("polarisation", descriptor.getPolarisation());
             metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
             metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+            metadataJSONObject.put("processMode", "FAST");
             String dt = dateFormat.format(new Date());
             metadataJSONObject.put("insertionTime", dt);
             metadataJSONObject.put("creationTime", dt);

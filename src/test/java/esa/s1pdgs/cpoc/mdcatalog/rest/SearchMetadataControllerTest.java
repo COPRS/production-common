@@ -39,15 +39,15 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	}
 
 	private void mockSearchMetadata(SearchMetadata response) throws Exception {
-		doReturn(response).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt());
+		doReturn(response).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
 	}
 
 	private void mockSearchMetadataNotPresentException() throws Exception {
-		doThrow(new MetadataNotPresentException("name")).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt());
+		doThrow(new MetadataNotPresentException("name")).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
 	}
 	
 	private void mockSearchMetadataException() throws Exception {
-		doThrow(new Exception()).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt());
+		doThrow(new Exception()).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
 	}
 	
 	
@@ -61,7 +61,7 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 		response.setValidityStart("startDate");
 		response.setValidityStop("stopDate");
 		this.mockSearchMetadata(response);
-		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&satellite=satellite&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19")).andExpect(MockMvcResultMatchers.status().isOk())
+		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&processMode=NRT&satellite=satellite&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());
 		assertEquals("Result is different from expected result", expectedResult.toString(), result.getResponse().getContentAsString());
@@ -70,7 +70,7 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	@Test
 	public void testSearchMetadataIsNULL() throws Exception {
 		this.mockSearchMetadata(null);
-		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&satellite=satellite&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19")).andExpect(MockMvcResultMatchers.status().isOk())
+		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&processMode=NRT&satellite=satellite&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());
 		assertEquals("Result is different from expected result", 0, result.getResponse().getContentLength());
@@ -79,14 +79,14 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	@Test
 	public void testSearchMetadataIsNotPresentException() throws Exception {
 		this.mockSearchMetadataNotPresentException();
-		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&satellite=satellite&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19")).andExpect(MockMvcResultMatchers.status().is4xxClientError())
+		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&processMode=NRT&satellite=satellite&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19")).andExpect(MockMvcResultMatchers.status().is4xxClientError())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP NOT FOUND Status code", 400, result.getResponse().getStatus());
 	}
 	
 	@Test
 	public void testSearchMetadataBadMode() throws Exception {
-		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=BADMODE&satellite=satellite&t0=startDate&t1=stopDate")).andExpect(MockMvcResultMatchers.status().is4xxClientError())
+		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=BADMODE&processMode=NRT&satellite=satellite&t0=startDate&t1=stopDate")).andExpect(MockMvcResultMatchers.status().is4xxClientError())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP NOT FOUND Status code", 400, result.getResponse().getStatus());
 	}
@@ -94,7 +94,7 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	@Test
 	public void testSearchMetadataException() throws Exception {
 		this.mockSearchMetadataException();
-		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&satellite=satellite&t0=startDate&t1=stopDate")).andExpect(MockMvcResultMatchers.status().is5xxServerError())
+		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&processMode=NRT&satellite=satellite&t0=startDate&t1=stopDate")).andExpect(MockMvcResultMatchers.status().is5xxServerError())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP NOT FOUND Status code", 500, result.getResponse().getStatus());
 	}

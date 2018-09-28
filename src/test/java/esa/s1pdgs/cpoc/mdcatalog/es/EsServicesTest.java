@@ -236,7 +236,7 @@ public class EsServicesTest{
 		
 		try {
 			SearchMetadata result = esServices.lastValCover("type", ProductFamily.L0_ACN, 
-			        "beginDate", "endDate", "satelliteId", 6);
+			        "beginDate", "endDate", "satelliteId", 6, "NRT");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -269,7 +269,7 @@ public class EsServicesTest{
 		
 		try {
 			SearchMetadata result = esServices.lastValCover("aux_res", ProductFamily.AUXILIARY_FILE, "beginDate", 
-			        "endDate", "satelliteId", -1);
+			        "endDate", "satelliteId", -1, "NRT");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -279,7 +279,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void lastValCoverIOExceptionTest() throws Exception {
 		this.mockSearchRequestThrowIOException();
-		esServices.lastValCover("type", ProductFamily.BLANK, "beginDate", "endDate", "satelliteId", -1);
+		esServices.lastValCover("type", ProductFamily.BLANK, "beginDate", "endDate", "satelliteId", -1, "NRT");
 	}
 	
 	@Test
@@ -300,7 +300,7 @@ public class EsServicesTest{
 		
 		try {
 			SearchMetadata result = esServices.lastValCover("type", ProductFamily.L0_ACN, "beginDate", 
-			        "endDate", "satelliteId", 6);
+			        "endDate", "satelliteId", 6, "NRT");
 			assertEquals("Search metadata are not equals", null, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());

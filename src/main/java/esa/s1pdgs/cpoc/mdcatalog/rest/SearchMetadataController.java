@@ -41,6 +41,7 @@ public class SearchMetadataController {
 	        @RequestParam(name = "productType") String productType,
 			@RequestParam(name = "mode") String mode, @RequestParam(name = "satellite") String satellite,
 			@RequestParam(name = "t0") String startDate, @RequestParam(name = "t1") String stopDate,
+			@RequestParam(name = "processMode", defaultValue = "NONE") String processMode,
 			@RequestParam(name = "insConfId", defaultValue = "-1") int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
@@ -51,7 +52,7 @@ public class SearchMetadataController {
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")),
-						satellite, insConfId);
+						satellite, insConfId, processMode);
 				SearchMetadataDto response = null;
 				if (f != null) {
 					response = new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),

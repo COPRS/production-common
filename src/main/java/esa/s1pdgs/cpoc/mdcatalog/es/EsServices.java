@@ -130,21 +130,40 @@ public class EsServices {
 	 * @throws Exception
 	 */
 	public SearchMetadata lastValCover(String productType, ProductFamily productFamily, String beginDate, 
-	        String endDate, String satelliteId,	int instrumentConfId) throws Exception {
+	        String endDate, String satelliteId,	int instrumentConfId, String processMode) throws Exception {
 	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
-			sourceBuilder
-					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-							.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId))
-					        .must(QueryBuilders.termQuery("productFamily.keyword", productFamily.toString())));
+		    if(ProductFamily.AUXILIARY_FILE.equals(productFamily)) {
+    			sourceBuilder
+    					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+    							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+    							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+    							.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId))
+    					        .must(QueryBuilders.termQuery("productType.keyword", productType)));
+		    } else {
+		        sourceBuilder
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+                        .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+                        .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+                        .must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId))
+                        .must(QueryBuilders.termQuery("productType.keyword", productType))
+                        .must(QueryBuilders.termQuery("processMode.keyword", processMode)));
+		    }
 		} else {
-			sourceBuilder
-					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-                            .must(QueryBuilders.termQuery("productFamily.keyword", productFamily.toString())));
+		    if(ProductFamily.AUXILIARY_FILE.equals(productFamily)) {
+    		    sourceBuilder
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+                        .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+                        .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+                        .must(QueryBuilders.termQuery("productType.keyword", productType)));
+		    } else {
+		        sourceBuilder
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+                        .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+                        .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+                        .must(QueryBuilders.termQuery("productType.keyword", productType))
+                        .must(QueryBuilders.termQuery("processMode.keyword", processMode)));
+		    }
 		}
 		String index = null;
         if(ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
