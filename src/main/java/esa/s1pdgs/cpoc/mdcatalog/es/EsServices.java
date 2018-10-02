@@ -40,6 +40,9 @@ import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
 @Service
 public class EsServices {
 
+    /**
+     * Logger
+
 	/**
 	 * Elasticsearch client
 	 */
@@ -68,7 +71,7 @@ public class EsServices {
 		    String productType = null;
             if(ProductFamily.AUXILIARY_FILE.equals(ProductFamily.valueOf(product.getString("productFamily"))) 
                     || ProductFamily.EDRS_SESSION.equals(ProductFamily.valueOf(product.getString("productFamily")))) {
-                productType = product.getString("productType");
+                productType = product.getString("productType").toLowerCase();
             } else {
                 productType = product.getString("productFamily").toLowerCase();
             }
@@ -97,7 +100,7 @@ public class EsServices {
 		    String productType = null;
             if(ProductFamily.AUXILIARY_FILE.equals(ProductFamily.valueOf(product.getString("productFamily"))) 
                     || ProductFamily.EDRS_SESSION.equals(ProductFamily.valueOf(product.getString("productFamily")))) {
-                productType = product.getString("productType");
+                productType = product.getString("productType").toLowerCase();
             } else {
                 productType = product.getString("productFamily").toLowerCase();
             }
@@ -105,7 +108,7 @@ public class EsServices {
 
 			IndexRequest request = new IndexRequest(productType, indexType, productName).source(product.toString(),
 					XContentType.JSON);
-
+			
 			IndexResponse response = elasticsearchDAO.index(request);
 			
 			if (response.status() != RestStatus.CREATED) {

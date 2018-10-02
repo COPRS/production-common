@@ -238,6 +238,7 @@ public class LevelProductsExtractorTest {
         descriptor.setProductType("IW_RAW__0S");
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
+        descriptor.setProductFamily(ProductFamily.L0_SLICE);
 
         JSONObject expected = extractor.mdBuilder
                 .buildL0SliceOutputFileMetadata(descriptor, file);
@@ -292,6 +293,7 @@ public class LevelProductsExtractorTest {
         descriptor.setProductType("IW_RAW__0S");
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
+        descriptor.setProductFamily(ProductFamily.L0_SLICE);
 
         JSONObject expected = extractor.mdBuilder
                 .buildL0SliceOutputFileMetadata(descriptor, file);
@@ -342,6 +344,7 @@ public class LevelProductsExtractorTest {
         descriptor.setProductType("IW_RAW__0S");
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
+        descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
         JSONObject expected = extractor.mdBuilder
                 .buildL1SliceOutputFileMetadata(descriptor, file);
@@ -392,6 +395,7 @@ public class LevelProductsExtractorTest {
         descriptor.setProductType("IW_RAW__0S");
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
+        descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
         JSONObject expected = extractor.mdBuilder
                 .buildL1SliceOutputFileMetadata(descriptor, file);

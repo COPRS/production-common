@@ -168,7 +168,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -209,7 +209,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-            metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -254,7 +254,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-            metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 
 		} catch (IOException | TransformerException | JSONException e) {
@@ -289,7 +289,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-            metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -315,7 +315,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-            metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -341,7 +341,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
-            metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -436,7 +436,7 @@ public class ExtractMetadata {
 	        String dt = dateFormat.format(new Date());
 	        metadataJSONObject.put("insertionTime", dt);
 	        metadataJSONObject.put("creationTime", dt);
-            metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException | ParseException e) {
 			throw new MetadataExtractionException(e);
@@ -479,7 +479,7 @@ public class ExtractMetadata {
             String dt = dateFormat.format(new Date());
             metadataJSONObject.put("insertionTime", dt);
             metadataJSONObject.put("creationTime", dt);
-            metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
             return metadataJSONObject;
         } catch (IOException | TransformerException | JSONException e) {
             throw new MetadataExtractionException(e);
@@ -541,7 +541,7 @@ public class ExtractMetadata {
 	        String dt = dateFormat.format(new Date());
 	        metadataJSONObject.put("insertionTime", dt);
 	        metadataJSONObject.put("creationTime", dt);
-            metadataJSONObject.put("productFamily", descriptor.getProductFamily());
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
