@@ -335,7 +335,7 @@ public class ExtractMetadata {
 		try {
 			JSONObject metadataJSONObject = new JSONObject();
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productType", descriptor.getProductType());
+			metadataJSONObject.put("productType", descriptor.getProductType().name());
 			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
