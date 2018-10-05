@@ -41,7 +41,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
      * Pattern for configuration files to extract data
      */
     public final static String PATTERN_CONFIG =
-            "^(S1|AS)(A|B)_(S[1-6]|IW|EW|WM|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$";
+            "^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$";
 
     /**
      * Amazon S3 service for configuration files
