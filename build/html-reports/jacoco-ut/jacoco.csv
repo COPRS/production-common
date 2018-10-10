@@ -29,7 +29,7 @@ S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server.co
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server.publication.routing,RouteTo,0,59,0,6,0,15,0,9,0,6
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server.publication.routing,Routing,0,90,0,10,0,23,0,13,0,8
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server.publication.routing,DefaultRoute,0,86,0,10,0,19,0,13,0,8
-S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,ApplicationProperties,0,102,2,8,0,24,2,11,0,8
+S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,ApplicationProperties,0,29,0,0,0,12,0,7,0,7
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,KafkaProperties.KafkaListenerProperties,0,13,0,0,0,6,0,3,0,3
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,Application,0,8,0,0,0,3,0,2,0,2
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,KafkaProperties.KafkaProducerProperties,0,13,0,0,0,6,0,3,0,3
@@ -37,7 +37,7 @@ S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,Ka
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,ApplicationProperties.ProductCategoryPublicationProperties,0,29,0,0,0,13,0,6,0,6
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,KafkaProperties,0,55,0,0,0,24,0,15,0,15
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,ApplicationProperties.ProductCategoryProperties,0,36,0,0,0,14,0,6,0,6
-S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,ApplicationProperties.ProductCategoryConsumptionProperties,0,38,0,0,0,16,0,8,0,8
+S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server,ApplicationProperties.ProductCategoryConsumptionProperties,0,36,0,0,0,14,0,6,0,6
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener,GenericMessageListener.new Object() {...},4,29,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener,MemoryConsumerAwareRebalanceListener,9,131,0,8,3,41,0,11,0,7
 S1-PDGS Cloud POC - Message queue interface server,esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener,GenericMessageListener,0,204,2,13,0,65,2,12,0,6
