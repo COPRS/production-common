@@ -51,7 +51,7 @@ public class ProductCategoryTest {
         assertEquals(ProductCategory.LEVEL_REPORTS,
                 ProductCategory.fromProductFamily(ProductFamily.L1_REPORT));
         assertEquals(ProductCategory.LEVEL_REPORTS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_ASP_REPORT));
+                ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT_REPORT));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
                 ProductCategory.fromProductFamily(ProductFamily.L0_ACN));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
@@ -65,7 +65,7 @@ public class ProductCategoryTest {
         assertEquals(ProductCategory.LEVEL_JOBS,
                 ProductCategory.fromProductFamily(ProductFamily.L1_JOB));
         assertEquals(ProductCategory.LEVEL_JOBS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_ASP_JOB));
+                ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT_JOB));
         assertEquals(ProductCategory.LEVEL_SEGMENTS,
                 ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT));
 

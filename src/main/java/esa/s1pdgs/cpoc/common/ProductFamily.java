@@ -8,9 +8,9 @@ package esa.s1pdgs.cpoc.common;
 public enum ProductFamily {
     EDRS_SESSION, AUXILIARY_FILE, 
     L0_ACN, L0_SLICE, L1_ACN, L1_SLICE, 
-    L0_REPORT, L1_REPORT, L0_ASP_REPORT,
+    L0_REPORT, L1_REPORT, L0_SEGMENT_REPORT,
     L0_SEGMENT,
-    L0_JOB, L1_JOB, L0_ASP_JOB,
+    L0_JOB, L1_JOB, L0_SEGMENT_JOB,
     JOB_ORDER, BLANK;
 
     /**
