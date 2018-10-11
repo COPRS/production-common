@@ -11,6 +11,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
@@ -134,40 +136,21 @@ public class EsServices {
 	 */
 	public SearchMetadata lastValCover(String productType, ProductFamily productFamily, String beginDate, 
 	        String endDate, String satelliteId,	int instrumentConfId, String processMode) throws Exception {
+	    
 	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
-		    if(ProductFamily.AUXILIARY_FILE.equals(productFamily)) {
-    			sourceBuilder
-    					.query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-    							.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-    							.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-    							.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId))
-    					        .must(QueryBuilders.termQuery("productType.keyword", productType)));
-		    } else {
-		        sourceBuilder
-                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-                        .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-                        .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-                        .must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId))
-                        .must(QueryBuilders.termQuery("productType.keyword", productType))
-                        .must(QueryBuilders.termQuery("processMode.keyword", processMode)));
-		    }
-		} else {
-		    if(ProductFamily.AUXILIARY_FILE.equals(productFamily)) {
-    		    sourceBuilder
-                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-                        .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-                        .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-                        .must(QueryBuilders.termQuery("productType.keyword", productType)));
-		    } else {
-		        sourceBuilder
-                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-                        .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-                        .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-                        .must(QueryBuilders.termQuery("productType.keyword", productType))
-                        .must(QueryBuilders.termQuery("processMode.keyword", processMode)));
-		    }
-		}
+	    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+                .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+                .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+                .must(QueryBuilders.termQuery("productType.keyword", productType));
+	    if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
+	        queryBuilder = queryBuilder.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId));
+	    }
+	    ProductCategory category = ProductCategory.fromProductFamily(productFamily);
+	    if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
+	        queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+	    }
+	    sourceBuilder.query(queryBuilder);
+	    
 		String index = null;
         if(ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
             index = productType;

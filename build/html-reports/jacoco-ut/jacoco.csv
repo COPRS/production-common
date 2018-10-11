@@ -26,7 +26,7 @@ S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.obs,Ob
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.obs,ObsService.new Object() {...},7,47,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsClientConfiguration,0,35,0,0,0,7,0,2,0,2
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,ElasticsearchDAO,21,3,0,0,3,1,3,1,3,1
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsServices,51,774,11,57,11,160,11,33,0,10
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsServices,31,724,11,57,7,147,11,33,0,10
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsClientConfiguration.new RestClientBuilder.RequestConfigCallback() {...},0,16,0,0,0,3,0,2,0,2
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,FileDescriptorBuilder,42,783,11,39,6,168,12,20,1,6
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,MetadataBuilder.new Object() {...},5,39,0,0,0,2,0,1,0,1
