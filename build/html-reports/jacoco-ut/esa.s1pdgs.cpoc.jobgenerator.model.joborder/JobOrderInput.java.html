@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>JobOrderInput.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.joborder</a> &gt; <span class="el_source">JobOrderInput.java</span></div><h1>JobOrderInput.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.joborder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.eclipse.persistence.oxm.annotations.XmlPath;
+import org.springframework.util.CollectionUtils;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
+
+/**
+ * Class description a job order input
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+@XmlRootElement(name = &quot;Input&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class JobOrderInput {
+
+	/**
+	 * File type (correspond to the product type)
+	 */
+	@XmlElement(name = &quot;File_Type&quot;)
+	private String fileType;
+
+	/**
+	 * File name type
+	 */
+	@XmlElement(name = &quot;File_Name_Type&quot;)
+	private JobOrderFileNameType fileNameType;
+
+	/**
+	 * List of filenames
+	 */
+	@XmlElementWrapper(name = &quot;List_of_File_Names&quot;)
+	@XmlElement(name = &quot;File_Name&quot;)
+	private List&lt;JobOrderInputFile&gt; filenames;
+
+	/**
+	 * Number of file names. Automatically built.
+	 */
+	@XmlPath(&quot;List_of_File_Names/@count&quot;)
+	private int nbFilenames;
+
+	/**
+	 * List of time intervals. One per files
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Time_Intervals&quot;)
+	@XmlElement(name = &quot;Time_Interval&quot;)
+	private List&lt;JobOrderTimeInterval&gt; timeIntervals;
+
+	/**
+	 * Number of time intervals. Automatically built.
+	 */
+	@XmlPath(&quot;List_of_Time_Intervals/@count&quot;)
+	private int nbTimeIntervals;
+
+	/**
+	 * Product family
+	 */
+	private ProductFamily family;
+
+	/**
+	 * Default constructor
+	 */
+	public JobOrderInput() {
+<span class="fc" id="L77">		super();</span>
+<span class="fc" id="L78">		this.timeIntervals = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L79">		this.filenames = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L80">		this.nbTimeIntervals = 0;</span>
+<span class="fc" id="L81">		this.nbFilenames = 0;</span>
+<span class="fc" id="L82">		this.family = ProductFamily.AUXILIARY_FILE;</span>
+<span class="fc" id="L83">	}</span>
+
+	/**
+	 * @param fileType
+	 * @param fileNameType
+	 * @param filenames
+	 * @param timeIntervals
+	 * @param family
+	 */
+	public JobOrderInput(final String fileType, final JobOrderFileNameType fileNameType,
+			final List&lt;JobOrderInputFile&gt; filenames, final List&lt;JobOrderTimeInterval&gt; timeIntervals,
+			final ProductFamily family) {
+<span class="fc" id="L95">		this();</span>
+<span class="fc" id="L96">		this.fileType = fileType;</span>
+<span class="fc" id="L97">		this.fileNameType = fileNameType;</span>
+<span class="fc" id="L98">		this.family = family;</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		if (filenames != null) {</span>
+<span class="fc" id="L100">			filenames.forEach(filename -&gt; {</span>
+<span class="fc" id="L101">				this.filenames.add(new JobOrderInputFile(filename));</span>
+<span class="fc" id="L102">			});</span>
+<span class="fc" id="L103">			this.nbFilenames = this.filenames.size();</span>
+		}
+<span class="fc bfc" id="L105" title="All 2 branches covered.">		if (timeIntervals != null) {</span>
+<span class="fc" id="L106">			timeIntervals.forEach(timeInterval -&gt; {</span>
+<span class="fc" id="L107">				this.timeIntervals.add(new JobOrderTimeInterval(timeInterval));</span>
+<span class="fc" id="L108">			});</span>
+<span class="fc" id="L109">			this.nbTimeIntervals = this.timeIntervals.size();</span>
+		}
+<span class="fc" id="L111">	}</span>
+
+	/**
+	 * Clone
+	 * 
+	 * @param obj
+	 */
+	public JobOrderInput(final JobOrderInput obj) {
+<span class="fc" id="L119">		this();</span>
+<span class="fc" id="L120">		this.family = obj.getFamily();</span>
+<span class="fc" id="L121">		this.fileType = obj.getFileType();</span>
+<span class="fc" id="L122">		this.fileNameType = obj.getFileNameType();</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">		if (!CollectionUtils.isEmpty(obj.getFilenames())) {</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">			this.filenames.addAll(obj.getFilenames().stream().filter(item -&gt; item != null)</span>
+<span class="fc" id="L125">					.map(item -&gt; new JobOrderInputFile(item)).collect(Collectors.toList()));</span>
+<span class="fc" id="L126">			this.nbFilenames = this.filenames.size();</span>
+		}
+<span class="fc bfc" id="L128" title="All 2 branches covered.">		if (!CollectionUtils.isEmpty(obj.getTimeIntervals())) {</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">			this.timeIntervals.addAll(obj.getTimeIntervals().stream().filter(item -&gt; item != null)</span>
+<span class="fc" id="L130">					.map(item -&gt; new JobOrderTimeInterval(item)).collect(Collectors.toList()));</span>
+<span class="fc" id="L131">			this.nbTimeIntervals = this.timeIntervals.size();</span>
+		}
+<span class="fc" id="L133">	}</span>
+
+	/**
+	 * @return the fileType
+	 */
+	public String getFileType() {
+<span class="fc" id="L139">		return fileType;</span>
+	}
+
+	/**
+	 * @param fileType
+	 *            the fileType to set
+	 */
+	public void setFileType(final String fileType) {
+<span class="fc" id="L147">		this.fileType = fileType;</span>
+<span class="fc" id="L148">	}</span>
+
+	/**
+	 * @return the fileNameType
+	 */
+	public JobOrderFileNameType getFileNameType() {
+<span class="fc" id="L154">		return fileNameType;</span>
+	}
+
+	/**
+	 * @param fileNameType
+	 *            the fileNameType to set
+	 */
+	public void setFileNameType(final JobOrderFileNameType fileNameType) {
+<span class="fc" id="L162">		this.fileNameType = fileNameType;</span>
+<span class="fc" id="L163">	}</span>
+
+	/**
+	 * @return the filenames
+	 */
+	public List&lt;JobOrderInputFile&gt; getFilenames() {
+<span class="fc" id="L169">		return filenames;</span>
+	}
+
+	/**
+	 * @param filenames
+	 *            the filenames to set
+	 */
+	public void addFilename(final String filename, final String objectStorageKey) {
+<span class="fc" id="L177">		this.filenames.add(new JobOrderInputFile(filename, objectStorageKey));</span>
+<span class="fc" id="L178">		this.nbFilenames++;</span>
+<span class="fc" id="L179">	}</span>
+
+	/**
+	 * @return the timeIntervals
+	 */
+	public List&lt;JobOrderTimeInterval&gt; getTimeIntervals() {
+<span class="fc" id="L185">		return timeIntervals;</span>
+	}
+
+	/**
+	 * @param timeIntervals
+	 *            the timeIntervals to set
+	 */
+	public void addTimeInterval(final JobOrderTimeInterval timeInterval) {
+<span class="fc" id="L193">		this.timeIntervals.add(timeInterval);</span>
+<span class="fc" id="L194">		this.nbTimeIntervals++;</span>
+<span class="fc" id="L195">	}</span>
+
+	/**
+	 * @return the nbFilenames
+	 */
+	public int getNbFilenames() {
+<span class="fc" id="L201">		return nbFilenames;</span>
+	}
+
+	/**
+	 * @return the nbTimeIntervals
+	 */
+	public int getNbTimeIntervals() {
+<span class="fc" id="L208">		return nbTimeIntervals;</span>
+	}
+
+	/**
+	 * @return the family
+	 */
+	public ProductFamily getFamily() {
+<span class="fc" id="L215">		return family;</span>
+	}
+
+	/**
+	 * @param family
+	 *            the family to set
+	 */
+	public void setFamily(final ProductFamily family) {
+<span class="fc" id="L223">		this.family = family;</span>
+<span class="fc" id="L224">	}</span>
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L231">		return String.format(</span>
+				&quot;{fileType: %s, fileNameType: %s, filenames: %s, nbFilenames: %s, timeIntervals: %s, nbTimeIntervals: %s, family: %s}&quot;,
+<span class="fc" id="L233">				fileType, fileNameType, filenames, nbFilenames, timeIntervals, nbTimeIntervals, family);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L241">		return Objects.hash(fileType, fileNameType, filenames, nbFilenames, timeIntervals, nbTimeIntervals, family);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L250" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L251">			ret = true;</span>
+<span class="fc bfc" id="L252" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L253">			ret = false;</span>
+		} else {
+<span class="fc" id="L255">			JobOrderInput other = (JobOrderInput) obj;</span>
+<span class="fc bfc" id="L256" title="All 4 branches covered.">			ret = Objects.equals(fileType, other.fileType) &amp;&amp; Objects.equals(fileNameType, other.fileNameType)</span>
+<span class="fc bfc" id="L257" title="All 4 branches covered.">					&amp;&amp; Objects.equals(filenames, other.filenames) &amp;&amp; nbFilenames == other.nbFilenames</span>
+<span class="fc bfc" id="L258" title="All 4 branches covered.">					&amp;&amp; Objects.equals(timeIntervals, other.timeIntervals) &amp;&amp; nbTimeIntervals == other.nbTimeIntervals</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">					&amp;&amp; Objects.equals(family, other.family);</span>
+		}
+<span class="fc" id="L261">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

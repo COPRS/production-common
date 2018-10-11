@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>JobOrder.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.joborder</a> &gt; <span class="el_source">JobOrder.java</span></div><h1>JobOrder.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.joborder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.eclipse.persistence.oxm.annotations.XmlPath;
+
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+
+/**
+ * Class describing the content of a file jobOrder.xml
+ * 
+ * @author Cyrielle
+ *
+ */
+@XmlRootElement(name = &quot;Ipf_Job_Order&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class JobOrder {
+
+	/**
+	 * Global configuration
+	 */
+	@XmlElement(name = &quot;Ipf_Conf&quot;)
+	private AbstractJobOrderConf conf;
+
+	/**
+	 * Processors
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Ipf_Procs&quot;)
+	@XmlElement(name = &quot;Ipf_Proc&quot;)
+	private List&lt;JobOrderProc&gt; procs;
+
+	/**
+	 * Number of processors. Automatically field
+	 */
+	@XmlPath(&quot;List_of_Ipf_Procs/@count&quot;)
+	private int nbProcs;
+
+	/**
+	 * Default constructor
+	 */
+	public JobOrder() {
+<span class="fc" id="L51">		super();</span>
+<span class="fc" id="L52">		this.procs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L53">		this.nbProcs = 0;</span>
+<span class="fc" id="L54">	}</span>
+
+	/**
+	 * Clone
+	 * 
+	 * @param obj
+	 */
+	public JobOrder(final JobOrder obj, final ApplicationLevel applicationLevel) {
+<span class="fc" id="L62">		this();</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">		this.conf = applicationLevel == ApplicationLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">		this.procs.addAll(obj.getProcs().stream().filter(item -&gt; item != null).map(item -&gt; new JobOrderProc(item))</span>
+<span class="fc" id="L65">				.collect(Collectors.toList()));</span>
+<span class="fc" id="L66">		this.nbProcs = this.procs.size();</span>
+<span class="fc" id="L67">	}</span>
+
+	/**
+	 * @return the conf
+	 */
+	public AbstractJobOrderConf getConf() {
+<span class="fc" id="L73">		return conf;</span>
+	}
+
+	/**
+	 * @param conf
+	 *            the conf to set
+	 */
+	public void setConf(final AbstractJobOrderConf conf) {
+<span class="fc" id="L81">		this.conf = conf;</span>
+<span class="fc" id="L82">	}</span>
+
+	/**
+	 * @return the procs
+	 */
+	public List&lt;JobOrderProc&gt; getProcs() {
+<span class="fc" id="L88">		return procs;</span>
+	}
+
+	/**
+	 * 
+	 * @param proc
+	 */
+	public void addProc(final JobOrderProc proc) {
+<span class="fc" id="L96">		this.procs.add(proc);</span>
+<span class="fc" id="L97">		this.nbProcs++;</span>
+<span class="fc" id="L98">	}</span>
+
+	/**
+	 * 
+	 * @param procs
+	 */
+	public void addProcs(final List&lt;JobOrderProc&gt; procs) {
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">		if (procs != null) {</span>
+<span class="fc" id="L106">			this.procs.addAll(procs);</span>
+<span class="fc" id="L107">			this.nbProcs += procs.size();</span>
+		}
+<span class="fc" id="L109">	}</span>
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L116">		return String.format(&quot;{conf: %s, procs: %s, nbProcs: %s}&quot;, conf, procs, nbProcs);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L124">		return Objects.hash(conf, procs, nbProcs);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L133" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L134">			ret = true;</span>
+<span class="fc bfc" id="L135" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L136">			ret = false;</span>
+		} else {
+<span class="fc" id="L138">			JobOrder other = (JobOrder) obj;</span>
+<span class="fc bfc" id="L139" title="All 6 branches covered.">			ret = Objects.equals(conf, other.conf) &amp;&amp; Objects.equals(procs, other.procs) &amp;&amp; nbProcs == other.nbProcs;</span>
+		}
+<span class="fc" id="L141">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

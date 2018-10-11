@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TaskTableDynProcParam.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.tasktable</a> &gt; <span class="el_source">TaskTableDynProcParam.java</span></div><h1>TaskTableDynProcParam.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.tasktable;
+
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * Object representing Dyn_ProcParam in task table
+ * 
+ * @author Cyrielle
+ *
+ */
+@XmlRootElement(name = &quot;Dyn_ProcParam&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class TaskTableDynProcParam {
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Param_Name&quot;)
+	private String name;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Param_Type&quot;)
+	private String type;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Param_Default&quot;)
+	private String defaultValue;
+
+	/**
+	 * 
+	 */
+	public TaskTableDynProcParam() {
+<span class="fc" id="L42">		super();</span>
+<span class="fc" id="L43">	}</span>
+
+	/**
+	 * @param name
+	 * @param type
+	 * @param defaultValue
+	 */
+	public TaskTableDynProcParam(final String name, final String type, final String defaultValue) {
+<span class="fc" id="L51">		this();</span>
+<span class="fc" id="L52">		this.name = name;</span>
+<span class="fc" id="L53">		this.type = type;</span>
+<span class="fc" id="L54">		this.defaultValue = defaultValue;</span>
+<span class="fc" id="L55">	}</span>
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+<span class="fc" id="L61">		return name;</span>
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(final String name) {
+<span class="fc" id="L69">		this.name = name;</span>
+<span class="fc" id="L70">	}</span>
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+<span class="fc" id="L76">		return type;</span>
+	}
+
+	/**
+	 * @param type
+	 *            the type to set
+	 */
+	public void setType(final String type) {
+<span class="fc" id="L84">		this.type = type;</span>
+<span class="fc" id="L85">	}</span>
+
+	/**
+	 * @return the defaultValue
+	 */
+	public String getDefaultValue() {
+<span class="fc" id="L91">		return defaultValue;</span>
+	}
+
+	/**
+	 * @param defaultValue
+	 *            the defaultValue to set
+	 */
+	public void setDefaultValue(final String defaultValue) {
+<span class="fc" id="L99">		this.defaultValue = defaultValue;</span>
+<span class="fc" id="L100">	}</span>
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L107">		return Objects.hash(name, type, defaultValue);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L116" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L117">			ret = true;</span>
+<span class="fc bfc" id="L118" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L119">			ret = false;</span>
+		} else {
+<span class="fc" id="L121">			TaskTableDynProcParam other = (TaskTableDynProcParam) obj;</span>
+<span class="fc bfc" id="L122" title="All 4 branches covered.">			ret = Objects.equals(name, other.name) &amp;&amp; Objects.equals(type, other.type)</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">					&amp;&amp; Objects.equals(defaultValue, other.defaultValue);</span>
+		}
+<span class="fc" id="L125">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

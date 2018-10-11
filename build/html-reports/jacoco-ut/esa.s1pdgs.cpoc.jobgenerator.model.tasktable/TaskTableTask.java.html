@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TaskTableTask.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.tasktable</a> &gt; <span class="el_source">TaskTableTask.java</span></div><h1>TaskTableTask.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.tasktable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * 
+ */
+@XmlRootElement(name = &quot;Task&quot;)
+@XmlAccessorType(XmlAccessType.NONE)
+public class TaskTableTask {
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Name&quot;)
+	private String name;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Version&quot;)
+	private String version;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Critical&quot;)
+	private boolean critical;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;Criticality_Level&quot;)
+	private int criticityLevel;
+
+	/**
+	 * 
+	 */
+	@XmlElement(name = &quot;File_Name&quot;)
+	private String fileName;
+
+	/**
+	 * 
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Inputs&quot;)
+	@XmlElement(name = &quot;Input&quot;)
+	private List&lt;TaskTableInput&gt; inputs;
+
+	/**
+	 * 
+	 */
+	@XmlElementWrapper(name = &quot;List_of_Outputs&quot;)
+	@XmlElement(name = &quot;Output&quot;)
+	private List&lt;TaskTableOuput&gt; outputs;
+
+	/**
+	 * 
+	 */
+	public TaskTableTask() {
+<span class="fc" id="L68">		super();</span>
+<span class="fc" id="L69">		this.critical = false;</span>
+<span class="fc" id="L70">		this.criticityLevel = 1;</span>
+<span class="fc" id="L71">		this.inputs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L72">		this.outputs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L73">	}</span>
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+<span class="fc" id="L79">		return name;</span>
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(final String name) {
+<span class="fc" id="L87">		this.name = name;</span>
+<span class="fc" id="L88">	}</span>
+
+	/**
+	 * @return the version
+	 */
+	public String getVersion() {
+<span class="fc" id="L94">		return version;</span>
+	}
+
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(final String version) {
+<span class="fc" id="L102">		this.version = version;</span>
+<span class="fc" id="L103">	}</span>
+
+	/**
+	 * @return the critical
+	 */
+	public boolean isCritical() {
+<span class="fc" id="L109">		return critical;</span>
+	}
+
+	/**
+	 * @param critical
+	 *            the critical to set
+	 */
+	public void setCritical(final boolean critical) {
+<span class="fc" id="L117">		this.critical = critical;</span>
+<span class="fc" id="L118">	}</span>
+
+	/**
+	 * @return the criticityLevel
+	 */
+	public int getCriticityLevel() {
+<span class="fc" id="L124">		return criticityLevel;</span>
+	}
+
+	/**
+	 * @param criticityLevel
+	 *            the criticityLevel to set
+	 */
+	public void setCriticityLevel(final int criticityLevel) {
+<span class="fc" id="L132">		this.criticityLevel = criticityLevel;</span>
+<span class="fc" id="L133">	}</span>
+
+	/**
+	 * @return the fileName
+	 */
+	public String getFileName() {
+<span class="fc" id="L139">		return fileName;</span>
+	}
+
+	/**
+	 * @param fileName
+	 *            the fileName to set
+	 */
+	public void setFileName(final String fileName) {
+<span class="fc" id="L147">		this.fileName = fileName;</span>
+<span class="fc" id="L148">	}</span>
+
+	/**
+	 * @return the inputs
+	 */
+	public List&lt;TaskTableInput&gt; getInputs() {
+<span class="fc" id="L154">		return inputs;</span>
+	}
+
+	/**
+	 * @param inputs
+	 *            the inputs to set
+	 */
+	public void setInputs(final List&lt;TaskTableInput&gt; inputs) {
+<span class="nc" id="L162">		this.inputs = inputs;</span>
+<span class="nc" id="L163">	}</span>
+
+	/**
+	 * @param inputs
+	 *            the inputs to set
+	 */
+	public void addInput(final TaskTableInput input) {
+<span class="fc" id="L170">		this.inputs.add(input);</span>
+<span class="fc" id="L171">	}</span>
+
+	/**
+	 * @return the outputs
+	 */
+	public List&lt;TaskTableOuput&gt; getOutputs() {
+<span class="fc" id="L177">		return outputs;</span>
+	}
+
+	/**
+	 * @param outputs
+	 *            the outputs to set
+	 */
+	public void setOutputs(final List&lt;TaskTableOuput&gt; outputs) {
+<span class="nc" id="L185">		this.outputs = outputs;</span>
+<span class="nc" id="L186">	}</span>
+
+	/**
+	 * @param outputs
+	 *            the outputs to set
+	 */
+	public void addOutput(final TaskTableOuput output) {
+<span class="fc" id="L193">		this.outputs.add(output);</span>
+<span class="fc" id="L194">	}</span>
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L201">		return Objects.hash(name, version, critical, criticityLevel, fileName, inputs, outputs);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L210" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L211">			ret = true;</span>
+<span class="fc bfc" id="L212" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L213">			ret = false;</span>
+		} else {
+<span class="fc" id="L215">			TaskTableTask other = (TaskTableTask) obj;</span>
+<span class="fc bfc" id="L216" title="All 8 branches covered.">			ret = Objects.equals(name, other.name) &amp;&amp; Objects.equals(version, other.version)</span>
+					&amp;&amp; critical == other.critical &amp;&amp; criticityLevel == other.criticityLevel
+<span class="fc bfc" id="L218" title="All 4 branches covered.">					&amp;&amp; Objects.equals(fileName, other.fileName) &amp;&amp; Objects.equals(inputs, other.inputs)</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">					&amp;&amp; Objects.equals(outputs, other.outputs);</span>
+		}
+<span class="fc" id="L221">		return ret;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

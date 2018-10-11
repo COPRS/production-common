@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L1AppJobsGenerator.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.tasks.l1app</a> &gt; <span class="el_source">L1AppJobsGenerator.java</span></div><h1>L1AppJobsGenerator.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.tasks.l1app;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
+import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
+import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0AcnMetadata;
+import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
+import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
+import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
+import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
+import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+
+/**
+ * Customization of the job generator for L0 slice products
+ * 
+ * @author Cyrielle Gailliard
+ */
+public class L1AppJobsGenerator
+        extends AbstractJobsGenerator&lt;LevelProductDto&gt; {
+
+    /**
+     * @param xmlConverter
+     * @param metadataService
+     * @param l0ProcessSettings
+     * @param taskTablesSettings
+     * @param JobsSender
+     */
+    public L1AppJobsGenerator(final XmlConverter xmlConverter,
+            final MetadataService metadataService,
+            final ProcessSettings l0ProcessSettings,
+            final JobGeneratorSettings taskTablesSettings,
+            final OutputProducerFactory outputFactory,
+            final AbstractAppCatalogJobService&lt;LevelProductDto&gt; appDataService) {
+<span class="fc" id="L48">        super(xmlConverter, metadataService, l0ProcessSettings,</span>
+                taskTablesSettings, outputFactory, appDataService);
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * Check the product and retrieve usefull information before searching
+     * inputs
+     */
+    @Override
+    protected void preSearch(final JobGeneration&lt;LevelProductDto&gt; job)
+            throws JobGenInputsMissingException {
+<span class="fc" id="L59">        Map&lt;String, String&gt; missingMetadata = new HashMap&lt;&gt;();</span>
+        // Retrieve instrument configuration id and slice number
+        try {
+<span class="fc" id="L62">            L0SliceMetadata file = this.metadataService.getSlice(&quot;blank&quot;,</span>
+<span class="fc" id="L63">                    job.getAppDataJob().getProduct().getProductName());</span>
+<span class="fc" id="L64">            job.getAppDataJob().getProduct()</span>
+<span class="fc" id="L65">                    .setProductType(file.getProductType());</span>
+<span class="fc" id="L66">            job.getAppDataJob().getProduct()</span>
+<span class="fc" id="L67">                    .setInsConfId(file.getInstrumentConfigurationId());</span>
+<span class="fc" id="L68">            job.getAppDataJob().getProduct()</span>
+<span class="fc" id="L69">                    .setNumberSlice(file.getNumberSlice());</span>
+<span class="fc" id="L70">            job.getAppDataJob().getProduct()</span>
+<span class="fc" id="L71">                    .setDataTakeId(file.getDatatakeId());</span>
+<span class="fc" id="L72">        } catch (JobGenMetadataException e) {</span>
+<span class="fc" id="L73">            missingMetadata.put(</span>
+<span class="fc" id="L74">                    job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="fc" id="L75">                    &quot;No Slice: &quot; + e.getMessage());</span>
+<span class="fc" id="L76">            throw new JobGenInputsMissingException(missingMetadata);</span>
+<span class="fc" id="L77">        }</span>
+        // Retrieve Total_Number_Of_Slices
+        try {
+<span class="fc" id="L80">            L0AcnMetadata acn = this.metadataService.getFirstACN(</span>
+<span class="fc" id="L81">                    job.getAppDataJob().getProduct().getProductType(),</span>
+<span class="fc" id="L82">                    job.getAppDataJob().getProduct().getProductName());</span>
+<span class="fc" id="L83">            job.getAppDataJob().getProduct()</span>
+<span class="fc" id="L84">                    .setTotalNbOfSlice(acn.getNumberOfSlices());</span>
+<span class="fc" id="L85">            job.getAppDataJob().getProduct()</span>
+<span class="fc" id="L86">                    .setSegmentStartDate(acn.getValidityStart());</span>
+<span class="fc" id="L87">            job.getAppDataJob().getProduct()</span>
+<span class="fc" id="L88">                    .setSegmentStopDate(acn.getValidityStop());</span>
+<span class="fc" id="L89">        } catch (JobGenMetadataException e) {</span>
+<span class="fc" id="L90">            missingMetadata.put(</span>
+<span class="fc" id="L91">                    job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="fc" id="L92">                    &quot;No ACNs: &quot; + e.getMessage());</span>
+<span class="fc" id="L93">            throw new JobGenInputsMissingException(missingMetadata);</span>
+<span class="fc" id="L94">        }</span>
+<span class="fc" id="L95">    }</span>
+
+    /**
+     * Custom job order before building the job DTO
+     */
+    @Override
+    protected void customJobOrder(final JobGeneration&lt;LevelProductDto&gt; job) {
+        // Rewrite job order sensing time
+<span class="fc" id="L103">        DateTimeFormatter formatterJobOrder =</span>
+<span class="fc" id="L104">                DateTimeFormatter.ofPattern(JobOrderSensingTime.DATE_FORMAT);</span>
+<span class="fc" id="L105">        DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;</span>
+<span class="fc" id="L106">        LocalDateTime startDate = LocalDateTime.parse(</span>
+<span class="fc" id="L107">                job.getAppDataJob().getProduct().getSegmentStartDate(),</span>
+                formatterProduct);
+<span class="fc" id="L109">        String jobOrderStart = startDate.format(formatterJobOrder);</span>
+<span class="fc" id="L110">        LocalDateTime stopDate = LocalDateTime.parse(</span>
+<span class="fc" id="L111">                job.getAppDataJob().getProduct().getSegmentStopDate(),</span>
+                formatterProduct);
+<span class="fc" id="L113">        String jobOrderStop = stopDate.format(formatterJobOrder);</span>
+<span class="fc" id="L114">        job.getJobOrder().getConf().setSensingTime(</span>
+                new JobOrderSensingTime(jobOrderStart, jobOrderStop));
+
+<span class="fc" id="L117">        this.updateProcParam(job.getJobOrder(), &quot;Mission_Id&quot;,</span>
+<span class="fc" id="L118">                job.getAppDataJob().getProduct().getMissionId()</span>
+<span class="fc" id="L119">                        + job.getAppDataJob().getProduct().getSatelliteId());</span>
+<span class="fc" id="L120">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Number&quot;,</span>
+<span class="fc" id="L121">                &quot;&quot; + job.getAppDataJob().getProduct().getNumberSlice());</span>
+<span class="fc" id="L122">        this.updateProcParam(job.getJobOrder(), &quot;Total_Number_Of_Slices&quot;,</span>
+<span class="fc" id="L123">                &quot;&quot; + job.getAppDataJob().getProduct().getTotalNbOfSlice());</span>
+<span class="fc" id="L124">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Overlap&quot;,</span>
+<span class="fc" id="L125">                &quot;&quot; + jobGeneratorSettings.getTypeOverlap().get(</span>
+<span class="fc" id="L126">                        job.getAppDataJob().getProduct().getAcquisition()));</span>
+<span class="fc" id="L127">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Length&quot;,</span>
+<span class="fc" id="L128">                &quot;&quot; + jobGeneratorSettings.getTypeSliceLength().get(</span>
+<span class="fc" id="L129">                        job.getAppDataJob().getProduct().getAcquisition()));</span>
+<span class="fc" id="L130">        this.updateProcParam(job.getJobOrder(), &quot;Slicing_Flag&quot;, &quot;TRUE&quot;);</span>
+<span class="fc" id="L131">    }</span>
+
+    /**
+     * Update or create a proc param in the job order
+     * 
+     * @param jobOrder
+     * @param name
+     * @param newValue
+     */
+    protected void updateProcParam(final JobOrder jobOrder, final String name,
+            final String newValue) {
+<span class="fc" id="L142">        boolean update = false;</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        for (JobOrderProcParam param : jobOrder.getConf().getProcParams()) {</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            if (name.equals(param.getName())) {</span>
+<span class="fc" id="L145">                param.setValue(newValue);</span>
+<span class="fc" id="L146">                update = true;</span>
+            }
+<span class="fc" id="L148">        }</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (!update) {</span>
+<span class="fc" id="L150">            jobOrder.getConf()</span>
+<span class="fc" id="L151">                    .addProcParam(new JobOrderProcParam(name, newValue));</span>
+        }
+<span class="fc" id="L153">    }</span>
+
+    /**
+     * Customisation of the job DTO before sending it
+     */
+    @Override
+    protected void customJobDto(final JobGeneration&lt;LevelProductDto&gt; job,
+            final LevelJobDto dto) {
+        // NOTHING TO DO
+
+<span class="fc" id="L163">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

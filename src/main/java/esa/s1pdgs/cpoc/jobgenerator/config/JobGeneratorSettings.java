@@ -74,6 +74,18 @@ public class JobGeneratorSettings {
      * Format:
      * {type_1}:{family_1}||{type_2}:{family_2}||...||{type_n}:{family_n}
      */
+    private String inputfamiliesstr;
+
+    /**
+     * Map between output product type and product family
+     */
+    private Map<String, ProductFamily> inputfamilies;
+
+    /**
+     * Map between output product type and product family in string format.<br/>
+     * Format:
+     * {type_1}:{family_1}||{type_2}:{family_2}||...||{type_n}:{family_n}
+     */
     private String outputfamiliesstr;
 
     /**
@@ -104,6 +116,7 @@ public class JobGeneratorSettings {
      * Default constructors
      */
     public JobGeneratorSettings() {
+        this.inputfamilies = new HashMap<>();
         this.outputfamilies = new HashMap<>();
     }
 
@@ -115,13 +128,32 @@ public class JobGeneratorSettings {
      */
     @PostConstruct
     public void initMaps() {
-        extractMapProductTypeFamily();
+        extractMapProductTypeFamilyInput();
+        extractMapProductTypeFamilyOutput();
     }
 
     /**
      * Extract map product type family from the string
      */
-    private void extractMapProductTypeFamily() {
+    private void extractMapProductTypeFamilyInput() {
+        if (StringUtils.isEmpty(inputfamiliesstr)) {
+            return;
+        }
+        String[] paramsTmp = inputfamiliesstr.split(MAP_ELM_SEP);
+        for (int i = 0; i < paramsTmp.length; i++) {
+            String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
+            if (tmp != null && tmp.length == 2) {
+                String key = tmp[0];
+                String valStr = tmp[1];
+                inputfamilies.put(key, ProductFamily.fromValue(valStr));
+            }
+        }
+    }
+
+    /**
+     * Extract map product type family from the string
+     */
+    private void extractMapProductTypeFamilyOutput() {
         if (StringUtils.isEmpty(outputfamiliesstr)) {
             return;
         }
@@ -328,6 +360,27 @@ public class JobGeneratorSettings {
      */
     public Map<String, ProductFamily> getOutputfamilies() {
         return outputfamilies;
+    }
+
+    /**
+     * @return the inputfamiliesstr
+     */
+    public String getInputfamiliesstr() {
+        return inputfamiliesstr;
+    }
+
+    /**
+     * @param inputfamiliesstr the inputfamiliesstr to set
+     */
+    public void setInputfamiliesstr(String inputfamiliesstr) {
+        this.inputfamiliesstr = inputfamiliesstr;
+    }
+
+    /**
+     * @return the inputfamilies
+     */
+    public Map<String, ProductFamily> getInputfamilies() {
+        return inputfamilies;
     }
 
     /**

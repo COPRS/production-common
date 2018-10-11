@@ -20,6 +20,7 @@ job-generator:
   waitmetadatainput:                                               # Minimal time between two execution of the following method: checking the global requirements to generate a job
     tempo: 60000
   defaultfamily: BLANK                                             # Default family of a output defined in the task table
+  inputfamiliesstr: ${products_family-per-type}             # !!!!  Family assignation of a specific output
   outputfamiliesstr: ${products_family-per-type}            # !!!!  Family assignation of a specific output
   type-overlap:                                             # !!!!  Overlap per acquiqition: map {acquisition -> overloap}
     EW: 8.2F
