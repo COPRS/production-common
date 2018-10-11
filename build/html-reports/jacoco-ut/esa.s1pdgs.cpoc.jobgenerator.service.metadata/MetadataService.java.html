@@ -270,7 +270,7 @@ public class MetadataService {
 	}
 
 	public SearchMetadata search(final SearchMetadataQuery query, final Date t0, final Date t1,
-			final String satelliteId, final int instrumentConfigurationId) 
+			final String satelliteId, final int instrumentConfigurationId, final String processMode) 
 			        throws JobGenMetadataException {
 <span class="fc" id="L275">		for (int retries = 0;; retries++) {</span>
 			try {
@@ -278,49 +278,51 @@ public class MetadataService {
 <span class="fc" id="L278">				String uri = this.uriSearch + &quot;/&quot; + query.getProductFamily().toString() + &quot;/search&quot;;</span>
 <span class="fc" id="L279">				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)</span>
 <span class="fc" id="L280">						.queryParam(&quot;productType&quot;, query.getProductType()).queryParam(&quot;mode&quot;, query.getRetrievalMode())</span>
-<span class="fc" id="L281">						.queryParam(&quot;processMode&quot;, query.getMode())</span>
-<span class="fc" id="L282">						.queryParam(&quot;t0&quot;, format.format(t0)).queryParam(&quot;t1&quot;, format.format(t1))</span>
-<span class="fc" id="L283">						.queryParam(&quot;dt0&quot;, query.getDeltaTime0()).queryParam(&quot;dt1&quot;, query.getDeltaTime1())</span>
-<span class="fc" id="L284">						.queryParam(&quot;satellite&quot;, satelliteId);</span>
-<span class="fc bfc" id="L285" title="All 2 branches covered.">				if (instrumentConfigurationId != -1) {</span>
-<span class="fc" id="L286">					builder.queryParam(&quot;insConfId&quot;, instrumentConfigurationId);</span>
+<span class="fc" id="L281">						.queryParam(&quot;t0&quot;, format.format(t0)).queryParam(&quot;t1&quot;, format.format(t1))</span>
+<span class="fc" id="L282">						.queryParam(&quot;dt0&quot;, query.getDeltaTime0()).queryParam(&quot;dt1&quot;, query.getDeltaTime1())</span>
+<span class="fc" id="L283">						.queryParam(&quot;satellite&quot;, satelliteId);</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">				if (processMode != null) {</span>
+<span class="fc" id="L285">				    builder.queryParam(&quot;processMode&quot;, processMode);</span>
 				}
-<span class="fc" id="L288">				LOGGER.debug(&quot;Call rest metadata on [{}]&quot;, builder.build().toUri());</span>
+<span class="fc bfc" id="L287" title="All 2 branches covered.">				if (instrumentConfigurationId != -1) {</span>
+<span class="fc" id="L288">					builder.queryParam(&quot;insConfId&quot;, instrumentConfigurationId);</span>
+				}
+<span class="fc" id="L290">				LOGGER.debug(&quot;Call rest metadata on [{}]&quot;, builder.build().toUri());</span>
 				
-<span class="fc" id="L290">				ResponseEntity&lt;SearchMetadata&gt; response = this.restTemplate.exchange(builder.build().toUri(),</span>
+<span class="fc" id="L292">				ResponseEntity&lt;SearchMetadata&gt; response = this.restTemplate.exchange(builder.build().toUri(),</span>
 						HttpMethod.GET, null, SearchMetadata.class);
-<span class="fc bfc" id="L292" title="All 2 branches covered.">				if (response.getStatusCode() != HttpStatus.OK) {</span>
-<span class="fc bfc" id="L293" title="All 2 branches covered.">					if (retries &lt; this.nbretry)</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">				if (response.getStatusCode() != HttpStatus.OK) {</span>
+<span class="fc bfc" id="L295" title="All 2 branches covered.">					if (retries &lt; this.nbretry)</span>
 					{
-<span class="fc" id="L295">						LOGGER.warn(&quot;Call rest api metadata failed: Attempt : {} / {}&quot;, retries, this.nbretry);</span>
+<span class="fc" id="L297">						LOGGER.warn(&quot;Call rest api metadata failed: Attempt : {} / {}&quot;, retries, this.nbretry);</span>
 						try {
-<span class="fc" id="L297">							Thread.sleep(this.temporetryms);</span>
-<span class="nc" id="L298">						} catch (InterruptedException e) {</span>
-<span class="nc" id="L299">							throw new JobGenMetadataException(e.getMessage(), e);</span>
-<span class="fc" id="L300">						}</span>
-<span class="fc" id="L301">						continue;</span>
+<span class="fc" id="L299">							Thread.sleep(this.temporetryms);</span>
+<span class="nc" id="L300">						} catch (InterruptedException e) {</span>
+<span class="nc" id="L301">							throw new JobGenMetadataException(e.getMessage(), e);</span>
+<span class="fc" id="L302">						}</span>
+<span class="fc" id="L303">						continue;</span>
 					}
 					else {
-<span class="fc" id="L304">						throw new JobGenMetadataException(</span>
-<span class="fc" id="L305">							String.format(&quot;Invalid HTTP status code %s&quot;, response.getStatusCode().name()));</span>
+<span class="fc" id="L306">						throw new JobGenMetadataException(</span>
+<span class="fc" id="L307">							String.format(&quot;Invalid HTTP status code %s&quot;, response.getStatusCode().name()));</span>
 					}
 				}
 				else {
-<span class="fc" id="L309">					return response.getBody();</span>
+<span class="fc" id="L311">					return response.getBody();</span>
 				}
-<span class="fc" id="L311">			} catch (RestClientException e) {</span>
-<span class="fc bfc" id="L312" title="All 2 branches covered.">				if (retries &lt; this.nbretry)</span>
+<span class="fc" id="L313">			} catch (RestClientException e) {</span>
+<span class="fc bfc" id="L314" title="All 2 branches covered.">				if (retries &lt; this.nbretry)</span>
 				{
-<span class="fc" id="L314">					LOGGER.warn(&quot;Call rest api metadata failed: Attempt : {} / {}&quot;, retries, this.nbretry);</span>
+<span class="fc" id="L316">					LOGGER.warn(&quot;Call rest api metadata failed: Attempt : {} / {}&quot;, retries, this.nbretry);</span>
 					try {
-<span class="fc" id="L316">						Thread.sleep(this.temporetryms);</span>
-<span class="nc" id="L317">					} catch (InterruptedException e1) {</span>
-<span class="nc" id="L318">						throw new JobGenMetadataException(e1.getMessage(), e1);</span>
-<span class="fc" id="L319">					}</span>
-<span class="fc" id="L320">					continue;</span>
+<span class="fc" id="L318">						Thread.sleep(this.temporetryms);</span>
+<span class="nc" id="L319">					} catch (InterruptedException e1) {</span>
+<span class="nc" id="L320">						throw new JobGenMetadataException(e1.getMessage(), e1);</span>
+<span class="fc" id="L321">					}</span>
+<span class="fc" id="L322">					continue;</span>
 				}
 				else {
-<span class="fc" id="L323">					throw new JobGenMetadataException(e.getMessage(), e);</span>
+<span class="fc" id="L325">					throw new JobGenMetadataException(e.getMessage(), e);</span>
 				}
 			}
 		}

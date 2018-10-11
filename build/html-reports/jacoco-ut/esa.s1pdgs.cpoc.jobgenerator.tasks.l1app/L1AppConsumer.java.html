@@ -165,40 +165,41 @@ public class L1AppConsumer extends AbstractGenericConsumer&lt;LevelProductDto&gt
 <span class="fc" id="L165">            productDto.setAcquisition(acquisition);</span>
 <span class="fc" id="L166">            productDto.setMissionId(missionId);</span>
 <span class="fc" id="L167">            productDto.setProductName(leveldto.getProductName());</span>
-<span class="fc" id="L168">            productDto.setSatelliteId(satelliteId);</span>
-<span class="fc" id="L169">            productDto.setStartTime(DateUtils</span>
-<span class="fc" id="L170">                    .convertWithSimpleDateFormat(startTime, DATE_FORMAT));</span>
-<span class="fc" id="L171">            productDto.setStopTime(DateUtils</span>
-<span class="fc" id="L172">                    .convertWithSimpleDateFormat(stopTime, DATE_FORMAT));</span>
-<span class="fc" id="L173">            jobDto.setProduct(productDto);</span>
+<span class="fc" id="L168">            productDto.setProcessMode(leveldto.getMode());</span>
+<span class="fc" id="L169">            productDto.setSatelliteId(satelliteId);</span>
+<span class="fc" id="L170">            productDto.setStartTime(DateUtils</span>
+<span class="fc" id="L171">                    .convertWithSimpleDateFormat(startTime, DATE_FORMAT));</span>
+<span class="fc" id="L172">            productDto.setStopTime(DateUtils</span>
+<span class="fc" id="L173">                    .convertWithSimpleDateFormat(stopTime, DATE_FORMAT));</span>
+<span class="fc" id="L174">            jobDto.setProduct(productDto);</span>
 
-<span class="fc" id="L175">            LOGGER.info(</span>
+<span class="fc" id="L176">            LOGGER.info(</span>
                     &quot;[REPORT] [MONITOR] [s1pdgsTask L1JobGeneration] [START] [productName {}] Starting job generation&quot;,
-<span class="fc" id="L177">                    jobDto.getProduct().getProductName());</span>
+<span class="fc" id="L178">                    jobDto.getProduct().getProductName());</span>
 
-<span class="fc" id="L179">            return appDataService.newJob(jobDto);</span>
+<span class="fc" id="L180">            return appDataService.newJob(jobDto);</span>
 
         } else {
             // Update pod if needed
-<span class="nc" id="L183">            AppDataJobDto&lt;LevelProductDto&gt; jobDto = existingJobs.get(0);</span>
-<span class="nc bnc" id="L184" title="All 2 branches missed.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
-<span class="nc" id="L185">                jobDto.setPod(processSettings.getHostname());</span>
-<span class="nc" id="L186">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
+<span class="nc" id="L184">            AppDataJobDto&lt;LevelProductDto&gt; jobDto = existingJobs.get(0);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
+<span class="nc" id="L186">                jobDto.setPod(processSettings.getHostname());</span>
+<span class="nc" id="L187">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
                         false, false, false);
             }
             // Job already exists
-<span class="nc" id="L190">            return jobDto;</span>
+<span class="nc" id="L191">            return jobDto;</span>
         }
     }
 
     protected String getProductName(
             final GenericMessageDto&lt;LevelProductDto&gt; dto) {
-<span class="fc" id="L196">        return dto.getBody().getProductName();</span>
+<span class="fc" id="L197">        return dto.getBody().getProductName();</span>
     }
 
     @Override
     protected String getTaskForFunctionalLog() {
-<span class="fc" id="L201">        return &quot;L1JobGeneration&quot;;</span>
+<span class="fc" id="L202">        return &quot;L1JobGeneration&quot;;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

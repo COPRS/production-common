@@ -59,12 +59,12 @@ public class JobOrder {
 	 * @param obj
 	 */
 	public JobOrder(final JobOrder obj, final ApplicationLevel applicationLevel) {
-<span class="fc" id="L62">		this();</span>
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">		this.conf = applicationLevel == ApplicationLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());</span>
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">		this.procs.addAll(obj.getProcs().stream().filter(item -&gt; item != null).map(item -&gt; new JobOrderProc(item))</span>
-<span class="fc" id="L65">				.collect(Collectors.toList()));</span>
-<span class="fc" id="L66">		this.nbProcs = this.procs.size();</span>
-<span class="fc" id="L67">	}</span>
+<span class="nc" id="L62">		this();</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		this.conf = applicationLevel == ApplicationLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		this.procs.addAll(obj.getProcs().stream().filter(item -&gt; item != null).map(item -&gt; new JobOrderProc(item))</span>
+<span class="nc" id="L65">				.collect(Collectors.toList()));</span>
+<span class="nc" id="L66">		this.nbProcs = this.procs.size();</span>
+<span class="nc" id="L67">	}</span>
 
 	/**
 	 * @return the conf

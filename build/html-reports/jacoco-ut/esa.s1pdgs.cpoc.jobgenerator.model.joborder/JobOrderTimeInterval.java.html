@@ -72,13 +72,13 @@ public class JobOrderTimeInterval {
 	 */
 	public JobOrderTimeInterval(final String start, final String stop, final String fileName,
 			final DateTimeFormatter formatInputs) {
-<span class="fc" id="L75">		this();</span>
-<span class="fc" id="L76">		LocalDateTime startDate = LocalDateTime.parse(start, formatInputs);</span>
-<span class="fc" id="L77">		this.start = startDate.format(DATE_FORMATTER);</span>
-<span class="fc" id="L78">		LocalDateTime stopDate = LocalDateTime.parse(stop, formatInputs);</span>
-<span class="fc" id="L79">		this.stop = stopDate.format(DATE_FORMATTER);</span>
-<span class="fc" id="L80">		this.fileName = fileName;</span>
-<span class="fc" id="L81">	}</span>
+<span class="nc" id="L75">		this();</span>
+<span class="nc" id="L76">		LocalDateTime startDate = LocalDateTime.parse(start, formatInputs);</span>
+<span class="nc" id="L77">		this.start = startDate.format(DATE_FORMATTER);</span>
+<span class="nc" id="L78">		LocalDateTime stopDate = LocalDateTime.parse(stop, formatInputs);</span>
+<span class="nc" id="L79">		this.stop = stopDate.format(DATE_FORMATTER);</span>
+<span class="nc" id="L80">		this.fileName = fileName;</span>
+<span class="nc" id="L81">	}</span>
 
 	/**
 	 * Clone

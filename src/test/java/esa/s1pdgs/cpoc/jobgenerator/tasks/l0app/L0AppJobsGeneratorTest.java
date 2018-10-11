@@ -201,7 +201,7 @@ public class L0AppJobsGeneratorTest {
 				}
 				return null;
 			}).when(this.metadataService).search(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyString(),
-					Mockito.anyInt());
+					Mockito.anyInt(), Mockito.anyString());
 		} catch (JobGenMetadataException e) {
 			fail(e.getMessage());
 		}

@@ -21,8 +21,8 @@ public class SearchMetadataResultTest {
 	 */
 	@Test
 	public void testToString() {
-		SearchMetadataQuery query = new SearchMetadataQuery(12, "retrievalMode", 0.0, 1.5, "productType", ProductFamily.L0_SLICE,"NRT");
-		SearchMetadataQuery query2 = new SearchMetadataQuery(1, "retrievalode", 2.1, 1.3, "productype", ProductFamily.L0_SLICE,"NRT");
+		SearchMetadataQuery query = new SearchMetadataQuery(12, "retrievalMode", 0.0, 1.5, "productType", ProductFamily.L0_SLICE);
+		SearchMetadataQuery query2 = new SearchMetadataQuery(1, "retrievalode", 2.1, 1.3, "productype", ProductFamily.L0_SLICE);
 		SearchMetadata result = new SearchMetadata("name", "type", "kobs", "start", "stop");
 
 		SearchMetadataResult obj = new SearchMetadataResult(query);

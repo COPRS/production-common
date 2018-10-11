@@ -294,9 +294,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                     SearchMetadataQuery query = new SearchMetadataQuery(
                             counter.incrementAndGet(), k.getRetrievalMode(),
                             k.getDeltaTime0(), k.getDeltaTime1(), fileType,
-                            this.jobGeneratorSettings.getInputfamilies().get(fileType),
-                            //TODO correct
-                            ProductFamily.L0_SEGMENT.equals(this.jobGeneratorSettings.getInputfamilies().get(fileType))?"FAST":"NRT");
+                            this.jobGeneratorSettings.getInputfamilies().get(fileType));
                     this.metadataSearchQueries.put(counter.get(), query);
                     v.forEach(alt -> {
                         alt.setIdSearchMetadataQuery(counter.get());
@@ -523,7 +521,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                             job.getAppDataJob().getProduct().getStartTime(),
                             job.getAppDataJob().getProduct().getStopTime(),
                             job.getAppDataJob().getProduct().getSatelliteId(),
-                            job.getAppDataJob().getProduct().getInsConfId());
+                            job.getAppDataJob().getProduct().getInsConfId(),
+                            job.getAppDataJob().getProduct().getProcessMode());
                     if (file != null) {
                         v.setResult(file);
                     }

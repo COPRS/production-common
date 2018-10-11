@@ -270,7 +270,7 @@ public class MetadataService {
 	}
 
 	public SearchMetadata search(final SearchMetadataQuery query, final Date t0, final Date t1,
-			final String satelliteId, final int instrumentConfigurationId) 
+			final String satelliteId, final int instrumentConfigurationId, final String processMode) 
 			        throws JobGenMetadataException {
 		for (int retries = 0;; retries++) {
 			try {
@@ -278,10 +278,12 @@ public class MetadataService {
 				String uri = this.uriSearch + "/" + query.getProductFamily().toString() + "/search";
 				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 						.queryParam("productType", query.getProductType()).queryParam("mode", query.getRetrievalMode())
-						.queryParam("processMode", query.getMode())
 						.queryParam("t0", format.format(t0)).queryParam("t1", format.format(t1))
 						.queryParam("dt0", query.getDeltaTime0()).queryParam("dt1", query.getDeltaTime1())
 						.queryParam("satellite", satelliteId);
+				if (processMode != null) {
+				    builder.queryParam("processMode", processMode);
+				}
 				if (instrumentConfigurationId != -1) {
 					builder.queryParam("insConfId", instrumentConfigurationId);
 				}

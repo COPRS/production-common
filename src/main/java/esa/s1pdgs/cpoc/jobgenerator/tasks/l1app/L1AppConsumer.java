@@ -165,6 +165,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             productDto.setAcquisition(acquisition);
             productDto.setMissionId(missionId);
             productDto.setProductName(leveldto.getProductName());
+            productDto.setProcessMode(leveldto.getMode());
             productDto.setSatelliteId(satelliteId);
             productDto.setStartTime(DateUtils
                     .convertWithSimpleDateFormat(startTime, DATE_FORMAT));

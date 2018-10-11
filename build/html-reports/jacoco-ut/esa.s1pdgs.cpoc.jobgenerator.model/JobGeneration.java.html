@@ -73,14 +73,14 @@ public class JobGeneration&lt;T&gt; {
     public void updateAppDataJob(final AppDataJobDto&lt;T&gt; appDataJob, final String taskTable) {
 <span class="fc" id="L74">        this.appDataJob = appDataJob;</span>
 <span class="fc" id="L75">        List&lt;AppDataJobGenerationDto&gt; generations = appDataJob.getGenerations();</span>
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(generations)) {</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (CollectionUtils.isEmpty(generations)) {</span>
 <span class="fc" id="L77">            generation = new AppDataJobGenerationDto();</span>
 <span class="fc" id="L78">            generation.setTaskTable(taskTable);</span>
         } else {
-<span class="pc bpc" id="L80" title="1 of 2 branches missed.">            for (AppDataJobGenerationDto jobGen : generations) {</span>
-<span class="pc bpc" id="L81" title="1 of 2 branches missed.">                if (taskTable.equals(jobGen.getTaskTable())) {</span>
-<span class="fc" id="L82">                    generation = jobGen;</span>
-<span class="fc" id="L83">                    break;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            for (AppDataJobGenerationDto jobGen : generations) {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                if (taskTable.equals(jobGen.getTaskTable())) {</span>
+<span class="nc" id="L82">                    generation = jobGen;</span>
+<span class="nc" id="L83">                    break;</span>
                 }
 <span class="nc" id="L85">            }</span>
         }
@@ -98,8 +98,8 @@ public class JobGeneration&lt;T&gt; {
      *            the appDataJob to set
      */
     public void setAppDataJob(final AppDataJobDto&lt;T&gt; appDataJob) {
-<span class="fc" id="L101">        this.appDataJob = appDataJob;</span>
-<span class="fc" id="L102">    }</span>
+<span class="nc" id="L101">        this.appDataJob = appDataJob;</span>
+<span class="nc" id="L102">    }</span>
 
     /**
      * @return the generation

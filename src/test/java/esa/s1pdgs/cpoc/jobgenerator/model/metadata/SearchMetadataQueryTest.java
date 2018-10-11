@@ -20,7 +20,7 @@ public class SearchMetadataQueryTest {
 	 */
 	@Test
 	public void testToString() {
-		SearchMetadataQuery obj = new SearchMetadataQuery(12, "retrievalMode", 0.0, 1.5, "productType", ProductFamily.L0_SLICE, "NRT");
+		SearchMetadataQuery obj = new SearchMetadataQuery(12, "retrievalMode", 0.0, 1.5, "productType", ProductFamily.L0_SLICE);
 		
 		String str = obj.toString();
 		assertTrue(str.contains("identifier: 12"));
@@ -29,7 +29,6 @@ public class SearchMetadataQueryTest {
 		assertTrue(str.contains("deltaTime1: 1.5"));
 		assertTrue(str.contains("productType: productType"));
         assertTrue(str.contains("productFamily: L0_SLICE"));
-        assertTrue(str.contains("mode: NRT"));
 		
 		obj.setIdentifier(1);
 		obj.setRetrievalMode("retrievalode");
@@ -37,7 +36,6 @@ public class SearchMetadataQueryTest {
 		obj.setDeltaTime1(1.2);
 		obj.setProductType("productype");
 		obj.setProductFamily(ProductFamily.L1_SLICE);
-		obj.setMode("FAST");
 		
 		str = obj.toString();
 		assertTrue(str.contains("identifier: 1"));
@@ -46,10 +44,9 @@ public class SearchMetadataQueryTest {
 		assertTrue(str.contains("deltaTime1: 1.2"));
 		assertTrue(str.contains("productType: productype"));
         assertTrue(str.contains("productFamily: L1_SLICE"));
-        assertTrue(str.contains("mode: FAST"));
 		
 		String log = obj.toLogMessage();
-		assertEquals("1|retrievalode|2.0|1.2|productype|L1_SLICE|FAST", log);
+		assertEquals("1|retrievalode|2.0|1.2|productype|L1_SLICE", log);
 	}
 
 	/**

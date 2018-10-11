@@ -100,35 +100,35 @@ public class L1AppJobsGenerator
     @Override
     protected void customJobOrder(final JobGeneration&lt;LevelProductDto&gt; job) {
         // Rewrite job order sensing time
-<span class="fc" id="L103">        DateTimeFormatter formatterJobOrder =</span>
-<span class="fc" id="L104">                DateTimeFormatter.ofPattern(JobOrderSensingTime.DATE_FORMAT);</span>
-<span class="fc" id="L105">        DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;</span>
-<span class="fc" id="L106">        LocalDateTime startDate = LocalDateTime.parse(</span>
-<span class="fc" id="L107">                job.getAppDataJob().getProduct().getSegmentStartDate(),</span>
+<span class="nc" id="L103">        DateTimeFormatter formatterJobOrder =</span>
+<span class="nc" id="L104">                DateTimeFormatter.ofPattern(JobOrderSensingTime.DATE_FORMAT);</span>
+<span class="nc" id="L105">        DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;</span>
+<span class="nc" id="L106">        LocalDateTime startDate = LocalDateTime.parse(</span>
+<span class="nc" id="L107">                job.getAppDataJob().getProduct().getSegmentStartDate(),</span>
                 formatterProduct);
-<span class="fc" id="L109">        String jobOrderStart = startDate.format(formatterJobOrder);</span>
-<span class="fc" id="L110">        LocalDateTime stopDate = LocalDateTime.parse(</span>
-<span class="fc" id="L111">                job.getAppDataJob().getProduct().getSegmentStopDate(),</span>
+<span class="nc" id="L109">        String jobOrderStart = startDate.format(formatterJobOrder);</span>
+<span class="nc" id="L110">        LocalDateTime stopDate = LocalDateTime.parse(</span>
+<span class="nc" id="L111">                job.getAppDataJob().getProduct().getSegmentStopDate(),</span>
                 formatterProduct);
-<span class="fc" id="L113">        String jobOrderStop = stopDate.format(formatterJobOrder);</span>
-<span class="fc" id="L114">        job.getJobOrder().getConf().setSensingTime(</span>
+<span class="nc" id="L113">        String jobOrderStop = stopDate.format(formatterJobOrder);</span>
+<span class="nc" id="L114">        job.getJobOrder().getConf().setSensingTime(</span>
                 new JobOrderSensingTime(jobOrderStart, jobOrderStop));
 
-<span class="fc" id="L117">        this.updateProcParam(job.getJobOrder(), &quot;Mission_Id&quot;,</span>
-<span class="fc" id="L118">                job.getAppDataJob().getProduct().getMissionId()</span>
-<span class="fc" id="L119">                        + job.getAppDataJob().getProduct().getSatelliteId());</span>
-<span class="fc" id="L120">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Number&quot;,</span>
-<span class="fc" id="L121">                &quot;&quot; + job.getAppDataJob().getProduct().getNumberSlice());</span>
-<span class="fc" id="L122">        this.updateProcParam(job.getJobOrder(), &quot;Total_Number_Of_Slices&quot;,</span>
-<span class="fc" id="L123">                &quot;&quot; + job.getAppDataJob().getProduct().getTotalNbOfSlice());</span>
-<span class="fc" id="L124">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Overlap&quot;,</span>
-<span class="fc" id="L125">                &quot;&quot; + jobGeneratorSettings.getTypeOverlap().get(</span>
-<span class="fc" id="L126">                        job.getAppDataJob().getProduct().getAcquisition()));</span>
-<span class="fc" id="L127">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Length&quot;,</span>
-<span class="fc" id="L128">                &quot;&quot; + jobGeneratorSettings.getTypeSliceLength().get(</span>
-<span class="fc" id="L129">                        job.getAppDataJob().getProduct().getAcquisition()));</span>
-<span class="fc" id="L130">        this.updateProcParam(job.getJobOrder(), &quot;Slicing_Flag&quot;, &quot;TRUE&quot;);</span>
-<span class="fc" id="L131">    }</span>
+<span class="nc" id="L117">        this.updateProcParam(job.getJobOrder(), &quot;Mission_Id&quot;,</span>
+<span class="nc" id="L118">                job.getAppDataJob().getProduct().getMissionId()</span>
+<span class="nc" id="L119">                        + job.getAppDataJob().getProduct().getSatelliteId());</span>
+<span class="nc" id="L120">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Number&quot;,</span>
+<span class="nc" id="L121">                &quot;&quot; + job.getAppDataJob().getProduct().getNumberSlice());</span>
+<span class="nc" id="L122">        this.updateProcParam(job.getJobOrder(), &quot;Total_Number_Of_Slices&quot;,</span>
+<span class="nc" id="L123">                &quot;&quot; + job.getAppDataJob().getProduct().getTotalNbOfSlice());</span>
+<span class="nc" id="L124">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Overlap&quot;,</span>
+<span class="nc" id="L125">                &quot;&quot; + jobGeneratorSettings.getTypeOverlap().get(</span>
+<span class="nc" id="L126">                        job.getAppDataJob().getProduct().getAcquisition()));</span>
+<span class="nc" id="L127">        this.updateProcParam(job.getJobOrder(), &quot;Slice_Length&quot;,</span>
+<span class="nc" id="L128">                &quot;&quot; + jobGeneratorSettings.getTypeSliceLength().get(</span>
+<span class="nc" id="L129">                        job.getAppDataJob().getProduct().getAcquisition()));</span>
+<span class="nc" id="L130">        this.updateProcParam(job.getJobOrder(), &quot;Slicing_Flag&quot;, &quot;TRUE&quot;);</span>
+<span class="nc" id="L131">    }</span>
 
     /**
      * Update or create a proc param in the job order
@@ -160,7 +160,7 @@ public class L1AppJobsGenerator
             final LevelJobDto dto) {
         // NOTHING TO DO
 
-<span class="fc" id="L163">    }</span>
+<span class="nc" id="L163">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
