@@ -91,22 +91,27 @@ public class AppDataJobProduct {
      * Stop date of the segment
      */
     private String segmentStopDate;
+    
+    /**
+     * Process mode
+     */
+    private String processMode;
 
     /**
      * 
      */
     public AppDataJobProduct() {
-<span class="fc" id="L99">        super();</span>
-<span class="fc" id="L100">        this.raws1 = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L101">        this.raws2 = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L102">        this.insConfId = -1;</span>
-<span class="fc" id="L103">    }</span>
+<span class="fc" id="L104">        super();</span>
+<span class="fc" id="L105">        this.raws1 = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L106">        this.raws2 = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L107">        this.insConfId = -1;</span>
+<span class="fc" id="L108">    }</span>
 
     /**
      * @return the sessionId
      */
     public String getSessionId() {
-<span class="fc" id="L109">        return sessionId;</span>
+<span class="fc" id="L114">        return sessionId;</span>
     }
 
     /**
@@ -114,14 +119,14 @@ public class AppDataJobProduct {
      *            the sessionId to set
      */
     public void setSessionId(final String sessionId) {
-<span class="fc" id="L117">        this.sessionId = sessionId;</span>
-<span class="fc" id="L118">    }</span>
+<span class="fc" id="L122">        this.sessionId = sessionId;</span>
+<span class="fc" id="L123">    }</span>
 
     /**
      * @return the productName
      */
     public String getProductName() {
-<span class="fc" id="L124">        return productName;</span>
+<span class="fc" id="L129">        return productName;</span>
     }
 
     /**
@@ -129,14 +134,14 @@ public class AppDataJobProduct {
      *            the productName to set
      */
     public void setProductName(final String productName) {
-<span class="fc" id="L132">        this.productName = productName;</span>
-<span class="fc" id="L133">    }</span>
+<span class="fc" id="L137">        this.productName = productName;</span>
+<span class="fc" id="L138">    }</span>
 
     /**
      * @return the satelliteId
      */
     public String getSatelliteId() {
-<span class="fc" id="L139">        return satelliteId;</span>
+<span class="fc" id="L144">        return satelliteId;</span>
     }
 
     /**
@@ -144,14 +149,14 @@ public class AppDataJobProduct {
      *            the satelliteId to set
      */
     public void setSatelliteId(final String satelliteId) {
-<span class="fc" id="L147">        this.satelliteId = satelliteId;</span>
-<span class="fc" id="L148">    }</span>
+<span class="fc" id="L152">        this.satelliteId = satelliteId;</span>
+<span class="fc" id="L153">    }</span>
 
     /**
      * @return the missionId
      */
     public String getMissionId() {
-<span class="fc" id="L154">        return missionId;</span>
+<span class="fc" id="L159">        return missionId;</span>
     }
 
     /**
@@ -159,14 +164,14 @@ public class AppDataJobProduct {
      *            the missionId to set
      */
     public void setMissionId(final String missionId) {
-<span class="fc" id="L162">        this.missionId = missionId;</span>
-<span class="fc" id="L163">    }</span>
+<span class="fc" id="L167">        this.missionId = missionId;</span>
+<span class="fc" id="L168">    }</span>
 
     /**
      * @return the startTime
      */
     public Date getStartTime() {
-<span class="fc" id="L169">        return startTime;</span>
+<span class="fc" id="L174">        return startTime;</span>
     }
 
     /**
@@ -174,14 +179,14 @@ public class AppDataJobProduct {
      *            the startTime to set
      */
     public void setStartTime(final Date startTime) {
-<span class="fc" id="L177">        this.startTime = startTime;</span>
-<span class="fc" id="L178">    }</span>
+<span class="fc" id="L182">        this.startTime = startTime;</span>
+<span class="fc" id="L183">    }</span>
 
     /**
      * @return the stopTime
      */
     public Date getStopTime() {
-<span class="fc" id="L184">        return stopTime;</span>
+<span class="fc" id="L189">        return stopTime;</span>
     }
 
     /**
@@ -189,14 +194,14 @@ public class AppDataJobProduct {
      *            the stopTime to set
      */
     public void setStopTime(final Date stopTime) {
-<span class="fc" id="L192">        this.stopTime = stopTime;</span>
-<span class="fc" id="L193">    }</span>
+<span class="fc" id="L197">        this.stopTime = stopTime;</span>
+<span class="fc" id="L198">    }</span>
 
     /**
      * @return the insConfId
      */
     public int getInsConfId() {
-<span class="fc" id="L199">        return insConfId;</span>
+<span class="fc" id="L204">        return insConfId;</span>
     }
 
     /**
@@ -204,14 +209,14 @@ public class AppDataJobProduct {
      *            the insConfId to set
      */
     public void setInsConfId(final int insConfId) {
-<span class="fc" id="L207">        this.insConfId = insConfId;</span>
-<span class="fc" id="L208">    }</span>
+<span class="fc" id="L212">        this.insConfId = insConfId;</span>
+<span class="fc" id="L213">    }</span>
 
     /**
      * @return the productType
      */
     public String getProductType() {
-<span class="fc" id="L214">        return productType;</span>
+<span class="fc" id="L219">        return productType;</span>
     }
 
     /**
@@ -219,14 +224,14 @@ public class AppDataJobProduct {
      *            the productType to set
      */
     public void setProductType(final String productType) {
-<span class="fc" id="L222">        this.productType = productType;</span>
-<span class="fc" id="L223">    }</span>
+<span class="fc" id="L227">        this.productType = productType;</span>
+<span class="fc" id="L228">    }</span>
 
     /**
      * @return the raws1
      */
     public List&lt;AppDataJobFile&gt; getRaws1() {
-<span class="fc" id="L229">        return raws1;</span>
+<span class="fc" id="L234">        return raws1;</span>
     }
 
     /**
@@ -234,14 +239,14 @@ public class AppDataJobProduct {
      *            the raws1 to set
      */
     public void setRaws1(final List&lt;AppDataJobFile&gt; raws1) {
-<span class="fc" id="L237">        this.raws1 = raws1;</span>
-<span class="fc" id="L238">    }</span>
+<span class="fc" id="L242">        this.raws1 = raws1;</span>
+<span class="fc" id="L243">    }</span>
 
     /**
      * @return the raws2
      */
     public List&lt;AppDataJobFile&gt; getRaws2() {
-<span class="fc" id="L244">        return raws2;</span>
+<span class="fc" id="L249">        return raws2;</span>
     }
 
     /**
@@ -249,14 +254,14 @@ public class AppDataJobProduct {
      *            the raws2 to set
      */
     public void setRaws2(final List&lt;AppDataJobFile&gt; raws2) {
-<span class="fc" id="L252">        this.raws2 = raws2;</span>
-<span class="fc" id="L253">    }</span>
+<span class="fc" id="L257">        this.raws2 = raws2;</span>
+<span class="fc" id="L258">    }</span>
 
     /**
      * @return the acquisition
      */
     public String getAcquisition() {
-<span class="fc" id="L259">        return acquisition;</span>
+<span class="fc" id="L264">        return acquisition;</span>
     }
 
     /**
@@ -264,14 +269,14 @@ public class AppDataJobProduct {
      *            the acquisition to set
      */
     public void setAcquisition(final String acquisition) {
-<span class="fc" id="L267">        this.acquisition = acquisition;</span>
-<span class="fc" id="L268">    }</span>
+<span class="fc" id="L272">        this.acquisition = acquisition;</span>
+<span class="fc" id="L273">    }</span>
 
     /**
      * @return the dataTakeId
      */
     public String getDataTakeId() {
-<span class="fc" id="L274">        return dataTakeId;</span>
+<span class="fc" id="L279">        return dataTakeId;</span>
     }
 
     /**
@@ -279,14 +284,14 @@ public class AppDataJobProduct {
      *            the dataTakeId to set
      */
     public void setDataTakeId(final String dataTakeId) {
-<span class="fc" id="L282">        this.dataTakeId = dataTakeId;</span>
-<span class="fc" id="L283">    }</span>
+<span class="fc" id="L287">        this.dataTakeId = dataTakeId;</span>
+<span class="fc" id="L288">    }</span>
 
     /**
      * @return the numberSlice
      */
     public int getNumberSlice() {
-<span class="fc" id="L289">        return numberSlice;</span>
+<span class="fc" id="L294">        return numberSlice;</span>
     }
 
     /**
@@ -294,14 +299,14 @@ public class AppDataJobProduct {
      *            the numberSlice to set
      */
     public void setNumberSlice(final int numberSlice) {
-<span class="fc" id="L297">        this.numberSlice = numberSlice;</span>
-<span class="fc" id="L298">    }</span>
+<span class="fc" id="L302">        this.numberSlice = numberSlice;</span>
+<span class="fc" id="L303">    }</span>
 
     /**
      * @return the totalNbOfSlice
      */
     public int getTotalNbOfSlice() {
-<span class="fc" id="L304">        return totalNbOfSlice;</span>
+<span class="fc" id="L309">        return totalNbOfSlice;</span>
     }
 
     /**
@@ -309,14 +314,14 @@ public class AppDataJobProduct {
      *            the totalNbOfSlice to set
      */
     public void setTotalNbOfSlice(final int totalNbOfSlice) {
-<span class="fc" id="L312">        this.totalNbOfSlice = totalNbOfSlice;</span>
-<span class="fc" id="L313">    }</span>
+<span class="fc" id="L317">        this.totalNbOfSlice = totalNbOfSlice;</span>
+<span class="fc" id="L318">    }</span>
 
     /**
      * @return the segmentStartDate
      */
     public String getSegmentStartDate() {
-<span class="fc" id="L319">        return segmentStartDate;</span>
+<span class="fc" id="L324">        return segmentStartDate;</span>
     }
 
     /**
@@ -324,14 +329,14 @@ public class AppDataJobProduct {
      *            the segmentStartDate to set
      */
     public void setSegmentStartDate(final String segmentStartDate) {
-<span class="fc" id="L327">        this.segmentStartDate = segmentStartDate;</span>
-<span class="fc" id="L328">    }</span>
+<span class="fc" id="L332">        this.segmentStartDate = segmentStartDate;</span>
+<span class="fc" id="L333">    }</span>
 
     /**
      * @return the segmentStopDate
      */
     public String getSegmentStopDate() {
-<span class="fc" id="L334">        return segmentStopDate;</span>
+<span class="fc" id="L339">        return segmentStopDate;</span>
     }
 
     /**
@@ -339,20 +344,34 @@ public class AppDataJobProduct {
      *            the segmentStopDate to set
      */
     public void setSegmentStopDate(final String segmentStopDate) {
-<span class="fc" id="L342">        this.segmentStopDate = segmentStopDate;</span>
-<span class="fc" id="L343">    }</span>
+<span class="fc" id="L347">        this.segmentStopDate = segmentStopDate;</span>
+<span class="fc" id="L348">    }</span>
+
+    /**
+     * @return the processMode
+     */
+    public String getProcessMode() {
+<span class="fc" id="L354">        return processMode;</span>
+    }
+
+    /**
+     * @param processMode the processMode to set
+     */
+    public void setProcessMode(String processMode) {
+<span class="fc" id="L361">        this.processMode = processMode;</span>
+<span class="fc" id="L362">    }</span>
 
     /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-<span class="fc" id="L350">        return String.format(</span>
-                &quot;{sessionId: %s, productName: %s, satelliteId: %s, missionId: %s, startTime: %s, stopTime: %s, insConfId: %s, productType: %s, raws1: %s, raws2: %s, acquisition: %s, dataTakeId: %s, numberSlice: %s, totalNbOfSlice: %s, segmentStartDate: %s, segmentStopDate: %s}&quot;,
+<span class="fc" id="L369">        return String.format(</span>
+                &quot;{sessionId: %s, productName: %s, satelliteId: %s, missionId: %s, startTime: %s, stopTime: %s, insConfId: %s, productType: %s, raws1: %s, raws2: %s, acquisition: %s, dataTakeId: %s, numberSlice: %s, totalNbOfSlice: %s, segmentStartDate: %s, segmentStopDate: %s, processMode: %s}&quot;,
                 sessionId, productName, satelliteId, missionId, startTime,
-<span class="fc" id="L353">                stopTime, insConfId, productType, raws1, raws2, acquisition,</span>
-<span class="fc" id="L354">                dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate,</span>
-                segmentStopDate);
+<span class="fc" id="L372">                stopTime, insConfId, productType, raws1, raws2, acquisition,</span>
+<span class="fc" id="L373">                dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate,</span>
+                segmentStopDate, processMode);
     }
 
     /**
@@ -360,10 +379,10 @@ public class AppDataJobProduct {
      */
     @Override
     public int hashCode() {
-<span class="fc" id="L363">        return Objects.hash(sessionId, productName, satelliteId, missionId, startTime,</span>
-<span class="fc" id="L364">                stopTime, insConfId, productType, raws1, raws2, acquisition,</span>
-<span class="fc" id="L365">                dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate,</span>
-                segmentStopDate);
+<span class="fc" id="L382">        return Objects.hash(sessionId, productName, satelliteId, missionId, startTime,</span>
+<span class="fc" id="L383">                stopTime, insConfId, productType, raws1, raws2, acquisition,</span>
+<span class="fc" id="L384">                dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate,</span>
+                segmentStopDate, processMode);
     }
 
     /**
@@ -372,30 +391,31 @@ public class AppDataJobProduct {
     @Override
     public boolean equals(final Object obj) {
         boolean ret;
-<span class="fc bfc" id="L375" title="All 2 branches covered.">        if (this == obj) {</span>
-<span class="fc" id="L376">            ret = true;</span>
-<span class="fc bfc" id="L377" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L378">            ret = false;</span>
+<span class="fc bfc" id="L394" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L395">            ret = true;</span>
+<span class="fc bfc" id="L396" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L397">            ret = false;</span>
         } else {
-<span class="fc" id="L380">            AppDataJobProduct other = (AppDataJobProduct) obj;</span>
-<span class="fc bfc" id="L381" title="All 2 branches covered.">            ret = Objects.equals(sessionId, other.sessionId)</span>
-<span class="fc bfc" id="L382" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productName, other.productName)</span>
-<span class="fc bfc" id="L383" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(satelliteId, other.satelliteId)</span>
-<span class="fc bfc" id="L384" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(missionId, other.missionId)</span>
-<span class="fc bfc" id="L385" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(startTime, other.startTime)</span>
-<span class="fc bfc" id="L386" title="All 4 branches covered.">                    &amp;&amp; Objects.equals(stopTime, other.stopTime)</span>
+<span class="fc" id="L399">            AppDataJobProduct other = (AppDataJobProduct) obj;</span>
+<span class="fc bfc" id="L400" title="All 2 branches covered.">            ret = Objects.equals(sessionId, other.sessionId)</span>
+<span class="fc bfc" id="L401" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productName, other.productName)</span>
+<span class="fc bfc" id="L402" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(satelliteId, other.satelliteId)</span>
+<span class="fc bfc" id="L403" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(missionId, other.missionId)</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(startTime, other.startTime)</span>
+<span class="fc bfc" id="L405" title="All 4 branches covered.">                    &amp;&amp; Objects.equals(stopTime, other.stopTime)</span>
                     &amp;&amp; insConfId == other.insConfId
-<span class="fc bfc" id="L388" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productType, other.productType)</span>
-<span class="fc bfc" id="L389" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(raws1, other.raws1)</span>
-<span class="fc bfc" id="L390" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(raws2, other.raws2)</span>
-<span class="fc bfc" id="L391" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(acquisition, other.acquisition)</span>
-<span class="fc bfc" id="L392" title="All 6 branches covered.">                    &amp;&amp; Objects.equals(dataTakeId, other.dataTakeId)</span>
+<span class="fc bfc" id="L407" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productType, other.productType)</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(raws1, other.raws1)</span>
+<span class="fc bfc" id="L409" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(raws2, other.raws2)</span>
+<span class="fc bfc" id="L410" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(acquisition, other.acquisition)</span>
+<span class="fc bfc" id="L411" title="All 6 branches covered.">                    &amp;&amp; Objects.equals(dataTakeId, other.dataTakeId)</span>
                     &amp;&amp; numberSlice == other.numberSlice
                     &amp;&amp; totalNbOfSlice == other.totalNbOfSlice
-<span class="fc bfc" id="L395" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(segmentStartDate, other.segmentStartDate)</span>
-<span class="fc bfc" id="L396" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(segmentStopDate, other.segmentStopDate);</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(segmentStartDate, other.segmentStartDate)</span>
+<span class="fc bfc" id="L415" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(segmentStopDate, other.segmentStopDate)</span>
+<span class="fc bfc" id="L416" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(processMode, other.processMode);</span>
         }
-<span class="fc" id="L398">        return ret;</span>
+<span class="fc" id="L418">        return ret;</span>
     }
 
 }

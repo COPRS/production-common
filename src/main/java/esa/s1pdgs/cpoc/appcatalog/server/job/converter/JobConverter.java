@@ -161,6 +161,7 @@ public class JobConverter<T> {
             jobProductDto.setSegmentStartDate(jobProductDb.getSegmentStartDate());
             jobProductDto.setSegmentStopDate(jobProductDb.getSegmentStopDate());
             jobProductDto.setTotalNbOfSlice(jobProductDb.getTotalNbOfSlice());
+            jobProductDto.setProcessMode(jobProductDb.getProcessMode());
             if (!CollectionUtils.isEmpty(jobProductDb.getRaws1())) {
                 for (AppDataJobFile fileDb : jobProductDb.getRaws1()) {
                     jobProductDto.getRaws1()
@@ -203,6 +204,7 @@ public class JobConverter<T> {
             jobProductDb.setSegmentStartDate(jobProductDto.getSegmentStartDate());
             jobProductDb.setSegmentStopDate(jobProductDto.getSegmentStopDate());
             jobProductDb.setTotalNbOfSlice(jobProductDto.getTotalNbOfSlice());
+            jobProductDb.setProcessMode(jobProductDto.getProcessMode());
             if (!CollectionUtils.isEmpty(jobProductDto.getRaws1())) {
                 for (AppDataJobFileDto fileDto : jobProductDto.getRaws1()) {
                     jobProductDb.getRaws1()

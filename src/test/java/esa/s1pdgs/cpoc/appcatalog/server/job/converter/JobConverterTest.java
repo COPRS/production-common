@@ -93,6 +93,7 @@ public class JobConverterTest {
             productDb.setTotalNbOfSlice(15);
             productDb.setStartTime(startProduct);
             productDb.setStopTime(stopProduct);
+            productDb.setProcessMode("FAST");
             if (!productRaw1Null) {
                 productDb.setRaws1(
                         Arrays.asList(new AppDataJobFile("file1", "key1"),
@@ -144,6 +145,7 @@ public class JobConverterTest {
             productDto.setTotalNbOfSlice(15);
             productDto.setStartTime(startProduct);
             productDto.setStopTime(stopProduct);
+            productDto.setProcessMode("FAST");
             if (!productRaw1Null) {
                 productDto.setRaws1(
                         Arrays.asList(new AppDataJobFileDto("file1", "key1"),
