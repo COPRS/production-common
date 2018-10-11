@@ -5,9 +5,9 @@ S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.status,AppStatus,
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.status.dto,StatusPerCategoryDto,0,152,0,14,0,32,0,20,0,13
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.status.dto,GlobalStatusDto,0,102,0,10,0,22,0,14,0,9
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest,RestExceptionHandler,0,50,0,2,0,12,0,4,0,3
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest,L0SliceMetadataController,10,385,3,21,2,84,3,13,0,4
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest,L0SliceMetadataController,5,370,2,20,1,79,2,13,0,4
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest,ErrorResponse,0,17,0,0,0,7,0,5,0,5
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest,SearchMetadataController,0,117,0,4,0,29,0,6,0,4
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest,SearchMetadataController,0,120,0,4,0,29,0,6,0,4
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest,EdrsSessionMetadataController,0,98,0,2,0,23,0,4,0,3
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog,RequestLoggingFilterConfig,0,30,0,0,0,10,0,2,0,2
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog,Application,0,8,0,0,0,3,0,2,0,2
@@ -17,30 +17,31 @@ S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es.model,EdrsSess
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es.model,L0SliceMetadata,2,156,1,17,1,34,1,18,0,10
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es.model,SearchMetadata,0,3,0,0,0,2,0,1,0,1
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.model,L0OutputFileDescriptor,2,319,1,53,1,67,1,42,0,16
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.model,AbstractFileDescriptor,8,265,1,57,3,70,3,43,2,15
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.model,AbstractFileDescriptor,8,328,1,69,3,94,3,53,2,19
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.model,ConfigFileDescriptor,2,155,1,21,1,32,1,18,0,8
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.model,L1OutputFileDescriptor,2,319,1,53,1,67,1,42,0,16
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.model,EdrsSessionFileDescriptor,5,170,1,19,2,35,2,18,1,9
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.obs,ObsService,2,143,2,13,1,40,2,13,0,5
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.obs,ObsService,2,146,2,14,1,42,2,14,0,5
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.obs,ObsConfig,0,5,0,0,0,2,0,2,0,2
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.obs,ObsService.new Object() {...},6,41,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.obs,ObsService.new Object() {...},7,47,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsClientConfiguration,0,35,0,0,0,7,0,2,0,2
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,ElasticsearchDAO,21,3,0,0,3,1,3,1,3,1
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsServices,11,670,6,46,2,139,6,30,0,10
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsServices,51,774,11,57,11,160,11,33,0,10
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsClientConfiguration.new RestClientBuilder.RequestConfigCallback() {...},0,16,0,0,0,3,0,2,0,2
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,FileDescriptorBuilder,16,590,4,32,1,126,5,19,1,5
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,FileDescriptorBuilder,42,783,11,39,6,168,12,20,1,6
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,MetadataBuilder.new Object() {...},5,39,0,0,0,2,0,1,0,1
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,ExtractMetadata,104,1839,36,60,19,274,34,30,0,16
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,MetadataBuilder,8,143,1,8,1,37,1,13,0,8
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,ExtractMetadata,121,1549,23,31,23,246,21,23,0,17
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,MetadataBuilder,8,155,1,8,1,40,1,14,0,9
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest.dto,L0AcnMetadataDto,2,156,1,17,1,39,1,19,0,11
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest.dto,EdrsSessionMetadataDto,0,21,0,0,0,5,0,2,0,2
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest.dto,MetadataDto,33,265,0,46,13,55,6,33,6,10
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest.dto,L0SliceMetadataDto,2,156,1,17,1,39,1,19,0,11
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest.dto,SearchMetadataDto,0,21,0,0,0,5,0,2,0,2
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.mqi,MqiConfiguration,0,68,0,0,0,13,0,5,0,5
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.mqi,MqiConfiguration,0,82,0,0,0,15,0,6,0,6
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,LevelSegmentsExtractor,3,147,0,6,2,32,1,9,1,6
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,MetadataExtractorConfig,0,24,0,0,0,11,0,7,0,7
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,GenericExtractor,154,183,5,3,30,47,3,6,0,5
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,AuxiliaryFilesExtractor,0,144,0,6,0,32,0,10,0,7
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,LevelProductsExtractor.new Object() {...},4,29,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,EdrsSessionsExtractor,4,58,0,0,3,13,2,4,2,4
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,LevelProductsExtractor,11,229,1,10,3,60,2,12,1,6
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction,LevelProductsExtractor,11,233,1,10,3,60,2,12,1,6

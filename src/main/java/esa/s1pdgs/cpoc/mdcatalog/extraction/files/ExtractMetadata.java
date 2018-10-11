@@ -95,11 +95,12 @@ public class ExtractMetadata {
 	private JSONArray processCoordinates(String productName, String rawCoordinates) throws MetadataExtractionException {
 		JSONArray coordinates = new JSONArray();
 		try {
-			for (String coord : rawCoordinates.split(" ")) {
+		    String[] coordSplitSpace = rawCoordinates.split(" ");
+			for (String coord : coordSplitSpace) {
 				coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
 			}
-			if(!rawCoordinates.split(" ")[0].equals(rawCoordinates.split(" ")[rawCoordinates.split(" ").length-1])) {
-				coordinates.put(new JSONArray("[" + (rawCoordinates.split(" ")[0].split(","))[1] + "," + (rawCoordinates.split(" ")[0].split(","))[0] + "]"));
+			if(!coordSplitSpace[0].equals(coordSplitSpace[coordSplitSpace.length-1])) {
+				coordinates.put(new JSONArray("[" + (coordSplitSpace[0].split(","))[1] + "," + (coordSplitSpace[0].split(","))[0] + "]"));
 			}
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -383,7 +384,7 @@ public class ExtractMetadata {
             if(metadataJSONObject.has("stopTime")) {
                 metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
             }
-	        if(metadataJSONObject.has("sliceCoordinates")) {
+	        if(metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
 	        	JSONObject coordinates = new JSONObject();
 	        	coordinates.put("type", "polygon");
 	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates")));
@@ -432,7 +433,7 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("polarisation", descriptor.getPolarisation());
 	        metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 	        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-	        metadataJSONObject.put("processMode", "NRT");
+	        metadataJSONObject.put("processMode", descriptor.getMode());
 	        String dt = dateFormat.format(new Date());
 	        metadataJSONObject.put("insertionTime", dt);
 	        metadataJSONObject.put("creationTime", dt);
@@ -475,7 +476,7 @@ public class ExtractMetadata {
             metadataJSONObject.put("polarisation", descriptor.getPolarisation());
             metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
             metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-            metadataJSONObject.put("processMode", "FAST");
+            metadataJSONObject.put("processMode", descriptor.getMode());
             String dt = dateFormat.format(new Date());
             metadataJSONObject.put("insertionTime", dt);
             metadataJSONObject.put("creationTime", dt);
@@ -516,7 +517,7 @@ public class ExtractMetadata {
 	        transformerL1.transform(l1File, new StreamResult(new File(output)));
 	        //JSON creation
 	        JSONObject metadataJSONObject = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
-	        if(metadataJSONObject.has("sliceCoordinates")) {
+	        if(metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
 	        	JSONObject coordinates = new JSONObject();
 	        	coordinates.put("type", "polygon");
 	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates")));
@@ -542,6 +543,7 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("insertionTime", dt);
 	        metadataJSONObject.put("creationTime", dt);
             metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+            metadataJSONObject.put("processMode", descriptor.getMode());
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);

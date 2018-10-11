@@ -14,6 +14,8 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * Service to build file descriptor
@@ -158,7 +160,7 @@ public class FileDescriptorBuilder {
 		}
 	}
 
-	public L0OutputFileDescriptor buildL0OutputFileDescriptor(File file)
+	public L0OutputFileDescriptor buildL0OutputFileDescriptor(File file, LevelProductDto product)
 			throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
@@ -191,6 +193,7 @@ public class FileDescriptorBuilder {
 			l0Descriptor.setProductName(productName);
 			l0Descriptor.setRelativePath(relativePath);
 			l0Descriptor.setFilename(filename);
+			l0Descriptor.setMode(product.getMode());
 			l0Descriptor.setMissionId(m.group(1));
 			l0Descriptor.setSatelliteId(m.group(2));
 			l0Descriptor.setSwathtype(m.group(3));
@@ -215,7 +218,7 @@ public class FileDescriptorBuilder {
 		return l0Descriptor;
 	}
 	
-	public L0OutputFileDescriptor buildL0SegmentFileDescriptor(File file)
+	public L0OutputFileDescriptor buildL0SegmentFileDescriptor(File file, LevelSegmentDto product)
             throws MetadataFilePathException, MetadataIgnoredFileException {
         // Extract relative path
         String absolutePath = file.getAbsolutePath();
@@ -248,6 +251,7 @@ public class FileDescriptorBuilder {
             l0Descriptor.setProductName(productName);
             l0Descriptor.setRelativePath(relativePath);
             l0Descriptor.setFilename(filename);
+            l0Descriptor.setMode(product.getMode());
             l0Descriptor.setMissionId(m.group(1));
             l0Descriptor.setSatelliteId(m.group(2));
             l0Descriptor.setSwathtype(m.group(3));
@@ -268,7 +272,7 @@ public class FileDescriptorBuilder {
         return l0Descriptor;
     }
 
-	public L1OutputFileDescriptor buildL1OutputFileDescriptor(File file)
+	public L1OutputFileDescriptor buildL1OutputFileDescriptor(File file, LevelProductDto product)
 			throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
@@ -301,6 +305,7 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setProductName(productName);
 			l1Descriptor.setRelativePath(relativePath);
 			l1Descriptor.setFilename(filename);
+			l1Descriptor.setMode(product.getMode());
 			l1Descriptor.setMissionId(m.group(1) + m.group(2));
 			// l1Descriptor.setSatelliteId(m.group(2));
 			l1Descriptor.setSwathtype(m.group(3));

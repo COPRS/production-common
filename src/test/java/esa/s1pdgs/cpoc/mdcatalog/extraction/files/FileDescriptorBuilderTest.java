@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
@@ -21,6 +22,8 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 public class FileDescriptorBuilderTest {
 
@@ -173,6 +176,10 @@ public class FileDescriptorBuilderTest {
 
     @Test
     public void testBuildL0OutputFileDescriptor() {
+        LevelProductDto dto = new LevelProductDto(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                ProductFamily.L0_SLICE, "FAST");
         L0OutputFileDescriptor expectedResult = new L0OutputFileDescriptor();
         expectedResult.setExtension(FileExtension.SAFE);
         expectedResult.setFilename("manifest.safe");
@@ -190,6 +197,7 @@ public class FileDescriptorBuilderTest {
         expectedResult.setProductType("IW_RAW__0S");
         expectedResult.setPolarisation("DV");
         expectedResult.setDataTakeId("021735");
+        expectedResult.setMode("FAST");
 
         File file = new File(
                 "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
@@ -200,7 +208,7 @@ public class FileDescriptorBuilderTest {
                         Pattern.CASE_INSENSITIVE));
         try {
             L0OutputFileDescriptor result =
-                    fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
+                    fileDescriptorBuilder.buildL0OutputFileDescriptor(file, dto);
 
             assertNotNull("File descriptor should not be null", result);
             assertEquals("File descriptor are not equals",
@@ -209,9 +217,13 @@ public class FileDescriptorBuilderTest {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
-    
+
     @Test
     public void testBuildL0SegmentFileDescriptor() {
+        LevelSegmentDto dto = new LevelSegmentDto(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                ProductFamily.L0_SLICE, "FAST");
         L0OutputFileDescriptor expectedResult = new L0OutputFileDescriptor();
         expectedResult.setExtension(FileExtension.SAFE);
         expectedResult.setFilename("manifest.safe");
@@ -229,6 +241,7 @@ public class FileDescriptorBuilderTest {
         expectedResult.setProductType("IW_RAW__0S");
         expectedResult.setPolarisation("DV");
         expectedResult.setDataTakeId("021735");
+        expectedResult.setMode("FAST");
 
         File file = new File(
                 "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
@@ -239,7 +252,7 @@ public class FileDescriptorBuilderTest {
                         Pattern.CASE_INSENSITIVE));
         try {
             L0OutputFileDescriptor result =
-                    fileDescriptorBuilder.buildL0SegmentFileDescriptor(file);
+                    fileDescriptorBuilder.buildL0SegmentFileDescriptor(file, dto);
 
             assertNotNull("File descriptor should not be null", result);
             assertEquals("File descriptor are not equals",
@@ -251,6 +264,11 @@ public class FileDescriptorBuilderTest {
 
     @Test
     public void testBuildL1OutputFileDescriptor() {
+        LevelProductDto dto = new LevelProductDto(
+                "S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE",
+                "S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE",
+                ProductFamily.L1_SLICE, "NRT");
+        
         L1OutputFileDescriptor expectedResult = new L1OutputFileDescriptor();
         expectedResult.setExtension(FileExtension.SAFE);
         expectedResult.setFilename("manifest.safe");
@@ -268,6 +286,7 @@ public class FileDescriptorBuilderTest {
         expectedResult.setProductType("IW_GRDH_1S");
         expectedResult.setPolarisation("DV");
         expectedResult.setDataTakeId("023A69");
+        expectedResult.setMode("NRT");
 
         File file = new File(
                 "test/workDir/S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe");
@@ -278,7 +297,7 @@ public class FileDescriptorBuilderTest {
                         Pattern.CASE_INSENSITIVE));
         try {
             L1OutputFileDescriptor result =
-                    fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
+                    fileDescriptorBuilder.buildL1OutputFileDescriptor(file, dto);
 
             assertNotNull("File descriptor should not be null", result);
             assertEquals("File descriptor are not equals",
@@ -325,6 +344,10 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L0
+        LevelProductDto dto = new LevelProductDto(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                ProductFamily.L0_SLICE, "FAST");
         file = new File(
                 "test/workDir/S1A_IR_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
         fileDescriptorBuilder = new FileDescriptorBuilder(
@@ -332,7 +355,7 @@ public class FileDescriptorBuilderTest {
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
-            fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
+            fileDescriptorBuilder.buildL0OutputFileDescriptor(file, dto);
             fail("An exception should occur");
         } catch (AbstractCodedException fe) {
             assertEquals(
@@ -341,6 +364,10 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L1
+        LevelProductDto dto1 = new LevelProductDto(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                ProductFamily.L1_SLICE, "FAST");
         file = new File(
                 "test/workDir/S1A_IW_GRDH_1ZDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe");
         fileDescriptorBuilder = new FileDescriptorBuilder(
@@ -348,7 +375,7 @@ public class FileDescriptorBuilderTest {
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
-            fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
+            fileDescriptorBuilder.buildL1OutputFileDescriptor(file, dto1);
             fail("An exception should occur");
         } catch (AbstractCodedException fe) {
             assertEquals(
@@ -391,6 +418,10 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L0
+        LevelProductDto dto = new LevelProductDto(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                ProductFamily.L0_SLICE, "FAST");
         file = new File("/S1A_IW_RAW__0SDV");
         fileDescriptorBuilder = new FileDescriptorBuilder(
                 Paths.get("").toAbsolutePath() + "/test/workDir/",
@@ -398,7 +429,7 @@ public class FileDescriptorBuilderTest {
                         "^([0-9a-z]{2})([0-9a-z]){1}_(S[1-6]|IW|EW|WM|N[1-6]|EN|Z[1-6]|ZE|ZI|ZW|RF|GP|HK)_(RAW)(_)_(0)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV|__)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?",
                         Pattern.CASE_INSENSITIVE));
         try {
-            fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
+            fileDescriptorBuilder.buildL0OutputFileDescriptor(file, dto);
             fail("An exception should occur");
         } catch (AbstractCodedException fe) {
             assertEquals(
@@ -407,6 +438,10 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L1
+        LevelProductDto dto1 = new LevelProductDto(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                ProductFamily.L0_SLICE, "FAST");
         file = new File("/S1A_IW_GRDH_1SDV");
         fileDescriptorBuilder = new FileDescriptorBuilder(
                 Paths.get("").toAbsolutePath() + "/test/workDir/",
@@ -414,7 +449,7 @@ public class FileDescriptorBuilderTest {
                         "^(S1A|S1B|ASA)_(S[1-6]|IW|EW|WM|N[1-6]|EN|IM)_(SLC|GRD|OCN)(F|H|M|_)_(1|2)(A|S)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$",
                         Pattern.CASE_INSENSITIVE));
         try {
-            fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
+            fileDescriptorBuilder.buildL1OutputFileDescriptor(file, dto1);
             fail("An exception should occur");
         } catch (AbstractCodedException fe) {
             assertEquals(
@@ -461,6 +496,10 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L0
+        LevelProductDto dto = new LevelProductDto(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                ProductFamily.L0_SLICE, "FAST");
         file = new File(
                 "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
         fileDescriptorBuilder = new FileDescriptorBuilder(
@@ -468,7 +507,7 @@ public class FileDescriptorBuilderTest {
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
-            fileDescriptorBuilder.buildL0OutputFileDescriptor(file);
+            fileDescriptorBuilder.buildL0OutputFileDescriptor(file, dto);
             fail("An exception should occur " + file.getName()
                     + " shall be a directory : " + file.isDirectory());
         } catch (AbstractCodedException fe) {
@@ -478,6 +517,10 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L1
+        LevelProductDto dto1 = new LevelProductDto(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                ProductFamily.L0_SLICE, "FAST");
         file = new File(
                 "test/workDir/S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE");
         fileDescriptorBuilder = new FileDescriptorBuilder(
@@ -485,7 +528,7 @@ public class FileDescriptorBuilderTest {
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
-            fileDescriptorBuilder.buildL1OutputFileDescriptor(file);
+            fileDescriptorBuilder.buildL1OutputFileDescriptor(file, dto1);
             fail("An exception should occur " + file.getName()
                     + " shall be a directory : " + file.isDirectory());
         } catch (AbstractCodedException fe) {

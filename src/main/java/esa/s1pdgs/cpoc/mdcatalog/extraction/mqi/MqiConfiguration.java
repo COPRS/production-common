@@ -12,9 +12,11 @@ import esa.s1pdgs.cpoc.mqi.client.EdrsSessionMqiService;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
+import esa.s1pdgs.cpoc.mqi.client.LevelSegmentsMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * Configuration of MQI client.<br/>
@@ -54,6 +56,20 @@ public class MqiConfiguration {
         this.hostUri = hostUri;
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
+    }
+
+    /**
+     * Service for querying MQI for LEVEL_SEGMENT category
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = "mqiServiceForLevelSegments")
+    public GenericMqiService<LevelSegmentDto> mqiServiceForLevelSegments(
+            final RestTemplateBuilder builder) {
+        RestTemplate template = builder.build();
+        return new LevelSegmentsMqiService(template, hostUri, maxRetries,
+                tempoRetryMs);
     }
 
     /**

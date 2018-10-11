@@ -109,7 +109,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
                         "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L0_ACN] [productName {}] Extracting from filename",
                         extractProductNameFromDto(dto));
                 L0OutputFileDescriptor l0AcnDesc = fileDescriptorBuilder
-                        .buildL0OutputFileDescriptor(metadataFile);
+                        .buildL0OutputFileDescriptor(metadataFile, dto);
                 // Build metadata from file and extracted
                 LOGGER.info(
                         "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L0_ACN] [productName {}] Extracting from file",
@@ -122,7 +122,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
                         "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L0_PRODUCT] [productName {}] Extracting from filename",
                         extractProductNameFromDto(dto));
                 L0OutputFileDescriptor l0SliceDesc = fileDescriptorBuilder
-                        .buildL0OutputFileDescriptor(metadataFile);
+                        .buildL0OutputFileDescriptor(metadataFile, dto);
                 // Build metadata from file and extracted
                 LOGGER.info(
                         "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L0_PRODUCT] [productName {}] Extracting from file",
@@ -135,7 +135,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
                         "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L1_ACN] [productName {}] Extracting from filename",
                         extractProductNameFromDto(dto));
                 L1OutputFileDescriptor l1AcnDesc = fileDescriptorBuilder
-                        .buildL1OutputFileDescriptor(metadataFile);
+                        .buildL1OutputFileDescriptor(metadataFile, dto);
                 // Build metadata from file and extracted
                 LOGGER.info(
                         "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L1_ACN] [productName {}] Extracting from file",
@@ -148,26 +148,12 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
                         "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L1_PRODUCT] [productName {}] Extracting from filename",
                         extractProductNameFromDto(dto));
                 L1OutputFileDescriptor l1SliceDesc = fileDescriptorBuilder
-                        .buildL1OutputFileDescriptor(metadataFile);
+                        .buildL1OutputFileDescriptor(metadataFile, dto);
                 // Build metadata from file and extracted
                 LOGGER.info(
                         "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L1_PRODUCT] [productName {}] Extracting from file",
                         extractProductNameFromDto(dto));
                 result = mdBuilder.buildL1SliceOutputFileMetadata(l1SliceDesc,
-                        metadataFile);
-                break;
-            case L0_SEGMENT:
-                //TODO
-                LOGGER.info(
-                        "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L0_SEGMENT] [productName {}] Extracting from filename",
-                        extractProductNameFromDto(dto));
-                L0OutputFileDescriptor l0SegmentDesc = fileDescriptorBuilder
-                        .buildL0SegmentFileDescriptor(metadataFile);
-                // Build metadata from file and extracted
-                LOGGER.info(
-                        "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L0_SEGMENT] [productName {}] Extracting from file",
-                        extractProductNameFromDto(dto));
-                result = mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc,
                         metadataFile);
                 break;
             default:

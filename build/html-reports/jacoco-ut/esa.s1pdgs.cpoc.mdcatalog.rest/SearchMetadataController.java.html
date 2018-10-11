@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.SearchMetadataDto;
@@ -25,49 +27,51 @@ import esa.s1pdgs.cpoc.mdcatalog.rest.dto.SearchMetadataDto;
 @RequestMapping(path = &quot;/metadata&quot;)
 public class SearchMetadataController {
 
-<span class="fc" id="L28">	private static final Logger LOGGER = LogManager.getLogger(SearchMetadataController.class);</span>
+<span class="fc" id="L30">	private static final Logger LOGGER = LogManager.getLogger(SearchMetadataController.class);</span>
 
 	private final EsServices esServices;
 
 	@Autowired
-<span class="fc" id="L33">	public SearchMetadataController(final EsServices esServices) {</span>
-<span class="fc" id="L34">		this.esServices = esServices;</span>
-<span class="fc" id="L35">	}</span>
+<span class="fc" id="L35">	public SearchMetadataController(final EsServices esServices) {</span>
+<span class="fc" id="L36">		this.esServices = esServices;</span>
+<span class="fc" id="L37">	}</span>
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = &quot;/search&quot;)
-	public ResponseEntity&lt;SearchMetadataDto&gt; search(@RequestParam(name = &quot;productType&quot;) String productType,
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = &quot;/{productFamily}/search&quot;)
+	public ResponseEntity&lt;SearchMetadataDto&gt; search(@PathVariable(name = &quot;productFamily&quot;) String productFamily,
+	        @RequestParam(name = &quot;productType&quot;) String productType,
 			@RequestParam(name = &quot;mode&quot;) String mode, @RequestParam(name = &quot;satellite&quot;) String satellite,
 			@RequestParam(name = &quot;t0&quot;) String startDate, @RequestParam(name = &quot;t1&quot;) String stopDate,
+			@RequestParam(name = &quot;processMode&quot;, defaultValue = &quot;NONE&quot;) String processMode,
 			@RequestParam(name = &quot;insConfId&quot;, defaultValue = &quot;-1&quot;) int insConfId,
 			@RequestParam(value = &quot;dt0&quot;, defaultValue = &quot;0.0&quot;) double dt0,
 			@RequestParam(value = &quot;dt1&quot;, defaultValue = &quot;0.0&quot;) double dt1) {
 		try {
-<span class="fc bfc" id="L45" title="All 2 branches covered.">			if (mode.equals(&quot;LatestValCover&quot;)) {</span>
-<span class="fc" id="L46">				SearchMetadata f = esServices.lastValCover(productType,</span>
-<span class="fc" id="L47">						convertDateForSearch(startDate, -dt0,</span>
-<span class="fc" id="L48">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.999999&quot;)),</span>
-<span class="fc" id="L49">						convertDateForSearch(stopDate, dt1,</span>
-<span class="fc" id="L50">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.000000&quot;)),</span>
-						satellite, insConfId);
-<span class="fc" id="L52">				SearchMetadataDto response = null;</span>
-<span class="fc bfc" id="L53" title="All 2 branches covered.">				if (f != null) {</span>
-<span class="fc" id="L54">					response = new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),</span>
-<span class="fc" id="L55">							f.getValidityStart(), f.getValidityStop());</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">			if (mode.equals(&quot;LatestValCover&quot;)) {</span>
+<span class="fc" id="L50">				SearchMetadata f = esServices.lastValCover(productType, ProductFamily.fromValue(productFamily),</span>
+<span class="fc" id="L51">						convertDateForSearch(startDate, -dt0,</span>
+<span class="fc" id="L52">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.999999&quot;)),</span>
+<span class="fc" id="L53">						convertDateForSearch(stopDate, dt1,</span>
+<span class="fc" id="L54">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.000000&quot;)),</span>
+						satellite, insConfId, processMode);
+<span class="fc" id="L56">				SearchMetadataDto response = null;</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">				if (f != null) {</span>
+<span class="fc" id="L58">					response = new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),</span>
+<span class="fc" id="L59">							f.getValidityStart(), f.getValidityStop());</span>
 				}
-<span class="fc" id="L57">				return new ResponseEntity&lt;SearchMetadataDto&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L61">				return new ResponseEntity&lt;SearchMetadataDto&gt;(response, HttpStatus.OK);</span>
 			} else {
-<span class="fc" id="L59">				LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg Unknown mode]&quot;, productType,</span>
-<span class="fc" id="L60">						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);</span>
-<span class="fc" id="L61">				return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L63">				LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg Unknown mode]&quot;, productType,</span>
+<span class="fc" id="L64">						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);</span>
+<span class="fc" id="L65">				return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.BAD_REQUEST);</span>
 			}
-<span class="fc" id="L63">		} catch (AbstractCodedException e) {</span>
-<span class="fc" id="L64">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] {}&quot;, productType, e.getCode().getCode(), mode,</span>
-<span class="fc" id="L65">					e.getLogMessage());</span>
-<span class="fc" id="L66">			return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.BAD_REQUEST);</span>
-<span class="fc" id="L67">		} catch (Exception e) {</span>
-<span class="fc" id="L68">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg {}]&quot;, productType,</span>
-<span class="fc" id="L69">					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());</span>
-<span class="fc" id="L70">			return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L67">		} catch (AbstractCodedException e) {</span>
+<span class="fc" id="L68">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] {}&quot;, productType, e.getCode().getCode(), mode,</span>
+<span class="fc" id="L69">					e.getLogMessage());</span>
+<span class="fc" id="L70">			return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L71">		} catch (Exception e) {</span>
+<span class="fc" id="L72">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg {}]&quot;, productType,</span>
+<span class="fc" id="L73">					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());</span>
+<span class="fc" id="L74">			return new ResponseEntity&lt;SearchMetadataDto&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
 		}
 
 	}
@@ -75,9 +79,9 @@ public class SearchMetadataController {
 	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter)
 			throws ParseException {
 
-<span class="fc" id="L78">		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);</span>
-<span class="fc" id="L79">		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));</span>
-<span class="fc" id="L80">		return timePlus.format(outFormatter);</span>
+<span class="fc" id="L82">		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);</span>
+<span class="fc" id="L83">		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));</span>
+<span class="fc" id="L84">		return timePlus.format(outFormatter);</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

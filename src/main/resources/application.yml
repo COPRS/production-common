@@ -37,6 +37,10 @@ file:
       local-directory: /data/local-catalog/level_products/        # Must contains the last /
       fixed-delay-ms: 500                                         # 
       init-delay-poll-ms: 2000                                    # 
+    level-segments:
+      local-directory: /data/local-catalog/level_segments/        # Must contains the last /
+      fixed-delay-ms: 500                                         # 
+      init-delay-poll-ms: 2000                                    # 
     
 # REST controller
 server:

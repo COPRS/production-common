@@ -50,6 +50,11 @@ public class AbstractFileDescriptor {
 	 * Product Family
 	 */
 	protected ProductFamily productFamily;
+	
+	/**
+	 * Mode
+	 */
+	protected String mode;
 
 	/**
 	 * Default constructor
@@ -177,6 +182,20 @@ public class AbstractFileDescriptor {
         this.productFamily = productFamily;
     }
 
+    /**
+     * @return the mode
+     */
+    public String getMode() {
+        return mode;
+    }
+
+    /**
+     * @param mode the mode to set
+     */
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -200,6 +219,8 @@ public class AbstractFileDescriptor {
                 + ((relativePath == null) ? 0 : relativePath.hashCode());
         result = prime * result
                 + ((satelliteId == null) ? 0 : satelliteId.hashCode());
+        result = prime * result
+                + ((mode == null) ? 0 : mode.hashCode());
         return result;
     }
 
@@ -248,6 +269,11 @@ public class AbstractFileDescriptor {
             if (other.satelliteId != null)
                 return false;
         } else if (!satelliteId.equals(other.satelliteId))
+            return false;
+        if (mode == null) {
+            if (other.mode != null)
+                return false;
+        } else if (!mode.equals(other.mode))
             return false;
         return true;
     }
