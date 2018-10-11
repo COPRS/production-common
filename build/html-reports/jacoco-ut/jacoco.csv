@@ -94,7 +94,7 @@ S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common.errors,AbstractCodedExce
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.common.rest.model.job,AppDataJobGenerationDtoState,0,58,0,0,0,2,0,4,0,4
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.common.rest.model.job,AppDataJobFileDto,7,91,0,10,4,21,2,13,2,8
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.common.rest.model.job,AppDataJobDtoState,0,58,0,0,0,2,0,4,0,4
-S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.common.rest.model.job,AppDataJobProductDto,0,427,0,38,0,80,0,55,0,36
+S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.common.rest.model.job,AppDataJobProductDto,7,443,0,40,3,81,2,56,2,36
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.common.rest.model.job,AppDataJobGenerationDto,0,164,0,16,0,34,0,22,0,14
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.appcatalog.common.rest.model.job,AppDataJobDto,0,259,0,24,0,50,0,34,0,22
 S1-PDGS Cloud POC common library,esa.s1pdgs.cpoc.common.filter,FilterCriterion,0,127,0,12,0,30,0,17,0,11

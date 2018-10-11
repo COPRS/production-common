@@ -91,6 +91,11 @@ public class AppDataJobProductDto {
      * Stop date of the segment
      */
     private String segmentStopDate;
+    
+    /**
+     * Process mode
+     */
+    private String processMode;
 
     /**
      * 
@@ -344,6 +349,20 @@ public class AppDataJobProductDto {
         this.segmentStopDate = segmentStopDate;
     }
 
+    /**
+     * @return the processMode
+     */
+    public String getProcessMode() {
+        return processMode;
+    }
+
+    /**
+     * @param processMode the processMode to set
+     */
+    public void setProcessMode(String processMode) {
+        this.processMode = processMode;
+    }
+
     /*
      * (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -351,11 +370,11 @@ public class AppDataJobProductDto {
     @Override
     public String toString() {
         return String.format(
-                "{sessionId: %s, productName: %s, satelliteId: %s, missionId: %s, startTime: %s, stopTime: %s, insConfId: %s, productType: %s, raws1: %s, raws2: %s, acquisition: %s, dataTakeId: %s, numberSlice: %s, totalNbOfSlice: %s, segmentStartDate: %s, segmentStopDate: %s}",
+                "{sessionId: %s, productName: %s, satelliteId: %s, missionId: %s, startTime: %s, stopTime: %s, insConfId: %s, productType: %s, raws1: %s, raws2: %s, acquisition: %s, dataTakeId: %s, numberSlice: %s, totalNbOfSlice: %s, segmentStartDate: %s, segmentStopDate: %s, processMode: %s}",
                 sessionId, productName, satelliteId, missionId, startTime,
                 stopTime, insConfId, productType, raws1, raws2, acquisition,
                 dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate,
-                segmentStopDate);
+                segmentStopDate, processMode);
     }
 
     /**
@@ -366,7 +385,7 @@ public class AppDataJobProductDto {
         return Objects.hash(sessionId, productName, satelliteId, missionId,
                 startTime, stopTime, insConfId, productType, raws1, raws2,
                 acquisition, dataTakeId, numberSlice, totalNbOfSlice,
-                segmentStartDate, segmentStopDate);
+                segmentStartDate, segmentStopDate, processMode);
     }
 
     /**
@@ -396,7 +415,8 @@ public class AppDataJobProductDto {
                     && numberSlice == other.numberSlice
                     && totalNbOfSlice == other.totalNbOfSlice
                     && Objects.equals(segmentStartDate, other.segmentStartDate)
-                    && Objects.equals(segmentStopDate, other.segmentStopDate);
+                    && Objects.equals(segmentStopDate, other.segmentStopDate)
+                    && Objects.equals(processMode, other.processMode);
         }
         return ret;
     }
