@@ -23,7 +23,7 @@ public class LevelJobsMessageDtoTest {
     @Test
     public void testGettersSettersConstructors() {
         LevelJobDto body = new LevelJobDto(ProductFamily.L0_JOB,
-                "testEqualsFunction", "/data/localWD/123456",
+                "testEqualsFunction", "NRT", "/data/localWD/123456",
                 "/data/localWD/123456/JobOrder.xml");
         LevelJobsMessageDto dto =
                 new LevelJobsMessageDto(123, "input-key", body);
@@ -46,7 +46,7 @@ public class LevelJobsMessageDtoTest {
     @Test
     public void testToString() {
         LevelJobDto body = new LevelJobDto(ProductFamily.L0_JOB,
-                "testEqualsFunction", "/data/localWD/123456",
+                "testEqualsFunction", "NRT", "/data/localWD/123456",
                 "/data/localWD/123456/JobOrder.xml");
         LevelJobsMessageDto dto =
                 new LevelJobsMessageDto(123, "input-key", body);

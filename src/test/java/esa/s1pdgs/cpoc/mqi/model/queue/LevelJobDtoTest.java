@@ -49,6 +49,7 @@ public class LevelJobDtoTest {
 	private void checkDto(LevelJobDto dto1) {
 	    assertEquals(ProductFamily.L0_JOB, dto1.getFamily());
 		assertTrue("testEqualsFunction".equals(dto1.getProductIdentifier()));
+        assertTrue("NRT".equals(dto1.getProductProcessMode()));
 		assertTrue("/data/localWD/123456".equals(dto1.getWorkDirectory()));
 		assertTrue("/data/localWD/123456/JobOrder.xml".equals(dto1.getJobOrder()));
 		assertTrue(2 == dto1.getInputs().size());
@@ -65,7 +66,7 @@ public class LevelJobDtoTest {
 	 */
 	@Test
 	public void testConstructorAndGetters() {
-		LevelJobDto dto1 = new LevelJobDto(ProductFamily.L0_JOB, "testEqualsFunction", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml");
+		LevelJobDto dto1 = new LevelJobDto(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml");
 		dto1.addInput(input1);
 		dto1.addInput(input2);
 		dto1.addOutput(output1);
@@ -85,6 +86,7 @@ public class LevelJobDtoTest {
 		LevelJobDto dto1 = new LevelJobDto();
 		dto1.setFamily(ProductFamily.L0_JOB);
 		dto1.setProductIdentifier("testEqualsFunction");
+		dto1.setProductProcessMode("NRT");
 		dto1.setWorkDirectory("/data/localWD/123456");
 		dto1.setJobOrder("/data/localWD/123456/JobOrder.xml");
 		dto1.setInputs(Arrays.asList(input1, input2));
@@ -96,6 +98,7 @@ public class LevelJobDtoTest {
 		String str = dto1.toString();
         assertTrue(str.contains("family: L0_JOB"));
 		assertTrue(str.contains("productIdentifier: testEqualsFunction"));
+        assertTrue(str.contains("productProcessMode: NRT"));
 		assertTrue(str.contains("workDirectory: /data/localWD/123456"));
 		assertTrue(str.contains("jobOrder: /data/localWD/123456/JobOrder.xml"));
 		assertTrue(str.contains("inputs:"));

@@ -83,26 +83,26 @@
 <th>Violation</th>
 <th>Ligne</th></tr>
 <tr class="b">
-<td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'32').</td>
-<td>26&#x2013;32</td></tr>
+<td>Found 'DU'-anomaly for variable 'ret' (lines '26'-'59').</td>
+<td>26&#x2013;59</td></tr>
 <tr class="a">
-<td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'37').</td>
-<td>26&#x2013;37</td></tr>
-<tr class="b">
 <td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'29').</td>
 <td>26&#x2013;29</td></tr>
-<tr class="a">
-<td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'42').</td>
-<td>26&#x2013;42</td></tr>
 <tr class="b">
-<td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'51').</td>
-<td>26&#x2013;51</td></tr>
+<td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'32').</td>
+<td>26&#x2013;32</td></tr>
 <tr class="a">
 <td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'48').</td>
 <td>26&#x2013;48</td></tr>
 <tr class="b">
-<td>Found 'DU'-anomaly for variable 'ret' (lines '26'-'59').</td>
-<td>26&#x2013;59</td></tr></table></div>
+<td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'42').</td>
+<td>26&#x2013;42</td></tr>
+<tr class="a">
+<td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'51').</td>
+<td>26&#x2013;51</td></tr>
+<tr class="b">
+<td>Found 'DD'-anomaly for variable 'ret' (lines '26'-'37').</td>
+<td>26&#x2013;37</td></tr></table></div>
 <div class="section">
 <h3>esa/s1pdgs/cpoc/common/ProductFamily.java<a name="esas1pdgscpoccommonProductFamily.java"></a></h3>
 <table border="0" class="bodyTable">
@@ -179,11 +179,11 @@
 <td>fieldCommentRequirement Required</td>
 <td>9</td></tr>
 <tr class="b">
-<td>publicMethodCommentRequirement Required</td>
-<td>11&#x2013;13</td></tr>
-<tr class="a">
 <td>Parameter 'productName' is not assigned and could be declared final</td>
 <td>11</td></tr>
+<tr class="a">
+<td>publicMethodCommentRequirement Required</td>
+<td>11&#x2013;13</td></tr>
 <tr class="b">
 <td>Avoid unused constructor parameters such as 'productName'.</td>
 <td>11</td></tr></table></div>
@@ -203,10 +203,10 @@
 <td>Found 'DD'-anomaly for variable 'criterion' (lines '18'-'21').</td>
 <td>18&#x2013;21</td></tr>
 <tr class="a">
-<td>Potential violation of Law of Demeter (method chain calls)</td>
+<td>When doing a String.toLowerCase()/toUpperCase() call, use a Locale</td>
 <td>20</td></tr>
 <tr class="b">
-<td>When doing a String.toLowerCase()/toUpperCase() call, use a Locale</td>
+<td>Potential violation of Law of Demeter (method chain calls)</td>
 <td>20</td></tr>
 <tr class="a">
 <td>Potential violation of Law of Demeter (method chain calls)</td>
@@ -227,10 +227,10 @@
 <th>Violation</th>
 <th>Ligne</th></tr>
 <tr class="b">
-<td>headerCommentRequirement Required</td>
+<td>All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.</td>
 <td>10&#x2013;40</td></tr>
 <tr class="a">
-<td>All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.</td>
+<td>headerCommentRequirement Required</td>
 <td>10&#x2013;40</td></tr>
 <tr class="b">
 <td>When instantiating a SimpleDateFormat object, specify a Locale</td>
@@ -281,11 +281,29 @@
 <td>publicMethodCommentRequirement Required</td>
 <td>7&#x2013;11</td></tr>
 <tr class="b">
-<td>Parameter 'logger' is not assigned and could be declared final</td>
+<td>Parameter 'message' is not assigned and could be declared final</td>
 <td>7</td></tr>
 <tr class="a">
-<td>Parameter 'message' is not assigned and could be declared final</td>
-<td>7</td></tr></table></div></div>
+<td>Parameter 'logger' is not assigned and could be declared final</td>
+<td>7</td></tr></table></div>
+<div class="section">
+<h3>esa/s1pdgs/cpoc/mqi/model/queue/LevelJobDto.java<a name="esas1pdgscpocmqimodelqueueLevelJobDto.java"></a></h3>
+<table border="0" class="bodyTable">
+<tr class="b">
+<th>Violation</th>
+<th>Ligne</th></tr>
+<tr class="a">
+<td>Avoid excessively long variable names like productProcessMode</td>
+<td>29</td></tr>
+<tr class="b">
+<td>Avoid excessively long variable names like productProcessMode</td>
+<td>73</td></tr>
+<tr class="a">
+<td>Avoid excessively long variable names like productProcessMode</td>
+<td>153</td></tr>
+<tr class="b">
+<td>Parameter 'productProcessMode' is not assigned and could be declared final</td>
+<td>153</td></tr></table></div></div>
       </div>
     </div>
     <div class="clear">

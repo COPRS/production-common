@@ -23,7 +23,7 @@ public class MqiLevelJobMessageDtoTest {
      * DTO
      */
     private LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB,
-            "prodcut-name", "work-dir", "job-order");
+            "prodcut-name", "NRT", "work-dir", "job-order");
 
     /**
      * Test constructors
