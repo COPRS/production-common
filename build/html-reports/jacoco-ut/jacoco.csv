@@ -3,7 +3,7 @@ S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.c
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelSegmentsAppCatalogJobService,0,115,0,4,0,24,0,7,0,5
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,EdrsSessionsAppCatalogJobService,0,115,0,4,0,24,0,7,0,5
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelSegmentsAppCatalogJobService.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
-S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,AbstractAppCatalogJobService,16,710,0,22,5,148,1,26,1,15
+S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,AbstractAppCatalogJobService,29,710,0,22,8,148,2,26,2,15
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelSegmentAppDataJobDto,0,3,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,LevelProductsAppCatalogJobService,0,115,0,4,0,24,0,7,0,5
 S1-PDGS Cloud POC - Applicative data catalog client,esa.s1pdgs.cpoc.appcatalog.client.job,EdrsSessionAppDataJobDto,0,3,0,0,0,1,0,1,0,1
