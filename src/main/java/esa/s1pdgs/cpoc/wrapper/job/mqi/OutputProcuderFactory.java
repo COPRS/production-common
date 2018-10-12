@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
@@ -13,6 +14,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
@@ -31,6 +33,11 @@ public class OutputProcuderFactory {
      */
     protected static final Logger LOGGER =
             LogManager.getLogger(OutputProcuderFactory.class);
+
+    /**
+     * MQI client for LEVEL_SEGMENTS
+     */
+    private final GenericMqiService<LevelSegmentDto> senderSegments;
 
     /**
      * MQI client for LEVEL_PRODUCTS
@@ -55,9 +62,11 @@ public class OutputProcuderFactory {
      */
     @Autowired
     public OutputProcuderFactory(
+            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> senderSegments,
             @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> senderProducts,
             @Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports,
             @Qualifier("mqiServiceForErrors") final ErrorService senderErrors) {
+        this.senderSegments = senderSegments;
         this.senderProducts = senderProducts;
         this.senderReports = senderReports;
         this.senderErrors = senderErrors;
@@ -87,12 +96,23 @@ public class OutputProcuderFactory {
     public void sendOutput(final ObsQueueMessage msg,
             GenericMessageDto<LevelJobDto> inputMessage)
             throws AbstractCodedException {
-        LevelProductDto dtoProduct = new LevelProductDto(msg.getProductName(),
-                msg.getKeyObs(), msg.getFamily(), msg.getProcessMode());
-        senderProducts
-                .publish(new GenericPublicationMessageDto<LevelProductDto>(
-                        inputMessage.getIdentifier(), msg.getFamily(),
-                        dtoProduct));
+        if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
+            LevelSegmentDto dtoProduct =
+                    new LevelSegmentDto(msg.getProductName(), msg.getKeyObs(),
+                            msg.getFamily(), msg.getProcessMode());
+            senderSegments
+                    .publish(new GenericPublicationMessageDto<LevelSegmentDto>(
+                            inputMessage.getIdentifier(), msg.getFamily(),
+                            dtoProduct));
+        } else {
+            LevelProductDto dtoProduct =
+                    new LevelProductDto(msg.getProductName(), msg.getKeyObs(),
+                            msg.getFamily(), msg.getProcessMode());
+            senderProducts
+                    .publish(new GenericPublicationMessageDto<LevelProductDto>(
+                            inputMessage.getIdentifier(), msg.getFamily(),
+                            dtoProduct));
+        }
     }
 
     /**
