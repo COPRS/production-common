@@ -233,8 +233,7 @@ public class L1AppJobsGeneratorTest {
                         "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                         "2017-12-13T12:16:23.224083Z",
                         "2017-12-13T12:16:56.224083Z", 6, 3, "021735");
-            }).when(this.metadataService).getSlice(Mockito.anyString(),
-                    Mockito.anyString());
+            }).when(this.metadataService).getL0Slice(Mockito.anyString());
             Mockito.doAnswer(i -> {
                 return new L0AcnMetadata(
                         "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
@@ -354,7 +353,7 @@ public class L1AppJobsGeneratorTest {
             throws JobGenInputsMissingException, JobGenMetadataException {
         doThrow(new JobGenMetadataException("test ex"))
                 .when(this.metadataService)
-                .getSlice(Mockito.anyString(), Mockito.anyString());
+                .getL0Slice(Mockito.anyString());
 
         thrown.expect(JobGenInputsMissingException.class);
         thrown.expectMessage("Missing inputs");

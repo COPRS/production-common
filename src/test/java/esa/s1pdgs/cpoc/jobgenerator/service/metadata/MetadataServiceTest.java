@@ -158,11 +158,11 @@ public class MetadataServiceTest {
                 "20171213T121623", "20171213T121656", 6, 2, "021735");
         ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(
                 expectedResult, HttpStatus.OK);
-        String uri = "http://" + METADATA_HOST + "/l0Slice/IW_RAW__0S/" + file;
+        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file;
         when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), eq(null),
                 eq(L0SliceMetadata.class))).thenReturn(r);
 
-        this.service.getSlice("IW_RAW__0S", file);
+        this.service.getL0Slice(file);
 
         verify(this.restTemplate, times(1)).exchange(eq(uri),
                 eq(HttpMethod.GET), eq(null), eq(L0SliceMetadata.class));
@@ -180,7 +180,7 @@ public class MetadataServiceTest {
         when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
                 eq(null), eq(L0SliceMetadata.class))).thenReturn(r);
 
-        L0SliceMetadata f = this.service.getSlice("IW_RAW__0S", file);
+        L0SliceMetadata f = this.service.getL0Slice(file);
 
         assertEquals("IW_RAW__0S", f.getProductType());
         assertEquals(file, f.getProductName());
@@ -204,7 +204,7 @@ public class MetadataServiceTest {
 
         thrown.expect(JobGenMetadataException.class);
         thrown.expectMessage("nvalid HTTP statu");
-        this.service.getSlice("IW_RAW__0S", file);
+        this.service.getL0Slice(file);
     }
 
     @Test
@@ -219,7 +219,7 @@ public class MetadataServiceTest {
         thrown.expect(JobGenMetadataException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
-        this.service.getSlice("IW_RAW__0S", file);
+        this.service.getL0Slice(file);
     }
 
     // --------------------------------------------------
@@ -237,15 +237,16 @@ public class MetadataServiceTest {
                 "20171213T121623", "20171213T121656", 6, 2, "021735") };
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
                 expectedResult, HttpStatus.OK);
-        String uri = "http://" + METADATA_HOST + "/l0Slice/IW_RAW__0S/" + file
+        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file
                 + "/acns";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-                .queryParam("mode", "ONE");
+                .queryParam("mode", "ONE")
+                .queryParam("processMode", "NRT");
         when(restTemplate.exchange(eq(builder.build().toUri()),
                 eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
                         .thenReturn(r);
 
-        this.service.getFirstACN("IW_RAW__0S", file);
+        this.service.getFirstACN(file, "NRT");
 
         verify(this.restTemplate, times(1)).exchange(
                 eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
@@ -267,17 +268,18 @@ public class MetadataServiceTest {
                 new L0AcnMetadata(fileN, "IW_RAW__0C", fileN,
                         "2017-12-13T12:16:23", "2017-12-13T12:16:56", 6, 2,
                         "021735") };
-        String uri = "http://" + METADATA_HOST + "/l0Slice/IW_RAW__0S/" + file
+        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file
                 + "/acns";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-                .queryParam("mode", "ONE");
+                .queryParam("mode", "ONE")
+                .queryParam("processMode", "NRT");
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
                 expectedResult, HttpStatus.OK);
         when(restTemplate.exchange(eq(builder.build().toUri()),
                 eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
                         .thenReturn(r);
 
-        L0AcnMetadata f = this.service.getFirstACN("IW_RAW__0S", file);
+        L0AcnMetadata f = this.service.getFirstACN(file, "NRT");
 
         assertEquals("IW_RAW__0A", f.getProductType());
         assertEquals(fileA, f.getProductName());
@@ -296,17 +298,18 @@ public class MetadataServiceTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
                 HttpStatus.INTERNAL_SERVER_ERROR);
-        String uri = "http://" + METADATA_HOST + "/l0Slice/IW_RAW__0S/" + file
+        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file
                 + "/acns";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-                .queryParam("mode", "ONE");
+                .queryParam("mode", "ONE")
+                .queryParam("processMode", "FAST");
         when(restTemplate.exchange(eq(builder.build().toUri()),
                 eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
                         .thenReturn(r);
 
         thrown.expect(JobGenMetadataException.class);
         thrown.expectMessage("nvalid HTTP statu");
-        this.service.getFirstACN("IW_RAW__0S", file);
+        this.service.getFirstACN(file, "FAST");
     }
 
     @Test
@@ -320,7 +323,7 @@ public class MetadataServiceTest {
         thrown.expect(JobGenMetadataException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
-        this.service.getFirstACN("IW_RAW__0S", file);
+        this.service.getFirstACN(file, "FAST");
     }
 
     // --------------------------------------------------

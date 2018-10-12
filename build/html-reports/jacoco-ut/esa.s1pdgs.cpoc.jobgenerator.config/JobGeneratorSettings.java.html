@@ -108,17 +108,16 @@ public class JobGeneratorSettings {
      * Map product type and corresponding metadata index in case of the product
      * type in lowercase in not the metadata index (example: aux_resorb use
      * aux_res)&lt;br/&gt;
-     * Format: acquisition in IW, EW, SM, EM
      */
     private Map&lt;String, String&gt; mapTypeMeta;
 
     /**
      * Default constructors
      */
-<span class="fc" id="L118">    public JobGeneratorSettings() {</span>
-<span class="fc" id="L119">        this.inputfamilies = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L120">        this.outputfamilies = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L121">    }</span>
+<span class="fc" id="L117">    public JobGeneratorSettings() {</span>
+<span class="fc" id="L118">        this.inputfamilies = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L119">        this.outputfamilies = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L120">    }</span>
 
     /**
      * Initialization function:
@@ -128,45 +127,45 @@ public class JobGeneratorSettings {
      */
     @PostConstruct
     public void initMaps() {
-<span class="fc" id="L131">        extractMapProductTypeFamilyInput();</span>
-<span class="fc" id="L132">        extractMapProductTypeFamilyOutput();</span>
-<span class="fc" id="L133">    }</span>
+<span class="fc" id="L130">        extractMapProductTypeFamilyInput();</span>
+<span class="fc" id="L131">        extractMapProductTypeFamilyOutput();</span>
+<span class="fc" id="L132">    }</span>
 
     /**
      * Extract map product type family from the string
      */
     private void extractMapProductTypeFamilyInput() {
-<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (StringUtils.isEmpty(inputfamiliesstr)) {</span>
-<span class="fc" id="L140">            return;</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">        if (StringUtils.isEmpty(inputfamiliesstr)) {</span>
+<span class="fc" id="L139">            return;</span>
         }
-<span class="fc" id="L142">        String[] paramsTmp = inputfamiliesstr.split(MAP_ELM_SEP);</span>
-<span class="fc bfc" id="L143" title="All 2 branches covered.">        for (int i = 0; i &lt; paramsTmp.length; i++) {</span>
-<span class="fc" id="L144">            String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);</span>
-<span class="pc bpc" id="L145" title="2 of 4 branches missed.">            if (tmp != null &amp;&amp; tmp.length == 2) {</span>
-<span class="fc" id="L146">                String key = tmp[0];</span>
-<span class="fc" id="L147">                String valStr = tmp[1];</span>
-<span class="fc" id="L148">                inputfamilies.put(key, ProductFamily.fromValue(valStr));</span>
+<span class="fc" id="L141">        String[] paramsTmp = inputfamiliesstr.split(MAP_ELM_SEP);</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        for (int i = 0; i &lt; paramsTmp.length; i++) {</span>
+<span class="fc" id="L143">            String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);</span>
+<span class="pc bpc" id="L144" title="2 of 4 branches missed.">            if (tmp != null &amp;&amp; tmp.length == 2) {</span>
+<span class="fc" id="L145">                String key = tmp[0];</span>
+<span class="fc" id="L146">                String valStr = tmp[1];</span>
+<span class="fc" id="L147">                inputfamilies.put(key, ProductFamily.fromValue(valStr));</span>
             }
         }
-<span class="fc" id="L151">    }</span>
+<span class="fc" id="L150">    }</span>
 
     /**
      * Extract map product type family from the string
      */
     private void extractMapProductTypeFamilyOutput() {
-<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (StringUtils.isEmpty(outputfamiliesstr)) {</span>
-<span class="fc" id="L158">            return;</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (StringUtils.isEmpty(outputfamiliesstr)) {</span>
+<span class="fc" id="L157">            return;</span>
         }
-<span class="fc" id="L160">        String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);</span>
-<span class="fc bfc" id="L161" title="All 2 branches covered.">        for (int i = 0; i &lt; paramsTmp.length; i++) {</span>
-<span class="fc" id="L162">            String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);</span>
-<span class="pc bpc" id="L163" title="1 of 4 branches missed.">            if (tmp != null &amp;&amp; tmp.length == 2) {</span>
-<span class="fc" id="L164">                String key = tmp[0];</span>
-<span class="fc" id="L165">                String valStr = tmp[1];</span>
-<span class="fc" id="L166">                outputfamilies.put(key, ProductFamily.fromValue(valStr));</span>
+<span class="fc" id="L159">        String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        for (int i = 0; i &lt; paramsTmp.length; i++) {</span>
+<span class="fc" id="L161">            String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);</span>
+<span class="pc bpc" id="L162" title="1 of 4 branches missed.">            if (tmp != null &amp;&amp; tmp.length == 2) {</span>
+<span class="fc" id="L163">                String key = tmp[0];</span>
+<span class="fc" id="L164">                String valStr = tmp[1];</span>
+<span class="fc" id="L165">                outputfamilies.put(key, ProductFamily.fromValue(valStr));</span>
             }
         }
-<span class="fc" id="L169">    }</span>
+<span class="fc" id="L168">    }</span>
 
     /**
      * Class of delay configuration
@@ -187,10 +186,10 @@ public class JobGeneratorSettings {
         /**
          * Default constructor
          */
-<span class="fc" id="L190">        public WaitTempo() {</span>
-<span class="fc" id="L191">            this.tempo = 0;</span>
-<span class="fc" id="L192">            this.retries = 0;</span>
-<span class="fc" id="L193">        }</span>
+<span class="fc" id="L189">        public WaitTempo() {</span>
+<span class="fc" id="L190">            this.tempo = 0;</span>
+<span class="fc" id="L191">            this.retries = 0;</span>
+<span class="fc" id="L192">        }</span>
 
         /**
          * Constructor using field
@@ -198,16 +197,16 @@ public class JobGeneratorSettings {
          * @param tempo
          * @param retries
          */
-<span class="nc" id="L201">        public WaitTempo(final int tempo, final int retries) {</span>
-<span class="nc" id="L202">            this.tempo = tempo;</span>
-<span class="nc" id="L203">            this.retries = retries;</span>
-<span class="nc" id="L204">        }</span>
+<span class="nc" id="L200">        public WaitTempo(final int tempo, final int retries) {</span>
+<span class="nc" id="L201">            this.tempo = tempo;</span>
+<span class="nc" id="L202">            this.retries = retries;</span>
+<span class="nc" id="L203">        }</span>
 
         /**
          * @return the tempo
          */
         public int getTempo() {
-<span class="fc" id="L210">            return tempo;</span>
+<span class="fc" id="L209">            return tempo;</span>
         }
 
         /**
@@ -215,14 +214,14 @@ public class JobGeneratorSettings {
          *            the tempo to set
          */
         public void setTempo(final int tempo) {
-<span class="fc" id="L218">            this.tempo = tempo;</span>
-<span class="fc" id="L219">        }</span>
+<span class="fc" id="L217">            this.tempo = tempo;</span>
+<span class="fc" id="L218">        }</span>
 
         /**
          * @return the retries
          */
         public int getRetries() {
-<span class="fc" id="L225">            return retries;</span>
+<span class="fc" id="L224">            return retries;</span>
         }
 
         /**
@@ -230,8 +229,8 @@ public class JobGeneratorSettings {
          *            the retries to set
          */
         public void setRetries(final int retries) {
-<span class="fc" id="L233">            this.retries = retries;</span>
-<span class="fc" id="L234">        }</span>
+<span class="fc" id="L232">            this.retries = retries;</span>
+<span class="fc" id="L233">        }</span>
 
     }
 
@@ -239,7 +238,7 @@ public class JobGeneratorSettings {
      * @return the maxnboftasktable
      */
     public int getMaxnboftasktable() {
-<span class="fc" id="L242">        return maxnboftasktable;</span>
+<span class="fc" id="L241">        return maxnboftasktable;</span>
     }
 
     /**
@@ -247,14 +246,14 @@ public class JobGeneratorSettings {
      *            the maxnboftasktable to set
      */
     public void setMaxnboftasktable(final int maxnboftasktable) {
-<span class="fc" id="L250">        this.maxnboftasktable = maxnboftasktable;</span>
-<span class="fc" id="L251">    }</span>
+<span class="fc" id="L249">        this.maxnboftasktable = maxnboftasktable;</span>
+<span class="fc" id="L250">    }</span>
 
     /**
      * @return the waitprimarycheck
      */
     public WaitTempo getWaitprimarycheck() {
-<span class="fc" id="L257">        return waitprimarycheck;</span>
+<span class="fc" id="L256">        return waitprimarycheck;</span>
     }
 
     /**
@@ -262,14 +261,14 @@ public class JobGeneratorSettings {
      *            the waitprimarycheck to set
      */
     public void setWaitprimarycheck(final WaitTempo waitprimarycheck) {
-<span class="fc" id="L265">        this.waitprimarycheck = waitprimarycheck;</span>
-<span class="fc" id="L266">    }</span>
+<span class="fc" id="L264">        this.waitprimarycheck = waitprimarycheck;</span>
+<span class="fc" id="L265">    }</span>
 
     /**
      * @return the waitmetadatainput
      */
     public WaitTempo getWaitmetadatainput() {
-<span class="fc" id="L272">        return waitmetadatainput;</span>
+<span class="fc" id="L271">        return waitmetadatainput;</span>
     }
 
     /**
@@ -277,14 +276,14 @@ public class JobGeneratorSettings {
      *            the waitmetadatainput to set
      */
     public void setWaitmetadatainput(final WaitTempo waitmetadatainput) {
-<span class="fc" id="L280">        this.waitmetadatainput = waitmetadatainput;</span>
-<span class="fc" id="L281">    }</span>
+<span class="fc" id="L279">        this.waitmetadatainput = waitmetadatainput;</span>
+<span class="fc" id="L280">    }</span>
 
     /**
      * @return the diroftasktables
      */
     public String getDiroftasktables() {
-<span class="fc" id="L287">        return diroftasktables;</span>
+<span class="fc" id="L286">        return diroftasktables;</span>
     }
 
     /**
@@ -292,14 +291,14 @@ public class JobGeneratorSettings {
      *            the diroftasktables to set
      */
     public void setDiroftasktables(final String diroftasktables) {
-<span class="fc" id="L295">        this.diroftasktables = diroftasktables;</span>
-<span class="fc" id="L296">    }</span>
+<span class="fc" id="L294">        this.diroftasktables = diroftasktables;</span>
+<span class="fc" id="L295">    }</span>
 
     /**
      * @return the maxnumberofjobs
      */
     public int getMaxnumberofjobs() {
-<span class="fc" id="L302">        return maxnumberofjobs;</span>
+<span class="fc" id="L301">        return maxnumberofjobs;</span>
     }
 
     /**
@@ -307,14 +306,14 @@ public class JobGeneratorSettings {
      *            the maxnumberofjobs to set
      */
     public void setMaxnumberofjobs(final int maxnumberofjobs) {
-<span class="fc" id="L310">        this.maxnumberofjobs = maxnumberofjobs;</span>
-<span class="fc" id="L311">    }</span>
+<span class="fc" id="L309">        this.maxnumberofjobs = maxnumberofjobs;</span>
+<span class="fc" id="L310">    }</span>
 
     /**
      * @return the jobgenfixedrate
      */
     public int getJobgenfixedrate() {
-<span class="fc" id="L317">        return jobgenfixedrate;</span>
+<span class="fc" id="L316">        return jobgenfixedrate;</span>
     }
 
     /**
@@ -322,14 +321,14 @@ public class JobGeneratorSettings {
      *            the jobgenfixedrate to set
      */
     public void setJobgenfixedrate(final int jobgenfixedrate) {
-<span class="fc" id="L325">        this.jobgenfixedrate = jobgenfixedrate;</span>
-<span class="fc" id="L326">    }</span>
+<span class="fc" id="L324">        this.jobgenfixedrate = jobgenfixedrate;</span>
+<span class="fc" id="L325">    }</span>
 
     /**
      * @return the defaultfamily
      */
     public String getDefaultfamily() {
-<span class="fc" id="L332">        return defaultfamily;</span>
+<span class="fc" id="L331">        return defaultfamily;</span>
     }
 
     /**
@@ -337,14 +336,14 @@ public class JobGeneratorSettings {
      *            the defaultfamily to set
      */
     public void setDefaultfamily(final String defaultfamily) {
-<span class="fc" id="L340">        this.defaultfamily = defaultfamily;</span>
-<span class="fc" id="L341">    }</span>
+<span class="fc" id="L339">        this.defaultfamily = defaultfamily;</span>
+<span class="fc" id="L340">    }</span>
 
     /**
      * @return the outputfamiliesstr
      */
     public String getOutputfamiliesstr() {
-<span class="fc" id="L347">        return outputfamiliesstr;</span>
+<span class="fc" id="L346">        return outputfamiliesstr;</span>
     }
 
     /**
@@ -352,56 +351,56 @@ public class JobGeneratorSettings {
      *            the outputfamiliesstr to set
      */
     public void setOutputfamiliesstr(final String outputfamiliesstr) {
-<span class="fc" id="L355">        this.outputfamiliesstr = outputfamiliesstr;</span>
-<span class="fc" id="L356">    }</span>
+<span class="fc" id="L354">        this.outputfamiliesstr = outputfamiliesstr;</span>
+<span class="fc" id="L355">    }</span>
 
     /**
      * @return the outputfamilies
      */
     public Map&lt;String, ProductFamily&gt; getOutputfamilies() {
-<span class="fc" id="L362">        return outputfamilies;</span>
+<span class="fc" id="L361">        return outputfamilies;</span>
     }
 
     /**
      * @return the inputfamiliesstr
      */
     public String getInputfamiliesstr() {
-<span class="nc" id="L369">        return inputfamiliesstr;</span>
+<span class="fc" id="L368">        return inputfamiliesstr;</span>
     }
 
     /**
      * @param inputfamiliesstr the inputfamiliesstr to set
      */
     public void setInputfamiliesstr(String inputfamiliesstr) {
-<span class="fc" id="L376">        this.inputfamiliesstr = inputfamiliesstr;</span>
-<span class="fc" id="L377">    }</span>
+<span class="fc" id="L375">        this.inputfamiliesstr = inputfamiliesstr;</span>
+<span class="fc" id="L376">    }</span>
 
     /**
      * @return the inputfamilies
      */
     public Map&lt;String, ProductFamily&gt; getInputfamilies() {
-<span class="fc" id="L383">        return inputfamilies;</span>
+<span class="fc" id="L382">        return inputfamilies;</span>
     }
 
     /**
      * @return the typeOverlap
      */
     public Map&lt;String, Float&gt; getTypeOverlap() {
-<span class="fc" id="L390">        return typeOverlap;</span>
+<span class="fc" id="L389">        return typeOverlap;</span>
     }
 
     /**
      * @return the typeSliceLength
      */
     public Map&lt;String, Float&gt; getTypeSliceLength() {
-<span class="fc" id="L397">        return typeSliceLength;</span>
+<span class="fc" id="L396">        return typeSliceLength;</span>
     }
 
     /**
      * @return the mapTypeMeta
      */
     public Map&lt;String, String&gt; getMapTypeMeta() {
-<span class="fc" id="L404">        return mapTypeMeta;</span>
+<span class="fc" id="L403">        return mapTypeMeta;</span>
     }
 
     /**
@@ -409,31 +408,31 @@ public class JobGeneratorSettings {
      * @param typeOverlap
      */
     public void setTypeOverlap(final Map&lt;String, Float&gt; typeOverlap) {
-<span class="fc" id="L412">        this.typeOverlap = typeOverlap;</span>
-<span class="fc" id="L413">    }</span>
+<span class="fc" id="L411">        this.typeOverlap = typeOverlap;</span>
+<span class="fc" id="L412">    }</span>
 
     /**
      * 
      * @param typeSliceLength
      */
     public void setTypeSliceLength(final Map&lt;String, Float&gt; typeSliceLength) {
-<span class="fc" id="L420">        this.typeSliceLength = typeSliceLength;</span>
-<span class="fc" id="L421">    }</span>
+<span class="fc" id="L419">        this.typeSliceLength = typeSliceLength;</span>
+<span class="fc" id="L420">    }</span>
 
     /**
      * 
      * @param mapTypeMeta
      */
     public void setMapTypeMeta(final Map&lt;String, String&gt; mapTypeMeta) {
-<span class="fc" id="L428">        this.mapTypeMeta = mapTypeMeta;</span>
-<span class="fc" id="L429">    }</span>
+<span class="fc" id="L427">        this.mapTypeMeta = mapTypeMeta;</span>
+<span class="fc" id="L428">    }</span>
 
     /**
      * Display object in JSON format
      */
     @Override
     public String toString() {
-<span class="fc" id="L436">        return &quot;{maxnboftasktable: &quot; + maxnboftasktable + &quot;, maxnumberofjobs: &quot;</span>
+<span class="fc" id="L435">        return &quot;{maxnboftasktable: &quot; + maxnboftasktable + &quot;, maxnumberofjobs: &quot;</span>
                 + maxnumberofjobs + &quot;, waitprimarycheck: &quot; + waitprimarycheck
                 + &quot;, waitmetadatainput: &quot; + waitmetadatainput
                 + &quot;, diroftasktables: &quot; + diroftasktables

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
@@ -62,7 +63,7 @@ public class L1AppJobDispatcher
      * key = {acquisition_satelliteId} 'IW_A' -> {taskTable1.xml;
      * TaskTable2.xml}
      */
-    protected final Map<String, List<String>> routingMap;
+    protected final Map<Pattern, List<String>> routingMap;
 
     /**
      * Path of the routinh XML file
@@ -87,7 +88,7 @@ public class L1AppJobDispatcher
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
         this.xmlConverter = xmlConverter;
-        this.routingMap = new HashMap<String, List<String>>();
+        this.routingMap = new HashMap<Pattern, List<String>>();
         this.pathRoutingXmlFile = pathRoutingXmlFile;
     }
 
@@ -105,7 +106,7 @@ public class L1AppJobDispatcher
                 routing.getRoutes().stream().forEach(route -> {
                     String key = route.getRouteFrom().getAcquisition() + "_"
                             + route.getRouteFrom().getSatelliteId();
-                    this.routingMap.put(key,
+                    this.routingMap.put(Pattern.compile(key, Pattern.CASE_INSENSITIVE),
                             route.getRouteTo().getTaskTables());
                 });
             }
@@ -142,17 +143,20 @@ public class L1AppJobDispatcher
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"
                 + job.getProduct().getSatelliteId();
-        if (this.routingMap.containsKey(key)) {
-            for (String taskTable : this.routingMap.get(key)) {
-                if (this.generators.containsKey(taskTable)) {
-                    taskTables.add(taskTable);
-                } else {
-                    LOGGER.warn(
-                            "[MONITOR] [Step 2] [productName {}] Task table {} not found",
-                            job.getProduct().getProductName(), taskTable);
+        routingMap.forEach((k,v) -> {
+            if (k.matcher(key).matches()) {
+                for (String taskTable : v) {
+                    if (generators.containsKey(taskTable)) {
+                        taskTables.add(taskTable);
+                    } else {
+                        LOGGER.warn(
+                                "[MONITOR] [Step 2] [productName {}] Task table {} not found",
+                                job.getProduct().getProductName(), taskTable);
+                    }
                 }
             }
-        } else {
+        });
+        if (taskTables.isEmpty()) {
             throw new JobGenMissingRoutingEntryException(
                     String.format("No found routing entries for %s", key));
         }

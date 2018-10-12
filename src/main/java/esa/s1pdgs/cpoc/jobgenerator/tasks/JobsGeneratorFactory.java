@@ -14,9 +14,11 @@ import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l0app.L0AppJobsGenerator;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp.L0SegmentAppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobsGenerator;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 @Service
 public class JobsGeneratorFactory {
@@ -46,6 +48,14 @@ public class JobsGeneratorFactory {
      */
     private final OutputProducerFactory outputFactory;
 
+    /**
+     * 
+     * @param l0ProcessSettings
+     * @param jobGeneratorSettings
+     * @param xmlConverter
+     * @param metadataService
+     * @param outputFactory
+     */
     @Autowired
     public JobsGeneratorFactory(final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings jobGeneratorSettings,
@@ -59,8 +69,15 @@ public class JobsGeneratorFactory {
         this.outputFactory = outputFactory;
     }
 
+    /**
+     * 
+     * @param xmlFile
+     * @param appDataService
+     * @return
+     * @throws JobGenBuildTaskTableException
+     */
     public AbstractJobsGenerator<EdrsSessionDto> createJobGeneratorForEdrsSession(
-            File xmlFile,
+            final File xmlFile,
             final AbstractAppCatalogJobService<EdrsSessionDto> appDataService)
             throws JobGenBuildTaskTableException {
         AbstractJobsGenerator<EdrsSessionDto> processor =
@@ -73,12 +90,40 @@ public class JobsGeneratorFactory {
         return processor;
     }
 
+    /**
+     * 
+     * @param xmlFile
+     * @param appDataService
+     * @return
+     * @throws JobGenBuildTaskTableException
+     */
     public AbstractJobsGenerator<LevelProductDto> createJobGeneratorForL0Slice(
-            File xmlFile,
+            final File xmlFile,
             final AbstractAppCatalogJobService<LevelProductDto> appDataService)
             throws JobGenBuildTaskTableException {
         AbstractJobsGenerator<LevelProductDto> processor =
                 new L1AppJobsGenerator(this.xmlConverter,
+                        this.metadataService, this.l0ProcessSettings,
+                        this.jobGeneratorSettings, this.outputFactory,
+                        appDataService);
+        processor.setMode(ProductMode.SLICING);
+        processor.initialize(xmlFile);
+        return processor;
+    }
+
+    /**
+     * 
+     * @param xmlFile
+     * @param appDataService
+     * @return
+     * @throws JobGenBuildTaskTableException
+     */
+    public AbstractJobsGenerator<LevelSegmentDto> createJobGeneratorForL0Segment(
+            final File xmlFile,
+            final AbstractAppCatalogJobService<LevelSegmentDto> appDataService)
+            throws JobGenBuildTaskTableException {
+        AbstractJobsGenerator<LevelSegmentDto> processor =
+                new L0SegmentAppJobsGenerator(this.xmlConverter,
                         this.metadataService, this.l0ProcessSettings,
                         this.jobGeneratorSettings, this.outputFactory,
                         appDataService);

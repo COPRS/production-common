@@ -108,7 +108,6 @@ public class JobGeneratorSettings {
      * Map product type and corresponding metadata index in case of the product
      * type in lowercase in not the metadata index (example: aux_resorb use
      * aux_res)<br/>
-     * Format: acquisition in IW, EW, SM, EM
      */
     private Map<String, String> mapTypeMeta;
 

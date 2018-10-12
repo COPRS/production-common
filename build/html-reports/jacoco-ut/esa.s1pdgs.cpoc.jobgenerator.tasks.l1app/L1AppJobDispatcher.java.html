@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
@@ -49,8 +50,8 @@ public class L1AppJobDispatcher
     /**
      * Logger
      */
-<span class="fc" id="L52">    private static final Logger LOGGER =</span>
-<span class="fc" id="L53">            LogManager.getLogger(L1AppJobDispatcher.class);</span>
+<span class="fc" id="L53">    private static final Logger LOGGER =</span>
+<span class="fc" id="L54">            LogManager.getLogger(L1AppJobDispatcher.class);</span>
 
     /**
      * XML converter
@@ -62,7 +63,7 @@ public class L1AppJobDispatcher
      * key = {acquisition_satelliteId} 'IW_A' -&gt; {taskTable1.xml;
      * TaskTable2.xml}
      */
-    protected final Map&lt;String, List&lt;String&gt;&gt; routingMap;
+    protected final Map&lt;Pattern, List&lt;String&gt;&gt; routingMap;
 
     /**
      * Path of the routinh XML file
@@ -84,12 +85,12 @@ public class L1AppJobDispatcher
             final XmlConverter xmlConverter,
             @Value(&quot;${level1.pathroutingxmlfile}&quot;) String pathRoutingXmlFile,
             @Qualifier(&quot;appCatalogServiceForLevelProducts&quot;) final AbstractAppCatalogJobService&lt;LevelProductDto&gt; appDataService) {
-<span class="fc" id="L87">        super(settings, processSettings, factory, taskScheduler,</span>
+<span class="fc" id="L88">        super(settings, processSettings, factory, taskScheduler,</span>
                 appDataService);
-<span class="fc" id="L89">        this.xmlConverter = xmlConverter;</span>
-<span class="fc" id="L90">        this.routingMap = new HashMap&lt;String, List&lt;String&gt;&gt;();</span>
-<span class="fc" id="L91">        this.pathRoutingXmlFile = pathRoutingXmlFile;</span>
-<span class="fc" id="L92">    }</span>
+<span class="fc" id="L90">        this.xmlConverter = xmlConverter;</span>
+<span class="fc" id="L91">        this.routingMap = new HashMap&lt;Pattern, List&lt;String&gt;&gt;();</span>
+<span class="fc" id="L92">        this.pathRoutingXmlFile = pathRoutingXmlFile;</span>
+<span class="fc" id="L93">    }</span>
 
     /**
      * @throws AbstractCodedException
@@ -99,26 +100,26 @@ public class L1AppJobDispatcher
 
         // Init the routing map from XML file located in the task table folder
         try {
-<span class="fc" id="L102">            L1Routing routing = (L1Routing) xmlConverter</span>
-<span class="fc" id="L103">                    .convertFromXMLToObject(this.pathRoutingXmlFile);</span>
-<span class="pc bpc" id="L104" title="2 of 4 branches missed.">            if (routing != null &amp;&amp; routing.getRoutes() != null) {</span>
-<span class="fc" id="L105">                routing.getRoutes().stream().forEach(route -&gt; {</span>
-<span class="fc" id="L106">                    String key = route.getRouteFrom().getAcquisition() + &quot;_&quot;</span>
-<span class="fc" id="L107">                            + route.getRouteFrom().getSatelliteId();</span>
-<span class="fc" id="L108">                    this.routingMap.put(key,</span>
-<span class="fc" id="L109">                            route.getRouteTo().getTaskTables());</span>
-<span class="fc" id="L110">                });</span>
+<span class="fc" id="L103">            L1Routing routing = (L1Routing) xmlConverter</span>
+<span class="fc" id="L104">                    .convertFromXMLToObject(this.pathRoutingXmlFile);</span>
+<span class="pc bpc" id="L105" title="2 of 4 branches missed.">            if (routing != null &amp;&amp; routing.getRoutes() != null) {</span>
+<span class="fc" id="L106">                routing.getRoutes().stream().forEach(route -&gt; {</span>
+<span class="fc" id="L107">                    String key = route.getRouteFrom().getAcquisition() + &quot;_&quot;</span>
+<span class="fc" id="L108">                            + route.getRouteFrom().getSatelliteId();</span>
+<span class="fc" id="L109">                    this.routingMap.put(Pattern.compile(key, Pattern.CASE_INSENSITIVE),</span>
+<span class="fc" id="L110">                            route.getRouteTo().getTaskTables());</span>
+<span class="fc" id="L111">                });</span>
             }
-<span class="fc" id="L112">        } catch (IOException | JAXBException e) {</span>
-<span class="fc" id="L113">            throw new InternalErrorException(</span>
-<span class="fc" id="L114">                    String.format(&quot;Cannot parse routing XML file located in %s&quot;,</span>
+<span class="fc" id="L113">        } catch (IOException | JAXBException e) {</span>
+<span class="fc" id="L114">            throw new InternalErrorException(</span>
+<span class="fc" id="L115">                    String.format(&quot;Cannot parse routing XML file located in %s&quot;,</span>
                             this.pathRoutingXmlFile),
                     e);
-<span class="fc" id="L117">        }</span>
+<span class="fc" id="L118">        }</span>
         
         // Init job generators from task tables
-<span class="fc" id="L120">        super.initTaskTables();</span>
-<span class="fc" id="L121">    }</span>
+<span class="fc" id="L121">        super.initTaskTables();</span>
+<span class="fc" id="L122">    }</span>
 
     /**
      * 
@@ -126,7 +127,7 @@ public class L1AppJobDispatcher
     @Override
     protected AbstractJobsGenerator&lt;LevelProductDto&gt; createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
-<span class="fc" id="L129">        return this.factory.createJobGeneratorForL0Slice(xmlFile,</span>
+<span class="fc" id="L130">        return this.factory.createJobGeneratorForL0Slice(xmlFile,</span>
                 appDataService);
     }
 
@@ -139,29 +140,32 @@ public class L1AppJobDispatcher
     protected List&lt;String&gt; getTaskTables(
             final AppDataJobDto&lt;LevelProductDto&gt; job)
             throws JobGenMissingRoutingEntryException {
-<span class="fc" id="L142">        List&lt;String&gt; taskTables = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L143">        String key = job.getProduct().getAcquisition() + &quot;_&quot;</span>
-<span class="fc" id="L144">                + job.getProduct().getSatelliteId();</span>
-<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (this.routingMap.containsKey(key)) {</span>
-<span class="fc bfc" id="L146" title="All 2 branches covered.">            for (String taskTable : this.routingMap.get(key)) {</span>
-<span class="pc bpc" id="L147" title="1 of 2 branches missed.">                if (this.generators.containsKey(taskTable)) {</span>
-<span class="fc" id="L148">                    taskTables.add(taskTable);</span>
-                } else {
-<span class="nc" id="L150">                    LOGGER.warn(</span>
-                            &quot;[MONITOR] [Step 2] [productName {}] Task table {} not found&quot;,
-<span class="nc" id="L152">                            job.getProduct().getProductName(), taskTable);</span>
-                }
-<span class="fc" id="L154">            }</span>
-        } else {
-<span class="fc" id="L156">            throw new JobGenMissingRoutingEntryException(</span>
-<span class="fc" id="L157">                    String.format(&quot;No found routing entries for %s&quot;, key));</span>
+<span class="fc" id="L143">        List&lt;String&gt; taskTables = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L144">        String key = job.getProduct().getAcquisition() + &quot;_&quot;</span>
+<span class="fc" id="L145">                + job.getProduct().getSatelliteId();</span>
+<span class="fc" id="L146">        routingMap.forEach((k,v) -&gt; {</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">            if (k.matcher(key).matches()) {</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">                for (String taskTable : v) {</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">                    if (generators.containsKey(taskTable)) {</span>
+<span class="fc" id="L150">                        taskTables.add(taskTable);</span>
+                    } else {
+<span class="nc" id="L152">                        LOGGER.warn(</span>
+                                &quot;[MONITOR] [Step 2] [productName {}] Task table {} not found&quot;,
+<span class="nc" id="L154">                                job.getProduct().getProductName(), taskTable);</span>
+                    }
+<span class="fc" id="L156">                }</span>
+            }
+<span class="fc" id="L158">        });</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (taskTables.isEmpty()) {</span>
+<span class="fc" id="L160">            throw new JobGenMissingRoutingEntryException(</span>
+<span class="fc" id="L161">                    String.format(&quot;No found routing entries for %s&quot;, key));</span>
         }
-<span class="fc" id="L159">        return taskTables;</span>
+<span class="fc" id="L163">        return taskTables;</span>
     }
 
     @Override
     protected String getTaskForFunctionalLog() {
-<span class="nc" id="L164">        return &quot;L1JobGeneration&quot;;</span>
+<span class="nc" id="L168">        return &quot;L1JobGeneration&quot;;</span>
     }
 
 }

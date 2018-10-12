@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.tasks.l1app;
+package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,14 +22,15 @@ import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * Customization of the job generator for L0 slice products
  * 
  * @author Cyrielle Gailliard
  */
-public class L1AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
+public class L0SegmentAppJobsGenerator
+        extends AbstractJobsGenerator<LevelSegmentDto> {
 
     /**
      * @param xmlConverter
@@ -38,12 +39,12 @@ public class L1AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
      * @param taskTablesSettings
      * @param JobsSender
      */
-    public L1AppJobsGenerator(final XmlConverter xmlConverter,
+    public L0SegmentAppJobsGenerator(final XmlConverter xmlConverter,
             final MetadataService metadataService,
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<LevelProductDto> appDataService) {
+            final AbstractAppCatalogJobService<LevelSegmentDto> appDataService) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
@@ -53,7 +54,7 @@ public class L1AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
      * inputs
      */
     @Override
-    protected void preSearch(final JobGeneration<LevelProductDto> job)
+    protected void preSearch(final JobGeneration<LevelSegmentDto> job)
             throws JobGenInputsMissingException {
         Map<String, String> missingMetadata = new HashMap<>();
         // Retrieve instrument configuration id and slice number
@@ -97,7 +98,7 @@ public class L1AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
      * Custom job order before building the job DTO
      */
     @Override
-    protected void customJobOrder(final JobGeneration<LevelProductDto> job) {
+    protected void customJobOrder(final JobGeneration<LevelSegmentDto> job) {
         // Rewrite job order sensing time
         DateTimeFormatter formatterJobOrder =
                 DateTimeFormatter.ofPattern(JobOrderSensingTime.DATE_FORMAT);
@@ -116,17 +117,6 @@ public class L1AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
         this.updateProcParam(job.getJobOrder(), "Mission_Id",
                 job.getAppDataJob().getProduct().getMissionId()
                         + job.getAppDataJob().getProduct().getSatelliteId());
-        this.updateProcParam(job.getJobOrder(), "Slice_Number",
-                "" + job.getAppDataJob().getProduct().getNumberSlice());
-        this.updateProcParam(job.getJobOrder(), "Total_Number_Of_Slices",
-                "" + job.getAppDataJob().getProduct().getTotalNbOfSlice());
-        this.updateProcParam(job.getJobOrder(), "Slice_Overlap",
-                "" + jobGeneratorSettings.getTypeOverlap().get(
-                        job.getAppDataJob().getProduct().getAcquisition()));
-        this.updateProcParam(job.getJobOrder(), "Slice_Length",
-                "" + jobGeneratorSettings.getTypeSliceLength().get(
-                        job.getAppDataJob().getProduct().getAcquisition()));
-        this.updateProcParam(job.getJobOrder(), "Slicing_Flag", "TRUE");
     }
 
     /**
@@ -155,7 +145,7 @@ public class L1AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
      * Customisation of the job DTO before sending it
      */
     @Override
-    protected void customJobDto(final JobGeneration<LevelProductDto> job,
+    protected void customJobDto(final JobGeneration<LevelSegmentDto> job,
             final LevelJobDto dto) {
         // NOTHING TO DO
 

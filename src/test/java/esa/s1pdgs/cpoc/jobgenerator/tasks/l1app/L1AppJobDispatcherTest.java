@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBException;
@@ -45,8 +46,6 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Routing;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobDispatcher;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 
@@ -232,8 +231,8 @@ public class L1AppJobDispatcherTest {
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
         doReturn(TestL1Utils.buildJobGeneration(true)).when(appDataService)
-                .patchJob(Mockito.eq(123L), Mockito.any(),
-                        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+                .patchJob(Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean(),
+                        Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
                 Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));
@@ -284,24 +283,31 @@ public class L1AppJobDispatcherTest {
             verify(jobsGeneratorFactory, times(1))
                     .createJobGeneratorForL0Slice(eq(taskTable4), any());
             assertTrue(dispatcher.getGenerators().size() == this.nbTaskTables);
-            assertTrue(dispatcher.getGenerators().containsKey(taskTable1.getName()));
-            assertTrue(dispatcher.getGenerators().containsKey(taskTable2.getName()));
-            assertTrue(dispatcher.getGenerators().containsKey(taskTable3.getName()));
-            assertTrue(dispatcher.getGenerators().containsKey(taskTable4.getName()));
+            assertTrue(dispatcher.getGenerators()
+                    .containsKey(taskTable1.getName()));
+            assertTrue(dispatcher.getGenerators()
+                    .containsKey(taskTable2.getName()));
+            assertTrue(dispatcher.getGenerators()
+                    .containsKey(taskTable3.getName()));
+            assertTrue(dispatcher.getGenerators()
+                    .containsKey(taskTable4.getName()));
 
             // Verify creation of routing creation
             L1Routing routing = TestL1Utils.buildL1Routing();
+            Map<String, List<String>> expectedRoutingMap = new HashMap<>();
             assertTrue("Invalid number of routes",
                     routing.getRoutes().size() == dispatcher.routingMap.size());
             routing.getRoutes().forEach(route -> {
                 String key = route.getRouteFrom().getAcquisition() + "_"
                         + route.getRouteFrom().getSatelliteId();
-                assertTrue("The key does not exists " + key,
-                        dispatcher.routingMap.containsKey(key));
-                assertTrue("Invalid number of task tables for " + key,
-                        route.getRouteTo().getTaskTables()
-                                .size() == dispatcher.routingMap.get(key)
-                                        .size());
+                expectedRoutingMap.put(key, route.getRouteTo().getTaskTables());
+            });
+
+            dispatcher.routingMap.forEach((k, v) -> {
+                assertTrue("The key does not exists " + k.pattern(),
+                        expectedRoutingMap.containsKey(k.pattern()));
+                assertTrue("Invalid number of task tables for " + k.pattern(),
+                        expectedRoutingMap.get(k.pattern()).size() == v.size());
             });
 
         } catch (AbstractCodedException e) {
@@ -381,6 +387,30 @@ public class L1AppJobDispatcherTest {
     public void testDispatchIWB() throws ParseException {
         try {
             AppDataJobDto<LevelProductDto> jobA = buildAppDataJobDto("B", "IW");
+            this.dispatcher.initialize();
+            assertEquals(3, this.dispatcher.getTaskTables(jobA).size());
+
+        } catch (AbstractCodedException e) {
+            fail("Invalid raised exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDispatchS3A() throws ParseException {
+        try {
+            AppDataJobDto<LevelProductDto> jobA = buildAppDataJobDto("A", "S3");
+            this.dispatcher.initialize();
+            assertEquals(6, this.dispatcher.getTaskTables(jobA).size());
+
+        } catch (AbstractCodedException e) {
+            fail("Invalid raised exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDispatchS5B() throws ParseException {
+        try {
+            AppDataJobDto<LevelProductDto> jobA = buildAppDataJobDto("B", "S5");
             this.dispatcher.initialize();
             assertEquals(3, this.dispatcher.getTaskTables(jobA).size());
 

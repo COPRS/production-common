@@ -294,7 +294,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                     SearchMetadataQuery query = new SearchMetadataQuery(
                             counter.incrementAndGet(), k.getRetrievalMode(),
                             k.getDeltaTime0(), k.getDeltaTime1(), fileType,
-                            this.jobGeneratorSettings.getInputfamilies().get(fileType));
+                            this.jobGeneratorSettings.getInputfamilies()
+                                    .get(fileType));
                     this.metadataSearchQueries.put(counter.get(), query);
                     v.forEach(alt -> {
                         alt.setIdSearchMetadataQuery(counter.get());
@@ -588,8 +589,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                                         this.jobGeneratorSettings
                                                                 .getDefaultfamily());
                                         if (this.jobGeneratorSettings
-                                                .getInputfamilies()
-                                                .containsKey(
+                                                .getInputfamilies().containsKey(
                                                         alt.getFileType())) {
                                             family = this.jobGeneratorSettings
                                                     .getInputfamilies()
@@ -741,7 +741,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
             family = ProductFamily.L1_JOB;
         }
         final LevelJobDto r = new LevelJobDto(family,
-                job.getAppDataJob().getProduct().getProductName(), workingDir,
+                job.getAppDataJob().getProduct().getProductName(),
+                job.getAppDataJob().getProduct().getProcessMode(), workingDir,
                 jobOrder);
 
         try {

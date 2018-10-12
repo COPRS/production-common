@@ -294,21 +294,22 @@ public abstract class AbstractJobsGenerator&lt;T&gt; implements Runnable {
 <span class="fc" id="L294">                    SearchMetadataQuery query = new SearchMetadataQuery(</span>
 <span class="fc" id="L295">                            counter.incrementAndGet(), k.getRetrievalMode(),</span>
 <span class="fc" id="L296">                            k.getDeltaTime0(), k.getDeltaTime1(), fileType,</span>
-<span class="fc" id="L297">                            this.jobGeneratorSettings.getInputfamilies().get(fileType));</span>
-<span class="fc" id="L298">                    this.metadataSearchQueries.put(counter.get(), query);</span>
-<span class="fc" id="L299">                    v.forEach(alt -&gt; {</span>
-<span class="fc" id="L300">                        alt.setIdSearchMetadataQuery(counter.get());</span>
-<span class="fc" id="L301">                    });</span>
-<span class="fc" id="L302">                });</span>
-<span class="fc" id="L303">    }</span>
+<span class="fc" id="L297">                            this.jobGeneratorSettings.getInputfamilies()</span>
+<span class="fc" id="L298">                                    .get(fileType));</span>
+<span class="fc" id="L299">                    this.metadataSearchQueries.put(counter.get(), query);</span>
+<span class="fc" id="L300">                    v.forEach(alt -&gt; {</span>
+<span class="fc" id="L301">                        alt.setIdSearchMetadataQuery(counter.get());</span>
+<span class="fc" id="L302">                    });</span>
+<span class="fc" id="L303">                });</span>
+<span class="fc" id="L304">    }</span>
 
     protected void buildTasks() {
-<span class="fc" id="L306">        this.taskTable.getPools().forEach(pool -&gt; {</span>
-<span class="fc" id="L307">            this.tasks.add(</span>
-<span class="fc" id="L308">                    pool.getTasks().stream().map(TaskTableTask::getFileName)</span>
-<span class="fc" id="L309">                            .collect(Collectors.toList()));</span>
-<span class="fc" id="L310">        });</span>
-<span class="fc" id="L311">    }</span>
+<span class="fc" id="L307">        this.taskTable.getPools().forEach(pool -&gt; {</span>
+<span class="fc" id="L308">            this.tasks.add(</span>
+<span class="fc" id="L309">                    pool.getTasks().stream().map(TaskTableTask::getFileName)</span>
+<span class="fc" id="L310">                            .collect(Collectors.toList()));</span>
+<span class="fc" id="L311">        });</span>
+<span class="fc" id="L312">    }</span>
 
     // ----------------------------------------------------
     // JOB GENERATION
@@ -316,193 +317,193 @@ public abstract class AbstractJobsGenerator&lt;T&gt; implements Runnable {
 
     @Override
     public void run() {
-<span class="fc" id="L319">        JobGeneration&lt;T&gt; job = null;</span>
+<span class="fc" id="L320">        JobGeneration&lt;T&gt; job = null;</span>
 
         // Get a job to generate
         try {
-<span class="fc" id="L323">            List&lt;AppDataJobDto&lt;T&gt;&gt; jobs = appDataService</span>
-<span class="nc" id="L324">                    .findNByPodAndGenerationTaskTableWithNotSentGeneration(</span>
-<span class="fc" id="L325">                            l0ProcessSettings.getHostname(), taskTableXmlName);</span>
+<span class="fc" id="L324">            List&lt;AppDataJobDto&lt;T&gt;&gt; jobs = appDataService</span>
+<span class="nc" id="L325">                    .findNByPodAndGenerationTaskTableWithNotSentGeneration(</span>
+<span class="fc" id="L326">                            l0ProcessSettings.getHostname(), taskTableXmlName);</span>
             // Determine job to process
-<span class="nc bnc" id="L327" title="All 2 branches missed.">            if (CollectionUtils.isEmpty(jobs)) {</span>
-<span class="nc" id="L328">                job = null;</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">            if (CollectionUtils.isEmpty(jobs)) {</span>
+<span class="nc" id="L329">                job = null;</span>
             } else {
-<span class="nc bnc" id="L330" title="All 2 branches missed.">                for (AppDataJobDto&lt;T&gt; appDataJob : jobs) {</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">                for (AppDataJobDto&lt;T&gt; appDataJob : jobs) {</span>
                     // Check if we can do a loop
-<span class="nc" id="L332">                    long currentTimestamp = System.currentTimeMillis();</span>
-<span class="nc" id="L333">                    boolean todo = false;</span>
-<span class="nc" id="L334">                    job = new JobGeneration&lt;&gt;(appDataJob, taskTableXmlName);</span>
-<span class="nc bnc" id="L335" title="All 3 branches missed.">                    switch (job.getGeneration().getState()) {</span>
+<span class="nc" id="L333">                    long currentTimestamp = System.currentTimeMillis();</span>
+<span class="nc" id="L334">                    boolean todo = false;</span>
+<span class="nc" id="L335">                    job = new JobGeneration&lt;&gt;(appDataJob, taskTableXmlName);</span>
+<span class="nc bnc" id="L336" title="All 3 branches missed.">                    switch (job.getGeneration().getState()) {</span>
                         case INITIAL:
-<span class="nc bnc" id="L337" title="All 2 branches missed.">                            if (job.getGeneration().getLastUpdateDate() == null</span>
-<span class="nc" id="L338">                                    || job.getGeneration().getLastUpdateDate()</span>
-<span class="nc" id="L339">                                            .getTime() &lt; currentTimestamp</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">                            if (job.getGeneration().getLastUpdateDate() == null</span>
+<span class="nc" id="L339">                                    || job.getGeneration().getLastUpdateDate()</span>
+<span class="nc" id="L340">                                            .getTime() &lt; currentTimestamp</span>
                                                     - jobGeneratorSettings
-<span class="nc" id="L341">                                                            .getWaitprimarycheck()</span>
-<span class="nc bnc" id="L342" title="All 2 branches missed.">                                                            .getTempo()) {</span>
-<span class="nc" id="L343">                                todo = true;</span>
+<span class="nc" id="L342">                                                            .getWaitprimarycheck()</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">                                                            .getTempo()) {</span>
+<span class="nc" id="L344">                                todo = true;</span>
                             }
                             break;
                         case PRIMARY_CHECK:
-<span class="nc" id="L347">                            if (job.getGeneration().getLastUpdateDate()</span>
-<span class="nc" id="L348">                                    .getTime() &lt; currentTimestamp</span>
+<span class="nc" id="L348">                            if (job.getGeneration().getLastUpdateDate()</span>
+<span class="nc" id="L349">                                    .getTime() &lt; currentTimestamp</span>
                                             - jobGeneratorSettings
-<span class="nc" id="L350">                                                    .getWaitmetadatainput()</span>
-<span class="nc bnc" id="L351" title="All 2 branches missed.">                                                    .getTempo()) {</span>
-<span class="nc" id="L352">                                todo = true;</span>
+<span class="nc" id="L351">                                                    .getWaitmetadatainput()</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">                                                    .getTempo()) {</span>
+<span class="nc" id="L353">                                todo = true;</span>
                             }
                             break;
                         default:
-<span class="nc" id="L356">                            todo = true;</span>
+<span class="nc" id="L357">                            todo = true;</span>
                             break;
                     }
-<span class="nc bnc" id="L359" title="All 2 branches missed.">                    if (todo) {</span>
-<span class="nc" id="L360">                        job.setJobOrder(new JobOrder(this.jobOrderTemplate,</span>
-<span class="nc" id="L361">                                this.l0ProcessSettings.getLevel()));</span>
-<span class="nc bnc" id="L362" title="All 2 branches missed.">                        for (Integer key : metadataSearchQueries.keySet()) {</span>
-<span class="nc" id="L363">                            SearchMetadataQuery query =</span>
-<span class="nc" id="L364">                                    metadataSearchQueries.get(key);</span>
-<span class="nc" id="L365">                            job.getMetadataQueries().put(key,</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">                    if (todo) {</span>
+<span class="nc" id="L361">                        job.setJobOrder(new JobOrder(this.jobOrderTemplate,</span>
+<span class="nc" id="L362">                                this.l0ProcessSettings.getLevel()));</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">                        for (Integer key : metadataSearchQueries.keySet()) {</span>
+<span class="nc" id="L364">                            SearchMetadataQuery query =</span>
+<span class="nc" id="L365">                                    metadataSearchQueries.get(key);</span>
+<span class="nc" id="L366">                            job.getMetadataQueries().put(key,</span>
                                     new SearchMetadataResult(
                                             new SearchMetadataQuery(query)));
-<span class="nc" id="L368">                        }</span>
-<span class="nc" id="L369">                        break;</span>
+<span class="nc" id="L369">                        }</span>
+<span class="nc" id="L370">                        break;</span>
                     } else {
-<span class="nc" id="L371">                        job = null;</span>
+<span class="nc" id="L372">                        job = null;</span>
                     }
-<span class="nc" id="L373">                }</span>
+<span class="nc" id="L374">                }</span>
             }
-<span class="fc" id="L375">        } catch (AbstractCodedException ace) {</span>
-<span class="fc" id="L376">            LOGGER.error(&quot;{} CAnnot retrieve the current jobs: {}&quot;,</span>
-<span class="fc" id="L377">                    this.prefixLogMonitor, ace.getLogMessage());</span>
-<span class="nc" id="L378">        }</span>
+<span class="fc" id="L376">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L377">            LOGGER.error(&quot;{} CAnnot retrieve the current jobs: {}&quot;,</span>
+<span class="fc" id="L378">                    this.prefixLogMonitor, ace.getLogMessage());</span>
+<span class="nc" id="L379">        }</span>
 
-<span class="pc bpc" id="L380" title="1 of 2 branches missed.">        if (job != null) {</span>
-<span class="nc" id="L381">            String productName =</span>
-<span class="nc" id="L382">                    job.getAppDataJob().getProduct().getProductName();</span>
+<span class="pc bpc" id="L381" title="1 of 2 branches missed.">        if (job != null) {</span>
+<span class="nc" id="L382">            String productName =</span>
+<span class="nc" id="L383">                    job.getAppDataJob().getProduct().getProductName();</span>
 
             try {
-<span class="nc" id="L385">                LOGGER.debug(</span>
+<span class="nc" id="L386">                LOGGER.debug(</span>
                         &quot;{} [productName {}] [status {}] Trying job generation&quot;,
                         this.prefixLogMonitor, productName,
-<span class="nc" id="L388">                        job.getGeneration().getState());</span>
+<span class="nc" id="L389">                        job.getGeneration().getState());</span>
 
                 // Check primary input
-<span class="nc" id="L391">                if (job.getGeneration()</span>
-<span class="nc bnc" id="L392" title="All 2 branches missed.">                        .getState() == AppDataJobGenerationDtoState.INITIAL) {</span>
+<span class="nc" id="L392">                if (job.getGeneration()</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                        .getState() == AppDataJobGenerationDtoState.INITIAL) {</span>
                     try {
-<span class="nc bnc" id="L394" title="All 2 branches missed.">                        if (job.getGeneration().getNbErrors() == 0) {</span>
-<span class="nc" id="L395">                            LOGGER.info(</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">                        if (job.getGeneration().getNbErrors() == 0) {</span>
+<span class="nc" id="L396">                            LOGGER.info(</span>
                                     &quot;{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [START] [productName {}] [inputs {}] Trying job generation&quot;,
                                     this.prefixLogMonitor,
-<span class="nc" id="L398">                                    this.taskTable.getLevel(), productName,</span>
-<span class="nc" id="L399">                                    job.getGeneration().getTaskTable());</span>
+<span class="nc" id="L399">                                    this.taskTable.getLevel(), productName,</span>
+<span class="nc" id="L400">                                    job.getGeneration().getTaskTable());</span>
                         }
-<span class="nc" id="L401">                        LOGGER.info(</span>
+<span class="nc" id="L402">                        LOGGER.info(</span>
                                 &quot;{} [productName {}] 1 - Checking the pre-requirements&quot;,
                                 this.prefixLogMonitor, productName);
-<span class="nc" id="L404">                        this.preSearch(job);</span>
-<span class="nc" id="L405">                        AppDataJobDto&lt;T&gt; modifiedJob = appDataService.patchJob(</span>
-<span class="nc" id="L406">                                job.getAppDataJob().getIdentifier(),</span>
-<span class="nc" id="L407">                                job.getAppDataJob(), false, true, false);</span>
-<span class="nc" id="L408">                        job.setAppDataJob(modifiedJob);</span>
-<span class="nc" id="L409">                        updateState(job,</span>
+<span class="nc" id="L405">                        this.preSearch(job);</span>
+<span class="nc" id="L406">                        AppDataJobDto&lt;T&gt; modifiedJob = appDataService.patchJob(</span>
+<span class="nc" id="L407">                                job.getAppDataJob().getIdentifier(),</span>
+<span class="nc" id="L408">                                job.getAppDataJob(), false, true, false);</span>
+<span class="nc" id="L409">                        job.setAppDataJob(modifiedJob);</span>
+<span class="nc" id="L410">                        updateState(job,</span>
                                 AppDataJobGenerationDtoState.PRIMARY_CHECK);
-<span class="nc" id="L411">                    } catch (AbstractCodedException e) {</span>
-<span class="nc" id="L412">                        updateState(job, AppDataJobGenerationDtoState.INITIAL);</span>
-<span class="nc" id="L413">                        LOGGER.error(</span>
+<span class="nc" id="L412">                    } catch (AbstractCodedException e) {</span>
+<span class="nc" id="L413">                        updateState(job, AppDataJobGenerationDtoState.INITIAL);</span>
+<span class="nc" id="L414">                        LOGGER.error(</span>
                                 &quot;{} [productName {}] 1 - Pre-requirements not checked: {}&quot;,
                                 this.prefixLogMonitor, productName,
-<span class="nc" id="L416">                                e.getLogMessage());</span>
-<span class="nc" id="L417">                    }</span>
+<span class="nc" id="L417">                                e.getLogMessage());</span>
+<span class="nc" id="L418">                    }</span>
                 }
 
                 // Search input
-<span class="nc" id="L421">                if (job.getGeneration()</span>
-<span class="nc bnc" id="L422" title="All 2 branches missed.">                        .getState() == AppDataJobGenerationDtoState.PRIMARY_CHECK) {</span>
+<span class="nc" id="L422">                if (job.getGeneration()</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">                        .getState() == AppDataJobGenerationDtoState.PRIMARY_CHECK) {</span>
                     try {
-<span class="nc" id="L424">                        LOGGER.info(&quot;{} [productName {}] 2 - Searching inputs&quot;,</span>
-<span class="nc" id="L425">                                this.prefixLogMonitor, job.getAppDataJob()</span>
-<span class="nc" id="L426">                                        .getProduct().getProductName());</span>
-<span class="nc" id="L427">                        this.inputsSearch(job);</span>
-<span class="nc" id="L428">                        updateState(job, AppDataJobGenerationDtoState.READY);</span>
-<span class="nc" id="L429">                    } catch (AbstractCodedException e) {</span>
-<span class="nc" id="L430">                        updateState(job,</span>
+<span class="nc" id="L425">                        LOGGER.info(&quot;{} [productName {}] 2 - Searching inputs&quot;,</span>
+<span class="nc" id="L426">                                this.prefixLogMonitor, job.getAppDataJob()</span>
+<span class="nc" id="L427">                                        .getProduct().getProductName());</span>
+<span class="nc" id="L428">                        this.inputsSearch(job);</span>
+<span class="nc" id="L429">                        updateState(job, AppDataJobGenerationDtoState.READY);</span>
+<span class="nc" id="L430">                    } catch (AbstractCodedException e) {</span>
+<span class="nc" id="L431">                        updateState(job,</span>
                                 AppDataJobGenerationDtoState.PRIMARY_CHECK);
-<span class="nc" id="L432">                        LOGGER.error(</span>
+<span class="nc" id="L433">                        LOGGER.error(</span>
                                 &quot;{} [productName {}] 2 - Inputs not found: {}&quot;,
                                 this.prefixLogMonitor, productName,
-<span class="nc" id="L435">                                e.getLogMessage());</span>
-<span class="nc" id="L436">                    }</span>
+<span class="nc" id="L436">                                e.getLogMessage());</span>
+<span class="nc" id="L437">                    }</span>
                 }
 
                 // Prepare and send job if ready
-<span class="nc" id="L440">                if (job.getGeneration()</span>
-<span class="nc bnc" id="L441" title="All 2 branches missed.">                        .getState() == AppDataJobGenerationDtoState.READY) {</span>
+<span class="nc" id="L441">                if (job.getGeneration()</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">                        .getState() == AppDataJobGenerationDtoState.READY) {</span>
                     try {
-<span class="nc" id="L443">                        LOGGER.info(&quot;{} [productName {}] 2 - Searching inputs&quot;,</span>
-<span class="nc" id="L444">                                this.prefixLogMonitor, job.getAppDataJob()</span>
-<span class="nc" id="L445">                                        .getProduct().getProductName());</span>
-<span class="nc" id="L446">                        this.inputsSearch(job);</span>
-<span class="nc" id="L447">                        LOGGER.info(&quot;{} [productName {}] 3 - Sending job&quot;,</span>
-<span class="nc" id="L448">                                this.prefixLogMonitor, job.getAppDataJob()</span>
-<span class="nc" id="L449">                                        .getProduct().getProductName());</span>
-<span class="nc" id="L450">                        this.send(job);</span>
-<span class="nc" id="L451">                        updateState(job, AppDataJobGenerationDtoState.SENT);</span>
-<span class="nc" id="L452">                    } catch (AbstractCodedException e) {</span>
-<span class="nc" id="L453">                        updateState(job, AppDataJobGenerationDtoState.READY);</span>
-<span class="nc" id="L454">                        LOGGER.error(&quot;{} [productName {}] 3 - Job not send: {}&quot;,</span>
+<span class="nc" id="L444">                        LOGGER.info(&quot;{} [productName {}] 2 - Searching inputs&quot;,</span>
+<span class="nc" id="L445">                                this.prefixLogMonitor, job.getAppDataJob()</span>
+<span class="nc" id="L446">                                        .getProduct().getProductName());</span>
+<span class="nc" id="L447">                        this.inputsSearch(job);</span>
+<span class="nc" id="L448">                        LOGGER.info(&quot;{} [productName {}] 3 - Sending job&quot;,</span>
+<span class="nc" id="L449">                                this.prefixLogMonitor, job.getAppDataJob()</span>
+<span class="nc" id="L450">                                        .getProduct().getProductName());</span>
+<span class="nc" id="L451">                        this.send(job);</span>
+<span class="nc" id="L452">                        updateState(job, AppDataJobGenerationDtoState.SENT);</span>
+<span class="nc" id="L453">                    } catch (AbstractCodedException e) {</span>
+<span class="nc" id="L454">                        updateState(job, AppDataJobGenerationDtoState.READY);</span>
+<span class="nc" id="L455">                        LOGGER.error(&quot;{} [productName {}] 3 - Job not send: {}&quot;,</span>
                                 this.prefixLogMonitor, productName,
-<span class="nc" id="L456">                                e.getLogMessage());</span>
-<span class="nc" id="L457">                    }</span>
+<span class="nc" id="L457">                                e.getLogMessage());</span>
+<span class="nc" id="L458">                    }</span>
                 }
-<span class="nc" id="L459">            } catch (AbstractCodedException ace) {</span>
-<span class="nc" id="L460">                LOGGER.error(</span>
+<span class="nc" id="L460">            } catch (AbstractCodedException ace) {</span>
+<span class="nc" id="L461">                LOGGER.error(</span>
                         &quot;{} [productName {}] [code ] Cannot generate job: {}&quot;,
                         this.prefixLogMonitor, productName,
-<span class="nc" id="L463">                        ace.getCode().getCode(), ace.getLogMessage());</span>
-<span class="nc" id="L464">            }</span>
+<span class="nc" id="L464">                        ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="nc" id="L465">            }</span>
 
-<span class="nc" id="L466">            LOGGER.info(&quot;{} End&quot;, this.prefixLogMonitor);</span>
+<span class="nc" id="L467">            LOGGER.info(&quot;{} End&quot;, this.prefixLogMonitor);</span>
         }
-<span class="fc" id="L468">    }</span>
+<span class="fc" id="L469">    }</span>
 
     protected void updateState(JobGeneration&lt;T&gt; job,
             AppDataJobGenerationDtoState newState)
             throws AbstractCodedException {
-<span class="nc" id="L473">        AppDataJobDto&lt;T&gt; modifiedJob = appDataService.patchTaskTableOfJob(</span>
-<span class="nc" id="L474">                job.getAppDataJob().getIdentifier(),</span>
-<span class="nc" id="L475">                job.getGeneration().getTaskTable(), newState);</span>
-<span class="nc" id="L476">        job.updateAppDataJob(modifiedJob, taskTableXmlName);</span>
+<span class="nc" id="L474">        AppDataJobDto&lt;T&gt; modifiedJob = appDataService.patchTaskTableOfJob(</span>
+<span class="nc" id="L475">                job.getAppDataJob().getIdentifier(),</span>
+<span class="nc" id="L476">                job.getGeneration().getTaskTable(), newState);</span>
+<span class="nc" id="L477">        job.updateAppDataJob(modifiedJob, taskTableXmlName);</span>
 
         // Log functional logs
-<span class="nc" id="L479">        if (job.getGeneration()</span>
-<span class="nc bnc" id="L480" title="All 2 branches missed.">                .getState() == AppDataJobGenerationDtoState.SENT) {</span>
-<span class="nc bnc" id="L481" title="All 2 branches missed.">            if (newState == AppDataJobGenerationDtoState.SENT) {</span>
+<span class="nc" id="L480">        if (job.getGeneration()</span>
+<span class="nc bnc" id="L481" title="All 2 branches missed.">                .getState() == AppDataJobGenerationDtoState.SENT) {</span>
+<span class="nc bnc" id="L482" title="All 2 branches missed.">            if (newState == AppDataJobGenerationDtoState.SENT) {</span>
                 // TODO addoutputs
-<span class="nc" id="L483">                LOGGER.info(</span>
+<span class="nc" id="L484">                LOGGER.info(</span>
                         &quot;{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [STOP OK] [productName {}] Job generation successfully finished&quot;,
-<span class="nc" id="L485">                        this.prefixLogMonitor, this.taskTable.getLevel(),</span>
-<span class="nc" id="L486">                        job.getAppDataJob().getProduct().getProductName());</span>
+<span class="nc" id="L486">                        this.prefixLogMonitor, this.taskTable.getLevel(),</span>
+<span class="nc" id="L487">                        job.getAppDataJob().getProduct().getProductName());</span>
             } else {
-<span class="nc" id="L488">                LOGGER.error(</span>
+<span class="nc" id="L489">                LOGGER.error(</span>
                         &quot;{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [STOP KO] [productName {}] Job generation finished but job not sent&quot;,
-<span class="nc" id="L490">                        this.prefixLogMonitor, this.taskTable.getLevel(),</span>
-<span class="nc" id="L491">                        job.getAppDataJob().getProduct().getProductName());</span>
+<span class="nc" id="L491">                        this.prefixLogMonitor, this.taskTable.getLevel(),</span>
+<span class="nc" id="L492">                        job.getAppDataJob().getProduct().getProductName());</span>
             }
         }
-<span class="nc bnc" id="L494" title="All 2 branches missed.">        if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {</span>
-<span class="nc" id="L495">            List&lt;String&gt; taskTables = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L496">            job.getAppDataJob().getGenerations().stream().forEach(gen -&gt; {</span>
-<span class="nc" id="L497">                taskTables.add(gen.getTaskTable());</span>
-<span class="nc" id="L498">            });</span>
-<span class="nc" id="L499">            LOGGER.info(</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">        if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {</span>
+<span class="nc" id="L496">            List&lt;String&gt; taskTables = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L497">            job.getAppDataJob().getGenerations().stream().forEach(gen -&gt; {</span>
+<span class="nc" id="L498">                taskTables.add(gen.getTaskTable());</span>
+<span class="nc" id="L499">            });</span>
+<span class="nc" id="L500">            LOGGER.info(</span>
                     &quot;{} [REPORT] [s1pdgsTask {}JobGeneration] [STOP OK] [productName {}] [outputs {}] Job finished&quot;,
-<span class="nc" id="L501">                    this.prefixLogMonitor, this.taskTable.getLevel(),</span>
-<span class="nc" id="L502">                    job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="nc" id="L502">                    this.prefixLogMonitor, this.taskTable.getLevel(),</span>
+<span class="nc" id="L503">                    job.getAppDataJob().getProduct().getProductName(),</span>
                     taskTables);
         }
-<span class="nc" id="L505">    }</span>
+<span class="nc" id="L506">    }</span>
 
     protected abstract void preSearch(JobGeneration&lt;T&gt; job)
             throws JobGenInputsMissingException;
@@ -510,86 +511,85 @@ public abstract class AbstractJobsGenerator&lt;T&gt; implements Runnable {
     protected void inputsSearch(JobGeneration&lt;T&gt; job)
             throws JobGenInputsMissingException {
         // First, we evaluate each input query with no found file
-<span class="nc" id="L513">        LOGGER.info(&quot;{} [productName {}] 2a - Requesting metadata&quot;,</span>
+<span class="nc" id="L514">        LOGGER.info(&quot;{} [productName {}] 2a - Requesting metadata&quot;,</span>
                 this.prefixLogMonitor,
-<span class="nc" id="L515">                job.getAppDataJob().getProduct().getProductName());</span>
-<span class="nc" id="L516">        job.getMetadataQueries().forEach((k, v) -&gt; {</span>
-<span class="nc bnc" id="L517" title="All 4 branches missed.">            if (v != null &amp;&amp; v.getResult() == null) {</span>
+<span class="nc" id="L516">                job.getAppDataJob().getProduct().getProductName());</span>
+<span class="nc" id="L517">        job.getMetadataQueries().forEach((k, v) -&gt; {</span>
+<span class="nc bnc" id="L518" title="All 4 branches missed.">            if (v != null &amp;&amp; v.getResult() == null) {</span>
                 try {
-<span class="nc" id="L519">                    SearchMetadata file = this.metadataService.search(</span>
-<span class="nc" id="L520">                            v.getQuery(),</span>
-<span class="nc" id="L521">                            job.getAppDataJob().getProduct().getStartTime(),</span>
-<span class="nc" id="L522">                            job.getAppDataJob().getProduct().getStopTime(),</span>
-<span class="nc" id="L523">                            job.getAppDataJob().getProduct().getSatelliteId(),</span>
-<span class="nc" id="L524">                            job.getAppDataJob().getProduct().getInsConfId(),</span>
-<span class="nc" id="L525">                            job.getAppDataJob().getProduct().getProcessMode());</span>
-<span class="nc bnc" id="L526" title="All 2 branches missed.">                    if (file != null) {</span>
-<span class="nc" id="L527">                        v.setResult(file);</span>
+<span class="nc" id="L520">                    SearchMetadata file = this.metadataService.search(</span>
+<span class="nc" id="L521">                            v.getQuery(),</span>
+<span class="nc" id="L522">                            job.getAppDataJob().getProduct().getStartTime(),</span>
+<span class="nc" id="L523">                            job.getAppDataJob().getProduct().getStopTime(),</span>
+<span class="nc" id="L524">                            job.getAppDataJob().getProduct().getSatelliteId(),</span>
+<span class="nc" id="L525">                            job.getAppDataJob().getProduct().getInsConfId(),</span>
+<span class="nc" id="L526">                            job.getAppDataJob().getProduct().getProcessMode());</span>
+<span class="nc bnc" id="L527" title="All 2 branches missed.">                    if (file != null) {</span>
+<span class="nc" id="L528">                        v.setResult(file);</span>
                     }
-<span class="nc" id="L529">                } catch (JobGenMetadataException me) {</span>
-<span class="nc" id="L530">                    LOGGER.warn(</span>
+<span class="nc" id="L530">                } catch (JobGenMetadataException me) {</span>
+<span class="nc" id="L531">                    LOGGER.warn(</span>
                             &quot;{} [productName {}] [alternative {}] Exception occurred when searching alternative: {}&quot;,
                             this.prefixLogMonitor,
-<span class="nc" id="L533">                            job.getAppDataJob().getProduct().getProductName(),</span>
-<span class="nc" id="L534">                            v.getQuery().toLogMessage(), me.getMessage());</span>
-<span class="nc" id="L535">                }</span>
+<span class="nc" id="L534">                            job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="nc" id="L535">                            v.getQuery().toLogMessage(), me.getMessage());</span>
+<span class="nc" id="L536">                }</span>
             }
-<span class="nc" id="L537">        });</span>
+<span class="nc" id="L538">        });</span>
 
         // Second, for each task check if input is mandatory and if a file exist
-<span class="nc" id="L540">        LOGGER.info(&quot;{} [productName {}] 2b - Try building inputs&quot;,</span>
+<span class="nc" id="L541">        LOGGER.info(&quot;{} [productName {}] 2b - Try building inputs&quot;,</span>
                 this.prefixLogMonitor,
-<span class="nc" id="L542">                job.getAppDataJob().getProduct().getProductName());</span>
-<span class="nc" id="L543">        int counterProc = 0;</span>
-<span class="nc" id="L544">        Map&lt;String, JobOrderInput&gt; referenceInputs = new HashMap&lt;&gt;();</span>
-<span class="nc bnc" id="L545" title="All 2 branches missed.">        for (TaskTablePool pool : this.taskTable.getPools()) {</span>
-<span class="nc bnc" id="L546" title="All 2 branches missed.">            for (TaskTableTask task : pool.getTasks()) {</span>
-<span class="nc" id="L547">                Map&lt;String, String&gt; missingMetadata = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L548">                List&lt;JobOrderInput&gt; futureInputs = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L549" title="All 2 branches missed.">                for (TaskTableInput input : task.getInputs()) {</span>
+<span class="nc" id="L543">                job.getAppDataJob().getProduct().getProductName());</span>
+<span class="nc" id="L544">        int counterProc = 0;</span>
+<span class="nc" id="L545">        Map&lt;String, JobOrderInput&gt; referenceInputs = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L546" title="All 2 branches missed.">        for (TaskTablePool pool : this.taskTable.getPools()) {</span>
+<span class="nc bnc" id="L547" title="All 2 branches missed.">            for (TaskTableTask task : pool.getTasks()) {</span>
+<span class="nc" id="L548">                Map&lt;String, String&gt; missingMetadata = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L549">                List&lt;JobOrderInput&gt; futureInputs = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L550" title="All 2 branches missed.">                for (TaskTableInput input : task.getInputs()) {</span>
                     // If it is a reference
-<span class="nc bnc" id="L551" title="All 2 branches missed.">                    if (StringUtils.isEmpty(input.getReference())) {</span>
+<span class="nc bnc" id="L552" title="All 2 branches missed.">                    if (StringUtils.isEmpty(input.getReference())) {</span>
 
-<span class="nc bnc" id="L553" title="All 2 branches missed.">                        if (ProductMode.isCompatibleWithTaskTableMode(this.mode,</span>
-<span class="nc" id="L554">                                input.getMode())) {</span>
-<span class="nc" id="L555">                            int currentOrder = 99;</span>
-<span class="nc" id="L556">                            List&lt;JobOrderInput&gt; inputsToAdd = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L557" title="All 2 branches missed.">                            for (TaskTableInputAlternative alt : input</span>
-<span class="nc" id="L558">                                    .getAlternatives()) {</span>
+<span class="nc bnc" id="L554" title="All 2 branches missed.">                        if (ProductMode.isCompatibleWithTaskTableMode(this.mode,</span>
+<span class="nc" id="L555">                                input.getMode())) {</span>
+<span class="nc" id="L556">                            int currentOrder = 99;</span>
+<span class="nc" id="L557">                            List&lt;JobOrderInput&gt; inputsToAdd = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L558" title="All 2 branches missed.">                            for (TaskTableInputAlternative alt : input</span>
+<span class="nc" id="L559">                                    .getAlternatives()) {</span>
                                 // We ignore input not DB
-<span class="nc bnc" id="L560" title="All 2 branches missed.">                                if (alt.getOrigin() == TaskTableInputOrigin.DB) {</span>
-<span class="nc" id="L561">                                    if (job.getMetadataQueries()</span>
-<span class="nc" id="L562">                                            .get(alt.getIdSearchMetadataQuery())</span>
-<span class="nc bnc" id="L563" title="All 2 branches missed.">                                            .getResult() != null) {</span>
-<span class="nc" id="L564">                                        SearchMetadata file = job</span>
-<span class="nc" id="L565">                                                .getMetadataQueries()</span>
-<span class="nc" id="L566">                                                .get(alt.getIdSearchMetadataQuery())</span>
-<span class="nc" id="L567">                                                .getResult();</span>
+<span class="nc bnc" id="L561" title="All 2 branches missed.">                                if (alt.getOrigin() == TaskTableInputOrigin.DB) {</span>
+<span class="nc" id="L562">                                    if (job.getMetadataQueries()</span>
+<span class="nc" id="L563">                                            .get(alt.getIdSearchMetadataQuery())</span>
+<span class="nc bnc" id="L564" title="All 2 branches missed.">                                            .getResult() != null) {</span>
+<span class="nc" id="L565">                                        SearchMetadata file = job</span>
+<span class="nc" id="L566">                                                .getMetadataQueries()</span>
+<span class="nc" id="L567">                                                .get(alt.getIdSearchMetadataQuery())</span>
+<span class="nc" id="L568">                                                .getResult();</span>
 
-<span class="nc" id="L569">                                        JobOrderFileNameType type =</span>
+<span class="nc" id="L570">                                        JobOrderFileNameType type =</span>
                                                 JobOrderFileNameType.BLANK;
-<span class="nc bnc" id="L571" title="All 4 branches missed.">                                        switch (alt.getFileNameType()) {</span>
+<span class="nc bnc" id="L572" title="All 4 branches missed.">                                        switch (alt.getFileNameType()) {</span>
                                             case PHYSICAL:
-<span class="nc" id="L573">                                                type = JobOrderFileNameType.PHYSICAL;</span>
-<span class="nc" id="L574">                                                break;</span>
+<span class="nc" id="L574">                                                type = JobOrderFileNameType.PHYSICAL;</span>
+<span class="nc" id="L575">                                                break;</span>
                                             case DIRECTORY:
-<span class="nc" id="L576">                                                type = JobOrderFileNameType.DIRECTORY;</span>
-<span class="nc" id="L577">                                                break;</span>
+<span class="nc" id="L577">                                                type = JobOrderFileNameType.DIRECTORY;</span>
+<span class="nc" id="L578">                                                break;</span>
                                             case REGEXP:
-<span class="nc" id="L579">                                                type = JobOrderFileNameType.REGEXP;</span>
-<span class="nc" id="L580">                                                break;</span>
+<span class="nc" id="L580">                                                type = JobOrderFileNameType.REGEXP;</span>
+<span class="nc" id="L581">                                                break;</span>
                                             default:
                                                 break;
                                         }
 
                                         // Retrieve family
-<span class="nc" id="L586">                                        ProductFamily family =</span>
-<span class="nc" id="L587">                                                ProductFamily.fromValue(</span>
+<span class="nc" id="L587">                                        ProductFamily family =</span>
+<span class="nc" id="L588">                                                ProductFamily.fromValue(</span>
                                                         this.jobGeneratorSettings
-<span class="nc" id="L589">                                                                .getDefaultfamily());</span>
-<span class="nc" id="L590">                                        if (this.jobGeneratorSettings</span>
-<span class="nc" id="L591">                                                .getInputfamilies()</span>
-<span class="nc bnc" id="L592" title="All 2 branches missed.">                                                .containsKey(</span>
+<span class="nc" id="L590">                                                                .getDefaultfamily());</span>
+<span class="nc" id="L591">                                        if (this.jobGeneratorSettings</span>
+<span class="nc bnc" id="L592" title="All 2 branches missed.">                                                .getInputfamilies().containsKey(</span>
 <span class="nc" id="L593">                                                        alt.getFileType())) {</span>
 <span class="nc" id="L594">                                            family = this.jobGeneratorSettings</span>
 <span class="nc" id="L595">                                                    .getInputfamilies()</span>
@@ -741,88 +741,89 @@ public abstract class AbstractJobsGenerator&lt;T&gt; implements Runnable {
 <span class="nc" id="L741">            family = ProductFamily.L1_JOB;</span>
         }
 <span class="nc" id="L743">        final LevelJobDto r = new LevelJobDto(family,</span>
-<span class="nc" id="L744">                job.getAppDataJob().getProduct().getProductName(), workingDir,</span>
+<span class="nc" id="L744">                job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="nc" id="L745">                job.getAppDataJob().getProduct().getProcessMode(), workingDir,</span>
                 jobOrder);
 
         try {
 
             // Add jobOrder inputs to the DTO
-<span class="nc" id="L750">            List&lt;JobOrderInput&gt; distinctInputJobOrder = job.getJobOrder()</span>
-<span class="nc" id="L751">                    .getProcs().stream()</span>
-<span class="nc bnc" id="L752" title="All 2 branches missed.">                    .filter(proc -&gt; proc != null</span>
-<span class="nc bnc" id="L753" title="All 2 branches missed.">                            &amp;&amp; !CollectionUtils.isEmpty(proc.getInputs()))</span>
-<span class="nc" id="L754">                    .flatMap(proc -&gt; proc.getInputs().stream()).distinct()</span>
-<span class="nc" id="L755">                    .collect(Collectors.toList());</span>
-<span class="nc" id="L756">            r.addInputs(distinctInputJobOrder.stream()</span>
-<span class="nc" id="L757">                    .map(input -&gt; new LevelJobInputDto(input.getFamily().name(),</span>
-<span class="nc" id="L758">                            input.getFilenames().get(0).getFilename(),</span>
-<span class="nc" id="L759">                            input.getFilenames().get(0).getKeyObjectStorage()))</span>
-<span class="nc" id="L760">                    .collect(Collectors.toList()));</span>
+<span class="nc" id="L751">            List&lt;JobOrderInput&gt; distinctInputJobOrder = job.getJobOrder()</span>
+<span class="nc" id="L752">                    .getProcs().stream()</span>
+<span class="nc bnc" id="L753" title="All 2 branches missed.">                    .filter(proc -&gt; proc != null</span>
+<span class="nc bnc" id="L754" title="All 2 branches missed.">                            &amp;&amp; !CollectionUtils.isEmpty(proc.getInputs()))</span>
+<span class="nc" id="L755">                    .flatMap(proc -&gt; proc.getInputs().stream()).distinct()</span>
+<span class="nc" id="L756">                    .collect(Collectors.toList());</span>
+<span class="nc" id="L757">            r.addInputs(distinctInputJobOrder.stream()</span>
+<span class="nc" id="L758">                    .map(input -&gt; new LevelJobInputDto(input.getFamily().name(),</span>
+<span class="nc" id="L759">                            input.getFilenames().get(0).getFilename(),</span>
+<span class="nc" id="L760">                            input.getFilenames().get(0).getKeyObjectStorage()))</span>
+<span class="nc" id="L761">                    .collect(Collectors.toList()));</span>
 
             // Add the jobOrder itself in inputs
-<span class="nc" id="L763">            r.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(),</span>
+<span class="nc" id="L764">            r.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(),</span>
                     jobOrder, xmlConverter
-<span class="nc" id="L765">                            .convertFromObjectToXMLString(job.getJobOrder())));</span>
+<span class="nc" id="L766">                            .convertFromObjectToXMLString(job.getJobOrder())));</span>
 
             // Add joborder output to the DTO
-<span class="nc" id="L768">            List&lt;JobOrderOutput&gt; distinctOutputJobOrder = job.getJobOrder()</span>
-<span class="nc" id="L769">                    .getProcs().stream()</span>
-<span class="nc bnc" id="L770" title="All 2 branches missed.">                    .filter(proc -&gt; proc != null</span>
-<span class="nc bnc" id="L771" title="All 2 branches missed.">                            &amp;&amp; !CollectionUtils.isEmpty(proc.getOutputs()))</span>
-<span class="nc" id="L772">                    .flatMap(proc -&gt; proc.getOutputs().stream())</span>
-<span class="nc" id="L773">                    .filter(output -&gt; output</span>
-<span class="nc bnc" id="L774" title="All 2 branches missed.">                            .getFileNameType() == JobOrderFileNameType.REGEXP</span>
+<span class="nc" id="L769">            List&lt;JobOrderOutput&gt; distinctOutputJobOrder = job.getJobOrder()</span>
+<span class="nc" id="L770">                    .getProcs().stream()</span>
+<span class="nc bnc" id="L771" title="All 2 branches missed.">                    .filter(proc -&gt; proc != null</span>
+<span class="nc bnc" id="L772" title="All 2 branches missed.">                            &amp;&amp; !CollectionUtils.isEmpty(proc.getOutputs()))</span>
+<span class="nc" id="L773">                    .flatMap(proc -&gt; proc.getOutputs().stream())</span>
+<span class="nc" id="L774">                    .filter(output -&gt; output</span>
+<span class="nc bnc" id="L775" title="All 2 branches missed.">                            .getFileNameType() == JobOrderFileNameType.REGEXP</span>
                             &amp;&amp; output
-<span class="nc bnc" id="L776" title="All 2 branches missed.">                                    .getDestination() == JobOrderDestination.DB)</span>
-<span class="nc" id="L777">                    .distinct().collect(Collectors.toList());</span>
-<span class="nc" id="L778">            r.addOutputs(distinctOutputJobOrder.stream()</span>
-<span class="nc" id="L779">                    .map(output -&gt; new LevelJobOutputDto(</span>
-<span class="nc" id="L780">                            output.getFamily().name(), output.getFileName()))</span>
-<span class="nc" id="L781">                    .collect(Collectors.toList()));</span>
-<span class="nc" id="L782">            List&lt;JobOrderOutput&gt; distinctOutputJobOrderNotRegexp = job</span>
-<span class="nc" id="L783">                    .getJobOrder().getProcs().stream()</span>
-<span class="nc bnc" id="L784" title="All 2 branches missed.">                    .filter(proc -&gt; proc != null</span>
-<span class="nc bnc" id="L785" title="All 2 branches missed.">                            &amp;&amp; !CollectionUtils.isEmpty(proc.getOutputs()))</span>
-<span class="nc" id="L786">                    .flatMap(proc -&gt; proc.getOutputs().stream())</span>
-<span class="nc" id="L787">                    .filter(output -&gt; output</span>
-<span class="nc bnc" id="L788" title="All 2 branches missed.">                            .getFileNameType() == JobOrderFileNameType.DIRECTORY</span>
+<span class="nc bnc" id="L777" title="All 2 branches missed.">                                    .getDestination() == JobOrderDestination.DB)</span>
+<span class="nc" id="L778">                    .distinct().collect(Collectors.toList());</span>
+<span class="nc" id="L779">            r.addOutputs(distinctOutputJobOrder.stream()</span>
+<span class="nc" id="L780">                    .map(output -&gt; new LevelJobOutputDto(</span>
+<span class="nc" id="L781">                            output.getFamily().name(), output.getFileName()))</span>
+<span class="nc" id="L782">                    .collect(Collectors.toList()));</span>
+<span class="nc" id="L783">            List&lt;JobOrderOutput&gt; distinctOutputJobOrderNotRegexp = job</span>
+<span class="nc" id="L784">                    .getJobOrder().getProcs().stream()</span>
+<span class="nc bnc" id="L785" title="All 2 branches missed.">                    .filter(proc -&gt; proc != null</span>
+<span class="nc bnc" id="L786" title="All 2 branches missed.">                            &amp;&amp; !CollectionUtils.isEmpty(proc.getOutputs()))</span>
+<span class="nc" id="L787">                    .flatMap(proc -&gt; proc.getOutputs().stream())</span>
+<span class="nc" id="L788">                    .filter(output -&gt; output</span>
+<span class="nc bnc" id="L789" title="All 2 branches missed.">                            .getFileNameType() == JobOrderFileNameType.DIRECTORY</span>
                             &amp;&amp; output
-<span class="nc bnc" id="L790" title="All 2 branches missed.">                                    .getDestination() == JobOrderDestination.DB)</span>
-<span class="nc" id="L791">                    .distinct().collect(Collectors.toList());</span>
-<span class="nc" id="L792">            r.addOutputs(distinctOutputJobOrderNotRegexp</span>
-<span class="nc" id="L793">                    .stream().map(</span>
-<span class="nc" id="L794">                            output -&gt; new LevelJobOutputDto(</span>
-<span class="nc" id="L795">                                    output.getFamily().name(),</span>
-<span class="nc" id="L796">                                    output.getFileName() + &quot;^.*&quot;</span>
-<span class="nc" id="L797">                                            + output.getFileType() + &quot;.*$&quot;))</span>
-<span class="nc" id="L798">                    .collect(Collectors.toList()));</span>
+<span class="nc bnc" id="L791" title="All 2 branches missed.">                                    .getDestination() == JobOrderDestination.DB)</span>
+<span class="nc" id="L792">                    .distinct().collect(Collectors.toList());</span>
+<span class="nc" id="L793">            r.addOutputs(distinctOutputJobOrderNotRegexp</span>
+<span class="nc" id="L794">                    .stream().map(</span>
+<span class="nc" id="L795">                            output -&gt; new LevelJobOutputDto(</span>
+<span class="nc" id="L796">                                    output.getFamily().name(),</span>
+<span class="nc" id="L797">                                    output.getFileName() + &quot;^.*&quot;</span>
+<span class="nc" id="L798">                                            + output.getFileType() + &quot;.*$&quot;))</span>
+<span class="nc" id="L799">                    .collect(Collectors.toList()));</span>
 
             // Add the tasks
-<span class="nc" id="L801">            this.tasks.forEach(pool -&gt; {</span>
-<span class="nc" id="L802">                LevelJobPoolDto poolDto = new LevelJobPoolDto();</span>
-<span class="nc" id="L803">                pool.forEach(task -&gt; {</span>
-<span class="nc" id="L804">                    poolDto.addTask(new LevelJobTaskDto(task));</span>
-<span class="nc" id="L805">                });</span>
-<span class="nc" id="L806">                r.addPool(poolDto);</span>
-<span class="nc" id="L807">            });</span>
+<span class="nc" id="L802">            this.tasks.forEach(pool -&gt; {</span>
+<span class="nc" id="L803">                LevelJobPoolDto poolDto = new LevelJobPoolDto();</span>
+<span class="nc" id="L804">                pool.forEach(task -&gt; {</span>
+<span class="nc" id="L805">                    poolDto.addTask(new LevelJobTaskDto(task));</span>
+<span class="nc" id="L806">                });</span>
+<span class="nc" id="L807">                r.addPool(poolDto);</span>
+<span class="nc" id="L808">            });</span>
 
             // Apply implementation build job
-<span class="nc" id="L810">            LOGGER.info(&quot;{} [productName {}] 3b - Building custom job&quot;,</span>
+<span class="nc" id="L811">            LOGGER.info(&quot;{} [productName {}] 3b - Building custom job&quot;,</span>
                     this.prefixLogMonitor,
-<span class="nc" id="L812">                    job.getAppDataJob().getProduct().getProductName());</span>
-<span class="nc" id="L813">            this.customJobDto(job, r);</span>
+<span class="nc" id="L813">                    job.getAppDataJob().getProduct().getProductName());</span>
+<span class="nc" id="L814">            this.customJobDto(job, r);</span>
 
-<span class="nc" id="L815">        } catch (IOException | JAXBException e) {</span>
-<span class="nc" id="L816">            throw new InternalErrorException(&quot;Cannot send the job&quot;, e);</span>
-<span class="nc" id="L817">        }</span>
+<span class="nc" id="L816">        } catch (IOException | JAXBException e) {</span>
+<span class="nc" id="L817">            throw new InternalErrorException(&quot;Cannot send the job&quot;, e);</span>
+<span class="nc" id="L818">        }</span>
 
         // Thrid, send the job
-<span class="nc" id="L820">        LOGGER.info(&quot;{} [productName {}] 3c - Publishing job&quot;,</span>
+<span class="nc" id="L821">        LOGGER.info(&quot;{} [productName {}] 3c - Publishing job&quot;,</span>
                 this.prefixLogMonitor,
-<span class="nc" id="L822">                job.getAppDataJob().getProduct().getProductName());</span>
+<span class="nc" id="L823">                job.getAppDataJob().getProduct().getProductName());</span>
 
-<span class="nc" id="L824">        this.outputFactory.sendJob(job.getAppDataJob().getMessages().get(0), r);</span>
-<span class="nc" id="L825">    }</span>
+<span class="nc" id="L825">        this.outputFactory.sendJob(job.getAppDataJob().getMessages().get(0), r);</span>
+<span class="nc" id="L826">    }</span>
 
     protected abstract void customJobOrder(JobGeneration&lt;T&gt; job);
 

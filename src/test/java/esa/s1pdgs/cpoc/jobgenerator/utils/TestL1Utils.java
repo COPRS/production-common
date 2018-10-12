@@ -50,12 +50,12 @@ public class TestL1Utils {
                 new L1RouteTo(Arrays.asList("IW_RAW__0_SLC__1.xml",
                         "IW_RAW__0_SLC__1_GRDH_1.xml",
                         "IW_RAW__0_SLC__1_GRDM_1.xml"))));
-        r.addRoute(new L1Route(new L1RouteFrom("SM", "A"),
+        r.addRoute(new L1Route(new L1RouteFrom("S[1-6]", "A"),
                 new L1RouteTo(Arrays.asList("SM_RAW__0_GRDF_1.xml",
                         "SM_RAW__0_GRDH_1.xml", "SM_RAW__0_GRDM_1.xml",
                         "SM_RAW__0_SLC__1.xml", "SM_RAW__0_SLC__1_GRDF_1.xml",
                         "SM_RAW__0_SLC__1_GRDH_1.xml"))));
-        r.addRoute(new L1Route(new L1RouteFrom("SM", "B"),
+        r.addRoute(new L1Route(new L1RouteFrom("S[1-6]", "B"),
                 new L1RouteTo(Arrays.asList("SM_RAW__0_SLC__1.xml",
                         "SM_RAW__0_SLC__1_GRDF_1.xml",
                         "SM_RAW__0_SLC__1_GRDH_1.xml"))));
@@ -91,6 +91,7 @@ public class TestL1Utils {
         product.setStartTime(DateUtils.convertDateIso("20171213T121623"));
         product.setStopTime(DateUtils.convertDateIso("20171213T121656"));
         product.setAcquisition("IW");
+        product.setProcessMode("NRT");
         if (preSearchInfo) {
             product.setProductType("IW_RAW__0S");
             product.setDataTakeId("021735");

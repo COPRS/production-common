@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L0SegmentAppJobDispatcher.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp</a> &gt; <span class="el_source">L0SegmentAppJobDispatcher.java</span></div><h1>L0SegmentAppJobDispatcher.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Service;
+
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
+import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+
+/**
+ * Dispatcher of L0 slice product&lt;br/&gt;
+ * 1 product to 1 or several task table&lt;br/&gt;
+ * The routing is given in a XML file and is done by mapping the acquisition and
+ * the mission and satellite identifier to a list of task tables
+ * 
+ * @author Cyrielle Gailliard
+ */
+@Service
+@ConditionalOnProperty(name = &quot;process.level&quot;, havingValue = &quot;L0_SEGMENT&quot;)
+public class L0SegmentAppJobDispatcher
+        extends AbstractJobsDispatcher&lt;LevelSegmentDto&gt; {
+
+    /**
+     * Task table
+     */
+    private static final String TASK_TABLE_NAME = &quot;TaskTable.L0ASP.xml&quot;;
+
+    /**
+     * @param settings
+     * @param factory
+     * @param taskScheduler
+     * @param xmlConverter
+     * @param pathRoutingXmlFile
+     */
+    @Autowired
+    public L0SegmentAppJobDispatcher(final JobGeneratorSettings settings,
+            final ProcessSettings processSettings,
+            final JobsGeneratorFactory factory,
+            final ThreadPoolTaskScheduler taskScheduler,
+            @Qualifier(&quot;appCatalogServiceForLevelSegments&quot;) final AbstractAppCatalogJobService&lt;LevelSegmentDto&gt; appDataService) {
+<span class="nc" id="L57">        super(settings, processSettings, factory, taskScheduler,</span>
+                appDataService);
+<span class="nc" id="L59">    }</span>
+
+    /**
+     * @throws AbstractCodedException
+     */
+    @PostConstruct
+    public void initialize() throws AbstractCodedException {
+        // Init job generators from task tables
+<span class="nc" id="L67">        super.initTaskTables();</span>
+<span class="nc" id="L68">    }</span>
+
+    /**
+     * 
+     */
+    @Override
+    protected AbstractJobsGenerator&lt;LevelSegmentDto&gt; createJobGenerator(
+            final File xmlFile) throws AbstractCodedException {
+<span class="nc" id="L76">        return this.factory.createJobGeneratorForL0Segment(xmlFile,</span>
+                appDataService);
+    }
+
+    /**
+     * Get task tables to generate for given job
+     * 
+     * @throws JobGenMissingRoutingEntryException
+     */
+    @Override
+    protected List&lt;String&gt; getTaskTables(
+            final AppDataJobDto&lt;LevelSegmentDto&gt; job)
+            throws JobGenMissingRoutingEntryException {
+<span class="nc" id="L89">        return Arrays.asList(TASK_TABLE_NAME);</span>
+    }
+
+    @Override
+    protected String getTaskForFunctionalLog() {
+<span class="nc" id="L94">        return &quot;L0SegmentJobGeneration&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

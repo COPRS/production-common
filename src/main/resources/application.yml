@@ -34,6 +34,15 @@ job-generator:
     WM: 0.0F
   map-type-meta:                                             # !!!!  
     AUX_RES: AUX_RESORB
+    SM_RAW__0S: S[1-6]_RAW__0S
+    SM_RAW__0A: S[1-6]_RAW__0A
+    SM_RAW__0C: S[1-6]_RAW__0C
+    SM_RAW__0N: S[1-6]_RAW__0N
+    AN_RAW__0S: N[1-6]_RAW__0S
+    AN_RAW__0A: N[1-6]_RAW__0A
+    AN_RAW__0C: N[1-6]_RAW__0C
+    AN_RAW__0N: N[1-6]_RAW__0N
+    
     
 status:
   delete-fixed-delay-ms: 1800000                                   # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
