@@ -71,7 +71,7 @@ public class LevelJobsMqiServiceTest {
         service = new LevelJobsMqiService(restTemplate, "uri", 2, 500);
 
         message = new LevelJobsMessageDto(123, "input-key", new LevelJobDto(
-                ProductFamily.L0_JOB, "name", "workdir", "joborder"));
+                ProductFamily.L0_JOB, "name", "FAST", "workdir", "joborder"));
     }
 
     /**
