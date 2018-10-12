@@ -20,6 +20,11 @@ public class ApplicationProperties {
      * Application level
      */
     private ApplicationLevel level;
+    
+    /**
+     * Process mode
+     */
+    private String mode;
 
     /**
      * Timeout (in seconds) for waiting end of several tasks
@@ -65,14 +70,14 @@ public class ApplicationProperties {
      * Default constructor
      */
     public ApplicationProperties() {
-<span class="fc" id="L68">        super();</span>
-<span class="fc" id="L69">    }</span>
+<span class="fc" id="L73">        super();</span>
+<span class="fc" id="L74">    }</span>
 
     /**
      * @return the level
      */
     public ApplicationLevel getLevel() {
-<span class="fc" id="L75">        return level;</span>
+<span class="fc" id="L80">        return level;</span>
     }
 
     /**
@@ -80,14 +85,28 @@ public class ApplicationProperties {
      *            the level to set
      */
     public void setLevel(final ApplicationLevel level) {
-<span class="fc" id="L83">        this.level = level;</span>
-<span class="fc" id="L84">    }</span>
+<span class="fc" id="L88">        this.level = level;</span>
+<span class="fc" id="L89">    }</span>
+
+    /**
+     * @return the mode
+     */
+    public String getMode() {
+<span class="nc" id="L95">        return mode;</span>
+    }
+
+    /**
+     * @param mode the mode to set
+     */
+    public void setMode(String mode) {
+<span class="nc" id="L102">        this.mode = mode;</span>
+<span class="nc" id="L103">    }</span>
 
     /**
      * @return the tmProcAllTasksS
      */
     public long getTmProcAllTasksS() {
-<span class="fc" id="L90">        return tmProcAllTasksS;</span>
+<span class="fc" id="L109">        return tmProcAllTasksS;</span>
     }
 
     /**
@@ -95,14 +114,14 @@ public class ApplicationProperties {
      *            the tmProcAllTasksS to set
      */
     public void setTmProcAllTasksS(final long tmProcAllTasksS) {
-<span class="fc" id="L98">        this.tmProcAllTasksS = tmProcAllTasksS;</span>
-<span class="fc" id="L99">    }</span>
+<span class="fc" id="L117">        this.tmProcAllTasksS = tmProcAllTasksS;</span>
+<span class="fc" id="L118">    }</span>
 
     /**
      * @return the tmProcOneTaskS
      */
     public long getTmProcOneTaskS() {
-<span class="fc" id="L105">        return tmProcOneTaskS;</span>
+<span class="fc" id="L124">        return tmProcOneTaskS;</span>
     }
 
     /**
@@ -110,14 +129,14 @@ public class ApplicationProperties {
      *            the tmProcOneTaskS to set
      */
     public void setTmProcOneTaskS(final long tmProcOneTaskS) {
-<span class="fc" id="L113">        this.tmProcOneTaskS = tmProcOneTaskS;</span>
-<span class="fc" id="L114">    }</span>
+<span class="fc" id="L132">        this.tmProcOneTaskS = tmProcOneTaskS;</span>
+<span class="fc" id="L133">    }</span>
 
     /**
      * @return the tmProcStopS
      */
     public long getTmProcStopS() {
-<span class="fc" id="L120">        return tmProcStopS;</span>
+<span class="fc" id="L139">        return tmProcStopS;</span>
     }
 
     /**
@@ -125,14 +144,14 @@ public class ApplicationProperties {
      *            the tmProcStopS to set
      */
     public void setTmProcStopS(final long tmProcStopS) {
-<span class="fc" id="L128">        this.tmProcStopS = tmProcStopS;</span>
-<span class="fc" id="L129">    }</span>
+<span class="fc" id="L147">        this.tmProcStopS = tmProcStopS;</span>
+<span class="fc" id="L148">    }</span>
 
     /**
      * @return the tmProcCheckStopS
      */
     public long getTmProcCheckStopS() {
-<span class="fc" id="L135">        return tmProcCheckStopS;</span>
+<span class="fc" id="L154">        return tmProcCheckStopS;</span>
     }
 
     /**
@@ -140,14 +159,14 @@ public class ApplicationProperties {
      *            the tmProcCheckStopS to set
      */
     public void setTmProcCheckStopS(final long tmProcCheckStopS) {
-<span class="fc" id="L143">        this.tmProcCheckStopS = tmProcCheckStopS;</span>
-<span class="fc" id="L144">    }</span>
+<span class="fc" id="L162">        this.tmProcCheckStopS = tmProcCheckStopS;</span>
+<span class="fc" id="L163">    }</span>
 
     /**
      * @return the sizeBatchS3Upload
      */
     public int getSizeBatchUpload() {
-<span class="fc" id="L150">        return sizeBatchUpload;</span>
+<span class="fc" id="L169">        return sizeBatchUpload;</span>
     }
 
     /**
@@ -155,14 +174,14 @@ public class ApplicationProperties {
      *            the sizeBatchS3Upload to set
      */
     public void setSizeBatchUpload(final int sizeBatchS3Upload) {
-<span class="fc" id="L158">        this.sizeBatchUpload = sizeBatchS3Upload;</span>
-<span class="fc" id="L159">    }</span>
+<span class="fc" id="L177">        this.sizeBatchUpload = sizeBatchS3Upload;</span>
+<span class="fc" id="L178">    }</span>
 
     /**
      * @return the sizeBatchS3Download
      */
     public int getSizeBatchDownload() {
-<span class="fc" id="L165">        return sizeBatchDownload;</span>
+<span class="fc" id="L184">        return sizeBatchDownload;</span>
     }
 
     /**
@@ -170,14 +189,14 @@ public class ApplicationProperties {
      *            the sizeBatchS3Download to set
      */
     public void setSizeBatchDownload(final int sizeBatchS3Download) {
-<span class="fc" id="L173">        this.sizeBatchDownload = sizeBatchS3Download;</span>
-<span class="fc" id="L174">    }</span>
+<span class="fc" id="L192">        this.sizeBatchDownload = sizeBatchS3Download;</span>
+<span class="fc" id="L193">    }</span>
 
     /**
      * @return the waitActiveProcessNbMaxLoop
      */
     public int getWapNbMaxLoop() {
-<span class="fc" id="L180">        return wapNbMaxLoop;</span>
+<span class="fc" id="L199">        return wapNbMaxLoop;</span>
     }
 
     /**
@@ -185,14 +204,14 @@ public class ApplicationProperties {
      *            the waitActiveProcessNbMaxLoop to set
      */
     public void setWapNbMaxLoop(final int waitActiveProcessNbMaxLoop) {
-<span class="fc" id="L188">        this.wapNbMaxLoop = waitActiveProcessNbMaxLoop;</span>
-<span class="fc" id="L189">    }</span>
+<span class="fc" id="L207">        this.wapNbMaxLoop = waitActiveProcessNbMaxLoop;</span>
+<span class="fc" id="L208">    }</span>
 
     /**
      * @return the waitActiveProcessTempoS
      */
     public long getWapTempoS() {
-<span class="fc" id="L195">        return wapTempoS;</span>
+<span class="fc" id="L214">        return wapTempoS;</span>
     }
 
     /**
@@ -200,8 +219,8 @@ public class ApplicationProperties {
      *            the waitActiveProcessTempoS to set
      */
     public void setWapTempoS(final long waitActiveProcessTempoS) {
-<span class="fc" id="L203">        this.wapTempoS = waitActiveProcessTempoS;</span>
-<span class="fc" id="L204">    }</span>
+<span class="fc" id="L222">        this.wapTempoS = waitActiveProcessTempoS;</span>
+<span class="fc" id="L223">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

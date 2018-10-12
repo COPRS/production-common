@@ -158,7 +158,7 @@ public class JobProcessor {
         // Initialize processing
         // ------------------------------------------------------
         LevelJobDto job = message.getBody();
-        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [START] Start L0 Job generation",
+        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [START] Start job processing",
         		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_READ, job), job.getProductIdentifier());
         File workdir = new File(job.getWorkDirectory());
         // Remove working directory if exist
@@ -170,6 +170,8 @@ public class JobProcessor {
                 job.getWorkDirectory() + workdir.getName() + ".LIST";
         if (properties.getLevel() == ApplicationLevel.L0) {
             outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
+        } else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
+            outputListFile = job.getWorkDirectory() + "L0ASPProcList.LIST";
         }
         // Initialize the pool processor executor
         PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties,
@@ -195,7 +197,7 @@ public class JobProcessor {
         processJob(message, inputDownloader, outputProcessor, procExecutorSrv,
                 procCompletionSrv, procExecutor);
 
-        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [STOP OK] End L0 job generation",
+        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [STOP OK] End job processing",
         		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_END, job), job.getProductIdentifier());
 
     }

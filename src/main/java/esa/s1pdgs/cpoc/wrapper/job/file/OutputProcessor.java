@@ -97,11 +97,12 @@ public class OutputProcessor {
      * Prefix before each monitor logs
      */
     private final String prefixMonitorLogs;
-    
+
     /**
      * Application level
      */
     private final ApplicationLevel appLevel;
+
     /**
      * Constructor
      * 
@@ -166,13 +167,10 @@ public class OutputProcessor {
 
         for (String line : lines) {
 
-            // Extract the product name, the complete filepath, job output and the mode
+            // Extract the product name, the complete filepath, job output and
+            // the mode
             String productName = getProductName(line);
             String filePath = getFilePath(line, productName);
-            String mode = "NONE";
-            if(line.contains("NRT")||line.contains("FAST")) {
-                mode = line.substring(0, line.indexOf(File.separator));
-            }
             LevelJobOutputDto matchOutput = getMatchOutput(productName);
 
             // If match process output
@@ -194,26 +192,39 @@ public class OutputProcessor {
                                 productName, new File(filePath)));
                         break;
                     case L0_SLICE:
-                        if("NRT".equals(mode)) {
+                        // Specific case of the L0 wrapper
+                        if (appLevel == ApplicationLevel.L0) {
+                            if (line.contains("NRT")) {
+                                LOGGER.info(
+                                        "Output {} is considered as belonging to the family {}",
+                                        productName, matchOutput.getFamily());
+                                uploadBatch.add(new S3UploadFile(family,
+                                        productName, new File(filePath)));
+                                outputToPublish.add(new ObsQueueMessage(family,
+                                        productName, productName, "NRT"));
+                            } else if (line.contains("FAST24")) {
+                                LOGGER.info(
+                                        "Output {} is considered as belonging to the family {}",
+                                        productName, ProductFamily.L0_SEGMENT);
+                                uploadBatch.add(new S3UploadFile(
+                                        ProductFamily.L0_SEGMENT, productName,
+                                        new File(filePath)));
+                                outputToPublish.add(new ObsQueueMessage(
+                                        ProductFamily.L0_SEGMENT, productName,
+                                        productName, "FAST24"));
+                            } else {
+                                LOGGER.warn(
+                                        "Output {} ignored because unknown mode",
+                                        productName);
+                            }
+                        } else {
                             LOGGER.info(
                                     "Output {} is considered as belonging to the family {}",
                                     productName, matchOutput.getFamily());
-                            uploadBatch.add(new S3UploadFile(family, productName,
-                                    new File(filePath)));
+                            uploadBatch.add(new S3UploadFile(family,
+                                    productName, new File(filePath)));
                             outputToPublish.add(new ObsQueueMessage(family,
-                                    productName, productName));
-                        } else if("FAST".equals(mode)) {
-                            LOGGER.info(
-                                    "Output {} is considered as belonging to the family {}",
-                                    productName, ProductFamily.L0_SEGMENT);
-                            uploadBatch.add(new S3UploadFile(ProductFamily.L0_SEGMENT, productName,
-                                    new File(filePath)));
-                            outputToPublish.add(new ObsQueueMessage(ProductFamily.L0_SEGMENT,
-                                    productName, productName));
-                        } else {
-                            LOGGER.warn(
-                                    "Output {} ignored because unknown mode",
-                                    productName);
+                                    productName, productName, inputMessage.getBody().getProductProcessMode()));
                         }
                         break;
                     case L0_ACN:
@@ -227,7 +238,7 @@ public class OutputProcessor {
                         uploadBatch.add(new S3UploadFile(family, productName,
                                 new File(filePath)));
                         outputToPublish.add(new ObsQueueMessage(family,
-                                productName, productName));
+                                productName, productName, inputMessage.getBody().getProductProcessMode()));
                         break;
                     case BLANK:
                         LOGGER.info("Output {} will be ignored", productName);
@@ -335,11 +346,12 @@ public class OutputProcessor {
                 this.obsService.uploadFilesPerBatch(sublist);
             }
         }
-        String listoutputs="";
+        String listoutputs = "";
         for (int i = 0; i < size; i++) {
-        	listoutputs =  listoutputs + " " + uploadBatch.get(i).getKey();
+            listoutputs = listoutputs + " " + uploadBatch.get(i).getKey();
         }
-        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch [outputs {}]",
+        LOGGER.info(
+                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch [outputs {}]",
                 this.prefixMonitorLogs, this.appLevel, listoutputs);
         publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);
     }
@@ -407,8 +419,9 @@ public class OutputProcessor {
                     try {
                         procuderFactory.sendOutput(msg, inputMessage);
                     } catch (MqiPublicationError ace) {
-                        String message = String.format("%s [code %d] %s", prefixMonitorLogs,
-                                ace.getCode().getCode(), ace.getLogMessage());
+                        String message = String.format("%s [code %d] %s",
+                                prefixMonitorLogs, ace.getCode().getCode(),
+                                ace.getLogMessage());
                         LOGGER.error(message);
                         procuderFactory.sendError(message);
                     }

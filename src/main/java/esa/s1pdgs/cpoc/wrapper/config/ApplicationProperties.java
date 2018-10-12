@@ -20,6 +20,11 @@ public class ApplicationProperties {
      * Application level
      */
     private ApplicationLevel level;
+    
+    /**
+     * Process mode
+     */
+    private String mode;
 
     /**
      * Timeout (in seconds) for waiting end of several tasks
@@ -81,6 +86,20 @@ public class ApplicationProperties {
      */
     public void setLevel(final ApplicationLevel level) {
         this.level = level;
+    }
+
+    /**
+     * @return the mode
+     */
+    public String getMode() {
+        return mode;
+    }
+
+    /**
+     * @param mode the mode to set
+     */
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 
     /**

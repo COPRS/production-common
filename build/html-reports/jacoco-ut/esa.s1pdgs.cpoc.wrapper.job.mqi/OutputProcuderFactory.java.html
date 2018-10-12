@@ -29,7 +29,8 @@ public class OutputProcuderFactory {
     /**
      * Logger
      */
-<span class="fc" id="L32">    protected static final Logger LOGGER = LogManager.getLogger(OutputProcuderFactory.class);</span>
+<span class="fc" id="L32">    protected static final Logger LOGGER =</span>
+<span class="fc" id="L33">            LogManager.getLogger(OutputProcuderFactory.class);</span>
 
     /**
      * MQI client for LEVEL_PRODUCTS
@@ -56,11 +57,11 @@ public class OutputProcuderFactory {
     public OutputProcuderFactory(
             @Qualifier(&quot;mqiServiceForLevelProducts&quot;) final GenericMqiService&lt;LevelProductDto&gt; senderProducts,
             @Qualifier(&quot;mqiServiceForLevelReports&quot;) final GenericMqiService&lt;LevelReportDto&gt; senderReports,
-<span class="fc" id="L59">            @Qualifier(&quot;mqiServiceForErrors&quot;) final ErrorService senderErrors) {</span>
-<span class="fc" id="L60">        this.senderProducts = senderProducts;</span>
-<span class="fc" id="L61">        this.senderReports = senderReports;</span>
-<span class="fc" id="L62">        this.senderErrors = senderErrors;</span>
-<span class="fc" id="L63">    }</span>
+<span class="fc" id="L60">            @Qualifier(&quot;mqiServiceForErrors&quot;) final ErrorService senderErrors) {</span>
+<span class="fc" id="L61">        this.senderProducts = senderProducts;</span>
+<span class="fc" id="L62">        this.senderReports = senderReports;</span>
+<span class="fc" id="L63">        this.senderErrors = senderErrors;</span>
+<span class="fc" id="L64">    }</span>
 
     /**
      * Send an output in right topic according its family
@@ -71,11 +72,11 @@ public class OutputProcuderFactory {
     public void sendOutput(final FileQueueMessage msg,
             GenericMessageDto&lt;LevelJobDto&gt; inputMessage)
             throws AbstractCodedException {
-<span class="fc" id="L74">        LevelReportDto dtoReport = new LevelReportDto(msg.getProductName(),</span>
-<span class="fc" id="L75">                FileUtils.readFile(msg.getFile()), msg.getFamily());</span>
-<span class="fc" id="L76">        senderReports.publish(new GenericPublicationMessageDto&lt;LevelReportDto&gt;(</span>
-<span class="fc" id="L77">                inputMessage.getIdentifier(), msg.getFamily(), dtoReport));</span>
-<span class="fc" id="L78">    }</span>
+<span class="fc" id="L75">        LevelReportDto dtoReport = new LevelReportDto(msg.getProductName(),</span>
+<span class="fc" id="L76">                FileUtils.readFile(msg.getFile()), msg.getFamily());</span>
+<span class="fc" id="L77">        senderReports.publish(new GenericPublicationMessageDto&lt;LevelReportDto&gt;(</span>
+<span class="fc" id="L78">                inputMessage.getIdentifier(), msg.getFamily(), dtoReport));</span>
+<span class="fc" id="L79">    }</span>
 
     /**
      * Send an output in right topic according its family
@@ -86,24 +87,25 @@ public class OutputProcuderFactory {
     public void sendOutput(final ObsQueueMessage msg,
             GenericMessageDto&lt;LevelJobDto&gt; inputMessage)
             throws AbstractCodedException {
-<span class="fc" id="L89">        LevelProductDto dtoProduct = new LevelProductDto(msg.getProductName(),</span>
-<span class="fc" id="L90">                msg.getKeyObs(), msg.getFamily());</span>
-<span class="fc" id="L91">        senderProducts</span>
-<span class="fc" id="L92">                .publish(new GenericPublicationMessageDto&lt;LevelProductDto&gt;(</span>
-<span class="fc" id="L93">                        inputMessage.getIdentifier(), msg.getFamily(),</span>
+<span class="fc" id="L90">        LevelProductDto dtoProduct = new LevelProductDto(msg.getProductName(),</span>
+<span class="fc" id="L91">                msg.getKeyObs(), msg.getFamily(), msg.getProcessMode());</span>
+<span class="fc" id="L92">        senderProducts</span>
+<span class="fc" id="L93">                .publish(new GenericPublicationMessageDto&lt;LevelProductDto&gt;(</span>
+<span class="fc" id="L94">                        inputMessage.getIdentifier(), msg.getFamily(),</span>
                         dtoProduct));
-<span class="fc" id="L95">    }</span>
-    
+<span class="fc" id="L96">    }</span>
+
     /**
      * Publish a error
+     * 
      * @param message
      */
     public void sendError(final String message) {
         try {
-<span class="fc" id="L103">            senderErrors.publish(message);</span>
-<span class="fc" id="L104">        } catch (AbstractCodedException e) {</span>
-<span class="fc" id="L105">            LOGGER.error(e.getLogMessage());</span>
-<span class="fc" id="L106">        }</span>
-<span class="fc" id="L107">    }</span>
+<span class="fc" id="L105">            senderErrors.publish(message);</span>
+<span class="fc" id="L106">        } catch (AbstractCodedException e) {</span>
+<span class="fc" id="L107">            LOGGER.error(e.getLogMessage());</span>
+<span class="fc" id="L108">        }</span>
+<span class="fc" id="L109">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

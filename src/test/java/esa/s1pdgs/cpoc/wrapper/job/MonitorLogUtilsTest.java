@@ -17,7 +17,7 @@ public class MonitorLogUtilsTest {
     @Test
     public void testGetPrefixMonitorLogs() {
         
-        LevelJobDto job = new LevelJobDto(ProductFamily.L0_JOB, "SESSIONID",
+        LevelJobDto job = new LevelJobDto(ProductFamily.L0_JOB, "SESSIONID", "FAST",
                 "./test_work_dir/", "job-order");
         String baseLog = "[MONITOR]";
         String productLog =

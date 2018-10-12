@@ -17,7 +17,7 @@ public class TestUtils {
     public final static String WORKDIR = "./test_work_dir/";
 
     public static LevelJobDto buildL0LevelJobDto() {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "SESSIONID", WORKDIR, WORKDIR + "JobOrder.xml");
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml");
 
         dto.addInput(buildAuxiliaryInputDto("AUX_OBMEMC.xml"));
         dto.addInput(buildAuxiliaryInputDto("MPL_OBRP.xml"));

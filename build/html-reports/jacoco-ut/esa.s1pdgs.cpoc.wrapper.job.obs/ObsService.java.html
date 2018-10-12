@@ -169,30 +169,33 @@ public class ObsService {
      */
     protected ObsFamily getObsFamily(final ProductFamily family) {
         ObsFamily ret;
-<span class="pc bfc" id="L172" title="All 7 branches covered.">        switch (family) {</span>
+<span class="pc bfc" id="L172" title="All 8 branches covered.">        switch (family) {</span>
             case AUXILIARY_FILE:
 <span class="fc" id="L174">                ret = ObsFamily.AUXILIARY_FILE;</span>
 <span class="fc" id="L175">                break;</span>
             case EDRS_SESSION:
 <span class="fc" id="L177">                ret = ObsFamily.EDRS_SESSION;</span>
 <span class="fc" id="L178">                break;</span>
-            case L0_PRODUCT:
-<span class="fc" id="L180">                ret = ObsFamily.L0_PRODUCT;</span>
+            case L0_SLICE:
+<span class="fc" id="L180">                ret = ObsFamily.L0_SLICE;</span>
 <span class="fc" id="L181">                break;</span>
-            case L0_ACN:
-<span class="fc" id="L183">                ret = ObsFamily.L0_ACN;</span>
+            case L0_SEGMENT:
+<span class="fc" id="L183">                ret = ObsFamily.L0_SEGMENT;</span>
 <span class="fc" id="L184">                break;</span>
-            case L1_PRODUCT:
-<span class="fc" id="L186">                ret = ObsFamily.L1_PRODUCT;</span>
+            case L0_ACN:
+<span class="fc" id="L186">                ret = ObsFamily.L0_ACN;</span>
 <span class="fc" id="L187">                break;</span>
-            case L1_ACN:
-<span class="fc" id="L189">                ret = ObsFamily.L1_ACN;</span>
+            case L1_SLICE:
+<span class="fc" id="L189">                ret = ObsFamily.L1_SLICE;</span>
 <span class="fc" id="L190">                break;</span>
+            case L1_ACN:
+<span class="fc" id="L192">                ret = ObsFamily.L1_ACN;</span>
+<span class="fc" id="L193">                break;</span>
             default:
-<span class="fc" id="L192">                ret = ObsFamily.UNKNOWN;</span>
+<span class="fc" id="L195">                ret = ObsFamily.UNKNOWN;</span>
                 break;
         }
-<span class="fc" id="L195">        return ret;</span>
+<span class="fc" id="L198">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

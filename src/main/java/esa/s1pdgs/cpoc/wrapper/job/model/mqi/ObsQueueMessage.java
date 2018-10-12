@@ -13,7 +13,11 @@ public class ObsQueueMessage extends QueueMessage {
      * Key in OBS
      */
     private final String keyObs;
-    
+
+    /**
+     * Process mode
+     */
+    private String processMode;
 
     /**
      * @param family
@@ -21,9 +25,10 @@ public class ObsQueueMessage extends QueueMessage {
      * @param keyObs
      */
     public ObsQueueMessage(final ProductFamily family, final String productName,
-            final String keyObs) {
+            final String keyObs, final String processMode) {
         super(family, productName);
         this.keyObs = keyObs;
+        this.processMode = processMode;
     }
 
     /**
@@ -34,12 +39,28 @@ public class ObsQueueMessage extends QueueMessage {
     }
 
     /**
+     * @return the processMode
+     */
+    public String getProcessMode() {
+        return processMode;
+    }
+
+    /**
+     * @param processMode
+     *            the processMode to set
+     */
+    public void setProcessMode(String processMode) {
+        this.processMode = processMode;
+    }
+
+    /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         String superStr = super.toStringForExtendedClasses();
-        return String.format("{%s, keyObs: %s}", superStr, keyObs);
+        return String.format("{%s, keyObs: %s, processMode: %s}", superStr,
+                keyObs, processMode);
     }
 
     /**
@@ -48,7 +69,7 @@ public class ObsQueueMessage extends QueueMessage {
     @Override
     public int hashCode() {
         int superHash = super.hashCode();
-        return Objects.hash(superHash, keyObs);
+        return Objects.hash(superHash, keyObs, processMode);
     }
 
     /**
@@ -64,7 +85,8 @@ public class ObsQueueMessage extends QueueMessage {
         } else {
             ObsQueueMessage other = (ObsQueueMessage) obj;
             // field comparison
-            ret = super.equals(other) && Objects.equals(keyObs, other.keyObs);
+            ret = super.equals(other) && Objects.equals(keyObs, other.keyObs)
+                    && Objects.equals(processMode, other.processMode);
         }
         return ret;
     }

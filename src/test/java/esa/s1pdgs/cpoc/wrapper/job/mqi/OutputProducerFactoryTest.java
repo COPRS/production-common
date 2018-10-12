@@ -76,7 +76,7 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory = new OutputProcuderFactory(senderProducts,
                 senderReports, errorService);
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
-                new LevelJobDto(ProductFamily.L0_JOB, "product-name",
+                new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST",
                         "work-dir", "job-order"));
     }
 
@@ -109,7 +109,7 @@ public class OutputProducerFactoryTest {
     public void testSendProduct() throws AbstractCodedException {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L0_SLICE,
-                        "test.txt", "test.txt"), inputMessage);
+                        "test.txt", "test.txt", "NRT"), inputMessage);
         GenericPublicationMessageDto<LevelProductDto> message =
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L0_SLICE,
@@ -127,11 +127,11 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendAcn() throws AbstractCodedException {
         this.outputProcuderFactory.sendOutput(new ObsQueueMessage(
-                ProductFamily.L0_ACN, "test.txt", "test.txt"), inputMessage);
+                ProductFamily.L0_ACN, "test.txt", "test.txt", "FAST"), inputMessage);
         GenericPublicationMessageDto<LevelProductDto> message =
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L0_ACN, new LevelProductDto("test.txt",
-                                "test.txt", ProductFamily.L0_ACN, "NRT"));
+                                "test.txt", ProductFamily.L0_ACN, "FAST"));
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
@@ -165,12 +165,12 @@ public class OutputProducerFactoryTest {
     public void testSendL1Product() throws AbstractCodedException {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L1_SLICE,
-                        "test.txt", "test.txt"), inputMessage);
+                        "test.txt", "test.txt", "FAST"), inputMessage);
         GenericPublicationMessageDto<LevelProductDto> message =
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L1_SLICE,
                         new LevelProductDto("test.txt", "test.txt",
-                                ProductFamily.L1_SLICE, "NRT"));
+                                ProductFamily.L1_SLICE, "FAST"));
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
@@ -183,7 +183,7 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendL1Acn() throws AbstractCodedException {
         this.outputProcuderFactory.sendOutput(new ObsQueueMessage(
-                ProductFamily.L1_ACN, "test.txt", "test.txt"), inputMessage);
+                ProductFamily.L1_ACN, "test.txt", "test.txt", "NRT"), inputMessage);
         GenericPublicationMessageDto<LevelProductDto> message =
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L1_ACN, new LevelProductDto("test.txt",

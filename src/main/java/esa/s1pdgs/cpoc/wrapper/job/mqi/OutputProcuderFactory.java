@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
@@ -30,7 +29,8 @@ public class OutputProcuderFactory {
     /**
      * Logger
      */
-    protected static final Logger LOGGER = LogManager.getLogger(OutputProcuderFactory.class);
+    protected static final Logger LOGGER =
+            LogManager.getLogger(OutputProcuderFactory.class);
 
     /**
      * MQI client for LEVEL_PRODUCTS
@@ -88,16 +88,16 @@ public class OutputProcuderFactory {
             GenericMessageDto<LevelJobDto> inputMessage)
             throws AbstractCodedException {
         LevelProductDto dtoProduct = new LevelProductDto(msg.getProductName(),
-                msg.getKeyObs(), msg.getFamily(),
-                msg.getFamily().equals(ProductFamily.L0_SEGMENT) ? "FAST" : "NRT");
+                msg.getKeyObs(), msg.getFamily(), msg.getProcessMode());
         senderProducts
                 .publish(new GenericPublicationMessageDto<LevelProductDto>(
                         inputMessage.getIdentifier(), msg.getFamily(),
                         dtoProduct));
     }
-    
+
     /**
      * Publish a error
+     * 
      * @param message
      */
     public void sendError(final String message) {

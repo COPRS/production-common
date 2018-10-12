@@ -15,30 +15,52 @@ public class ObsQueueMessage extends QueueMessage {
     private final String keyObs;
 
     /**
+     * Process mode
+     */
+    private String processMode;
+
+    /**
      * @param family
      * @param productName
      * @param keyObs
      */
     public ObsQueueMessage(final ProductFamily family, final String productName,
-            final String keyObs) {
-<span class="fc" id="L24">        super(family, productName);</span>
-<span class="fc" id="L25">        this.keyObs = keyObs;</span>
-<span class="fc" id="L26">    }</span>
+            final String keyObs, final String processMode) {
+<span class="fc" id="L29">        super(family, productName);</span>
+<span class="fc" id="L30">        this.keyObs = keyObs;</span>
+<span class="fc" id="L31">        this.processMode = processMode;</span>
+<span class="fc" id="L32">    }</span>
 
     /**
      * @return the keyObs
      */
     public String getKeyObs() {
-<span class="fc" id="L32">        return keyObs;</span>
+<span class="fc" id="L38">        return keyObs;</span>
     }
+
+    /**
+     * @return the processMode
+     */
+    public String getProcessMode() {
+<span class="fc" id="L45">        return processMode;</span>
+    }
+
+    /**
+     * @param processMode
+     *            the processMode to set
+     */
+    public void setProcessMode(String processMode) {
+<span class="nc" id="L53">        this.processMode = processMode;</span>
+<span class="nc" id="L54">    }</span>
 
     /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-<span class="fc" id="L40">        String superStr = super.toStringForExtendedClasses();</span>
-<span class="fc" id="L41">        return String.format(&quot;{%s, keyObs: %s}&quot;, superStr, keyObs);</span>
+<span class="fc" id="L61">        String superStr = super.toStringForExtendedClasses();</span>
+<span class="fc" id="L62">        return String.format(&quot;{%s, keyObs: %s, processMode: %s}&quot;, superStr,</span>
+                keyObs, processMode);
     }
 
     /**
@@ -46,8 +68,8 @@ public class ObsQueueMessage extends QueueMessage {
      */
     @Override
     public int hashCode() {
-<span class="fc" id="L49">        int superHash = super.hashCode();</span>
-<span class="fc" id="L50">        return Objects.hash(superHash, keyObs);</span>
+<span class="fc" id="L71">        int superHash = super.hashCode();</span>
+<span class="fc" id="L72">        return Objects.hash(superHash, keyObs, processMode);</span>
     }
 
     /**
@@ -56,16 +78,17 @@ public class ObsQueueMessage extends QueueMessage {
     @Override
     public boolean equals(final Object obj) {
         boolean ret;
-<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (this == obj) {</span>
-<span class="fc" id="L60">            ret = true;</span>
-<span class="fc bfc" id="L61" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L62">            ret = false;</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L82">            ret = true;</span>
+<span class="fc bfc" id="L83" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L84">            ret = false;</span>
         } else {
-<span class="fc" id="L64">            ObsQueueMessage other = (ObsQueueMessage) obj;</span>
+<span class="fc" id="L86">            ObsQueueMessage other = (ObsQueueMessage) obj;</span>
             // field comparison
-<span class="fc bfc" id="L66" title="All 4 branches covered.">            ret = super.equals(other) &amp;&amp; Objects.equals(keyObs, other.keyObs);</span>
+<span class="fc bfc" id="L88" title="All 4 branches covered.">            ret = super.equals(other) &amp;&amp; Objects.equals(keyObs, other.keyObs)</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(processMode, other.processMode);</span>
         }
-<span class="fc" id="L68">        return ret;</span>
+<span class="fc" id="L91">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

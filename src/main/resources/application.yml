@@ -11,6 +11,7 @@ server:
     
 process:
   level: L0                               # application level (L0/L1)
+  mode: NRT                               # process mode: NRT or FAST
   fixed-delay-ms: 500                     # (fixed delay) period in milliseconds between 2 polls of next message
   init-delay-poll-ms: 1000                # the initial delay to apply before consuming messages
   tm-proc-one-task-s: 600                 # Timeout in second for stopping task of pool's task execution
