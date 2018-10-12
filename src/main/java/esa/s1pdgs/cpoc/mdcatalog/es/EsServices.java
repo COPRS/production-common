@@ -136,16 +136,25 @@ public class EsServices {
 	 */
 	public SearchMetadata lastValCover(String productType, ProductFamily productFamily, String beginDate, 
 	        String endDate, String satelliteId,	int instrumentConfId, String processMode) throws Exception {
-	    
+
+        ProductCategory category = ProductCategory.fromProductFamily(productFamily);
+        
 	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+	    // Generic fields
 	    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
                 .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-                .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-                .must(QueryBuilders.termQuery("productType.keyword", productType));
+                .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
+	    // Product type
+        if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
+            queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+        } else {
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery("productType.keyword", productType));
+        }
+	    // Instrument configuration id
 	    if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
 	        queryBuilder = queryBuilder.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId));
 	    }
-	    ProductCategory category = ProductCategory.fromProductFamily(productFamily);
+	    // Process mode
 	    if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 	        queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 	    }
@@ -169,7 +178,7 @@ public class EsServices {
 				Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
 				SearchMetadata r = new SearchMetadata();
 				r.setProductName(source.get("productName").toString());
-				r.setProductType(productType);
+				r.setProductType(source.get("productType").toString());
 				r.setKeyObjectStorage(source.get("url").toString());
 				if (source.containsKey("validityStartTime")) {
 					r.setValidityStart(source.get("validityStartTime").toString());
@@ -215,26 +224,27 @@ public class EsServices {
 		return r;
 	}
 
-	public L0SliceMetadata getL0Slice(ProductFamily productFamily, String productName) throws Exception{
-		Map<String, Object> source = this.getRequest(productFamily.toString().toLowerCase(), productName);
-		return this.extractInfoForL0Slice(source, productFamily.toString().toLowerCase(), productName);
+	public L0SliceMetadata getL0Slice(String productName) throws Exception{
+		Map<String, Object> source = this.getRequest(ProductFamily.L0_SLICE.name().toLowerCase(), productName);
+		return this.extractInfoForL0Slice(source, productName);
 	}
 
-	public L0AcnMetadata getL0Acn(ProductFamily productFamily, String datatakeId, String type) throws Exception {
+	public L0AcnMetadata getL0Acn(String productType, String datatakeId, String processMode) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("dataTakeId.keyword", datatakeId))
-		        .must(QueryBuilders.termQuery("productClass.keyword", type)));
+		        .must(QueryBuilders.termQuery("productType.keyword", productType))
+                .must(QueryBuilders.termQuery("processMode.keyword", processMode)));
 
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 
-		SearchRequest searchRequest = new SearchRequest(productFamily.toString().toLowerCase());
+		SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_ACN.name().toLowerCase());
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
 			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
-				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap(), productFamily.toString().toLowerCase(), datatakeId);
+				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap());
 			}
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
@@ -242,9 +252,9 @@ public class EsServices {
 		return null;
 	}
 
-	private Map<String, Object> getRequest(String productType, String productName) throws Exception {
+	private Map<String, Object> getRequest(String index, String productName) throws Exception {
 		try {
-			GetRequest getRequest = new GetRequest(productType.toLowerCase(), indexType, productName);
+			GetRequest getRequest = new GetRequest(index.toLowerCase(), indexType, productName);
 
 			GetResponse response = elasticsearchDAO.get(getRequest);
 
@@ -257,15 +267,19 @@ public class EsServices {
 		return new HashMap<>();
 	}
 
-	private L0AcnMetadata extractInfoForL0ACN(Map<String, Object> source, String productType, String dataTakeID)
+	private L0AcnMetadata extractInfoForL0ACN(Map<String, Object> source)
 			throws MetadataMalformedException {
 		L0AcnMetadata r = new L0AcnMetadata();
-		r.setProductType(productType);
 		if (source.containsKey("productName")) {
 			r.setProductName(source.get("productName").toString());
 		} else {
 			throw new MetadataMalformedException("productName");
 		}
+        if (source.containsKey("productType")) {
+            r.setProductType(source.get("productType").toString());
+        } else {
+            throw new MetadataMalformedException("productType");
+        }
 		if (source.containsKey("url")) {
 			r.setKeyObjectStorage(source.get("url").toString());
 		} else {
@@ -299,17 +313,19 @@ public class EsServices {
 		return r;
 	}
 
-	private L0SliceMetadata extractInfoForL0Slice(Map<String, Object> source, String productType, String productName)
+	private L0SliceMetadata extractInfoForL0Slice(Map<String, Object> source, String productName)
 			throws MetadataMalformedException, MetadataNotPresentException {
 
 		L0SliceMetadata r = new L0SliceMetadata();
-		r.setProductType(productType);
 		if(source.isEmpty()) {
 			throw new MetadataNotPresentException(productName);
 		}
-		if (source.containsKey("productName")) {
-			r.setProductName(source.get("productName").toString());
-		}
+        r.setProductName(productName);
+        if (source.containsKey("productType")) {
+            r.setProductType(source.get("productType").toString());
+        } else {
+            throw new MetadataMalformedException("productType");
+        }
 		if (source.containsKey("url")) {
 			r.setKeyObjectStorage(source.get("url").toString());
 		} else {
