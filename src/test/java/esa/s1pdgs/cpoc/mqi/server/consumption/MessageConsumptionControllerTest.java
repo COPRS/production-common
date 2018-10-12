@@ -432,7 +432,7 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAsk()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(
@@ -466,7 +466,7 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAskButTopicUnknown()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(
@@ -503,7 +503,7 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopAsk()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(

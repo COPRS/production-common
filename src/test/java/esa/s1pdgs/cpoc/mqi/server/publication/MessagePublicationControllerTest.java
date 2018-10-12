@@ -384,7 +384,7 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelJobs() throws Exception {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
@@ -398,7 +398,7 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelJobs1() throws Exception {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "product-name", "NRT",
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
@@ -413,7 +413,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelJobsNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-directory", "job-order");
         initCustomControllerForNoPublication();
 

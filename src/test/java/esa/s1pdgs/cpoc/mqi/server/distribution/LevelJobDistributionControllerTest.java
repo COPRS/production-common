@@ -77,7 +77,7 @@ public class LevelJobDistributionControllerTest extends RestControllerTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         consumedMessage =
                 new GenericMessageDto<LevelJobDto>(123, "input-key", dto);
@@ -162,7 +162,7 @@ public class LevelJobDistributionControllerTest extends RestControllerTest {
         doNothing().when(publication).publish(Mockito.any(), Mockito.any());
         GenericPublicationMessageDto<LevelJobDto> dto =
                 new GenericPublicationMessageDto<>(ProductFamily.L0_JOB,
-                        new LevelJobDto(ProductFamily.L0_JOB, "product-name",
+                        new LevelJobDto(ProductFamily.L0_JOB, "product-name", "NRT",
                                 "work-dir", "job-order"));
         String convertedObj = GenericKafkaUtils.convertObjectToJsonString(dto);
         request(post("/messages/level_jobs/publish")
