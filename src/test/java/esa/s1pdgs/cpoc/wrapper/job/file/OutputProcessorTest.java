@@ -329,7 +329,7 @@ public class OutputProcessorTest {
                 outputToPublish.get(2));
         assertEquals(new ObsQueueMessage(ProductFamily.L0_ACN,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE",
-                "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE", "FAST24"),
+                "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE", "NRT"),
                 outputToPublish.get(3));
 
         // Check report

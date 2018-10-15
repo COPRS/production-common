@@ -223,11 +223,48 @@ public class OutputProcessor {
                                     productName, matchOutput.getFamily());
                             uploadBatch.add(new S3UploadFile(family,
                                     productName, new File(filePath)));
-                            outputToPublish.add(new ObsQueueMessage(family,
-                                    productName, productName, inputMessage.getBody().getProductProcessMode()));
+                            outputToPublish.add(
+                                    new ObsQueueMessage(family, productName,
+                                            productName, inputMessage.getBody()
+                                                    .getProductProcessMode()));
                         }
                         break;
                     case L0_ACN:
+                        // Specific case of the L0 wrapper
+                        if (appLevel == ApplicationLevel.L0) {
+                            if (line.contains("NRT")) {
+                                LOGGER.info(
+                                        "Output {} is considered as belonging to the family {}",
+                                        productName, matchOutput.getFamily());
+                                uploadBatch.add(new S3UploadFile(family,
+                                        productName, new File(filePath)));
+                                outputToPublish.add(new ObsQueueMessage(family,
+                                        productName, productName, "NRT"));
+                            } else if (line.contains("FAST24")) {
+                                LOGGER.info(
+                                        "Output {} is considered as belonging to the family {}",
+                                        productName, matchOutput.getFamily());
+                                uploadBatch.add(new S3UploadFile(family,
+                                        productName, new File(filePath)));
+                                outputToPublish.add(new ObsQueueMessage(family,
+                                        productName, productName, "FAST24"));
+                            } else {
+                                LOGGER.warn(
+                                        "Output {} ignored because unknown mode",
+                                        productName);
+                            }
+                        } else {
+                            LOGGER.info(
+                                    "Output {} is considered as belonging to the family {}",
+                                    productName, matchOutput.getFamily());
+                            uploadBatch.add(new S3UploadFile(family,
+                                    productName, new File(filePath)));
+                            outputToPublish.add(
+                                    new ObsQueueMessage(family, productName,
+                                            productName, inputMessage.getBody()
+                                                    .getProductProcessMode()));
+                        }
+                        break;
                     case L1_SLICE:
                     case L1_ACN:
                         // If compatible object storage, put in a cache to
@@ -238,7 +275,8 @@ public class OutputProcessor {
                         uploadBatch.add(new S3UploadFile(family, productName,
                                 new File(filePath)));
                         outputToPublish.add(new ObsQueueMessage(family,
-                                productName, productName, inputMessage.getBody().getProductProcessMode()));
+                                productName, productName, inputMessage.getBody()
+                                        .getProductProcessMode()));
                         break;
                     case BLANK:
                         LOGGER.info("Output {} will be ignored", productName);
