@@ -92,20 +92,30 @@ public class ExtractMetadata {
 	 * @return the coordinates in good format
 	 * @throws MetadataExtractionException 
 	 */
-	private JSONArray processCoordinates(String productName, String rawCoordinates) throws MetadataExtractionException {
+	private JSONObject processCoordinates(String productName, String rawCoordinates) throws MetadataExtractionException {
+	    JSONObject geoShape = new JSONObject();
 		JSONArray coordinates = new JSONArray();
 		try {
 		    String[] coordSplitSpace = rawCoordinates.split(" ");
-			for (String coord : coordSplitSpace) {
-				coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
-			}
-			if(!coordSplitSpace[0].equals(coordSplitSpace[coordSplitSpace.length-1])) {
-				coordinates.put(new JSONArray("[" + (coordSplitSpace[0].split(","))[1] + "," + (coordSplitSpace[0].split(","))[0] + "]"));
-			}
+		    if(coordSplitSpace.length == 2) { //BBOX type (envelope in ES)
+		        geoShape.put("type", "envelope");
+		        for (String coord : coordSplitSpace) {
+                    coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
+                }
+		    } else { //Polygon type
+		        geoShape.put("type", "polygon");
+		        for (String coord : coordSplitSpace) {
+	                coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
+	            }
+	            if(!coordSplitSpace[0].equals(coordSplitSpace[coordSplitSpace.length-1])) {
+	                coordinates.put(new JSONArray("[" + (coordSplitSpace[0].split(","))[1] + "," + (coordSplitSpace[0].split(","))[0] + "]"));
+	            }
+		    }
+            geoShape.put("coordinates", new JSONArray().put(coordinates));
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
 		}
-		return new JSONArray().put(coordinates);
+		return geoShape;
 	}
 	
 	/**
@@ -385,10 +395,7 @@ public class ExtractMetadata {
                 metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
             }
 	        if(metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
-	        	JSONObject coordinates = new JSONObject();
-	        	coordinates.put("type", "polygon");
-	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates")));
-	        	metadataJSONObject.put("sliceCoordinates", coordinates); 
+	        	metadataJSONObject.put("sliceCoordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates"))); 
 	        }	
 	        if(descriptor.getProductClass().equals("A") || descriptor.getProductClass().equals("C") || descriptor.getProductClass().equals("N")) {
 	        	if(metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
@@ -406,7 +413,7 @@ public class ExtractMetadata {
 										dateFormat.parse(metadataJSONObject.getString("stopTime")).getTime()/1000,
 										descriptor.getSwathtype()));
 		        	}
-		        	else if (descriptor.getSwathtype().matches("WM")) {
+		        	else if (descriptor.getSwathtype().matches("WV")) {
 						metadataJSONObject.put("totalNumberOfSlice", 
 								totalNumberOfSlice(
 										dateFormat.parse(metadataJSONObject.getString("startTime")).getTime()/1000, 
@@ -447,13 +454,13 @@ public class ExtractMetadata {
 	public JSONObject processL0Segment(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
 	    try {
             //XSLT Transformation
-            String xsltFilename = this.xsltDirectory + "XSLT_L0_MANIFEST.xslt";
+            String xsltFilename = this.xsltDirectory + "XSLT_L0_SEGMENT.xslt";
             Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
             Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);
             Source l1File = new StreamSource(file);
-            transformerL0.transform(l1File, new StreamResult(new File("outputl0seg.xml")));
+            transformerL0.transform(l1File, new StreamResult(new File("tmp/outputl0seg.xml")));
             //JSON creation
-            JSONObject metadataJSONObject = XML.toJSONObject(readFile("outputl0seg.xml", Charset.defaultCharset()));
+            JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/outputl0seg.xml", Charset.defaultCharset()));
             if(metadataJSONObject.has("startTime")) {
                 metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));
             }
@@ -461,10 +468,7 @@ public class ExtractMetadata {
                 metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
             }
             if(metadataJSONObject.has("segmentCoordinates")) {
-                JSONObject coordinates = new JSONObject();
-                coordinates.put("type", "polygon");
-                coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("segmentCoordinates")));
-                metadataJSONObject.put("segmentCoordinates", coordinates); 
+                metadataJSONObject.put("segmentCoordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("segmentCoordinates"))); 
             }
             metadataJSONObject.put("productName", descriptor.getProductName());
             metadataJSONObject.put("productClass", descriptor.getProductClass());
@@ -518,10 +522,7 @@ public class ExtractMetadata {
 	        //JSON creation
 	        JSONObject metadataJSONObject = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
 	        if(metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
-	        	JSONObject coordinates = new JSONObject();
-	        	coordinates.put("type", "polygon");
-	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates")));
-	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
+	        	metadataJSONObject.put("sliceCoordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates")));       	
 	        }
 	        if(metadataJSONObject.has("startTime")) {
 	        	metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));

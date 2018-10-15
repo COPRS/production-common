@@ -203,7 +203,7 @@ public class LevelSegmentsExtractorTest {
     }
 
     @Test
-    public void testExtractMetadataL0Slice()
+    public void testExtractMetadataL0Segment()
             throws MetadataExtractionException, AbstractCodedException {
 
         File file = new File((new File("./test/workDir/")).getAbsolutePath()
@@ -241,10 +241,10 @@ public class LevelSegmentsExtractorTest {
         descriptor.setMode("FAST");
 
         JSONObject expected = extractor.mdBuilder
-                .buildL0SliceOutputFileMetadata(descriptor, file);
+                .buildL0SegmentOutputFileMetadata(descriptor, file);
         JSONObject result = extractor.extractMetadata(inputMessageSafe);
         for (String key : expected.keySet()) {
-            if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
+            if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) 
                     || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));
             }
