@@ -11,5 +11,5 @@ FROM registry.geohub.space/wo7/docker_l0aiop:dev
 RUN yum install -y java-1.8.0-openjdk wget exec && yum clean all
 WORKDIR /app
 COPY --from=build /app/target/s1pdgs-wrapper-2.0.0.jar s1pdgs-wrapper.jar
-COPY /config/start_l0.sh start_l0.sh
+COPY /config/start/start_l0.sh start_l0.sh
 ENTRYPOINT "/app/start_l0.sh"

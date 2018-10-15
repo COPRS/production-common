@@ -12,10 +12,12 @@ build:
   tags:
   - docker
   script:
-  - cp Dockerfile_L0 Dockerfile
+  - cp config/dockerfiles/Dockerfile_L0 Dockerfile
   - docker build -t $CI_PROJECT_NAME/l0:$CI_COMMIT_REF_NAME .
-  - cp Dockerfile_L1 Dockerfile
+  - cp config/dockerfiles/Dockerfile_L1 Dockerfile
   - docker build -t $CI_PROJECT_NAME/l1:$CI_COMMIT_REF_NAME .
+  - cp config/dockerfiles/Dockerfile_L0_segment Dockerfile
+  - docker build -t $CI_PROJECT_NAME/l0_segment:$CI_COMMIT_REF_NAME .
 
 push_dev:
   stage: push_dev
@@ -29,6 +31,8 @@ push_dev:
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0:$CI_COMMIT_REF_NAME
     - docker tag $CI_PROJECT_NAME/l1:$CI_COMMIT_REF_NAME $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1:$CI_COMMIT_REF_NAME
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1:$CI_COMMIT_REF_NAME
+    - docker tag $CI_PROJECT_NAME/l0_segment:$CI_COMMIT_REF_NAME $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment:$CI_COMMIT_REF_NAME
+    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment:$CI_COMMIT_REF_NAME
 
 push_master:
   stage: push_master
@@ -41,6 +45,8 @@ push_master:
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0:latest
     - docker tag $CI_PROJECT_NAME/l1:$CI_COMMIT_REF_NAME $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1:latest
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1:latest
+    - docker tag $CI_PROJECT_NAME/l0_segment:$CI_COMMIT_REF_NAME $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment:latest
+    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment:latest
 
 push_tag:
   stage: push_tag
@@ -53,4 +59,6 @@ push_tag:
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0:$CI_COMMIT_TAG
     - docker tag $CI_PROJECT_NAME/l1:$CI_COMMIT_TAG $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1:$CI_COMMIT_TAG
     - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1:$CI_COMMIT_TAG
+    - docker tag $CI_PROJECT_NAME/l0_segment:$CI_COMMIT_TAG $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment:$CI_COMMIT_TAG
+    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment:$CI_COMMIT_TAG
 

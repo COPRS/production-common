@@ -262,7 +262,6 @@ public class InputDownloader {
                                 prefixMonitorLogs);
                         poolProcExecutor.setActive(true);
                     }
-
                 }
             }
         }
