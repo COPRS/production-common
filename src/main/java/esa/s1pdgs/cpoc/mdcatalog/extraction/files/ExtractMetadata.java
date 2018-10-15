@@ -102,6 +102,7 @@ public class ExtractMetadata {
 		        for (String coord : coordSplitSpace) {
                     coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
                 }
+	            geoShape.put("coordinates", coordinates);
 		    } else { //Polygon type
 		        geoShape.put("type", "polygon");
 		        for (String coord : coordSplitSpace) {
@@ -110,8 +111,8 @@ public class ExtractMetadata {
 	            if(!coordSplitSpace[0].equals(coordSplitSpace[coordSplitSpace.length-1])) {
 	                coordinates.put(new JSONArray("[" + (coordSplitSpace[0].split(","))[1] + "," + (coordSplitSpace[0].split(","))[0] + "]"));
 	            }
+	            geoShape.put("coordinates", new JSONArray().put(coordinates));
 		    }
-            geoShape.put("coordinates", new JSONArray().put(coordinates));
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
 		}
