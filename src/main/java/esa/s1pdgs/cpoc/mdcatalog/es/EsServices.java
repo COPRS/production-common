@@ -162,9 +162,9 @@ public class EsServices {
 	    
 		String index = null;
         if(ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
-            index = productType;
+            index = productType.toLowerCase();
         } else {
-            index = productFamily.toString().toLowerCase();
+            index = productFamily.name().toLowerCase();
         }
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));

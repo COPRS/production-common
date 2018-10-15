@@ -162,9 +162,9 @@ public class EsServices {
 	    
 <span class="fc" id="L163">		String index = null;</span>
 <span class="pc bpc" id="L164" title="1 of 4 branches missed.">        if(ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {</span>
-<span class="fc" id="L165">            index = productType;</span>
+<span class="fc" id="L165">            index = productType.toLowerCase();</span>
         } else {
-<span class="fc" id="L167">            index = productFamily.toString().toLowerCase();</span>
+<span class="fc" id="L167">            index = productFamily.name().toLowerCase();</span>
         }
 <span class="fc" id="L169">		sourceBuilder.size(1);</span>
 <span class="fc" id="L170">		sourceBuilder.sort(new FieldSortBuilder(&quot;creationTime&quot;).order(SortOrder.DESC));</span>
