@@ -211,12 +211,11 @@ public class EsServices {
 	    
 	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         // Generic fields
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("startTime").lt(beginDate))
-                .must(QueryBuilders.rangeQuery("stopTime").gt(endDate))
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("startTime").lt(endDate))
+                .must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
                 .must(QueryBuilders.termQuery("dataTakeId.keyword", dataTakeId));
         sourceBuilder.query(queryBuilder);
         sourceBuilder.size(20);
-        
         SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());
         searchRequest.types(indexType);
         searchRequest.source(sourceBuilder);
