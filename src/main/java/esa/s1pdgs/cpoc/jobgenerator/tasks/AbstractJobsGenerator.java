@@ -272,6 +272,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     }
 
     private void buildMetadataSearchQuery() {
+        LOGGER.info("TESTLOG: inpuit families {}", this.jobGeneratorSettings.getInputfamilies());
         final AtomicInteger counter = new AtomicInteger(0);
         this.taskTable.getPools().stream()
                 .filter(pool -> !CollectionUtils.isEmpty(pool.getTasks()))
@@ -296,6 +297,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                             k.getDeltaTime0(), k.getDeltaTime1(), fileType,
                             this.jobGeneratorSettings.getInputfamilies()
                                     .get(fileType));
+                    LOGGER.info("TESTLOG: query {} {}", counter.get(), query);
                     this.metadataSearchQueries.put(counter.get(), query);
                     v.forEach(alt -> {
                         alt.setIdSearchMetadataQuery(counter.get());
