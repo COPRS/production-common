@@ -68,9 +68,9 @@ public class S3Configuration {
     public static final String BCK_EDRS_SESSIONS = "bucket.edrs-sessions";
 
     /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L0_PRODUCT}
+     * Name of the bucket dedicated to the family {@link ObsFamily#L0_SLICE}
      */
-    public static final String BCK_L0_PRODUCTS = "bucket.l0-products";
+    public static final String BCK_L0_SLICES = "bucket.l0-slices";
 
     /**
      * Name of the bucket dedicated to the family {@link ObsFamily#L0_ACN}
@@ -78,14 +78,19 @@ public class S3Configuration {
     public static final String BCK_L0_ACNS = "bucket.l0-acns";
 
     /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L1_PRODUCT}
+     * Name of the bucket dedicated to the family {@link ObsFamily#L1_SLICE}
      */
-    public static final String BCK_L1_PRODUCTS = "bucket.l1-products";
+    public static final String BCK_L1_SLICES = "bucket.l1-slices";
 
     /**
      * Name of the bucket dedicated to the family {@link ObsFamily#L1_ACN}
      */
     public static final String BCK_L1_ACNS = "bucket.l1-acns";
+
+    /**
+     * Name of the bucket dedicated to the family {@link ObsFamily#L0_SEGMENT}
+     */
+    public static final String BCK_L0_SEGMENT = "bucket.l0-segments";
 
     /**
      * Timeout in second for shutdown a thread
@@ -182,14 +187,17 @@ public class S3Configuration {
             case L0_ACN:
                 bucket = configuration.getString(BCK_L0_ACNS);
                 break;
-            case L0_PRODUCT:
-                bucket = configuration.getString(BCK_L0_PRODUCTS);
+            case L0_SLICE:
+                bucket = configuration.getString(BCK_L0_SLICES);
                 break;
             case L1_ACN:
                 bucket = configuration.getString(BCK_L1_ACNS);
                 break;
-            case L1_PRODUCT:
-                bucket = configuration.getString(BCK_L1_PRODUCTS);
+            case L1_SLICE:
+                bucket = configuration.getString(BCK_L1_SLICES);
+                break;
+            case L0_SEGMENT:
+                bucket = configuration.getString(BCK_L0_SEGMENT);
                 break;
             default:
                 throw new ObsServiceException(

@@ -130,14 +130,14 @@ public class ObsObjectTest {
                 "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ObsFamily.L0_PRODUCT,
+        obj = new ObsDownloadObject("key-t", ObsFamily.L0_SLICE,
                 "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
         obj = new ObsDownloadObject("key-t", ObsFamily.L0_ACN, "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ObsFamily.L1_PRODUCT,
+        obj = new ObsDownloadObject("key-t", ObsFamily.L1_SLICE,
                 "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 

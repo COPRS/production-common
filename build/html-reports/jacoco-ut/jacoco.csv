@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsFamily,0,88,0,0,0,2,0,4,0,4
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsFamily,0,98,0,0,0,2,0,4,0,4
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsClientBuilder,7,4,0,0,2,1,1,1,1,1
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,AbstractObsClient,8,180,0,16,2,45,0,14,0,6
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsDownloadCallable,0,40,0,2,0,10,0,3,0,2
@@ -13,6 +13,6 @@ S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsServic
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsClient,0,125,0,4,0,35,0,11,0,9
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsServiceException,0,47,0,0,0,12,0,5,0,5
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3SdkClientException,0,47,0,0,0,12,0,5,0,5
-S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration,34,158,0,7,6,42,0,11,0,5
-S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration.new Object() {...},6,41,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration,40,158,1,7,8,42,1,11,0,5
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration.new Object() {...},7,47,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3.retry,SDKCustomDefaultRetryCondition,0,45,0,4,0,8,0,5,0,3
