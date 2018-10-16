@@ -12,6 +12,15 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  *
  */
 public class ProductFamilyTest {
+    
+    /**
+     * Test basic enumeration
+     */
+    @Test
+    public void testBasic() {
+        assertEquals(15, ProductFamily.values().length);
+        assertEquals(ProductFamily.L0_SLICE, ProductFamily.valueOf("L0_SLICE"));
+    }
 
 	/**
 	 * Test the function fromValue

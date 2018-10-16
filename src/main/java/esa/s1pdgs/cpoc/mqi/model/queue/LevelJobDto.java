@@ -22,6 +22,11 @@ public class LevelJobDto {
      * Session identifier
      */
     private String productIdentifier;
+    
+    /**
+     * Process mode
+     */
+    private String productProcessMode;
 
     /**
      * Local work directory for launching the job
@@ -65,11 +70,12 @@ public class LevelJobDto {
      * Constructor from session identifier
      */
     public LevelJobDto(final ProductFamily family,
-            final String productIdentifier, final String workDirectory,
+            final String productIdentifier, final String productProcessMode, final String workDirectory,
             final String jobOrder) {
         this();
         this.family = family;
         this.productIdentifier = productIdentifier;
+        this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
     }
@@ -132,6 +138,20 @@ public class LevelJobDto {
      */
     public void setJobOrder(final String jobOrder) {
         this.jobOrder = jobOrder;
+    }
+
+    /**
+     * @return the productProcessMode
+     */
+    public String getProductProcessMode() {
+        return productProcessMode;
+    }
+
+    /**
+     * @param productProcessMode the productProcessMode to set
+     */
+    public void setProductProcessMode(String productProcessMode) {
+        this.productProcessMode = productProcessMode;
     }
 
     /**
@@ -227,8 +247,8 @@ public class LevelJobDto {
     @Override
     public String toString() {
         return String.format(
-                "{family: %s, productIdentifier: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s}",
-                family, productIdentifier, workDirectory, jobOrder, inputs,
+                "{family: %s, productIdentifier: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s}",
+                family, productIdentifier, productProcessMode, workDirectory, jobOrder, inputs,
                 outputs, pools);
     }
 
@@ -237,7 +257,7 @@ public class LevelJobDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(family, productIdentifier, workDirectory, jobOrder,
+        return Objects.hash(family, productIdentifier, productProcessMode, workDirectory, jobOrder, 
                 inputs, outputs, pools);
     }
 
@@ -256,6 +276,8 @@ public class LevelJobDto {
             ret = Objects.equals(family, other.family)
                     && Objects.equals(productIdentifier,
                             other.productIdentifier)
+                    && Objects.equals(productProcessMode,
+                            other.productProcessMode)
                     && Objects.equals(workDirectory, other.workDirectory)
                     && Objects.equals(jobOrder, other.jobOrder)
                     && Objects.equals(inputs, other.inputs)

@@ -23,7 +23,7 @@ public class MqiLevelProductMessageDtoTest {
      * DTO
      */
     private LevelProductDto dto = new LevelProductDto("prodcut-name", "key-obs",
-            ProductFamily.L0_PRODUCT);
+            ProductFamily.L0_SLICE, null);
 
     /**
      * Test constructors

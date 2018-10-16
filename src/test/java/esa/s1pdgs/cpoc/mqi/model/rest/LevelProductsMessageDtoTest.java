@@ -23,7 +23,7 @@ public class LevelProductsMessageDtoTest {
     @Test
     public void testGettersSettersConstructors() {
         LevelProductDto body = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L0_PRODUCT);
+                ProductFamily.L0_SLICE, "NRT");
         LevelProductsMessageDto dto =
                 new LevelProductsMessageDto(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
@@ -45,7 +45,7 @@ public class LevelProductsMessageDtoTest {
     @Test
     public void testToString() {
         LevelProductDto body = new LevelProductDto("product-name", "key-obs",
-                ProductFamily.L0_PRODUCT);
+                ProductFamily.L0_SLICE, "NRT");
         LevelProductsMessageDto dto =
                 new LevelProductsMessageDto(123, "input-key", body);
         String str = dto.toString();

@@ -6,5 +6,5 @@ package esa.s1pdgs.cpoc.common;
  *
  */
 public enum ApplicationLevel {
-	L0, L1;
+	L0, L1, L0_SEGMENT;
 }

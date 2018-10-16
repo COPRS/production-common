@@ -6,8 +6,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
 /**
@@ -22,7 +20,7 @@ public class ProductCategoryTest {
      */
     @Test
     public void testNominalEnumFunctions() {
-        assertEquals(5, ProductCategory.values().length);
+        assertEquals(6, ProductCategory.values().length);
         assertEquals(ProductCategory.AUXILIARY_FILES,
                 ProductCategory.valueOf("AUXILIARY_FILES"));
         assertEquals(ProductCategory.EDRS_SESSIONS,
@@ -33,6 +31,8 @@ public class ProductCategoryTest {
                 ProductCategory.valueOf("LEVEL_REPORTS"));
         assertEquals(ProductCategory.LEVEL_JOBS,
                 ProductCategory.valueOf("LEVEL_JOBS"));
+        assertEquals(ProductCategory.LEVEL_SEGMENTS,
+                ProductCategory.valueOf("LEVEL_SEGMENTS"));
     }
 
     /**
@@ -44,24 +44,30 @@ public class ProductCategoryTest {
     public void testValueFromFamily() throws InternalErrorException {
         assertEquals(ProductCategory.AUXILIARY_FILES, ProductCategory
                 .fromProductFamily(ProductFamily.AUXILIARY_FILE));
-        assertEquals(ProductCategory.EDRS_SESSIONS, ProductCategory
-                .fromProductFamily(ProductFamily.EDRS_SESSION));
+        assertEquals(ProductCategory.EDRS_SESSIONS,
+                ProductCategory.fromProductFamily(ProductFamily.EDRS_SESSION));
         assertEquals(ProductCategory.LEVEL_REPORTS,
                 ProductCategory.fromProductFamily(ProductFamily.L0_REPORT));
         assertEquals(ProductCategory.LEVEL_REPORTS,
                 ProductCategory.fromProductFamily(ProductFamily.L1_REPORT));
+        assertEquals(ProductCategory.LEVEL_REPORTS,
+                ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT_REPORT));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
                 ProductCategory.fromProductFamily(ProductFamily.L0_ACN));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_PRODUCT));
+                ProductCategory.fromProductFamily(ProductFamily.L0_SLICE));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
                 ProductCategory.fromProductFamily(ProductFamily.L1_ACN));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L1_PRODUCT));
+                ProductCategory.fromProductFamily(ProductFamily.L1_SLICE));
         assertEquals(ProductCategory.LEVEL_JOBS,
                 ProductCategory.fromProductFamily(ProductFamily.L0_JOB));
         assertEquals(ProductCategory.LEVEL_JOBS,
                 ProductCategory.fromProductFamily(ProductFamily.L1_JOB));
+        assertEquals(ProductCategory.LEVEL_JOBS,
+                ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT_JOB));
+        assertEquals(ProductCategory.LEVEL_SEGMENTS,
+                ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT));
 
         try {
             ProductCategory.fromProductFamily(null);

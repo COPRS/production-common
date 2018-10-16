@@ -6,32 +6,31 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
- * Test the LevelJobsMessageDto
+ * Test the LevelProductsMessageDto
  * 
  * @author Viveris Technologies
  */
-public class LevelJobsMessageDtoTest {
+public class LevelSegmentsMessageDtoTest {
 
     /**
      * Test getters, setters and constructors
      */
     @Test
     public void testGettersSettersConstructors() {
-        LevelJobDto body = new LevelJobDto(ProductFamily.L0_JOB,
-                "testEqualsFunction", "NRT", "/data/localWD/123456",
-                "/data/localWD/123456/JobOrder.xml");
-        LevelJobsMessageDto dto =
-                new LevelJobsMessageDto(123, "input-key", body);
+        LevelSegmentDto body = new LevelSegmentDto("product-name", "key-obs",
+                ProductFamily.L0_SEGMENT, "NRT");
+        LevelSegmentsMessageDto dto =
+                new LevelSegmentsMessageDto(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new LevelJobsMessageDto();
+        dto = new LevelSegmentsMessageDto();
         dto.setIdentifier(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -45,11 +44,10 @@ public class LevelJobsMessageDtoTest {
      */
     @Test
     public void testToString() {
-        LevelJobDto body = new LevelJobDto(ProductFamily.L0_JOB,
-                "testEqualsFunction", "NRT", "/data/localWD/123456",
-                "/data/localWD/123456/JobOrder.xml");
-        LevelJobsMessageDto dto =
-                new LevelJobsMessageDto(123, "input-key", body);
+        LevelSegmentDto body = new LevelSegmentDto("product-name", "key-obs",
+                ProductFamily.L0_SEGMENT, "NRT");
+        LevelSegmentsMessageDto dto =
+                new LevelSegmentsMessageDto(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("identifier: 123"));
@@ -64,7 +62,7 @@ public class LevelJobsMessageDtoTest {
      */
     @Test
     public void checkEquals() {
-        EqualsVerifier.forClass(LevelJobsMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(LevelSegmentsMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

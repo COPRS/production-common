@@ -8,44 +8,44 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
- * Test the object MqiLevelJobMessageDto
+ * Test the object MqiLevelProductMessageDto
  * 
  * @author Viveris Technologies
  */
-public class MqiLevelJobMessageDtoTest {
+public class MqiLevelSegmentMessageDtoTest {
 
     /**
      * DTO
      */
-    private LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB,
-            "prodcut-name", "NRT", "work-dir", "job-order");
+    private LevelSegmentDto dto = new LevelSegmentDto("prodcut-name", "key-obs",
+            ProductFamily.L0_SEGMENT, null);
 
     /**
      * Test constructors
      */
     @Test
     public void testConstructors() {
-        MqiLevelJobMessageDto obj = new MqiLevelJobMessageDto();
+        MqiLevelSegmentMessageDto obj = new MqiLevelSegmentMessageDto();
         assertNull(obj.getDto());
-        assertEquals(ProductCategory.LEVEL_JOBS, obj.getCategory());
+        assertEquals(ProductCategory.LEVEL_SEGMENTS, obj.getCategory());
 
-        MqiLevelJobMessageDto obj2 =
-                new MqiLevelJobMessageDto(1000, "topic-name", 2, 3210);
+        MqiLevelSegmentMessageDto obj2 =
+                new MqiLevelSegmentMessageDto(1000, "topic-name", 2, 3210);
         assertNull(obj2.getDto());
-        assertEquals(ProductCategory.LEVEL_JOBS, obj2.getCategory());
+        assertEquals(ProductCategory.LEVEL_SEGMENTS, obj2.getCategory());
         assertEquals(1000, obj2.getIdentifier());
         assertEquals("topic-name", obj2.getTopic());
         assertEquals(2, obj2.getPartition());
         assertEquals(3210, obj2.getOffset());
 
-        MqiLevelJobMessageDto obj3 =
-                new MqiLevelJobMessageDto(1000, "topic-name", 2, 3210, dto);
-        assertEquals(ProductCategory.LEVEL_JOBS, obj3.getCategory());
+        MqiLevelSegmentMessageDto obj3 =
+                new MqiLevelSegmentMessageDto(1000, "topic-name", 2, 3210, dto);
+        assertEquals(ProductCategory.LEVEL_SEGMENTS, obj3.getCategory());
         assertEquals(1000, obj3.getIdentifier());
         assertEquals("topic-name", obj3.getTopic());
         assertEquals(2, obj3.getPartition());
@@ -59,8 +59,8 @@ public class MqiLevelJobMessageDtoTest {
      */
     @Test
     public void testToString() {
-        MqiLevelJobMessageDto obj =
-                new MqiLevelJobMessageDto(1000, "topic-name", 2, 3210, dto);
+        MqiLevelSegmentMessageDto obj =
+                new MqiLevelSegmentMessageDto(1000, "topic-name", 2, 3210, dto);
         String str = obj.toString();
         assertTrue(str.contains(obj.toStringForExtend()));
         assertTrue(str.contains("dto: " + dto.toString()));
@@ -71,7 +71,7 @@ public class MqiLevelJobMessageDtoTest {
      */
     @Test
     public void testEquals() {
-        EqualsVerifier.forClass(MqiLevelJobMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(MqiLevelProductMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

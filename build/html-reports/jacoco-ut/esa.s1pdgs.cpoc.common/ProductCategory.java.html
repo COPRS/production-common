@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
  * @author Viveris Technologie
  */
 <span class="fc" id="L10">public enum ProductCategory {</span>
-<span class="fc" id="L11">    AUXILIARY_FILES, EDRS_SESSIONS, LEVEL_JOBS, LEVEL_PRODUCTS, LEVEL_REPORTS;</span>
+<span class="fc" id="L11">    AUXILIARY_FILES, EDRS_SESSIONS, LEVEL_JOBS, LEVEL_PRODUCTS, LEVEL_REPORTS, LEVEL_SEGMENTS;</span>
 
     /**
      * Get the category for a given product family
@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
                     &quot;Cannot determinate product category for a null family&quot;);
         }
 <span class="fc" id="L26">        ProductCategory ret = null;</span>
-<span class="pc bfc" id="L27" title="All 6 branches covered.">        switch (family) {</span>
+<span class="pc bfc" id="L27" title="All 7 branches covered.">        switch (family) {</span>
             case AUXILIARY_FILE:
 <span class="fc" id="L29">                ret = ProductCategory.AUXILIARY_FILES;</span>
 <span class="fc" id="L30">                break;</span>
@@ -33,24 +33,29 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 <span class="fc" id="L33">                break;</span>
             case L0_JOB:
             case L1_JOB:
-<span class="fc" id="L36">                ret = ProductCategory.LEVEL_JOBS;</span>
-<span class="fc" id="L37">                break;</span>
+            case L0_SEGMENT_JOB:
+<span class="fc" id="L37">                ret = ProductCategory.LEVEL_JOBS;</span>
+<span class="fc" id="L38">                break;</span>
             case L0_REPORT:
             case L1_REPORT:
-<span class="fc" id="L40">                ret = ProductCategory.LEVEL_REPORTS;</span>
-<span class="fc" id="L41">                break;</span>
+            case L0_SEGMENT_REPORT:
+<span class="fc" id="L42">                ret = ProductCategory.LEVEL_REPORTS;</span>
+<span class="fc" id="L43">                break;</span>
             case L0_ACN:
-            case L0_PRODUCT:
+            case L0_SLICE:
             case L1_ACN:
-            case L1_PRODUCT:
-<span class="fc" id="L46">                ret = ProductCategory.LEVEL_PRODUCTS;</span>
-<span class="fc" id="L47">                break;</span>
+            case L1_SLICE:
+<span class="fc" id="L48">                ret = ProductCategory.LEVEL_PRODUCTS;</span>
+<span class="fc" id="L49">                break;</span>
+            case L0_SEGMENT:
+<span class="fc" id="L51">                ret = ProductCategory.LEVEL_SEGMENTS;</span>
+<span class="fc" id="L52">                break;</span>
             default:
-<span class="fc" id="L49">                throw new InternalErrorException(</span>
+<span class="fc" id="L54">                throw new InternalErrorException(</span>
                         &quot;Cannot determinate product category for family &quot;
                                 + family);
         }
-<span class="fc" id="L53">        return ret;</span>
+<span class="fc" id="L58">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
