@@ -196,8 +196,9 @@ public class InputDownloader {
                     break;
                 case "EDRS_SESSION":
                 case "AUXILIARY_FILE":
-                case "L0_PRODUCT":
+                case "L0_SLICE":
                 case "L0_ACN":
+                case "L0_SEGMENT":
                     LOGGER.info("Input {}-{} will be stored in {}",
                             input.getFamily(), input.getContentRef(),
                             input.getLocalPath());
