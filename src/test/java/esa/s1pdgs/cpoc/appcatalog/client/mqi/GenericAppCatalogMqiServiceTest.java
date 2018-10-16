@@ -77,7 +77,7 @@ public class GenericAppCatalogMqiServiceTest {
     private MqiGenericReadMessageDto<LevelProductDto> readMessage;
     private MqiSendMessageDto sendMessage;
     private LevelProductDto dto =
-            new LevelProductDto("name", "keyobs", ProductFamily.L0_PRODUCT);
+            new LevelProductDto("name", "keyobs", ProductFamily.L0_SLICE, "FAST");
 
     /**
      * Initialization

@@ -225,6 +225,20 @@ public abstract class AbstractAppCatalogJobService<T> {
     }
 
     /**
+     * Search by product datatake identifier
+     * 
+     * @param messageId
+     * @return
+     * @throws AbstractCodedException
+     */
+    public List<AppDataJobDto<T>> findByProductDataTakeId(final String dataTakeId)
+            throws AbstractCodedException {
+        Map<String, String> filters = new HashMap<>();
+        filters.put("product.dataTakeId", dataTakeId);
+        return search(filters);
+    }
+
+    /**
      * Search by pod and state
      * 
      * @param pod

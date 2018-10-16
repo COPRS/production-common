@@ -72,7 +72,7 @@ public class AppCatalogMqiLevelJobsServiceTest {
     private List<MqiGenericMessageDto<LevelJobDto>> messages;
     private List<MqiLevelJobMessageDto> messages2;
     private LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "name",
-            "workdir", "joborder");
+            "FAST", "workdir", "joborder");
 
     /**
      * Initialization
@@ -319,8 +319,7 @@ public class AppCatalogMqiLevelJobsServiceTest {
         doReturn(
                 new ResponseEntity<MqiLevelJobMessageDto>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<MqiLevelJobMessageDto>(
-                        HttpStatus.NOT_FOUND))
+                new ResponseEntity<MqiLevelJobMessageDto>(HttpStatus.NOT_FOUND))
                         .when(restTemplate).exchange(Mockito.anyString(),
                                 Mockito.any(HttpMethod.class), Mockito.any(),
                                 Mockito.any(Class.class));
@@ -328,8 +327,7 @@ public class AppCatalogMqiLevelJobsServiceTest {
         thrown.expect(AppCatalogMqiGetApiError.class);
         thrown.expect(hasProperty("category", is(ProductCategory.LEVEL_JOBS)));
         thrown.expect(hasProperty("uri", is("uri/mqi/level_jobs/1234")));
-        thrown.expectMessage(
-                containsString("Message not found"));
+        thrown.expectMessage(containsString("Message not found"));
 
         service.get(1234);
     }
@@ -355,8 +353,7 @@ public class AppCatalogMqiLevelJobsServiceTest {
         assertEquals(ret, message1);
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/mqi/level_jobs/1234"),
-                Mockito.eq(HttpMethod.GET),
-                Mockito.eq(null),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(MqiLevelJobMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
@@ -378,8 +375,7 @@ public class AppCatalogMqiLevelJobsServiceTest {
         assertEquals(ret, message1);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/level_jobs/1234"),
-                Mockito.eq(HttpMethod.GET),
-                Mockito.eq(null),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(MqiLevelJobMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
