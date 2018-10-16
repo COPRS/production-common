@@ -2,6 +2,7 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 S1-PDGS Cloud POC - Message queue interface client,esa.s1pdgs.cpoc.mqi.client,EdrsSessionMqiService,0,86,0,2,0,16,0,3,0,2
 S1-PDGS Cloud POC - Message queue interface client,esa.s1pdgs.cpoc.mqi.client,LevelProductsMqiService,0,86,0,2,0,16,0,3,0,2
 S1-PDGS Cloud POC - Message queue interface client,esa.s1pdgs.cpoc.mqi.client,GenericMqiService,3,327,0,12,2,58,0,11,0,5
+S1-PDGS Cloud POC - Message queue interface client,esa.s1pdgs.cpoc.mqi.client,LevelSegmentsMqiService,0,86,0,2,0,16,0,3,0,2
 S1-PDGS Cloud POC - Message queue interface client,esa.s1pdgs.cpoc.mqi.client,StatusService,3,197,0,10,2,42,0,10,0,5
 S1-PDGS Cloud POC - Message queue interface client,esa.s1pdgs.cpoc.mqi.client,AuxiliaryFilesMqiService,0,86,0,2,0,16,0,3,0,2
 S1-PDGS Cloud POC - Message queue interface client,esa.s1pdgs.cpoc.mqi.client,LevelReportsMqiService,0,86,0,2,0,16,0,3,0,2

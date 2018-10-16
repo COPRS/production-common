@@ -28,16 +28,16 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.LevelJobsMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.LevelSegmentsMessageDto;
 
 /**
  * Test the REST service ErrorService
  * 
  * @author Viveris Technologies
  */
-public class LevelJobsMqiServiceTest {
+public class LevelSegmentsMqiServiceTest {
 
     /**
      * To check the raised custom exceptions
@@ -54,12 +54,12 @@ public class LevelJobsMqiServiceTest {
     /**
      * Service to test
      */
-    private LevelJobsMqiService service;
+    private LevelSegmentsMqiService service;
 
     /**
      * DTO
      */
-    private LevelJobsMessageDto message;
+    private LevelSegmentsMessageDto message;
 
     /**
      * Initialization
@@ -68,10 +68,10 @@ public class LevelJobsMqiServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new LevelJobsMqiService(restTemplate, "uri", 2, 500);
+        service = new LevelSegmentsMqiService(restTemplate, "uri", 2, 500);
 
-        message = new LevelJobsMessageDto(123, "input-key", new LevelJobDto(
-                ProductFamily.L0_JOB, "name", "FAST", "workdir", "joborder"));
+        message = new LevelSegmentsMessageDto(123, "input-key",
+                new LevelSegmentDto("name", "keyobs", ProductFamily.L0_SEGMENT, "NRT"));
     }
 
     /**
@@ -88,7 +88,8 @@ public class LevelJobsMqiServiceTest {
                         Mockito.any(Class.class));
 
         thrown.expect(MqiNextApiError.class);
-        thrown.expect(hasProperty("category", is(ProductCategory.LEVEL_JOBS)));
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_SEGMENTS)));
 
         service.next();
     }
@@ -102,16 +103,19 @@ public class LevelJobsMqiServiceTest {
     @Test
     public void testNextWhenResponseKO() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<LevelJobsMessageDto>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<LevelJobsMessageDto>(
+                new ResponseEntity<LevelSegmentsMessageDto>(
+                        HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<LevelSegmentsMessageDto>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<LevelJobsMessageDto>(HttpStatus.NOT_FOUND))
-                        .when(restTemplate).exchange(Mockito.anyString(),
+                new ResponseEntity<LevelSegmentsMessageDto>(
+                        HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
+                                Mockito.anyString(),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(Class.class));
 
         thrown.expect(MqiNextApiError.class);
-        thrown.expect(hasProperty("category", is(ProductCategory.LEVEL_JOBS)));
+        thrown.expect(
+                hasProperty("category", is(ProductCategory.LEVEL_SEGMENTS)));
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
@@ -127,11 +131,13 @@ public class LevelJobsMqiServiceTest {
     @Test
     public void testMaxRetries() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<LevelJobsMessageDto>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<LevelJobsMessageDto>(
+                new ResponseEntity<LevelSegmentsMessageDto>(
+                        HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<LevelSegmentsMessageDto>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<LevelJobsMessageDto>(HttpStatus.NOT_FOUND))
-                        .when(restTemplate).exchange(Mockito.anyString(),
+                new ResponseEntity<LevelSegmentsMessageDto>(
+                        HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
+                                Mockito.anyString(),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(Class.class));
 
@@ -140,9 +146,9 @@ public class LevelJobsMqiServiceTest {
             fail("An exception shall be raised");
         } catch (MqiNextApiError mpee) {
             verify(restTemplate, times(2)).exchange(
-                    Mockito.eq("uri/messages/level_jobs/next"),
+                    Mockito.eq("uri/messages/level_segments/next"),
                     Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                    Mockito.eq(LevelJobsMessageDto.class));
+                    Mockito.eq(LevelSegmentsMessageDto.class));
             verifyNoMoreInteractions(restTemplate);
         }
     }
@@ -156,18 +162,20 @@ public class LevelJobsMqiServiceTest {
     @Test
     public void testNext1() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<LevelJobsMessageDto>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<LevelJobsMessageDto>(message, HttpStatus.OK))
-                        .when(restTemplate).exchange(Mockito.anyString(),
+                new ResponseEntity<LevelSegmentsMessageDto>(
+                        HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<LevelSegmentsMessageDto>(message,
+                        HttpStatus.OK)).when(restTemplate).exchange(
+                                Mockito.anyString(),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(Class.class));
 
-        GenericMessageDto<LevelJobDto> ret = service.next();
+        GenericMessageDto<LevelSegmentDto> ret = service.next();
         assertEquals(message, ret);
         verify(restTemplate, times(2)).exchange(
-                Mockito.eq("uri/messages/level_jobs/next"),
+                Mockito.eq("uri/messages/level_segments/next"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                Mockito.eq(LevelJobsMessageDto.class));
+                Mockito.eq(LevelSegmentsMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
 
@@ -179,18 +187,17 @@ public class LevelJobsMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testNext2() throws AbstractCodedException {
-        doReturn(
-                new ResponseEntity<LevelJobsMessageDto>(message, HttpStatus.OK))
-                        .when(restTemplate).exchange(Mockito.anyString(),
-                                Mockito.any(HttpMethod.class), Mockito.isNull(),
-                                Mockito.any(Class.class));
+        doReturn(new ResponseEntity<LevelSegmentsMessageDto>(message,
+                HttpStatus.OK)).when(restTemplate).exchange(Mockito.anyString(),
+                        Mockito.any(HttpMethod.class), Mockito.isNull(),
+                        Mockito.any(Class.class));
 
-        GenericMessageDto<LevelJobDto> ret = service.next();
+        GenericMessageDto<LevelSegmentDto> ret = service.next();
         assertEquals(message, ret);
         verify(restTemplate, times(1)).exchange(
-                Mockito.eq("uri/messages/level_jobs/next"),
+                Mockito.eq("uri/messages/level_segments/next"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                Mockito.eq(LevelJobsMessageDto.class));
+                Mockito.eq(LevelSegmentsMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
 }

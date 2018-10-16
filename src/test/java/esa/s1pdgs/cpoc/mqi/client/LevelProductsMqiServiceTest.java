@@ -71,7 +71,7 @@ public class LevelProductsMqiServiceTest {
         service = new LevelProductsMqiService(restTemplate, "uri", 2, 500);
 
         message = new LevelProductsMessageDto(123, "input-key",
-                new LevelProductDto("name", "keyobs", ProductFamily.L0_ACN));
+                new LevelProductDto("name", "keyobs", ProductFamily.L0_ACN, "NRT"));
     }
 
     /**

@@ -76,8 +76,8 @@ public class GenericMqiServiceTest {
         ackMessage = new AckMessageDto(1, Ack.OK, "message", true);
 
         pubMessage = new GenericPublicationMessageDto<LevelProductDto>(
-                ProductFamily.L0_PRODUCT, new LevelProductDto("name", "keyobs",
-                        ProductFamily.L0_PRODUCT));
+                ProductFamily.L0_SLICE, new LevelProductDto("name", "keyobs",
+                        ProductFamily.L0_SLICE, "NRT"));
     }
     
     @Test
