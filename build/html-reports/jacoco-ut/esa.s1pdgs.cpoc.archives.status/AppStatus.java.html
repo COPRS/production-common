@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AppStatus.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For S1-PDGS Archives</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.archives.status</a> &gt; <span class="el_source">AppStatus.java</span></div><h1>AppStatus.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.archives.status;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import esa.s1pdgs.cpoc.common.AppState;
+
+/**
+ * Application status
+ * 
+ * @author Viveris Technologies
+ */
+@Component
+public class AppStatus {
+
+    /**
+     * Status
+     */
+    private final ArchiveStatus status;
+
+    /**
+     * Maximal number of consecutive errors for processing
+     */
+    private final int maxErrorCounterSlices;
+    
+    /**
+     * Maximal number of consecutive errors for processing
+     */
+    private final int maxErrorCounterReports;
+    
+    /**
+     * Indicate if the application shall be stopped
+     */
+    private boolean shallBeStopped;
+
+
+    /**
+     * Constructor
+     * 
+     * @param maxErrorCounter
+     */
+    @Autowired
+    public AppStatus(
+            @Value(&quot;${status.max-error-counter-slices}&quot;) final int maxErrorCounterSlices,
+<span class="fc" id="L47">            @Value(&quot;${status.max-error-counter-reports}&quot;) final int maxErrorCounterReports) {</span>
+<span class="fc" id="L48">        this.status = new ArchiveStatus();</span>
+<span class="fc" id="L49">        this.shallBeStopped = false;</span>
+<span class="fc" id="L50">        this.maxErrorCounterSlices = maxErrorCounterSlices;</span>
+<span class="fc" id="L51">        this.maxErrorCounterReports = maxErrorCounterReports;</span>
+<span class="fc" id="L52">    }</span>
+
+    /**
+     * @return the status
+     */
+    public synchronized ArchiveStatus getStatus() {
+<span class="fc" id="L58">        return status;</span>
+    }
+
+    /**
+     * Set application as waiting
+     */
+    public synchronized void setWaiting() {
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if(!this.shallBeStopped) {</span>
+<span class="fc" id="L66">            this.status.setWaiting();</span>
+        }
+<span class="fc" id="L68">    }</span>
+    
+    /**
+     * Set application as processing
+     */
+    public synchronized void setProcessing(String type) {
+<span class="fc bfc" id="L74" title="All 4 branches covered.">        if(!this.shallBeStopped &amp;&amp; !this.status.isFatalError()) {</span>
+<span class="fc" id="L75">            this.status.setProcessing();</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">            if(&quot;SLICES&quot;.equals(type)) {</span>
+<span class="fc" id="L77">                this.status.resetErrorCounterSlices();</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">            } else if(&quot;REPORTS&quot;.equals(type)) {</span>
+<span class="nc" id="L79">                this.status.resetErrorCounterReports();</span>
+            }
+            
+        }
+<span class="fc" id="L83">    }</span>
+
+    /**
+     * Set application as stopping
+     */
+    public synchronized void setStopping() {
+<span class="fc" id="L89">        this.setShallBeStopped(true);</span>
+<span class="fc" id="L90">        this.status.setStopping();</span>
+<span class="fc" id="L91">    }</span>
+
+    /**
+     * Set application as error
+     */
+    public synchronized void setError(String type) {
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if(&quot;SLICES&quot;.equals(type)) {</span>
+<span class="fc" id="L98">            this.status.setErrorSlices(maxErrorCounterSlices);</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        } else if(&quot;REPORTS&quot;.equals(type)) {</span>
+<span class="nc" id="L100">            this.status.setErrorReports(maxErrorCounterReports);</span>
+        }
+        
+<span class="fc" id="L103">    }</span>
+
+    /**
+     * @return the shallBeStopped
+     */
+    public synchronized boolean isShallBeStopped() {
+<span class="fc" id="L109">        return shallBeStopped;</span>
+    }
+
+    /**
+     * @param shallBeStopped
+     *            the shallBeStopped to set
+     */
+    public synchronized void setShallBeStopped(final boolean shallBeStopped) {
+<span class="fc" id="L117">        this.shallBeStopped = shallBeStopped;</span>
+<span class="fc" id="L118">    }</span>
+
+    /**
+     * Internal status
+     * 
+     * @author Viveris Technologies
+     */
+    public class ArchiveStatus {
+
+        /**
+         * State
+         */
+        private AppState state;
+
+        /**
+         * Date of the last change of the status (old status != new status)
+         */
+        private long dateLastChangeMs;
+
+        /**
+         * Number of consecutive errors for slices
+         */
+        private int errorCounterSlices;
+        
+        /**
+         * Number of consecutive errors for reports
+         */
+        private int errorCounterReports;
+        
+
+        /**
+         * Constrcutor
+         */
+<span class="fc" id="L151">        public ArchiveStatus() {</span>
+<span class="fc" id="L152">            this.state = AppState.WAITING;</span>
+<span class="fc" id="L153">            errorCounterSlices = 0;</span>
+<span class="fc" id="L154">            errorCounterReports = 0;</span>
+<span class="fc" id="L155">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L156">        }</span>
+
+        /**
+         * @return the status
+         */
+        public AppState getState() {
+<span class="fc" id="L162">            return state;</span>
+        }
+
+        /**
+         * @return the timeSinceLastChange
+         */
+        public long getDateLastChangeMs() {
+<span class="fc" id="L169">            return dateLastChangeMs;</span>
+        }
+
+        /**
+         * @return the errorCounter
+         */
+        public int getErrorCounterSlices() {
+<span class="fc" id="L176">            return errorCounterSlices;</span>
+        }
+                
+        /**
+         * Reset the error counter for MQI
+         */
+        public void resetErrorCounterSlices() {
+<span class="fc" id="L183">            this.errorCounterSlices = 0;</span>
+<span class="fc" id="L184">        }</span>
+        
+        /**
+         * @return the errorCounter
+         */
+        public int getErrorCounterReports() {
+<span class="fc" id="L190">            return errorCounterReports;</span>
+        }
+                
+        /**
+         * Reset the error counter for MQI
+         */
+        public void resetErrorCounterReports() {
+<span class="fc" id="L197">            this.errorCounterReports = 0;</span>
+<span class="fc" id="L198">        }</span>
+        
+        /**
+         * Set status WAITING
+         */
+        public void setWaiting() {
+<span class="pc bpc" id="L204" title="1 of 4 branches missed.">            if (!isStopping() &amp;&amp; !isFatalError()) {</span>
+<span class="fc" id="L205">                state = AppState.WAITING;</span>
+<span class="fc" id="L206">                dateLastChangeMs = System.currentTimeMillis();</span>
+            }
+<span class="fc" id="L208">        }</span>
+
+        /**
+         * Set status STOPPING
+         */
+        public void setStopping() {
+<span class="fc" id="L214">            state = AppState.STOPPING;</span>
+<span class="fc" id="L215">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L216">            this.resetErrorCounterReports();</span>
+<span class="fc" id="L217">            this.resetErrorCounterSlices();</span>
+<span class="fc" id="L218">        }</span>
+
+        /**
+         * Set status ERROR
+         */
+        public void setErrorSlices(final int maxErrorCounter) {
+<span class="fc bfc" id="L224" title="All 2 branches covered.">            if (!isStopping()) {</span>
+<span class="fc" id="L225">                state = AppState.ERROR;</span>
+<span class="fc" id="L226">                dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L227">                errorCounterSlices++;</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">                if (errorCounterSlices &gt;= maxErrorCounter) {</span>
+<span class="fc" id="L229">                    setFatalError();</span>
+                }
+            }
+<span class="fc" id="L232">        }</span>
+        
+        /**
+         * Set status ERROR
+         */
+        public void setErrorReports(final int maxErrorCounter) {
+<span class="nc bnc" id="L238" title="All 2 branches missed.">            if (!isStopping()) {</span>
+<span class="nc" id="L239">                state = AppState.ERROR;</span>
+<span class="nc" id="L240">                dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="nc" id="L241">                errorCounterReports++;</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">                if (errorCounterReports &gt;= maxErrorCounter) {</span>
+<span class="nc" id="L243">                    setFatalError();</span>
+                }
+            }
+<span class="nc" id="L246">        }</span>
+        
+        /**
+         * Set status PROCESSING
+         */
+        public void setProcessing() {
+<span class="fc" id="L252">            state = AppState.PROCESSING;</span>
+<span class="fc" id="L253">            dateLastChangeMs = System.currentTimeMillis();</span>
+            
+<span class="fc" id="L255">        }</span>
+
+        /**
+         * Set status FATALERROR
+         */
+        public void setFatalError() {
+<span class="fc" id="L261">            state = AppState.FATALERROR;</span>
+<span class="fc" id="L262">            dateLastChangeMs = System.currentTimeMillis();</span>
+<span class="fc" id="L263">        }</span>
+
+        /**
+         * Indicate if state is waiting
+         * 
+         * @return
+         */
+        public boolean isWaiting() {
+<span class="fc bfc" id="L271" title="All 2 branches covered.">            return state == AppState.WAITING;</span>
+        }
+
+        /**
+         * Indicate if state is STOPPING
+         * 
+         * @return
+         */
+        public boolean isStopping() {
+<span class="fc bfc" id="L280" title="All 2 branches covered.">            return state == AppState.STOPPING;</span>
+        }
+        
+        /**
+         * Indicate if state is PROCESSING
+         * 
+         * @return
+         */
+        public boolean isProcessing() {
+<span class="fc bfc" id="L289" title="All 2 branches covered.">            return state == AppState.PROCESSING;</span>
+        }
+
+        /**
+         * Indicate if state is ERROR
+         * 
+         * @return
+         */
+        public boolean isError() {
+<span class="fc bfc" id="L298" title="All 2 branches covered.">            return state == AppState.ERROR;</span>
+        }
+
+        /**
+         * Indicate if state is FATALERROR
+         * 
+         * @return
+         */
+        public boolean isFatalError() {
+<span class="fc bfc" id="L307" title="All 2 branches covered.">            return state == AppState.FATALERROR;</span>
+        }
+
+    }
+
+    /**
+     * Stop the application if someone asks for forcing stop
+     */
+    @Scheduled(fixedDelayString = &quot;${status.delete-fixed-delay-ms}&quot;)
+    public void forceStopping() {
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">        if (this.isShallBeStopped()) {</span>
+<span class="nc" id="L318">            System.exit(0);</span>
+        }
+<span class="fc" id="L320">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

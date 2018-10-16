@@ -118,30 +118,33 @@ public class ObsService {
      */
     protected ObsFamily getObsFamily(final ProductFamily family) {
         ObsFamily ret;
-<span class="pc bfc" id="L121" title="All 7 branches covered.">        switch (family) {</span>
+<span class="pc bpc" id="L121" title="1 of 8 branches missed.">        switch (family) {</span>
             case AUXILIARY_FILE:
 <span class="fc" id="L123">                ret = ObsFamily.AUXILIARY_FILE;</span>
 <span class="fc" id="L124">                break;</span>
             case EDRS_SESSION:
 <span class="fc" id="L126">                ret = ObsFamily.EDRS_SESSION;</span>
 <span class="fc" id="L127">                break;</span>
-            case L0_PRODUCT:
-<span class="fc" id="L129">                ret = ObsFamily.L0_PRODUCT;</span>
+            case L0_SLICE:
+<span class="fc" id="L129">                ret = ObsFamily.L0_SLICE;</span>
 <span class="fc" id="L130">                break;</span>
             case L0_ACN:
 <span class="fc" id="L132">                ret = ObsFamily.L0_ACN;</span>
 <span class="fc" id="L133">                break;</span>
-            case L1_PRODUCT:
-<span class="fc" id="L135">                ret = ObsFamily.L1_PRODUCT;</span>
+            case L1_SLICE:
+<span class="fc" id="L135">                ret = ObsFamily.L1_SLICE;</span>
 <span class="fc" id="L136">                break;</span>
             case L1_ACN:
 <span class="fc" id="L138">                ret = ObsFamily.L1_ACN;</span>
 <span class="fc" id="L139">                break;</span>
+            case L0_SEGMENT:
+<span class="nc" id="L141">                ret = ObsFamily.L0_SEGMENT;</span>
+<span class="nc" id="L142">                break;</span>
             default:
-<span class="fc" id="L141">                ret = ObsFamily.UNKNOWN;</span>
+<span class="fc" id="L144">                ret = ObsFamily.UNKNOWN;</span>
                 break;
         }
-<span class="fc" id="L144">        return ret;</span>
+<span class="fc" id="L147">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

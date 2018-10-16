@@ -122,14 +122,14 @@ public class ObsServiceTest {
                 service.getObsFamily(ProductFamily.BLANK));
         assertEquals(ObsFamily.L0_ACN,
                 service.getObsFamily(ProductFamily.L0_ACN));
-        assertEquals(ObsFamily.L0_PRODUCT,
-                service.getObsFamily(ProductFamily.L0_PRODUCT));
+        assertEquals(ObsFamily.L0_SLICE,
+                service.getObsFamily(ProductFamily.L0_SLICE));
         assertEquals(ObsFamily.UNKNOWN,
                 service.getObsFamily(ProductFamily.L0_REPORT));
         assertEquals(ObsFamily.L1_ACN,
                 service.getObsFamily(ProductFamily.L1_ACN));
-        assertEquals(ObsFamily.L1_PRODUCT,
-                service.getObsFamily(ProductFamily.L1_PRODUCT));
+        assertEquals(ObsFamily.L1_SLICE,
+                service.getObsFamily(ProductFamily.L1_SLICE));
         assertEquals(ObsFamily.UNKNOWN,
                 service.getObsFamily(ProductFamily.L1_REPORT));
         assertEquals(ObsFamily.UNKNOWN,

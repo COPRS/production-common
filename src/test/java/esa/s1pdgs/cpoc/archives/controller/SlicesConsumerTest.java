@@ -65,7 +65,7 @@ public class SlicesConsumerTest {
 
     private void mockSliceObjectStorageException()
             throws ObsException, ObsUnknownObject {
-        doThrow(new ObsException(ProductFamily.L0_PRODUCT, "kobs",
+        doThrow(new ObsException(ProductFamily.L0_SLICE, "kobs",
                 new Throwable())).when(obsService).downloadFile(
                         Mockito.any(ProductFamily.class), Mockito.anyString(),
                         Mockito.anyString());
@@ -85,17 +85,17 @@ public class SlicesConsumerTest {
                 new SlicesConsumer(obsService, "test/data/slices", devProperties,
                         appStatus);
         File expectedResult =
-                new File("test/data/slices/l0_product/productName");
+                new File("test/data/slices/l0_slice/productName");
         mockDevProperties(true);
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("kobs"),
-                Mockito.eq("test/data/slices/l0_product"));
+                Mockito.eq(ProductFamily.L0_SLICE), Mockito.eq("kobs"),
+                Mockito.eq("test/data/slices/l0_slice"));
     }
 
     @Test
@@ -105,16 +105,16 @@ public class SlicesConsumerTest {
                 new SlicesConsumer(obsService, "test/data/slices", devProperties,
                         appStatus);
         File expectedResult =
-                new File("test/data/slices/l0_product/productName");
+                new File("test/data/slices/l0_slice/productName");
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L0_PRODUCT), Mockito.eq("kobs/manifest.safe"),
-                Mockito.eq("test/data/slices/l0_product"));
+                Mockito.eq(ProductFamily.L0_SLICE), Mockito.eq("kobs/manifest.safe"),
+                Mockito.eq("test/data/slices/l0_slice"));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class SlicesConsumerTest {
                         appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -138,7 +138,7 @@ public class SlicesConsumerTest {
                         appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -150,12 +150,12 @@ public class SlicesConsumerTest {
                 new SlicesConsumer(obsService, "test/data/slices", devProperties,
                         appStatus);
         File expectedResult =
-                new File("test/data/slices/l0_product/productName");
+                new File("test/data/slices/l0_slice/productName");
         this.mockSliceDownloadFiles(expectedResult);
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }
@@ -167,16 +167,16 @@ public class SlicesConsumerTest {
                 new SlicesConsumer(obsService, "test/data/slices", devProperties,
                         appStatus);
         File expectedResult =
-                new File("test/data/slices/l1_product/productName");
+                new File("test/data/slices/l1_slice/productName");
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L1_PRODUCT), Mockito.eq("kobs/manifest.safe"),
-                Mockito.eq("test/data/slices/l1_product"));
+                Mockito.eq(ProductFamily.L1_SLICE), Mockito.eq("kobs/manifest.safe"),
+                Mockito.eq("test/data/slices/l1_slice"));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class SlicesConsumerTest {
                         appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -200,7 +200,7 @@ public class SlicesConsumerTest {
                         appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -212,12 +212,12 @@ public class SlicesConsumerTest {
                 new SlicesConsumer(obsService, "test/data/slices", devProperties,
                         appStatus);
         File expectedResult =
-                new File("test/data/slices/l1_product/productName");
+                new File("test/data/slices/l1_slice/productName");
         this.mockSliceDownloadFiles(expectedResult);
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L1_PRODUCT),
+                new LevelProductDto("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }
@@ -228,7 +228,7 @@ public class SlicesConsumerTest {
                 new SlicesConsumer(obsService, "test/data/slices", devProperties,
                         appStatus);
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.BLANK),
+                new LevelProductDto("productName", "kobs", ProductFamily.BLANK, "NRT"),
                 ack, "topic");
     }
 
