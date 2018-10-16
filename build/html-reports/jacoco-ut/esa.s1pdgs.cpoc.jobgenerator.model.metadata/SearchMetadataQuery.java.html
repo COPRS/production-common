@@ -2,192 +2,222 @@
 
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 /**
  * Class describing a search query for metadata
  * 
  * @author Cyrielle Gailliard
- *
  */
 public class SearchMetadataQuery {
 
-	/**
-	 * Identify the query
-	 */
-	private int identifier;
+    /**
+     * Identify the query
+     */
+    private int identifier;
 
-	/**
-	 * Retrieval mode
-	 */
-	private String retrievalMode;
+    /**
+     * Retrieval mode
+     */
+    private String retrievalMode;
 
-	/**
-	 * Delta time to apply to the validity start time
-	 */
-	private double deltaTime0;
+    /**
+     * Delta time to apply to the validity start time
+     */
+    private double deltaTime0;
 
-	/**
-	 * Delta time to apply to the validity stop time
-	 */
-	private double deltaTime1;
+    /**
+     * Delta time to apply to the validity stop time
+     */
+    private double deltaTime1;
 
-	/**
-	 * Wanted product type
-	 */
-	private String productType;
+    /**
+     * Wanted product type
+     */
+    private String productType;
 
-	/**
-	 * Default constructor
-	 */
-	public SearchMetadataQuery() {
-<span class="fc" id="L42">		super();</span>
-<span class="fc" id="L43">	}</span>
+    /**
+     * Product Family
+     */
+    private ProductFamily productFamily;
 
-	/**
-	 * Constructor using fields
-	 * 
-	 * @param identifier
-	 * @param retrievalMode
-	 * @param deltaTime0
-	 * @param deltaTime1
-	 * @param fileType
-	 */
-	public SearchMetadataQuery(final int identifier, final String retrievalMode, final double deltaTime0,
-			final double deltaTime1, final String productType) {
-<span class="fc" id="L56">		this();</span>
-<span class="fc" id="L57">		this.identifier = identifier;</span>
-<span class="fc" id="L58">		this.retrievalMode = retrievalMode;</span>
-<span class="fc" id="L59">		this.deltaTime0 = deltaTime0;</span>
-<span class="fc" id="L60">		this.deltaTime1 = deltaTime1;</span>
-<span class="fc" id="L61">		this.productType = productType;</span>
-<span class="fc" id="L62">	}</span>
+    /**
+     * Default constructor
+     */
+    public SearchMetadataQuery() {
+<span class="fc" id="L48">        super();</span>
+<span class="fc" id="L49">    }</span>
 
-	/**
-	 * Clone
-	 * 
-	 * @param obj
-	 */
-	public SearchMetadataQuery(final SearchMetadataQuery obj) {
-<span class="fc" id="L70">		this(obj.getIdentifier(), obj.getRetrievalMode(), obj.getDeltaTime0(), obj.getDeltaTime1(),</span>
-<span class="fc" id="L71">				obj.getProductType());</span>
-<span class="fc" id="L72">	}</span>
+    /**
+     * Constructor using fields
+     * 
+     * @param identifier
+     * @param retrievalMode
+     * @param deltaTime0
+     * @param deltaTime1
+     * @param fileType
+     */
+    public SearchMetadataQuery(final int identifier, final String retrievalMode,
+            final double deltaTime0, final double deltaTime1,
+            final String productType, final ProductFamily productFamily) {
+<span class="fc" id="L63">        this();</span>
+<span class="fc" id="L64">        this.identifier = identifier;</span>
+<span class="fc" id="L65">        this.retrievalMode = retrievalMode;</span>
+<span class="fc" id="L66">        this.deltaTime0 = deltaTime0;</span>
+<span class="fc" id="L67">        this.deltaTime1 = deltaTime1;</span>
+<span class="fc" id="L68">        this.productType = productType;</span>
+<span class="fc" id="L69">        this.productFamily = productFamily;</span>
+<span class="fc" id="L70">    }</span>
 
-	/**
-	 * @return the identifier
-	 */
-	public int getIdentifier() {
-<span class="fc" id="L78">		return identifier;</span>
-	}
+    /**
+     * Clone
+     * 
+     * @param obj
+     */
+    public SearchMetadataQuery(final SearchMetadataQuery obj) {
+<span class="nc" id="L78">        this(obj.getIdentifier(), obj.getRetrievalMode(), obj.getDeltaTime0(),</span>
+<span class="nc" id="L79">                obj.getDeltaTime1(), obj.getProductType(),</span>
+<span class="nc" id="L80">                obj.getProductFamily());</span>
+<span class="nc" id="L81">    }</span>
 
-	/**
-	 * @param identifier
-	 *            the identifier to set
-	 */
-	public void setIdentifier(final int identifier) {
-<span class="fc" id="L86">		this.identifier = identifier;</span>
-<span class="fc" id="L87">	}</span>
+    /**
+     * @return the identifier
+     */
+    public int getIdentifier() {
+<span class="fc" id="L87">        return identifier;</span>
+    }
 
-	/**
-	 * @return the retrievalMode
-	 */
-	public String getRetrievalMode() {
-<span class="fc" id="L93">		return retrievalMode;</span>
-	}
+    /**
+     * @param identifier
+     *            the identifier to set
+     */
+    public void setIdentifier(final int identifier) {
+<span class="fc" id="L95">        this.identifier = identifier;</span>
+<span class="fc" id="L96">    }</span>
 
-	/**
-	 * @param retrievalMode
-	 *            the retrievalMode to set
-	 */
-	public void setRetrievalMode(final String retrievalMode) {
-<span class="fc" id="L101">		this.retrievalMode = retrievalMode;</span>
-<span class="fc" id="L102">	}</span>
+    /**
+     * @return the retrievalMode
+     */
+    public String getRetrievalMode() {
+<span class="fc" id="L102">        return retrievalMode;</span>
+    }
 
-	/**
-	 * @return the deltaTime0
-	 */
-	public double getDeltaTime0() {
-<span class="fc" id="L108">		return deltaTime0;</span>
-	}
+    /**
+     * @param retrievalMode
+     *            the retrievalMode to set
+     */
+    public void setRetrievalMode(final String retrievalMode) {
+<span class="fc" id="L110">        this.retrievalMode = retrievalMode;</span>
+<span class="fc" id="L111">    }</span>
 
-	/**
-	 * @param deltaTime0
-	 *            the deltaTime0 to set
-	 */
-	public void setDeltaTime0(final double deltaTime0) {
-<span class="fc" id="L116">		this.deltaTime0 = deltaTime0;</span>
-<span class="fc" id="L117">	}</span>
+    /**
+     * @return the deltaTime0
+     */
+    public double getDeltaTime0() {
+<span class="fc" id="L117">        return deltaTime0;</span>
+    }
 
-	/**
-	 * @return the deltaTime1
-	 */
-	public double getDeltaTime1() {
-<span class="fc" id="L123">		return deltaTime1;</span>
-	}
+    /**
+     * @param deltaTime0
+     *            the deltaTime0 to set
+     */
+    public void setDeltaTime0(final double deltaTime0) {
+<span class="fc" id="L125">        this.deltaTime0 = deltaTime0;</span>
+<span class="fc" id="L126">    }</span>
 
-	/**
-	 * @param deltaTime1
-	 *            the deltaTime1 to set
-	 */
-	public void setDeltaTime1(final double deltaTime1) {
-<span class="fc" id="L131">		this.deltaTime1 = deltaTime1;</span>
-<span class="fc" id="L132">	}</span>
+    /**
+     * @return the deltaTime1
+     */
+    public double getDeltaTime1() {
+<span class="fc" id="L132">        return deltaTime1;</span>
+    }
 
-	/**
-	 * @return the productType
-	 */
-	public String getProductType() {
-<span class="fc" id="L138">		return productType;</span>
-	}
+    /**
+     * @param deltaTime1
+     *            the deltaTime1 to set
+     */
+    public void setDeltaTime1(final double deltaTime1) {
+<span class="fc" id="L140">        this.deltaTime1 = deltaTime1;</span>
+<span class="fc" id="L141">    }</span>
 
-	/**
-	 * @param productType
-	 *            the productType to set
-	 */
-	public void setProductType(final String productType) {
-<span class="fc" id="L146">		this.productType = productType;</span>
-<span class="fc" id="L147">	}</span>
+    /**
+     * @return the productType
+     */
+    public String getProductType() {
+<span class="fc" id="L147">        return productType;</span>
+    }
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-<span class="fc" id="L154">		return String.format(&quot;{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s}&quot;,</span>
-<span class="fc" id="L155">				identifier, retrievalMode, deltaTime0, deltaTime1, productType);</span>
-	}
+    /**
+     * @param productType
+     *            the productType to set
+     */
+    public void setProductType(final String productType) {
+<span class="fc" id="L155">        this.productType = productType;</span>
+<span class="fc" id="L156">    }</span>
 
-	/**
-	 * 
-	 * @return
-	 */
-	public String toLogMessage() {
-<span class="fc" id="L163">		return identifier + &quot;|&quot; + retrievalMode + &quot;|&quot; + deltaTime0 + &quot;|&quot; + deltaTime1 + &quot;|&quot; + productType;</span>
-	}
+    /**
+     * @return the productFamily
+     */
+    public ProductFamily getProductFamily() {
+<span class="fc" id="L162">        return productFamily;</span>
+    }
 
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-<span class="fc" id="L171">		return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1, productType);</span>
-	}
+    /**
+     * @param productFamily
+     *            the productFamily to set
+     */
+    public void setProductFamily(ProductFamily productFamily) {
+<span class="fc" id="L170">        this.productFamily = productFamily;</span>
+<span class="fc" id="L171">    }</span>
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(final Object obj) {
-		boolean ret;
-<span class="fc bfc" id="L180" title="All 2 branches covered.">		if (this == obj) {</span>
-<span class="fc" id="L181">			ret = true;</span>
-<span class="fc bfc" id="L182" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L183">			ret = false;</span>
-		} else {
-<span class="fc" id="L185">			SearchMetadataQuery other = (SearchMetadataQuery) obj;</span>
-<span class="fc bfc" id="L186" title="All 4 branches covered.">			ret = identifier == other.identifier &amp;&amp; Objects.equals(retrievalMode, other.retrievalMode)</span>
-<span class="fc bfc" id="L187" title="All 4 branches covered.">					&amp;&amp; Objects.equals(deltaTime0, other.deltaTime0) &amp;&amp; Objects.equals(deltaTime1, other.deltaTime1)</span>
-<span class="fc bfc" id="L188" title="All 2 branches covered.">					&amp;&amp; Objects.equals(productType, other.productType);</span>
-		}
-<span class="fc" id="L190">		return ret;</span>
-	}
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L178">        return String.format(</span>
+                &quot;{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s, productFamily: %s}&quot;,
+<span class="fc" id="L180">                identifier, retrievalMode, deltaTime0, deltaTime1, productType,</span>
+                productFamily);
+    }
+
+    /**
+     * @return
+     */
+    public String toLogMessage() {
+<span class="fc" id="L188">        return identifier + &quot;|&quot; + retrievalMode + &quot;|&quot; + deltaTime0 + &quot;|&quot;</span>
+                + deltaTime1 + &quot;|&quot; + productType + &quot;|&quot; + productFamily;
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L197">        return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1,</span>
+                productType, productFamily);
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L207" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L208">            ret = true;</span>
+<span class="fc bfc" id="L209" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L210">            ret = false;</span>
+        } else {
+<span class="fc" id="L212">            SearchMetadataQuery other = (SearchMetadataQuery) obj;</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">            ret = identifier == other.identifier</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(retrievalMode, other.retrievalMode)</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(deltaTime0, other.deltaTime0)</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(deltaTime1, other.deltaTime1)</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productType, other.productType)</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productFamily, other.productFamily);</span>
+        }
+<span class="fc" id="L220">        return ret;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

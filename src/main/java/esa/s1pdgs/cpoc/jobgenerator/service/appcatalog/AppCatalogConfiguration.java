@@ -10,8 +10,10 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.client.job.EdrsSessionsAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.client.job.LevelProductsAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.LevelSegmentsAppCatalogJobService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * Configuration of applicative data catalog client Creation of 3 services:
@@ -85,5 +87,18 @@ public class AppCatalogConfiguration {
 		RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
 		return new LevelProductsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);
 	}
+
+    /**
+     * Service for querying MQI for LEVEL_PRODUCT category
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = "appCatalogServiceForLevelSegments")
+    public AbstractAppCatalogJobService<LevelSegmentDto> appCatalogServiceForLevelSegments(
+            final RestTemplateBuilder builder) {
+        RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
+        return new LevelSegmentsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);
+    }
 
 }

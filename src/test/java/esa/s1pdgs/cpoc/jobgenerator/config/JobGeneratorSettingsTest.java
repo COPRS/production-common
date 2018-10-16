@@ -44,7 +44,8 @@ public class JobGeneratorSettingsTest {
 		assertEquals("Invalid waitmedataraw tempo", 3000, jobGenSettings.getWaitmetadatainput().getTempo());
 		assertEquals("Invalid waitmedatainput retries", 5, jobGenSettings.getWaitmetadatainput().getRetries());
 		assertEquals("Invalid default output family", "L0_ACN", jobGenSettings.getDefaultfamily());
-		assertEquals("Invalid size of output families", 18, jobGenSettings.getOutputfamilies().size());
+		assertEquals("Invalid size of output families", 8, jobGenSettings.getInputfamilies().size());
+        assertEquals("Invalid size of input families", 18, jobGenSettings.getOutputfamilies().size());
 	}
 
 	/**
@@ -53,15 +54,22 @@ public class JobGeneratorSettingsTest {
 	@Test
 	public void testMaps() {
 		// Test map product type / family
-		assertEquals("Invalid value of outputfamiliesstr",
-				"SM_RAW__0S:L0_PRODUCT||IW_RAW__0S:L0_PRODUCT||EW_RAW__0S:L0_PRODUCT||WV_RAW__0S:L0_PRODUCT||RF_RAW__0S:L0_PRODUCT||AN_RAW__0S:L0_PRODUCT||EN_RAW__0S:L0_PRODUCT||ZS_RAW__0S:L0_PRODUCT||ZE_RAW__0S:L0_PRODUCT||ZI_RAW__0S:L0_PRODUCT||ZW_RAW__0S:L0_PRODUCT||GP_RAW__0_:BLANK||HK_RAW__0_:BLANK||REP_ACQNR:L0_REPORT||REP_L0PSA_:L0_REPORT||REP_EFEP_:L0_REPORT||IW_GRDH_1S:L1_PRODUCT||IW_GRDH_1A:L1_ACN",
-				jobGenSettings.getOutputfamiliesstr());
-		assertEquals("Invalid 1st output family", ProductFamily.L0_PRODUCT,
-				jobGenSettings.getOutputfamilies().get("SM_RAW__0S"));
-		assertEquals("Invalid directory", ProductFamily.L0_REPORT, jobGenSettings.getOutputfamilies().get("REP_EFEP_"));
-		assertEquals("Invalid directory", ProductFamily.L1_PRODUCT,
-				jobGenSettings.getOutputfamilies().get("IW_GRDH_1S"));
-		assertEquals("Invalid directory", ProductFamily.L1_ACN, jobGenSettings.getOutputfamilies().get("IW_GRDH_1A"));
+		assertEquals("Invalid value of inputfamiliesstr",
+				"MPL_ORBPRE:AUXILIARY_FILE||MPL_ORBSCT:AUXILIARY_FILE||AUX_OBMEMC:AUXILIARY_FILE||AUX_CAL:AUXILIARY_FILE||AUX_PP1:AUXILIARY_FILE||AUX_INS:AUXILIARY_FILE||AUX_RESORB:AUXILIARY_FILE||AUX_RES:AUXILIARY_FILE",
+				jobGenSettings.getInputfamiliesstr());
+		assertEquals("Invalid 1st output family", ProductFamily.AUXILIARY_FILE,
+				jobGenSettings.getInputfamilies().get("MPL_ORBSCT"));
+		assertEquals("Invalid directory", ProductFamily.AUXILIARY_FILE, jobGenSettings.getInputfamilies().get("AUX_RESORB"));
+		
+        assertEquals("Invalid value of outputfamiliesstr",
+                "SM_RAW__0S:L0_SLICE||IW_RAW__0S:L0_SLICE||EW_RAW__0S:L0_SLICE||WV_RAW__0S:L0_SLICE||RF_RAW__0S:L0_SLICE||AN_RAW__0S:L0_SLICE||EN_RAW__0S:L0_SLICE||ZS_RAW__0S:L0_SLICE||ZE_RAW__0S:L0_SLICE||ZI_RAW__0S:L0_SLICE||ZW_RAW__0S:L0_SLICE||GP_RAW__0_:BLANK||HK_RAW__0_:BLANK||REP_ACQNR:L0_REPORT||REP_L0PSA_:L0_REPORT||REP_EFEP_:L0_REPORT||IW_GRDH_1S:L1_SLICE||IW_GRDH_1A:L1_ACN",
+                jobGenSettings.getOutputfamiliesstr());
+        assertEquals("Invalid 1st output family", ProductFamily.L0_SLICE,
+                jobGenSettings.getOutputfamilies().get("SM_RAW__0S"));
+        assertEquals("Invalid directory", ProductFamily.L0_REPORT, jobGenSettings.getOutputfamilies().get("REP_EFEP_"));
+        assertEquals("Invalid directory", ProductFamily.L1_SLICE,
+                jobGenSettings.getOutputfamilies().get("IW_GRDH_1S"));
+        assertEquals("Invalid directory", ProductFamily.L1_ACN, jobGenSettings.getOutputfamilies().get("IW_GRDH_1A"));
 		// Test map acquisition / overloap
 		assertEquals("Invalid size of output familiestype overlap", 4, jobGenSettings.getTypeOverlap().size());
 		assertEquals("Invalid value of output familiestype overlap", 7.4F,
@@ -71,7 +79,7 @@ public class JobGeneratorSettingsTest {
 		assertEquals("Invalid value of output familiestype overlap", 0.0F,
 				jobGenSettings.getTypeSliceLength().get("WM").floatValue(), 0);
 		// Test map product type / index type
-		assertEquals("Invalid size of mapTypeMeta", 2, jobGenSettings.getMapTypeMeta().size());
+		assertEquals("Invalid size of mapTypeMeta", 10, jobGenSettings.getMapTypeMeta().size());
 		assertEquals("Invalid value of mapTypeMeta", "AUX_TUT", jobGenSettings.getMapTypeMeta().get("AUX_TUTU"));
 
 	}

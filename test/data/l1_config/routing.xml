@@ -88,7 +88,7 @@
 	</l1_route>
 	<l1_route>
 		<l1_from>
-			<acquisition>SM</acquisition>
+			<acquisition>S[1-6]</acquisition>
 			<satellite_id>A</satellite_id>
 		</l1_from>
 		<l1_to>
@@ -104,7 +104,7 @@
 	</l1_route>
 	<l1_route>
 		<l1_from>
-			<acquisition>SM</acquisition>
+			<acquisition>S[1-6]</acquisition>
 			<satellite_id>B</satellite_id>
 		</l1_from>
 		<l1_to>

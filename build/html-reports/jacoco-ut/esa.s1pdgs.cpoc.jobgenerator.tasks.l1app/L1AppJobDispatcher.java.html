@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L1AppJobDispatcher.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.tasks.l1app</a> &gt; <span class="el_source">L1AppJobDispatcher.java</span></div><h1>L1AppJobDispatcher.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.tasks.l1app;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Service;
+
+import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
+import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Routing;
+import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+
+/**
+ * Dispatcher of L0 slice product&lt;br/&gt;
+ * 1 product to 1 or several task table&lt;br/&gt;
+ * The routing is given in a XML file and is done by mapping the acquisition and
+ * the mission and satellite identifier to a list of task tables
+ * 
+ * @author Cyrielle Gailliard
+ */
+@Service
+@ConditionalOnProperty(name = &quot;process.level&quot;, havingValue = &quot;L1&quot;)
+public class L1AppJobDispatcher
+        extends AbstractJobsDispatcher&lt;LevelProductDto&gt; {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L53">    private static final Logger LOGGER =</span>
+<span class="fc" id="L54">            LogManager.getLogger(L1AppJobDispatcher.class);</span>
+
+    /**
+     * XML converter
+     */
+    private final XmlConverter xmlConverter;
+
+    /**
+     * Routing table&lt;br/&gt;
+     * key = {acquisition_satelliteId} 'IW_A' -&gt; {taskTable1.xml;
+     * TaskTable2.xml}
+     */
+    protected final Map&lt;Pattern, List&lt;String&gt;&gt; routingMap;
+
+    /**
+     * Path of the routinh XML file
+     */
+    protected final String pathRoutingXmlFile;
+
+    /**
+     * @param settings
+     * @param factory
+     * @param taskScheduler
+     * @param xmlConverter
+     * @param pathRoutingXmlFile
+     */
+    @Autowired
+    public L1AppJobDispatcher(final JobGeneratorSettings settings,
+            final ProcessSettings processSettings,
+            final JobsGeneratorFactory factory,
+            final ThreadPoolTaskScheduler taskScheduler,
+            final XmlConverter xmlConverter,
+            @Value(&quot;${level1.pathroutingxmlfile}&quot;) String pathRoutingXmlFile,
+            @Qualifier(&quot;appCatalogServiceForLevelProducts&quot;) final AbstractAppCatalogJobService&lt;LevelProductDto&gt; appDataService) {
+<span class="fc" id="L88">        super(settings, processSettings, factory, taskScheduler,</span>
+                appDataService);
+<span class="fc" id="L90">        this.xmlConverter = xmlConverter;</span>
+<span class="fc" id="L91">        this.routingMap = new HashMap&lt;Pattern, List&lt;String&gt;&gt;();</span>
+<span class="fc" id="L92">        this.pathRoutingXmlFile = pathRoutingXmlFile;</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * @throws AbstractCodedException
+     */
+    @PostConstruct
+    public void initialize() throws AbstractCodedException {
+
+        // Init the routing map from XML file located in the task table folder
+        try {
+<span class="fc" id="L103">            L1Routing routing = (L1Routing) xmlConverter</span>
+<span class="fc" id="L104">                    .convertFromXMLToObject(this.pathRoutingXmlFile);</span>
+<span class="pc bpc" id="L105" title="2 of 4 branches missed.">            if (routing != null &amp;&amp; routing.getRoutes() != null) {</span>
+<span class="fc" id="L106">                routing.getRoutes().stream().forEach(route -&gt; {</span>
+<span class="fc" id="L107">                    String key = route.getRouteFrom().getAcquisition() + &quot;_&quot;</span>
+<span class="fc" id="L108">                            + route.getRouteFrom().getSatelliteId();</span>
+<span class="fc" id="L109">                    this.routingMap.put(Pattern.compile(key, Pattern.CASE_INSENSITIVE),</span>
+<span class="fc" id="L110">                            route.getRouteTo().getTaskTables());</span>
+<span class="fc" id="L111">                });</span>
+            }
+<span class="fc" id="L113">        } catch (IOException | JAXBException e) {</span>
+<span class="fc" id="L114">            throw new InternalErrorException(</span>
+<span class="fc" id="L115">                    String.format(&quot;Cannot parse routing XML file located in %s&quot;,</span>
+                            this.pathRoutingXmlFile),
+                    e);
+<span class="fc" id="L118">        }</span>
+        
+        // Init job generators from task tables
+<span class="fc" id="L121">        super.initTaskTables();</span>
+<span class="fc" id="L122">    }</span>
+
+    /**
+     * 
+     */
+    @Override
+    protected AbstractJobsGenerator&lt;LevelProductDto&gt; createJobGenerator(
+            final File xmlFile) throws AbstractCodedException {
+<span class="fc" id="L130">        return this.factory.createJobGeneratorForL0Slice(xmlFile,</span>
+                appDataService);
+    }
+
+    /**
+     * Get task tables to generate for given job
+     * 
+     * @throws JobGenMissingRoutingEntryException
+     */
+    @Override
+    protected List&lt;String&gt; getTaskTables(
+            final AppDataJobDto&lt;LevelProductDto&gt; job)
+            throws JobGenMissingRoutingEntryException {
+<span class="fc" id="L143">        List&lt;String&gt; taskTables = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L144">        String key = job.getProduct().getAcquisition() + &quot;_&quot;</span>
+<span class="fc" id="L145">                + job.getProduct().getSatelliteId();</span>
+<span class="fc" id="L146">        routingMap.forEach((k,v) -&gt; {</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">            if (k.matcher(key).matches()) {</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">                for (String taskTable : v) {</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">                    if (generators.containsKey(taskTable)) {</span>
+<span class="fc" id="L150">                        taskTables.add(taskTable);</span>
+                    } else {
+<span class="nc" id="L152">                        LOGGER.warn(</span>
+                                &quot;[MONITOR] [Step 2] [productName {}] Task table {} not found&quot;,
+<span class="nc" id="L154">                                job.getProduct().getProductName(), taskTable);</span>
+                    }
+<span class="fc" id="L156">                }</span>
+            }
+<span class="fc" id="L158">        });</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (taskTables.isEmpty()) {</span>
+<span class="fc" id="L160">            throw new JobGenMissingRoutingEntryException(</span>
+<span class="fc" id="L161">                    String.format(&quot;No found routing entries for %s&quot;, key));</span>
+        }
+<span class="fc" id="L163">        return taskTables;</span>
+    }
+
+    @Override
+    protected String getTaskForFunctionalLog() {
+<span class="nc" id="L168">        return &quot;L1JobGeneration&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

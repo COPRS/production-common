@@ -44,12 +44,12 @@ public class OutputProducerFactoryTest {
 
     @Test
     public void testSendJob() throws AbstractCodedException {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         GenericMessageDto<LevelProductDto> message =
                 new GenericMessageDto<LevelProductDto>(123, "key",
                         new LevelProductDto("level-name", "key-obs",
-                                ProductFamily.L0_PRODUCT));
+                                ProductFamily.L0_SLICE, "NRT"));
 
         GenericPublicationMessageDto<LevelJobDto> expected =
                 new GenericPublicationMessageDto<LevelJobDto>(123L,
