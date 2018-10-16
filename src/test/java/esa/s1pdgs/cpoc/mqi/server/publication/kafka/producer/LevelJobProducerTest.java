@@ -71,7 +71,7 @@ public class LevelJobProducerTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name-1",
+        dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name-1", "NRT",
                 "work-directory", "job-order");
 
         producer = new LevelJobProducer(properties, template);

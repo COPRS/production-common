@@ -29,35 +29,48 @@ application:
     auxiliary-files:
       consumption:
         enable: false
-        topicswithprioritystr: ""
+        topics-with-priority:
+          unknown: 0
       publication:
         enable: false
     edrs-sessions:
       consumption:
         enable: true
-        topicswithprioritystr: "t-pdgs-edrs-sessions:100"          
+        topics-with-priority: 
+          t-pdgs-edrs-sessions: 100          
       publication:
         enable: false
     level-products:
       consumption:
         enable: false
-        topicswithprioritystr: ""
+        topics-with-priority:
+          unknown: 0
       publication:
         enable: true
         routing-file: ./src/test/resources/routing-files/level-products.xml
     level-reports:
       consumption:
         enable: false
-        topicswithprioritystr: ""
+        topics-with-priority:
+          unknown: 0
       publication:
         enable: true
         routing-file: ./src/test/resources/routing-files/level-reports.xml
     level-jobs:
       consumption:
         enable: true
-        topicswithprioritystr: "t-pdgs-l0-jobs:100"
+        topics-with-priority: 
+          t-pdgs-l0-jobs: 100
       publication:
         enable: false
+    level-segments:
+      consumption:
+        enable: false
+        topics-with-priority:
+          unknown: 0
+      publication:
+        enable: false
+        routing-file: ./src/test/resources/routing-files/level-segments.xml                                  
 server:
   port: 8080
 persistence:

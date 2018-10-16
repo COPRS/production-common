@@ -53,7 +53,7 @@ public class ApplicationPropertiesTest {
     @Test
     public void testInitialization() {
         assertEquals("wrapper-0", properties.getHostname());
-        assertEquals(5, properties.getProductCategories().size());
+        assertEquals(6, properties.getProductCategories().size());
         assertEquals(500, properties.getWaitNextMs());
 
         // Check consumption
@@ -66,8 +66,6 @@ public class ApplicationPropertiesTest {
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.EDRS_SESSIONS).getConsumption()
                 .isEnable());
-        assertEquals("t-pdgs-edrs-sessions:100||t-topic-2:10", properties.getProductCategories()
-                .get(ProductCategory.EDRS_SESSIONS).getConsumption().getTopicswithprioritystr());
         Map<String, Integer> expectedTopics = new HashMap<>();
         expectedTopics.put("t-pdgs-edrs-sessions", 0);
         expectedTopics.put("t-topic-2", 0);
@@ -89,6 +87,10 @@ public class ApplicationPropertiesTest {
         // Level products
         assertFalse(properties.getProductCategories()
                 .get(ProductCategory.LEVEL_PRODUCTS).getConsumption()
+                .isEnable());
+        // Level segments
+        assertFalse(properties.getProductCategories()
+                .get(ProductCategory.LEVEL_SEGMENTS).getConsumption()
                 .isEnable());
 
         // Check publication
@@ -120,6 +122,9 @@ public class ApplicationPropertiesTest {
                 properties.getProductCategories()
                         .get(ProductCategory.LEVEL_PRODUCTS).getPublication()
                         .getRoutingFile());
+        // Level segments
+        assertFalse(properties.getProductCategories()
+                .get(ProductCategory.LEVEL_SEGMENTS).getPublication().isEnable());
     }
 
     /**

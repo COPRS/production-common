@@ -50,6 +50,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -110,6 +111,12 @@ public class MessageConsumptionControllerTest {
     private GenericAppCatalogMqiService<LevelReportDto> persistLevelReportsService;
 
     /**
+     * Service for AUXILIARY_FILES
+     */
+    @Mock
+    private GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
+
+    /**
      * 
      */
     @Mock
@@ -134,7 +141,7 @@ public class MessageConsumptionControllerTest {
                 kafkaProperties, persistAuxiliaryFilesService,
                 persistEdrsSessionsService, persistLevelJobsService,
                 persistLevelProductsService, persistLevelReportsService,
-                otherService, appStatus);
+                persistLevelSegmentsService, otherService, appStatus);
 
         doReturn("pod-name").when(appProperties).getHostname();
 
@@ -158,41 +165,43 @@ public class MessageConsumptionControllerTest {
         Map<String, Integer> lRepTopicsWithPriority = new HashMap<>();
         lRepTopicsWithPriority.put("topic", 100);
         lRepTopicsWithPriority.put("another-topic", 10);
+        Map<String, Integer> lSegTopicsWithPriority = new HashMap<>();
+        lSegTopicsWithPriority.put("topic", 100);
         Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
-        ProductCategoryConsumptionProperties prodCatAux = new ProductCategoryConsumptionProperties(true);
+        ProductCategoryConsumptionProperties prodCatAux =
+                new ProductCategoryConsumptionProperties(true);
         prodCatAux.setTopicsWithPriority(auxTopicsWithPriority);
         map.put(ProductCategory.AUXILIARY_FILES,
-                new ProductCategoryProperties(
-                        prodCatAux,
-                        null));
-        ProductCategoryConsumptionProperties prodCatProd = new ProductCategoryConsumptionProperties(true);
+                new ProductCategoryProperties(prodCatAux, null));
+        ProductCategoryConsumptionProperties prodCatProd =
+                new ProductCategoryConsumptionProperties(true);
         prodCatProd.setTopicsWithPriority(lProdTopicsWithPriority);
         map.put(ProductCategory.LEVEL_PRODUCTS,
-                new ProductCategoryProperties(
-                        prodCatProd,
-                        null));
-        ProductCategoryConsumptionProperties prodCatJob = new ProductCategoryConsumptionProperties(true);
+                new ProductCategoryProperties(prodCatProd, null));
+        ProductCategoryConsumptionProperties prodCatJob =
+                new ProductCategoryConsumptionProperties(true);
         prodCatJob.setTopicsWithPriority(lJobTopicsWithPriority);
         map.put(ProductCategory.LEVEL_JOBS,
-                new ProductCategoryProperties(
-                        prodCatJob,
-                        null));
-        ProductCategoryConsumptionProperties prodCatEDRS = new ProductCategoryConsumptionProperties(true);
+                new ProductCategoryProperties(prodCatJob, null));
+        ProductCategoryConsumptionProperties prodCatEDRS =
+                new ProductCategoryConsumptionProperties(true);
         prodCatEDRS.setTopicsWithPriority(edrsTopicsWithPriority);
         map.put(ProductCategory.EDRS_SESSIONS,
-                new ProductCategoryProperties(
-                        prodCatEDRS,
-                        null));
-        ProductCategoryConsumptionProperties prodCatRep = new ProductCategoryConsumptionProperties(true);
+                new ProductCategoryProperties(prodCatEDRS, null));
+        ProductCategoryConsumptionProperties prodCatRep =
+                new ProductCategoryConsumptionProperties(true);
         prodCatRep.setTopicsWithPriority(lRepTopicsWithPriority);
         map.put(ProductCategory.LEVEL_REPORTS,
-                new ProductCategoryProperties(
-                        prodCatRep,
-                        null));
+                new ProductCategoryProperties(prodCatRep, null));
+        ProductCategoryConsumptionProperties prodCatSeg =
+                new ProductCategoryConsumptionProperties(true);
+        prodCatSeg.setTopicsWithPriority(lSegTopicsWithPriority);
+        map.put(ProductCategory.LEVEL_SEGMENTS,
+                new ProductCategoryProperties(prodCatSeg, null));
         doReturn(map).when(appProperties).getProductCategories();
 
         manager.startConsumers();
-        assertEquals(5, manager.consumers.size());
+        assertEquals(6, manager.consumers.size());
     }
 
     /**
@@ -260,6 +269,14 @@ public class MessageConsumptionControllerTest {
         assertEquals(LevelReportDto.class,
                 manager.consumers.get(ProductCategory.LEVEL_REPORTS)
                         .get("another-topic").getConsumedMsgClass());
+
+        assertEquals(1,
+                manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).size());
+        assertEquals("topic", manager.consumers.get(ProductCategory.LEVEL_SEGMENTS)
+                .get("topic").getTopic());
+        assertEquals(LevelSegmentDto.class,
+                manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).get("topic")
+                        .getConsumedMsgClass());
     }
 
     /**
@@ -297,6 +314,8 @@ public class MessageConsumptionControllerTest {
                 ProductCategory.LEVEL_PRODUCTS);
         testNextMessageWhenNoResponse(persistLevelReportsService,
                 ProductCategory.LEVEL_REPORTS);
+        testNextMessageWhenNoResponse(persistLevelSegmentsService,
+                ProductCategory.LEVEL_SEGMENTS);
     }
 
     /**
@@ -336,6 +355,8 @@ public class MessageConsumptionControllerTest {
                 ProductCategory.LEVEL_PRODUCTS, 4);
         testNextMessage(persistLevelReportsService,
                 ProductCategory.LEVEL_REPORTS, 5);
+        testNextMessage(persistLevelSegmentsService,
+                ProductCategory.LEVEL_SEGMENTS, 6);
     }
 
     /**
@@ -411,7 +432,7 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAsk()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(
@@ -445,7 +466,7 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAskButTopicUnknown()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(
@@ -475,15 +496,14 @@ public class MessageConsumptionControllerTest {
         assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .get("topic").isPaused());
 
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic")
-                .resume();
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").resume();
     }
 
     @Test
     public void testAckWhenStopAsk()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name",
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         MqiGenericMessageDto<LevelJobDto> message =
                 new MqiGenericMessageDto<LevelJobDto>(
