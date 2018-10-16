@@ -1,9 +1,13 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.config.kafka,KafkaConsumerConfig,7,126,0,0,2,27,0,6,0,6
-Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.controller,ReportsConsumer,0,88,0,0,0,25,0,3,0,3
-Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.controller,SlicesConsumer,0,123,0,2,0,29,0,4,0,3
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.status.dto,ArchiveStatusDto,0,127,0,12,0,28,0,17,0,11
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.status,AppStatus.ArchiveStatus,22,138,5,17,7,41,4,25,1,17
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.status,ArchiveRestController,0,57,0,2,0,18,0,5,0,4
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.status,AppStatus,10,84,3,13,3,28,3,14,0,9
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.controller,ReportsConsumer,0,106,0,0,0,30,0,3,0,3
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.controller,SlicesConsumer,0,141,0,2,0,34,0,4,0,3
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsConfig,0,5,0,0,0,2,0,2,0,2
-Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsService,0,145,1,14,0,43,1,14,0,5
-Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsService.new Object() {...},6,41,0,0,0,1,0,1,0,1
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsService,3,145,2,14,2,43,2,14,0,5
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsService.new Object() {...},7,47,0,0,0,1,0,1,0,1
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives,DevProperties,0,10,0,0,0,4,0,3,0,3
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives,Application,0,8,0,0,0,3,0,2,0,2
