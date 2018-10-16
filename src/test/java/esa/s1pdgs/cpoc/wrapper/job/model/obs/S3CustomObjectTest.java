@@ -35,16 +35,16 @@ public class S3CustomObjectTest {
     @Test
     public void testToString() {
         S3CustomObject obj =
-                new S3CustomObject(ProductFamily.L0_PRODUCT, "key-obs");
+                new S3CustomObject(ProductFamily.L0_SLICE, "key-obs");
         String str = obj.toString();
         assertTrue(str.startsWith("{"));
-        assertTrue(str.contains("family: L0_PRODUCT"));
+        assertTrue(str.contains("family: L0_SLICE"));
         assertTrue(str.contains("key: key-obs"));
         assertTrue(str.endsWith("}"));
         
         str = obj.toStringForExtendedClasses();
         assertFalse(str.startsWith("{"));
-        assertTrue(str.contains("family: L0_PRODUCT"));
+        assertTrue(str.contains("family: L0_SLICE"));
         assertTrue(str.contains("key: key-obs"));
         assertFalse(str.endsWith("}"));
     }

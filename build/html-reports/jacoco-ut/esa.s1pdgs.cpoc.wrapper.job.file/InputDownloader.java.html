@@ -196,28 +196,29 @@ public class InputDownloader {
 <span class="fc" id="L196">                    break;</span>
                 case &quot;EDRS_SESSION&quot;:
                 case &quot;AUXILIARY_FILE&quot;:
-                case &quot;L0_PRODUCT&quot;:
+                case &quot;L0_SLICE&quot;:
                 case &quot;L0_ACN&quot;:
-<span class="fc" id="L201">                    LOGGER.info(&quot;Input {}-{} will be stored in {}&quot;,</span>
-<span class="fc" id="L202">                            input.getFamily(), input.getContentRef(),</span>
-<span class="fc" id="L203">                            input.getLocalPath());</span>
-<span class="fc" id="L204">                    downloadToBatch.add(new S3DownloadFile(</span>
-<span class="fc" id="L205">                            ProductFamily.fromValue(input.getFamily()),</span>
-<span class="fc" id="L206">                            input.getContentRef(),</span>
-<span class="fc" id="L207">                            (new File(input.getLocalPath()).getParent())));</span>
-<span class="fc" id="L208">                    break;</span>
+                case &quot;L0_SEGMENT&quot;:
+<span class="fc" id="L202">                    LOGGER.info(&quot;Input {}-{} will be stored in {}&quot;,</span>
+<span class="fc" id="L203">                            input.getFamily(), input.getContentRef(),</span>
+<span class="fc" id="L204">                            input.getLocalPath());</span>
+<span class="fc" id="L205">                    downloadToBatch.add(new S3DownloadFile(</span>
+<span class="fc" id="L206">                            ProductFamily.fromValue(input.getFamily()),</span>
+<span class="fc" id="L207">                            input.getContentRef(),</span>
+<span class="fc" id="L208">                            (new File(input.getLocalPath()).getParent())));</span>
+<span class="fc" id="L209">                    break;</span>
                 case &quot;BLANK&quot;:
-<span class="fc" id="L210">                    LOGGER.info(&quot;Input {} will be ignored&quot;,</span>
-<span class="fc" id="L211">                            input.getContentRef());</span>
-<span class="fc" id="L212">                    break;</span>
+<span class="fc" id="L211">                    LOGGER.info(&quot;Input {} will be ignored&quot;,</span>
+<span class="fc" id="L212">                            input.getContentRef());</span>
+<span class="fc" id="L213">                    break;</span>
                 default:
-<span class="fc" id="L214">                    throw new UnknownFamilyException(</span>
+<span class="fc" id="L215">                    throw new UnknownFamilyException(</span>
                             &quot;Family not managed in input downloader &quot;,
-<span class="fc" id="L216">                            input.getFamily());</span>
+<span class="fc" id="L217">                            input.getFamily());</span>
             }
 
-<span class="fc" id="L219">        }</span>
-<span class="fc" id="L220">        return downloadToBatch;</span>
+<span class="fc" id="L220">        }</span>
+<span class="fc" id="L221">        return downloadToBatch;</span>
     }
 
     /**
@@ -229,40 +230,39 @@ public class InputDownloader {
      */
     protected void downloadInputs(final List&lt;S3DownloadFile&gt; downloadToBatch)
             throws AbstractCodedException {
-<span class="fc" id="L232">        double size = Double.valueOf(downloadToBatch.size());</span>
-<span class="fc" id="L233">        String listinputs=&quot;&quot;;</span>
-<span class="fc bfc" id="L234" title="All 2 branches covered.">        for (int i = 0; i &lt; size; i++) {</span>
-<span class="fc" id="L235">        	listinputs =  listinputs + &quot; &quot; + downloadToBatch.get(i).getKey();</span>
+<span class="fc" id="L233">        double size = Double.valueOf(downloadToBatch.size());</span>
+<span class="fc" id="L234">        String listinputs=&quot;&quot;;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        for (int i = 0; i &lt; size; i++) {</span>
+<span class="fc" id="L236">        	listinputs =  listinputs + &quot; &quot; + downloadToBatch.get(i).getKey();</span>
         }
-<span class="fc" id="L237">        LOGGER.info(&quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [START] 4 - Starting downloading inputs from object storage [inputs {}]&quot;,</span>
+<span class="fc" id="L238">        LOGGER.info(&quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [START] 4 - Starting downloading inputs from object storage [inputs {}]&quot;,</span>
                 prefixMonitorLogs, this.appLevel, listinputs);
-<span class="fc" id="L239">        double nbPool = Math.ceil(size / sizeDownBatch);</span>
-<span class="fc" id="L240">        int nbUploadedRaw = 0;</span>
-<span class="fc bfc" id="L241" title="All 2 branches covered.">        for (int i = 0; i &lt; nbPool; i++) {</span>
-<span class="pc bpc" id="L242" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
-<span class="nc" id="L243">                throw new InternalErrorException(</span>
+<span class="fc" id="L240">        double nbPool = Math.ceil(size / sizeDownBatch);</span>
+<span class="fc" id="L241">        int nbUploadedRaw = 0;</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">        for (int i = 0; i &lt; nbPool; i++) {</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L244">                throw new InternalErrorException(</span>
                         &quot;The current thread as been interrupted&quot;);
             } else {
-<span class="fc" id="L246">                LOGGER.info(&quot;{} 4 - Starting downloading batch {}&quot;,</span>
-<span class="fc" id="L247">                        prefixMonitorLogs, i);</span>
-<span class="fc" id="L248">                int lastIndex = Math.min((i + 1) * sizeDownBatch,</span>
-<span class="fc" id="L249">                        downloadToBatch.size());</span>
-<span class="fc" id="L250">                List&lt;S3DownloadFile&gt; subListS3 =</span>
-<span class="fc" id="L251">                        downloadToBatch.subList(i * sizeDownBatch, lastIndex);</span>
-<span class="fc" id="L252">                this.obsService.downloadFilesPerBatch(subListS3);</span>
-<span class="fc bfc" id="L253" title="All 4 branches covered.">                if (appLevel == ApplicationLevel.L0 &amp;&amp; nbUploadedRaw &lt; 2) {</span>
-<span class="fc" id="L254">                    nbUploadedRaw += subListS3.stream().filter(</span>
-<span class="fc bfc" id="L255" title="All 2 branches covered.">                            file -&gt; file.getFamily() == ProductFamily.EDRS_SESSION)</span>
-<span class="fc" id="L256">                            .count();</span>
-<span class="pc bpc" id="L257" title="1 of 2 branches missed.">                    if (nbUploadedRaw &gt;= 2) {</span>
+<span class="fc" id="L247">                LOGGER.info(&quot;{} 4 - Starting downloading batch {}&quot;,</span>
+<span class="fc" id="L248">                        prefixMonitorLogs, i);</span>
+<span class="fc" id="L249">                int lastIndex = Math.min((i + 1) * sizeDownBatch,</span>
+<span class="fc" id="L250">                        downloadToBatch.size());</span>
+<span class="fc" id="L251">                List&lt;S3DownloadFile&gt; subListS3 =</span>
+<span class="fc" id="L252">                        downloadToBatch.subList(i * sizeDownBatch, lastIndex);</span>
+<span class="fc" id="L253">                this.obsService.downloadFilesPerBatch(subListS3);</span>
+<span class="fc bfc" id="L254" title="All 4 branches covered.">                if (appLevel == ApplicationLevel.L0 &amp;&amp; nbUploadedRaw &lt; 2) {</span>
+<span class="fc" id="L255">                    nbUploadedRaw += subListS3.stream().filter(</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">                            file -&gt; file.getFamily() == ProductFamily.EDRS_SESSION)</span>
+<span class="fc" id="L257">                            .count();</span>
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">                    if (nbUploadedRaw &gt;= 2) {</span>
                         // On suppose l'ordre de traitement des input:
                         // les 2 preemiers RAW sont le raw1
                         // du channel 1 et le raw 1 du channel 2
-<span class="fc" id="L261">                        LOGGER.info(&quot;{} 4 - Setting process executor as active&quot;,</span>
+<span class="fc" id="L262">                        LOGGER.info(&quot;{} 4 - Setting process executor as active&quot;,</span>
                                 prefixMonitorLogs);
-<span class="fc" id="L263">                        poolProcExecutor.setActive(true);</span>
+<span class="fc" id="L264">                        poolProcExecutor.setActive(true);</span>
                     }
-
                 }
             }
         }

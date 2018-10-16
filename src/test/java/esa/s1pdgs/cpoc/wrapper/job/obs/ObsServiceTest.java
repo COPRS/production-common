@@ -131,14 +131,16 @@ public class ObsServiceTest {
                 service.getObsFamily(ProductFamily.BLANK));
         assertEquals(ObsFamily.L0_ACN,
                 service.getObsFamily(ProductFamily.L0_ACN));
-        assertEquals(ObsFamily.L0_PRODUCT,
-                service.getObsFamily(ProductFamily.L0_PRODUCT));
+        assertEquals(ObsFamily.L0_SLICE,
+                service.getObsFamily(ProductFamily.L0_SLICE));
+        assertEquals(ObsFamily.L0_SEGMENT,
+                service.getObsFamily(ProductFamily.L0_SEGMENT));
         assertEquals(ObsFamily.UNKNOWN,
                 service.getObsFamily(ProductFamily.L0_REPORT));
         assertEquals(ObsFamily.L1_ACN,
                 service.getObsFamily(ProductFamily.L1_ACN));
-        assertEquals(ObsFamily.L1_PRODUCT,
-                service.getObsFamily(ProductFamily.L1_PRODUCT));
+        assertEquals(ObsFamily.L1_SLICE,
+                service.getObsFamily(ProductFamily.L1_SLICE));
         assertEquals(ObsFamily.UNKNOWN,
                 service.getObsFamily(ProductFamily.L1_REPORT));
         assertEquals(ObsFamily.UNKNOWN,
@@ -349,7 +351,7 @@ public class ObsServiceTest {
         List<S3DownloadFile> filesToDownload = new ArrayList<>();
         filesToDownload.add(
                 new S3DownloadFile(ProductFamily.L0_ACN, "key1", "target1"));
-        filesToDownload.add(new S3DownloadFile(ProductFamily.L0_PRODUCT, "key2",
+        filesToDownload.add(new S3DownloadFile(ProductFamily.L0_SLICE, "key2",
                 "target1"));
         filesToDownload.add(
                 new S3DownloadFile(ProductFamily.L1_ACN, "key3", "target2"));
@@ -376,19 +378,19 @@ public class ObsServiceTest {
                 Mockito.anyBoolean());
 
         List<S3DownloadFile> filesToDownload = new ArrayList<>();
-        filesToDownload.add(new S3DownloadFile(ProductFamily.L0_PRODUCT, "key1",
+        filesToDownload.add(new S3DownloadFile(ProductFamily.L0_SLICE, "key1",
                 "target1"));
-        filesToDownload.add(new S3DownloadFile(ProductFamily.L1_PRODUCT, "key2",
+        filesToDownload.add(new S3DownloadFile(ProductFamily.L1_SLICE, "key2",
                 "target1"));
-        filesToDownload.add(new S3DownloadFile(ProductFamily.L1_PRODUCT, "key3",
+        filesToDownload.add(new S3DownloadFile(ProductFamily.L1_SLICE, "key3",
                 "target2"));
         List<ObsDownloadObject> objects = new ArrayList<>();
         objects.add(
-                new ObsDownloadObject("key1", ObsFamily.L0_PRODUCT, "target1"));
+                new ObsDownloadObject("key1", ObsFamily.L0_SLICE, "target1"));
         objects.add(
-                new ObsDownloadObject("key2", ObsFamily.L1_PRODUCT, "target1"));
+                new ObsDownloadObject("key2", ObsFamily.L1_SLICE, "target1"));
         objects.add(
-                new ObsDownloadObject("key3", ObsFamily.L1_PRODUCT, "target2"));
+                new ObsDownloadObject("key3", ObsFamily.L1_SLICE, "target2"));
 
         service.downloadFilesPerBatch(filesToDownload);
 
@@ -412,7 +414,7 @@ public class ObsServiceTest {
         List<S3UploadFile> filesToDownload = new ArrayList<>();
         filesToDownload.add(new S3UploadFile(ProductFamily.L0_ACN, "key1",
                 new File("target1")));
-        filesToDownload.add(new S3UploadFile(ProductFamily.L0_PRODUCT, "key2",
+        filesToDownload.add(new S3UploadFile(ProductFamily.L0_SLICE, "key2",
                 new File("target1")));
         filesToDownload.add(new S3UploadFile(ProductFamily.L1_ACN, "key3",
                 new File("target2")));
@@ -439,18 +441,18 @@ public class ObsServiceTest {
                 Mockito.anyBoolean());
 
         List<S3UploadFile> filesToDownload = new ArrayList<>();
-        filesToDownload.add(new S3UploadFile(ProductFamily.L0_PRODUCT, "key1",
+        filesToDownload.add(new S3UploadFile(ProductFamily.L0_SLICE, "key1",
                 new File("target1")));
-        filesToDownload.add(new S3UploadFile(ProductFamily.L1_PRODUCT, "key2",
+        filesToDownload.add(new S3UploadFile(ProductFamily.L1_SLICE, "key2",
                 new File("target1")));
-        filesToDownload.add(new S3UploadFile(ProductFamily.L1_PRODUCT, "key3",
+        filesToDownload.add(new S3UploadFile(ProductFamily.L1_SLICE, "key3",
                 new File("target2")));
         List<ObsUploadObject> objects = new ArrayList<>();
-        objects.add(new ObsUploadObject("key1", ObsFamily.L0_PRODUCT,
+        objects.add(new ObsUploadObject("key1", ObsFamily.L0_SLICE,
                 new File("target1")));
-        objects.add(new ObsUploadObject("key2", ObsFamily.L1_PRODUCT,
+        objects.add(new ObsUploadObject("key2", ObsFamily.L1_SLICE,
                 new File("target1")));
-        objects.add(new ObsUploadObject("key3", ObsFamily.L1_PRODUCT,
+        objects.add(new ObsUploadObject("key3", ObsFamily.L1_SLICE,
                 new File("target2")));
 
         service.uploadFilesPerBatch(filesToDownload);

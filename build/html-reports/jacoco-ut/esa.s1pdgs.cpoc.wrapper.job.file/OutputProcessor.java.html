@@ -97,11 +97,12 @@ public class OutputProcessor {
      * Prefix before each monitor logs
      */
     private final String prefixMonitorLogs;
-    
+
     /**
      * Application level
      */
     private final ApplicationLevel appLevel;
+
     /**
      * Constructor
      * 
@@ -117,17 +118,17 @@ public class OutputProcessor {
             final OutputProcuderFactory procuderFactory,
             final GenericMessageDto&lt;LevelJobDto&gt; inputMessage,
             final String listFile, final int sizeUploadBatch,
-<span class="fc" id="L120">            final String prefixMonitorLogs, final ApplicationLevel appLevel) {</span>
-<span class="fc" id="L121">        this.obsService = obsService;</span>
-<span class="fc" id="L122">        this.procuderFactory = procuderFactory;</span>
-<span class="fc" id="L123">        this.listFile = listFile;</span>
-<span class="fc" id="L124">        this.inputMessage = inputMessage;</span>
-<span class="fc" id="L125">        this.authorizedOutputs = inputMessage.getBody().getOutputs();</span>
-<span class="fc" id="L126">        this.workDirectory = inputMessage.getBody().getWorkDirectory();</span>
-<span class="fc" id="L127">        this.sizeUploadBatch = sizeUploadBatch;</span>
-<span class="fc" id="L128">        this.prefixMonitorLogs = prefixMonitorLogs;</span>
-<span class="fc" id="L129">        this.appLevel = appLevel;</span>
-<span class="fc" id="L130">    }</span>
+<span class="fc" id="L121">            final String prefixMonitorLogs, final ApplicationLevel appLevel) {</span>
+<span class="fc" id="L122">        this.obsService = obsService;</span>
+<span class="fc" id="L123">        this.procuderFactory = procuderFactory;</span>
+<span class="fc" id="L124">        this.listFile = listFile;</span>
+<span class="fc" id="L125">        this.inputMessage = inputMessage;</span>
+<span class="fc" id="L126">        this.authorizedOutputs = inputMessage.getBody().getOutputs();</span>
+<span class="fc" id="L127">        this.workDirectory = inputMessage.getBody().getWorkDirectory();</span>
+<span class="fc" id="L128">        this.sizeUploadBatch = sizeUploadBatch;</span>
+<span class="fc" id="L129">        this.prefixMonitorLogs = prefixMonitorLogs;</span>
+<span class="fc" id="L130">        this.appLevel = appLevel;</span>
+<span class="fc" id="L131">    }</span>
 
     /**
      * Extract the list of outputs from a file
@@ -136,13 +137,13 @@ public class OutputProcessor {
      * @throws InternalErrorException
      */
     private List&lt;String&gt; extractFiles() throws InternalErrorException {
-<span class="fc" id="L139">        LOGGER.info(&quot;{} 1 - Extracting list of outputs&quot;, prefixMonitorLogs);</span>
+<span class="fc" id="L140">        LOGGER.info(&quot;{} 1 - Extracting list of outputs&quot;, prefixMonitorLogs);</span>
         try {
-<span class="fc" id="L141">            return Files.lines(Paths.get(listFile))</span>
-<span class="fc" id="L142">                    .collect(Collectors.toList());</span>
-<span class="nc" id="L143">        } catch (IOException ioe) {</span>
-<span class="nc" id="L144">            throw new InternalErrorException(&quot;Cannot parse result list file &quot;</span>
-<span class="nc" id="L145">                    + listFile + &quot;: &quot; + ioe.getMessage(), ioe);</span>
+<span class="fc" id="L142">            return Files.lines(Paths.get(listFile))</span>
+<span class="fc" id="L143">                    .collect(Collectors.toList());</span>
+<span class="nc" id="L144">        } catch (IOException ioe) {</span>
+<span class="nc" id="L145">            throw new InternalErrorException(&quot;Cannot parse result list file &quot;</span>
+<span class="nc" id="L146">                    + listFile + &quot;: &quot; + ioe.getMessage(), ioe);</span>
         }
     }
 
@@ -162,59 +163,133 @@ public class OutputProcessor {
             final List&lt;FileQueueMessage&gt; reportToPublish)
             throws UnknownFamilyException {
 
-<span class="fc" id="L165">        LOGGER.info(&quot;{} 2 - Starting organizing outputs&quot;, prefixMonitorLogs);</span>
+<span class="fc" id="L166">        LOGGER.info(&quot;{} 2 - Starting organizing outputs&quot;, prefixMonitorLogs);</span>
 
-<span class="fc bfc" id="L167" title="All 2 branches covered.">        for (String line : lines) {</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        for (String line : lines) {</span>
 
-            // Extract the product name, the complete filepath and job output
-<span class="fc" id="L170">            String productName = getProductName(line);</span>
-<span class="fc" id="L171">            String filePath = getFilePath(line, productName);</span>
-<span class="fc" id="L172">            LevelJobOutputDto matchOutput = getMatchOutput(productName);</span>
+            // Extract the product name, the complete filepath, job output and
+            // the mode
+<span class="fc" id="L172">            String productName = getProductName(line);</span>
+<span class="fc" id="L173">            String filePath = getFilePath(line, productName);</span>
+<span class="fc" id="L174">            LevelJobOutputDto matchOutput = getMatchOutput(productName);</span>
 
             // If match process output
-<span class="fc bfc" id="L175" title="All 2 branches covered.">            if (matchOutput == null) {</span>
-<span class="fc" id="L176">                LOGGER.warn(</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">            if (matchOutput == null) {</span>
+<span class="fc" id="L178">                LOGGER.warn(</span>
                         &quot;Output {} ignored because no found matching regular expression&quot;,
                         productName);
             } else {
-<span class="fc" id="L180">                ProductFamily family =</span>
-<span class="fc" id="L181">                        ProductFamily.fromValue(matchOutput.getFamily());</span>
-<span class="pc bpc" id="L182" title="1 of 4 branches missed.">                switch (family) {</span>
+<span class="fc" id="L182">                ProductFamily family =</span>
+<span class="fc" id="L183">                        ProductFamily.fromValue(matchOutput.getFamily());</span>
+<span class="pc bpc" id="L184" title="2 of 6 branches missed.">                switch (family) {</span>
                     case L0_REPORT:
                     case L1_REPORT:
                         // If report, put in a cache to send report
-<span class="fc" id="L186">                        LOGGER.info(</span>
+<span class="fc" id="L188">                        LOGGER.info(</span>
                                 &quot;Output {} is considered as belonging to the family {}&quot;,
-<span class="fc" id="L188">                                productName, matchOutput.getFamily());</span>
-<span class="fc" id="L189">                        reportToPublish.add(new FileQueueMessage(family,</span>
+<span class="fc" id="L190">                                productName, matchOutput.getFamily());</span>
+<span class="fc" id="L191">                        reportToPublish.add(new FileQueueMessage(family,</span>
                                 productName, new File(filePath)));
-<span class="fc" id="L191">                        break;</span>
-                    case L0_PRODUCT:
+<span class="fc" id="L193">                        break;</span>
+                    case L0_SLICE:
+                        // Specific case of the L0 wrapper
+<span class="fc bfc" id="L196" title="All 2 branches covered.">                        if (appLevel == ApplicationLevel.L0) {</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">                            if (line.contains(&quot;NRT&quot;)) {</span>
+<span class="fc" id="L198">                                LOGGER.info(</span>
+                                        &quot;Output {} is considered as belonging to the family {}&quot;,
+<span class="fc" id="L200">                                        productName, matchOutput.getFamily());</span>
+<span class="fc" id="L201">                                uploadBatch.add(new S3UploadFile(family,</span>
+                                        productName, new File(filePath)));
+<span class="fc" id="L203">                                outputToPublish.add(new ObsQueueMessage(family,</span>
+                                        productName, productName, &quot;NRT&quot;));
+<span class="fc bfc" id="L205" title="All 2 branches covered.">                            } else if (line.contains(&quot;FAST24&quot;)) {</span>
+<span class="fc" id="L206">                                LOGGER.info(</span>
+                                        &quot;Output {} is considered as belonging to the family {}&quot;,
+                                        productName, ProductFamily.L0_SEGMENT);
+<span class="fc" id="L209">                                uploadBatch.add(new S3UploadFile(</span>
+                                        ProductFamily.L0_SEGMENT, productName,
+                                        new File(filePath)));
+<span class="fc" id="L212">                                outputToPublish.add(new ObsQueueMessage(</span>
+                                        ProductFamily.L0_SEGMENT, productName,
+                                        productName, &quot;FAST24&quot;));
+                            } else {
+<span class="fc" id="L216">                                LOGGER.warn(</span>
+                                        &quot;Output {} ignored because unknown mode&quot;,
+                                        productName);
+                            }
+                        } else {
+<span class="fc" id="L221">                            LOGGER.info(</span>
+                                    &quot;Output {} is considered as belonging to the family {}&quot;,
+<span class="fc" id="L223">                                    productName, matchOutput.getFamily());</span>
+<span class="fc" id="L224">                            uploadBatch.add(new S3UploadFile(family,</span>
+                                    productName, new File(filePath)));
+<span class="fc" id="L226">                            outputToPublish.add(</span>
+                                    new ObsQueueMessage(family, productName,
+<span class="fc" id="L228">                                            productName, inputMessage.getBody()</span>
+<span class="fc" id="L229">                                                    .getProductProcessMode()));</span>
+                        }
+<span class="fc" id="L231">                        break;</span>
                     case L0_ACN:
-                    case L1_PRODUCT:
+                        // Specific case of the L0 wrapper
+<span class="fc bfc" id="L234" title="All 2 branches covered.">                        if (appLevel == ApplicationLevel.L0) {</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">                            if (line.contains(&quot;NRT&quot;)) {</span>
+<span class="fc" id="L236">                                LOGGER.info(</span>
+                                        &quot;Output {} is considered as belonging to the family {}&quot;,
+<span class="fc" id="L238">                                        productName, matchOutput.getFamily());</span>
+<span class="fc" id="L239">                                uploadBatch.add(new S3UploadFile(family,</span>
+                                        productName, new File(filePath)));
+<span class="fc" id="L241">                                outputToPublish.add(new ObsQueueMessage(family,</span>
+                                        productName, productName, &quot;NRT&quot;));
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">                            } else if (line.contains(&quot;FAST24&quot;)) {</span>
+<span class="fc" id="L244">                                LOGGER.info(</span>
+                                        &quot;Output {} is considered as belonging to the family {}&quot;,
+<span class="fc" id="L246">                                        productName, matchOutput.getFamily());</span>
+<span class="fc" id="L247">                                uploadBatch.add(new S3UploadFile(family,</span>
+                                        productName, new File(filePath)));
+<span class="fc" id="L249">                                outputToPublish.add(new ObsQueueMessage(family,</span>
+                                        productName, productName, &quot;FAST24&quot;));
+                            } else {
+<span class="nc" id="L252">                                LOGGER.warn(</span>
+                                        &quot;Output {} ignored because unknown mode&quot;,
+                                        productName);
+                            }
+                        } else {
+<span class="fc" id="L257">                            LOGGER.info(</span>
+                                    &quot;Output {} is considered as belonging to the family {}&quot;,
+<span class="fc" id="L259">                                    productName, matchOutput.getFamily());</span>
+<span class="fc" id="L260">                            uploadBatch.add(new S3UploadFile(family,</span>
+                                    productName, new File(filePath)));
+<span class="fc" id="L262">                            outputToPublish.add(</span>
+                                    new ObsQueueMessage(family, productName,
+<span class="fc" id="L264">                                            productName, inputMessage.getBody()</span>
+<span class="fc" id="L265">                                                    .getProductProcessMode()));</span>
+                        }
+<span class="fc" id="L267">                        break;</span>
+                    case L1_SLICE:
                     case L1_ACN:
                         // If compatible object storage, put in a cache to
                         // upload per batch
-<span class="fc" id="L198">                        LOGGER.info(</span>
+<span class="nc" id="L272">                        LOGGER.info(</span>
                                 &quot;Output {} is considered as belonging to the family {}&quot;,
-<span class="fc" id="L200">                                productName, matchOutput.getFamily());</span>
-<span class="fc" id="L201">                        uploadBatch.add(new S3UploadFile(family, productName,</span>
+<span class="nc" id="L274">                                productName, matchOutput.getFamily());</span>
+<span class="nc" id="L275">                        uploadBatch.add(new S3UploadFile(family, productName,</span>
                                 new File(filePath)));
-<span class="fc" id="L203">                        outputToPublish.add(new ObsQueueMessage(family,</span>
-                                productName, productName));
-<span class="fc" id="L205">                        break;</span>
+<span class="nc" id="L277">                        outputToPublish.add(new ObsQueueMessage(family,</span>
+<span class="nc" id="L278">                                productName, productName, inputMessage.getBody()</span>
+<span class="nc" id="L279">                                        .getProductProcessMode()));</span>
+<span class="nc" id="L280">                        break;</span>
                     case BLANK:
-<span class="fc" id="L207">                        LOGGER.info(&quot;Output {} will be ignored&quot;, productName);</span>
-<span class="fc" id="L208">                        break;</span>
+<span class="fc" id="L282">                        LOGGER.info(&quot;Output {} will be ignored&quot;, productName);</span>
+<span class="fc" id="L283">                        break;</span>
                     default:
-<span class="nc" id="L210">                        throw new UnknownFamilyException(</span>
+<span class="nc" id="L285">                        throw new UnknownFamilyException(</span>
                                 &quot;Family not managed in output processor &quot;,
-<span class="nc" id="L212">                                family.name());</span>
+<span class="nc" id="L287">                                family.name());</span>
                 }
             }
 
-<span class="fc" id="L216">        }</span>
-<span class="fc" id="L217">    }</span>
+<span class="fc" id="L291">        }</span>
+<span class="fc" id="L292">    }</span>
 
     /**
      * Extract the product name from the line of the result file
@@ -225,17 +300,17 @@ public class OutputProcessor {
     private String getProductName(final String line) {
         // Extract the product name and the complete filepath
         // First, remove the first directory (NRT or REPORT)
-<span class="fc" id="L228">        String productName = line;</span>
-<span class="fc" id="L229">        int index = line.indexOf('/');</span>
-<span class="fc bfc" id="L230" title="All 2 branches covered.">        if (index != -1) {</span>
-<span class="fc" id="L231">            productName = line.substring(index + 1);</span>
+<span class="fc" id="L303">        String productName = line;</span>
+<span class="fc" id="L304">        int index = line.indexOf('/');</span>
+<span class="fc bfc" id="L305" title="All 2 branches covered.">        if (index != -1) {</span>
+<span class="fc" id="L306">            productName = line.substring(index + 1);</span>
         }
         // Second: if file ISIP, retrieve only .SAFE
-<span class="fc bfc" id="L234" title="All 2 branches covered.">        if (productName.toUpperCase().endsWith(EXT_ISIP)) {</span>
-<span class="fc" id="L235">            productName = productName.substring(0,</span>
-<span class="fc" id="L236">                    productName.length() - EXT_ISIP.length()) + EXT_SAFE;</span>
+<span class="fc bfc" id="L309" title="All 2 branches covered.">        if (productName.toUpperCase().endsWith(EXT_ISIP)) {</span>
+<span class="fc" id="L310">            productName = productName.substring(0,</span>
+<span class="fc" id="L311">                    productName.length() - EXT_ISIP.length()) + EXT_SAFE;</span>
         }
-<span class="fc" id="L238">        return productName;</span>
+<span class="fc" id="L313">        return productName;</span>
     }
 
     /**
@@ -248,12 +323,12 @@ public class OutputProcessor {
      * @return
      */
     private String getFilePath(final String line, final String productName) {
-<span class="fc" id="L251">        String filePath = workDirectory + line;</span>
+<span class="fc" id="L326">        String filePath = workDirectory + line;</span>
         // Second: if file ISIP, retrieve only .SAFE
-<span class="fc bfc" id="L253" title="All 2 branches covered.">        if (line.toUpperCase().endsWith(&quot;ISIP&quot;)) {</span>
-<span class="fc" id="L254">            filePath = filePath + File.separator + productName;</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">        if (line.toUpperCase().endsWith(&quot;ISIP&quot;)) {</span>
+<span class="fc" id="L329">            filePath = filePath + File.separator + productName;</span>
         }
-<span class="fc" id="L256">        return filePath;</span>
+<span class="fc" id="L331">        return filePath;</span>
     }
 
     /**
@@ -263,14 +338,14 @@ public class OutputProcessor {
      * @return
      */
     private LevelJobOutputDto getMatchOutput(final String productName) {
-<span class="fc bfc" id="L266" title="All 2 branches covered.">        for (LevelJobOutputDto jobOutputDto : authorizedOutputs) {</span>
-<span class="fc bfc" id="L267" title="All 2 branches covered.">            if (Pattern.matches(</span>
-<span class="fc" id="L268">                    jobOutputDto.getRegexp().substring(workDirectory.length()),</span>
+<span class="fc bfc" id="L341" title="All 2 branches covered.">        for (LevelJobOutputDto jobOutputDto : authorizedOutputs) {</span>
+<span class="fc bfc" id="L342" title="All 2 branches covered.">            if (Pattern.matches(</span>
+<span class="fc" id="L343">                    jobOutputDto.getRegexp().substring(workDirectory.length()),</span>
                     productName)) {
-<span class="fc" id="L270">                return jobOutputDto;</span>
+<span class="fc" id="L345">                return jobOutputDto;</span>
             }
-<span class="fc" id="L272">        }</span>
-<span class="fc" id="L273">        return null;</span>
+<span class="fc" id="L347">        }</span>
+<span class="fc" id="L348">        return null;</span>
     }
 
     /**
@@ -284,39 +359,40 @@ public class OutputProcessor {
     protected void processProducts(final List&lt;S3UploadFile&gt; uploadBatch,
             final List&lt;ObsQueueMessage&gt; outputToPublish)
             throws AbstractCodedException {
-<span class="fc" id="L287">        LOGGER.info(</span>
+<span class="fc" id="L362">        LOGGER.info(</span>
                 &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [START] 3 - Starting processing object storage compatible outputs&quot;,
                 prefixMonitorLogs, this.appLevel);
 
-<span class="fc" id="L291">        double size = Double.valueOf(uploadBatch.size());</span>
-<span class="fc" id="L292">        double nbPool = Math.ceil(size / sizeUploadBatch);</span>
+<span class="fc" id="L366">        double size = Double.valueOf(uploadBatch.size());</span>
+<span class="fc" id="L367">        double nbPool = Math.ceil(size / sizeUploadBatch);</span>
 
-<span class="fc bfc" id="L294" title="All 2 branches covered.">        for (int i = 0; i &lt; nbPool; i++) {</span>
-<span class="fc" id="L295">            int lastIndex =</span>
-<span class="fc" id="L296">                    Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());</span>
-<span class="fc" id="L297">            List&lt;S3UploadFile&gt; sublist =</span>
-<span class="fc" id="L298">                    uploadBatch.subList(i * sizeUploadBatch, lastIndex);</span>
+<span class="fc bfc" id="L369" title="All 2 branches covered.">        for (int i = 0; i &lt; nbPool; i++) {</span>
+<span class="fc" id="L370">            int lastIndex =</span>
+<span class="fc" id="L371">                    Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());</span>
+<span class="fc" id="L372">            List&lt;S3UploadFile&gt; sublist =</span>
+<span class="fc" id="L373">                    uploadBatch.subList(i * sizeUploadBatch, lastIndex);</span>
 
-<span class="fc bfc" id="L300" title="All 2 branches covered.">            if (i &gt; 0) {</span>
-<span class="fc" id="L301">                this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(),</span>
+<span class="fc bfc" id="L375" title="All 2 branches covered.">            if (i &gt; 0) {</span>
+<span class="fc" id="L376">                this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(),</span>
                         outputToPublish);
             }
-<span class="fc" id="L304">            LOGGER.info(&quot;{} 3 - Uploading batch {} &quot;, prefixMonitorLogs, i);</span>
-<span class="pc bpc" id="L305" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
-<span class="nc" id="L306">                throw new InternalErrorException(</span>
+<span class="fc" id="L379">            LOGGER.info(&quot;{} 3 - Uploading batch {} &quot;, prefixMonitorLogs, i);</span>
+<span class="pc bpc" id="L380" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L381">                throw new InternalErrorException(</span>
                         &quot;The current thread as been interrupted&quot;);
             } else {
-<span class="fc" id="L309">                this.obsService.uploadFilesPerBatch(sublist);</span>
+<span class="fc" id="L384">                this.obsService.uploadFilesPerBatch(sublist);</span>
             }
         }
-<span class="fc" id="L312">        String listoutputs=&quot;&quot;;</span>
-<span class="fc bfc" id="L313" title="All 2 branches covered.">        for (int i = 0; i &lt; size; i++) {</span>
-<span class="fc" id="L314">        	listoutputs =  listoutputs + &quot; &quot; + uploadBatch.get(i).getKey();</span>
+<span class="fc" id="L387">        String listoutputs = &quot;&quot;;</span>
+<span class="fc bfc" id="L388" title="All 2 branches covered.">        for (int i = 0; i &lt; size; i++) {</span>
+<span class="fc" id="L389">            listoutputs = listoutputs + &quot; &quot; + uploadBatch.get(i).getKey();</span>
         }
-<span class="fc" id="L316">        LOGGER.info(&quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch [outputs {}]&quot;,</span>
+<span class="fc" id="L391">        LOGGER.info(</span>
+                &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch [outputs {}]&quot;,
                 this.prefixMonitorLogs, this.appLevel, listoutputs);
-<span class="fc" id="L318">        publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);</span>
-<span class="fc" id="L319">    }</span>
+<span class="fc" id="L394">        publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);</span>
+<span class="fc" id="L395">    }</span>
 
     /**
      * Public uploaded files, i.e. unitl the output to publish is the next key
@@ -331,32 +407,32 @@ public class OutputProcessor {
             final String nextKeyUpload,
             final List&lt;ObsQueueMessage&gt; outputToPublish)
             throws AbstractCodedException {
-<span class="fc" id="L334">        LOGGER.info(&quot;{} 3 - Publishing KAFKA messages for batch {}&quot;,</span>
-<span class="fc" id="L335">                prefixMonitorLogs, nbBatch);</span>
-<span class="fc" id="L336">        Iterator&lt;ObsQueueMessage&gt; iter = outputToPublish.iterator();</span>
-<span class="fc" id="L337">        boolean stop = false;</span>
-<span class="fc bfc" id="L338" title="All 4 branches covered.">        while (!stop &amp;&amp; iter.hasNext()) {</span>
-<span class="pc bpc" id="L339" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
-<span class="nc" id="L340">                throw new InternalErrorException(</span>
+<span class="fc" id="L410">        LOGGER.info(&quot;{} 3 - Publishing KAFKA messages for batch {}&quot;,</span>
+<span class="fc" id="L411">                prefixMonitorLogs, nbBatch);</span>
+<span class="fc" id="L412">        Iterator&lt;ObsQueueMessage&gt; iter = outputToPublish.iterator();</span>
+<span class="fc" id="L413">        boolean stop = false;</span>
+<span class="fc bfc" id="L414" title="All 4 branches covered.">        while (!stop &amp;&amp; iter.hasNext()) {</span>
+<span class="pc bpc" id="L415" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L416">                throw new InternalErrorException(</span>
                         &quot;The current thread as been interrupted&quot;);
             } else {
-<span class="fc" id="L343">                ObsQueueMessage msg = iter.next();</span>
-<span class="fc bfc" id="L344" title="All 2 branches covered.">                if (nextKeyUpload.startsWith(msg.getKeyObs())) {</span>
-<span class="fc" id="L345">                    stop = true;</span>
+<span class="fc" id="L419">                ObsQueueMessage msg = iter.next();</span>
+<span class="fc bfc" id="L420" title="All 2 branches covered.">                if (nextKeyUpload.startsWith(msg.getKeyObs())) {</span>
+<span class="fc" id="L421">                    stop = true;</span>
                 } else {
-<span class="fc" id="L347">                    LOGGER.info(&quot;{} 3 - Publishing message for output {}&quot;,</span>
-<span class="fc" id="L348">                            prefixMonitorLogs, msg.getProductName());</span>
+<span class="fc" id="L423">                    LOGGER.info(&quot;{} 3 - Publishing message for output {}&quot;,</span>
+<span class="fc" id="L424">                            prefixMonitorLogs, msg.getProductName());</span>
                     try {
-<span class="fc" id="L350">                        procuderFactory.sendOutput(msg, inputMessage);</span>
-<span class="fc" id="L351">                    } catch (MqiPublicationError ace) {</span>
-<span class="fc" id="L352">                        LOGGER.error(&quot;{} [code {}] {}&quot;, prefixMonitorLogs,</span>
-<span class="fc" id="L353">                                ace.getCode().getCode(), ace.getLogMessage());</span>
-<span class="fc" id="L354">                    }</span>
-<span class="fc" id="L355">                    iter.remove();</span>
+<span class="fc" id="L426">                        procuderFactory.sendOutput(msg, inputMessage);</span>
+<span class="fc" id="L427">                    } catch (MqiPublicationError ace) {</span>
+<span class="fc" id="L428">                        LOGGER.error(&quot;{} [code {}] {}&quot;, prefixMonitorLogs,</span>
+<span class="fc" id="L429">                                ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L430">                    }</span>
+<span class="fc" id="L431">                    iter.remove();</span>
                 }
-<span class="fc" id="L357">            }</span>
+<span class="fc" id="L433">            }</span>
         }
-<span class="fc" id="L359">    }</span>
+<span class="fc" id="L435">    }</span>
 
     /**
      * Publish reports in message queue system
@@ -367,29 +443,30 @@ public class OutputProcessor {
     protected void processReports(final List&lt;FileQueueMessage&gt; reportToPublish)
             throws AbstractCodedException {
 
-<span class="fc" id="L370">        LOGGER.info(</span>
+<span class="fc" id="L446">        LOGGER.info(</span>
                 &quot;{} 4 - Starting processing not object storage compatible outputs&quot;,
                 prefixMonitorLogs);
-<span class="fc bfc" id="L373" title="All 2 branches covered.">        if (!reportToPublish.isEmpty()) {</span>
-<span class="fc bfc" id="L374" title="All 2 branches covered.">            for (FileQueueMessage msg : reportToPublish) {</span>
-<span class="pc bpc" id="L375" title="1 of 2 branches missed.">                if (Thread.currentThread().isInterrupted()) {</span>
-<span class="nc" id="L376">                    throw new InternalErrorException(</span>
+<span class="fc bfc" id="L449" title="All 2 branches covered.">        if (!reportToPublish.isEmpty()) {</span>
+<span class="fc bfc" id="L450" title="All 2 branches covered.">            for (FileQueueMessage msg : reportToPublish) {</span>
+<span class="pc bpc" id="L451" title="1 of 2 branches missed.">                if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L452">                    throw new InternalErrorException(</span>
                             &quot;The current thread as been interrupted&quot;);
                 } else {
-<span class="fc" id="L379">                    LOGGER.info(&quot;{} 4 - Publishing KAFKA message for output {}&quot;,</span>
-<span class="fc" id="L380">                            prefixMonitorLogs, msg.getProductName());</span>
+<span class="fc" id="L455">                    LOGGER.info(&quot;{} 4 - Publishing KAFKA message for output {}&quot;,</span>
+<span class="fc" id="L456">                            prefixMonitorLogs, msg.getProductName());</span>
                     try {
-<span class="fc" id="L382">                        procuderFactory.sendOutput(msg, inputMessage);</span>
-<span class="fc" id="L383">                    } catch (MqiPublicationError ace) {</span>
-<span class="fc" id="L384">                        String message = String.format(&quot;%s [code %d] %s&quot;, prefixMonitorLogs,</span>
-<span class="fc" id="L385">                                ace.getCode().getCode(), ace.getLogMessage());</span>
-<span class="fc" id="L386">                        LOGGER.error(message);</span>
-<span class="fc" id="L387">                        procuderFactory.sendError(message);</span>
-<span class="fc" id="L388">                    }</span>
+<span class="fc" id="L458">                        procuderFactory.sendOutput(msg, inputMessage);</span>
+<span class="fc" id="L459">                    } catch (MqiPublicationError ace) {</span>
+<span class="fc" id="L460">                        String message = String.format(&quot;%s [code %d] %s&quot;,</span>
+<span class="fc" id="L461">                                prefixMonitorLogs, ace.getCode().getCode(),</span>
+<span class="fc" id="L462">                                ace.getLogMessage());</span>
+<span class="fc" id="L463">                        LOGGER.error(message);</span>
+<span class="fc" id="L464">                        procuderFactory.sendError(message);</span>
+<span class="fc" id="L465">                    }</span>
                 }
-<span class="fc" id="L390">            }</span>
+<span class="fc" id="L467">            }</span>
         }
-<span class="fc" id="L392">    }</span>
+<span class="fc" id="L469">    }</span>
 
     /**
      * Function which process all the output of L0 process
@@ -400,20 +477,20 @@ public class OutputProcessor {
     public void processOutput() throws AbstractCodedException {
 
         // Extract files
-<span class="fc" id="L403">        List&lt;String&gt; lines = extractFiles();</span>
+<span class="fc" id="L480">        List&lt;String&gt; lines = extractFiles();</span>
 
         // Sort outputs
-<span class="fc" id="L406">        List&lt;S3UploadFile&gt; uploadBatch = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L407">        List&lt;ObsQueueMessage&gt; outputToPublish = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L408">        List&lt;FileQueueMessage&gt; reportToPublish = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L409">        sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish);</span>
+<span class="fc" id="L483">        List&lt;S3UploadFile&gt; uploadBatch = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L484">        List&lt;ObsQueueMessage&gt; outputToPublish = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L485">        List&lt;FileQueueMessage&gt; reportToPublish = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L486">        sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish);</span>
 
         // Upload per batch the output
-<span class="fc" id="L412">        processProducts(uploadBatch, outputToPublish);</span>
+<span class="fc" id="L489">        processProducts(uploadBatch, outputToPublish);</span>
 
         // Publish reports
-<span class="fc" id="L415">        processReports(reportToPublish);</span>
-<span class="fc" id="L416">    }</span>
+<span class="fc" id="L492">        processReports(reportToPublish);</span>
+<span class="fc" id="L493">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

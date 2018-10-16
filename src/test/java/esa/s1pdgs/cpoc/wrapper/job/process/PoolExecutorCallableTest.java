@@ -46,7 +46,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         mockDefaultAppProperties();
         mockWapAppProperties(3, 1);
 
-        job = new LevelJobDto(ProductFamily.L0_JOB, "id", ".", "3");
+        job = new LevelJobDto(ProductFamily.L0_JOB, "id", "FAST", ".", "3");
         job.addPool(new LevelJobPoolDto());
         job.getPools().get(0)
                 .addTask(new LevelJobTaskDto(SystemUtils.getCmdMkdir()));

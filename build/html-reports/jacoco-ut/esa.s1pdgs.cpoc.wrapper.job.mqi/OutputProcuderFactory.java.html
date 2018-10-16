@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
@@ -13,6 +14,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
@@ -29,7 +31,13 @@ public class OutputProcuderFactory {
     /**
      * Logger
      */
-<span class="fc" id="L32">    protected static final Logger LOGGER = LogManager.getLogger(OutputProcuderFactory.class);</span>
+<span class="fc" id="L34">    protected static final Logger LOGGER =</span>
+<span class="fc" id="L35">            LogManager.getLogger(OutputProcuderFactory.class);</span>
+
+    /**
+     * MQI client for LEVEL_SEGMENTS
+     */
+    private final GenericMqiService&lt;LevelSegmentDto&gt; senderSegments;
 
     /**
      * MQI client for LEVEL_PRODUCTS
@@ -54,13 +62,15 @@ public class OutputProcuderFactory {
      */
     @Autowired
     public OutputProcuderFactory(
+            @Qualifier(&quot;mqiServiceForLevelSegments&quot;) final GenericMqiService&lt;LevelSegmentDto&gt; senderSegments,
             @Qualifier(&quot;mqiServiceForLevelProducts&quot;) final GenericMqiService&lt;LevelProductDto&gt; senderProducts,
             @Qualifier(&quot;mqiServiceForLevelReports&quot;) final GenericMqiService&lt;LevelReportDto&gt; senderReports,
-<span class="fc" id="L59">            @Qualifier(&quot;mqiServiceForErrors&quot;) final ErrorService senderErrors) {</span>
-<span class="fc" id="L60">        this.senderProducts = senderProducts;</span>
-<span class="fc" id="L61">        this.senderReports = senderReports;</span>
-<span class="fc" id="L62">        this.senderErrors = senderErrors;</span>
-<span class="fc" id="L63">    }</span>
+<span class="fc" id="L68">            @Qualifier(&quot;mqiServiceForErrors&quot;) final ErrorService senderErrors) {</span>
+<span class="fc" id="L69">        this.senderSegments = senderSegments;</span>
+<span class="fc" id="L70">        this.senderProducts = senderProducts;</span>
+<span class="fc" id="L71">        this.senderReports = senderReports;</span>
+<span class="fc" id="L72">        this.senderErrors = senderErrors;</span>
+<span class="fc" id="L73">    }</span>
 
     /**
      * Send an output in right topic according its family
@@ -71,11 +81,11 @@ public class OutputProcuderFactory {
     public void sendOutput(final FileQueueMessage msg,
             GenericMessageDto&lt;LevelJobDto&gt; inputMessage)
             throws AbstractCodedException {
-<span class="fc" id="L74">        LevelReportDto dtoReport = new LevelReportDto(msg.getProductName(),</span>
-<span class="fc" id="L75">                FileUtils.readFile(msg.getFile()), msg.getFamily());</span>
-<span class="fc" id="L76">        senderReports.publish(new GenericPublicationMessageDto&lt;LevelReportDto&gt;(</span>
-<span class="fc" id="L77">                inputMessage.getIdentifier(), msg.getFamily(), dtoReport));</span>
-<span class="fc" id="L78">    }</span>
+<span class="fc" id="L84">        LevelReportDto dtoReport = new LevelReportDto(msg.getProductName(),</span>
+<span class="fc" id="L85">                FileUtils.readFile(msg.getFile()), msg.getFamily());</span>
+<span class="fc" id="L86">        senderReports.publish(new GenericPublicationMessageDto&lt;LevelReportDto&gt;(</span>
+<span class="fc" id="L87">                inputMessage.getIdentifier(), msg.getFamily(), dtoReport));</span>
+<span class="fc" id="L88">    }</span>
 
     /**
      * Send an output in right topic according its family
@@ -86,24 +96,36 @@ public class OutputProcuderFactory {
     public void sendOutput(final ObsQueueMessage msg,
             GenericMessageDto&lt;LevelJobDto&gt; inputMessage)
             throws AbstractCodedException {
-<span class="fc" id="L89">        LevelProductDto dtoProduct = new LevelProductDto(msg.getProductName(),</span>
-<span class="fc" id="L90">                msg.getKeyObs(), msg.getFamily());</span>
-<span class="fc" id="L91">        senderProducts</span>
-<span class="fc" id="L92">                .publish(new GenericPublicationMessageDto&lt;LevelProductDto&gt;(</span>
-<span class="fc" id="L93">                        inputMessage.getIdentifier(), msg.getFamily(),</span>
-                        dtoProduct));
-<span class="fc" id="L95">    }</span>
-    
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (msg.getFamily() == ProductFamily.L0_SEGMENT) {</span>
+<span class="fc" id="L100">            LevelSegmentDto dtoProduct =</span>
+<span class="fc" id="L101">                    new LevelSegmentDto(msg.getProductName(), msg.getKeyObs(),</span>
+<span class="fc" id="L102">                            msg.getFamily(), msg.getProcessMode());</span>
+<span class="fc" id="L103">            senderSegments</span>
+<span class="fc" id="L104">                    .publish(new GenericPublicationMessageDto&lt;LevelSegmentDto&gt;(</span>
+<span class="fc" id="L105">                            inputMessage.getIdentifier(), msg.getFamily(),</span>
+                            dtoProduct));
+<span class="fc" id="L107">        } else {</span>
+<span class="fc" id="L108">            LevelProductDto dtoProduct =</span>
+<span class="fc" id="L109">                    new LevelProductDto(msg.getProductName(), msg.getKeyObs(),</span>
+<span class="fc" id="L110">                            msg.getFamily(), msg.getProcessMode());</span>
+<span class="fc" id="L111">            senderProducts</span>
+<span class="fc" id="L112">                    .publish(new GenericPublicationMessageDto&lt;LevelProductDto&gt;(</span>
+<span class="fc" id="L113">                            inputMessage.getIdentifier(), msg.getFamily(),</span>
+                            dtoProduct));
+        }
+<span class="fc" id="L116">    }</span>
+
     /**
      * Publish a error
+     * 
      * @param message
      */
     public void sendError(final String message) {
         try {
-<span class="fc" id="L103">            senderErrors.publish(message);</span>
-<span class="fc" id="L104">        } catch (AbstractCodedException e) {</span>
-<span class="fc" id="L105">            LOGGER.error(e.getLogMessage());</span>
-<span class="fc" id="L106">        }</span>
-<span class="fc" id="L107">    }</span>
+<span class="fc" id="L125">            senderErrors.publish(message);</span>
+<span class="fc" id="L126">        } catch (AbstractCodedException e) {</span>
+<span class="fc" id="L127">            LOGGER.error(e.getLogMessage());</span>
+<span class="fc" id="L128">        }</span>
+<span class="fc" id="L129">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

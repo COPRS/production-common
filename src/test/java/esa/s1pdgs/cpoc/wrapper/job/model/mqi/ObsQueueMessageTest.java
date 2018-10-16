@@ -23,10 +23,11 @@ public class ObsQueueMessageTest {
     @Test
     public void testConstructors() {
         ObsQueueMessage obj = new ObsQueueMessage(ProductFamily.AUXILIARY_FILE,
-                "product-name", "key");
+                "product-name", "key", "FAST");
         assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
         assertEquals("product-name", obj.getProductName());
-        assertEquals("key", obj.getKeyObs());
+        assertEquals("key", obj.getKeyObs());    
+        assertEquals("FAST", obj.getProcessMode());    
     }
 
     /**
@@ -35,11 +36,12 @@ public class ObsQueueMessageTest {
     @Test
     public void testToString() {
         ObsQueueMessage obj = new ObsQueueMessage(ProductFamily.EDRS_SESSION,
-                "product-name", "key");
+                "product-name", "key", "FAST");
         String str = obj.toString();
         assertTrue(str.contains("family: EDRS_SESSION"));
         assertTrue(str.contains("productName: product-name"));
         assertTrue(str.contains("keyObs: key"));
+        assertTrue(str.contains("processMode: FAST"));
     }
 
     /**
