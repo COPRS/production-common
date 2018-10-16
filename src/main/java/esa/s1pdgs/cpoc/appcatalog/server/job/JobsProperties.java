@@ -19,6 +19,8 @@ public class JobsProperties {
     
     private JobPropertiesPerCategory edrsSessions;
     
+    private JobPropertiesPerCategory levelSegments;
+    
     /**
      * 
      */
@@ -84,7 +86,19 @@ public class JobsProperties {
         this.edrsSessions = edrsSessions;
     }
 
-   public static class JobPropertiesPerCategory {
+    /**
+     * 
+     * @return
+     */
+   public JobPropertiesPerCategory getLevelSegments() {
+        return levelSegments;
+    }
+
+    public void setLevelSegments(final JobPropertiesPerCategory levelSegments) {
+        this.levelSegments = levelSegments;
+    }
+
+public static class JobPropertiesPerCategory {
 
         /**
          * Maximal job age per status

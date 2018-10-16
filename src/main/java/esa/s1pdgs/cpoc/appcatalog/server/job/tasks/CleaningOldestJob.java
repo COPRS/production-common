@@ -41,6 +41,11 @@ public class CleaningOldestJob {
     private final Map<String, Long> maxAgeJobsEdrsSessions;
 
     /**
+     * Maximal job age per status
+     */
+    private final Map<String, Long> maxAgeJobsLevelSegments;
+
+    /**
      * @param appDataJobService
      * @param category
      * @param maxAgeJobs
@@ -54,6 +59,8 @@ public class CleaningOldestJob {
                 jobsProperties.getEdrsSessions().getMaxAgeJobMs();
         this.maxAgeJobsEdrsSessions =
                 jobsProperties.getLevelProducts().getMaxAgeJobMs();
+        this.maxAgeJobsLevelSegments =
+                jobsProperties.getLevelSegments().getMaxAgeJobMs();
     }
 
     /**
@@ -61,35 +68,7 @@ public class CleaningOldestJob {
      */
     @Scheduled(fixedDelayString = "${jobs.cleaning-jobs-terminated-fixed-rate-ms}")
     public void cleanJobInGeneratedState() {
-        // EDRS sessions
-        Date dateCompareE =
-                new Date(System.currentTimeMillis() - maxAgeJobsEdrsSessions
-                        .get(AppDataJobState.TERMINATED.name().toLowerCase()));
-        List<AppDataJob> jobsE = appDataJobService
-                .findByStateAndCategoryAndLastUpdateDateLessThan(
-                        AppDataJobState.TERMINATED,
-                        ProductCategory.EDRS_SESSIONS, dateCompareE);
-        for (AppDataJob jobE : jobsE) {
-            LOGGER.info(
-                    "[productName {}] [level {}] Remove terminated job for enough time",
-                    jobE.getProduct().getProductName(),
-                    ProductCategory.EDRS_SESSIONS, jobE.getLevel());
-            appDataJobService.deleteJob(jobE.getIdentifier());
-        }
-        // Level products
-        Date dateCompareP =
-                new Date(System.currentTimeMillis() - maxAgeJobsLevelProducts
-                        .get(AppDataJobState.TERMINATED.name().toLowerCase()));
-        List<AppDataJob> jobsP = appDataJobService
-                .findByStateAndCategoryAndLastUpdateDateLessThan(
-                        AppDataJobState.TERMINATED,
-                        ProductCategory.LEVEL_PRODUCTS, dateCompareP);
-        for (AppDataJob jobP : jobsP) {
-            LOGGER.info(
-                    "[productName {}] [level {}] Remove terminated job for enough time",
-                    jobP.getProduct().getProductName(), jobP.getLevel());
-            appDataJobService.deleteJob(jobP.getIdentifier());
-        }
+        cleanJobsByState(AppDataJobState.TERMINATED, false);
     }
 
     /**
@@ -97,40 +76,57 @@ public class CleaningOldestJob {
      */
     @Scheduled(fixedDelayString = "${jobs.cleaning-jobs-invalid-fixed-rate-ms}")
     public void cleanJobInWaitingForTooLong() {
-        this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.WAITING);
-        this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.DISPATCHING);
-        this.deleteJobsInTemporarlyStateForTooLong(AppDataJobState.GENERATING);
+        cleanJobsByState(AppDataJobState.WAITING, true);
+        cleanJobsByState(AppDataJobState.DISPATCHING, true);
+        cleanJobsByState(AppDataJobState.GENERATING, true);
     }
 
     /**
+     * 
      * @param state
+     * @param isError
      */
-    private void deleteJobsInTemporarlyStateForTooLong(AppDataJobState state) {
+    private void cleanJobsByState(final AppDataJobState state, final boolean isError) {
         // EDRS sessions
-        Date dateCompareE = new Date(System.currentTimeMillis()
-                - maxAgeJobsEdrsSessions.get(state.name().toLowerCase()));
-        List<AppDataJob> jobsE = appDataJobService
-                .findByStateAndCategoryAndLastUpdateDateLessThan(state,
-                        ProductCategory.EDRS_SESSIONS, dateCompareE);
-        for (AppDataJob jobE : jobsE) {
-            LOGGER.info(
-                    "[category {}] [productName {}] [level {}] [state {}] Remove transitory job for long time",
-                    ProductCategory.EDRS_SESSIONS,
-                    jobE.getProduct().getProductName(), jobE.getLevel(), state);
-            appDataJobService.deleteJob(jobE.getIdentifier());
-        }
+        cleanJobsByStateAndCategory(state, ProductCategory.EDRS_SESSIONS,
+                maxAgeJobsEdrsSessions.get(state.name().toLowerCase()),
+                isError);
         // Level products
-        Date dateCompareP = new Date(System.currentTimeMillis()
-                - maxAgeJobsEdrsSessions.get(state.name().toLowerCase()));
-        List<AppDataJob> jobsP = appDataJobService
+        cleanJobsByStateAndCategory(state, ProductCategory.LEVEL_PRODUCTS,
+                maxAgeJobsLevelProducts.get(state.name().toLowerCase()),
+                isError);
+        // Level segments
+        cleanJobsByStateAndCategory(state, ProductCategory.LEVEL_SEGMENTS,
+                maxAgeJobsLevelSegments.get(state.name().toLowerCase()),
+                isError);
+    }
+
+    /**
+     * 
+     * @param state
+     * @param category
+     * @param maxAge
+     * @param isError
+     */
+    private void cleanJobsByStateAndCategory(final AppDataJobState state,
+            final ProductCategory category, final long maxAge, final boolean isError) {
+        Date dateCompareS = new Date(System.currentTimeMillis() - maxAge);
+        List<AppDataJob> jobsS = appDataJobService
                 .findByStateAndCategoryAndLastUpdateDateLessThan(state,
-                        ProductCategory.LEVEL_PRODUCTS, dateCompareP);
-        for (AppDataJob jobP : jobsP) {
-            LOGGER.error(
-                    "[category {}] [productName {}] [level {}] [state {}] Remove transitory job for long time",
-                    ProductCategory.LEVEL_PRODUCTS,
-                    jobP.getProduct().getProductName(), jobP.getLevel(), state);
-            appDataJobService.deleteJob(jobP.getIdentifier());
+                        category, dateCompareS);
+        for (AppDataJob jobS : jobsS) {
+            if (isError) {
+                LOGGER.error(
+                        "[productName {}] [category {}] [level {}] Remove {} job for enough time",
+                        jobS.getProduct().getProductName(), category,
+                        jobS.getLevel(), state);
+            } else {
+                LOGGER.info(
+                        "[productName {}] [category {}] [level {}] Remove {} job for enough time",
+                        jobS.getProduct().getProductName(), category,
+                        jobS.getLevel(), state);
+            }
+            appDataJobService.deleteJob(jobS.getIdentifier());
         }
     }
 

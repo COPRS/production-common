@@ -37,3 +37,12 @@ jobs:
     generations:
       max-errors-initial: 50
       max-errors-primary-check: 300
+  level-segments:
+    max-age-job-ms:
+      waiting: 600000
+      dispatching: 3600000
+      generating: 3600000
+      terminated: 600000
+    generations:
+      max-errors-initial: 50
+      max-errors-primary-check: 300

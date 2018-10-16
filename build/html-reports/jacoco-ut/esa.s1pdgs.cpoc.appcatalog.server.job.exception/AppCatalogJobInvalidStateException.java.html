@@ -32,23 +32,23 @@ public class AppCatalogJobInvalidStateException
      */
     public AppCatalogJobInvalidStateException(final String state,
             final String type) {
-<span class="nc" id="L35">        super(ErrorCode.JOB_INVALID_STATE, &quot;Invalid job state&quot;);</span>
-<span class="nc" id="L36">        this.state = state;</span>
-<span class="nc" id="L37">        this.type = type;</span>
-<span class="nc" id="L38">    }</span>
+<span class="fc" id="L35">        super(ErrorCode.JOB_INVALID_STATE, &quot;Invalid job state&quot;);</span>
+<span class="fc" id="L36">        this.state = state;</span>
+<span class="fc" id="L37">        this.type = type;</span>
+<span class="fc" id="L38">    }</span>
 
     /**
      * @return the state
      */
     public String getState() {
-<span class="nc" id="L44">        return state;</span>
+<span class="fc" id="L44">        return state;</span>
     }
 
     /**
      * @return the type
      */
     public String getType() {
-<span class="nc" id="L51">        return type;</span>
+<span class="fc" id="L51">        return type;</span>
     }
 
     /**
@@ -56,8 +56,8 @@ public class AppCatalogJobInvalidStateException
      */
     @Override
     public String getLogMessage() {
-<span class="nc" id="L59">        return String.format(&quot;[state %s] [type %s] [msg %s]&quot;, state, type,</span>
-<span class="nc" id="L60">                getMessage());</span>
+<span class="fc" id="L59">        return String.format(&quot;[state %s] [type %s] [msg %s]&quot;, state, type,</span>
+<span class="fc" id="L60">                getMessage());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

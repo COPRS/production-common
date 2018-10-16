@@ -60,13 +60,13 @@ public class JobConverter&lt;T&gt; {
 <span class="fc" id="L60">        jobDto.setState(convertJobStateFromDbToDto(jobDb.getState()));</span>
 <span class="fc" id="L61">        jobDto.setCreationDate(jobDb.getCreationDate());</span>
 <span class="fc" id="L62">        jobDto.setLastUpdateDate(jobDb.getLastUpdateDate());</span>
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        for (Object jobMsgDb : jobDb.getMessages()) {</span>
-<span class="nc" id="L64">            jobDto.getMessages().add((GenericMessageDto&lt;T&gt;) jobMsgDb);</span>
-<span class="nc" id="L65">        }</span>
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        for (AppDataJobGeneration jobGenDb : jobDb.getGenerations()) {</span>
-<span class="nc" id="L67">            jobDto.getGenerations()</span>
-<span class="nc" id="L68">                    .add(convertJobGenerationFromDbToDto(jobGenDb));</span>
-<span class="nc" id="L69">        }</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        for (Object jobMsgDb : jobDb.getMessages()) {</span>
+<span class="fc" id="L64">            jobDto.getMessages().add((GenericMessageDto&lt;T&gt;) jobMsgDb);</span>
+<span class="fc" id="L65">        }</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        for (AppDataJobGeneration jobGenDb : jobDb.getGenerations()) {</span>
+<span class="fc" id="L67">            jobDto.getGenerations()</span>
+<span class="fc" id="L68">                    .add(convertJobGenerationFromDbToDto(jobGenDb));</span>
+<span class="fc" id="L69">        }</span>
 <span class="fc" id="L70">        return jobDto;</span>
     }
 
@@ -90,13 +90,13 @@ public class JobConverter&lt;T&gt; {
 <span class="fc" id="L90">        jobDb.setCreationDate(jobDto.getCreationDate());</span>
 <span class="fc" id="L91">        jobDb.setLastUpdateDate(jobDto.getLastUpdateDate());</span>
 <span class="fc" id="L92">        jobDb.setCategory(category);</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        for (GenericMessageDto&lt;T&gt; jobMsgDb : jobDto.getMessages()) {</span>
-<span class="nc" id="L94">            jobDb.getMessages().add(jobMsgDb);</span>
-<span class="nc" id="L95">        }</span>
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        for (AppDataJobGenerationDto jobGenDto : jobDto.getGenerations()) {</span>
-<span class="nc" id="L97">            jobDb.getGenerations()</span>
-<span class="nc" id="L98">                    .add(convertJobGenerationFromDtoToDb(jobGenDto));</span>
-<span class="nc" id="L99">        }</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        for (GenericMessageDto&lt;T&gt; jobMsgDb : jobDto.getMessages()) {</span>
+<span class="fc" id="L94">            jobDb.getMessages().add(jobMsgDb);</span>
+<span class="fc" id="L95">        }</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        for (AppDataJobGenerationDto jobGenDto : jobDto.getGenerations()) {</span>
+<span class="fc" id="L97">            jobDb.getGenerations()</span>
+<span class="fc" id="L98">                    .add(convertJobGenerationFromDtoToDb(jobGenDto));</span>
+<span class="fc" id="L99">        }</span>
 <span class="fc" id="L100">        return jobDb;</span>
     }
 
@@ -108,14 +108,14 @@ public class JobConverter&lt;T&gt; {
     public AppDataJobGenerationDto convertJobGenerationFromDbToDto(
             AppDataJobGeneration jobGenDb)
             throws AppCatalogJobGenerationInvalidStateException {
-<span class="nc" id="L111">        AppDataJobGenerationDto jobGenDto = new AppDataJobGenerationDto();</span>
-<span class="nc" id="L112">        jobGenDto.setCreationDate(jobGenDb.getCreationDate());</span>
-<span class="nc" id="L113">        jobGenDto.setLastUpdateDate(jobGenDb.getLastUpdateDate());</span>
-<span class="nc" id="L114">        jobGenDto.setTaskTable(jobGenDb.getTaskTable());</span>
-<span class="nc" id="L115">        jobGenDto.setState(</span>
-<span class="nc" id="L116">                convertJobGenerationStateFromDbToDto(jobGenDb.getState()));</span>
-<span class="nc" id="L117">        jobGenDto.setNbErrors(jobGenDb.getNbErrors());</span>
-<span class="nc" id="L118">        return jobGenDto;</span>
+<span class="fc" id="L111">        AppDataJobGenerationDto jobGenDto = new AppDataJobGenerationDto();</span>
+<span class="fc" id="L112">        jobGenDto.setCreationDate(jobGenDb.getCreationDate());</span>
+<span class="fc" id="L113">        jobGenDto.setLastUpdateDate(jobGenDb.getLastUpdateDate());</span>
+<span class="fc" id="L114">        jobGenDto.setTaskTable(jobGenDb.getTaskTable());</span>
+<span class="fc" id="L115">        jobGenDto.setState(</span>
+<span class="fc" id="L116">                convertJobGenerationStateFromDbToDto(jobGenDb.getState()));</span>
+<span class="fc" id="L117">        jobGenDto.setNbErrors(jobGenDb.getNbErrors());</span>
+<span class="fc" id="L118">        return jobGenDto;</span>
     }
 
     /**
@@ -126,14 +126,14 @@ public class JobConverter&lt;T&gt; {
     public AppDataJobGeneration convertJobGenerationFromDtoToDb(
             AppDataJobGenerationDto jobGenDto)
             throws AppCatalogJobGenerationInvalidStateException {
-<span class="nc" id="L129">        AppDataJobGeneration jobGenDb = new AppDataJobGeneration();</span>
-<span class="nc" id="L130">        jobGenDb.setCreationDate(jobGenDto.getCreationDate());</span>
-<span class="nc" id="L131">        jobGenDb.setLastUpdateDate(jobGenDto.getLastUpdateDate());</span>
-<span class="nc" id="L132">        jobGenDb.setTaskTable(jobGenDto.getTaskTable());</span>
-<span class="nc" id="L133">        jobGenDb.setState(</span>
-<span class="nc" id="L134">                convertJobGenerationStateFromDtoToDb(jobGenDto.getState()));</span>
-<span class="nc" id="L135">        jobGenDb.setNbErrors(jobGenDto.getNbErrors());</span>
-<span class="nc" id="L136">        return jobGenDb;</span>
+<span class="fc" id="L129">        AppDataJobGeneration jobGenDb = new AppDataJobGeneration();</span>
+<span class="fc" id="L130">        jobGenDb.setCreationDate(jobGenDto.getCreationDate());</span>
+<span class="fc" id="L131">        jobGenDb.setLastUpdateDate(jobGenDto.getLastUpdateDate());</span>
+<span class="fc" id="L132">        jobGenDb.setTaskTable(jobGenDto.getTaskTable());</span>
+<span class="fc" id="L133">        jobGenDb.setState(</span>
+<span class="fc" id="L134">                convertJobGenerationStateFromDtoToDb(jobGenDto.getState()));</span>
+<span class="fc" id="L135">        jobGenDb.setNbErrors(jobGenDto.getNbErrors());</span>
+<span class="fc" id="L136">        return jobGenDb;</span>
     }
 
     /**
@@ -145,36 +145,37 @@ public class JobConverter&lt;T&gt; {
     public AppDataJobProductDto convertJobProductFromDbToDto(
             final AppDataJobProduct jobProductDb) {
 <span class="fc" id="L147">        AppDataJobProductDto jobProductDto = null;</span>
-<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if (jobProductDb != null) {</span>
-<span class="nc" id="L149">            jobProductDto = new AppDataJobProductDto();</span>
-<span class="nc" id="L150">            jobProductDto.setProductName(jobProductDb.getProductName());</span>
-<span class="nc" id="L151">            jobProductDto.setMissionId(jobProductDb.getMissionId());</span>
-<span class="nc" id="L152">            jobProductDto.setSatelliteId(jobProductDb.getSatelliteId());</span>
-<span class="nc" id="L153">            jobProductDto.setSessionId(jobProductDb.getSessionId());</span>
-<span class="nc" id="L154">            jobProductDto.setStartTime(jobProductDb.getStartTime());</span>
-<span class="nc" id="L155">            jobProductDto.setStopTime(jobProductDb.getStopTime());</span>
-<span class="nc" id="L156">            jobProductDto.setAcquisition(jobProductDb.getAcquisition());</span>
-<span class="nc" id="L157">            jobProductDto.setDataTakeId(jobProductDb.getDataTakeId());</span>
-<span class="nc" id="L158">            jobProductDto.setInsConfId(jobProductDb.getInsConfId());</span>
-<span class="nc" id="L159">            jobProductDto.setNumberSlice(jobProductDb.getNumberSlice());</span>
-<span class="nc" id="L160">            jobProductDto.setProductType(jobProductDb.getProductType());</span>
-<span class="nc" id="L161">            jobProductDto.setSegmentStartDate(jobProductDb.getSegmentStartDate());</span>
-<span class="nc" id="L162">            jobProductDto.setSegmentStopDate(jobProductDb.getSegmentStopDate());</span>
-<span class="nc" id="L163">            jobProductDto.setTotalNbOfSlice(jobProductDb.getTotalNbOfSlice());</span>
-<span class="nc bnc" id="L164" title="All 2 branches missed.">            if (!CollectionUtils.isEmpty(jobProductDb.getRaws1())) {</span>
-<span class="nc bnc" id="L165" title="All 2 branches missed.">                for (AppDataJobFile fileDb : jobProductDb.getRaws1()) {</span>
-<span class="nc" id="L166">                    jobProductDto.getRaws1()</span>
-<span class="nc" id="L167">                            .add(convertJobFileFromDbToDto(fileDb));</span>
-<span class="nc" id="L168">                }</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if (jobProductDb != null) {</span>
+<span class="fc" id="L149">            jobProductDto = new AppDataJobProductDto();</span>
+<span class="fc" id="L150">            jobProductDto.setProductName(jobProductDb.getProductName());</span>
+<span class="fc" id="L151">            jobProductDto.setMissionId(jobProductDb.getMissionId());</span>
+<span class="fc" id="L152">            jobProductDto.setSatelliteId(jobProductDb.getSatelliteId());</span>
+<span class="fc" id="L153">            jobProductDto.setSessionId(jobProductDb.getSessionId());</span>
+<span class="fc" id="L154">            jobProductDto.setStartTime(jobProductDb.getStartTime());</span>
+<span class="fc" id="L155">            jobProductDto.setStopTime(jobProductDb.getStopTime());</span>
+<span class="fc" id="L156">            jobProductDto.setAcquisition(jobProductDb.getAcquisition());</span>
+<span class="fc" id="L157">            jobProductDto.setDataTakeId(jobProductDb.getDataTakeId());</span>
+<span class="fc" id="L158">            jobProductDto.setInsConfId(jobProductDb.getInsConfId());</span>
+<span class="fc" id="L159">            jobProductDto.setNumberSlice(jobProductDb.getNumberSlice());</span>
+<span class="fc" id="L160">            jobProductDto.setProductType(jobProductDb.getProductType());</span>
+<span class="fc" id="L161">            jobProductDto.setSegmentStartDate(jobProductDb.getSegmentStartDate());</span>
+<span class="fc" id="L162">            jobProductDto.setSegmentStopDate(jobProductDb.getSegmentStopDate());</span>
+<span class="fc" id="L163">            jobProductDto.setTotalNbOfSlice(jobProductDb.getTotalNbOfSlice());</span>
+<span class="fc" id="L164">            jobProductDto.setProcessMode(jobProductDb.getProcessMode());</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">            if (!CollectionUtils.isEmpty(jobProductDb.getRaws1())) {</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">                for (AppDataJobFile fileDb : jobProductDb.getRaws1()) {</span>
+<span class="fc" id="L167">                    jobProductDto.getRaws1()</span>
+<span class="fc" id="L168">                            .add(convertJobFileFromDbToDto(fileDb));</span>
+<span class="fc" id="L169">                }</span>
             }
-<span class="nc bnc" id="L170" title="All 2 branches missed.">            if (!CollectionUtils.isEmpty(jobProductDb.getRaws2())) {</span>
-<span class="nc bnc" id="L171" title="All 2 branches missed.">                for (AppDataJobFile fileDb : jobProductDb.getRaws2()) {</span>
-<span class="nc" id="L172">                    jobProductDto.getRaws2()</span>
-<span class="nc" id="L173">                            .add(convertJobFileFromDbToDto(fileDb));</span>
-<span class="nc" id="L174">                }</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">            if (!CollectionUtils.isEmpty(jobProductDb.getRaws2())) {</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">                for (AppDataJobFile fileDb : jobProductDb.getRaws2()) {</span>
+<span class="fc" id="L173">                    jobProductDto.getRaws2()</span>
+<span class="fc" id="L174">                            .add(convertJobFileFromDbToDto(fileDb));</span>
+<span class="fc" id="L175">                }</span>
             }
         }
-<span class="fc" id="L177">        return jobProductDto;</span>
+<span class="fc" id="L178">        return jobProductDto;</span>
     }
 
     /**
@@ -185,38 +186,39 @@ public class JobConverter&lt;T&gt; {
      */
     public AppDataJobProduct convertJobProductFromDtoToDb(
             final AppDataJobProductDto jobProductDto) {
-<span class="fc" id="L188">        AppDataJobProduct jobProductDb = null;</span>
-<span class="pc bpc" id="L189" title="1 of 2 branches missed.">        if (jobProductDto != null) {</span>
-<span class="nc" id="L190">            jobProductDb = new AppDataJobProduct();</span>
-<span class="nc" id="L191">            jobProductDb.setProductName(jobProductDto.getProductName());</span>
-<span class="nc" id="L192">            jobProductDb.setMissionId(jobProductDto.getMissionId());</span>
-<span class="nc" id="L193">            jobProductDb.setSatelliteId(jobProductDto.getSatelliteId());</span>
-<span class="nc" id="L194">            jobProductDb.setSessionId(jobProductDto.getSessionId());</span>
-<span class="nc" id="L195">            jobProductDb.setStartTime(jobProductDto.getStartTime());</span>
-<span class="nc" id="L196">            jobProductDb.setStopTime(jobProductDto.getStopTime());</span>
-<span class="nc" id="L197">            jobProductDb.setAcquisition(jobProductDto.getAcquisition());</span>
-<span class="nc" id="L198">            jobProductDb.setAcquisition(jobProductDto.getAcquisition());</span>
-<span class="nc" id="L199">            jobProductDb.setDataTakeId(jobProductDto.getDataTakeId());</span>
-<span class="nc" id="L200">            jobProductDb.setInsConfId(jobProductDto.getInsConfId());</span>
-<span class="nc" id="L201">            jobProductDb.setNumberSlice(jobProductDto.getNumberSlice());</span>
-<span class="nc" id="L202">            jobProductDb.setProductType(jobProductDto.getProductType());</span>
-<span class="nc" id="L203">            jobProductDb.setSegmentStartDate(jobProductDto.getSegmentStartDate());</span>
-<span class="nc" id="L204">            jobProductDb.setSegmentStopDate(jobProductDto.getSegmentStopDate());</span>
-<span class="nc" id="L205">            jobProductDb.setTotalNbOfSlice(jobProductDto.getTotalNbOfSlice());</span>
-<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (!CollectionUtils.isEmpty(jobProductDto.getRaws1())) {</span>
-<span class="nc bnc" id="L207" title="All 2 branches missed.">                for (AppDataJobFileDto fileDto : jobProductDto.getRaws1()) {</span>
-<span class="nc" id="L208">                    jobProductDb.getRaws1()</span>
-<span class="nc" id="L209">                            .add(convertJobFileFromDtoToDb(fileDto));</span>
-<span class="nc" id="L210">                }</span>
+<span class="fc" id="L189">        AppDataJobProduct jobProductDb = null;</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if (jobProductDto != null) {</span>
+<span class="fc" id="L191">            jobProductDb = new AppDataJobProduct();</span>
+<span class="fc" id="L192">            jobProductDb.setProductName(jobProductDto.getProductName());</span>
+<span class="fc" id="L193">            jobProductDb.setMissionId(jobProductDto.getMissionId());</span>
+<span class="fc" id="L194">            jobProductDb.setSatelliteId(jobProductDto.getSatelliteId());</span>
+<span class="fc" id="L195">            jobProductDb.setSessionId(jobProductDto.getSessionId());</span>
+<span class="fc" id="L196">            jobProductDb.setStartTime(jobProductDto.getStartTime());</span>
+<span class="fc" id="L197">            jobProductDb.setStopTime(jobProductDto.getStopTime());</span>
+<span class="fc" id="L198">            jobProductDb.setAcquisition(jobProductDto.getAcquisition());</span>
+<span class="fc" id="L199">            jobProductDb.setAcquisition(jobProductDto.getAcquisition());</span>
+<span class="fc" id="L200">            jobProductDb.setDataTakeId(jobProductDto.getDataTakeId());</span>
+<span class="fc" id="L201">            jobProductDb.setInsConfId(jobProductDto.getInsConfId());</span>
+<span class="fc" id="L202">            jobProductDb.setNumberSlice(jobProductDto.getNumberSlice());</span>
+<span class="fc" id="L203">            jobProductDb.setProductType(jobProductDto.getProductType());</span>
+<span class="fc" id="L204">            jobProductDb.setSegmentStartDate(jobProductDto.getSegmentStartDate());</span>
+<span class="fc" id="L205">            jobProductDb.setSegmentStopDate(jobProductDto.getSegmentStopDate());</span>
+<span class="fc" id="L206">            jobProductDb.setTotalNbOfSlice(jobProductDto.getTotalNbOfSlice());</span>
+<span class="fc" id="L207">            jobProductDb.setProcessMode(jobProductDto.getProcessMode());</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">            if (!CollectionUtils.isEmpty(jobProductDto.getRaws1())) {</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">                for (AppDataJobFileDto fileDto : jobProductDto.getRaws1()) {</span>
+<span class="fc" id="L210">                    jobProductDb.getRaws1()</span>
+<span class="fc" id="L211">                            .add(convertJobFileFromDtoToDb(fileDto));</span>
+<span class="fc" id="L212">                }</span>
             }
-<span class="nc bnc" id="L212" title="All 2 branches missed.">            if (!CollectionUtils.isEmpty(jobProductDto.getRaws2())) {</span>
-<span class="nc bnc" id="L213" title="All 2 branches missed.">                for (AppDataJobFileDto fileDto : jobProductDto.getRaws2()) {</span>
-<span class="nc" id="L214">                    jobProductDb.getRaws2()</span>
-<span class="nc" id="L215">                            .add(convertJobFileFromDtoToDb(fileDto));</span>
-<span class="nc" id="L216">                }</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">            if (!CollectionUtils.isEmpty(jobProductDto.getRaws2())) {</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">                for (AppDataJobFileDto fileDto : jobProductDto.getRaws2()) {</span>
+<span class="fc" id="L216">                    jobProductDb.getRaws2()</span>
+<span class="fc" id="L217">                            .add(convertJobFileFromDtoToDb(fileDto));</span>
+<span class="fc" id="L218">                }</span>
             }
         }
-<span class="fc" id="L219">        return jobProductDb;</span>
+<span class="fc" id="L221">        return jobProductDb;</span>
     }
 
     /**
@@ -225,7 +227,7 @@ public class JobConverter&lt;T&gt; {
      * @return
      */
     public AppDataJobFileDto convertJobFileFromDbToDto(AppDataJobFile fileDb) {
-<span class="nc" id="L228">        return new AppDataJobFileDto(fileDb.getFilename(), fileDb.getKeyObs());</span>
+<span class="fc" id="L230">        return new AppDataJobFileDto(fileDb.getFilename(), fileDb.getKeyObs());</span>
     }
 
     /**
@@ -234,7 +236,7 @@ public class JobConverter&lt;T&gt; {
      * @return
      */
     public AppDataJobFile convertJobFileFromDtoToDb(AppDataJobFileDto fileDto) {
-<span class="nc" id="L237">        return new AppDataJobFile(fileDto.getFilename(), fileDto.getKeyObs());</span>
+<span class="fc" id="L239">        return new AppDataJobFile(fileDto.getFilename(), fileDto.getKeyObs());</span>
     }
 
     /**
@@ -247,25 +249,25 @@ public class JobConverter&lt;T&gt; {
     public AppDataJobDtoState convertJobStateFromDbToDto(
             final AppDataJobState jobStateDb)
             throws AppCatalogJobInvalidStateException {
-<span class="fc" id="L250">        AppDataJobDtoState jobStateDto = AppDataJobDtoState.WAITING;</span>
-<span class="pc bpc" id="L251" title="1 of 5 branches missed.">        switch (jobStateDb) {</span>
+<span class="fc" id="L252">        AppDataJobDtoState jobStateDto = AppDataJobDtoState.WAITING;</span>
+<span class="pc bpc" id="L253" title="1 of 5 branches missed.">        switch (jobStateDb) {</span>
             case WAITING:
-<span class="fc" id="L253">                jobStateDto = AppDataJobDtoState.WAITING;</span>
-<span class="fc" id="L254">                break;</span>
+<span class="fc" id="L255">                jobStateDto = AppDataJobDtoState.WAITING;</span>
+<span class="fc" id="L256">                break;</span>
             case DISPATCHING:
-<span class="fc" id="L256">                jobStateDto = AppDataJobDtoState.DISPATCHING;</span>
-<span class="fc" id="L257">                break;</span>
+<span class="fc" id="L258">                jobStateDto = AppDataJobDtoState.DISPATCHING;</span>
+<span class="fc" id="L259">                break;</span>
             case GENERATING:
-<span class="fc" id="L259">                jobStateDto = AppDataJobDtoState.GENERATING;</span>
-<span class="fc" id="L260">                break;</span>
+<span class="fc" id="L261">                jobStateDto = AppDataJobDtoState.GENERATING;</span>
+<span class="fc" id="L262">                break;</span>
             case TERMINATED:
-<span class="fc" id="L262">                jobStateDto = AppDataJobDtoState.TERMINATED;</span>
-<span class="fc" id="L263">                break;</span>
+<span class="fc" id="L264">                jobStateDto = AppDataJobDtoState.TERMINATED;</span>
+<span class="fc" id="L265">                break;</span>
             default:
-<span class="nc" id="L265">                throw new AppCatalogJobInvalidStateException(jobStateDb.name(),</span>
+<span class="nc" id="L267">                throw new AppCatalogJobInvalidStateException(jobStateDb.name(),</span>
                         &quot;DB&quot;);
         }
-<span class="fc" id="L268">        return jobStateDto;</span>
+<span class="fc" id="L270">        return jobStateDto;</span>
     }
 
     /**
@@ -278,25 +280,25 @@ public class JobConverter&lt;T&gt; {
     public AppDataJobState convertJobStateFromDtoToDb(
             final AppDataJobDtoState jobStateDto)
             throws AppCatalogJobInvalidStateException {
-<span class="fc" id="L281">        AppDataJobState jobStateDb = AppDataJobState.WAITING;</span>
-<span class="pc bpc" id="L282" title="1 of 5 branches missed.">        switch (jobStateDto) {</span>
+<span class="fc" id="L283">        AppDataJobState jobStateDb = AppDataJobState.WAITING;</span>
+<span class="pc bpc" id="L284" title="1 of 5 branches missed.">        switch (jobStateDto) {</span>
             case WAITING:
-<span class="fc" id="L284">                jobStateDb = AppDataJobState.WAITING;</span>
-<span class="fc" id="L285">                break;</span>
+<span class="fc" id="L286">                jobStateDb = AppDataJobState.WAITING;</span>
+<span class="fc" id="L287">                break;</span>
             case DISPATCHING:
-<span class="fc" id="L287">                jobStateDb = AppDataJobState.DISPATCHING;</span>
-<span class="fc" id="L288">                break;</span>
+<span class="fc" id="L289">                jobStateDb = AppDataJobState.DISPATCHING;</span>
+<span class="fc" id="L290">                break;</span>
             case GENERATING:
-<span class="fc" id="L290">                jobStateDb = AppDataJobState.GENERATING;</span>
-<span class="fc" id="L291">                break;</span>
+<span class="fc" id="L292">                jobStateDb = AppDataJobState.GENERATING;</span>
+<span class="fc" id="L293">                break;</span>
             case TERMINATED:
-<span class="fc" id="L293">                jobStateDb = AppDataJobState.TERMINATED;</span>
-<span class="fc" id="L294">                break;</span>
+<span class="fc" id="L295">                jobStateDb = AppDataJobState.TERMINATED;</span>
+<span class="fc" id="L296">                break;</span>
             default:
-<span class="nc" id="L296">                throw new AppCatalogJobInvalidStateException(jobStateDto.name(),</span>
+<span class="nc" id="L298">                throw new AppCatalogJobInvalidStateException(jobStateDto.name(),</span>
                         &quot;DTO&quot;);
         }
-<span class="fc" id="L299">        return jobStateDb;</span>
+<span class="fc" id="L301">        return jobStateDb;</span>
     }
 
     /**
@@ -309,26 +311,26 @@ public class JobConverter&lt;T&gt; {
     public AppDataJobGenerationDtoState convertJobGenerationStateFromDbToDto(
             final AppDataJobGenerationState jobGenStateDb)
             throws AppCatalogJobGenerationInvalidStateException {
-<span class="fc" id="L312">        AppDataJobGenerationDtoState jobGenStateDto =</span>
+<span class="fc" id="L314">        AppDataJobGenerationDtoState jobGenStateDto =</span>
                 AppDataJobGenerationDtoState.INITIAL;
-<span class="pc bpc" id="L314" title="1 of 5 branches missed.">        switch (jobGenStateDb) {</span>
+<span class="pc bpc" id="L316" title="1 of 5 branches missed.">        switch (jobGenStateDb) {</span>
             case INITIAL:
-<span class="fc" id="L316">                jobGenStateDto = AppDataJobGenerationDtoState.INITIAL;</span>
-<span class="fc" id="L317">                break;</span>
+<span class="fc" id="L318">                jobGenStateDto = AppDataJobGenerationDtoState.INITIAL;</span>
+<span class="fc" id="L319">                break;</span>
             case PRIMARY_CHECK:
-<span class="fc" id="L319">                jobGenStateDto = AppDataJobGenerationDtoState.PRIMARY_CHECK;</span>
-<span class="fc" id="L320">                break;</span>
+<span class="fc" id="L321">                jobGenStateDto = AppDataJobGenerationDtoState.PRIMARY_CHECK;</span>
+<span class="fc" id="L322">                break;</span>
             case READY:
-<span class="fc" id="L322">                jobGenStateDto = AppDataJobGenerationDtoState.READY;</span>
-<span class="fc" id="L323">                break;</span>
+<span class="fc" id="L324">                jobGenStateDto = AppDataJobGenerationDtoState.READY;</span>
+<span class="fc" id="L325">                break;</span>
             case SENT:
-<span class="fc" id="L325">                jobGenStateDto = AppDataJobGenerationDtoState.SENT;</span>
-<span class="fc" id="L326">                break;</span>
+<span class="fc" id="L327">                jobGenStateDto = AppDataJobGenerationDtoState.SENT;</span>
+<span class="fc" id="L328">                break;</span>
             default:
-<span class="nc" id="L328">                throw new AppCatalogJobGenerationInvalidStateException(</span>
-<span class="nc" id="L329">                        jobGenStateDb.name(), &quot;DB&quot;);</span>
+<span class="nc" id="L330">                throw new AppCatalogJobGenerationInvalidStateException(</span>
+<span class="nc" id="L331">                        jobGenStateDb.name(), &quot;DB&quot;);</span>
         }
-<span class="fc" id="L331">        return jobGenStateDto;</span>
+<span class="fc" id="L333">        return jobGenStateDto;</span>
     }
 
     /**
@@ -341,26 +343,26 @@ public class JobConverter&lt;T&gt; {
     public AppDataJobGenerationState convertJobGenerationStateFromDtoToDb(
             final AppDataJobGenerationDtoState jobGenStateDto)
             throws AppCatalogJobGenerationInvalidStateException {
-<span class="nc" id="L344">        AppDataJobGenerationState jobGenStateDb =</span>
+<span class="fc" id="L346">        AppDataJobGenerationState jobGenStateDb =</span>
                 AppDataJobGenerationState.INITIAL;
-<span class="pc bnc" id="L346" title="All 5 branches missed.">        switch (jobGenStateDto) {</span>
+<span class="pc bpc" id="L348" title="3 of 5 branches missed.">        switch (jobGenStateDto) {</span>
             case INITIAL:
-<span class="nc" id="L348">                jobGenStateDb = AppDataJobGenerationState.INITIAL;</span>
-<span class="nc" id="L349">                break;</span>
+<span class="nc" id="L350">                jobGenStateDb = AppDataJobGenerationState.INITIAL;</span>
+<span class="nc" id="L351">                break;</span>
             case PRIMARY_CHECK:
-<span class="nc" id="L351">                jobGenStateDb = AppDataJobGenerationState.PRIMARY_CHECK;</span>
-<span class="nc" id="L352">                break;</span>
+<span class="nc" id="L353">                jobGenStateDb = AppDataJobGenerationState.PRIMARY_CHECK;</span>
+<span class="nc" id="L354">                break;</span>
             case READY:
-<span class="nc" id="L354">                jobGenStateDb = AppDataJobGenerationState.READY;</span>
-<span class="nc" id="L355">                break;</span>
+<span class="fc" id="L356">                jobGenStateDb = AppDataJobGenerationState.READY;</span>
+<span class="fc" id="L357">                break;</span>
             case SENT:
-<span class="nc" id="L357">                jobGenStateDb = AppDataJobGenerationState.SENT;</span>
-<span class="nc" id="L358">                break;</span>
+<span class="fc" id="L359">                jobGenStateDb = AppDataJobGenerationState.SENT;</span>
+<span class="fc" id="L360">                break;</span>
             default:
-<span class="nc" id="L360">                throw new AppCatalogJobGenerationInvalidStateException(</span>
-<span class="nc" id="L361">                        jobGenStateDto.name(), &quot;DTO&quot;);</span>
+<span class="nc" id="L362">                throw new AppCatalogJobGenerationInvalidStateException(</span>
+<span class="nc" id="L363">                        jobGenStateDto.name(), &quot;DTO&quot;);</span>
         }
-<span class="nc" id="L363">        return jobGenStateDb;</span>
+<span class="fc" id="L365">        return jobGenStateDb;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

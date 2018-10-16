@@ -32,23 +32,23 @@ public class AppCatalogJobGenerationNotFoundException
      */
     public AppCatalogJobGenerationNotFoundException(final long jobId,
             final String taskTable) {
-<span class="nc" id="L35">        super(ErrorCode.JOB_NOT_FOUND, &quot;Job generation not found&quot;);</span>
-<span class="nc" id="L36">        this.jobId = jobId;</span>
-<span class="nc" id="L37">        this.taskTable = taskTable;</span>
-<span class="nc" id="L38">    }</span>
+<span class="fc" id="L35">        super(ErrorCode.JOB_GENERATION_NOT_FOUND, &quot;Job generation not found&quot;);</span>
+<span class="fc" id="L36">        this.jobId = jobId;</span>
+<span class="fc" id="L37">        this.taskTable = taskTable;</span>
+<span class="fc" id="L38">    }</span>
 
     /**
      * @return the jobId
      */
     public long getJobId() {
-<span class="nc" id="L44">        return jobId;</span>
+<span class="fc" id="L44">        return jobId;</span>
     }
 
     /**
      * @return the taskTables
      */
     public String getTaskTable() {
-<span class="nc" id="L51">        return taskTable;</span>
+<span class="fc" id="L51">        return taskTable;</span>
     }
 
     /**
@@ -56,8 +56,8 @@ public class AppCatalogJobGenerationNotFoundException
      */
     @Override
     public String getLogMessage() {
-<span class="nc" id="L59">        return String.format(&quot;[jobId %s] [taskTable %s] [msg %s]&quot;, jobId,</span>
-<span class="nc" id="L60">                taskTable, getMessage());</span>
+<span class="fc" id="L59">        return String.format(&quot;[jobId %s] [taskTable %s] [msg %s]&quot;, jobId,</span>
+<span class="fc" id="L60">                taskTable, getMessage());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

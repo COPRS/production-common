@@ -32,24 +32,24 @@ public class AppCatalogJobGenerationInvalidTransitionStateException
      */
     public AppCatalogJobGenerationInvalidTransitionStateException(
             final String stateBefore, final String stateAfter) {
-<span class="nc" id="L35">        super(ErrorCode.JOB_GENERATION_INVALID_STATE_TRANSITION,</span>
+<span class="fc" id="L35">        super(ErrorCode.JOB_GENERATION_INVALID_STATE_TRANSITION,</span>
                 &quot;Invalid job generation state transition&quot;);
-<span class="nc" id="L37">        this.stateBefore = stateBefore;</span>
-<span class="nc" id="L38">        this.stateAfter = stateAfter;</span>
-<span class="nc" id="L39">    }</span>
+<span class="fc" id="L37">        this.stateBefore = stateBefore;</span>
+<span class="fc" id="L38">        this.stateAfter = stateAfter;</span>
+<span class="fc" id="L39">    }</span>
 
     /**
      * @return the state
      */
     public String getStateBefore() {
-<span class="nc" id="L45">        return stateBefore;</span>
+<span class="fc" id="L45">        return stateBefore;</span>
     }
 
     /**
      * @return the type
      */
     public String getStateAfter() {
-<span class="nc" id="L52">        return stateAfter;</span>
+<span class="fc" id="L52">        return stateAfter;</span>
     }
 
     /**
@@ -57,8 +57,8 @@ public class AppCatalogJobGenerationInvalidTransitionStateException
      */
     @Override
     public String getLogMessage() {
-<span class="nc" id="L60">        return String.format(&quot;[stateBefore %s] [stateAfter %s] [msg %s]&quot;,</span>
-<span class="nc" id="L61">                stateBefore, stateAfter, getMessage());</span>
+<span class="fc" id="L60">        return String.format(&quot;[stateBefore %s] [stateAfter %s] [msg %s]&quot;,</span>
+<span class="fc" id="L61">                stateBefore, stateAfter, getMessage());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
