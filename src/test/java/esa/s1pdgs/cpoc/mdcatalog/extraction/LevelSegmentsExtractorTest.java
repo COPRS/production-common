@@ -99,13 +99,13 @@ public class LevelSegmentsExtractorTest {
         typeOverlap.put("EW", 8.2F);
         typeOverlap.put("IW", 7.4F);
         typeOverlap.put("SM", 7.7F);
-        typeOverlap.put("WM", 0.0F);
+        typeOverlap.put("WV", 0.0F);
         // "EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"
         Map<String, Float> typeSliceLength = new HashMap<String, Float>();
         typeSliceLength.put("EW", 60.0F);
         typeSliceLength.put("IW", 25.0F);
         typeSliceLength.put("SM", 25.0F);
-        typeSliceLength.put("WM", 0.0F);
+        typeSliceLength.put("WV", 0.0F);
         doReturn("config/xsltDir/").when(extractorConfig).getXsltDirectory();
         doReturn(typeOverlap).when(extractorConfig).getTypeOverlap();
         doReturn(typeSliceLength).when(extractorConfig).getTypeSliceLength();
@@ -208,13 +208,13 @@ public class LevelSegmentsExtractorTest {
 
         File file = new File((new File("./test/workDir/")).getAbsolutePath()
                 + File.separator
-                + "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE"
+                + "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE"
                 + File.separator + "manifest.safe");
 
         inputMessageSafe = new GenericMessageDto<LevelSegmentDto>(123, "",
                 new LevelSegmentDto(
-                        "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                        "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                        "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
+                        "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
                         ProductFamily.L0_SEGMENT, "FAST"));
 
         doReturn(file).when(obsService).downloadFile(Mockito.any(),
@@ -224,19 +224,19 @@ public class LevelSegmentsExtractorTest {
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
-                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE");
         descriptor.setMissionId("S1");
         descriptor.setSatelliteId("A");
         descriptor.setProductName(
-                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE");
         descriptor.setRelativePath(
-                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
-        descriptor.setSwathtype("IW");
+                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE");
+        descriptor.setSwathtype("WV");
         descriptor.setResolution("_");
         descriptor.setProductClass("S");
-        descriptor.setProductType("IW_RAW__0S");
-        descriptor.setPolarisation("DV");
-        descriptor.setDataTakeId("021735");
+        descriptor.setProductType("WV_RAW__0S");
+        descriptor.setPolarisation("SV");
+        descriptor.setDataTakeId("0294F4");
         descriptor.setProductFamily(ProductFamily.L0_SEGMENT);
         descriptor.setMode("FAST");
 
@@ -253,7 +253,7 @@ public class LevelSegmentsExtractorTest {
         verify(obsService, times(1)).downloadFile(
                 Mockito.eq(ProductFamily.L0_SEGMENT),
                 Mockito.eq(
-                        "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
+                        "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe"),
                 Mockito.eq(extractor.localDirectory));
 
     }

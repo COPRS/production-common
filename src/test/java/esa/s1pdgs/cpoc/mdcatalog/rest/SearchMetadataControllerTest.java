@@ -6,6 +6,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +23,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.rest.SearchMetadataController;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.SearchMetadataDto;
-import esa.s1pdgs.cpoc.test.RestControllerTest;
 
 public class SearchMetadataControllerTest extends RestControllerTest {
 
@@ -38,9 +39,13 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 		this.initMockMvc(this.controller);
 	}
 
-	private void mockSearchMetadata(SearchMetadata response) throws Exception {
+	private void mockSearchMetadataLastValCover(SearchMetadata response) throws Exception {
 		doReturn(response).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
 	}
+	
+	private void mockSearchMetadataValIntersect(List<SearchMetadata> response) throws Exception {
+        doReturn(response).when(esServices).valIntersect(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class));
+    }
 
 	private void mockSearchMetadataNotPresentException() throws Exception {
 		doThrow(new MetadataNotPresentException("name")).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
@@ -52,24 +57,44 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	
 	
 	@Test
-	public void testSearchMetadata() throws Exception {
-		SearchMetadataDto expectedResult = new SearchMetadataDto("name", "type", "kobs", "startDate", "stopDate");
+	public void testSearchMetadataLastValCover() throws Exception {
+		List<SearchMetadataDto> expectedResult = new ArrayList<>();
+		expectedResult.add(new SearchMetadataDto("name", "type", "kobs", "startDate", "stopDate"));
 		SearchMetadata response = new SearchMetadata();
 		response.setProductName("name");
 		response.setProductType("type");
 		response.setKeyObjectStorage("kobs");
 		response.setValidityStart("startDate");
 		response.setValidityStop("stopDate");
-		this.mockSearchMetadata(response);
+		this.mockSearchMetadataLastValCover(response);
 		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&processMode=NRT&satellite=satellite&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());
-		assertEquals("Result is different from expected result", expectedResult.toString(), result.getResponse().getContentAsString());
 	}
 	
 	@Test
+    public void testSearchMetadataValIntersect() throws Exception {
+        List<SearchMetadataDto> expectedResult = new ArrayList<>();
+        expectedResult.add(new SearchMetadataDto("name", "type", "kobs", "startDate", "stopDate", "polarisation", "productConsolidation"));
+        SearchMetadata r = new SearchMetadata();
+        r.setProductName("name");
+        r.setProductType("type");
+        r.setKeyObjectStorage("kobs");
+        r.setValidityStart("startDate");
+        r.setValidityStop("stopDate");
+        r.setPolarisation("polarisation");
+        r.setProductConsolidation("productConsolidation");
+        List<SearchMetadata> response = new ArrayList<>();
+        response.add(r);
+        this.mockSearchMetadataValIntersect(response);
+        MvcResult result = request(get("/metadata/L0_SEGMENT/search?mode=ValIntersect&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19&dataTakeId=0294F4")).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());
+    }
+	
+	@Test
 	public void testSearchMetadataIsNULL() throws Exception {
-		this.mockSearchMetadata(null);
+		this.mockSearchMetadataLastValCover(null);
 		MvcResult result = request(get("/metadata/L0_SLICE/search?productType=type&mode=LatestValCover&processMode=NRT&satellite=satellite&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());

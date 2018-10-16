@@ -8,6 +8,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -279,7 +281,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void lastValCoverIOExceptionTest() throws Exception {
 		this.mockSearchRequestThrowIOException();
-		esServices.lastValCover("type", ProductFamily.BLANK, "beginDate", "endDate", "satelliteId", -1, "NRT");
+		esServices.lastValCover("type", ProductFamily.L0_SLICE, "beginDate", "endDate", "satelliteId", -1, "NRT");
 	}
 	
 	@Test
@@ -306,6 +308,73 @@ public class EsServicesTest{
 			fail("Exception occurred: " + e.getMessage());
 		}
 	}
+	
+	@Test
+    public void valIntersectTest() throws IOException {
+        // Product
+        SearchMetadata r = new SearchMetadata();
+        r.setProductName("name");
+        r.setProductType("product_type");
+        r.setKeyObjectStorage("url");
+        r.setValidityStart("validityStartTime");
+        r.setValidityStop("validityStopTime");
+        r.setPolarisation("polarisation");
+        r.setProductConsolidation("productConsolidation");
+        List<SearchMetadata> expectedResult = new ArrayList<>();
+        expectedResult.add(r);
+        
+        //Response
+        BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productType\": \"product_type\","
+                + "\"polarisation\": \"polarisation\", \"productConsolidation\": \"productConsolidation\"}");
+        SearchHit hit = new SearchHit(1);
+        hit.sourceRef(source);
+        SearchHit[] hits = {hit};
+        SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+        SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+        SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        
+        //Mocking the search request
+        this.mockSearchRequest(response);
+        
+        try {
+            List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "dataTakeId");
+            assertEquals("Search metadata are not equals", expectedResult, result);
+        } catch (Exception e) {
+            fail("Exception occurred: " + e.getMessage());
+        }
+    }
+    
+    @Test(expected = Exception.class)
+    public void valIntersectIOExceptionTest() throws Exception {
+        this.mockSearchRequestThrowIOException();
+        esServices.valIntersect("beginDate", "endDate", "dataTakeId");
+    }
+    
+    @Test
+    public void valIntersectNoHitTest() throws IOException {
+        //Response
+        BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
+                + "\"validityStopTime\", \"productType\": \"product_type\"}");
+        SearchHit hit = new SearchHit(1);
+        hit.sourceRef(source);
+        SearchHit[] hits = {hit};
+        SearchHits searchHits = new SearchHits(hits, 0, 1.0F);
+        SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+        SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        
+        //Mocking the search request
+        this.mockSearchRequest(response);
+        
+        try {
+            List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "dataTakeId");
+            assertEquals("Search metadata are not equals", null, result);
+        } catch (Exception e) {
+            fail("Exception occurred: " + e.getMessage());
+        }
+    }
 	
 	@Test
 	public void getEdrsSessionTest() throws IOException {

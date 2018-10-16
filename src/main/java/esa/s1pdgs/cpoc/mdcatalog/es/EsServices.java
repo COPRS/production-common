@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.mdcatalog.es;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.action.get.GetRequest;
@@ -14,6 +16,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -192,6 +195,61 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 		return null;
+	}
+	
+	/**
+	 * Function which returns the list of all the Segments for a specific datatakeid and start/stop time
+	 * 
+	 * @param beginDate
+	 * @param endDate
+	 * @param dataTakeId
+	 * 
+	 * @return the list of the corresponding Segment
+	 * @throws Exception 
+	 */
+	public List<SearchMetadata> valIntersect(String beginDate, String endDate, String dataTakeId) throws Exception {
+	    
+	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        // Generic fields
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("startTime").lt(beginDate))
+                .must(QueryBuilders.rangeQuery("stopTime").gt(endDate))
+                .must(QueryBuilders.termQuery("dataTakeId.keyword", dataTakeId));
+        sourceBuilder.query(queryBuilder);
+        sourceBuilder.size(20);
+        
+        SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());
+        searchRequest.types(indexType);
+        searchRequest.source(sourceBuilder);
+        try {
+            SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+            if (searchResponse.getHits().totalHits >= 1) {
+                List<SearchMetadata> r = new ArrayList<>();
+                for(SearchHit hit : searchResponse.getHits().getHits()) {
+                    Map<String, Object> source = hit.getSourceAsMap();
+                    SearchMetadata local = new SearchMetadata();
+                    local.setProductName(source.get("productName").toString());
+                    local.setProductType(source.get("productType").toString());
+                    local.setKeyObjectStorage(source.get("url").toString());
+                    if (source.containsKey("startTime")) {
+                        local.setValidityStart(source.get("startTime").toString());
+                    }
+                    if (source.containsKey("stopTime")) {
+                        local.setValidityStop(source.get("stopTime").toString());
+                    }
+                    if(source.containsKey("polarisation")) {
+                        local.setPolarisation(source.get("polarisation").toString());
+                    }
+                    if(source.containsKey("productConsolidation")) {
+                        local.setProductConsolidation(source.get("productConsolidation").toString());
+                    }
+                    r.add(local);
+                }
+                return r;
+            }
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        }
+	    return null;
 	}
 
 	/**

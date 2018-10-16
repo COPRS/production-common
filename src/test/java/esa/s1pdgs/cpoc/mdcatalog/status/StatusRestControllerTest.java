@@ -21,8 +21,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mdcatalog.rest.RestControllerTest;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.test.RestControllerTest;
 
 public class StatusRestControllerTest extends RestControllerTest {
 

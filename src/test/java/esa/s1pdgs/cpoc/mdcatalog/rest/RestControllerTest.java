@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.test;
+package esa.s1pdgs.cpoc.mdcatalog.rest;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 

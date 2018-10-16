@@ -24,13 +24,17 @@ public class SearchMetadataTest {
 		obj.setKeyObjectStorage("kobs");
 		obj.setValidityStart("start");
 		obj.setValidityStop("stop");
-		
+		obj.setPolarisation("polarisation");
+		obj.setProductConsolidation("productConsolidation");
+		//{"productName":"name","productType":"type","keyObjectStorage":"kobs","validityStart":"startDate","validityStop":"stopDate","polarisation":null,"productConsolidation":null}
 		String str = obj.toString();
 		assertTrue(str.contains("productName= name"));
 		assertTrue(str.contains("productType= type"));
 		assertTrue(str.contains("keyObjectStorage= kobs"));
 		assertTrue(str.contains("validityStart= start"));
 		assertTrue(str.contains("validityStop= stop"));
+        assertTrue(str.contains("polarisation= polarisation"));
+        assertTrue(str.contains("productConsolidation= productConsolidation"));
 	}
 
 	/**

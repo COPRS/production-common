@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.mdcatalog.rest;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -37,41 +39,56 @@ public class SearchMetadataController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
-	public ResponseEntity<SearchMetadataDto> search(@PathVariable(name = "productFamily") String productFamily,
-	        @RequestParam(name = "productType") String productType,
-			@RequestParam(name = "mode") String mode, @RequestParam(name = "satellite") String satellite,
+	public ResponseEntity<List<SearchMetadataDto>> search(@PathVariable(name = "productFamily") String productFamily,
+	        @RequestParam(name = "productType", defaultValue = "NONE") String productType, 
+	        @RequestParam(name = "dataTakeId", defaultValue = "NONE") String dataTakeId,
+			@RequestParam(name = "mode", defaultValue = "NONE") String mode, 
+			@RequestParam(name = "satellite", defaultValue = "NONE") String satellite,
 			@RequestParam(name = "t0") String startDate, @RequestParam(name = "t1") String stopDate,
 			@RequestParam(name = "processMode", defaultValue = "NONE") String processMode,
 			@RequestParam(name = "insConfId", defaultValue = "-1") int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
 		try {
-			if (mode.equals("LatestValCover")) {
+		    List<SearchMetadataDto> response = new ArrayList<SearchMetadataDto>();
+			if ("LatestValCover".equals(mode)) {
 				SearchMetadata f = esServices.lastValCover(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")),
 						satellite, insConfId, processMode);
-				SearchMetadataDto response = null;
+				
 				if (f != null) {
-					response = new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop());
+					response.add(new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
+							f.getValidityStart(), f.getValidityStop()));
 				}
-				return new ResponseEntity<SearchMetadataDto>(response, HttpStatus.OK);
+				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
+			} else if("ValIntersect".equals(mode)) {
+			    List<SearchMetadata> f = esServices.valIntersect(convertDateForSearch(startDate, -dt0,
+                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
+                        convertDateForSearch(stopDate, dt1,
+                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")),
+                        dataTakeId);
+			    for(SearchMetadata m : f) {
+			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), 
+			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop(),
+			                m.getPolarisation(), m.getProductConsolidation()));
+			    }
+                return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
 			} else {
 				LOGGER.error("[productType {}] [code {}] [mode {}] [msg Unknown mode]", productType,
 						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);
-				return new ResponseEntity<SearchMetadataDto>(HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.BAD_REQUEST);
 			}
 		} catch (AbstractCodedException e) {
 			LOGGER.error("[productType {}] [code {}] [mode {}] {}", productType, e.getCode().getCode(), mode,
 					e.getLogMessage());
-			return new ResponseEntity<SearchMetadataDto>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			LOGGER.error("[productType {}] [code {}] [mode {}] [msg {}]", productType,
 					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());
-			return new ResponseEntity<SearchMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}

@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0AcnMetadataDto;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0SliceMetadataDto;
-import esa.s1pdgs.cpoc.test.RestControllerTest;
 
 public class L0SliceMetadataControllerTest extends RestControllerTest {
 

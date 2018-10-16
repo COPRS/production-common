@@ -400,36 +400,12 @@ public class ExtractMetadata {
 	        }	
 	        if(descriptor.getProductClass().equals("A") || descriptor.getProductClass().equals("C") || descriptor.getProductClass().equals("N")) {
 	        	if(metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
-	        		if(descriptor.getSwathtype().matches("IW")) {
-	            		metadataJSONObject.put("totalNumberOfSlice", 
+	        		metadataJSONObject.put("totalNumberOfSlice", 
 							totalNumberOfSlice(
 									dateFormat.parse(metadataJSONObject.getString("startTime")).getTime()/1000, 
 									dateFormat.parse(metadataJSONObject.getString("stopTime")).getTime()/1000,
-									descriptor.getSwathtype()));
-	        		}	
-		        	else if (descriptor.getSwathtype().matches("EW")) {
-						metadataJSONObject.put("totalNumberOfSlice", 
-								totalNumberOfSlice(
-										dateFormat.parse(metadataJSONObject.getString("startTime")).getTime()/1000, 
-										dateFormat.parse(metadataJSONObject.getString("stopTime")).getTime()/1000,
-										descriptor.getSwathtype()));
-		        	}
-		        	else if (descriptor.getSwathtype().matches("WV")) {
-						metadataJSONObject.put("totalNumberOfSlice", 
-								totalNumberOfSlice(
-										dateFormat.parse(metadataJSONObject.getString("startTime")).getTime()/1000, 
-										dateFormat.parse(metadataJSONObject.getString("stopTime")).getTime()/1000,
-										descriptor.getSwathtype()));
-	
-		        	}
-		        	else if (descriptor.getSwathtype().matches("S[1-6]")) {
-						metadataJSONObject.put("totalNumberOfSlice", 
-								totalNumberOfSlice(
-										dateFormat.parse(metadataJSONObject.getString("startTime")).getTime()/1000, 
-										dateFormat.parse(metadataJSONObject.getString("stopTime")).getTime()/1000,
-										"SM"));
-		        	}
-	        	}
+									descriptor.getSwathtype().matches("S[1-6]") ? "SM" : descriptor.getSwathtype()));
+	        		}
 	        }
 	        metadataJSONObject.put("productName", descriptor.getProductName());
 	        metadataJSONObject.put("productClass", descriptor.getProductClass());
