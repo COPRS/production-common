@@ -538,6 +538,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 }
             }
         });
+        LOGGER.info("TESTLOGS results {}", job.getMetadataQueries());
 
         // Second, for each task check if input is mandatory and if a file exist
         LOGGER.info("{} [productName {}] 2b - Try building inputs",
