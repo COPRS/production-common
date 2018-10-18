@@ -72,8 +72,7 @@ public class SearchMetadataController {
                         dataTakeId);
 			    for(SearchMetadata m : f) {
 			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), 
-			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop(),
-			                m.getPolarisation(), m.getProductConsolidation()));
+			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop()));
 			    }
                 return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
 			} else {

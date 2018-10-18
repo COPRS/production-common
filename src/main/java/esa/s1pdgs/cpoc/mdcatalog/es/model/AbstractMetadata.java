@@ -122,13 +122,15 @@ public abstract class AbstractMetadata {
 	}
 
 	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "AbstractMetadata [productName= " + productName + ", productType= " + productType + ", keyObjectStorage= "
-				+ keyObjectStorage + ", validityStart= " + validityStart + ", validityStop= " + validityStop + "]";
-	}
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return String.format(
+                "AbstractMetadata [productName= %s, productType= %s, keyObjectStorage= %s, validityStart= %s, validityStop= %s]",
+                productName, productType, keyObjectStorage, validityStart,
+                validityStop);
+    }
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()

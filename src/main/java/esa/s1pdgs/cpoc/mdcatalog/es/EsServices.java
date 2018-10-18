@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.mdcatalog.es.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
 
 /**
@@ -235,12 +236,6 @@ public class EsServices {
                     if (source.containsKey("stopTime")) {
                         local.setValidityStop(source.get("stopTime").toString());
                     }
-                    if(source.containsKey("polarisation")) {
-                        local.setPolarisation(source.get("polarisation").toString());
-                    }
-                    if(source.containsKey("productConsolidation")) {
-                        local.setProductConsolidation(source.get("productConsolidation").toString());
-                    }
                     r.add(local);
                 }
                 return r;
@@ -415,4 +410,68 @@ public class EsServices {
 		}
 		return r;
 	}
+
+    public LevelSegmentMetadata getLevelSegment(ProductFamily family, String productName) throws Exception{
+        LevelSegmentMetadata ret = null;
+        try {
+            GetRequest getRequest = new GetRequest(family.name().toLowerCase(), indexType, productName);
+
+            GetResponse response = elasticsearchDAO.get(getRequest);
+
+            if (response.isExists()) {
+                ret = this.extractInfoForLevelSegment(response.getSourceAsMap(), productName);
+            } else {
+                throw new MetadataNotPresentException(productName);
+            }
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        }
+        return ret;
+    }
+
+    private LevelSegmentMetadata extractInfoForLevelSegment(Map<String, Object> source, String productName)
+            throws MetadataMalformedException, MetadataNotPresentException {
+
+        LevelSegmentMetadata r = new LevelSegmentMetadata();
+        if(source.isEmpty()) {
+            throw new MetadataNotPresentException(productName);
+        }
+        r.setProductName(productName);
+        if (source.containsKey("productType")) {
+            r.setProductType(source.get("productType").toString());
+        } else {
+            throw new MetadataMalformedException("productType");
+        }
+        if (source.containsKey("url")) {
+            r.setKeyObjectStorage(source.get("url").toString());
+        } else {
+            throw new MetadataMalformedException("url");
+        }
+        if (source.containsKey("startTime")) {
+            r.setValidityStart(source.get("startTime").toString());
+        } else {
+            throw new MetadataMalformedException("startTime");
+        }
+        if (source.containsKey("stopTime")) {
+            r.setValidityStop(source.get("stopTime").toString());
+        } else {
+            throw new MetadataMalformedException("stopTime");
+        }
+        if (source.containsKey("dataTakeId")) {
+            r.setDatatakeId(source.get("dataTakeId").toString());
+        } else {
+            throw new MetadataMalformedException("dataTakeId");
+        }
+        if(source.containsKey("polarisation")) {
+            r.setPolarisation(source.get("polarisation").toString());
+        } else {
+            throw new MetadataMalformedException("polarisation");
+        }
+        if(source.containsKey("productConsolidation")) {
+            r.setConsolidation(source.get("productConsolidation").toString());
+        } else {
+            throw new MetadataMalformedException("productConsolidation");
+        }
+        return r;
+    }
 }
