@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -746,8 +745,16 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         // Second, build the DTO
         String jobOrder = "/data/localWD/" + inc + "/JobOrder." + inc + ".xml";
         ProductFamily family = ProductFamily.L0_JOB;
-        if (l0ProcessSettings.getLevel() == ApplicationLevel.L1) {
-            family = ProductFamily.L1_JOB;
+        switch (l0ProcessSettings.getLevel()) {
+            case L0:
+                family = ProductFamily.L0_JOB;
+                break;
+            case L0_SEGMENT:
+                family = ProductFamily.L0_SEGMENT_JOB;
+                break;
+            case L1:
+                family = ProductFamily.L1_JOB;
+                break;
         }
         final LevelJobDto r = new LevelJobDto(family,
                 job.getAppDataJob().getProduct().getProductName(),
