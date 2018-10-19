@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.scaler.kafka;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -47,7 +48,7 @@ public class KafkaMonitoringProperties {
 	/**
 	 * Topic names
 	 */
-	private Map<SpdgsTopic, String> topics;
+	private Map<SpdgsTopic, List<String>> topics;
 
 	/**
 	 * Groups identifier per topics
@@ -132,7 +133,7 @@ public class KafkaMonitoringProperties {
 	/**
 	 * @return the topics
 	 */
-	public Map<SpdgsTopic, String> getTopics() {
+	public Map<SpdgsTopic, List<String>> getTopics() {
 		return topics;
 	}
 
@@ -140,7 +141,7 @@ public class KafkaMonitoringProperties {
 	 * @param topics
 	 *            the topics to set
 	 */
-	public void setTopics(final Map<SpdgsTopic, String> topics) {
+	public void setTopics(final Map<SpdgsTopic, List<String>> topics) {
 		this.topics = topics;
 	}
 

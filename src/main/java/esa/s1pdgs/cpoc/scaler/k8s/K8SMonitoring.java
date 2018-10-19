@@ -111,7 +111,6 @@ public class K8SMonitoring {
 
     public List<WrapperNodeMonitor> monitorL1Wrappers()
             throws WrapperStatusException, AbstractCodedException {
-        String topic = kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS);
         List<WrapperNodeMonitor> monitors = new ArrayList<>();
 
         // Retrieve nodes dedicated to L1
@@ -148,8 +147,7 @@ public class K8SMonitoring {
                                     .getWrapperStatus(pod.getName(),
                                             pod.getAddresses().get(
                                                     AddressType.INTERNAL_IP));
-                            long nbReadingMessage = this.appCatalogService
-                                    .getNbReadingMessages(topic, pod.getName());
+                            long nbReadingMessage = getNbReadingMessage(pod.getName());
                             podMonitor.setLogicalStatus(wrapper.getStatus());
                             if (wrapper.getStatus()
                                     .equals(PodLogicalStatus.PROCESSING)) {
@@ -176,5 +174,14 @@ public class K8SMonitoring {
         }
 
         return monitors;
+    }
+    
+    private long getNbReadingMessage(String podName) throws AbstractCodedException {
+        long ret = 0;
+        for (String topicName : kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS)) {
+            ret += this.appCatalogService
+                    .getNbReadingMessages(topicName, podName);
+        }
+        return ret;
     }
 }

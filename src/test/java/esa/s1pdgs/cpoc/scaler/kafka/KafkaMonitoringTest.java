@@ -5,7 +5,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -14,11 +16,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoring;
-import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoringProperties;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerGroupsDescription;
-import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
+import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.model.PartitionDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.SpdgsTopic;
 import esa.s1pdgs.cpoc.scaler.kafka.services.KafkaService;
@@ -46,8 +46,8 @@ public class KafkaMonitoringTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        Map<SpdgsTopic, String> topics = new HashMap<>();
-        topics.put(SpdgsTopic.L1_JOBS, "topic");
+        Map<SpdgsTopic, List<String>> topics = new HashMap<>();
+        topics.put(SpdgsTopic.L1_JOBS, Arrays.asList("topic"));
         Map<SpdgsTopic, String> groups = new HashMap<>();
         groups.put(SpdgsTopic.L1_JOBS, "group");
         doReturn(topics).when(kafkaProperties).getTopics();
@@ -78,9 +78,9 @@ public class KafkaMonitoringTest {
         doReturn(desc).when(kafkaService).describeConsumerGroup(
                 Mockito.anyString(), Mockito.anyString());
         
-        KafkaPerGroupPerTopicMonitor result = admin.monitorL1Jobs();
+        KafkaPerGroupMonitor result = admin.monitorL1Jobs();
         assertEquals("group", result.getGroupId());
-        assertEquals("topic", result.getTopicName());
+        assertEquals(Arrays.asList("topic"), result.getTopics());
         assertEquals(2, result.getNbConsumers());
         assertEquals(3, result.getNbPartitions());
         assertEquals(2, result.getLagPerConsumers().size());
@@ -109,9 +109,9 @@ public class KafkaMonitoringTest {
         doReturn(desc).when(kafkaService).describeConsumerGroup(
                 Mockito.anyString(), Mockito.anyString());
         
-        KafkaPerGroupPerTopicMonitor result = admin.monitorL1Jobs();
+        KafkaPerGroupMonitor result = admin.monitorL1Jobs();
         assertEquals("group", result.getGroupId());
-        assertEquals("topic", result.getTopicName());
+        assertEquals(Arrays.asList("topic"), result.getTopics());
         assertEquals(0, result.getNbConsumers());
         assertEquals(3, result.getNbPartitions());
         assertEquals(0, result.getLagPerConsumers().size());
@@ -143,9 +143,9 @@ public class KafkaMonitoringTest {
         doReturn(desc).when(kafkaService).describeConsumerGroup(
                 Mockito.anyString(), Mockito.anyString());
         
-        KafkaPerGroupPerTopicMonitor result = admin.monitorL1Jobs();
+        KafkaPerGroupMonitor result = admin.monitorL1Jobs();
         assertEquals("group", result.getGroupId());
-        assertEquals("topic", result.getTopicName());
+        assertEquals(Arrays.asList("topic"), result.getTopics());
         assertEquals(2, result.getNbConsumers());
         assertEquals(0, result.getNbPartitions());
         assertEquals(2, result.getLagPerConsumers().size());

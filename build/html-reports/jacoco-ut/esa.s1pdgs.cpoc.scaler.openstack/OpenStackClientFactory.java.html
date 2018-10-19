@@ -19,12 +19,12 @@ import org.springframework.stereotype.Component;
      * @return
      */
     public OSClientV3 osClient(final OpenStackServerProperties osProperties) {
-<span class="pc" id="L22">        return OSFactory.builderV3().endpoint(osProperties.getEndpoint())</span>
+<span class="fc" id="L22">        return OSFactory.builderV3().endpoint(osProperties.getEndpoint())</span>
 <span class="fc" id="L23">                .credentials(osProperties.getCredentialUsername(),</span>
 <span class="fc" id="L24">                        osProperties.getCredentialPassword(),</span>
 <span class="fc" id="L25">                        Identifier.byId(osProperties.getDomainId()))</span>
 <span class="fc" id="L26">                .scopeToProject(Identifier.byId(osProperties.getProjectId()))</span>
-<span class="nc" id="L27">                .authenticate();</span>
+<span class="fc" id="L27">                .authenticate();</span>
     }
 
 }

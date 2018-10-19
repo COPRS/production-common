@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>KafkaPerGroupMonitor.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.kafka.model</a> &gt; <span class="el_source">KafkaPerGroupMonitor.java</span></div><h1>KafkaPerGroupMonitor.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.kafka.model;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Consumer monitor for a given group and given topic
+ * 
+ * @author Cyrielle Gailliard
+ */
+public class KafkaPerGroupMonitor {
+
+    /**
+     * Monitoring date
+     */
+    private Date monitoringDate;
+
+    /**
+     * Group identifier
+     */
+    private String groupId;
+
+    /**
+     * Topic name
+     */
+    private List&lt;String&gt; topics;
+
+    /**
+     * Number of consumers of the group on the topic
+     */
+    private int nbConsumers;
+
+    /**
+     * Number of partitions of the topic
+     */
+    private int nbPartitions;
+
+    /**
+     * Lag per consumers = sum of partition lag group by consumers
+     */
+    private final Map&lt;String, Long&gt; lagPerConsumers;
+
+    /**
+     * Lag per partition
+     */
+    private final Map&lt;Integer, Long&gt; lagPerPartition;
+
+    /**
+     * Default constructor
+     */
+<span class="fc" id="L55">    public KafkaPerGroupMonitor(Date monitoringDate, String groupId) {</span>
+<span class="fc" id="L56">        this.monitoringDate = monitoringDate;</span>
+<span class="fc" id="L57">        this.groupId = groupId;</span>
+<span class="fc" id="L58">        this.lagPerConsumers = new HashMap&lt;String, Long&gt;();</span>
+<span class="fc" id="L59">        this.lagPerPartition = new HashMap&lt;Integer, Long&gt;();</span>
+<span class="fc" id="L60">        this.nbPartitions = 0;</span>
+<span class="fc" id="L61">        this.nbConsumers = 0;</span>
+<span class="fc" id="L62">        this.topics = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * Add a monitor
+     * 
+     * @param monitor
+     */
+    public void addMonitor(KafkaPerGroupPerTopicMonitor monitor) {
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (monitor != null) {</span>
+<span class="fc" id="L72">            topics.add(monitor.getTopicName());</span>
+<span class="fc" id="L73">            nbPartitions = Math.max(nbPartitions, monitor.getNbPartitions());</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            for (Integer partition : monitor.getLagPerPartition().keySet()) {</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">                if (lagPerPartition.containsKey(partition)) {</span>
+<span class="fc" id="L76">                    Long value = lagPerPartition.get(partition);</span>
+<span class="fc" id="L77">                    lagPerPartition.put(partition, value</span>
+<span class="fc" id="L78">                            + monitor.getLagPerPartition().get(partition));</span>
+<span class="fc" id="L79">                } else {</span>
+<span class="fc" id="L80">                    lagPerPartition.put(partition,</span>
+<span class="fc" id="L81">                            monitor.getLagPerPartition().get(partition));</span>
+                }
+<span class="fc" id="L83">            }</span>
+<span class="fc" id="L84">            nbConsumers = Math.max(nbConsumers, monitor.getNbConsumers());</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            for (String consumer : monitor.getLagPerConsumers().keySet()) {</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">                if (lagPerConsumers.containsKey(consumer)) {</span>
+<span class="fc" id="L87">                    Long value = lagPerConsumers.get(consumer);</span>
+<span class="fc" id="L88">                    lagPerConsumers.put(consumer,</span>
+<span class="fc" id="L89">                            value + monitor.getLagPerConsumers().get(consumer));</span>
+<span class="fc" id="L90">                } else {</span>
+<span class="fc" id="L91">                    lagPerConsumers.put(consumer,</span>
+<span class="fc" id="L92">                            monitor.getLagPerConsumers().get(consumer));</span>
+                }
+<span class="fc" id="L94">            }</span>
+        }
+<span class="fc" id="L96">    }</span>
+
+    /**
+     * @return the monitoringDate
+     */
+    public Date getMonitoringDate() {
+<span class="fc" id="L102">        return monitoringDate;</span>
+    }
+
+    /**
+     * @return the groupId
+     */
+    public String getGroupId() {
+<span class="fc" id="L109">        return groupId;</span>
+    }
+
+    /**
+     * @return the topics
+     */
+    public List&lt;String&gt; getTopics() {
+<span class="fc" id="L116">        return topics;</span>
+    }
+
+    /**
+     * @return the nbConsumers
+     */
+    public int getNbConsumers() {
+<span class="fc" id="L123">        return nbConsumers;</span>
+    }
+
+    /**
+     * @return the nbPartitions
+     */
+    public int getNbPartitions() {
+<span class="fc" id="L130">        return nbPartitions;</span>
+    }
+
+    /**
+     * @return the lagPerConsumers
+     */
+    public Map&lt;String, Long&gt; getLagPerConsumers() {
+<span class="fc" id="L137">        return lagPerConsumers;</span>
+    }
+
+    /**
+     * @return the lagPerPartition
+     */
+    public Map&lt;Integer, Long&gt; getLagPerPartition() {
+<span class="fc" id="L144">        return lagPerPartition;</span>
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L152">        return String.format(</span>
+                &quot;{monitoringDate: %s, groupId: %s, topics: %s, nbConsumers: %s, nbPartitions: %s, lagPerConsumers: %s, lagPerPartition: %s}&quot;,
+<span class="fc" id="L154">                monitoringDate, groupId, topics, nbConsumers, nbPartitions,</span>
+                lagPerConsumers, lagPerPartition);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L163">        return Objects.hash(monitoringDate, groupId, topics, nbConsumers,</span>
+<span class="fc" id="L164">                nbPartitions, lagPerConsumers, lagPerPartition);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L174">            ret = true;</span>
+<span class="fc bfc" id="L175" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L176">            ret = false;</span>
+        } else {
+<span class="fc" id="L178">            final KafkaPerGroupMonitor other = (KafkaPerGroupMonitor) obj;</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            ret = Objects.equals(monitoringDate, other.monitoringDate)</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(groupId, other.groupId)</span>
+<span class="fc bfc" id="L181" title="All 6 branches covered.">                    &amp;&amp; Objects.equals(topics, other.topics)</span>
+                    &amp;&amp; nbConsumers == other.nbConsumers
+                    &amp;&amp; nbPartitions == other.nbPartitions
+<span class="fc bfc" id="L184" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(lagPerConsumers, other.lagPerConsumers)</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(lagPerPartition, other.lagPerPartition);</span>
+        }
+<span class="fc" id="L187">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

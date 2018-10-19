@@ -51,6 +51,7 @@ import esa.s1pdgs.cpoc.scaler.k8s.model.PodLogicalStatus;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperNodeMonitor;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperPodMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoring;
+import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
 import esa.s1pdgs.cpoc.scaler.openstack.OpenStackAdministration;
 import esa.s1pdgs.cpoc.scaler.scaling.Scaler.ScalingAction;
@@ -83,7 +84,7 @@ public class ScalerTest {
     private DevProperties devProperties;
 
     private Scaler scaler;
-    private KafkaPerGroupPerTopicMonitor kafkaMonitor;
+    private KafkaPerGroupMonitor kafkaMonitor;
     private List<WrapperNodeMonitor> wrappersMonitor;
 
     @Before
@@ -161,86 +162,89 @@ public class ScalerTest {
     }
 
     private void mockStep2(ScalingAction action) {
+        KafkaPerGroupPerTopicMonitor tmpMonitor = null;
         switch (action) {
             case ALLOC:
-                kafkaMonitor = new KafkaPerGroupPerTopicMonitor(new Date(),
+                tmpMonitor = new KafkaPerGroupPerTopicMonitor(new Date(),
                         "group", "topic");
-                kafkaMonitor.setNbConsumers(3);
-                kafkaMonitor.setNbPartitions(6);
-                kafkaMonitor.getLagPerConsumers().put("consumer1",
+                tmpMonitor.setNbConsumers(3);
+                tmpMonitor.setNbPartitions(6);
+                tmpMonitor.getLagPerConsumers().put("consumer1",
                         Long.valueOf(3));
-                kafkaMonitor.getLagPerConsumers().put("consumer2",
+                tmpMonitor.getLagPerConsumers().put("consumer2",
                         Long.valueOf(5));
-                kafkaMonitor.getLagPerConsumers().put("consumer3",
+                tmpMonitor.getLagPerConsumers().put("consumer3",
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(0),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(0),
                         Long.valueOf(2));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(1),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(1),
                         Long.valueOf(3));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(2),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(2),
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(3),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(3),
                         Long.valueOf(2));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(4),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(4),
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(5),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(5),
                         Long.valueOf(1));
                 break;
             case FREE:
-                kafkaMonitor = new KafkaPerGroupPerTopicMonitor(new Date(),
+                tmpMonitor = new KafkaPerGroupPerTopicMonitor(new Date(),
                         "group", "topic");
-                kafkaMonitor.setNbConsumers(6);
-                kafkaMonitor.setNbPartitions(6);
-                kafkaMonitor.getLagPerConsumers().put("consumer1",
+                tmpMonitor.setNbConsumers(6);
+                tmpMonitor.setNbPartitions(6);
+                tmpMonitor.getLagPerConsumers().put("consumer1",
                         Long.valueOf(2));
-                kafkaMonitor.getLagPerConsumers().put("consumer2",
+                tmpMonitor.getLagPerConsumers().put("consumer2",
                         Long.valueOf(3));
-                kafkaMonitor.getLagPerConsumers().put("consumer3",
+                tmpMonitor.getLagPerConsumers().put("consumer3",
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerConsumers().put("consumer4",
+                tmpMonitor.getLagPerConsumers().put("consumer4",
                         Long.valueOf(2));
-                kafkaMonitor.getLagPerConsumers().put("consumer5",
+                tmpMonitor.getLagPerConsumers().put("consumer5",
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerConsumers().put("consumer6",
+                tmpMonitor.getLagPerConsumers().put("consumer6",
                         Long.valueOf(1));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(0),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(0),
                         Long.valueOf(2));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(1),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(1),
                         Long.valueOf(3));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(2),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(2),
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(3),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(3),
                         Long.valueOf(2));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(4),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(4),
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(5),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(5),
                         Long.valueOf(1));
                 break;
             default:
-                kafkaMonitor = new KafkaPerGroupPerTopicMonitor(new Date(),
+                tmpMonitor = new KafkaPerGroupPerTopicMonitor(new Date(),
                         "group", "topic");
-                kafkaMonitor.setNbConsumers(3);
-                kafkaMonitor.setNbPartitions(6);
-                kafkaMonitor.getLagPerConsumers().put("consumer1",
+                tmpMonitor.setNbConsumers(3);
+                tmpMonitor.setNbPartitions(6);
+                tmpMonitor.getLagPerConsumers().put("consumer1",
                         Long.valueOf(3));
-                kafkaMonitor.getLagPerConsumers().put("consumer2",
+                tmpMonitor.getLagPerConsumers().put("consumer2",
                         Long.valueOf(5));
-                kafkaMonitor.getLagPerConsumers().put("consumer3",
+                tmpMonitor.getLagPerConsumers().put("consumer3",
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(0),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(0),
                         Long.valueOf(2));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(1),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(1),
                         Long.valueOf(3));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(2),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(2),
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(3),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(3),
                         Long.valueOf(2));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(4),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(4),
                         Long.valueOf(0));
-                kafkaMonitor.getLagPerPartition().put(Integer.valueOf(5),
+                tmpMonitor.getLagPerPartition().put(Integer.valueOf(5),
                         Long.valueOf(1));
                 break;
         }
+        kafkaMonitor = new KafkaPerGroupMonitor(tmpMonitor.getMonitoringDate(), tmpMonitor.getGroupId());
+        kafkaMonitor.addMonitor(tmpMonitor);
 
         doReturn(kafkaMonitor).when(kafkaMonitoring).monitorL1Jobs();
     }
@@ -715,8 +719,8 @@ public class ScalerTest {
             esa.s1pdgs.cpoc.common.errors.AbstractCodedException {
 
         // Mock no consumer
-        KafkaPerGroupPerTopicMonitor noConsumer =
-                new KafkaPerGroupPerTopicMonitor(new Date(), "group", "topic");
+        KafkaPerGroupMonitor noConsumer =
+                new KafkaPerGroupMonitor(new Date(), "group");
 
         doReturn(noConsumer).when(kafkaMonitoring).monitorL1Jobs();
 

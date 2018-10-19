@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.scaler.k8s.model.AddressType;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperNodeMonitor;
 import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperPodMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoring;
-import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
+import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
 import esa.s1pdgs.cpoc.scaler.openstack.OpenStackAdministration;
 
 /**
@@ -193,7 +193,7 @@ public class Scaler {
 
             // Monitor KAFKA
 <span class="fc" id="L195">            step++;</span>
-<span class="fc" id="L196">            KafkaPerGroupPerTopicMonitor monitorKafka = null;</span>
+<span class="fc" id="L196">            KafkaPerGroupMonitor monitorKafka = null;</span>
 <span class="fc" id="L197">            int nbPartitions = 0;</span>
 <span class="fc" id="L198">            int counter = 0;</span>
 <span class="fc bfc" id="L199" title="All 2 branches covered.">            if (devProperties.getActivations().get(&quot;kafka-monitoring&quot;)) {</span>
@@ -317,7 +317,7 @@ public class Scaler {
     }
 
     protected double calculateMonitoredValue(
-            KafkaPerGroupPerTopicMonitor monitorKafka,
+            KafkaPerGroupMonitor monitorKafka,
             List&lt;WrapperNodeMonitor&gt; wrapperNodeMonitors) {
 <span class="fc" id="L322">        long totalLag = monitorKafka.getLagPerPartition().values().stream()</span>
 <span class="fc" id="L323">                .mapToLong(Long::longValue).sum();</span>
