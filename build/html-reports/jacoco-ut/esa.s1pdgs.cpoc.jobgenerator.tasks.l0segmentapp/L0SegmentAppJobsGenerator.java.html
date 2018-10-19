@@ -2,20 +2,25 @@
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.CollectionUtils;
+
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0AcnMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
+import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
@@ -23,6 +28,7 @@ import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * Customization of the job generator for L0 slice products
@@ -45,9 +51,9 @@ public class L0SegmentAppJobsGenerator
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AbstractAppCatalogJobService&lt;LevelSegmentDto&gt; appDataService) {
-<span class="nc" id="L48">        super(xmlConverter, metadataService, l0ProcessSettings,</span>
+<span class="fc" id="L54">        super(xmlConverter, metadataService, l0ProcessSettings,</span>
                 taskTablesSettings, outputFactory, appDataService);
-<span class="nc" id="L50">    }</span>
+<span class="fc" id="L56">    }</span>
 
     /**
      * Check the product and retrieve usefull information before searching
@@ -56,68 +62,168 @@ public class L0SegmentAppJobsGenerator
     @Override
     protected void preSearch(final JobGeneration&lt;LevelSegmentDto&gt; job)
             throws JobGenInputsMissingException {
-<span class="nc" id="L59">        Map&lt;String, String&gt; missingMetadata = new HashMap&lt;&gt;();</span>
-        // Retrieve instrument configuration id and slice number
+<span class="fc" id="L65">        boolean fullCoverage = false;</span>
+
+        // Retrieve the segments
+<span class="fc" id="L68">        Map&lt;String, String&gt; missingMetadata = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L69">        List&lt;String&gt; pols = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L70">        Map&lt;String, List&lt;LevelSegmentMetadata&gt;&gt; segmentsGroupByPol =</span>
+                new HashMap&lt;&gt;();
+<span class="fc" id="L72">        String lastName = &quot;&quot;;</span>
         try {
-<span class="nc" id="L62">            L0SliceMetadata file = this.metadataService.getL0Slice(</span>
-<span class="nc" id="L63">                    job.getAppDataJob().getProduct().getProductName());</span>
-<span class="nc" id="L64">            job.getAppDataJob().getProduct()</span>
-<span class="nc" id="L65">                    .setProductType(file.getProductType());</span>
-<span class="nc" id="L66">            job.getAppDataJob().getProduct()</span>
-<span class="nc" id="L67">                    .setInsConfId(file.getInstrumentConfigurationId());</span>
-<span class="nc" id="L68">            job.getAppDataJob().getProduct()</span>
-<span class="nc" id="L69">                    .setNumberSlice(file.getNumberSlice());</span>
-<span class="nc" id="L70">            job.getAppDataJob().getProduct()</span>
-<span class="nc" id="L71">                    .setDataTakeId(file.getDatatakeId());</span>
-<span class="nc" id="L72">        } catch (JobGenMetadataException e) {</span>
-<span class="nc" id="L73">            missingMetadata.put(</span>
-<span class="nc" id="L74">                    job.getAppDataJob().getProduct().getProductName(),</span>
-<span class="nc" id="L75">                    &quot;No Slice: &quot; + e.getMessage());</span>
-<span class="nc" id="L76">            throw new JobGenInputsMissingException(missingMetadata);</span>
-<span class="nc" id="L77">        }</span>
-        // Retrieve Total_Number_Of_Slices
-        try {
-<span class="nc" id="L80">            L0AcnMetadata acn = this.metadataService.getFirstACN(</span>
-<span class="nc" id="L81">                    job.getAppDataJob().getProduct().getProductName(),</span>
-<span class="nc" id="L82">                    job.getAppDataJob().getProduct().getProcessMode());</span>
-<span class="nc" id="L83">            job.getAppDataJob().getProduct()</span>
-<span class="nc" id="L84">                    .setTotalNbOfSlice(acn.getNumberOfSlices());</span>
-<span class="nc" id="L85">            job.getAppDataJob().getProduct()</span>
-<span class="nc" id="L86">                    .setSegmentStartDate(acn.getValidityStart());</span>
-<span class="nc" id="L87">            job.getAppDataJob().getProduct()</span>
-<span class="nc" id="L88">                    .setSegmentStopDate(acn.getValidityStop());</span>
-<span class="nc" id="L89">        } catch (JobGenMetadataException e) {</span>
-<span class="nc" id="L90">            missingMetadata.put(</span>
-<span class="nc" id="L91">                    job.getAppDataJob().getProduct().getProductName(),</span>
-<span class="nc" id="L92">                    &quot;No ACNs: &quot; + e.getMessage());</span>
-<span class="nc" id="L93">            throw new JobGenInputsMissingException(missingMetadata);</span>
-<span class="nc" id="L94">        }</span>
-<span class="nc" id="L95">    }</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            for (GenericMessageDto&lt;LevelSegmentDto&gt; message : job</span>
+<span class="fc" id="L75">                    .getAppDataJob().getMessages()) {</span>
+<span class="fc" id="L76">                LevelSegmentDto dto = message.getBody();</span>
+<span class="fc" id="L77">                lastName = dto.getName();</span>
+<span class="fc" id="L78">                LevelSegmentMetadata metadata = metadataService</span>
+<span class="fc" id="L79">                        .getLevelSegment(dto.getFamily(), dto.getName());</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">                if (metadata == null) {</span>
+<span class="fc" id="L81">                    missingMetadata.put(dto.getName(), &quot;Missing segment&quot;);</span>
+                } else {
+<span class="fc" id="L83">                    if (!segmentsGroupByPol</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">                            .containsKey(metadata.getPolarisation())) {</span>
+<span class="fc" id="L85">                        pols.add(metadata.getPolarisation());</span>
+<span class="fc" id="L86">                        segmentsGroupByPol.put(metadata.getPolarisation(),</span>
+                                new ArrayList&lt;&gt;());
+                    }
+<span class="fc" id="L89">                    segmentsGroupByPol.get(metadata.getPolarisation())</span>
+<span class="fc" id="L90">                            .add(metadata);</span>
+                }
+<span class="fc" id="L92">            }</span>
+<span class="fc" id="L93">        } catch (JobGenMetadataException e) {</span>
+<span class="fc" id="L94">            missingMetadata.put(</span>
+                    lastName,
+<span class="fc" id="L96">                    &quot;Missing segment: &quot; + e.getMessage());</span>
+<span class="fc" id="L97">        }</span>
+
+        // If missing one segment
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (!missingMetadata.isEmpty()) {</span>
+<span class="fc" id="L101">            throw new JobGenInputsMissingException(missingMetadata);</span>
+        }
+
+        // Check polarisation right
+<span class="fc" id="L105">        Date sensingStart = null;</span>
+<span class="fc" id="L106">        Date sensingStop = null;</span>
+<span class="fc bfc" id="L107" title="All 4 branches covered.">        if (pols.size() &lt;= 0 || pols.size() &gt; 2) {</span>
+<span class="fc" id="L108">            missingMetadata.put(</span>
+<span class="fc" id="L109">                    job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="fc" id="L110">                    &quot;Invalid number of polarisation &quot; + pols.size());</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        } else if (pols.size() == 1) {</span>
+            // Sort segments
+<span class="fc" id="L113">            String polA = pols.get(0);</span>
+<span class="fc" id="L114">            List&lt;LevelSegmentMetadata&gt; segmentsA = segmentsGroupByPol.get(polA);</span>
+            // Check coverage ok
+<span class="fc bfc" id="L116" title="All 2 branches covered.">            if (isSinglePolarisation(polA)) {</span>
+<span class="fc" id="L117">                sortSegmentsPerStartDate(segmentsA);</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">                if (isCovered(segmentsA)) {</span>
+<span class="fc" id="L119">                    fullCoverage = true;</span>
+                } else {
+<span class="fc" id="L121">                    fullCoverage = false;</span>
+<span class="fc" id="L122">                    missingMetadata.put(</span>
+<span class="fc" id="L123">                            job.getAppDataJob().getProduct().getProductName(),</span>
+                            &quot;Missing segments for the coverage of polarisation &quot;
+                                    + polA + &quot;: &quot;
+<span class="fc" id="L126">                                    + extractConsolidation(segmentsA));</span>
+                }
+            } else {
+<span class="fc" id="L129">                fullCoverage = false;</span>
+<span class="fc" id="L130">                missingMetadata.put(</span>
+<span class="fc" id="L131">                        job.getAppDataJob().getProduct().getProductName(),</span>
+                        &quot;Missing the other polarisation of &quot; + polA);
+            }
+            // Get sensing start and stop
+            try {
+<span class="fc" id="L136">                sensingStart = getStartSensingDate(segmentsA);</span>
+<span class="fc" id="L137">                sensingStop = getStopSensingDate(segmentsA);</span>
+<span class="nc" id="L138">            } catch (InternalErrorException e) {</span>
+<span class="nc" id="L139">                fullCoverage = false;</span>
+<span class="nc" id="L140">                missingMetadata.put(</span>
+<span class="nc" id="L141">                        job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="nc" id="L142">                        &quot;Cannot get sensing period: &quot; + e.getMessage());</span>
+<span class="fc" id="L143">            }</span>
+
+<span class="fc" id="L145">        } else {</span>
+<span class="fc" id="L146">            String polA = pols.get(0);</span>
+<span class="fc" id="L147">            String polB = pols.get(1);</span>
+            // Sort segments
+<span class="fc" id="L149">            List&lt;LevelSegmentMetadata&gt; segmentsA = segmentsGroupByPol.get(polA);</span>
+<span class="fc" id="L150">            List&lt;LevelSegmentMetadata&gt; segmentsB = segmentsGroupByPol.get(polB);</span>
+            // Check coverage ok
+<span class="fc bfc" id="L152" title="All 2 branches covered.">            if (isDoublePolarisation(polA, polB)) {</span>
+<span class="fc" id="L153">                boolean fullCoverageA = false;</span>
+<span class="fc" id="L154">                sortSegmentsPerStartDate(segmentsA);</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                if (isCovered(segmentsA)) {</span>
+<span class="fc" id="L156">                    fullCoverageA = true;</span>
+                } else {
+<span class="fc" id="L158">                    fullCoverageA = false;</span>
+<span class="fc" id="L159">                    missingMetadata.put(</span>
+<span class="fc" id="L160">                            job.getAppDataJob().getProduct().getProductName(),</span>
+                            &quot;Missing segments for the coverage of polarisation &quot;
+                                    + polA + &quot;: &quot;
+<span class="fc" id="L163">                                    + extractConsolidation(segmentsA));</span>
+                }
+<span class="fc" id="L165">                boolean fullCoverageB = false;</span>
+<span class="fc" id="L166">                sortSegmentsPerStartDate(segmentsB);</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">                if (isCovered(segmentsB)) {</span>
+<span class="fc" id="L168">                    fullCoverageB = true;</span>
+                } else {
+<span class="fc" id="L170">                    fullCoverageB = false;</span>
+<span class="fc" id="L171">                    missingMetadata.put(</span>
+<span class="fc" id="L172">                            job.getAppDataJob().getProduct().getProductName(),</span>
+                            &quot;Missing segments for the coverage of polarisation &quot;
+                                    + polB + &quot;: &quot;
+<span class="fc" id="L175">                                    + extractConsolidation(segmentsB));</span>
+                }
+<span class="fc bfc" id="L177" title="All 4 branches covered.">                fullCoverage = fullCoverageA &amp;&amp; fullCoverageB;</span>
+<span class="fc" id="L178">            } else {</span>
+<span class="fc" id="L179">                fullCoverage = false;</span>
+<span class="fc" id="L180">                missingMetadata.put(</span>
+<span class="fc" id="L181">                        job.getAppDataJob().getProduct().getProductName(),</span>
+                        &quot;Invalid double polarisation &quot; + polA + &quot; - &quot; + polB);
+            }
+            // Get sensing start and stop
+            try {
+<span class="fc" id="L186">                sensingStart = least(getStartSensingDate(segmentsA),</span>
+<span class="fc" id="L187">                        getStartSensingDate(segmentsB));</span>
+<span class="fc" id="L188">                sensingStop = more(getStopSensingDate(segmentsA),</span>
+<span class="fc" id="L189">                        getStopSensingDate(segmentsB));</span>
+<span class="nc" id="L190">            } catch (InternalErrorException e) {</span>
+<span class="nc" id="L191">                fullCoverage = false;</span>
+<span class="nc" id="L192">                missingMetadata.put(</span>
+<span class="nc" id="L193">                        job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="nc" id="L194">                        &quot;Cannot get sensing period: &quot; + e.getMessage());</span>
+<span class="fc" id="L195">            }</span>
+        }
+
+        // Check if we add the coverage
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        if (!fullCoverage) {</span>
+<span class="fc" id="L200">            Date currentDate = new Date();</span>
+<span class="fc" id="L201">            if (job.getGeneration().getCreationDate()</span>
+<span class="fc" id="L202">                    .getTime() &lt; currentDate.getTime() - jobGeneratorSettings</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">                            .getWaitprimarycheck().getMaxTimelifeS() * 1000) {</span>
+<span class="fc" id="L204">                LOGGER.warn(&quot;Continue generation of {} {} even if sensing gaps&quot;,</span>
+<span class="fc" id="L205">                        job.getAppDataJob().getProduct().getProductName(),</span>
+<span class="fc" id="L206">                        job.getGeneration());</span>
+<span class="fc" id="L207">                job.getAppDataJob().getProduct().setStartTime(sensingStart);</span>
+<span class="fc" id="L208">                job.getAppDataJob().getProduct().setStopTime(sensingStop);</span>
+            } else {
+<span class="fc" id="L210">                throw new JobGenInputsMissingException(missingMetadata);</span>
+            }
+<span class="fc" id="L212">        } else {</span>
+<span class="fc" id="L213">            job.getAppDataJob().getProduct().setStartTime(sensingStart);</span>
+<span class="fc" id="L214">            job.getAppDataJob().getProduct().setStopTime(sensingStop);</span>
+        }
+<span class="fc" id="L216">    }</span>
 
     /**
      * Custom job order before building the job DTO
      */
     @Override
     protected void customJobOrder(final JobGeneration&lt;LevelSegmentDto&gt; job) {
-        // Rewrite job order sensing time
-<span class="nc" id="L103">        DateTimeFormatter formatterJobOrder =</span>
-<span class="nc" id="L104">                DateTimeFormatter.ofPattern(JobOrderSensingTime.DATE_FORMAT);</span>
-<span class="nc" id="L105">        DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;</span>
-<span class="nc" id="L106">        LocalDateTime startDate = LocalDateTime.parse(</span>
-<span class="nc" id="L107">                job.getAppDataJob().getProduct().getSegmentStartDate(),</span>
-                formatterProduct);
-<span class="nc" id="L109">        String jobOrderStart = startDate.format(formatterJobOrder);</span>
-<span class="nc" id="L110">        LocalDateTime stopDate = LocalDateTime.parse(</span>
-<span class="nc" id="L111">                job.getAppDataJob().getProduct().getSegmentStopDate(),</span>
-                formatterProduct);
-<span class="nc" id="L113">        String jobOrderStop = stopDate.format(formatterJobOrder);</span>
-<span class="nc" id="L114">        job.getJobOrder().getConf().setSensingTime(</span>
-                new JobOrderSensingTime(jobOrderStart, jobOrderStop));
-
-<span class="nc" id="L117">        this.updateProcParam(job.getJobOrder(), &quot;Mission_Id&quot;,</span>
-<span class="nc" id="L118">                job.getAppDataJob().getProduct().getMissionId()</span>
-<span class="nc" id="L119">                        + job.getAppDataJob().getProduct().getSatelliteId());</span>
-<span class="nc" id="L120">    }</span>
+<span class="fc" id="L223">        this.updateProcParam(job.getJobOrder(), &quot;Mission_Id&quot;,</span>
+<span class="fc" id="L224">                job.getAppDataJob().getProduct().getMissionId()</span>
+<span class="fc" id="L225">                        + job.getAppDataJob().getProduct().getSatelliteId());</span>
+<span class="fc" id="L226">    }</span>
 
     /**
      * Update or create a proc param in the job order
@@ -128,18 +234,18 @@ public class L0SegmentAppJobsGenerator
      */
     protected void updateProcParam(final JobOrder jobOrder, final String name,
             final String newValue) {
-<span class="nc" id="L131">        boolean update = false;</span>
-<span class="nc bnc" id="L132" title="All 2 branches missed.">        for (JobOrderProcParam param : jobOrder.getConf().getProcParams()) {</span>
-<span class="nc bnc" id="L133" title="All 2 branches missed.">            if (name.equals(param.getName())) {</span>
-<span class="nc" id="L134">                param.setValue(newValue);</span>
-<span class="nc" id="L135">                update = true;</span>
+<span class="fc" id="L237">        boolean update = false;</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">        for (JobOrderProcParam param : jobOrder.getConf().getProcParams()) {</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">            if (name.equals(param.getName())) {</span>
+<span class="fc" id="L240">                param.setValue(newValue);</span>
+<span class="fc" id="L241">                update = true;</span>
             }
-<span class="nc" id="L137">        }</span>
-<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (!update) {</span>
-<span class="nc" id="L139">            jobOrder.getConf()</span>
-<span class="nc" id="L140">                    .addProcParam(new JobOrderProcParam(name, newValue));</span>
+<span class="fc" id="L243">        }</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">        if (!update) {</span>
+<span class="nc" id="L245">            jobOrder.getConf()</span>
+<span class="nc" id="L246">                    .addProcParam(new JobOrderProcParam(name, newValue));</span>
         }
-<span class="nc" id="L142">    }</span>
+<span class="fc" id="L248">    }</span>
 
     /**
      * Customisation of the job DTO before sending it
@@ -149,7 +255,130 @@ public class L0SegmentAppJobsGenerator
             final LevelJobDto dto) {
         // NOTHING TO DO
 
-<span class="nc" id="L152">    }</span>
+<span class="fc" id="L258">    }</span>
+
+    protected void sortSegmentsPerStartDate(List&lt;LevelSegmentMetadata&gt; list) {
+<span class="fc" id="L261">        list.sort((LevelSegmentMetadata s1, LevelSegmentMetadata s2) -&gt; {</span>
+<span class="fc" id="L262">            DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;</span>
+<span class="fc" id="L263">            LocalDateTime startDate1 = LocalDateTime</span>
+<span class="fc" id="L264">                    .parse(s1.getValidityStart(), formatterProduct);</span>
+<span class="fc" id="L265">            LocalDateTime startDate2 = LocalDateTime</span>
+<span class="fc" id="L266">                    .parse(s2.getValidityStart(), formatterProduct);</span>
+<span class="fc" id="L267">            return startDate1.compareTo(startDate2);</span>
+        });
+<span class="fc" id="L269">    }</span>
+
+    protected boolean isSinglePolarisation(String polA) {
+<span class="fc bfc" id="L272" title="All 4 branches covered.">        if (&quot;SH&quot;.equals(polA) || &quot;SV&quot;.equals(polA)) {</span>
+<span class="fc" id="L273">            return true;</span>
+        } else {
+<span class="fc" id="L275">            return false;</span>
+        }
+    }
+
+    protected boolean isDoublePolarisation(String polA, String polB) {
+<span class="fc bfc" id="L280" title="All 4 branches covered.">        if ((&quot;VH&quot;.equals(polA) &amp;&amp; &quot;VV&quot;.equals(polB))</span>
+<span class="fc bfc" id="L281" title="All 4 branches covered.">                || (&quot;VV&quot;.equals(polA) &amp;&amp; &quot;VH&quot;.equals(polB))) {</span>
+<span class="fc" id="L282">            return true;</span>
+<span class="fc bfc" id="L283" title="All 4 branches covered.">        } else if ((&quot;HH&quot;.equals(polA) &amp;&amp; &quot;HV&quot;.equals(polB))</span>
+<span class="pc bpc" id="L284" title="1 of 4 branches missed.">                || (&quot;HV&quot;.equals(polA) &amp;&amp; &quot;HH&quot;.equals(polB))) {</span>
+<span class="fc" id="L285">            return true;</span>
+        } else {
+<span class="fc" id="L287">            return false;</span>
+        }
+    }
+
+    protected boolean isCovered(List&lt;LevelSegmentMetadata&gt; sortedSegments) {
+<span class="fc bfc" id="L292" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(sortedSegments)) {</span>
+<span class="fc" id="L293">            return false;</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">        } else if (sortedSegments.size() == 1) {</span>
+<span class="fc bfc" id="L295" title="All 2 branches covered.">            if (&quot;FULL&quot;.equals(sortedSegments.get(0).getConsolidation())) {</span>
+<span class="fc" id="L296">                return true;</span>
+            } else {
+<span class="fc" id="L298">                return false;</span>
+            }
+        } else {
+            // Check consolidation first
+<span class="fc bfc" id="L302" title="All 2 branches covered.">            if (&quot;BEGIN&quot;.equals(sortedSegments.get(0).getConsolidation())</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">                    &amp;&amp; &quot;END&quot;.equals(</span>
+<span class="fc" id="L304">                            sortedSegments.get(sortedSegments.size() - 1)</span>
+<span class="fc" id="L305">                                    .getConsolidation())) {</span>
+<span class="fc" id="L306">                DateTimeFormatter formatterProduct =</span>
+                        SearchMetadata.DATE_FORMATTER;
+<span class="fc" id="L308">                LocalDateTime previousStopDate = LocalDateTime.parse(</span>
+<span class="fc" id="L309">                        sortedSegments.get(0).getValidityStop(),</span>
+                        formatterProduct);
+<span class="fc bfc" id="L311" title="All 2 branches covered.">                for (LevelSegmentMetadata segment : sortedSegments.subList(1,</span>
+<span class="fc" id="L312">                        sortedSegments.size())) {</span>
+<span class="fc" id="L313">                    LocalDateTime startDate = LocalDateTime.parse(</span>
+<span class="fc" id="L314">                            segment.getValidityStart(), formatterProduct);</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">                    if (startDate.isAfter(previousStopDate)) {</span>
+<span class="fc" id="L316">                        return false;</span>
+                    }
+<span class="fc" id="L318">                    previousStopDate = LocalDateTime.parse(</span>
+<span class="fc" id="L319">                            segment.getValidityStop(), formatterProduct);</span>
+<span class="fc" id="L320">                }</span>
+<span class="fc" id="L321">                return true;</span>
+            } else {
+<span class="fc" id="L323">                return false;</span>
+            }
+        }
+    }
+
+    protected Date getStartSensingDate(
+            List&lt;LevelSegmentMetadata&gt; sortedSegments)
+            throws InternalErrorException {
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(sortedSegments)) {</span>
+<span class="fc" id="L332">            return null;</span>
+        }
+<span class="fc" id="L334">        return DateUtils.convertWithSimpleDateFormat(</span>
+<span class="fc" id="L335">                sortedSegments.get(0).getValidityStart(),</span>
+                &quot;yyyy-MM-dd'T'HH:mm:ss&quot;);
+    }
+
+    protected Date getStopSensingDate(List&lt;LevelSegmentMetadata&gt; sortedSegments)
+            throws InternalErrorException {
+<span class="fc bfc" id="L341" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(sortedSegments)) {</span>
+<span class="fc" id="L342">            return null;</span>
+        }
+<span class="fc" id="L344">        return DateUtils.convertWithSimpleDateFormat(</span>
+<span class="fc" id="L345">                sortedSegments.get(sortedSegments.size() - 1).getValidityStop(),</span>
+                &quot;yyyy-MM-dd'T'HH:mm:ss&quot;);
+    }
+
+    protected String extractConsolidation(
+            List&lt;LevelSegmentMetadata&gt; sortedSegments) {
+<span class="fc" id="L351">        String ret = &quot;&quot;;</span>
+<span class="fc bfc" id="L352" title="All 2 branches covered.">        for (LevelSegmentMetadata segment : sortedSegments) {</span>
+<span class="fc" id="L353">            ret += segment.getConsolidation() + &quot; &quot; + segment.getValidityStart()</span>
+<span class="fc" id="L354">                    + &quot; &quot; + segment.getValidityStop() + &quot; | &quot;;</span>
+<span class="fc" id="L355">        }</span>
+<span class="fc" id="L356">        return ret;</span>
+    }
+
+    /**
+     * TODO: move in common lib
+     * @param a
+     * @param b
+     * @return
+     */
+    protected Date least(Date a, Date b) {
+<span class="pc bpc" id="L366" title="2 of 6 branches missed.">        return a == null ? b : (b == null ? a : (a.before(b) ? a : b));</span>
+    }
+
+    /**
+     * TODO: move in common lib
+     * @param a
+     * @param b
+     * @return
+     */
+    protected Date more(Date a, Date b) {
+<span class="pc bpc" id="L376" title="2 of 6 branches missed.">        return a == null ? b : (b == null ? a : (a.after(b) ? a : b));</span>
+    }
+
+}
+
+<span class="nc" id="L381">class MinimalL0SegmentComparable {</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

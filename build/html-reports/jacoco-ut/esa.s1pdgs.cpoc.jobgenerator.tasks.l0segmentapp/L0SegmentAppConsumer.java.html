@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L0SegmentAppConsumer.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp</a> &gt; <span class="el_source">L0SegmentAppConsumer.java</span></div><h1>L0SegmentAppConsumer.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,8 +19,6 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
@@ -31,17 +31,14 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 @Component
 @ConditionalOnProperty(name = &quot;process.level&quot;, havingValue = &quot;L0_SEGMENT&quot;)
 
-public class L0SegmentAppConsumer extends AbstractGenericConsumer&lt;LevelSegmentDto&gt; {
-
-    /**
-     * Settings used to extract information from L0 product name
-     */
-    private final L0SlicePatternSettings patternSettings;
+public class L0SegmentAppConsumer
+        extends AbstractGenericConsumer&lt;LevelSegmentDto&gt; {
 
     /**
      * Pattern built from the regular expression given in configuration
      */
-    private final Pattern l0SLicesPattern;
+    private final Pattern pattern;
+    private final Map&lt;String, Integer&gt; patternGroups;
 
     /**
      * Constructor
@@ -56,18 +53,18 @@ public class L0SegmentAppConsumer extends AbstractGenericConsumer&lt;LevelSegmen
     @Autowired
     public L0SegmentAppConsumer(
             final AbstractJobsDispatcher&lt;LevelSegmentDto&gt; jobsDispatcher,
-            final L0SlicePatternSettings patternSettings,
+            @Value(&quot;${pattern.regexp}&quot;) final String patternRegexp,
+            @Value(&quot;${pattern.groups}&quot;) final Map&lt;String, Integer&gt; patternGroups,
             final ProcessSettings processSettings,
             @Qualifier(&quot;mqiServiceForLevelSegments&quot;) final GenericMqiService&lt;LevelSegmentDto&gt; mqiService,
             @Qualifier(&quot;mqiServiceForStatus&quot;) final StatusService mqiStatusService,
             @Qualifier(&quot;appCatalogServiceForLevelSegments&quot;) final AbstractAppCatalogJobService&lt;LevelSegmentDto&gt; appDataService,
             final AppStatus appStatus) {
-<span class="nc" id="L65">        super(jobsDispatcher, processSettings, mqiService, mqiStatusService,</span>
+<span class="nc" id="L63">        super(jobsDispatcher, processSettings, mqiService, mqiStatusService,</span>
                 appDataService, appStatus);
-<span class="nc" id="L67">        this.patternSettings = patternSettings;</span>
-<span class="nc" id="L68">        this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),</span>
-                Pattern.CASE_INSENSITIVE);
-<span class="nc" id="L70">    }</span>
+<span class="nc" id="L65">        this.pattern = Pattern.compile(patternRegexp, Pattern.CASE_INSENSITIVE);</span>
+<span class="nc" id="L66">        this.patternGroups = patternGroups;</span>
+<span class="nc" id="L67">    }</span>
 
     /**
      * Periodic function for processing messages
@@ -75,131 +72,145 @@ public class L0SegmentAppConsumer extends AbstractGenericConsumer&lt;LevelSegmen
     @Scheduled(fixedDelayString = &quot;${process.fixed-delay-ms}&quot;, initialDelayString = &quot;${process.initial-delay-ms}&quot;)
     public void consumeMessages() {
         // First, consume message
-<span class="nc" id="L78">        GenericMessageDto&lt;LevelSegmentDto&gt; mqiMessage = readMessage();</span>
-<span class="nc bnc" id="L79" title="All 4 branches missed.">        if (mqiMessage == null || mqiMessage.getBody() == null) {</span>
-<span class="nc" id="L80">            LOGGER.trace(&quot;[MONITOR] [step 0] No message received: continue&quot;);</span>
-<span class="nc" id="L81">            return;</span>
+<span class="nc" id="L75">        GenericMessageDto&lt;LevelSegmentDto&gt; mqiMessage = readMessage();</span>
+<span class="nc bnc" id="L76" title="All 4 branches missed.">        if (mqiMessage == null || mqiMessage.getBody() == null) {</span>
+<span class="nc" id="L77">            LOGGER.trace(&quot;[MONITOR] [step 0] No message received: continue&quot;);</span>
+<span class="nc" id="L78">            return;</span>
         }
         // process message
-<span class="nc" id="L84">        appStatus.setProcessing(mqiMessage.getIdentifier());</span>
-<span class="nc" id="L85">        LOGGER.info(</span>
+<span class="nc" id="L81">        appStatus.setProcessing(mqiMessage.getIdentifier());</span>
+<span class="nc" id="L82">        LOGGER.info(</span>
                 &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L0SegmentJobGeneration] [subTask Consume] [START] [productName {}] Starting job generation&quot;,
-<span class="nc" id="L87">                getProductName(mqiMessage));</span>
-<span class="nc" id="L88">        int step = 1;</span>
-<span class="nc" id="L89">        boolean ackOk = false;</span>
-<span class="nc" id="L90">        String errorMessage = &quot;&quot;;</span>
+<span class="nc" id="L84">                getProductName(mqiMessage));</span>
+<span class="nc" id="L85">        int step = 1;</span>
+<span class="nc" id="L86">        boolean ackOk = false;</span>
+<span class="nc" id="L87">        String errorMessage = &quot;&quot;;</span>
 
         try {
 
             // Check if a job is already created for message identifier
-<span class="nc" id="L95">            LOGGER.info(&quot;[MONITOR] [step 1] [productName {}] Creating job&quot;,</span>
-<span class="nc" id="L96">                    getProductName(mqiMessage));</span>
-<span class="nc" id="L97">            AppDataJobDto&lt;LevelSegmentDto&gt; appDataJob = buildJob(mqiMessage);</span>
+<span class="nc" id="L92">            LOGGER.info(&quot;[MONITOR] [step 1] [productName {}] Creating/updating job&quot;,</span>
+<span class="nc" id="L93">                    getProductName(mqiMessage));</span>
+<span class="nc" id="L94">            AppDataJobDto&lt;LevelSegmentDto&gt; appDataJob = buildJob(mqiMessage);</span>
 
             // Dispatch job
-<span class="nc" id="L100">            step++;</span>
-<span class="nc" id="L101">            LOGGER.info(</span>
+<span class="nc" id="L97">            step++;</span>
+<span class="nc" id="L98">            LOGGER.info(</span>
                     &quot;[MONITOR] [step 2] [productName {}] Dispatching product&quot;,
-<span class="nc" id="L103">                    getProductName(mqiMessage));</span>
-<span class="nc bnc" id="L104" title="All 2 branches missed.">            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {</span>
-<span class="nc" id="L105">                appDataJob.setState(AppDataJobDtoState.DISPATCHING);</span>
-<span class="nc" id="L106">                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),</span>
+<span class="nc" id="L100">                    getProductName(mqiMessage));</span>
+<span class="nc bnc" id="L101" title="All 4 branches missed.">            if (appDataJob.getState() == AppDataJobDtoState.WAITING || appDataJob.getState() == AppDataJobDtoState.DISPATCHING) {</span>
+<span class="nc" id="L102">                appDataJob.setState(AppDataJobDtoState.DISPATCHING);</span>
+<span class="nc" id="L103">                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),</span>
                         appDataJob, false, false, false);
+<span class="nc" id="L105">                jobsDispatcher.dispatch(appDataJob);</span>
+            } else {
+<span class="nc" id="L107">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 2] [productName {}] Job for datatake already dispatched&quot;,
+<span class="nc" id="L109">                        getProductName(mqiMessage));</span>
             }
-<span class="nc" id="L109">            jobsDispatcher.dispatch(appDataJob);</span>
 
             // Ack
-<span class="nc" id="L112">            step++;</span>
-<span class="nc" id="L113">            ackOk = true;</span>
+<span class="nc" id="L113">            step++;</span>
+<span class="nc" id="L114">            ackOk = true;</span>
 
-<span class="nc" id="L115">        } catch (AbstractCodedException ace) {</span>
-<span class="nc" id="L116">            ackOk = false;</span>
-<span class="nc" id="L117">            errorMessage = String.format(</span>
-<span class="nc" id="L118">                    &quot;[MONITOR] [step %d] [productName %s] [code %d] %s&quot;, step,</span>
-<span class="nc" id="L119">                    getProductName(mqiMessage), ace.getCode().getCode(),</span>
-<span class="nc" id="L120">                    ace.getLogMessage());</span>
-<span class="nc" id="L121">        }</span>
+<span class="nc" id="L116">        } catch (AbstractCodedException ace) {</span>
+<span class="nc" id="L117">            ackOk = false;</span>
+<span class="nc" id="L118">            errorMessage = String.format(</span>
+<span class="nc" id="L119">                    &quot;[MONITOR] [step %d] [productName %s] [code %d] %s&quot;, step,</span>
+<span class="nc" id="L120">                    getProductName(mqiMessage), ace.getCode().getCode(),</span>
+<span class="nc" id="L121">                    ace.getLogMessage());</span>
+<span class="nc" id="L122">        }</span>
 
         // Ack and check if application shall stopped
-<span class="nc" id="L124">        ackProcessing(mqiMessage, ackOk, errorMessage);</span>
+<span class="nc" id="L125">        ackProcessing(mqiMessage, ackOk, errorMessage);</span>
 
-<span class="nc" id="L126">        LOGGER.info(&quot;[MONITOR] [step 0] [productName {}] End&quot;,</span>
-<span class="nc" id="L127">                getProductName(mqiMessage));</span>
-<span class="nc" id="L128">    }</span>
+<span class="nc" id="L127">        LOGGER.info(&quot;[MONITOR] [step 0] [productName {}] End&quot;,</span>
+<span class="nc" id="L128">                getProductName(mqiMessage));</span>
+<span class="nc" id="L129">    }</span>
 
     protected AppDataJobDto&lt;LevelSegmentDto&gt; buildJob(
             GenericMessageDto&lt;LevelSegmentDto&gt; mqiMessage)
             throws AbstractCodedException {
-<span class="nc" id="L133">        LevelSegmentDto leveldto = mqiMessage.getBody();</span>
+<span class="nc" id="L134">        LevelSegmentDto leveldto = mqiMessage.getBody();</span>
 
         // Check if a job is already created for message identifier
-<span class="nc" id="L136">        List&lt;AppDataJobDto&lt;LevelSegmentDto&gt;&gt; existingJobs = appDataService</span>
-<span class="nc" id="L137">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
+<span class="nc" id="L137">        List&lt;AppDataJobDto&lt;LevelSegmentDto&gt;&gt; existingJobs = appDataService</span>
+<span class="nc" id="L138">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
 
-<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
-            // Job does not exists =&gt; create it
-<span class="nc" id="L141">            Matcher m = l0SLicesPattern.matcher(leveldto.getName());</span>
-<span class="nc bnc" id="L142" title="All 2 branches missed.">            if (!m.matches()) {</span>
-<span class="nc" id="L143">                throw new InvalidFormatProduct(</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
+
+            // Extract information from name
+<span class="nc" id="L143">            Matcher m = pattern.matcher(leveldto.getName());</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">            if (!m.matches()) {</span>
+<span class="nc" id="L145">                throw new InvalidFormatProduct(</span>
                         &quot;Don't match with regular expression &quot;
-<span class="nc" id="L145">                                + this.patternSettings.getRegexp());</span>
+<span class="nc" id="L147">                                + this.pattern.pattern());</span>
             }
-<span class="nc" id="L147">            String satelliteId = m.group(this.patternSettings.getMGroupSatId());</span>
-<span class="nc" id="L148">            String missionId =</span>
-<span class="nc" id="L149">                    m.group(this.patternSettings.getMGroupMissionId());</span>
-<span class="nc" id="L150">            String acquisition =</span>
-<span class="nc" id="L151">                    m.group(this.patternSettings.getMGroupAcquisition());</span>
-<span class="nc" id="L152">            String startTime =</span>
-<span class="nc" id="L153">                    m.group(this.patternSettings.getMGroupStartTime());</span>
-<span class="nc" id="L154">            String stopTime = m.group(this.patternSettings.getMGroupStopTime());</span>
+<span class="nc" id="L149">            String satelliteId = m.group(this.patternGroups.get(&quot;satelliteId&quot;));</span>
+<span class="nc" id="L150">            String missionId = m.group(this.patternGroups.get(&quot;missionId&quot;));</span>
+<span class="nc" id="L151">            String acquisition = m.group(this.patternGroups.get(&quot;acquisition&quot;));</span>
+<span class="nc" id="L152">            String datatakeID = m.group(this.patternGroups.get(&quot;datatakeId&quot;));</span>
 
-            // Create the JOB
-<span class="nc" id="L157">            AppDataJobDto&lt;LevelSegmentDto&gt; jobDto = new AppDataJobDto&lt;&gt;();</span>
-            // General details
-<span class="nc" id="L159">            jobDto.setLevel(processSettings.getLevel());</span>
-<span class="nc" id="L160">            jobDto.setPod(processSettings.getHostname());</span>
-            // Messages
-<span class="nc" id="L162">            jobDto.getMessages().add(mqiMessage);</span>
-            // Product
-<span class="nc" id="L164">            AppDataJobProductDto productDto = new AppDataJobProductDto();</span>
-<span class="nc" id="L165">            productDto.setAcquisition(acquisition);</span>
-<span class="nc" id="L166">            productDto.setMissionId(missionId);</span>
-<span class="nc" id="L167">            productDto.setProductName(leveldto.getName());</span>
-<span class="nc" id="L168">            productDto.setProcessMode(leveldto.getMode());</span>
-<span class="nc" id="L169">            productDto.setSatelliteId(satelliteId);</span>
-<span class="nc" id="L170">            productDto.setStartTime(DateUtils</span>
-<span class="nc" id="L171">                    .convertWithSimpleDateFormat(startTime, DATE_FORMAT));</span>
-<span class="nc" id="L172">            productDto.setStopTime(DateUtils</span>
-<span class="nc" id="L173">                    .convertWithSimpleDateFormat(stopTime, DATE_FORMAT));</span>
-<span class="nc" id="L174">            jobDto.setProduct(productDto);</span>
+            // Search job for given datatake id
+<span class="nc" id="L155">            List&lt;AppDataJobDto&lt;LevelSegmentDto&gt;&gt; existingJobsForDatatake =</span>
+<span class="nc" id="L156">                    appDataService.findByProductDataTakeId(datatakeID);</span>
 
-<span class="nc" id="L176">            LOGGER.info(</span>
-                    &quot;[REPORT] [MONITOR] [s1pdgsTask L0SegmentJobGeneration] [START] [productName {}] Starting job generation&quot;,
-<span class="nc" id="L178">                    jobDto.getProduct().getProductName());</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            if (CollectionUtils.isEmpty(existingJobsForDatatake)) {</span>
 
-<span class="nc" id="L180">            return appDataService.newJob(jobDto);</span>
+                // Create the JOB
+<span class="nc" id="L161">                AppDataJobDto&lt;LevelSegmentDto&gt; jobDto = new AppDataJobDto&lt;&gt;();</span>
+                // General details
+<span class="nc" id="L163">                jobDto.setLevel(processSettings.getLevel());</span>
+<span class="nc" id="L164">                jobDto.setPod(processSettings.getHostname());</span>
+                // Messages
+<span class="nc" id="L166">                jobDto.getMessages().add(mqiMessage);</span>
+                // Product
+<span class="nc" id="L168">                AppDataJobProductDto productDto = new AppDataJobProductDto();</span>
+<span class="nc" id="L169">                productDto.setAcquisition(acquisition);</span>
+<span class="nc" id="L170">                productDto.setMissionId(missionId);</span>
+<span class="nc" id="L171">                productDto.setDataTakeId(datatakeID);</span>
+<span class="nc" id="L172">                productDto.setProductName(&quot;l0_segments_for_&quot; + datatakeID);</span>
+<span class="nc" id="L173">                productDto.setProcessMode(leveldto.getMode());</span>
+<span class="nc" id="L174">                productDto.setSatelliteId(satelliteId);</span>
+<span class="nc" id="L175">                jobDto.setProduct(productDto);</span>
+
+<span class="nc" id="L177">                LOGGER.info(</span>
+                        &quot;[REPORT] [MONITOR] [s1pdgsTask L0SegmentJobGeneration] [START] [datatake {}] Starting job generation&quot;,
+<span class="nc" id="L179">                        jobDto.getProduct().getDataTakeId());</span>
+
+<span class="nc" id="L181">                return appDataService.newJob(jobDto);</span>
+            } else {
+<span class="nc" id="L183">                AppDataJobDto&lt;LevelSegmentDto&gt; jobDto = existingJobsForDatatake.get(0);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
+<span class="nc" id="L185">                    jobDto.setPod(processSettings.getHostname());</span>
+                }
+<span class="nc" id="L187">                jobDto.getMessages().add(mqiMessage);</span>
+<span class="nc" id="L188">                return appDataService.patchJob(jobDto.getIdentifier(),</span>
+                        jobDto, true, false, false);
+
+            }
 
         } else {
             // Update pod if needed
-<span class="nc" id="L184">            AppDataJobDto&lt;LevelSegmentDto&gt; jobDto = existingJobs.get(0);</span>
-<span class="nc bnc" id="L185" title="All 2 branches missed.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
-<span class="nc" id="L186">                jobDto.setPod(processSettings.getHostname());</span>
-<span class="nc" id="L187">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
+<span class="nc" id="L195">            AppDataJobDto&lt;LevelSegmentDto&gt; jobDto = existingJobs.get(0);</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
+<span class="nc" id="L197">                jobDto.setPod(processSettings.getHostname());</span>
+<span class="nc" id="L198">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
                         false, false, false);
             }
             // Job already exists
-<span class="nc" id="L191">            return jobDto;</span>
+<span class="nc" id="L202">            return jobDto;</span>
         }
     }
 
     protected String getProductName(
             final GenericMessageDto&lt;LevelSegmentDto&gt; dto) {
-<span class="nc" id="L197">        return dto.getBody().getName();</span>
+<span class="nc" id="L208">        return dto.getBody().getName();</span>
     }
 
     @Override
     protected String getTaskForFunctionalLog() {
-<span class="nc" id="L202">        return &quot;L0SegmentJobGeneration&quot;;</span>
+<span class="nc" id="L213">        return &quot;L0SegmentJobGeneration&quot;;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

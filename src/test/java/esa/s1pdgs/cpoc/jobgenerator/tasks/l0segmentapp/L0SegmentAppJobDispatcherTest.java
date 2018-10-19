@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
+package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -30,18 +30,19 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0SegmentUtils;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * Test the class JobDispatcher
  * 
  * @author Cyrielle Gailliard
  */
-public class L0AppJobDispatcherTest {
+public class L0SegmentAppJobDispatcherTest {
 
     /**
      * Job generator factory
@@ -65,10 +66,10 @@ public class L0AppJobDispatcherTest {
     private ThreadPoolTaskScheduler jobGenerationTaskScheduler;
 
     @Mock
-    private L0AppJobsGenerator mockGenerator;
+    private L0SegmentAppJobDispatcher mockGenerator;
 
     @Mock
-    private AbstractAppCatalogJobService<EdrsSessionDto> appDataService;
+    private AbstractAppCatalogJobService<LevelSegmentDto> appDataService;
 
     /**
      * Test set up
@@ -101,8 +102,8 @@ public class L0AppJobDispatcherTest {
      * 
      * @return
      */
-    private L0AppJobDispatcher createSessionDispatcher() {
-        return new L0AppJobDispatcher(jobGeneratorSettings,
+    private L0SegmentAppJobDispatcher createSessionDispatcher() {
+        return new L0SegmentAppJobDispatcher(jobGeneratorSettings,
                 processSettings, jobsGeneratorFactory,
                 jobGenerationTaskScheduler, appDataService);
     }
@@ -113,7 +114,7 @@ public class L0AppJobDispatcherTest {
     private void mockJobGeneratorSettings() {
         // Mock the job generator settings
         doAnswer(i -> {
-            return "./test/data/l0_config/task_tables/";
+            return "./test/data/l0_segment_config/task_tables/";
         }).when(jobGeneratorSettings).getDiroftasktables();
         doAnswer(i -> {
             return 4;
@@ -150,49 +151,49 @@ public class L0AppJobDispatcherTest {
 
     private void mockAppDataService()
             throws InternalErrorException, AbstractCodedException {
-        doReturn(Arrays.asList(TestL0Utils.buildAppDataEdrsSession(true)))
+        doReturn(Arrays.asList(TestL0SegmentUtils.buildAppData()))
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<EdrsSessionDto> primaryCheckAppJob =
-                TestL0Utils.buildAppDataEdrsSession(false);
+        AppDataJobDto<LevelSegmentDto> primaryCheckAppJob =
+                TestL0SegmentUtils.buildAppData();
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<EdrsSessionDto> readyAppJob =
-                TestL0Utils.buildAppDataEdrsSession(false);
+        AppDataJobDto<LevelSegmentDto> readyAppJob =
+                TestL0SegmentUtils.buildAppData();
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<EdrsSessionDto> sentAppJob =
-                TestL0Utils.buildAppDataEdrsSession(false);
+        AppDataJobDto<LevelSegmentDto> sentAppJob =
+                TestL0SegmentUtils.buildAppData();
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
-        doReturn(TestL0Utils.buildAppDataEdrsSession(false))
-                .when(appDataService).patchJob(Mockito.eq(123L), Mockito.any(),
-                        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        doReturn(TestL0SegmentUtils.buildAppData()).when(appDataService)
+                .patchJob(Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean(),
+                        Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
-                Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
+                Mockito.eq(123L), Mockito.eq("TaskTable.L0ASP.xml"),
                 Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));
         doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
-                Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
+                Mockito.eq(123L), Mockito.eq("TaskTable.L0ASP.xml"),
                 Mockito.eq(AppDataJobGenerationDtoState.READY));
         doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
-                Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
+                Mockito.eq(123L), Mockito.eq("TaskTable.L0ASP.xml"),
                 Mockito.eq(AppDataJobGenerationDtoState.SENT));
     }
 
     @Test
     public void testCreate() {
         File taskTable1 = new File(
-                "./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
+                "./test/data/l0_segment/config/task_tables/TaskTable.L0ASP.xml");
 
         // Initialize
-        L0AppJobDispatcher dispatcher = this.createSessionDispatcher();
+        L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
         try {
             dispatcher.createJobGenerator(taskTable1);
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForEdrsSession(any(), any());
+                    .createJobGeneratorForL0Segment(any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForEdrsSession(eq(taskTable1), any());
+                    .createJobGeneratorForL0Segment(eq(taskTable1), any());
         } catch (AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
@@ -204,10 +205,10 @@ public class L0AppJobDispatcherTest {
     @Test
     public void testInitialize() {
         File taskTable1 = new File(
-                "./test/data/l0_config/task_tables/TaskTable.AIOP.xml");
+                "./test/data/l0_segment_config/task_tables/TaskTable.L0ASP.xml");
 
         // Intitialize
-        L0AppJobDispatcher dispatcher = this.createSessionDispatcher();
+        L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
         try {
             dispatcher.initialize();
             verify(jobGenerationTaskScheduler, times(1))
@@ -215,12 +216,13 @@ public class L0AppJobDispatcherTest {
             verify(jobGenerationTaskScheduler, times(1))
                     .scheduleWithFixedDelay(any(), eq(2000L));
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForEdrsSession(any(), any());
+                    .createJobGeneratorForL0Segment(any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForEdrsSession(eq(taskTable1), any());
+                    .createJobGeneratorForL0Segment(eq(taskTable1), any());
 
             assertTrue(dispatcher.getGenerators().size() == 1);
-            assertTrue(dispatcher.getGenerators().containsKey(taskTable1.getName()));
+            assertTrue(dispatcher.getGenerators()
+                    .containsKey(taskTable1.getName()));
         } catch (AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
@@ -228,15 +230,16 @@ public class L0AppJobDispatcherTest {
 
     /**
      * Test dispatch
+     * @throws JobGenMissingRoutingEntryException 
      */
     @Test
-    public void testGetTaskTable() {
+    public void testGetTaskTable() throws JobGenMissingRoutingEntryException {
 
-        AppDataJobDto<EdrsSessionDto> appData =
-                TestL0Utils.buildAppDataEdrsSession(false);
+        AppDataJobDto<LevelSegmentDto> appData =
+                TestL0SegmentUtils.buildAppData();
 
         // Init dispatcher
-        L0AppJobDispatcher dispatcher = this.createSessionDispatcher();
+        L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
         try {
             dispatcher.initialize();
         } catch (AbstractCodedException e) {

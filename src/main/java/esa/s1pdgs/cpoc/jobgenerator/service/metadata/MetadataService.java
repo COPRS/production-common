@@ -3,12 +3,14 @@ package esa.s1pdgs.cpoc.jobgenerator.service.metadata;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +19,12 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0AcnMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
+import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 
@@ -59,6 +63,11 @@ public class MetadataService {
     private final String uriL0Slice;
 
     /**
+     * URI for querying level segments
+     */
+    private final String uriLevelSegment;
+
+    /**
      * Nb max of retry for querying api rest
      */
     private final int nbretry;
@@ -83,6 +92,7 @@ public class MetadataService {
         this.uriEdrsSession = "http://" + metadataHostname + "/edrsSession";
         this.uriSearch = "http://" + metadataHostname + "/metadata";
         this.uriL0Slice = "http://" + metadataHostname + "/l0Slice";
+        this.uriLevelSegment = "http://" + metadataHostname + "/level_segment";
         this.nbretry = nbretry;
         this.temporetryms = temporetryms;
     }
@@ -211,6 +221,63 @@ public class MetadataService {
      * @return
      * @throws MetadataException
      */
+    public LevelSegmentMetadata getLevelSegment(final ProductFamily family, final String productName)
+            throws JobGenMetadataException {
+        for (int retries = 0;; retries++) {
+            try {
+                String uri = this.uriLevelSegment + "/" + family + "/" + productName;
+                LOGGER.debug("Call rest metadata on {}", uri);
+
+                ResponseEntity<LevelSegmentMetadata> response =
+                        this.restTemplate.exchange(uri, HttpMethod.GET, null,
+                                LevelSegmentMetadata.class);
+                if (response.getStatusCode() != HttpStatus.OK) {
+                    if (retries < this.nbretry) {
+                        LOGGER.warn(
+                                "Call rest api metadata failed: Attempt : {} / {}",
+                                retries, this.nbretry);
+                        try {
+                            Thread.sleep(this.temporetryms);
+                        } catch (InterruptedException e) {
+                            throw new JobGenMetadataException(e.getMessage(),
+                                    e);
+                        }
+                        continue;
+                    } else {
+                        throw new JobGenMetadataException(
+                                String.format("Invalid HTTP status code %s",
+                                        response.getStatusCode().name()));
+                    }
+                } else {
+                    return response.getBody();
+                }
+            } catch (RestClientException e) {
+                if (retries < this.nbretry) {
+                    LOGGER.warn(
+                            "Call rest api metadata failed: Attempt : {} / {}",
+                            retries, this.nbretry);
+                    try {
+                        Thread.sleep(this.temporetryms);
+                    } catch (InterruptedException e1) {
+                        throw new JobGenMetadataException(e1.getMessage(), e1);
+                    }
+                    continue;
+                } else {
+                    throw new JobGenMetadataException(e.getMessage(), e);
+                }
+            }
+        }
+    }
+
+    /**
+     * If productType = blank, the metadata catalog will extract the product
+     * type from the product name
+     * 
+     * @param productType
+     * @param productName
+     * @return
+     * @throws MetadataException
+     */
     public L0AcnMetadata getFirstACN(final String productName,
             final String processMode) throws JobGenMetadataException {
         for (int retries = 0;; retries++) {
@@ -284,7 +351,7 @@ public class MetadataService {
         }
     }
 
-    public SearchMetadata search(final SearchMetadataQuery query, final Date t0,
+    public List<SearchMetadata> search(final SearchMetadataQuery query, final Date t0,
             final Date t1, final String satelliteId,
             final int instrumentConfigurationId, final String processMode)
             throws JobGenMetadataException {
@@ -312,9 +379,10 @@ public class MetadataService {
                 LOGGER.debug("Call rest metadata on [{}]",
                         builder.build().toUri());
 
-                ResponseEntity<SearchMetadata> response =
+                ResponseEntity<List<SearchMetadata>> response =
                         this.restTemplate.exchange(builder.build().toUri(),
-                                HttpMethod.GET, null, SearchMetadata.class);
+                                HttpMethod.GET, null, new ParameterizedTypeReference<List<SearchMetadata>>() {
+                                });
                 if (response.getStatusCode() != HttpStatus.OK) {
                     if (retries < this.nbretry) {
                         LOGGER.warn(

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,7 +19,7 @@ public class SearchMetadataResult {
 	/**
 	 * Result. Null if not found
 	 */
-	private SearchMetadata result;
+	private List<SearchMetadata> result;
 
 	/**
 	 * Constructor using fields
@@ -48,7 +49,7 @@ public class SearchMetadataResult {
 	/**
 	 * @return the result
 	 */
-	public SearchMetadata getResult() {
+	public List<SearchMetadata> getResult() {
 		return result;
 	}
 
@@ -56,7 +57,7 @@ public class SearchMetadataResult {
 	 * @param result
 	 *            the result to set
 	 */
-	public void setResult(final SearchMetadata result) {
+	public void setResult(final List<SearchMetadata> result) {
 		this.result = result;
 	}
 

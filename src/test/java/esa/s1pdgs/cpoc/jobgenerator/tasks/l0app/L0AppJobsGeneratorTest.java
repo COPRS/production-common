@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -195,25 +196,25 @@ public class L0AppJobsGeneratorTest {
             Mockito.doAnswer(i -> {
                 SearchMetadataQuery query = i.getArgument(0);
                 if ("MPL_ORBPRE".equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                             "MPL_ORBPRE",
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
-                            "2017-12-05T20:03:09", "2017-12-15T20:03:09");
+                            "2017-12-05T20:03:09", "2017-12-15T20:03:09"));
                 } else if ("MPL_ORBSCT"
                         .equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
                             "MPL_ORBSCT",
                             "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
-                            "2014-04-03T22:46:09", "9999-12-31T23:59:59");
+                            "2014-04-03T22:46:09", "9999-12-31T23:59:59"));
                 } else if ("AUX_OBMEMC"
                         .equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                             "AUX_OBMEMC",
                             "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-                            "2014-02-01T00:00:00", "9999-12-31T23:59:59");
+                            "2014-02-01T00:00:00", "9999-12-31T23:59:59"));
                 }
                 return null;
             }).when(this.metadataService).search(Mockito.any(), Mockito.any(),

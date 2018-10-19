@@ -9,15 +9,17 @@ Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.meta
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.metadata,AbstractMetadata,0,200,0,16,0,35,0,24,0,16
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.metadata,EdrsSessionMetadata,0,8,0,0,0,2,0,1,0,1
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.metadata,L0AcnMetadata,0,141,0,14,0,27,0,17,0,10
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.metadata,LevelSegmentMetadata,0,155,0,14,0,26,0,17,0,10
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.metadata,SearchMetadataResult,6,80,0,10,2,16,2,11,2,6
-Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks,AbstractJobsGenerator,1277,458,108,19,326,114,84,34,26,27
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks,AbstractJobsGenerator,1263,468,108,21,327,117,86,35,28,27
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks,AbstractJobsDispatcher,0,297,4,26,0,76,4,17,0,6
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks,AbstractGenericConsumer,53,142,2,4,17,43,2,7,0,6
-Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks,JobsGeneratorFactory,23,64,0,0,4,15,1,3,1,3
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks,JobsGeneratorFactory,0,87,0,0,0,19,0,4,0,4
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks,AbstractJobsGenerator.new Object() {...},44,0,0,0,2,0,1,0,1,0
-Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp,L0SegmentAppJobsGenerator,215,0,6,0,60,0,8,0,5,0
-Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp,L0SegmentAppConsumer,299,0,12,0,78,0,11,0,5,0
-Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp,L0SegmentAppJobDispatcher,28,0,0,0,7,0,5,0,5,0
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp,L0SegmentAppJobsGenerator,54,715,6,84,12,169,6,54,0,15
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp,L0SegmentAppConsumer,353,0,18,0,81,0,14,0,5,0
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp,L0SegmentAppJobDispatcher,2,26,0,0,1,6,1,4,1,4
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp,MinimalL0SegmentComparable,3,0,0,0,1,0,1,0,1,0
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.converter,TaskTableToJobOrderConverter,3,73,1,3,1,16,1,4,0,3
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.converter,TaskTableDynProcParamToJobOrderProcParamConverter,0,17,0,0,0,5,0,2,0,2
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.converter,TaskTableCfgFilesToString,0,6,0,0,0,3,0,2,0,2
@@ -46,7 +48,8 @@ Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.service.s3
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.service.s3,ObsService.new Object() {...},7,47,0,0,0,1,0,1,0,1
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums,JobOrderFileNameType,0,68,0,0,0,9,0,5,0,5
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums,JobOrderDestination,0,38,0,0,0,2,0,4,0,4
-Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.service.metadata,MetadataService,102,583,7,33,25,129,6,20,0,6
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.service.metadata,MetadataService,118,698,7,39,29,154,6,24,0,7
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.service.metadata,MetadataService.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator,Application,0,8,0,0,0,3,0,2,0,2
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0app,L0AppConsumer,60,393,9,25,15,101,10,16,2,7
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.tasks.l0app,L0AppJobDispatcher,2,26,0,0,1,6,1,4,1,4
@@ -59,7 +62,7 @@ Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.config,Pro
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.config,AppConfig,0,49,0,0,0,12,0,3,0,3
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.config,L0SlicePatternSettings,0,60,0,0,0,25,0,13,0,13
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.config,ThreadPoolTaskSchedulerConfig,0,16,0,0,0,5,0,2,0,2
-Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.config,JobGeneratorSettings.WaitTempo,9,23,0,0,4,10,1,5,1,5
+Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.config,JobGeneratorSettings.WaitTempo,0,32,0,0,0,14,0,6,0,6
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.config,JobGeneratorSettings,0,267,3,13,0,66,3,36,0,31
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.config,MetadataConfig,0,6,0,0,0,2,0,2,0,2
 Spring Boot Docker For Job Generator App,esa.s1pdgs.cpoc.jobgenerator.service,EdrsSessionFileService,0,56,2,2,0,11,2,2,0,2

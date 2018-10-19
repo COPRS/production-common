@@ -73,7 +73,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     /**
      * Logger
      */
-    private static final Logger LOGGER =
+    protected static final Logger LOGGER =
             LogManager.getLogger(AbstractJobsGenerator.class);
 
     /**
@@ -291,11 +291,16 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         fileType = this.jobGeneratorSettings.getMapTypeMeta()
                                 .get(k.getFileType());
                     }
+                    ProductFamily family = ProductFamily.BLANK;
+                    if (this.jobGeneratorSettings.getInputfamilies()
+                            .containsKey(fileType)) {
+                        family = this.jobGeneratorSettings.getInputfamilies()
+                                .get(fileType);
+                    }
                     SearchMetadataQuery query = new SearchMetadataQuery(
                             counter.incrementAndGet(), k.getRetrievalMode(),
                             k.getDeltaTime0(), k.getDeltaTime1(), fileType,
-                            this.jobGeneratorSettings.getInputfamilies()
-                                    .get(fileType));
+                            family);
                     this.metadataSearchQueries.put(counter.get(), query);
                     v.forEach(alt -> {
                         alt.setIdSearchMetadataQuery(counter.get());
@@ -517,7 +522,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         job.getMetadataQueries().forEach((k, v) -> {
             if (v != null && v.getResult() == null) {
                 try {
-                    SearchMetadata file = this.metadataService.search(
+                    List<SearchMetadata> file = this.metadataService.search(
                             v.getQuery(),
                             job.getAppDataJob().getProduct().getStartTime(),
                             job.getAppDataJob().getProduct().getStopTime(),
@@ -562,10 +567,6 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                     if (job.getMetadataQueries()
                                             .get(alt.getIdSearchMetadataQuery())
                                             .getResult() != null) {
-                                        SearchMetadata file = job
-                                                .getMetadataQueries()
-                                                .get(alt.getIdSearchMetadataQuery())
-                                                .getResult();
 
                                         JobOrderFileNameType type =
                                                 JobOrderFileNameType.BLANK;
@@ -597,35 +598,41 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                         }
 
                                         // Check order
+                                        List<JobOrderInputFile> jobOrderInputFiles =
+                                                job.getMetadataQueries().get(alt
+                                                        .getIdSearchMetadataQuery())
+                                                        .getResult().stream()
+                                                        .map(file -> new JobOrderInputFile(
+                                                                file.getProductName(),
+                                                                file.getKeyObjectStorage()))
+                                                        .collect(Collectors
+                                                                .toList());
+                                        List<JobOrderTimeInterval> jobOrderTimeIntervals =
+                                                job.getMetadataQueries().get(alt
+                                                        .getIdSearchMetadataQuery())
+                                                        .getResult().stream()
+                                                        .map(file -> new JobOrderTimeInterval(
+                                                                file.getValidityStart(),
+                                                                file.getValidityStop(),
+                                                                file.getProductName(),
+                                                                SearchMetadata.DATE_FORMATTER))
+                                                        .collect(Collectors
+                                                                .toList());
+
                                         if (currentOrder == alt.getOrder()) {
+
                                             inputsToAdd.add(new JobOrderInput(
                                                     alt.getFileType(), type,
-                                                    Arrays.asList(
-                                                            new JobOrderInputFile(
-                                                                    file.getProductName(),
-                                                                    file.getKeyObjectStorage())),
-                                                    Arrays.asList(
-                                                            new JobOrderTimeInterval(
-                                                                    file.getValidityStart(),
-                                                                    file.getValidityStop(),
-                                                                    file.getProductName(),
-                                                                    SearchMetadata.DATE_FORMATTER)),
+                                                    jobOrderInputFiles,
+                                                    jobOrderTimeIntervals,
                                                     family));
                                         } else if (currentOrder > alt
                                                 .getOrder()) {
                                             inputsToAdd = new ArrayList<>();
                                             inputsToAdd.add(new JobOrderInput(
                                                     alt.getFileType(), type,
-                                                    Arrays.asList(
-                                                            new JobOrderInputFile(
-                                                                    file.getProductName(),
-                                                                    file.getKeyObjectStorage())),
-                                                    Arrays.asList(
-                                                            new JobOrderTimeInterval(
-                                                                    file.getValidityStart(),
-                                                                    file.getValidityStop(),
-                                                                    file.getProductName(),
-                                                                    SearchMetadata.DATE_FORMATTER)),
+                                                    jobOrderInputFiles,
+                                                    jobOrderTimeIntervals,
                                                     family));
                                         }
                                         break;
