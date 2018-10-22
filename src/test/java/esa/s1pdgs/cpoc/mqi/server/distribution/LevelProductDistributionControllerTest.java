@@ -158,11 +158,12 @@ public class LevelProductDistributionControllerTest extends RestControllerTest {
      */
     @Test
     public void testPublishMessageUri() throws Exception {
-        doNothing().when(publication).publish(Mockito.any(), Mockito.any());
+        doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any());
         GenericPublicationMessageDto<LevelProductDto> dto =
                 new GenericPublicationMessageDto<>(ProductFamily.L0_SLICE,
                         new LevelProductDto("product-name", "key-test",
                                 ProductFamily.L0_SLICE, "NRT"));
+        dto.setInputKey("key");
         String convertedObj = GenericKafkaUtils.convertObjectToJsonString(dto);
         request(post("/messages/level_products/publish")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -170,6 +171,7 @@ public class LevelProductDistributionControllerTest extends RestControllerTest {
                         .andExpect(MockMvcResultMatchers.status().isOk());
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.LEVEL_PRODUCTS),
-                Mockito.eq(dto.getMessageToPublish()));
+                Mockito.eq(dto.getMessageToPublish()), 
+                Mockito.eq("key"));
     }
 }

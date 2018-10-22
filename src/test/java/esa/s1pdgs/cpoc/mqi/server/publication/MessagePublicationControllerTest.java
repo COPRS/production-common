@@ -222,7 +222,7 @@ public class MessagePublicationControllerTest {
         thrown.expect(hasProperty("type", is("publisher")));
 
         customController.getTopic(ProductCategory.EDRS_SESSIONS,
-                ProductFamily.EDRS_SESSION);
+                ProductFamily.EDRS_SESSION, "NONE");
     }
 
     @Test
@@ -235,7 +235,7 @@ public class MessagePublicationControllerTest {
         thrown.expect(hasProperty("family", is(ProductFamily.AUXILIARY_FILE)));
 
         customController.getTopic(ProductCategory.EDRS_SESSIONS,
-                ProductFamily.AUXILIARY_FILE);
+                ProductFamily.AUXILIARY_FILE, "NONE");
     }
 
     @Test
@@ -250,7 +250,7 @@ public class MessagePublicationControllerTest {
                 hasProperty("category", is(ProductCategory.EDRS_SESSIONS)));
         thrown.expect(hasProperty("type", is("publisher")));
 
-        customController.publish(ProductCategory.EDRS_SESSIONS, dto);
+        customController.publish(ProductCategory.EDRS_SESSIONS, dto, "NONE");
     }
 
     @Test
@@ -259,7 +259,7 @@ public class MessagePublicationControllerTest {
                 EdrsSessionFileType.RAW, "S1", "A");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.EDRS_SESSIONS, dto);
+        customController.publish(ProductCategory.EDRS_SESSIONS, dto, "NONE");
 
         ConsumerRecord<String, EdrsSessionDto> record =
                 kafkaUtilsEdrsSession.getReceivedRecordEdrsSession(
@@ -288,7 +288,7 @@ public class MessagePublicationControllerTest {
         AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.AUXILIARY_FILES, dto);
+        customController.publish(ProductCategory.AUXILIARY_FILES, dto, "NONE");
 
         ConsumerRecord<String, AuxiliaryFileDto> record = kafkaUtilsAux
                 .getReceivedRecordAux(GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
@@ -316,7 +316,7 @@ public class MessagePublicationControllerTest {
                 ProductFamily.L0_SLICE, "NRT");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_PRODUCTS, dto);
+        customController.publish(ProductCategory.LEVEL_PRODUCTS, dto, "NONE");
 
         ConsumerRecord<String, LevelProductDto> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L0_PRODUCTS);
@@ -330,7 +330,7 @@ public class MessagePublicationControllerTest {
                 ProductFamily.L1_ACN, "NRT");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_PRODUCTS, dto);
+        customController.publish(ProductCategory.LEVEL_PRODUCTS, dto, "t-pdgs-l1-jobs-nrt");
 
         ConsumerRecord<String, LevelProductDto> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L1_ACNS);
@@ -350,7 +350,7 @@ public class MessagePublicationControllerTest {
                 hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
         thrown.expect(hasProperty("type", is("publisher")));
 
-        customController.publishLevelProducts(dto);
+        customController.publishLevelProducts(dto, "NONE");
     }
 
     @Test
@@ -359,7 +359,7 @@ public class MessagePublicationControllerTest {
                 ProductFamily.L0_SEGMENT, "FAST");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_SEGMENTS, dto);
+        customController.publish(ProductCategory.LEVEL_SEGMENTS, dto, "NONE");
 
         ConsumerRecord<String, LevelSegmentDto> record = kafkaUtilsSegments
                 .getReceivedRecordSegments(GenericKafkaUtils.TOPIC_L0_SEGMENTS);
@@ -388,7 +388,7 @@ public class MessagePublicationControllerTest {
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_JOBS, dto);
+        customController.publish(ProductCategory.LEVEL_JOBS, dto, "t-pdgs-l0-slices-nrt");
 
         ConsumerRecord<String, LevelJobDto> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L1_JOBS);
@@ -402,7 +402,7 @@ public class MessagePublicationControllerTest {
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_JOBS, dto);
+        customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE");
 
         ConsumerRecord<String, LevelJobDto> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L0_JOBS);
@@ -421,7 +421,7 @@ public class MessagePublicationControllerTest {
         thrown.expect(hasProperty("category", is(ProductCategory.LEVEL_JOBS)));
         thrown.expect(hasProperty("type", is("publisher")));
 
-        customController.publishLevelJobs(dto);
+        customController.publishLevelJobs(dto, "t-pdgs-l0-slices-nrt");
     }
 
     @Test
@@ -430,7 +430,7 @@ public class MessagePublicationControllerTest {
                 ProductFamily.L1_REPORT);
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_REPORTS, dto);
+        customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE");
 
         ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
                 .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L1_REPORTS);
@@ -444,7 +444,7 @@ public class MessagePublicationControllerTest {
                 ProductFamily.L0_REPORT);
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_REPORTS, dto);
+        customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE");
 
         ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
                 .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L0_REPORTS);

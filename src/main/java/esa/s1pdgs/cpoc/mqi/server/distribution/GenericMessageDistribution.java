@@ -171,7 +171,7 @@ public class GenericMessageDistribution<T> {
         ResponseEntity<Void> result =
                 new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
         try {
-            publication.publish(category, message.getMessageToPublish());
+            publication.publish(category, message.getMessageToPublish(), message.getInputKey());
             result = new ResponseEntity<Void>(HttpStatus.OK);
         } catch (MqiPublicationError kse) {
             LOGGER.error("[publish] KafkaSendException occurred: {}",
