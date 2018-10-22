@@ -62,6 +62,7 @@ public class OutputProducerFactory {
                 new GenericPublicationMessageDto<LevelJobDto>(
                         genericMessageDto.getIdentifier(), dto.getFamily(), dto);
         messageToPublish.setInputKey(genericMessageDto.getInputKey());
+        messageToPublish.setOutputKey(dto.getFamily().name());
         senderJobs.publish(messageToPublish);
     }
     
