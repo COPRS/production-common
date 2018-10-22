@@ -113,6 +113,7 @@ public class OutputProcuderFactory {
                             inputMessage.getIdentifier(), msg.getFamily(),
                             dtoProduct);
             messageToPublish.setInputKey(inputMessage.getInputKey());
+            messageToPublish.setOutputKey(msg.getFamily().name());
             senderProducts.publish(messageToPublish);
         }
     }
