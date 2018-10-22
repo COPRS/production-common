@@ -1,0 +1,112 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-l0-jobgenerator
+    
+# Logging
+logging:
+  config: ./test/log4j2-test.yml
+ 
+metadata:
+  host: localhost:8080
+  rest-api_nb-retry: 3
+  rest-api_tempo-retry-ms: 1000
+
+    
+level0:
+  maxnumberofsessions: 20
+  maxagesession: 25200000
+  dir-extractor-sessions: ./tmp/
+  
+level1:
+  pathroutingxmlfile: ./test/data/l1_config/routing.xml
+
+job-generator:
+  diroftasktables: ./test/data/l0_config/task_tables/
+  maxnboftasktable: 2
+  maxnumberofjobs: 20
+  jobgenfixedrate: 500
+  waitprimarycheck:
+    tempo: 2000
+    max-timelife-s: 2
+  waitmetadatainput:
+    tempo: 3000
+    max-timelife-s: 5
+  defaultfamily: L0_ACN
+  inputfamiliesstr: "MPL_ORBPRE:AUXILIARY_FILE||MPL_ORBSCT:AUXILIARY_FILE||AUX_OBMEMC:AUXILIARY_FILE||AUX_CAL:AUXILIARY_FILE||AUX_PP1:AUXILIARY_FILE||AUX_INS:AUXILIARY_FILE||AUX_RESORB:AUXILIARY_FILE||AUX_RES:AUXILIARY_FILE"             # !!!!  Family assignation of a specific output
+  outputfamiliesstr: "SM_RAW__0S:L0_SLICE||IW_RAW__0S:L0_SLICE||EW_RAW__0S:L0_SLICE||WV_RAW__0S:L0_SLICE||RF_RAW__0S:L0_SLICE||AN_RAW__0S:L0_SLICE||EN_RAW__0S:L0_SLICE||ZS_RAW__0S:L0_SLICE||ZE_RAW__0S:L0_SLICE||ZI_RAW__0S:L0_SLICE||ZW_RAW__0S:L0_SLICE||GP_RAW__0_:BLANK||HK_RAW__0_:BLANK||REP_ACQNR:L0_REPORT||REP_L0PSA_:L0_REPORT||REP_EFEP_:L0_REPORT||IW_GRDH_1S:L1_SLICE||IW_GRDH_1A:L1_ACN"
+  type-overlap: 
+    EW: 8.2F
+    IW: 7.4F
+    SM: 7.7F
+    WM: 0.0F
+  type-slice-length: 
+    EW: 60.0F
+    IW: 25.0F
+    SM: 25.0F
+    WM: 0.0F
+  map-type-meta: 
+    AUX_RES: AUX_RESORB
+    AUX_TUTU: AUX_TUT
+    SM_RAW__0S: S[1-6]_RAW__0S
+    SM_RAW__0A: S[1-6]_RAW__0A
+    SM_RAW__0C: S[1-6]_RAW__0C
+    SM_RAW__0N: S[1-6]_RAW__0N
+    AN_RAW__0S: N[1-6]_RAW__0S
+    AN_RAW__0A: N[1-6]_RAW__0A
+    AN_RAW__0C: N[1-6]_RAW__0C
+    AN_RAW__0N: N[1-6]_RAW__0N
+
+# L0 Process configuration
+process:
+  level: "L0_SEGMENT"
+  hostname: "hostname"
+  mode: "TEST"
+  params: 
+    Processing_Mode: NRT
+    Timeout: 10
+  loglevelstdout: DEBUG
+  loglevelstderr: INFO
+  processingstation: WILE
+  outputregexps: 
+    SM_RAW__0S: ^S1[A-B]_S[1-6]_RAW__0S.*$
+    AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$
+    ZS_RAW__0S: ^S1[A-B]_Z[1-6]_RAW__0S.*$
+    REP_L0PSA_: ^S1[A|B|_]_OPER_REP_ACQ.*$
+    REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$
+  mqi:
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempo-retry-ms: 1000
+  appcatalog:
+    host-uri: http://localhost:8080
+    max-retries: 5
+    tempo-retry-ms: 3000
+    tm-connect-ms: 200
+  fixed-delay-ms: 200
+  initial-delay-ms: 500
+    
+pattern-l0-slices:
+  regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
+  m-group-sat-id: 2
+  m-group-mission-id: 1
+  m-group-acquisition: 4
+  m-group-start-time: 6
+  m-group-stop-time: 7
+
+  
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-processing: 3
+  max-error-counter-mqi: 30
+  
+app-l0-segment:
+  name-regexp-pattern: ^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$
+  name-regexp-groups:
+    missionId: 1
+    satelliteId: 2 
+    acquisition: 4
+    polarisation: 5
+    startTime: 6
+    stopTime: 7
+    datatakeId: 9

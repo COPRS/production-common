@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -19,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
+import esa.s1pdgs.cpoc.jobgenerator.config.L0SegmentAppProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
@@ -53,8 +53,7 @@ public class L0SegmentAppConsumer
     @Autowired
     public L0SegmentAppConsumer(
             final AbstractJobsDispatcher<LevelSegmentDto> jobsDispatcher,
-            @Value("${pattern.regexp}") final String patternRegexp,
-            @Value("${pattern.groups}") final Map<String, Integer> patternGroups,
+            final L0SegmentAppProperties appProperties,
             final ProcessSettings processSettings,
             @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> mqiService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
@@ -62,8 +61,9 @@ public class L0SegmentAppConsumer
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
                 appDataService, appStatus);
-        this.pattern = Pattern.compile(patternRegexp, Pattern.CASE_INSENSITIVE);
-        this.patternGroups = patternGroups;
+        this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(),
+                Pattern.CASE_INSENSITIVE);
+        this.patternGroups = appProperties.getNameRegexpGroups();
     }
 
     /**
@@ -89,7 +89,8 @@ public class L0SegmentAppConsumer
         try {
 
             // Check if a job is already created for message identifier
-            LOGGER.info("[MONITOR] [step 1] [productName {}] Creating/updating job",
+            LOGGER.info(
+                    "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     getProductName(mqiMessage));
             AppDataJobDto<LevelSegmentDto> appDataJob = buildJob(mqiMessage);
 
@@ -98,7 +99,9 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 2] [productName {}] Dispatching product",
                     getProductName(mqiMessage));
-            if (appDataJob.getState() == AppDataJobDtoState.WAITING || appDataJob.getState() == AppDataJobDtoState.DISPATCHING) {
+            if (appDataJob.getState() == AppDataJobDtoState.WAITING
+                    || appDataJob
+                            .getState() == AppDataJobDtoState.DISPATCHING) {
                 appDataJob.setState(AppDataJobDtoState.DISPATCHING);
                 appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
                         appDataJob, false, false, false);
@@ -180,13 +183,14 @@ public class L0SegmentAppConsumer
 
                 return appDataService.newJob(jobDto);
             } else {
-                AppDataJobDto<LevelSegmentDto> jobDto = existingJobsForDatatake.get(0);
+                AppDataJobDto<LevelSegmentDto> jobDto =
+                        existingJobsForDatatake.get(0);
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
                 }
                 jobDto.getMessages().add(mqiMessage);
-                return appDataService.patchJob(jobDto.getIdentifier(),
-                        jobDto, true, false, false);
+                return appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                        true, false, false);
 
             }
 

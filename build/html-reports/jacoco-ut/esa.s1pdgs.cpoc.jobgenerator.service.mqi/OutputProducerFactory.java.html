@@ -58,9 +58,13 @@ public class OutputProducerFactory {
      */
     public void sendJob(GenericMessageDto&lt;?&gt; genericMessageDto, LevelJobDto dto)
             throws AbstractCodedException {
-<span class="fc" id="L61">        senderJobs.publish(new GenericPublicationMessageDto&lt;LevelJobDto&gt;(</span>
-<span class="fc" id="L62">                genericMessageDto.getIdentifier(), dto.getFamily(), dto));</span>
-<span class="fc" id="L63">    }</span>
+<span class="fc" id="L61">        GenericPublicationMessageDto&lt;LevelJobDto&gt; messageToPublish =</span>
+                new GenericPublicationMessageDto&lt;LevelJobDto&gt;(
+<span class="fc" id="L63">                        genericMessageDto.getIdentifier(), dto.getFamily(), dto);</span>
+<span class="fc" id="L64">        messageToPublish.setInputKey(genericMessageDto.getInputKey());</span>
+<span class="fc" id="L65">        messageToPublish.setOutputKey(dto.getFamily().name());</span>
+<span class="fc" id="L66">        senderJobs.publish(messageToPublish);</span>
+<span class="fc" id="L67">    }</span>
     
     /**
      * Publish a error
@@ -68,10 +72,10 @@ public class OutputProducerFactory {
      */
     public void sendError(final String message) {
         try {
-<span class="fc" id="L71">            senderErrors.publish(message);</span>
-<span class="fc" id="L72">        } catch (AbstractCodedException e) {</span>
-<span class="fc" id="L73">            LOGGER.error(e.getLogMessage());</span>
-<span class="fc" id="L74">        }</span>
-<span class="fc" id="L75">    }</span>
+<span class="fc" id="L75">            senderErrors.publish(message);</span>
+<span class="fc" id="L76">        } catch (AbstractCodedException e) {</span>
+<span class="fc" id="L77">            LOGGER.error(e.getLogMessage());</span>
+<span class="fc" id="L78">        }</span>
+<span class="fc" id="L79">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
