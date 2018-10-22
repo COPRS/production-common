@@ -41,7 +41,7 @@ public class RoutingTest {
         RouteTo rte1 = new RouteTo();
         rte1.setTopic("topic-l1-slices");
         rte.setInputKey("input-Key");
-        rte.setOutputKey(ProductFamily.L1_SLICE);
+        rte.setOutputKey("L1_SLICE");
         rte.setRouteTo(rte1);
         obj.addRoute(rte);
                 
@@ -51,8 +51,8 @@ public class RoutingTest {
         assertEquals(route2, obj.getDefaultRoute(ProductFamily.EDRS_SESSION));
         assertEquals(route1, obj.getDefaultRoute(ProductFamily.L0_ACN));
         assertNull(obj.getDefaultRoute(ProductFamily.AUXILIARY_FILE));
-        assertEquals(rte, obj.getRoute("input-Key"));
-        assertNull(obj.getRoute("inputKey"));
+        assertEquals(rte, obj.getRoute("input-Key", "L1_SLICE"));
+        assertNull(obj.getRoute("inputKey", "L1_SLICE"));
     }
 
     /**
@@ -82,7 +82,7 @@ public class RoutingTest {
         RouteTo rte1 = new RouteTo();
         rte1.setTopic("topic-l1-slices");
         rte.setInputKey("input-Key");
-        rte.setOutputKey(ProductFamily.L1_SLICE);
+        rte.setOutputKey("L1_SLICE");
         rte.setRouteTo(rte1);
         routes.add(rte);
         

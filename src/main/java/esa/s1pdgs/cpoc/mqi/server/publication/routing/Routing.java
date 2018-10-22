@@ -105,10 +105,10 @@ public class Routing {
      * @return the route
      * 
      */
-    public Route getRoute(final String inputKey) {
+    public Route getRoute(final String inputKey, final String outputKey) {
         Route result = null;
         for(Route rte : this.routes) {
-            if(rte.getInputKey().equals(inputKey)) {
+            if(rte.getInputKey().equals(inputKey) && rte.getOutputKey().equals(outputKey)) {
                 result = rte;
             }
         }

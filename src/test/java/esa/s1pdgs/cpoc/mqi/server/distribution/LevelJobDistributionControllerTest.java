@@ -159,12 +159,13 @@ public class LevelJobDistributionControllerTest extends RestControllerTest {
      */
     @Test
     public void testPublishMessageUri() throws Exception {
-        doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any());
+        doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         GenericPublicationMessageDto<LevelJobDto> dto =
                 new GenericPublicationMessageDto<>(ProductFamily.L0_JOB,
                         new LevelJobDto(ProductFamily.L0_JOB, "product-name", "NRT",
                                 "work-dir", "job-order"));
         dto.setInputKey("key");
+        dto.setOutputKey("L0_JOB");
         String convertedObj = GenericKafkaUtils.convertObjectToJsonString(dto);
         request(post("/messages/level_jobs/publish")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -173,6 +174,7 @@ public class LevelJobDistributionControllerTest extends RestControllerTest {
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.LEVEL_JOBS),
                 Mockito.eq(dto.getMessageToPublish()), 
-                Mockito.eq("key"));
+                Mockito.eq("key"), 
+                Mockito.eq("L0_JOB"));
     }
 }

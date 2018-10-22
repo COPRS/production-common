@@ -5,7 +5,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * Route to use for a given inputKey
@@ -20,14 +19,14 @@ public class Route {
     /**
      * Inputkey, represent the consumed topic
      */
-    @XmlElement(name = "inputKey")
+    @XmlElement(name = "input_key")
     private String inputKey;
     
     /**
      * OutputKey, represent the product family
      */
     @XmlElement(name = "output_key")
-    private ProductFamily outputKey;
+    private String outputKey;
     
     /**
      * Routeto, where the message shall be sent
@@ -39,13 +38,13 @@ public class Route {
      * Default Constructor
      */
     public Route() {
-        this.outputKey = ProductFamily.BLANK;
+        this.outputKey = "BLANK";
     }
     
     /**
      * Constructor
      */
-    public Route(String inputKey, ProductFamily outputKey, RouteTo routeTo) {
+    public Route(String inputKey, String outputKey, RouteTo routeTo) {
         this.inputKey = inputKey;
         this.outputKey = outputKey;
         this.routeTo = routeTo;
@@ -68,14 +67,14 @@ public class Route {
     /**
      * @return the outputKey
      */
-    public ProductFamily getOutputKey() {
+    public String getOutputKey() {
         return outputKey;
     }
 
     /**
      * @param outputKey the outputKey to set
      */
-    public void setOutputKey(ProductFamily outputKey) {
+    public void setOutputKey(String outputKey) {
         this.outputKey = outputKey;
     }
 
@@ -134,7 +133,10 @@ public class Route {
                 return false;
         } else if (!inputKey.equals(other.inputKey))
             return false;
-        if (outputKey != other.outputKey)
+        if (outputKey == null) {
+            if (other.outputKey != null)
+                return false;
+        } else if (!outputKey.equals(other.outputKey))
             return false;
         if (routeTo == null) {
             if (other.routeTo != null)

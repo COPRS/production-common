@@ -152,7 +152,7 @@ public class EdrsSessionDistributionControllerTest extends RestControllerTest {
 
     @Test
     public void testPublishMessageUri() throws Exception {
-        doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any());
+        doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         GenericPublicationMessageDto<EdrsSessionDto> dto =
                 new GenericPublicationMessageDto<>(ProductFamily.EDRS_SESSION,
                         new EdrsSessionDto("key-test", 1,
@@ -165,6 +165,7 @@ public class EdrsSessionDistributionControllerTest extends RestControllerTest {
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.EDRS_SESSIONS),
                 Mockito.eq(dto.getMessageToPublish()),
+                Mockito.eq(null), 
                 Mockito.eq(null));
     }
 }
