@@ -58,8 +58,11 @@ public class OutputProducerFactory {
      */
     public void sendJob(GenericMessageDto<?> genericMessageDto, LevelJobDto dto)
             throws AbstractCodedException {
-        senderJobs.publish(new GenericPublicationMessageDto<LevelJobDto>(
-                genericMessageDto.getIdentifier(), dto.getFamily(), dto));
+        GenericPublicationMessageDto<LevelJobDto> messageToPublish =
+                new GenericPublicationMessageDto<LevelJobDto>(
+                        genericMessageDto.getIdentifier(), dto.getFamily(), dto);
+        messageToPublish.setInputKey(genericMessageDto.getInputKey());
+        senderJobs.publish(messageToPublish);
     }
     
     /**
