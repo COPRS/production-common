@@ -108,10 +108,12 @@ public class OutputProcuderFactory {
             LevelProductDto dtoProduct =
                     new LevelProductDto(msg.getProductName(), msg.getKeyObs(),
                             msg.getFamily(), msg.getProcessMode());
-            senderProducts
-                    .publish(new GenericPublicationMessageDto<LevelProductDto>(
+            GenericPublicationMessageDto<LevelProductDto> messageToPublish =
+                    new GenericPublicationMessageDto<LevelProductDto>(
                             inputMessage.getIdentifier(), msg.getFamily(),
-                            dtoProduct));
+                            dtoProduct);
+            messageToPublish.setInputKey(inputMessage.getInputKey());
+            senderProducts.publish(messageToPublish);
         }
     }
 

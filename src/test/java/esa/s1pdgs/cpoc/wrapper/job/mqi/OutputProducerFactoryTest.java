@@ -85,6 +85,7 @@ public class OutputProducerFactoryTest {
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
                 new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST",
                         "work-dir", "job-order"));
+        inputMessage.setInputKey(null);
     }
 
     /**
