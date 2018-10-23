@@ -94,7 +94,7 @@ public class SearchMetadataController {
 	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter)
 			throws ParseException {
 
-		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
 		return timePlus.format(outFormatter);
 	}
