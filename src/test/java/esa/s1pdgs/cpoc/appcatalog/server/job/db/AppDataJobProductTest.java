@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.Date;
 
 import org.junit.Test;
 
@@ -33,8 +32,8 @@ public class AppDataJobProductTest {
         obj.setSatelliteId("B");
         obj.setMissionId("S1");
         obj.setAcquisition("EW");
-        obj.setStartTime(new Date());
-        obj.setStopTime(new Date());
+        obj.setStartTime("2017-12-24T10:24:33.123456Z");
+        obj.setStopTime("2017-12-25T10:24:33.123456Z");
         obj.setRaws1(Arrays.asList(new AppDataJobFile("message1"),
                 new AppDataJobFile("message2")));
         obj.setRaws2(Arrays.asList(new AppDataJobFile("gen1"),
@@ -55,8 +54,8 @@ public class AppDataJobProductTest {
         assertTrue(str.contains("productName: product-name"));
         assertTrue(str.contains("satelliteId: B"));
         assertTrue(str.contains("missionId: S1"));
-        assertTrue(str.contains("startTime: "));
-        assertTrue(str.contains("stopTime: "));
+        assertTrue(str.contains("startTime: 2017-12-24T10:24:33.123456Z"));
+        assertTrue(str.contains("stopTime: 2017-12-25T10:24:33.123456Z"));
         assertTrue(str.contains("acquisition: EW"));
         assertTrue(
                 str.contains(

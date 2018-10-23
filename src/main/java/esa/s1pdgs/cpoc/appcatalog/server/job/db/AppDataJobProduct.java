@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.appcatalog.server.job.db;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,6 +11,12 @@ import java.util.Objects;
  * @author Viveris Technologies
  */
 public class AppDataJobProduct {
+
+    /**
+     * Time formatter used
+     */
+    public final static DateTimeFormatter TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 
     /**
      * Session identifier
@@ -35,12 +41,12 @@ public class AppDataJobProduct {
     /**
      * 
      */
-    private Date startTime;
+    private String startTime;
 
     /**
      * 
      */
-    private Date stopTime;
+    private String stopTime;
 
     /**
      * Instrument configuration id (in metadata). -1 if not exist
@@ -91,7 +97,7 @@ public class AppDataJobProduct {
      * Stop date of the segment
      */
     private String segmentStopDate;
-    
+
     /**
      * Process mode
      */
@@ -170,7 +176,7 @@ public class AppDataJobProduct {
     /**
      * @return the startTime
      */
-    public Date getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
@@ -178,14 +184,14 @@ public class AppDataJobProduct {
      * @param startTime
      *            the startTime to set
      */
-    public void setStartTime(final Date startTime) {
+    public void setStartTime(final String startTime) {
         this.startTime = startTime;
     }
 
     /**
      * @return the stopTime
      */
-    public Date getStopTime() {
+    public String getStopTime() {
         return stopTime;
     }
 
@@ -193,7 +199,7 @@ public class AppDataJobProduct {
      * @param stopTime
      *            the stopTime to set
      */
-    public void setStopTime(final Date stopTime) {
+    public void setStopTime(final String stopTime) {
         this.stopTime = stopTime;
     }
 
@@ -355,7 +361,8 @@ public class AppDataJobProduct {
     }
 
     /**
-     * @param processMode the processMode to set
+     * @param processMode
+     *            the processMode to set
      */
     public void setProcessMode(String processMode) {
         this.processMode = processMode;
@@ -379,10 +386,10 @@ public class AppDataJobProduct {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(sessionId, productName, satelliteId, missionId, startTime,
-                stopTime, insConfId, productType, raws1, raws2, acquisition,
-                dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate,
-                segmentStopDate, processMode);
+        return Objects.hash(sessionId, productName, satelliteId, missionId,
+                startTime, stopTime, insConfId, productType, raws1, raws2,
+                acquisition, dataTakeId, numberSlice, totalNbOfSlice,
+                segmentStartDate, segmentStopDate, processMode);
     }
 
     /**
