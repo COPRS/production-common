@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.appcatalog.common.rest.model.job;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,6 +11,11 @@ import java.util.Objects;
  * @author Viveris Technologies
  */
 public class AppDataJobProductDto {
+    
+    /**
+     * Time formatter used
+     */
+    public final static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 
     /**
      * Session identifier
@@ -35,12 +40,12 @@ public class AppDataJobProductDto {
     /**
      * 
      */
-    private Date startTime;
+    private String startTime;
 
     /**
      * 
      */
-    private Date stopTime;
+    private String stopTime;
 
     /**
      * Instrument configuration id (in metadata). -1 if not exist
@@ -172,7 +177,7 @@ public class AppDataJobProductDto {
     /**
      * @return the startTime
      */
-    public Date getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
@@ -180,14 +185,14 @@ public class AppDataJobProductDto {
      * @param startTime
      *            the startTime to set
      */
-    public void setStartTime(final Date startTime) {
+    public void setStartTime(final String startTime) {
         this.startTime = startTime;
     }
 
     /**
      * @return the stopTime
      */
-    public Date getStopTime() {
+    public String getStopTime() {
         return stopTime;
     }
 
@@ -195,7 +200,7 @@ public class AppDataJobProductDto {
      * @param stopTime
      *            the stopTime to set
      */
-    public void setStopTime(final Date stopTime) {
+    public void setStopTime(final String stopTime) {
         this.stopTime = stopTime;
     }
 
