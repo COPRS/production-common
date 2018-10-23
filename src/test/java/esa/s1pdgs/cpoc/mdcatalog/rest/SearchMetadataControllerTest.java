@@ -75,15 +75,13 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	@Test
     public void testSearchMetadataValIntersect() throws Exception {
         List<SearchMetadataDto> expectedResult = new ArrayList<>();
-        expectedResult.add(new SearchMetadataDto("name", "type", "kobs", "startDate", "stopDate", "polarisation", "productConsolidation"));
+        expectedResult.add(new SearchMetadataDto("name", "type", "kobs", "startDate", "stopDate"));
         SearchMetadata r = new SearchMetadata();
         r.setProductName("name");
         r.setProductType("type");
         r.setKeyObjectStorage("kobs");
         r.setValidityStart("startDate");
         r.setValidityStop("stopDate");
-        r.setPolarisation("polarisation");
-        r.setProductConsolidation("productConsolidation");
         List<SearchMetadata> response = new ArrayList<>();
         response.add(r);
         this.mockSearchMetadataValIntersect(response);

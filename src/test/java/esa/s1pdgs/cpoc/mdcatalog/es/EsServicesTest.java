@@ -35,11 +35,11 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdcatalog.es.ElasticsearchDAO;
-import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.mdcatalog.es.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
 
 
@@ -318,16 +318,13 @@ public class EsServicesTest{
         r.setKeyObjectStorage("url");
         r.setValidityStart("validityStartTime");
         r.setValidityStop("validityStopTime");
-        r.setPolarisation("polarisation");
-        r.setProductConsolidation("productConsolidation");
         List<SearchMetadata> expectedResult = new ArrayList<>();
         expectedResult.add(r);
         
         //Response
         BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
                 + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"productType\": \"product_type\","
-                + "\"polarisation\": \"polarisation\", \"productConsolidation\": \"productConsolidation\"}");
+                + "\"validityStopTime\", \"productType\": \"product_type\"}");
         SearchHit hit = new SearchHit(1);
         hit.sourceRef(source);
         SearchHit[] hits = {hit};
@@ -800,4 +797,168 @@ public class EsServicesTest{
         }
 		
 	}
+    
+    @Test
+    public void getLevelSegmentTest() throws IOException {
+        //Expected result
+        LevelSegmentMetadata expectedResult = new LevelSegmentMetadata();
+        expectedResult.setProductName("name");
+        expectedResult.setProductType("product_type");
+        expectedResult.setKeyObjectStorage("url");
+        expectedResult.setValidityStart("validityStartTime");
+        expectedResult.setValidityStop("validityStopTime");
+        expectedResult.setConsolidation("FULL");
+        expectedResult.setPolarisation("SV");
+        expectedResult.setDatatakeId("datatakeId");
+        
+        //Response 
+        BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        GetResult getResult = new GetResult("index", "l0_segment", "id", 0, true, source, null);
+        GetResponse getResponse = new GetResponse(getResult);
+        
+        //Mocking the get Request
+        this.mockGetRequest(getResponse);
+        
+        try {
+            LevelSegmentMetadata result = esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            assertEquals("Search metadata are not equals", expectedResult, result);
+        } catch (Exception e) {
+            fail("Exception occurred: " + e.getMessage());
+        }
+    }
+    
+    @Test(expected = MetadataNotPresentException.class)
+    public void getLevelSegmentNoHitTest() throws Exception {
+        BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        GetResult getResult = new GetResult("index", "l0_segment", "id", 0, false, source, null);
+        GetResponse getResponse = new GetResponse(getResult);
+        
+        //Mocking the get Request
+        this.mockGetRequest(getResponse);
+        
+        esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+    }
+    
+    @Test
+    public void getLevelSegmentMalformedTest() throws Exception {
+        //MISSING URL
+        BytesReference source = new BytesArray("{\"productName\":\"name\","
+                + "\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        GetResponse getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "url", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING startTime
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "startTime", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING stopTime
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\","
+                + "\"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "stopTime", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING instrumentConfigurationId
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "productConsolidation", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING sliceNumber
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "polarisation", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING dataTakeId
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "dataTakeId", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING product type
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "productType", ((MetadataMalformedException) e).getMissingField());
+        }
+        
+    }
 }
