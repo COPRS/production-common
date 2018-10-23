@@ -339,7 +339,7 @@ public class EsServicesTest{
         this.mockSearchRequest(response);
         
         try {
-            List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "dataTakeId");
+            List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
             assertEquals("Search metadata are not equals", expectedResult, result);
         } catch (Exception e) {
             fail("Exception occurred: " + e.getMessage());
@@ -349,7 +349,7 @@ public class EsServicesTest{
     @Test(expected = Exception.class)
     public void valIntersectIOExceptionTest() throws Exception {
         this.mockSearchRequestThrowIOException();
-        esServices.valIntersect("beginDate", "endDate", "dataTakeId");
+        esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
     }
     
     @Test
@@ -369,7 +369,7 @@ public class EsServicesTest{
         this.mockSearchRequest(response);
         
         try {
-            List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "dataTakeId");
+            List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
             assertEquals("Search metadata are not equals", null, result);
         } catch (Exception e) {
             fail("Exception occurred: " + e.getMessage());

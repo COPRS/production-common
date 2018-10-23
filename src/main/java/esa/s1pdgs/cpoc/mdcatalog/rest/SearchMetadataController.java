@@ -40,8 +40,7 @@ public class SearchMetadataController {
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
 	public ResponseEntity<List<SearchMetadataDto>> search(@PathVariable(name = "productFamily") String productFamily,
-	        @RequestParam(name = "productType", defaultValue = "NONE") String productType, 
-	        @RequestParam(name = "dataTakeId", defaultValue = "NONE") String dataTakeId,
+	        @RequestParam(name = "productType", defaultValue = "NONE") String productType,
 			@RequestParam(name = "mode", defaultValue = "NONE") String mode, 
 			@RequestParam(name = "satellite", defaultValue = "NONE") String satellite,
 			@RequestParam(name = "t0") String startDate, @RequestParam(name = "t1") String stopDate,
@@ -69,7 +68,7 @@ public class SearchMetadataController {
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
                         convertDateForSearch(stopDate, dt1,
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")),
-                        dataTakeId);
+                        productType, processMode, satellite);
 			    for(SearchMetadata m : f) {
 			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), 
 			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop(),

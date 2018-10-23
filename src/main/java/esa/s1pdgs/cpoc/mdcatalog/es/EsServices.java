@@ -207,13 +207,16 @@ public class EsServices {
 	 * @return the list of the corresponding Segment
 	 * @throws Exception 
 	 */
-	public List<SearchMetadata> valIntersect(String beginDate, String endDate, String dataTakeId) throws Exception {
+	public List<SearchMetadata> valIntersect(String beginDate, String endDate, String productType, String processMode, 
+	        String satelliteId) throws Exception {
 	    
 	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         // Generic fields
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("startTime").lt(endDate))
                 .must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
-                .must(QueryBuilders.termQuery("dataTakeId.keyword", dataTakeId));
+                .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+                .must(QueryBuilders.termQuery("productType.keyword", productType))
+                .must(QueryBuilders.termQuery("processMode.keyword", processMode));
         sourceBuilder.query(queryBuilder);
         sourceBuilder.size(20);
         SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());
