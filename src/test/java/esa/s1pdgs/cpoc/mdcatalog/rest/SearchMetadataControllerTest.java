@@ -85,7 +85,7 @@ public class SearchMetadataControllerTest extends RestControllerTest {
         List<SearchMetadata> response = new ArrayList<>();
         response.add(r);
         this.mockSearchMetadataValIntersect(response);
-        MvcResult result = request(get("/metadata/L0_SEGMENT/search?mode=ValIntersect&t0=2017-12-08T12:45:23&t1=2017-12-08T13:02:19&productType=type&processMode=pMode&satellite=B")).andExpect(MockMvcResultMatchers.status().isOk())
+        MvcResult result = request(get("/metadata/L0_SEGMENT/search?mode=ValIntersect&t0=2017-12-08T12:45:23.132456&t1=2017-12-08T13:02:19.123456&productType=type&processMode=pMode&satellite=B")).andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
         assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());
     }

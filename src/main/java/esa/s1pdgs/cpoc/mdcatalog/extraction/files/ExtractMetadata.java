@@ -164,7 +164,7 @@ public class ExtractMetadata {
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
 			if (metadataJSONObject.getString("validityStopTime").equals("UTC=9999-99-99T99:99:99")) {
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
+				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
 			} else {
 				metadataJSONObject.put("validityStopTime",
 				        metadataJSONObject.getString("validityStopTime").substring(4));
@@ -249,7 +249,7 @@ public class ExtractMetadata {
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
 			if (metadataJSONObject.getString("validityStopTime").equals("UTC=9999-99-99T99:99:99")) {
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
+				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
 			} else {
 				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("validityStopTime").substring(4));
 			}
@@ -294,7 +294,7 @@ public class ExtractMetadata {
 			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-			metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
+			metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productType", descriptor.getProductType());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());

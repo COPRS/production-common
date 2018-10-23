@@ -53,9 +53,9 @@ public class SearchMetadataController {
 			if ("LatestValCover".equals(mode)) {
 				SearchMetadata f = esServices.lastValCover(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'")),
 						convertDateForSearch(stopDate, dt1,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")),
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'")),
 						satellite, insConfId, processMode);
 				
 				if (f != null) {
@@ -65,9 +65,9 @@ public class SearchMetadataController {
 				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
 			} else if("ValIntersect".equals(mode)) {
 			    List<SearchMetadata> f = esServices.valIntersect(convertDateForSearch(startDate, -dt0,
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999")),
+                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
                         convertDateForSearch(stopDate, dt1,
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000")),
+                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
                         productType, processMode, satellite);
 			    for(SearchMetadata m : f) {
 			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), 
