@@ -793,11 +793,13 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                             && !CollectionUtils.isEmpty(proc.getInputs()))
                     .flatMap(proc -> proc.getInputs().stream()).distinct()
                     .collect(Collectors.toList());
-            r.addInputs(distinctInputJobOrder.stream()
-                    .map(input -> new LevelJobInputDto(input.getFamily().name(),
-                            input.getFilenames().get(0).getFilename(),
-                            input.getFilenames().get(0).getKeyObjectStorage()))
-                    .collect(Collectors.toList()));
+            distinctInputJobOrder.forEach(input -> {
+                for (JobOrderInputFile file : input.getFilenames()) {
+                    r.addInput(new LevelJobInputDto(input.getFamily().name(),
+                            file.getFilename(),
+                            file.getKeyObjectStorage()));
+                }
+            });
 
             // Add the jobOrder itself in inputs
             r.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(),
