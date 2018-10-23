@@ -21,7 +21,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
@@ -246,11 +245,10 @@ public class L0SegmentAppJobsGenerator
 
     protected void sortSegmentsPerStartDate(List<LevelSegmentMetadata> list) {
         list.sort((LevelSegmentMetadata s1, LevelSegmentMetadata s2) -> {
-            DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;
             LocalDateTime startDate1 = LocalDateTime
-                    .parse(s1.getValidityStart(), formatterProduct);
+                    .parse(s1.getValidityStart(), s1.getStartTimeFormatter());
             LocalDateTime startDate2 = LocalDateTime
-                    .parse(s2.getValidityStart(), formatterProduct);
+                    .parse(s2.getValidityStart(), s2.getStartTimeFormatter());
             return startDate1.compareTo(startDate2);
         });
     }
@@ -290,20 +288,18 @@ public class L0SegmentAppJobsGenerator
                     && "END".equals(
                             sortedSegments.get(sortedSegments.size() - 1)
                                     .getConsolidation())) {
-                DateTimeFormatter formatterProduct =
-                        SearchMetadata.DATE_FORMATTER;
                 LocalDateTime previousStopDate = LocalDateTime.parse(
                         sortedSegments.get(0).getValidityStop(),
-                        formatterProduct);
+                        sortedSegments.get(0).getStopTimeFormatter());
                 for (LevelSegmentMetadata segment : sortedSegments.subList(1,
                         sortedSegments.size())) {
                     LocalDateTime startDate = LocalDateTime.parse(
-                            segment.getValidityStart(), formatterProduct);
+                            segment.getValidityStart(), segment.getStartTimeFormatter());
                     if (startDate.isAfter(previousStopDate)) {
                         return false;
                     }
                     previousStopDate = LocalDateTime
-                            .parse(segment.getValidityStop(), formatterProduct);
+                            .parse(segment.getValidityStop(), segment.getStopTimeFormatter());
                 }
                 return true;
             } else {
@@ -318,9 +314,9 @@ public class L0SegmentAppJobsGenerator
         if (CollectionUtils.isEmpty(sortedSegments)) {
             return null;
         }
-        return DateUtils.convertToAnotherFormat(
-                sortedSegments.get(0).getValidityStart(),
-                LevelSegmentMetadata.DATE_FORMATTER, outFormatter);
+        LevelSegmentMetadata segment = sortedSegments.get(0);
+        return DateUtils.convertToAnotherFormat(segment.getValidityStart(),
+                segment.getStartTimeFormatter(), outFormatter);
     }
 
     protected String getStopSensingDate(
@@ -329,9 +325,10 @@ public class L0SegmentAppJobsGenerator
         if (CollectionUtils.isEmpty(sortedSegments)) {
             return null;
         }
-        return DateUtils.convertToAnotherFormat(
-                sortedSegments.get(sortedSegments.size() - 1).getValidityStop(),
-                LevelSegmentMetadata.DATE_FORMATTER, outFormatter);
+        LevelSegmentMetadata segment =
+                sortedSegments.get(sortedSegments.size() - 1);
+        return DateUtils.convertToAnotherFormat(segment.getValidityStop(),
+                segment.getStopTimeFormatter(), outFormatter);
     }
 
     /**

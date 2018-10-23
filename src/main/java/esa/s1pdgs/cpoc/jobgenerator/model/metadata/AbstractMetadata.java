@@ -17,6 +17,12 @@ public abstract class AbstractMetadata {
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 
     /**
+     * 
+     */
+    public final static DateTimeFormatter DATE_FORMATTER_LIGTH =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    /**
      * Product name
      */
     protected String productName;
@@ -183,5 +189,21 @@ public abstract class AbstractMetadata {
                     && Objects.equals(validityStop, other.validityStop);
         }
         return ret;
+    }
+    
+    public DateTimeFormatter getStartTimeFormatter() {
+        if (validityStart.length() > 20) {
+            return DATE_FORMATTER;
+        } else {
+            return DATE_FORMATTER_LIGTH;
+        }
+    }
+    
+    public DateTimeFormatter getStopTimeFormatter() {
+        if (validityStop.length() > 20) {
+            return DATE_FORMATTER;
+        } else {
+            return DATE_FORMATTER_LIGTH;
+        }
     }
 }

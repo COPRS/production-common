@@ -627,10 +627,17 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                                         .getIdSearchMetadataQuery())
                                                         .getResult().stream()
                                                         .map(file -> new JobOrderTimeInterval(
-                                                                file.getValidityStart(),
-                                                                file.getValidityStop(),
-                                                                file.getProductName(),
-                                                                SearchMetadata.DATE_FORMATTER))
+                                                                DateUtils
+                                                                        .convertToAnotherFormat(
+                                                                                file.getValidityStart(),
+                                                                                file.getStartTimeFormatter(),
+                                                                                JobOrderTimeInterval.DATE_FORMATTER),
+                                                                DateUtils
+                                                                        .convertToAnotherFormat(
+                                                                                file.getValidityStop(),
+                                                                                file.getStopTimeFormatter(),
+                                                                                JobOrderTimeInterval.DATE_FORMATTER),
+                                                                file.getProductName()))
                                                         .collect(Collectors
                                                                 .toList());
 
@@ -796,8 +803,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
             distinctInputJobOrder.forEach(input -> {
                 for (JobOrderInputFile file : input.getFilenames()) {
                     r.addInput(new LevelJobInputDto(input.getFamily().name(),
-                            file.getFilename(),
-                            file.getKeyObjectStorage()));
+                            file.getFilename(), file.getKeyObjectStorage()));
                 }
             });
 
