@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,12 +23,14 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -43,6 +44,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.jobgenerator.model.metadata.AbstractMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
@@ -271,7 +273,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     }
 
     private void buildMetadataSearchQuery() {
-        LOGGER.info("TESTLOG: inpuit families {}", this.jobGeneratorSettings.getInputfamilies());
+        LOGGER.info("TESTLOG: inpuit families {}",
+                this.jobGeneratorSettings.getInputfamilies());
         final AtomicInteger counter = new AtomicInteger(0);
         this.taskTable.getPools().stream()
                 .filter(pool -> !CollectionUtils.isEmpty(pool.getTasks()))
@@ -297,10 +300,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         family = this.jobGeneratorSettings.getInputfamilies()
                                 .get(fileType);
                     }
-                    SearchMetadataQuery query = new SearchMetadataQuery(
-                            counter.incrementAndGet(), k.getRetrievalMode(),
-                            k.getDeltaTime0(), k.getDeltaTime1(), fileType,
-                            family);
+                    SearchMetadataQuery query =
+                            new SearchMetadataQuery(counter.incrementAndGet(),
+                                    k.getRetrievalMode(), k.getDeltaTime0(),
+                                    k.getDeltaTime1(), fileType, family);
                     this.metadataSearchQueries.put(counter.get(), query);
                     v.forEach(alt -> {
                         alt.setIdSearchMetadataQuery(counter.get());
@@ -522,13 +525,24 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         job.getMetadataQueries().forEach((k, v) -> {
             if (v != null && v.getResult() == null) {
                 try {
-                    List<SearchMetadata> file = this.metadataService.search(
-                            v.getQuery(),
-                            job.getAppDataJob().getProduct().getStartTime(),
-                            job.getAppDataJob().getProduct().getStopTime(),
-                            job.getAppDataJob().getProduct().getSatelliteId(),
-                            job.getAppDataJob().getProduct().getInsConfId(),
-                            job.getAppDataJob().getProduct().getProcessMode());
+                    List<SearchMetadata> file =
+                            this.metadataService.search(v.getQuery(),
+                                    DateUtils.convertToAnotherFormat(
+                                            job.getAppDataJob().getProduct()
+                                                    .getStartTime(),
+                                            AppDataJobProductDto.TIME_FORMATTER,
+                                            AbstractMetadata.DATE_FORMATTER),
+                                    DateUtils.convertToAnotherFormat(
+                                            job.getAppDataJob().getProduct()
+                                                    .getStopTime(),
+                                            AppDataJobProductDto.TIME_FORMATTER,
+                                            AbstractMetadata.DATE_FORMATTER),
+                                    job.getAppDataJob().getProduct()
+                                            .getSatelliteId(),
+                                    job.getAppDataJob().getProduct()
+                                            .getInsConfId(),
+                                    job.getAppDataJob().getProduct()
+                                            .getProcessMode());
                     if (file != null) {
                         v.setResult(file);
                     }
@@ -639,16 +653,23 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                         break;
                                     }
                                 } else {
-                                    // TODO set this general
-                                    SimpleDateFormat format =
-                                            new SimpleDateFormat(
+                                    DateTimeFormatter outFormatter =
+                                            DateTimeFormatter.ofPattern(
                                                     "yyyyMMdd_HHmmssSSSSSS");
-                                    String startDate = format.format(
-                                            job.getAppDataJob().getProduct()
-                                                    .getStartTime());
-                                    String stopDate = format.format(
-                                            job.getAppDataJob().getProduct()
-                                                    .getStopTime());
+                                    String startDate =
+                                            DateUtils.convertToAnotherFormat(
+                                                    job.getAppDataJob()
+                                                            .getProduct()
+                                                            .getStartTime(),
+                                                    AppDataJobProductDto.TIME_FORMATTER,
+                                                    outFormatter);
+                                    String stopDate =
+                                            DateUtils.convertToAnotherFormat(
+                                                    job.getAppDataJob()
+                                                            .getProduct()
+                                                            .getStopTime(),
+                                                    AppDataJobProductDto.TIME_FORMATTER,
+                                                    outFormatter);
                                     inputsToAdd.add(new JobOrderInput(
                                             alt.getFileType(),
                                             JobOrderFileNameType.REGEXP,
@@ -658,9 +679,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                                     new JobOrderTimeInterval(
                                                             startDate, stopDate,
                                                             alt.getFileType(),
-                                                            DateTimeFormatter
-                                                                    .ofPattern(
-                                                                            "yyyyMMdd_HHmmssSSSSSS"))),
+                                                            outFormatter)),
                                             ProductFamily.BLANK));
                                 }
                             }
@@ -731,13 +750,17 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 });
 
         // Apply implementation build job
-        SimpleDateFormat dateFormat =
-                new SimpleDateFormat(JobOrderSensingTime.DATE_FORMAT);
-        job.getJobOrder().getConf().setSensingTime(new JobOrderSensingTime(
-                dateFormat.format(
-                        job.getAppDataJob().getProduct().getStartTime()),
-                dateFormat.format(
-                        job.getAppDataJob().getProduct().getStopTime())));
+        job.getJobOrder().getConf()
+                .setSensingTime(new JobOrderSensingTime(
+                        DateUtils.convertToAnotherFormat(
+                                job.getAppDataJob().getProduct().getStartTime(),
+                                AppDataJobProductDto.TIME_FORMATTER,
+                                JobOrderSensingTime.DATETIME_FORMATTER),
+
+                        DateUtils.convertToAnotherFormat(
+                                job.getAppDataJob().getProduct().getStopTime(),
+                                AppDataJobProductDto.TIME_FORMATTER,
+                                JobOrderSensingTime.DATETIME_FORMATTER)));
 
         // Custom Job order according implementation
         this.customJobOrder(job);

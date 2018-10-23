@@ -8,11 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -410,7 +407,6 @@ public class MetadataServiceTest {
     @Test
     public void testHostnameSearch() throws RestClientException,
             JobGenMetadataException, ParseException {
-        DateFormat format = new SimpleDateFormat("yyyyMMdd_HHmmss");
         SearchMetadata expectedFile = new SearchMetadata(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
@@ -426,16 +422,17 @@ public class MetadataServiceTest {
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                format.parse("20171120_221516"),
-                format.parse("20171220_101516"), "A", -1, "FAST");
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z",
+                "A", -1, "FAST");
 
         String uri =
                 "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
                 .queryParam("productType", "AUX_OBMEMC")
                 .queryParam("mode", "LatestValCover")
-                .queryParam("t0", "2017-11-20T22:15:16")
-                .queryParam("t1", "2017-12-20T10:15:16")
+                .queryParam("t0", "2017-11-20T22:15:16.123456Z")
+                .queryParam("t1", "2017-12-20T10:15:16.654321Z")
                 .queryParam("dt0", "1.0").queryParam("dt1", "2.0")
                 .queryParam("satellite", "A").queryParam("processMode", "FAST");
         verify(this.restTemplate, times(1)).exchange(
@@ -447,7 +444,6 @@ public class MetadataServiceTest {
     @Test
     public void testHostnameSearchWithInsConfDir()
             throws JobGenMetadataException, ParseException {
-        DateFormat format = new SimpleDateFormat("yyyyMMdd_HHmmss");
         SearchMetadata expectedFile = new SearchMetadata(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
@@ -463,16 +459,16 @@ public class MetadataServiceTest {
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                format.parse("20171120_221516"),
-                format.parse("20171220_101516"), "A", 6, null);
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z", "A", 6, null);
 
         String uri =
                 "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
                 .queryParam("productType", "AUX_OBMEMC")
                 .queryParam("mode", "LatestValCover")
-                .queryParam("t0", "2017-11-20T22:15:16")
-                .queryParam("t1", "2017-12-20T10:15:16")
+                .queryParam("t0", "2017-11-20T22:15:16.123456Z")
+                .queryParam("t1", "2017-12-20T10:15:16.654321Z")
                 .queryParam("dt0", "1.0").queryParam("dt1", "2.0")
                 .queryParam("satellite", "A").queryParam("insConfId", 6);
         verify(this.restTemplate, times(1)).exchange(
@@ -498,7 +494,8 @@ public class MetadataServiceTest {
         List<SearchMetadata> files = this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                new Date(), new Date(), "A", -1, null);
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z", "A", -1, null);
         SearchMetadata file = files.get(0);
         assertEquals("MPL_ORBPRE", file.getProductType());
         assertEquals(
@@ -526,7 +523,8 @@ public class MetadataServiceTest {
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                new Date(), new Date(), "A", -1, "");
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z", "A", -1, "");
     }
 
     @Test
@@ -542,7 +540,8 @@ public class MetadataServiceTest {
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                new Date(), new Date(), "A", -1, "");
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z", "A", -1, "");
     }
 
 }

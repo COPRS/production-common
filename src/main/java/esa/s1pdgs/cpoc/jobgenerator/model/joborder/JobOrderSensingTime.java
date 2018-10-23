@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.model.joborder;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -17,7 +18,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class JobOrderSensingTime {
 
-	public final static String DATE_FORMAT = "yyyyMMdd_HHmmssSSSSSS";
+    public final static DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(
+            "yyyyMMdd_HHmmssSSSSSS");
 
 	/**
 	 * Sensing start time in format YYYYMMDD_HHmmssSSSSSS

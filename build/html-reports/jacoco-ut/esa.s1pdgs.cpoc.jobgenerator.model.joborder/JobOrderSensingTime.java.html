@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>JobOrderSensingTime.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model.joborder</a> &gt; <span class="el_source">JobOrderSensingTime.java</span></div><h1>JobOrderSensingTime.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model.joborder;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -17,7 +18,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class JobOrderSensingTime {
 
-	public final static String DATE_FORMAT = &quot;yyyyMMdd_HHmmssSSSSSS&quot;;
+<span class="fc" id="L21">    public final static DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(</span>
+            &quot;yyyyMMdd_HHmmssSSSSSS&quot;);
 
 	/**
 	 * Sensing start time in format YYYYMMDD_HHmmssSSSSSS
@@ -35,32 +37,32 @@ public class JobOrderSensingTime {
 	 * 
 	 */
 	public JobOrderSensingTime() {
-<span class="fc" id="L38">		super();</span>
-<span class="fc" id="L39">	}</span>
+<span class="fc" id="L40">		super();</span>
+<span class="fc" id="L41">	}</span>
 
 	/**
 	 * @param start
 	 * @param stop
 	 */
 	public JobOrderSensingTime(final String start, final String stop) {
-<span class="fc" id="L46">		this();</span>
-<span class="fc" id="L47">		this.start = start;</span>
-<span class="fc" id="L48">		this.stop = stop;</span>
-<span class="fc" id="L49">	}</span>
+<span class="fc" id="L48">		this();</span>
+<span class="fc" id="L49">		this.start = start;</span>
+<span class="fc" id="L50">		this.stop = stop;</span>
+<span class="fc" id="L51">	}</span>
 
 	/**
 	 * 
 	 * @param obj
 	 */
 	public JobOrderSensingTime(final JobOrderSensingTime obj) {
-<span class="fc" id="L56">		this(obj.getStart(), obj.getStop());</span>
-<span class="fc" id="L57">	}</span>
+<span class="fc" id="L58">		this(obj.getStart(), obj.getStop());</span>
+<span class="fc" id="L59">	}</span>
 
 	/**
 	 * @return the start
 	 */
 	public String getStart() {
-<span class="fc" id="L63">		return start;</span>
+<span class="fc" id="L65">		return start;</span>
 	}
 
 	/**
@@ -68,14 +70,14 @@ public class JobOrderSensingTime {
 	 *            the start to set
 	 */
 	public void setStart(final String start) {
-<span class="fc" id="L71">		this.start = start;</span>
-<span class="fc" id="L72">	}</span>
+<span class="fc" id="L73">		this.start = start;</span>
+<span class="fc" id="L74">	}</span>
 
 	/**
 	 * @return the stop
 	 */
 	public String getStop() {
-<span class="fc" id="L78">		return stop;</span>
+<span class="fc" id="L80">		return stop;</span>
 	}
 
 	/**
@@ -83,15 +85,15 @@ public class JobOrderSensingTime {
 	 *            the stop to set
 	 */
 	public void setStop(final String stop) {
-<span class="fc" id="L86">		this.stop = stop;</span>
-<span class="fc" id="L87">	}</span>
+<span class="fc" id="L88">		this.stop = stop;</span>
+<span class="fc" id="L89">	}</span>
 
 	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-<span class="fc" id="L94">		return String.format(&quot;{start: %s, stop: %s}&quot;, start, stop);</span>
+<span class="fc" id="L96">		return String.format(&quot;{start: %s, stop: %s}&quot;, start, stop);</span>
 	}
 
 	/**
@@ -99,7 +101,7 @@ public class JobOrderSensingTime {
 	 */
 	@Override
 	public int hashCode() {
-<span class="fc" id="L102">		return Objects.hash(start, stop);</span>
+<span class="fc" id="L104">		return Objects.hash(start, stop);</span>
 	}
 
 	/**
@@ -108,15 +110,15 @@ public class JobOrderSensingTime {
 	@Override
 	public boolean equals(final Object obj) {
 		boolean ret;
-<span class="fc bfc" id="L111" title="All 2 branches covered.">		if (this == obj) {</span>
-<span class="fc" id="L112">			ret = true;</span>
-<span class="fc bfc" id="L113" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L114">			ret = false;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L114">			ret = true;</span>
+<span class="fc bfc" id="L115" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L116">			ret = false;</span>
 		} else {
-<span class="fc" id="L116">			JobOrderSensingTime other = (JobOrderSensingTime) obj;</span>
-<span class="fc bfc" id="L117" title="All 4 branches covered.">			ret = Objects.equals(start, other.start) &amp;&amp; Objects.equals(stop, other.stop);</span>
+<span class="fc" id="L118">			JobOrderSensingTime other = (JobOrderSensingTime) obj;</span>
+<span class="fc bfc" id="L119" title="All 4 branches covered.">			ret = Objects.equals(start, other.start) &amp;&amp; Objects.equals(stop, other.stop);</span>
 		}
-<span class="fc" id="L119">		return ret;</span>
+<span class="fc" id="L121">		return ret;</span>
 	}
 
 }

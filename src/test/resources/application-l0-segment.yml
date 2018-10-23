@@ -101,7 +101,7 @@ status:
   max-error-counter-mqi: 30
   
 app-l0-segment:
-  name-regexp-pattern: ^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$
+  name-regexp-pattern: "^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
   name-regexp-groups:
     missionId: 1
     satelliteId: 2 

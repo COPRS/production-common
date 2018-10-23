@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -32,12 +33,12 @@ import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
@@ -56,8 +57,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 public class L0SegmentAppJobsGeneratorTest {
-
-    private final static String FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     @Mock
     private XmlConverter xmlConverter;
@@ -198,8 +197,8 @@ public class L0SegmentAppJobsGeneratorTest {
                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_011111_1BDE.SAFE",
                 "WV_RAW__0S",
                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_011111_1BDE.SAFE",
-                "2018-09-13T23:44:52", "2018-09-13T23:55:38", "SV", "FULL",
-                "011111")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:44:52.000000Z", "2018-09-13T23:55:38.000000Z",
+                "SV", "FULL", "011111")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_011111_1BDE.SAFE"));
         // One polarisation, several segments, complete
@@ -207,16 +206,16 @@ public class L0SegmentAppJobsGeneratorTest {
                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE",
                 "WV_RAW__0S",
                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE",
-                "2018-09-13T23:44:52", "2018-09-13T23:55:38", "SV", "BEGIN",
-                "0294FC")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:44:52.000000Z", "2018-09-13T23:55:38.000000Z",
+                "SV", "BEGIN", "0294FC")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
                 "S1A_WV_RAW__0SSV_20180913T235533_20180913T235555_023686_0294FC_1BDE.SAFE",
                 "WV_RAW__0S",
                 "S1A_WV_RAW__0SSV_20180913T235533_20180913T235555_023686_0294FC_1BDE.SAFE",
-                "2018-09-13T23:55:33", "2018-09-13T23:55:55", "SV", "END",
-                "0294FC")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:55:33.000000Z", "2018-09-13T23:55:55.000000Z",
+                "SV", "END", "0294FC")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_WV_RAW__0SSV_20180913T235533_20180913T235555_023686_0294FC_1BDE.SAFE"));
         // 2 polarisation, one segment, complete
@@ -224,16 +223,16 @@ public class L0SegmentAppJobsGeneratorTest {
                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000001_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000001_1BDE.SAFE",
-                "2018-09-13T23:55:33", "2018-09-13T23:55:55", "HV", "FULL",
-                "000001")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:55:33.000000Z", "2018-09-13T23:55:55.000000Z",
+                "HV", "FULL", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000001_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000001_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000001_1BDE.SAFE",
-                "2018-09-13T23:55:33", "2018-09-13T23:55:55", "HH", "FULL",
-                "000001")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:55:33.000000Z", "2018-09-13T23:55:55.000000Z",
+                "HH", "FULL", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000001_1BDE.SAFE"));
         // 2 polarisation, only one segment, incomplete
@@ -241,8 +240,8 @@ public class L0SegmentAppJobsGeneratorTest {
                 "S1A_IW_RAW__0SVH_20180913T235533_20180913T235555_023686_000002_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SVH_20180913T235533_20180913T235555_023686_000002_1BDE.SAFE",
-                "2018-09-13T23:55:33", "2018-09-13T23:55:55", "VH", "FULL",
-                "000002")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:55:33.000000Z", "2018-09-13T23:55:55.000000Z",
+                "VH", "FULL", "000002")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SVH_20180913T235533_20180913T235555_023686_000002_1BDE.SAFE"));
         // 2 polarisation, one segment, incomplete
@@ -250,32 +249,32 @@ public class L0SegmentAppJobsGeneratorTest {
                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                "2018-09-13T23:55:33", "2018-09-13T23:55:55", "HV", "BEGIN",
-                "000001")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:55:33.000000Z", "2018-09-13T23:55:55.000000Z",
+                "HV", "BEGIN", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
                 "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
-                "2018-09-13T23:55:50", "2018-09-13T23:58:01", "HV", "END",
-                "000001")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:55:50.000000Z", "2018-09-13T23:58:01.000000Z",
+                "HV", "END", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                "2018-09-13T23:55:33", "2018-09-13T23:55:55", "HH", "BEGIN",
-                "000001")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:55:33.000000Z", "2018-09-13T23:55:55.000000Z",
+                "HH", "BEGIN", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
                 "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
-                "2018-09-13T23:55:50", "2018-09-13T23:58:01", "HH", "END",
-                "000001")).when(metadataService).getLevelSegment(
+                "2018-09-13T23:55:50.000000Z", "2018-09-13T23:58:01.000000Z",
+                "HH", "END", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
     }
@@ -364,13 +363,9 @@ public class L0SegmentAppJobsGeneratorTest {
                         "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE",
                         "S1A_WV_RAW__0SSV_20180913T235533_20180913T235555_023686_0294FC_1BDE.SAFE"));
         generator.preSearch(job);
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:44:52",
-                        FORMAT),
+        assertEquals("2018-09-13T23:44:52.000000Z",
                 job.getAppDataJob().getProduct().getStartTime());
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:55:55",
-                        FORMAT),
+        assertEquals("2018-09-13T23:55:55.000000Z",
                 job.getAppDataJob().getProduct().getStopTime());
     }
 
@@ -380,13 +375,9 @@ public class L0SegmentAppJobsGeneratorTest {
         TestL0SegmentUtils.setMessageToBuildData(job.getAppDataJob(), Arrays
                 .asList("S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_011111_1BDE.SAFE"));
         generator.preSearch(job);
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:44:52",
-                        FORMAT),
+        assertEquals("2018-09-13T23:44:52.000000Z",
                 job.getAppDataJob().getProduct().getStartTime());
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:55:38",
-                        FORMAT),
+        assertEquals("2018-09-13T23:55:38.000000Z",
                 job.getAppDataJob().getProduct().getStopTime());
     }
 
@@ -414,13 +405,9 @@ public class L0SegmentAppJobsGeneratorTest {
         job.getGeneration()
                 .setCreationDate(new Date(System.currentTimeMillis() - 10010));
         generator.preSearch(job);
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:44:52",
-                        FORMAT),
+        assertEquals("2018-09-13T23:44:52.000000Z",
                 job.getAppDataJob().getProduct().getStartTime());
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:55:38",
-                        FORMAT),
+        assertEquals("2018-09-13T23:55:38.000000Z",
                 job.getAppDataJob().getProduct().getStopTime());
     }
 
@@ -520,13 +507,9 @@ public class L0SegmentAppJobsGeneratorTest {
                         "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000001_1BDE.SAFE",
                         "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000001_1BDE.SAFE"));
         generator.preSearch(job);
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:55:33",
-                        FORMAT),
+        assertEquals("2018-09-13T23:55:33.000000Z",
                 job.getAppDataJob().getProduct().getStartTime());
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:55:55",
-                        FORMAT),
+        assertEquals("2018-09-13T23:55:55.000000Z",
                 job.getAppDataJob().getProduct().getStopTime());
     }
 
@@ -540,13 +523,9 @@ public class L0SegmentAppJobsGeneratorTest {
                         "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
                         "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
         generator.preSearch(job);
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:55:33",
-                        FORMAT),
+        assertEquals("2018-09-13T23:55:33.000000Z",
                 job.getAppDataJob().getProduct().getStartTime());
-        assertEquals(
-                DateUtils.convertWithSimpleDateFormat("2018-09-13T23:58:01",
-                        FORMAT),
+        assertEquals("2018-09-13T23:58:01.000000Z",
                 job.getAppDataJob().getProduct().getStopTime());
     }
 
@@ -591,20 +570,20 @@ public class L0SegmentAppJobsGeneratorTest {
     @Test
     public void testSortSegmentPerStartDate() {
         LevelSegmentMetadata obj1 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T12:55:00",
-                "2018-10-12T18:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T12:55:00.000000Z",
+                "2018-10-12T18:55:00.000000Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj2 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T13:12:04",
-                "2018-10-12T16:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T13:12:04.000000Z",
+                "2018-10-12T16:55:00.000000Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj3 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T13:12:05",
-                "2018-10-12T18:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T13:12:04.000001Z",
+                "2018-10-12T18:55:00.000000Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj4 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-05T12:55:00",
-                "2018-10-12T18:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-05T12:55:00.000000Z",
+                "2018-10-12T18:55:00.000000Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj5 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-11-12T12:55:00",
-                "2018-10-12T18:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-11-12T12:55:00.000000Z",
+                "2018-10-12T18:55:00.000000Z", "SH", "FULL", "14256");
 
         List<LevelSegmentMetadata> expectedList =
                 Arrays.asList(obj4, obj1, obj2, obj3, obj5);
@@ -654,64 +633,78 @@ public class L0SegmentAppJobsGeneratorTest {
     @Test
     public void testGetSensingTime() throws InternalErrorException {
         LevelSegmentMetadata obj1 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T12:55:00",
-                "2018-10-12T18:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T12:55:00.111111Z",
+                "2018-10-12T18:55:00.000000Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj2 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T13:12:04",
-                "2018-10-12T16:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T13:12:04.222222Z",
+                "2018-10-12T16:55:00.000000Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj3 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T13:12:05",
-                "2018-10-12T18:58:06", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T13:12:05.999999Z",
+                "2018-10-12T18:58:06.985621Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj4 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-05T12:55:00",
-                "2018-10-12T18:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-05T12:55:00.000000Z",
+                "2018-10-12T18:55:00.124356Z", "SH", "FULL", "14256");
 
         List<LevelSegmentMetadata> listSortedFull =
                 Arrays.asList(obj4, obj1, obj2, obj3);
         List<LevelSegmentMetadata> listSortedOne = Arrays.asList(obj4);
 
-        String format = "yyyy-MM-dd'T'HH:mm:ss";
+        assertEquals("2018-10-05T12:55:00.000000Z",
+                generator.getStartSensingDate(listSortedFull,
+                        AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals("20181005_125500_000000",
+                generator.getStartSensingDate(listSortedFull,
+                        DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSSSSS")));
+        assertEquals("2018-10-12T18:58:06.985621Z",
+                generator.getStopSensingDate(listSortedFull,
+                        AppDataJobProductDto.TIME_FORMATTER));
 
-        assertEquals(DateUtils
-                .convertWithSimpleDateFormat("2018-10-05T12:55:00", format),
-                generator.getStartSensingDate(listSortedFull));
-        assertEquals(DateUtils
-                .convertWithSimpleDateFormat("2018-10-12T18:58:06", format),
-                generator.getStopSensingDate(listSortedFull));
+        assertEquals("2018-10-05T12:55:00.000000Z",
+                generator.getStartSensingDate(listSortedFull,
+                        AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals("2018-10-12T18:55:00.124356Z",
+                generator.getStopSensingDate(listSortedOne,
+                        AppDataJobProductDto.TIME_FORMATTER));
 
-        assertEquals(DateUtils
-                .convertWithSimpleDateFormat("2018-10-05T12:55:00", format),
-                generator.getStartSensingDate(listSortedOne));
-        assertEquals(DateUtils
-                .convertWithSimpleDateFormat("2018-10-12T18:55:00", format),
-                generator.getStopSensingDate(listSortedOne));
+        assertNull(generator.getStartSensingDate(new ArrayList<>(),
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertNull(generator.getStopSensingDate(new ArrayList<>(),
+                AppDataJobProductDto.TIME_FORMATTER));
 
-        assertNull(generator.getStartSensingDate(new ArrayList<>()));
-        assertNull(generator.getStopSensingDate(new ArrayList<>()));
-
-        assertNull(generator.getStartSensingDate(null));
-        assertNull(generator.getStopSensingDate(null));
+        assertNull(generator.getStartSensingDate(null,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertNull(generator.getStopSensingDate(null,
+                AppDataJobProductDto.TIME_FORMATTER));
 
     }
 
     @Test
     public void testLeastMoreDates() {
-        long currentMillis = System.currentTimeMillis();
-        Date date1 = new Date(currentMillis);
-        Date date2 = new Date(currentMillis + 15000);
-        Date date3 = new Date(currentMillis - 35900);
+        String date1 = "2017-10-24T12:14:02.123456Z";
+        String date2 = "2017-10-24T12:14:02.183456Z";
+        String date3 = "2017-10-24T12:11:02.123456Z";
 
-        assertEquals(date1, generator.least(date1, date2));
-        assertEquals(date1, generator.least(date2, date1));
-        assertEquals(date3, generator.least(date1, date3));
-        assertEquals(date3, generator.least(date2, date3));
-        assertEquals(date1, generator.least(date1, date1));
+        assertEquals(date1, generator.least(date1, date2,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals(date1, generator.least(date2, date1,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals(date3, generator.least(date1, date3,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals(date3, generator.least(date2, date3,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals(date1, generator.least(date1, date1,
+                AppDataJobProductDto.TIME_FORMATTER));
 
-        assertEquals(date2, generator.more(date1, date2));
-        assertEquals(date2, generator.more(date2, date1));
-        assertEquals(date1, generator.more(date1, date3));
-        assertEquals(date2, generator.more(date2, date3));
-        assertEquals(date1, generator.more(date1, date1));
+        assertEquals(date2, generator.more(date1, date2,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals(date2, generator.more(date2, date1,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals(date1, generator.more(date1, date3,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals(date2, generator.more(date2, date3,
+                AppDataJobProductDto.TIME_FORMATTER));
+        assertEquals(date1, generator.more(date1, date1,
+                AppDataJobProductDto.TIME_FORMATTER));
 
     }
 
@@ -744,20 +737,23 @@ public class L0SegmentAppJobsGeneratorTest {
         assertFalse(generator.isCovered(new ArrayList<>()));
 
         LevelSegmentMetadata obj1 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T12:55:00",
-                "2018-10-12T18:55:00", "SH", "FULL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T12:55:00.000000Z",
+                "2018-10-12T18:55:00.000000Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj2 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T12:55:00",
-                "2018-10-12T18:55:00", "SH", "BEGIN", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T12:55:00.000000Z",
+                "2018-10-12T18:55:00.000152Z", "SH", "BEGIN", "14256");
         LevelSegmentMetadata obj3 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T17:55:00",
-                "2018-10-12T18:55:01", "SH", "PARTIAL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T17:55:00.000000Z",
+                "2018-10-12T18:55:01.000000Z", "SH", "PARTIAL", "14256");
         LevelSegmentMetadata obj4 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T18:55:01",
-                "2018-10-12T19:55:00", "SH", "PARTIAL", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T18:55:01.000000Z",
+                "2018-10-12T19:55:00.000000Z", "SH", "PARTIAL", "14256");
+        LevelSegmentMetadata obj6 = new LevelSegmentMetadata("name1",
+                "IW_RAW_0S", "key1", "2018-10-12T18:55:00.000152Z",
+                "2018-10-12T19:53:10.000001Z", "SH", "PARTIAL", "14256");
         LevelSegmentMetadata obj5 = new LevelSegmentMetadata("name1",
-                "IW_RAW_0S", "key1", "2018-10-12T19:53:10",
-                "2018-10-12T19:58:10", "SH", "END", "14256");
+                "IW_RAW_0S", "key1", "2018-10-12T19:53:10.000000Z",
+                "2018-10-12T19:58:10.000000Z", "SH", "END", "14256");
 
         assertFalse(generator.isCovered(Arrays.asList(obj2)));
         assertFalse(generator.isCovered(Arrays.asList(obj3)));
@@ -769,6 +765,7 @@ public class L0SegmentAppJobsGeneratorTest {
         assertFalse(generator.isCovered(Arrays.asList(obj2, obj5)));
         assertFalse(generator.isCovered(Arrays.asList(obj2, obj3, obj5)));
         assertTrue(generator.isCovered(Arrays.asList(obj2, obj3, obj4, obj5)));
+        assertTrue(generator.isCovered(Arrays.asList(obj2, obj6, obj5)));
     }
 
 }

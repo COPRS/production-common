@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.jobgenerator.config;
 
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,8 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "pattern-l0-slices")
 public class L0SlicePatternSettings {
+    
+    public final static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 
 	/**
 	 * The regular expression in Java format

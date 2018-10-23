@@ -11,7 +11,6 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Route;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1RouteFrom;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1RouteTo;
@@ -88,8 +87,8 @@ public class TestL1Utils {
         product.setProductName(
                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE");
         product.setSatelliteId("A");
-        product.setStartTime(DateUtils.convertDateIso("20171213T121623"));
-        product.setStopTime(DateUtils.convertDateIso("20171213T121656"));
+        product.setStartTime("2017-12-13T12:16:23.000000Z");
+        product.setStopTime("2017-12-13T12:16:56.000000Z");
         product.setAcquisition("IW");
         product.setProcessMode("NRT");
         if (preSearchInfo) {

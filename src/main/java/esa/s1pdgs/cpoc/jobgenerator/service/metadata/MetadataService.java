@@ -1,8 +1,5 @@
 package esa.s1pdgs.cpoc.jobgenerator.service.metadata;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -221,11 +218,12 @@ public class MetadataService {
      * @return
      * @throws MetadataException
      */
-    public LevelSegmentMetadata getLevelSegment(final ProductFamily family, final String productName)
-            throws JobGenMetadataException {
+    public LevelSegmentMetadata getLevelSegment(final ProductFamily family,
+            final String productName) throws JobGenMetadataException {
         for (int retries = 0;; retries++) {
             try {
-                String uri = this.uriLevelSegment + "/" + family + "/" + productName;
+                String uri =
+                        this.uriLevelSegment + "/" + family + "/" + productName;
                 LOGGER.debug("Call rest metadata on {}", uri);
 
                 ResponseEntity<LevelSegmentMetadata> response =
@@ -351,22 +349,19 @@ public class MetadataService {
         }
     }
 
-    public List<SearchMetadata> search(final SearchMetadataQuery query, final Date t0,
-            final Date t1, final String satelliteId,
+    public List<SearchMetadata> search(final SearchMetadataQuery query,
+            final String t0, final String t1, final String satelliteId,
             final int instrumentConfigurationId, final String processMode)
             throws JobGenMetadataException {
         for (int retries = 0;; retries++) {
             try {
-                DateFormat format =
-                        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                 String uri = this.uriSearch + "/"
                         + query.getProductFamily().toString() + "/search";
                 UriComponentsBuilder builder = UriComponentsBuilder
                         .fromUriString(uri)
                         .queryParam("productType", query.getProductType())
                         .queryParam("mode", query.getRetrievalMode())
-                        .queryParam("t0", format.format(t0))
-                        .queryParam("t1", format.format(t1))
+                        .queryParam("t0", t0).queryParam("t1", t1)
                         .queryParam("dt0", query.getDeltaTime0())
                         .queryParam("dt1", query.getDeltaTime1())
                         .queryParam("satellite", satelliteId);
@@ -381,7 +376,8 @@ public class MetadataService {
 
                 ResponseEntity<List<SearchMetadata>> response =
                         this.restTemplate.exchange(builder.build().toUri(),
-                                HttpMethod.GET, null, new ParameterizedTypeReference<List<SearchMetadata>>() {
+                                HttpMethod.GET, null,
+                                new ParameterizedTypeReference<List<SearchMetadata>>() {
                                 });
                 if (response.getStatusCode() != HttpStatus.OK) {
                     if (retries < this.nbretry) {

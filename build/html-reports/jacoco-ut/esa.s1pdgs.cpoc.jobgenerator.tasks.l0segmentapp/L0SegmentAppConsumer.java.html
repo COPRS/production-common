@@ -59,12 +59,12 @@ public class L0SegmentAppConsumer
             @Qualifier(&quot;mqiServiceForStatus&quot;) final StatusService mqiStatusService,
             @Qualifier(&quot;appCatalogServiceForLevelSegments&quot;) final AbstractAppCatalogJobService&lt;LevelSegmentDto&gt; appDataService,
             final AppStatus appStatus) {
-<span class="nc" id="L62">        super(jobsDispatcher, processSettings, mqiService, mqiStatusService,</span>
+<span class="fc" id="L62">        super(jobsDispatcher, processSettings, mqiService, mqiStatusService,</span>
                 appDataService, appStatus);
-<span class="nc" id="L64">        this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(),</span>
+<span class="fc" id="L64">        this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(),</span>
                 Pattern.CASE_INSENSITIVE);
-<span class="nc" id="L66">        this.patternGroups = appProperties.getNameRegexpGroups();</span>
-<span class="nc" id="L67">    }</span>
+<span class="fc" id="L66">        this.patternGroups = appProperties.getNameRegexpGroups();</span>
+<span class="fc" id="L67">    }</span>
 
     /**
      * Periodic function for processing messages
@@ -134,54 +134,54 @@ public class L0SegmentAppConsumer
     protected AppDataJobDto&lt;LevelSegmentDto&gt; buildJob(
             GenericMessageDto&lt;LevelSegmentDto&gt; mqiMessage)
             throws AbstractCodedException {
-<span class="nc" id="L137">        LevelSegmentDto leveldto = mqiMessage.getBody();</span>
+<span class="fc" id="L137">        LevelSegmentDto leveldto = mqiMessage.getBody();</span>
 
         // Check if a job is already created for message identifier
-<span class="nc" id="L140">        List&lt;AppDataJobDto&lt;LevelSegmentDto&gt;&gt; existingJobs = appDataService</span>
-<span class="nc" id="L141">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
+<span class="fc" id="L140">        List&lt;AppDataJobDto&lt;LevelSegmentDto&gt;&gt; existingJobs = appDataService</span>
+<span class="fc" id="L141">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
 
-<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
 
             // Extract information from name
-<span class="nc" id="L146">            Matcher m = pattern.matcher(leveldto.getName());</span>
-<span class="nc bnc" id="L147" title="All 2 branches missed.">            if (!m.matches()) {</span>
+<span class="fc" id="L146">            Matcher m = pattern.matcher(leveldto.getName());</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">            if (!m.matches()) {</span>
 <span class="nc" id="L148">                throw new InvalidFormatProduct(</span>
                         &quot;Don't match with regular expression &quot;
 <span class="nc" id="L150">                                + this.pattern.pattern());</span>
             }
-<span class="nc" id="L152">            String satelliteId = m.group(this.patternGroups.get(&quot;satelliteId&quot;));</span>
-<span class="nc" id="L153">            String missionId = m.group(this.patternGroups.get(&quot;missionId&quot;));</span>
-<span class="nc" id="L154">            String acquisition = m.group(this.patternGroups.get(&quot;acquisition&quot;));</span>
-<span class="nc" id="L155">            String datatakeID = m.group(this.patternGroups.get(&quot;datatakeId&quot;));</span>
+<span class="fc" id="L152">            String satelliteId = m.group(this.patternGroups.get(&quot;satelliteId&quot;));</span>
+<span class="fc" id="L153">            String missionId = m.group(this.patternGroups.get(&quot;missionId&quot;));</span>
+<span class="fc" id="L154">            String acquisition = m.group(this.patternGroups.get(&quot;acquisition&quot;));</span>
+<span class="fc" id="L155">            String datatakeID = m.group(this.patternGroups.get(&quot;datatakeId&quot;));</span>
 
             // Search job for given datatake id
-<span class="nc" id="L158">            List&lt;AppDataJobDto&lt;LevelSegmentDto&gt;&gt; existingJobsForDatatake =</span>
-<span class="nc" id="L159">                    appDataService.findByProductDataTakeId(datatakeID);</span>
+<span class="fc" id="L158">            List&lt;AppDataJobDto&lt;LevelSegmentDto&gt;&gt; existingJobsForDatatake =</span>
+<span class="fc" id="L159">                    appDataService.findByProductDataTakeId(datatakeID);</span>
 
-<span class="nc bnc" id="L161" title="All 2 branches missed.">            if (CollectionUtils.isEmpty(existingJobsForDatatake)) {</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">            if (CollectionUtils.isEmpty(existingJobsForDatatake)) {</span>
 
                 // Create the JOB
-<span class="nc" id="L164">                AppDataJobDto&lt;LevelSegmentDto&gt; jobDto = new AppDataJobDto&lt;&gt;();</span>
+<span class="fc" id="L164">                AppDataJobDto&lt;LevelSegmentDto&gt; jobDto = new AppDataJobDto&lt;&gt;();</span>
                 // General details
-<span class="nc" id="L166">                jobDto.setLevel(processSettings.getLevel());</span>
-<span class="nc" id="L167">                jobDto.setPod(processSettings.getHostname());</span>
+<span class="fc" id="L166">                jobDto.setLevel(processSettings.getLevel());</span>
+<span class="fc" id="L167">                jobDto.setPod(processSettings.getHostname());</span>
                 // Messages
-<span class="nc" id="L169">                jobDto.getMessages().add(mqiMessage);</span>
+<span class="fc" id="L169">                jobDto.getMessages().add(mqiMessage);</span>
                 // Product
-<span class="nc" id="L171">                AppDataJobProductDto productDto = new AppDataJobProductDto();</span>
-<span class="nc" id="L172">                productDto.setAcquisition(acquisition);</span>
-<span class="nc" id="L173">                productDto.setMissionId(missionId);</span>
-<span class="nc" id="L174">                productDto.setDataTakeId(datatakeID);</span>
-<span class="nc" id="L175">                productDto.setProductName(&quot;l0_segments_for_&quot; + datatakeID);</span>
-<span class="nc" id="L176">                productDto.setProcessMode(leveldto.getMode());</span>
-<span class="nc" id="L177">                productDto.setSatelliteId(satelliteId);</span>
-<span class="nc" id="L178">                jobDto.setProduct(productDto);</span>
+<span class="fc" id="L171">                AppDataJobProductDto productDto = new AppDataJobProductDto();</span>
+<span class="fc" id="L172">                productDto.setAcquisition(acquisition);</span>
+<span class="fc" id="L173">                productDto.setMissionId(missionId);</span>
+<span class="fc" id="L174">                productDto.setDataTakeId(datatakeID);</span>
+<span class="fc" id="L175">                productDto.setProductName(&quot;l0_segments_for_&quot; + datatakeID);</span>
+<span class="fc" id="L176">                productDto.setProcessMode(leveldto.getMode());</span>
+<span class="fc" id="L177">                productDto.setSatelliteId(satelliteId);</span>
+<span class="fc" id="L178">                jobDto.setProduct(productDto);</span>
 
-<span class="nc" id="L180">                LOGGER.info(</span>
+<span class="fc" id="L180">                LOGGER.info(</span>
                         &quot;[REPORT] [MONITOR] [s1pdgsTask L0SegmentJobGeneration] [START] [datatake {}] Starting job generation&quot;,
-<span class="nc" id="L182">                        jobDto.getProduct().getDataTakeId());</span>
+<span class="fc" id="L182">                        jobDto.getProduct().getDataTakeId());</span>
 
-<span class="nc" id="L184">                return appDataService.newJob(jobDto);</span>
+<span class="fc" id="L184">                return appDataService.newJob(jobDto);</span>
             } else {
 <span class="nc" id="L186">                AppDataJobDto&lt;LevelSegmentDto&gt; jobDto =</span>
 <span class="nc" id="L187">                        existingJobsForDatatake.get(0);</span>
@@ -209,12 +209,12 @@ public class L0SegmentAppConsumer
 
     protected String getProductName(
             final GenericMessageDto&lt;LevelSegmentDto&gt; dto) {
-<span class="nc" id="L212">        return dto.getBody().getName();</span>
+<span class="fc" id="L212">        return dto.getBody().getName();</span>
     }
 
     @Override
     protected String getTaskForFunctionalLog() {
-<span class="nc" id="L217">        return &quot;L0SegmentJobGeneration&quot;;</span>
+<span class="fc" id="L217">        return &quot;L0SegmentJobGeneration&quot;;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

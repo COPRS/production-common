@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +32,6 @@ import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l0app.L0AppConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
@@ -111,12 +109,6 @@ public class L0AppConsumerTest {
         }).when(jobsDispatcher).dispatch(Mockito.any());
 
         // Mock the dispatcher
-        Calendar start1 = Calendar.getInstance();
-        start1.set(2017, Calendar.DECEMBER, 11, 14, 22, 37);
-        start1.set(Calendar.MILLISECOND, 0);
-        Calendar stop1 = Calendar.getInstance();
-        stop1.set(2017, Calendar.DECEMBER, 11, 14, 42, 25);
-        stop1.set(Calendar.MILLISECOND, 0);
         Mockito.doAnswer(i -> {
             return TestL0Utils.createEdrsSessionFileChannel1(true);
         }).when(edrsSessionFileService)
@@ -128,8 +120,8 @@ public class L0AppConsumerTest {
         Mockito.doAnswer(i -> {
             EdrsSessionFile r = new EdrsSessionFile();
             r.setSessionId("SESSION_2");
-            r.setStartTime(start1.getTime());
-            r.setStopTime(stop1.getTime());
+            r.setStartTime("2017-12-11T14:22:37Z");
+            r.setStopTime("2017-12-11T14:42:25Z");
             r.setRawNames(Arrays.asList(
                     new EdrsSessionFileRaw("file1.raw", "file1.raw"),
                     new EdrsSessionFileRaw("file2.raw", "file2.raw")));
@@ -139,8 +131,8 @@ public class L0AppConsumerTest {
         Mockito.doAnswer(i -> {
             EdrsSessionFile r = new EdrsSessionFile();
             r.setSessionId("SESSION_2");
-            r.setStartTime(start1.getTime());
-            r.setStopTime(stop1.getTime());
+            r.setStartTime("2017-12-11T14:22:37Z");
+            r.setStopTime("2017-12-11T14:42:25Z");
             r.setRawNames(Arrays.asList(
                     new EdrsSessionFileRaw("file1.raw", "file1.raw"),
                     new EdrsSessionFileRaw("file2.raw", "file2.raw")));
@@ -210,10 +202,9 @@ public class L0AppConsumerTest {
         doReturn(message1, message3, message2, message4).when(mqiService)
                 .next();
 
-        L0AppConsumer edrsSessionsConsumer =
-                new L0AppConsumer(jobsDispatcher, processSettings,
-                        mqiService, edrsSessionFileService, mqiStatusService,
-                        appDataService, appStatus);
+        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+                processSettings, mqiService, edrsSessionFileService,
+                mqiStatusService, appDataService, appStatus);
 
         // Job<EdrsSession> job = new Job<EdrsSession>(session.getSessionId(),
         // session.getStartTime(), session.getStartTime(), session);
@@ -247,10 +238,9 @@ public class L0AppConsumerTest {
      */
     @Test
     public void testReceiveRaw() throws Exception {
-        L0AppConsumer edrsSessionsConsumer =
-                new L0AppConsumer(jobsDispatcher, processSettings,
-                        mqiService, edrsSessionFileService, mqiStatusService,
-                        appDataService, appStatus);
+        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+                processSettings, mqiService, edrsSessionFileService,
+                mqiStatusService, appDataService, appStatus);
         doReturn(new GenericMessageDto<EdrsSessionDto>(1, "",
                 new EdrsSessionDto("KEY_OBS_SESSION_2_2", 2,
                         EdrsSessionFileType.RAW, "S1", "A"))).when(mqiService)
@@ -263,10 +253,9 @@ public class L0AppConsumerTest {
 
     @Test
     public void testReceivedSameMessageTwice() throws Exception {
-        L0AppConsumer edrsSessionsConsumer =
-                new L0AppConsumer(jobsDispatcher, processSettings,
-                        mqiService, edrsSessionFileService, mqiStatusService,
-                        appDataService, appStatus);
+        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+                processSettings, mqiService, edrsSessionFileService,
+                mqiStatusService, appDataService, appStatus);
         doReturn(message1, message1).when(mqiService).next();
 
         edrsSessionsConsumer.consumeMessages();
@@ -282,10 +271,9 @@ public class L0AppConsumerTest {
 
     @Test
     public void testReceivedInvalidProductChannel() throws Exception {
-        L0AppConsumer edrsSessionsConsumer =
-                new L0AppConsumer(jobsDispatcher, processSettings,
-                        mqiService, edrsSessionFileService, mqiStatusService,
-                        appDataService, appStatus);
+        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+                processSettings, mqiService, edrsSessionFileService,
+                mqiStatusService, appDataService, appStatus);
         dto1.setChannelId(3);
         doReturn(message1).when(mqiService).next();
 
@@ -310,10 +298,9 @@ public class L0AppConsumerTest {
         doReturn(Arrays.asList(expected)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
 
-        L0AppConsumer edrsSessionsConsumer =
-                new L0AppConsumer(jobsDispatcher, processSettings,
-                        mqiService, edrsSessionFileService, mqiStatusService,
-                        appDataService, appStatus);
+        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+                processSettings, mqiService, edrsSessionFileService,
+                mqiStatusService, appDataService, appStatus);
 
         AppDataJobDto<EdrsSessionDto> result =
                 edrsSessionsConsumer.buildJob(message);
@@ -341,10 +328,9 @@ public class L0AppConsumerTest {
         doReturn(Arrays.asList(returned)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
 
-        L0AppConsumer edrsSessionsConsumer =
-                new L0AppConsumer(jobsDispatcher, processSettings,
-                        mqiService, edrsSessionFileService, mqiStatusService,
-                        appDataService, appStatus);
+        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+                processSettings, mqiService, edrsSessionFileService,
+                mqiStatusService, appDataService, appStatus);
 
         AppDataJobDto<EdrsSessionDto> result =
                 edrsSessionsConsumer.buildJob(message);
@@ -377,10 +363,9 @@ public class L0AppConsumerTest {
         doReturn(Arrays.asList(returned)).when(appDataService)
                 .findByProductSessionId(Mockito.anyString());
 
-        L0AppConsumer edrsSessionsConsumer =
-                new L0AppConsumer(jobsDispatcher, processSettings,
-                        mqiService, edrsSessionFileService, mqiStatusService,
-                        appDataService, appStatus);
+        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+                processSettings, mqiService, edrsSessionFileService,
+                mqiStatusService, appDataService, appStatus);
 
         AppDataJobDto<EdrsSessionDto> result =
                 edrsSessionsConsumer.buildJob(message);
@@ -388,8 +373,10 @@ public class L0AppConsumerTest {
                 Mockito.any(), Mockito.eq(true), Mockito.eq(true),
                 Mockito.eq(false));
         assertTrue(result.getMessages().size() == 2);
-        assertEquals(expected.getProduct().getRaws2(), result.getProduct().getRaws2());
-        assertEquals(expected.getProduct().getRaws1(), result.getProduct().getRaws1());
+        assertEquals(expected.getProduct().getRaws2(),
+                result.getProduct().getRaws2());
+        assertEquals(expected.getProduct().getRaws1(),
+                result.getProduct().getRaws1());
         assertEquals(expected.getPod(), result.getPod());
     }
 
@@ -417,10 +404,9 @@ public class L0AppConsumerTest {
         doReturn(Arrays.asList(returned)).when(appDataService)
                 .findByProductSessionId(Mockito.anyString());
 
-        L0AppConsumer edrsSessionsConsumer =
-                new L0AppConsumer(jobsDispatcher, processSettings,
-                        mqiService, edrsSessionFileService, mqiStatusService,
-                        appDataService, appStatus);
+        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+                processSettings, mqiService, edrsSessionFileService,
+                mqiStatusService, appDataService, appStatus);
 
         AppDataJobDto<EdrsSessionDto> result =
                 edrsSessionsConsumer.buildJob(message);

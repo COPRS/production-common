@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
@@ -31,8 +32,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 @Component
 @ConditionalOnProperty(name = "process.level", havingValue = "L0")
-public class L0AppConsumer
-        extends AbstractGenericConsumer<EdrsSessionDto> {
+public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
     /**
      * Service for EDRS session file
      */
@@ -52,7 +52,7 @@ public class L0AppConsumer
         this.edrsService = edrsService;
     }
 
-    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString="${process.initial-delay-ms}")
+    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {
         // First, consume message
         GenericMessageDto<EdrsSessionDto> mqiMessage = readMessage();
@@ -96,9 +96,9 @@ public class L0AppConsumer
                             getProductName(mqiMessage));
                     if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
                         appDataJob.setState(AppDataJobDtoState.DISPATCHING);
-                        appDataJob =
-                                appDataService.patchJob(appDataJob.getIdentifier(),
-                                        appDataJob, false, false, false);
+                        appDataJob = appDataService.patchJob(
+                                appDataJob.getIdentifier(), appDataJob, false,
+                                false, false);
                     }
                     jobsDispatcher.dispatch(appDataJob);
                 }
@@ -157,8 +157,12 @@ public class L0AppConsumer
                 productDto.setProductName(file.getSessionId());
                 productDto
                         .setSatelliteId(mqiMessage.getBody().getSatelliteId());
-                productDto.setStartTime(file.getStartTime());
-                productDto.setStopTime(file.getStopTime());
+                productDto.setStartTime(DateUtils.convertToAnotherFormat(
+                        file.getStartTime(), EdrsSessionFile.TIME_FORMATTER,
+                        AppDataJobProductDto.TIME_FORMATTER));
+                productDto.setStopTime(DateUtils.convertToAnotherFormat(
+                        file.getStopTime(), EdrsSessionFile.TIME_FORMATTER,
+                        AppDataJobProductDto.TIME_FORMATTER));
                 if (mqiMessage.getBody().getChannelId() == 1) {
                     productDto.setRaws1(file.getRawNames().stream().map(
                             rawI -> new AppDataJobFileDto(rawI.getFileName()))
@@ -181,7 +185,8 @@ public class L0AppConsumer
                 boolean update = false;
                 boolean updateMessage = false;
                 boolean updateProduct = false;
-                AppDataJobDto<EdrsSessionDto> jobDto = existingJobsForSession.get(0);
+                AppDataJobDto<EdrsSessionDto> jobDto =
+                        existingJobsForSession.get(0);
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
                     update = true;

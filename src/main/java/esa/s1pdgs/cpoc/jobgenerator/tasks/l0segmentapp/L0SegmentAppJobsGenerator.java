@@ -11,7 +11,7 @@ import java.util.Map;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -91,9 +91,7 @@ public class L0SegmentAppJobsGenerator
                 }
             }
         } catch (JobGenMetadataException e) {
-            missingMetadata.put(
-                    lastName,
-                    "Missing segment: " + e.getMessage());
+            missingMetadata.put(lastName, "Missing segment: " + e.getMessage());
         }
 
         // If missing one segment
@@ -102,8 +100,8 @@ public class L0SegmentAppJobsGenerator
         }
 
         // Check polarisation right
-        Date sensingStart = null;
-        Date sensingStop = null;
+        String sensingStart = null;
+        String sensingStop = null;
         if (pols.size() <= 0 || pols.size() > 2) {
             missingMetadata.put(
                     job.getAppDataJob().getProduct().getProductName(),
@@ -132,15 +130,10 @@ public class L0SegmentAppJobsGenerator
                         "Missing the other polarisation of " + polA);
             }
             // Get sensing start and stop
-            try {
-                sensingStart = getStartSensingDate(segmentsA);
-                sensingStop = getStopSensingDate(segmentsA);
-            } catch (InternalErrorException e) {
-                fullCoverage = false;
-                missingMetadata.put(
-                        job.getAppDataJob().getProduct().getProductName(),
-                        "Cannot get sensing period: " + e.getMessage());
-            }
+            sensingStart = getStartSensingDate(segmentsA,
+                    AppDataJobProductDto.TIME_FORMATTER);
+            sensingStop = getStopSensingDate(segmentsA,
+                    AppDataJobProductDto.TIME_FORMATTER);
 
         } else {
             String polA = pols.get(0);
@@ -182,17 +175,11 @@ public class L0SegmentAppJobsGenerator
                         "Invalid double polarisation " + polA + " - " + polB);
             }
             // Get sensing start and stop
-            try {
-                sensingStart = least(getStartSensingDate(segmentsA),
-                        getStartSensingDate(segmentsB));
-                sensingStop = more(getStopSensingDate(segmentsA),
-                        getStopSensingDate(segmentsB));
-            } catch (InternalErrorException e) {
-                fullCoverage = false;
-                missingMetadata.put(
-                        job.getAppDataJob().getProduct().getProductName(),
-                        "Cannot get sensing period: " + e.getMessage());
-            }
+            DateTimeFormatter formatter = AppDataJobProductDto.TIME_FORMATTER;
+            sensingStart = least(getStartSensingDate(segmentsA, formatter),
+                    getStartSensingDate(segmentsB, formatter), formatter);
+            sensingStop = more(getStopSensingDate(segmentsA, formatter),
+                    getStopSensingDate(segmentsB, formatter), formatter);
         }
 
         // Check if we add the coverage
@@ -315,8 +302,8 @@ public class L0SegmentAppJobsGenerator
                     if (startDate.isAfter(previousStopDate)) {
                         return false;
                     }
-                    previousStopDate = LocalDateTime.parse(
-                            segment.getValidityStop(), formatterProduct);
+                    previousStopDate = LocalDateTime
+                            .parse(segment.getValidityStop(), formatterProduct);
                 }
                 return true;
             } else {
@@ -325,25 +312,54 @@ public class L0SegmentAppJobsGenerator
         }
     }
 
-    protected Date getStartSensingDate(
-            List<LevelSegmentMetadata> sortedSegments)
-            throws InternalErrorException {
+    protected String getStartSensingDate(
+            List<LevelSegmentMetadata> sortedSegments,
+            DateTimeFormatter outFormatter) {
         if (CollectionUtils.isEmpty(sortedSegments)) {
             return null;
         }
-        return DateUtils.convertWithSimpleDateFormat(
+        return DateUtils.convertToAnotherFormat(
                 sortedSegments.get(0).getValidityStart(),
-                "yyyy-MM-dd'T'HH:mm:ss");
+                LevelSegmentMetadata.DATE_FORMATTER, outFormatter);
     }
 
-    protected Date getStopSensingDate(List<LevelSegmentMetadata> sortedSegments)
-            throws InternalErrorException {
+    protected String getStopSensingDate(
+            List<LevelSegmentMetadata> sortedSegments,
+            DateTimeFormatter outFormatter) {
         if (CollectionUtils.isEmpty(sortedSegments)) {
             return null;
         }
-        return DateUtils.convertWithSimpleDateFormat(
+        return DateUtils.convertToAnotherFormat(
                 sortedSegments.get(sortedSegments.size() - 1).getValidityStop(),
-                "yyyy-MM-dd'T'HH:mm:ss");
+                LevelSegmentMetadata.DATE_FORMATTER, outFormatter);
+    }
+
+    /**
+     * TODO: move in common lib
+     * 
+     * @param a
+     * @param b
+     * @return
+     */
+    protected String least(String a, String b, DateTimeFormatter formatter) {
+        LocalDateTime timeA = LocalDateTime.parse(a, formatter);
+        LocalDateTime timeB = LocalDateTime.parse(b, formatter);
+        return timeA == null ? b
+                : (b == null ? a : (timeA.isBefore(timeB) ? a : b));
+    }
+
+    /**
+     * TODO: move in common lib
+     * 
+     * @param a
+     * @param b
+     * @return
+     */
+    protected String more(String a, String b, DateTimeFormatter formatter) {
+        LocalDateTime timeA = LocalDateTime.parse(a, formatter);
+        LocalDateTime timeB = LocalDateTime.parse(b, formatter);
+        return timeA == null ? b
+                : (b == null ? a : (timeA.isAfter(timeB) ? a : b));
     }
 
     protected String extractConsolidation(
@@ -354,26 +370,6 @@ public class L0SegmentAppJobsGenerator
                     + " " + segment.getValidityStop() + " | ";
         }
         return ret;
-    }
-
-    /**
-     * TODO: move in common lib
-     * @param a
-     * @param b
-     * @return
-     */
-    protected Date least(Date a, Date b) {
-        return a == null ? b : (b == null ? a : (a.before(b) ? a : b));
-    }
-
-    /**
-     * TODO: move in common lib
-     * @param a
-     * @param b
-     * @return
-     */
-    protected Date more(Date a, Date b) {
-        return a == null ? b : (b == null ? a : (a.after(b) ? a : b));
     }
 
 }
