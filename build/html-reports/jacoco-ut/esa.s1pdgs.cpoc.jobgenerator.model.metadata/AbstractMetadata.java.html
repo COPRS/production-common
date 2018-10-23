@@ -19,8 +19,14 @@ public abstract class AbstractMetadata {
     /**
      * 
      */
-<span class="fc" id="L22">    public final static DateTimeFormatter DATE_FORMATTER_LIGTH =</span>
-<span class="fc" id="L23">            DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss&quot;);</span>
+<span class="fc" id="L22">    public final static DateTimeFormatter DATE_FORMATTER_26 =</span>
+<span class="fc" id="L23">            DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSSSS&quot;);</span>
+
+    /**
+     * 
+     */
+<span class="fc" id="L28">    public final static DateTimeFormatter DATE_FORMATTER_LIGTH =</span>
+<span class="fc" id="L29">            DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss&quot;);</span>
 
     /**
      * Product name
@@ -57,19 +63,19 @@ public abstract class AbstractMetadata {
     public AbstractMetadata(final String productName, final String productType,
             final String keyObjectStorage, final String validityStart,
             final String validityStop) {
-<span class="fc" id="L60">        super();</span>
-<span class="fc" id="L61">        this.productName = productName;</span>
-<span class="fc" id="L62">        this.productType = productType;</span>
-<span class="fc" id="L63">        this.keyObjectStorage = keyObjectStorage;</span>
-<span class="fc" id="L64">        this.validityStart = validityStart;</span>
-<span class="fc" id="L65">        this.validityStop = validityStop;</span>
-<span class="fc" id="L66">    }</span>
+<span class="fc" id="L66">        super();</span>
+<span class="fc" id="L67">        this.productName = productName;</span>
+<span class="fc" id="L68">        this.productType = productType;</span>
+<span class="fc" id="L69">        this.keyObjectStorage = keyObjectStorage;</span>
+<span class="fc" id="L70">        this.validityStart = validityStart;</span>
+<span class="fc" id="L71">        this.validityStop = validityStop;</span>
+<span class="fc" id="L72">    }</span>
 
     /**
      * @return the productName
      */
     public String getProductName() {
-<span class="fc" id="L72">        return productName;</span>
+<span class="fc" id="L78">        return productName;</span>
     }
 
     /**
@@ -77,14 +83,14 @@ public abstract class AbstractMetadata {
      *            the productName to set
      */
     public void setProductName(final String productName) {
-<span class="fc" id="L80">        this.productName = productName;</span>
-<span class="fc" id="L81">    }</span>
+<span class="fc" id="L86">        this.productName = productName;</span>
+<span class="fc" id="L87">    }</span>
 
     /**
      * @return the keyObjectStorage
      */
     public String getKeyObjectStorage() {
-<span class="fc" id="L87">        return keyObjectStorage;</span>
+<span class="fc" id="L93">        return keyObjectStorage;</span>
     }
 
     /**
@@ -92,14 +98,14 @@ public abstract class AbstractMetadata {
      *            the keyObjectStorage to set
      */
     public void setKeyObjectStorage(final String keyObjectStorage) {
-<span class="fc" id="L95">        this.keyObjectStorage = keyObjectStorage;</span>
-<span class="fc" id="L96">    }</span>
+<span class="fc" id="L101">        this.keyObjectStorage = keyObjectStorage;</span>
+<span class="fc" id="L102">    }</span>
 
     /**
      * @return the validityStart
      */
     public String getValidityStart() {
-<span class="fc" id="L102">        return validityStart;</span>
+<span class="fc" id="L108">        return validityStart;</span>
     }
 
     /**
@@ -107,14 +113,14 @@ public abstract class AbstractMetadata {
      *            the validityStart to set
      */
     public void setValidityStart(final String validityStart) {
-<span class="fc" id="L110">        this.validityStart = validityStart;</span>
-<span class="fc" id="L111">    }</span>
+<span class="fc" id="L116">        this.validityStart = validityStart;</span>
+<span class="fc" id="L117">    }</span>
 
     /**
      * @return the validityStop
      */
     public String getValidityStop() {
-<span class="fc" id="L117">        return validityStop;</span>
+<span class="fc" id="L123">        return validityStop;</span>
     }
 
     /**
@@ -122,14 +128,14 @@ public abstract class AbstractMetadata {
      *            the validityStop to set
      */
     public void setValidityStop(final String validityStop) {
-<span class="fc" id="L125">        this.validityStop = validityStop;</span>
-<span class="fc" id="L126">    }</span>
+<span class="fc" id="L131">        this.validityStop = validityStop;</span>
+<span class="fc" id="L132">    }</span>
 
     /**
      * @return the productType
      */
     public String getProductType() {
-<span class="fc" id="L132">        return productType;</span>
+<span class="fc" id="L138">        return productType;</span>
     }
 
     /**
@@ -137,15 +143,15 @@ public abstract class AbstractMetadata {
      *            the productType to set
      */
     public void setProductType(final String productType) {
-<span class="fc" id="L140">        this.productType = productType;</span>
-<span class="fc" id="L141">    }</span>
+<span class="fc" id="L146">        this.productType = productType;</span>
+<span class="fc" id="L147">    }</span>
 
     /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-<span class="fc" id="L148">        return String.format(</span>
+<span class="fc" id="L154">        return String.format(</span>
                 &quot;{productName: %s, productType: %s, keyObjectStorage: %s, validityStart: %s, validityStop: %s}&quot;,
                 productName, productType, keyObjectStorage, validityStart,
                 validityStop);
@@ -155,7 +161,7 @@ public abstract class AbstractMetadata {
      *
      */
     public String toAbstractString() {
-<span class="fc" id="L158">        return String.format(</span>
+<span class="fc" id="L164">        return String.format(</span>
                 &quot;productName: %s, productType: %s, keyObjectStorage: %s, validityStart: %s, validityStop: %s&quot;,
                 productName, productType, keyObjectStorage, validityStart,
                 validityStop);
@@ -166,7 +172,7 @@ public abstract class AbstractMetadata {
      */
     @Override
     public int hashCode() {
-<span class="fc" id="L169">        return Objects.hash(productName, productType, keyObjectStorage,</span>
+<span class="fc" id="L175">        return Objects.hash(productName, productType, keyObjectStorage,</span>
                 validityStart, validityStop);
     }
 
@@ -176,34 +182,38 @@ public abstract class AbstractMetadata {
     @Override
     public boolean equals(final Object obj) {
         boolean ret;
-<span class="fc bfc" id="L179" title="All 2 branches covered.">        if (this == obj) {</span>
-<span class="fc" id="L180">            ret = true;</span>
-<span class="fc bfc" id="L181" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L182">            ret = false;</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L186">            ret = true;</span>
+<span class="fc bfc" id="L187" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L188">            ret = false;</span>
         } else {
-<span class="fc" id="L184">            AbstractMetadata other = (AbstractMetadata) obj;</span>
-<span class="fc bfc" id="L185" title="All 2 branches covered.">            ret = Objects.equals(productName, other.productName)</span>
-<span class="fc bfc" id="L186" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productType, other.productType)</span>
-<span class="fc bfc" id="L187" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(keyObjectStorage, other.keyObjectStorage)</span>
-<span class="fc bfc" id="L188" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(validityStart, other.validityStart)</span>
-<span class="fc bfc" id="L189" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(validityStop, other.validityStop);</span>
+<span class="fc" id="L190">            AbstractMetadata other = (AbstractMetadata) obj;</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">            ret = Objects.equals(productName, other.productName)</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(productType, other.productType)</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(keyObjectStorage, other.keyObjectStorage)</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(validityStart, other.validityStart)</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(validityStop, other.validityStop);</span>
         }
-<span class="fc" id="L191">        return ret;</span>
+<span class="fc" id="L197">        return ret;</span>
     }
     
     public DateTimeFormatter getStartTimeFormatter() {
-<span class="pc bpc" id="L195" title="1 of 2 branches missed.">        if (validityStart.length() &gt; 20) {</span>
-<span class="fc" id="L196">            return DATE_FORMATTER;</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        if (validityStart.length() &gt; 26) {</span>
+<span class="fc" id="L202">            return DATE_FORMATTER;</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        } else if (validityStart.length() == 26) {</span>
+<span class="nc" id="L204">            return DATE_FORMATTER_26;</span>
         } else {
-<span class="nc" id="L198">            return DATE_FORMATTER_LIGTH;</span>
+<span class="nc" id="L206">            return DATE_FORMATTER_LIGTH;</span>
         }
     }
     
     public DateTimeFormatter getStopTimeFormatter() {
-<span class="pc bpc" id="L203" title="1 of 2 branches missed.">        if (validityStop.length() &gt; 20) {</span>
-<span class="fc" id="L204">            return DATE_FORMATTER;</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">        if (validityStop.length() &gt; 26) {</span>
+<span class="fc" id="L212">            return DATE_FORMATTER;</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        } else if (validityStop.length() == 26) {</span>
+<span class="nc" id="L214">            return DATE_FORMATTER_26;</span>
         } else {
-<span class="nc" id="L206">            return DATE_FORMATTER_LIGTH;</span>
+<span class="nc" id="L216">            return DATE_FORMATTER_LIGTH;</span>
         }
     }
 }

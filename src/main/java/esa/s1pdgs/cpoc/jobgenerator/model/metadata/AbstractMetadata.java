@@ -19,6 +19,12 @@ public abstract class AbstractMetadata {
     /**
      * 
      */
+    public final static DateTimeFormatter DATE_FORMATTER_26 =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+
+    /**
+     * 
+     */
     public final static DateTimeFormatter DATE_FORMATTER_LIGTH =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -192,16 +198,20 @@ public abstract class AbstractMetadata {
     }
     
     public DateTimeFormatter getStartTimeFormatter() {
-        if (validityStart.length() > 20) {
+        if (validityStart.length() > 26) {
             return DATE_FORMATTER;
+        } else if (validityStart.length() == 26) {
+            return DATE_FORMATTER_26;
         } else {
             return DATE_FORMATTER_LIGTH;
         }
     }
     
     public DateTimeFormatter getStopTimeFormatter() {
-        if (validityStop.length() > 20) {
+        if (validityStop.length() > 26) {
             return DATE_FORMATTER;
+        } else if (validityStop.length() == 26) {
+            return DATE_FORMATTER_26;
         } else {
             return DATE_FORMATTER_LIGTH;
         }
