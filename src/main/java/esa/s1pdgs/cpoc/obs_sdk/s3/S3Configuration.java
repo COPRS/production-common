@@ -14,6 +14,8 @@ import com.amazonaws.retry.PredefinedBackoffStrategies;
 import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -55,6 +57,18 @@ public class S3Configuration {
      * <code>endpoint.region</code>
      */
     public static final String ENDPOINT_REGION = "endpoint.region";
+
+    /**
+     * <code>endpoint</code>
+     */
+    public static final String TM_MP_UPLOAD_TH_MB =
+            "transfer.manager.multipart-upload-threshold-mb";
+
+    /**
+     * <code>endpoint.region</code>
+     */
+    public static final String TM_MIN_UPLOAD_PART_SIZE_MB =
+            "transfer.manager.minimum-upload-part-size-mb";
 
     /**
      * Name of the bucket dedicated to the family
@@ -106,27 +120,30 @@ public class S3Configuration {
      * Timeout in second of a upload execution
      */
     public static final String TM_S_UP_EXEC = "timeout-s.up-exec";
-    
+
     /**
      * Number of max retries
      */
-    public static final String RETRY_POLICY_MAX_RETRIES = "retry-policy.condition.max-retries";
-    
+    public static final String RETRY_POLICY_MAX_RETRIES =
+            "retry-policy.condition.max-retries";
+
     /**
      * Time in millisecond of the delay
      */
-    public static final String RETRY_POLICY_BASE_DELAY_MS = "retry-policy.backoff.base-delay-ms";
-    
+    public static final String RETRY_POLICY_BASE_DELAY_MS =
+            "retry-policy.backoff.base-delay-ms";
+
     /**
      * Time in millisecond of the throttled delay
      */
-    public static final String RETRY_POLICY_THROTTLED_BASE_DELAY_MS = "retry-policy.backoff.throttled-base-delay-ms";
-    
+    public static final String RETRY_POLICY_THROTTLED_BASE_DELAY_MS =
+            "retry-policy.backoff.throttled-base-delay-ms";
+
     /**
      * Time in millisecond of max backoff
      */
-    public static final String RETRY_POLICY_MAX_BACKOFF_MS = "retry-policy.backoff.max-backoff-ms";
-
+    public static final String RETRY_POLICY_MAX_BACKOFF_MS =
+            "retry-policy.backoff.max-backoff-ms";
 
     /**
      * @throws ConfigurationException
@@ -216,18 +233,21 @@ public class S3Configuration {
         BasicAWSCredentials awsCreds =
                 new BasicAWSCredentials(configuration.getString(USER_ID),
                         configuration.getString(USER_SECRET));
-        
+
         // Client configuration (protocol and retry policy)
         ClientConfiguration clientConfig = new ClientConfiguration();
         clientConfig.setProtocol(Protocol.HTTP);
         RetryPolicy retryPolicy = new RetryPolicy(
-                new SDKCustomDefaultRetryCondition(configuration.getInt(RETRY_POLICY_MAX_RETRIES)),
-                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(configuration.getInt(RETRY_POLICY_BASE_DELAY_MS),
-                        configuration.getInt(RETRY_POLICY_THROTTLED_BASE_DELAY_MS), 
+                new SDKCustomDefaultRetryCondition(
+                        configuration.getInt(RETRY_POLICY_MAX_RETRIES)),
+                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(
+                        configuration.getInt(RETRY_POLICY_BASE_DELAY_MS),
+                        configuration
+                                .getInt(RETRY_POLICY_THROTTLED_BASE_DELAY_MS),
                         configuration.getInt(RETRY_POLICY_MAX_BACKOFF_MS)),
                 configuration.getInt(RETRY_POLICY_MAX_RETRIES), true);
         clientConfig.setRetryPolicy(retryPolicy);
-        
+
         // Amazon s3 client
         return AmazonS3ClientBuilder.standard()
                 .withClientConfiguration(clientConfig)
@@ -236,5 +256,14 @@ public class S3Configuration {
                         configuration.getString(ENDPOINT_REGION)))
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                 .build();
+    }
+
+    public TransferManager defaultS3TransferManager(AmazonS3 client) {
+        return TransferManagerBuilder.standard()
+                .withMinimumUploadPartSize(
+                        configuration.getLong(TM_MIN_UPLOAD_PART_SIZE_MB))
+                .withMultipartUploadThreshold(
+                        configuration.getLong(TM_MP_UPLOAD_TH_MB))
+                .withS3Client(client).build();
     }
 }

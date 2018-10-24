@@ -9,10 +9,10 @@ S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsServiceExce
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsUploadCallable,0,16,0,0,0,5,0,2,0,2
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,ObsDownloadObject,0,118,0,14,0,25,0,15,0,8
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk,SdkClientException,0,9,0,0,0,4,0,2,0,2
-S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsServices,91,627,4,34,18,123,4,23,0,8
-S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsClient,0,125,0,4,0,35,0,11,0,9
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsServices,120,639,4,34,24,131,5,23,1,8
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsClient,0,133,0,4,0,39,0,11,0,9
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3ObsServiceException,0,47,0,0,0,12,0,5,0,5
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3SdkClientException,0,47,0,0,0,12,0,5,0,5
-S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration,40,158,1,7,8,42,1,11,0,5
+S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration,40,175,1,7,8,48,1,12,0,6
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3,S3Configuration.new Object() {...},7,47,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Object storage client,esa.s1pdgs.cpoc.obs_sdk.s3.retry,SDKCustomDefaultRetryCondition,0,45,0,4,0,8,0,5,0,3

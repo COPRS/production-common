@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>spdgs-sdk</groupId>
 	<artifactId>obs-clients</artifactId>
-	<version>1.1.1</version>
+	<version>1.2.0</version>
 	<packaging>jar</packaging>
 	<name>S1-PDGS Cloud POC - Object storage client</name>
 
