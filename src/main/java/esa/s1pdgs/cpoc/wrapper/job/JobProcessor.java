@@ -171,7 +171,7 @@ public class JobProcessor {
         if (properties.getLevel() == ApplicationLevel.L0) {
             outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
         } else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
-            outputListFile = job.getWorkDirectory() + "L0ASPProcList.LIST";
+            outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
         }
         // Initialize the pool processor executor
         PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties,

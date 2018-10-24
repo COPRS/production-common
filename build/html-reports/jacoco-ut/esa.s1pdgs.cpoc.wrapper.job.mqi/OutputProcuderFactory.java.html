@@ -108,12 +108,15 @@ public class OutputProcuderFactory {
 <span class="fc" id="L108">            LevelProductDto dtoProduct =</span>
 <span class="fc" id="L109">                    new LevelProductDto(msg.getProductName(), msg.getKeyObs(),</span>
 <span class="fc" id="L110">                            msg.getFamily(), msg.getProcessMode());</span>
-<span class="fc" id="L111">            senderProducts</span>
-<span class="fc" id="L112">                    .publish(new GenericPublicationMessageDto&lt;LevelProductDto&gt;(</span>
+<span class="fc" id="L111">            GenericPublicationMessageDto&lt;LevelProductDto&gt; messageToPublish =</span>
+                    new GenericPublicationMessageDto&lt;LevelProductDto&gt;(
 <span class="fc" id="L113">                            inputMessage.getIdentifier(), msg.getFamily(),</span>
-                            dtoProduct));
+                            dtoProduct);
+<span class="fc" id="L115">            messageToPublish.setInputKey(inputMessage.getInputKey());</span>
+<span class="fc" id="L116">            messageToPublish.setOutputKey(msg.getFamily().name());</span>
+<span class="fc" id="L117">            senderProducts.publish(messageToPublish);</span>
         }
-<span class="fc" id="L116">    }</span>
+<span class="fc" id="L119">    }</span>
 
     /**
      * Publish a error
@@ -122,10 +125,10 @@ public class OutputProcuderFactory {
      */
     public void sendError(final String message) {
         try {
-<span class="fc" id="L125">            senderErrors.publish(message);</span>
-<span class="fc" id="L126">        } catch (AbstractCodedException e) {</span>
-<span class="fc" id="L127">            LOGGER.error(e.getLogMessage());</span>
-<span class="fc" id="L128">        }</span>
-<span class="fc" id="L129">    }</span>
+<span class="fc" id="L128">            senderErrors.publish(message);</span>
+<span class="fc" id="L129">        } catch (AbstractCodedException e) {</span>
+<span class="fc" id="L130">            LOGGER.error(e.getLogMessage());</span>
+<span class="fc" id="L131">        }</span>
+<span class="fc" id="L132">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
