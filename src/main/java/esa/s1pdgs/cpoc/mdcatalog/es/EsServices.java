@@ -216,7 +216,7 @@ public class EsServices {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("startTime").lt(endDate))
                 .must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
                 .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-                .must(QueryBuilders.termQuery("productType.keyword", productType))
+                .must(QueryBuilders.regexpQuery("productType.keyword", productType))
                 .must(QueryBuilders.termQuery("processMode.keyword", processMode));
         sourceBuilder.query(queryBuilder);
         sourceBuilder.size(20);

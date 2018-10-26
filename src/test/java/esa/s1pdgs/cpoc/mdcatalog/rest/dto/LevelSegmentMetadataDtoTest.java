@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -70,7 +69,7 @@ public class LevelSegmentMetadataDtoTest {
 	 */
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(L0AcnMetadata.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(LevelSegmentMetadataDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }
