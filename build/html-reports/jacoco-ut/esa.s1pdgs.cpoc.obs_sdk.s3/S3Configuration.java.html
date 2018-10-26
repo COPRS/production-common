@@ -261,9 +261,9 @@ public class S3Configuration {
     public TransferManager defaultS3TransferManager(AmazonS3 client) {
 <span class="fc" id="L262">        return TransferManagerBuilder.standard()</span>
 <span class="fc" id="L263">                .withMinimumUploadPartSize(</span>
-<span class="fc" id="L264">                        configuration.getLong(TM_MIN_UPLOAD_PART_SIZE_MB))</span>
+<span class="fc" id="L264">                        configuration.getLong(TM_MIN_UPLOAD_PART_SIZE_MB) * 1024 * 1024)</span>
 <span class="fc" id="L265">                .withMultipartUploadThreshold(</span>
-<span class="fc" id="L266">                        configuration.getLong(TM_MP_UPLOAD_TH_MB))</span>
+<span class="fc" id="L266">                        configuration.getLong(TM_MP_UPLOAD_TH_MB) * 1024 * 1024)</span>
 <span class="fc" id="L267">                .withS3Client(client).build();</span>
     }
 }
