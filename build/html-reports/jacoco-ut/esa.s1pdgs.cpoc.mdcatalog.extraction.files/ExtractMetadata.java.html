@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
@@ -60,13 +61,13 @@ public class ExtractMetadata {
 	/**
 	 * Constructor
 	 */
-<span class="fc" id="L63">	public ExtractMetadata(Map&lt;String, Float&gt; typeOverlap, Map&lt;String, Float&gt; typeSliceLength, String xsltDirectory) {</span>
-<span class="fc" id="L64">		this.transFactory = TransformerFactory.newInstance();</span>
-<span class="fc" id="L65">		this.dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss&quot;);</span>
-<span class="fc" id="L66">		this.typeOverlap = typeOverlap;</span>
-<span class="fc" id="L67">		this.typeSliceLength = typeSliceLength;</span>
-<span class="fc" id="L68">		this.xsltDirectory = xsltDirectory;</span>
-<span class="fc" id="L69">	}</span>
+<span class="fc" id="L64">	public ExtractMetadata(Map&lt;String, Float&gt; typeOverlap, Map&lt;String, Float&gt; typeSliceLength, String xsltDirectory) {</span>
+<span class="fc" id="L65">		this.transFactory = TransformerFactory.newInstance();</span>
+<span class="fc" id="L66">		this.dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss&quot;);</span>
+<span class="fc" id="L67">		this.typeOverlap = typeOverlap;</span>
+<span class="fc" id="L68">		this.typeSliceLength = typeSliceLength;</span>
+<span class="fc" id="L69">		this.xsltDirectory = xsltDirectory;</span>
+<span class="fc" id="L70">	}</span>
 
 	/**
 	 * Tool function which returns the content of a file
@@ -79,8 +80,8 @@ public class ExtractMetadata {
 	 * @throws IOException
 	 */
 	private String readFile(String fileName, Charset encoding) throws IOException {
-<span class="fc" id="L82">		byte[] encoded = Files.readAllBytes(Paths.get(fileName));</span>
-<span class="fc" id="L83">		return new String(encoded, encoding);</span>
+<span class="fc" id="L83">		byte[] encoded = Files.readAllBytes(Paths.get(fileName));</span>
+<span class="fc" id="L84">		return new String(encoded, encoding);</span>
 	}
 	
 	/**
@@ -93,30 +94,30 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException 
 	 */
 	private JSONObject processCoordinates(String productName, String rawCoordinates) throws MetadataExtractionException {
-<span class="fc" id="L96">	    JSONObject geoShape = new JSONObject();</span>
-<span class="fc" id="L97">		JSONArray coordinates = new JSONArray();</span>
+<span class="fc" id="L97">	    JSONObject geoShape = new JSONObject();</span>
+<span class="fc" id="L98">		JSONArray coordinates = new JSONArray();</span>
 		try {
-<span class="fc" id="L99">		    String[] coordSplitSpace = rawCoordinates.split(&quot; &quot;);</span>
-<span class="fc bfc" id="L100" title="All 2 branches covered.">		    if(coordSplitSpace.length == 2) { //BBOX type (envelope in ES)</span>
-<span class="fc" id="L101">		        geoShape.put(&quot;type&quot;, &quot;envelope&quot;);</span>
-<span class="fc bfc" id="L102" title="All 2 branches covered.">		        for (String coord : coordSplitSpace) {</span>
-<span class="fc" id="L103">                    coordinates.put(new JSONArray(&quot;[&quot; + (coord.split(&quot;,&quot;))[1] + &quot;,&quot; + (coord.split(&quot;,&quot;))[0] + &quot;]&quot;));</span>
+<span class="fc" id="L100">		    String[] coordSplitSpace = rawCoordinates.split(&quot; &quot;);</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">		    if(coordSplitSpace.length == 2) { //BBOX type (envelope in ES)</span>
+<span class="fc" id="L102">		        geoShape.put(&quot;type&quot;, &quot;envelope&quot;);</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">		        for (String coord : coordSplitSpace) {</span>
+<span class="fc" id="L104">                    coordinates.put(new JSONArray(&quot;[&quot; + (coord.split(&quot;,&quot;))[1] + &quot;,&quot; + (coord.split(&quot;,&quot;))[0] + &quot;]&quot;));</span>
                 }
-<span class="fc" id="L105">	            geoShape.put(&quot;coordinates&quot;, coordinates);</span>
+<span class="fc" id="L106">	            geoShape.put(&quot;coordinates&quot;, coordinates);</span>
 		    } else { //Polygon type
-<span class="fc" id="L107">		        geoShape.put(&quot;type&quot;, &quot;polygon&quot;);</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">		        for (String coord : coordSplitSpace) {</span>
-<span class="fc" id="L109">	                coordinates.put(new JSONArray(&quot;[&quot; + (coord.split(&quot;,&quot;))[1] + &quot;,&quot; + (coord.split(&quot;,&quot;))[0] + &quot;]&quot;));</span>
+<span class="fc" id="L108">		        geoShape.put(&quot;type&quot;, &quot;polygon&quot;);</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">		        for (String coord : coordSplitSpace) {</span>
+<span class="fc" id="L110">	                coordinates.put(new JSONArray(&quot;[&quot; + (coord.split(&quot;,&quot;))[1] + &quot;,&quot; + (coord.split(&quot;,&quot;))[0] + &quot;]&quot;));</span>
 	            }
-<span class="fc bfc" id="L111" title="All 2 branches covered.">	            if(!coordSplitSpace[0].equals(coordSplitSpace[coordSplitSpace.length-1])) {</span>
-<span class="fc" id="L112">	                coordinates.put(new JSONArray(&quot;[&quot; + (coordSplitSpace[0].split(&quot;,&quot;))[1] + &quot;,&quot; + (coordSplitSpace[0].split(&quot;,&quot;))[0] + &quot;]&quot;));</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">	            if(!coordSplitSpace[0].equals(coordSplitSpace[coordSplitSpace.length-1])) {</span>
+<span class="fc" id="L113">	                coordinates.put(new JSONArray(&quot;[&quot; + (coordSplitSpace[0].split(&quot;,&quot;))[1] + &quot;,&quot; + (coordSplitSpace[0].split(&quot;,&quot;))[0] + &quot;]&quot;));</span>
 	            }
-<span class="fc" id="L114">	            geoShape.put(&quot;coordinates&quot;, new JSONArray().put(coordinates));</span>
+<span class="fc" id="L115">	            geoShape.put(&quot;coordinates&quot;, new JSONArray().put(coordinates));</span>
 		    }
-<span class="nc" id="L116">		} catch (JSONException e) {</span>
-<span class="nc" id="L117">			throw new MetadataExtractionException(e);</span>
-<span class="fc" id="L118">		}</span>
-<span class="fc" id="L119">		return geoShape;</span>
+<span class="nc" id="L117">		} catch (JSONException e) {</span>
+<span class="nc" id="L118">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L119">		}</span>
+<span class="fc" id="L120">		return geoShape;</span>
 	}
 	
 	/**
@@ -129,18 +130,25 @@ public class ExtractMetadata {
 	 * @return an int which is the number of Slices
 	 */
 	private int totalNumberOfSlice(Long startTimeLong, Long stopTimeLong, String type) {
-<span class="fc" id="L132">		int totalNumberOfSlices = 0;</span>
-<span class="fc" id="L133">		float tmpNumberOfSlices = 0F;</span>
-<span class="fc" id="L134">		double fracNumberOfSlices = 0.0;</span>
-<span class="fc" id="L135">		tmpNumberOfSlices = (stopTimeLong - startTimeLong - this.typeOverlap.get(type))/this.typeSliceLength.get(type);</span>
-<span class="fc" id="L136">		fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);</span>
-<span class="pc bpc" id="L137" title="1 of 2 branches missed.">		if((fracNumberOfSlices*this.typeSliceLength.get(type)) &lt; this.typeOverlap.get(type)){</span>
-<span class="nc" id="L138">			totalNumberOfSlices = (int) Math.floor(tmpNumberOfSlices);</span>
+<span class="fc" id="L133">	    float sliceLength = this.typeSliceLength.get(type);</span>
+	    
+	    // Case of their is no slice information in manifest
+<span class="fc bfc" id="L136" title="All 2 branches covered.">	    if (sliceLength &lt;= 0) {</span>
+<span class="fc" id="L137">	        return 1;</span>
+	    }
+
+<span class="fc" id="L140">        float overlap = this.typeOverlap.get(type);</span>
+        
+<span class="fc" id="L142">        float tmpNumberOfSlices = (stopTimeLong - startTimeLong - overlap) / sliceLength;</span>
+<span class="fc" id="L143">        double fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);</span>
+<span class="fc" id="L144">		int totalNumberOfSlices = 0;</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">		if((fracNumberOfSlices * sliceLength) &lt; overlap){</span>
+<span class="nc" id="L146">			totalNumberOfSlices = (int) Math.floor(tmpNumberOfSlices);</span>
 		}
 		else {
-<span class="fc" id="L141">			totalNumberOfSlices = (int) Math.ceil(tmpNumberOfSlices);</span>
+<span class="fc" id="L149">			totalNumberOfSlices = (int) Math.ceil(tmpNumberOfSlices);</span>
 		}
-<span class="fc" id="L143">		return Math.max(totalNumberOfSlices, 1);</span>
+<span class="fc" id="L151">		return Math.max(totalNumberOfSlices, 1);</span>
 	}
 
 	/**
@@ -156,34 +164,34 @@ public class ExtractMetadata {
 	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
 			// XSLT Transformation
-<span class="fc" id="L159">			String xsltFilename = this.xsltDirectory + &quot;XSLT_MPL_EOF.xslt&quot;;</span>
-<span class="fc" id="L160">			Source xsltMPLEOF = new StreamSource(new File(xsltFilename));</span>
-<span class="fc" id="L161">			Transformer transformerMPL = transFactory.newTransformer(xsltMPLEOF);</span>
-<span class="fc" id="L162">			Source mplMetadataFile = new StreamSource(file);</span>
-<span class="fc" id="L163">			transformerMPL.transform(mplMetadataFile, new StreamResult(new File(&quot;tmp/output.xml&quot;)));</span>
+<span class="fc" id="L167">			String xsltFilename = this.xsltDirectory + &quot;XSLT_MPL_EOF.xslt&quot;;</span>
+<span class="fc" id="L168">			Source xsltMPLEOF = new StreamSource(new File(xsltFilename));</span>
+<span class="fc" id="L169">			Transformer transformerMPL = transFactory.newTransformer(xsltMPLEOF);</span>
+<span class="fc" id="L170">			Source mplMetadataFile = new StreamSource(file);</span>
+<span class="fc" id="L171">			transformerMPL.transform(mplMetadataFile, new StreamResult(new File(&quot;tmp/output.xml&quot;)));</span>
 			// JSON creation
-<span class="fc" id="L165">			JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/output.xml&quot;, Charset.defaultCharset()));</span>
-<span class="pc bpc" id="L166" title="1 of 2 branches missed.">			if (metadataJSONObject.getString(&quot;validityStopTime&quot;).equals(&quot;UTC=9999-99-99T99:99:99&quot;)) {</span>
-<span class="nc" id="L167">				metadataJSONObject.put(&quot;validityStopTime&quot;, &quot;9999-12-31T23:59:59&quot;);</span>
+<span class="fc" id="L173">			JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/output.xml&quot;, Charset.defaultCharset()));</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">			if (metadataJSONObject.getString(&quot;validityStopTime&quot;).equals(&quot;UTC=9999-99-99T99:99:99&quot;)) {</span>
+<span class="nc" id="L175">				metadataJSONObject.put(&quot;validityStopTime&quot;, &quot;9999-12-31T23:59:59.999999&quot;);</span>
 			} else {
-<span class="fc" id="L169">				metadataJSONObject.put(&quot;validityStopTime&quot;,</span>
-<span class="fc" id="L170">				        metadataJSONObject.getString(&quot;validityStopTime&quot;).substring(4));</span>
+<span class="fc" id="L177">				metadataJSONObject.put(&quot;validityStopTime&quot;,</span>
+<span class="fc" id="L178">				        metadataJSONObject.getString(&quot;validityStopTime&quot;).substring(4));</span>
 			}
-<span class="fc" id="L172">			metadataJSONObject.put(&quot;creationTime&quot;,</span>
-<span class="fc" id="L173">			        metadataJSONObject.getString(&quot;creationTime&quot;).substring(4));</span>
-<span class="fc" id="L174">            metadataJSONObject.put(&quot;validityStartTime&quot;,</span>
-<span class="fc" id="L175">                    metadataJSONObject.getString(&quot;validityStartTime&quot;).substring(4));</span>
-<span class="fc" id="L176">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L177">			metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
-<span class="fc" id="L178">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
-<span class="fc" id="L179">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L180">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L181">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L182">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
-<span class="fc" id="L183">			metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L184">			return metadataJSONObject;</span>
-<span class="fc" id="L185">		} catch (IOException | TransformerException | JSONException e) {</span>
-<span class="fc" id="L186">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L180">			metadataJSONObject.put(&quot;creationTime&quot;,</span>
+<span class="fc" id="L181">			        metadataJSONObject.getString(&quot;creationTime&quot;).substring(4));</span>
+<span class="fc" id="L182">            metadataJSONObject.put(&quot;validityStartTime&quot;,</span>
+<span class="fc" id="L183">                    metadataJSONObject.getString(&quot;validityStartTime&quot;).substring(4));</span>
+<span class="fc" id="L184">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L185">			metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
+<span class="fc" id="L186">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
+<span class="fc" id="L187">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L188">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L189">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L190">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
+<span class="fc" id="L191">			metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L192">			return metadataJSONObject;</span>
+<span class="fc" id="L193">		} catch (IOException | TransformerException | JSONException e) {</span>
+<span class="fc" id="L194">			throw new MetadataExtractionException(e);</span>
 		}
 	}
 
@@ -201,30 +209,30 @@ public class ExtractMetadata {
 			throws MetadataExtractionException {
 		try {
 			// XSLT Transformation
-<span class="fc" id="L204">			String xsltFilename = this.xsltDirectory + &quot;XSLT_AUX_EOF.xslt&quot;;</span>
-<span class="fc" id="L205">			Source xsltAUXEOF = new StreamSource(new File(xsltFilename));</span>
-<span class="fc" id="L206">			Transformer transformerAUX = transFactory.newTransformer(xsltAUXEOF);</span>
-<span class="fc" id="L207">			Source auxMetadataFile = new StreamSource(file);</span>
-<span class="fc" id="L208">			transformerAUX.transform(auxMetadataFile, new StreamResult(new File(&quot;tmp/output.xml&quot;)));</span>
+<span class="fc" id="L212">			String xsltFilename = this.xsltDirectory + &quot;XSLT_AUX_EOF.xslt&quot;;</span>
+<span class="fc" id="L213">			Source xsltAUXEOF = new StreamSource(new File(xsltFilename));</span>
+<span class="fc" id="L214">			Transformer transformerAUX = transFactory.newTransformer(xsltAUXEOF);</span>
+<span class="fc" id="L215">			Source auxMetadataFile = new StreamSource(file);</span>
+<span class="fc" id="L216">			transformerAUX.transform(auxMetadataFile, new StreamResult(new File(&quot;tmp/output.xml&quot;)));</span>
 			// JSON creation
-<span class="fc" id="L210">			JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/output.xml&quot;, Charset.defaultCharset()));</span>
-<span class="fc" id="L211">			metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;validityStopTime&quot;).toString()</span>
-<span class="fc" id="L212">					.substring(4, metadataJSONObject.getString(&quot;validityStopTime&quot;).toString().length()));</span>
-<span class="fc" id="L213">			metadataJSONObject.put(&quot;creationTime&quot;, metadataJSONObject.getString(&quot;creationTime&quot;).toString().substring(4,</span>
-<span class="fc" id="L214">					metadataJSONObject.getString(&quot;creationTime&quot;).toString().length()));</span>
-<span class="fc" id="L215">			metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;validityStartTime&quot;).toString()</span>
-<span class="fc" id="L216">					.substring(4, metadataJSONObject.getString(&quot;validityStartTime&quot;).toString().length()));</span>
-<span class="fc" id="L217">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L218">			metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
-<span class="fc" id="L219">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
-<span class="fc" id="L220">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L221">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L222">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L223">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
-<span class="fc" id="L224">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L225">			return metadataJSONObject;</span>
-<span class="fc" id="L226">		} catch (IOException | TransformerException | JSONException e) {</span>
-<span class="fc" id="L227">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L218">			JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/output.xml&quot;, Charset.defaultCharset()));</span>
+<span class="fc" id="L219">			metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;validityStopTime&quot;).toString()</span>
+<span class="fc" id="L220">					.substring(4, metadataJSONObject.getString(&quot;validityStopTime&quot;).toString().length()));</span>
+<span class="fc" id="L221">			metadataJSONObject.put(&quot;creationTime&quot;, metadataJSONObject.getString(&quot;creationTime&quot;).toString().substring(4,</span>
+<span class="fc" id="L222">					metadataJSONObject.getString(&quot;creationTime&quot;).toString().length()));</span>
+<span class="fc" id="L223">			metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;validityStartTime&quot;).toString()</span>
+<span class="fc" id="L224">					.substring(4, metadataJSONObject.getString(&quot;validityStartTime&quot;).toString().length()));</span>
+<span class="fc" id="L225">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L226">			metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
+<span class="fc" id="L227">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
+<span class="fc" id="L228">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L229">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L230">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L231">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
+<span class="fc" id="L232">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L233">			return metadataJSONObject;</span>
+<span class="fc" id="L234">		} catch (IOException | TransformerException | JSONException e) {</span>
+<span class="fc" id="L235">			throw new MetadataExtractionException(e);</span>
 		}
 	}
 
@@ -241,36 +249,36 @@ public class ExtractMetadata {
 	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
 			// XSLT Transformation
-<span class="fc" id="L244">			String xsltFilename = this.xsltDirectory + &quot;XSLT_AUX_XML.xslt&quot;;</span>
-<span class="fc" id="L245">			Source xsltAUXXML = new StreamSource(new File(xsltFilename));</span>
-<span class="fc" id="L246">			Transformer transformerAUX = transFactory.newTransformer(xsltAUXXML);</span>
-<span class="fc" id="L247">			Source auxMetadataFile = new StreamSource(file);</span>
-<span class="fc" id="L248">			transformerAUX.transform(auxMetadataFile, new StreamResult(new File(&quot;tmp/output.xml&quot;)));</span>
+<span class="fc" id="L252">			String xsltFilename = this.xsltDirectory + &quot;XSLT_AUX_XML.xslt&quot;;</span>
+<span class="fc" id="L253">			Source xsltAUXXML = new StreamSource(new File(xsltFilename));</span>
+<span class="fc" id="L254">			Transformer transformerAUX = transFactory.newTransformer(xsltAUXXML);</span>
+<span class="fc" id="L255">			Source auxMetadataFile = new StreamSource(file);</span>
+<span class="fc" id="L256">			transformerAUX.transform(auxMetadataFile, new StreamResult(new File(&quot;tmp/output.xml&quot;)));</span>
 			// JSON creation
-<span class="fc" id="L250">			JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/output.xml&quot;, Charset.defaultCharset()));</span>
-<span class="fc bfc" id="L251" title="All 2 branches covered.">			if (metadataJSONObject.getString(&quot;validityStopTime&quot;).equals(&quot;UTC=9999-99-99T99:99:99&quot;)) {</span>
-<span class="fc" id="L252">				metadataJSONObject.put(&quot;validityStopTime&quot;, &quot;9999-12-31T23:59:59&quot;);</span>
+<span class="fc" id="L258">			JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/output.xml&quot;, Charset.defaultCharset()));</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">			if (metadataJSONObject.getString(&quot;validityStopTime&quot;).equals(&quot;UTC=9999-99-99T99:99:99&quot;)) {</span>
+<span class="fc" id="L260">				metadataJSONObject.put(&quot;validityStopTime&quot;, &quot;9999-12-31T23:59:59.999999&quot;);</span>
 			} else {
-<span class="fc" id="L254">				metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;validityStopTime&quot;).substring(4));</span>
+<span class="fc" id="L262">				metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;validityStopTime&quot;).substring(4));</span>
 			}
-<span class="pc bpc" id="L256" title="1 of 2 branches missed.">			if(metadataJSONObject.getString(&quot;validityStartTime&quot;).substring(0, 4).equals(&quot;UTC=&quot;)) {</span>
-<span class="fc" id="L257">				metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;validityStartTime&quot;).substring(4));</span>
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">			if(metadataJSONObject.getString(&quot;validityStartTime&quot;).substring(0, 4).equals(&quot;UTC=&quot;)) {</span>
+<span class="fc" id="L265">				metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;validityStartTime&quot;).substring(4));</span>
 			}
-<span class="pc bpc" id="L259" title="1 of 2 branches missed.">			if(metadataJSONObject.getString(&quot;creationTime&quot;).substring(0, 4).equals(&quot;UTC=&quot;)) {</span>
-<span class="fc" id="L260">				metadataJSONObject.put(&quot;creationTime&quot;, metadataJSONObject.getString(&quot;creationTime&quot;).substring(4));</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">			if(metadataJSONObject.getString(&quot;creationTime&quot;).substring(0, 4).equals(&quot;UTC=&quot;)) {</span>
+<span class="fc" id="L268">				metadataJSONObject.put(&quot;creationTime&quot;, metadataJSONObject.getString(&quot;creationTime&quot;).substring(4));</span>
 			}
-<span class="fc" id="L262">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L263">			metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
-<span class="fc" id="L264">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
-<span class="fc" id="L265">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L266">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L267">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L268">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
-<span class="fc" id="L269">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L270">			return metadataJSONObject;</span>
+<span class="fc" id="L270">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L271">			metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
+<span class="fc" id="L272">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
+<span class="fc" id="L273">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L274">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L275">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L276">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
+<span class="fc" id="L277">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L278">			return metadataJSONObject;</span>
 
-<span class="fc" id="L272">		} catch (IOException | TransformerException | JSONException e) {</span>
-<span class="fc" id="L273">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L280">		} catch (IOException | TransformerException | JSONException e) {</span>
+<span class="fc" id="L281">			throw new MetadataExtractionException(e);</span>
 		}
 	}
 
@@ -287,24 +295,24 @@ public class ExtractMetadata {
 	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
 		try {
 			// XSLT Transformation
-<span class="fc" id="L290">			String xsltFilename = this.xsltDirectory + &quot;XSLT_AUX_MANIFEST.xslt&quot;;</span>
-<span class="fc" id="L291">			Source xsltAUXMANIFEST = new StreamSource(new File(xsltFilename));</span>
-<span class="fc" id="L292">			Transformer transformerAUX = transFactory.newTransformer(xsltAUXMANIFEST);</span>
-<span class="fc" id="L293">			Source auxMetadataFile = new StreamSource(file);</span>
-<span class="fc" id="L294">			transformerAUX.transform(auxMetadataFile, new StreamResult(new File(&quot;tmp/output.xml&quot;)));</span>
+<span class="fc" id="L298">			String xsltFilename = this.xsltDirectory + &quot;XSLT_AUX_MANIFEST.xslt&quot;;</span>
+<span class="fc" id="L299">			Source xsltAUXMANIFEST = new StreamSource(new File(xsltFilename));</span>
+<span class="fc" id="L300">			Transformer transformerAUX = transFactory.newTransformer(xsltAUXMANIFEST);</span>
+<span class="fc" id="L301">			Source auxMetadataFile = new StreamSource(file);</span>
+<span class="fc" id="L302">			transformerAUX.transform(auxMetadataFile, new StreamResult(new File(&quot;tmp/output.xml&quot;)));</span>
 			// JSON creation
-<span class="fc" id="L296">			JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/output.xml&quot;, Charset.defaultCharset()));</span>
-<span class="fc" id="L297">			metadataJSONObject.put(&quot;validityStopTime&quot;, &quot;9999-12-31T23:59:59&quot;);</span>
-<span class="fc" id="L298">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L299">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
-<span class="fc" id="L300">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L301">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L302">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L303">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
-<span class="fc" id="L304">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L305">			return metadataJSONObject;</span>
-<span class="fc" id="L306">		} catch (IOException | TransformerException | JSONException e) {</span>
-<span class="fc" id="L307">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L304">			JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/output.xml&quot;, Charset.defaultCharset()));</span>
+<span class="fc" id="L305">			metadataJSONObject.put(&quot;validityStopTime&quot;, &quot;9999-12-31T23:59:59.999999&quot;);</span>
+<span class="fc" id="L306">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L307">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
+<span class="fc" id="L308">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L309">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L310">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L311">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
+<span class="fc" id="L312">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L313">			return metadataJSONObject;</span>
+<span class="fc" id="L314">		} catch (IOException | TransformerException | JSONException e) {</span>
+<span class="fc" id="L315">			throw new MetadataExtractionException(e);</span>
 		}
 	}
 
@@ -319,18 +327,18 @@ public class ExtractMetadata {
 	 */
 	public JSONObject processRAWFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
 		try {
-<span class="fc" id="L322">			JSONObject metadataJSONObject = new JSONObject();</span>
-<span class="fc" id="L323">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L324">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType().name());</span>
-<span class="fc" id="L325">			metadataJSONObject.put(&quot;sessionId&quot;, descriptor.getSessionIdentifier());</span>
-<span class="fc" id="L326">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L327">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L328">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L329">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
-<span class="fc" id="L330">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L331">			return metadataJSONObject;</span>
-<span class="nc" id="L332">		} catch (JSONException e) {</span>
-<span class="nc" id="L333">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L330">			JSONObject metadataJSONObject = new JSONObject();</span>
+<span class="fc" id="L331">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L332">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType().name());</span>
+<span class="fc" id="L333">			metadataJSONObject.put(&quot;sessionId&quot;, descriptor.getSessionIdentifier());</span>
+<span class="fc" id="L334">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L335">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L336">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L337">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
+<span class="fc" id="L338">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L339">			return metadataJSONObject;</span>
+<span class="nc" id="L340">		} catch (JSONException e) {</span>
+<span class="nc" id="L341">			throw new MetadataExtractionException(e);</span>
 		}
 	}
 
@@ -345,27 +353,27 @@ public class ExtractMetadata {
 	 */
 	public JSONObject processSESSIONFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
 		try {
-<span class="fc" id="L348">			JSONObject metadataJSONObject = new JSONObject();</span>
-<span class="fc" id="L349">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L350">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType().name());</span>
-<span class="fc" id="L351">			metadataJSONObject.put(&quot;sessionId&quot;, descriptor.getSessionIdentifier());</span>
-<span class="fc" id="L352">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L353">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L354">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L355">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
-<span class="fc" id="L356">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L357">			return metadataJSONObject;</span>
-<span class="nc" id="L358">		} catch (JSONException e) {</span>
-<span class="nc" id="L359">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L356">			JSONObject metadataJSONObject = new JSONObject();</span>
+<span class="fc" id="L357">			metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L358">			metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType().name());</span>
+<span class="fc" id="L359">			metadataJSONObject.put(&quot;sessionId&quot;, descriptor.getSessionIdentifier());</span>
+<span class="fc" id="L360">			metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L361">			metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L362">			metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L363">			metadataJSONObject.put(&quot;insertionTime&quot;, dateFormat.format(new Date()));</span>
+<span class="fc" id="L364">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L365">			return metadataJSONObject;</span>
+<span class="nc" id="L366">		} catch (JSONException e) {</span>
+<span class="nc" id="L367">			throw new MetadataExtractionException(e);</span>
 		}
 	}
 	
 	public JSONObject processL0SliceProd(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
-<span class="fc" id="L364">		return this.processL0Prod(descriptor, file, &quot;tmp/outputl0slices.xml&quot;);</span>
+<span class="fc" id="L372">		return this.processL0Prod(descriptor, file, &quot;tmp/outputl0slices.xml&quot;);</span>
 	}
 	
 	public JSONObject processL0AcnProd(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
-<span class="fc" id="L368">		return this.processL0Prod(descriptor, file, &quot;tmp/outputl0acns.xml&quot;);</span>
+<span class="fc" id="L376">		return this.processL0Prod(descriptor, file, &quot;tmp/outputl0acns.xml&quot;);</span>
 	}
 	
 	/**
@@ -382,98 +390,103 @@ public class ExtractMetadata {
 	private JSONObject processL0Prod(L0OutputFileDescriptor descriptor, File file, String output) throws MetadataExtractionException {
 		try {
 			//XSLT Transformation
-<span class="fc" id="L385">			String xsltFilename = this.xsltDirectory + &quot;XSLT_L0_MANIFEST.xslt&quot;;</span>
-<span class="fc" id="L386">			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));</span>
-<span class="fc" id="L387">	        Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);</span>
-<span class="fc" id="L388">	        Source l1File = new StreamSource(file);</span>
-<span class="fc" id="L389">	        transformerL0.transform(l1File, new StreamResult(new File(output)));</span>
+<span class="fc" id="L393">			String xsltFilename = this.xsltDirectory + &quot;XSLT_L0_MANIFEST.xslt&quot;;</span>
+<span class="fc" id="L394">			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));</span>
+<span class="fc" id="L395">	        Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);</span>
+<span class="fc" id="L396">	        Source l1File = new StreamSource(file);</span>
+<span class="fc" id="L397">	        transformerL0.transform(l1File, new StreamResult(new File(output)));</span>
 	        //JSON creation
-<span class="fc" id="L391">	        JSONObject metadataJSONObject = XML.toJSONObject(readFile(output, Charset.defaultCharset()));</span>
-<span class="pc bpc" id="L392" title="1 of 2 branches missed.">	        if(metadataJSONObject.has(&quot;startTime&quot;)) {</span>
-<span class="fc" id="L393">                metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;startTime&quot;));</span>
+<span class="fc" id="L399">	        JSONObject metadataJSONObject = XML.toJSONObject(readFile(output, Charset.defaultCharset()));</span>
+<span class="pc bpc" id="L400" title="1 of 2 branches missed.">	        if(metadataJSONObject.has(&quot;startTime&quot;)) {</span>
+<span class="fc" id="L401">                metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;startTime&quot;));</span>
             }
-<span class="pc bpc" id="L395" title="1 of 2 branches missed.">            if(metadataJSONObject.has(&quot;stopTime&quot;)) {</span>
-<span class="fc" id="L396">                metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;stopTime&quot;));</span>
+<span class="pc bpc" id="L403" title="1 of 2 branches missed.">            if(metadataJSONObject.has(&quot;stopTime&quot;)) {</span>
+<span class="fc" id="L404">                metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;stopTime&quot;));</span>
             }
-<span class="pc bpc" id="L398" title="2 of 4 branches missed.">	        if(metadataJSONObject.has(&quot;sliceCoordinates&quot;) &amp;&amp; !metadataJSONObject.getString(&quot;sliceCoordinates&quot;).isEmpty()) {</span>
-<span class="fc" id="L399">	        	metadataJSONObject.put(&quot;sliceCoordinates&quot;, processCoordinates(descriptor.getProductName(), metadataJSONObject.getString(&quot;sliceCoordinates&quot;))); </span>
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">            if (!metadataJSONObject.has(&quot;sliceNumber&quot;)) {</span>
+<span class="nc" id="L407">                metadataJSONObject.put(&quot;sliceNumber&quot;, 1);</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">            } else if (StringUtils.isEmpty(metadataJSONObject.get(&quot;sliceNumber&quot;).toString())) {</span>
+<span class="fc" id="L409">                metadataJSONObject.put(&quot;sliceNumber&quot;, 1);</span>
+            } 
+<span class="pc bpc" id="L411" title="2 of 4 branches missed.">	        if(metadataJSONObject.has(&quot;sliceCoordinates&quot;) &amp;&amp; !metadataJSONObject.getString(&quot;sliceCoordinates&quot;).isEmpty()) {</span>
+<span class="fc" id="L412">	        	metadataJSONObject.put(&quot;sliceCoordinates&quot;, processCoordinates(descriptor.getProductName(), metadataJSONObject.getString(&quot;sliceCoordinates&quot;))); </span>
 	        }	
-<span class="pc bpc" id="L401" title="1 of 6 branches missed.">	        if(descriptor.getProductClass().equals(&quot;A&quot;) || descriptor.getProductClass().equals(&quot;C&quot;) || descriptor.getProductClass().equals(&quot;N&quot;)) {</span>
-<span class="pc bpc" id="L402" title="2 of 4 branches missed.">	        	if(metadataJSONObject.has(&quot;startTime&quot;) &amp;&amp; metadataJSONObject.has(&quot;stopTime&quot;)) {</span>
-<span class="fc" id="L403">	        		metadataJSONObject.put(&quot;totalNumberOfSlice&quot;, </span>
-<span class="fc" id="L404">							totalNumberOfSlice(</span>
-<span class="fc" id="L405">									dateFormat.parse(metadataJSONObject.getString(&quot;startTime&quot;)).getTime()/1000, </span>
-<span class="fc" id="L406">									dateFormat.parse(metadataJSONObject.getString(&quot;stopTime&quot;)).getTime()/1000,</span>
-<span class="pc bpc" id="L407" title="1 of 2 branches missed.">									descriptor.getSwathtype().matches(&quot;S[1-6]&quot;) ? &quot;SM&quot; : descriptor.getSwathtype()));</span>
+<span class="pc bpc" id="L414" title="1 of 6 branches missed.">	        if(descriptor.getProductClass().equals(&quot;A&quot;) || descriptor.getProductClass().equals(&quot;C&quot;) || descriptor.getProductClass().equals(&quot;N&quot;)) {</span>
+<span class="pc bpc" id="L415" title="2 of 4 branches missed.">	        	if(metadataJSONObject.has(&quot;startTime&quot;) &amp;&amp; metadataJSONObject.has(&quot;stopTime&quot;)) {</span>
+<span class="fc" id="L416">	        		metadataJSONObject.put(&quot;totalNumberOfSlice&quot;, </span>
+<span class="fc" id="L417">							totalNumberOfSlice(</span>
+<span class="fc" id="L418">									dateFormat.parse(metadataJSONObject.getString(&quot;startTime&quot;)).getTime()/1000, </span>
+<span class="fc" id="L419">									dateFormat.parse(metadataJSONObject.getString(&quot;stopTime&quot;)).getTime()/1000,</span>
+<span class="pc bpc" id="L420" title="1 of 2 branches missed.">									descriptor.getSwathtype().matches(&quot;S[1-6]&quot;) ? &quot;SM&quot; : descriptor.getSwathtype()));</span>
 	        		}
 	        }
-<span class="fc" id="L410">	        metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L411">	        metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
-<span class="fc" id="L412">	        metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
-<span class="fc" id="L413">	        metadataJSONObject.put(&quot;resolution&quot;, descriptor.getResolution());</span>
-<span class="fc" id="L414">	        metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L415">	        metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L416">	        metadataJSONObject.put(&quot;swathtype&quot;, descriptor.getSwathtype());</span>
-<span class="fc" id="L417">	        metadataJSONObject.put(&quot;polarisation&quot;, descriptor.getPolarisation());</span>
-<span class="fc" id="L418">	        metadataJSONObject.put(&quot;dataTakeId&quot;, descriptor.getDataTakeId());</span>
-<span class="fc" id="L419">	        metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L420">	        metadataJSONObject.put(&quot;processMode&quot;, descriptor.getMode());</span>
-<span class="fc" id="L421">	        String dt = dateFormat.format(new Date());</span>
-<span class="fc" id="L422">	        metadataJSONObject.put(&quot;insertionTime&quot;, dt);</span>
-<span class="fc" id="L423">	        metadataJSONObject.put(&quot;creationTime&quot;, dt);</span>
-<span class="fc" id="L424">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L425">	        return metadataJSONObject;</span>
-<span class="fc" id="L426">		} catch (IOException | TransformerException | JSONException | ParseException e) {</span>
-<span class="fc" id="L427">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L423">	        metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L424">	        metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
+<span class="fc" id="L425">	        metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
+<span class="fc" id="L426">	        metadataJSONObject.put(&quot;resolution&quot;, descriptor.getResolution());</span>
+<span class="fc" id="L427">	        metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L428">	        metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L429">	        metadataJSONObject.put(&quot;swathtype&quot;, descriptor.getSwathtype());</span>
+<span class="fc" id="L430">	        metadataJSONObject.put(&quot;polarisation&quot;, descriptor.getPolarisation());</span>
+<span class="fc" id="L431">	        metadataJSONObject.put(&quot;dataTakeId&quot;, descriptor.getDataTakeId());</span>
+<span class="fc" id="L432">	        metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L433">	        metadataJSONObject.put(&quot;processMode&quot;, descriptor.getMode());</span>
+<span class="fc" id="L434">	        String dt = dateFormat.format(new Date());</span>
+<span class="fc" id="L435">	        metadataJSONObject.put(&quot;insertionTime&quot;, dt);</span>
+<span class="fc" id="L436">	        metadataJSONObject.put(&quot;creationTime&quot;, dt);</span>
+<span class="fc" id="L437">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L438">	        return metadataJSONObject;</span>
+<span class="fc" id="L439">		} catch (IOException | TransformerException | JSONException | ParseException e) {</span>
+<span class="fc" id="L440">			throw new MetadataExtractionException(e);</span>
 		}
 	}
 	
 	public JSONObject processL0Segment(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
 	    try {
             //XSLT Transformation
-<span class="fc" id="L434">            String xsltFilename = this.xsltDirectory + &quot;XSLT_L0_SEGMENT.xslt&quot;;</span>
-<span class="fc" id="L435">            Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));</span>
-<span class="fc" id="L436">            Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);</span>
-<span class="fc" id="L437">            Source l1File = new StreamSource(file);</span>
-<span class="fc" id="L438">            transformerL0.transform(l1File, new StreamResult(new File(&quot;tmp/outputl0seg.xml&quot;)));</span>
+<span class="fc" id="L447">            String xsltFilename = this.xsltDirectory + &quot;XSLT_L0_SEGMENT.xslt&quot;;</span>
+<span class="fc" id="L448">            Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));</span>
+<span class="fc" id="L449">            Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);</span>
+<span class="fc" id="L450">            Source l1File = new StreamSource(file);</span>
+<span class="fc" id="L451">            transformerL0.transform(l1File, new StreamResult(new File(&quot;tmp/outputl0seg.xml&quot;)));</span>
             //JSON creation
-<span class="fc" id="L440">            JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/outputl0seg.xml&quot;, Charset.defaultCharset()));</span>
-<span class="pc bpc" id="L441" title="1 of 2 branches missed.">            if(metadataJSONObject.has(&quot;startTime&quot;)) {</span>
-<span class="fc" id="L442">                metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;startTime&quot;));</span>
+<span class="fc" id="L453">            JSONObject metadataJSONObject = XML.toJSONObject(readFile(&quot;tmp/outputl0seg.xml&quot;, Charset.defaultCharset()));</span>
+<span class="pc bpc" id="L454" title="1 of 2 branches missed.">            if(metadataJSONObject.has(&quot;startTime&quot;)) {</span>
+<span class="fc" id="L455">                metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;startTime&quot;));</span>
             }
-<span class="pc bpc" id="L444" title="1 of 2 branches missed.">            if(metadataJSONObject.has(&quot;stopTime&quot;)) {</span>
-<span class="fc" id="L445">                metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;stopTime&quot;));</span>
+<span class="pc bpc" id="L457" title="1 of 2 branches missed.">            if(metadataJSONObject.has(&quot;stopTime&quot;)) {</span>
+<span class="fc" id="L458">                metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;stopTime&quot;));</span>
             }
-<span class="pc bpc" id="L447" title="1 of 2 branches missed.">            if(metadataJSONObject.has(&quot;segmentCoordinates&quot;)) {</span>
-<span class="fc" id="L448">                metadataJSONObject.put(&quot;segmentCoordinates&quot;, processCoordinates(descriptor.getProductName(), metadataJSONObject.getString(&quot;segmentCoordinates&quot;))); </span>
+<span class="pc bpc" id="L460" title="1 of 2 branches missed.">            if(metadataJSONObject.has(&quot;segmentCoordinates&quot;)) {</span>
+<span class="fc" id="L461">                metadataJSONObject.put(&quot;segmentCoordinates&quot;, processCoordinates(descriptor.getProductName(), metadataJSONObject.getString(&quot;segmentCoordinates&quot;))); </span>
             }
-<span class="fc" id="L450">            metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L451">            metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
-<span class="fc" id="L452">            metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
-<span class="fc" id="L453">            metadataJSONObject.put(&quot;resolution&quot;, descriptor.getResolution());</span>
-<span class="fc" id="L454">            metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L455">            metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L456">            metadataJSONObject.put(&quot;swathtype&quot;, descriptor.getSwathtype());</span>
-<span class="fc" id="L457">            metadataJSONObject.put(&quot;polarisation&quot;, descriptor.getPolarisation());</span>
-<span class="fc" id="L458">            metadataJSONObject.put(&quot;dataTakeId&quot;, descriptor.getDataTakeId());</span>
-<span class="fc" id="L459">            metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L460">            metadataJSONObject.put(&quot;processMode&quot;, descriptor.getMode());</span>
-<span class="fc" id="L461">            String dt = dateFormat.format(new Date());</span>
-<span class="fc" id="L462">            metadataJSONObject.put(&quot;insertionTime&quot;, dt);</span>
-<span class="fc" id="L463">            metadataJSONObject.put(&quot;creationTime&quot;, dt);</span>
-<span class="fc" id="L464">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L465">            return metadataJSONObject;</span>
-<span class="fc" id="L466">        } catch (IOException | TransformerException | JSONException e) {</span>
-<span class="fc" id="L467">            throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L463">            metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L464">            metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
+<span class="fc" id="L465">            metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
+<span class="fc" id="L466">            metadataJSONObject.put(&quot;resolution&quot;, descriptor.getResolution());</span>
+<span class="fc" id="L467">            metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L468">            metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L469">            metadataJSONObject.put(&quot;swathtype&quot;, descriptor.getSwathtype());</span>
+<span class="fc" id="L470">            metadataJSONObject.put(&quot;polarisation&quot;, descriptor.getPolarisation());</span>
+<span class="fc" id="L471">            metadataJSONObject.put(&quot;dataTakeId&quot;, descriptor.getDataTakeId());</span>
+<span class="fc" id="L472">            metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L473">            metadataJSONObject.put(&quot;processMode&quot;, descriptor.getMode());</span>
+<span class="fc" id="L474">            String dt = dateFormat.format(new Date());</span>
+<span class="fc" id="L475">            metadataJSONObject.put(&quot;insertionTime&quot;, dt);</span>
+<span class="fc" id="L476">            metadataJSONObject.put(&quot;creationTime&quot;, dt);</span>
+<span class="fc" id="L477">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L478">            return metadataJSONObject;</span>
+<span class="fc" id="L479">        } catch (IOException | TransformerException | JSONException e) {</span>
+<span class="fc" id="L480">            throw new MetadataExtractionException(e);</span>
         }
 	}
 	
 	public JSONObject processL1SliceProd(L1OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
-<span class="fc" id="L472">		return this.processL1Prod(descriptor, file, &quot;tmp/outputl1slices.xml&quot;);</span>
+<span class="fc" id="L485">		return this.processL1Prod(descriptor, file, &quot;tmp/outputl1slices.xml&quot;);</span>
 	}
 	
 	public JSONObject processL1AProd(L1OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
-<span class="fc" id="L476">		return this.processL1Prod(descriptor, file, &quot;tmp/outputl1a.xml&quot;);</span>
+<span class="fc" id="L489">		return this.processL1Prod(descriptor, file, &quot;tmp/outputl1a.xml&quot;);</span>
 	}
 	
 	/**
@@ -491,40 +504,40 @@ public class ExtractMetadata {
 			throws MetadataExtractionException {
 		try {
 			//XSLT Transformation
-<span class="fc" id="L494">			String xsltFilename = this.xsltDirectory + &quot;XSLT_L1_MANIFEST.xslt&quot;;</span>
-<span class="fc" id="L495">			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));</span>
-<span class="fc" id="L496">	        Transformer transformerL1 = transFactory.newTransformer(xsltL1MANIFEST);</span>
-<span class="fc" id="L497">	        Source l1File = new StreamSource(file);</span>
-<span class="fc" id="L498">	        transformerL1.transform(l1File, new StreamResult(new File(output)));</span>
+<span class="fc" id="L507">			String xsltFilename = this.xsltDirectory + &quot;XSLT_L1_MANIFEST.xslt&quot;;</span>
+<span class="fc" id="L508">			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));</span>
+<span class="fc" id="L509">	        Transformer transformerL1 = transFactory.newTransformer(xsltL1MANIFEST);</span>
+<span class="fc" id="L510">	        Source l1File = new StreamSource(file);</span>
+<span class="fc" id="L511">	        transformerL1.transform(l1File, new StreamResult(new File(output)));</span>
 	        //JSON creation
-<span class="fc" id="L500">	        JSONObject metadataJSONObject = XML.toJSONObject(readFile(output, Charset.defaultCharset()));</span>
-<span class="pc bpc" id="L501" title="2 of 4 branches missed.">	        if(metadataJSONObject.has(&quot;sliceCoordinates&quot;) &amp;&amp; !metadataJSONObject.getString(&quot;sliceCoordinates&quot;).isEmpty()) {</span>
-<span class="fc" id="L502">	        	metadataJSONObject.put(&quot;sliceCoordinates&quot;, processCoordinates(descriptor.getProductName(), metadataJSONObject.getString(&quot;sliceCoordinates&quot;)));       	</span>
+<span class="fc" id="L513">	        JSONObject metadataJSONObject = XML.toJSONObject(readFile(output, Charset.defaultCharset()));</span>
+<span class="pc bpc" id="L514" title="2 of 4 branches missed.">	        if(metadataJSONObject.has(&quot;sliceCoordinates&quot;) &amp;&amp; !metadataJSONObject.getString(&quot;sliceCoordinates&quot;).isEmpty()) {</span>
+<span class="fc" id="L515">	        	metadataJSONObject.put(&quot;sliceCoordinates&quot;, processCoordinates(descriptor.getProductName(), metadataJSONObject.getString(&quot;sliceCoordinates&quot;)));       	</span>
 	        }
-<span class="pc bpc" id="L504" title="1 of 2 branches missed.">	        if(metadataJSONObject.has(&quot;startTime&quot;)) {</span>
-<span class="fc" id="L505">	        	metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;startTime&quot;));</span>
+<span class="pc bpc" id="L517" title="1 of 2 branches missed.">	        if(metadataJSONObject.has(&quot;startTime&quot;)) {</span>
+<span class="fc" id="L518">	        	metadataJSONObject.put(&quot;validityStartTime&quot;, metadataJSONObject.getString(&quot;startTime&quot;));</span>
 	        }
-<span class="pc bpc" id="L507" title="1 of 2 branches missed.">	        if(metadataJSONObject.has(&quot;stopTime&quot;)) {</span>
-<span class="fc" id="L508">	        	metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;stopTime&quot;));</span>
+<span class="pc bpc" id="L520" title="1 of 2 branches missed.">	        if(metadataJSONObject.has(&quot;stopTime&quot;)) {</span>
+<span class="fc" id="L521">	        	metadataJSONObject.put(&quot;validityStopTime&quot;, metadataJSONObject.getString(&quot;stopTime&quot;));</span>
 	        }
-<span class="fc" id="L510">	        metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
-<span class="fc" id="L511">	        metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
-<span class="fc" id="L512">	        metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
-<span class="fc" id="L513">	        metadataJSONObject.put(&quot;resolution&quot;, descriptor.getResolution());</span>
-<span class="fc" id="L514">	        metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
-<span class="fc" id="L515">	        metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
-<span class="fc" id="L516">	        metadataJSONObject.put(&quot;swathtype&quot;, descriptor.getSwathtype());</span>
-<span class="fc" id="L517">	        metadataJSONObject.put(&quot;polarisation&quot;, descriptor.getPolarisation());</span>
-<span class="fc" id="L518">	        metadataJSONObject.put(&quot;dataTakeId&quot;, descriptor.getDataTakeId());</span>
-<span class="fc" id="L519">	        metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
-<span class="fc" id="L520">	        String dt = dateFormat.format(new Date());</span>
-<span class="fc" id="L521">	        metadataJSONObject.put(&quot;insertionTime&quot;, dt);</span>
-<span class="fc" id="L522">	        metadataJSONObject.put(&quot;creationTime&quot;, dt);</span>
-<span class="fc" id="L523">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
-<span class="fc" id="L524">            metadataJSONObject.put(&quot;processMode&quot;, descriptor.getMode());</span>
-<span class="fc" id="L525">	        return metadataJSONObject;</span>
-<span class="fc" id="L526">		} catch (IOException | TransformerException | JSONException e) {</span>
-<span class="fc" id="L527">			throw new MetadataExtractionException(e);</span>
+<span class="fc" id="L523">	        metadataJSONObject.put(&quot;productName&quot;, descriptor.getProductName());</span>
+<span class="fc" id="L524">	        metadataJSONObject.put(&quot;productClass&quot;, descriptor.getProductClass());</span>
+<span class="fc" id="L525">	        metadataJSONObject.put(&quot;productType&quot;, descriptor.getProductType());</span>
+<span class="fc" id="L526">	        metadataJSONObject.put(&quot;resolution&quot;, descriptor.getResolution());</span>
+<span class="fc" id="L527">	        metadataJSONObject.put(&quot;missionId&quot;, descriptor.getMissionId());</span>
+<span class="fc" id="L528">	        metadataJSONObject.put(&quot;satelliteId&quot;, descriptor.getSatelliteId());</span>
+<span class="fc" id="L529">	        metadataJSONObject.put(&quot;swathtype&quot;, descriptor.getSwathtype());</span>
+<span class="fc" id="L530">	        metadataJSONObject.put(&quot;polarisation&quot;, descriptor.getPolarisation());</span>
+<span class="fc" id="L531">	        metadataJSONObject.put(&quot;dataTakeId&quot;, descriptor.getDataTakeId());</span>
+<span class="fc" id="L532">	        metadataJSONObject.put(&quot;url&quot;, descriptor.getKeyObjectStorage());</span>
+<span class="fc" id="L533">	        String dt = dateFormat.format(new Date());</span>
+<span class="fc" id="L534">	        metadataJSONObject.put(&quot;insertionTime&quot;, dt);</span>
+<span class="fc" id="L535">	        metadataJSONObject.put(&quot;creationTime&quot;, dt);</span>
+<span class="fc" id="L536">            metadataJSONObject.put(&quot;productFamily&quot;, descriptor.getProductFamily().name());</span>
+<span class="fc" id="L537">            metadataJSONObject.put(&quot;processMode&quot;, descriptor.getMode());</span>
+<span class="fc" id="L538">	        return metadataJSONObject;</span>
+<span class="fc" id="L539">		} catch (IOException | TransformerException | JSONException e) {</span>
+<span class="fc" id="L540">			throw new MetadataExtractionException(e);</span>
 		}	
 	}
 }

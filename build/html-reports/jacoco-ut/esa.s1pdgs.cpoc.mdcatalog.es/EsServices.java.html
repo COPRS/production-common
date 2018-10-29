@@ -208,42 +208,45 @@ public class EsServices {
 	 * @return the list of the corresponding Segment
 	 * @throws Exception 
 	 */
-	public List&lt;SearchMetadata&gt; valIntersect(String beginDate, String endDate, String dataTakeId) throws Exception {
+	public List&lt;SearchMetadata&gt; valIntersect(String beginDate, String endDate, String productType, String processMode, 
+	        String satelliteId) throws Exception {
 	    
-<span class="fc" id="L213">	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();</span>
+<span class="fc" id="L214">	    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();</span>
         // Generic fields
-<span class="fc" id="L215">        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery(&quot;startTime&quot;).lt(endDate))</span>
-<span class="fc" id="L216">                .must(QueryBuilders.rangeQuery(&quot;stopTime&quot;).gt(beginDate))</span>
-<span class="fc" id="L217">                .must(QueryBuilders.termQuery(&quot;dataTakeId.keyword&quot;, dataTakeId));</span>
-<span class="fc" id="L218">        sourceBuilder.query(queryBuilder);</span>
-<span class="fc" id="L219">        sourceBuilder.size(20);</span>
-<span class="fc" id="L220">        SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());</span>
-<span class="fc" id="L221">        searchRequest.types(indexType);</span>
-<span class="fc" id="L222">        searchRequest.source(sourceBuilder);</span>
+<span class="fc" id="L216">        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery(&quot;startTime&quot;).lt(endDate))</span>
+<span class="fc" id="L217">                .must(QueryBuilders.rangeQuery(&quot;stopTime&quot;).gt(beginDate))</span>
+<span class="fc" id="L218">                .must(QueryBuilders.termQuery(&quot;satelliteId.keyword&quot;, satelliteId))</span>
+<span class="fc" id="L219">                .must(QueryBuilders.regexpQuery(&quot;productType.keyword&quot;, productType))</span>
+<span class="fc" id="L220">                .must(QueryBuilders.termQuery(&quot;processMode.keyword&quot;, processMode));</span>
+<span class="fc" id="L221">        sourceBuilder.query(queryBuilder);</span>
+<span class="fc" id="L222">        sourceBuilder.size(20);</span>
+<span class="fc" id="L223">        SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());</span>
+<span class="fc" id="L224">        searchRequest.types(indexType);</span>
+<span class="fc" id="L225">        searchRequest.source(sourceBuilder);</span>
         try {
-<span class="fc" id="L224">            SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);</span>
-<span class="fc bfc" id="L225" title="All 2 branches covered.">            if (searchResponse.getHits().totalHits &gt;= 1) {</span>
-<span class="fc" id="L226">                List&lt;SearchMetadata&gt; r = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L227" title="All 2 branches covered.">                for(SearchHit hit : searchResponse.getHits().getHits()) {</span>
-<span class="fc" id="L228">                    Map&lt;String, Object&gt; source = hit.getSourceAsMap();</span>
-<span class="fc" id="L229">                    SearchMetadata local = new SearchMetadata();</span>
-<span class="fc" id="L230">                    local.setProductName(source.get(&quot;productName&quot;).toString());</span>
-<span class="fc" id="L231">                    local.setProductType(source.get(&quot;productType&quot;).toString());</span>
-<span class="fc" id="L232">                    local.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
-<span class="pc bpc" id="L233" title="1 of 2 branches missed.">                    if (source.containsKey(&quot;startTime&quot;)) {</span>
-<span class="fc" id="L234">                        local.setValidityStart(source.get(&quot;startTime&quot;).toString());</span>
+<span class="fc" id="L227">            SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">            if (searchResponse.getHits().totalHits &gt;= 1) {</span>
+<span class="fc" id="L229">                List&lt;SearchMetadata&gt; r = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">                for(SearchHit hit : searchResponse.getHits().getHits()) {</span>
+<span class="fc" id="L231">                    Map&lt;String, Object&gt; source = hit.getSourceAsMap();</span>
+<span class="fc" id="L232">                    SearchMetadata local = new SearchMetadata();</span>
+<span class="fc" id="L233">                    local.setProductName(source.get(&quot;productName&quot;).toString());</span>
+<span class="fc" id="L234">                    local.setProductType(source.get(&quot;productType&quot;).toString());</span>
+<span class="fc" id="L235">                    local.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">                    if (source.containsKey(&quot;startTime&quot;)) {</span>
+<span class="fc" id="L237">                        local.setValidityStart(source.get(&quot;startTime&quot;).toString());</span>
                     }
-<span class="pc bpc" id="L236" title="1 of 2 branches missed.">                    if (source.containsKey(&quot;stopTime&quot;)) {</span>
-<span class="fc" id="L237">                        local.setValidityStop(source.get(&quot;stopTime&quot;).toString());</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">                    if (source.containsKey(&quot;stopTime&quot;)) {</span>
+<span class="fc" id="L240">                        local.setValidityStop(source.get(&quot;stopTime&quot;).toString());</span>
                     }
-<span class="fc" id="L239">                    r.add(local);</span>
+<span class="fc" id="L242">                    r.add(local);</span>
                 }
-<span class="fc" id="L241">                return r;</span>
+<span class="fc" id="L244">                return r;</span>
             }
-<span class="fc" id="L243">        } catch (IOException e) {</span>
-<span class="fc" id="L244">            throw new Exception(e.getMessage());</span>
-<span class="fc" id="L245">        }</span>
-<span class="fc" id="L246">	    return null;</span>
+<span class="fc" id="L246">        } catch (IOException e) {</span>
+<span class="fc" id="L247">            throw new Exception(e.getMessage());</span>
+<span class="fc" id="L248">        }</span>
+<span class="fc" id="L249">	    return null;</span>
 	}
 
 	/**
@@ -259,220 +262,220 @@ public class EsServices {
 	 * @throws Exception
 	 */
 	public EdrsSessionMetadata getEdrsSession(String productType, String productName) throws Exception {
-<span class="fc" id="L262">		Map&lt;String, Object&gt; source = this.getRequest(productType.toLowerCase(), productName);</span>
-<span class="fc" id="L263">		EdrsSessionMetadata r = new EdrsSessionMetadata();</span>
-<span class="fc" id="L264">		r.setProductType(productType);</span>
-<span class="fc" id="L265">		r.setProductName(productName);</span>
-<span class="fc bfc" id="L266" title="All 2 branches covered.">		if(source.isEmpty()) {</span>
-<span class="fc" id="L267">			throw new MetadataNotPresentException(productName);</span>
+<span class="fc" id="L265">		Map&lt;String, Object&gt; source = this.getRequest(productType.toLowerCase(), productName);</span>
+<span class="fc" id="L266">		EdrsSessionMetadata r = new EdrsSessionMetadata();</span>
+<span class="fc" id="L267">		r.setProductType(productType);</span>
+<span class="fc" id="L268">		r.setProductName(productName);</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">		if(source.isEmpty()) {</span>
+<span class="fc" id="L270">			throw new MetadataNotPresentException(productName);</span>
 		}
-<span class="fc" id="L269">		r.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
-<span class="pc bpc" id="L270" title="1 of 2 branches missed.">		if (source.containsKey(&quot;validityStartTime&quot;)) {</span>
-<span class="fc" id="L271">			r.setValidityStart(source.get(&quot;validityStartTime&quot;).toString());</span>
+<span class="fc" id="L272">		r.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">		if (source.containsKey(&quot;validityStartTime&quot;)) {</span>
+<span class="fc" id="L274">			r.setValidityStart(source.get(&quot;validityStartTime&quot;).toString());</span>
 		}
-<span class="pc bpc" id="L273" title="1 of 2 branches missed.">		if (source.containsKey(&quot;validityStopTime&quot;)) {</span>
-<span class="fc" id="L274">			r.setValidityStop(source.get(&quot;validityStopTime&quot;).toString());</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">		if (source.containsKey(&quot;validityStopTime&quot;)) {</span>
+<span class="fc" id="L277">			r.setValidityStop(source.get(&quot;validityStopTime&quot;).toString());</span>
 		}
-<span class="fc" id="L276">		return r;</span>
+<span class="fc" id="L279">		return r;</span>
 	}
 
 	public L0SliceMetadata getL0Slice(String productName) throws Exception{
-<span class="fc" id="L280">		Map&lt;String, Object&gt; source = this.getRequest(ProductFamily.L0_SLICE.name().toLowerCase(), productName);</span>
-<span class="fc" id="L281">		return this.extractInfoForL0Slice(source, productName);</span>
+<span class="fc" id="L283">		Map&lt;String, Object&gt; source = this.getRequest(ProductFamily.L0_SLICE.name().toLowerCase(), productName);</span>
+<span class="fc" id="L284">		return this.extractInfoForL0Slice(source, productName);</span>
 	}
 
 	public L0AcnMetadata getL0Acn(String productType, String datatakeId, String processMode) throws Exception {
-<span class="fc" id="L285">		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();</span>
-<span class="fc" id="L286">		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery(&quot;dataTakeId.keyword&quot;, datatakeId))</span>
-<span class="fc" id="L287">		        .must(QueryBuilders.termQuery(&quot;productType.keyword&quot;, productType))</span>
-<span class="fc" id="L288">                .must(QueryBuilders.termQuery(&quot;processMode.keyword&quot;, processMode)));</span>
+<span class="fc" id="L288">		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();</span>
+<span class="fc" id="L289">		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery(&quot;dataTakeId.keyword&quot;, datatakeId))</span>
+<span class="fc" id="L290">		        .must(QueryBuilders.termQuery(&quot;productType.keyword&quot;, productType))</span>
+<span class="fc" id="L291">                .must(QueryBuilders.termQuery(&quot;processMode.keyword&quot;, processMode)));</span>
 
-<span class="fc" id="L290">		sourceBuilder.size(1);</span>
-<span class="fc" id="L291">		sourceBuilder.sort(new FieldSortBuilder(&quot;creationTime&quot;).order(SortOrder.DESC));</span>
+<span class="fc" id="L293">		sourceBuilder.size(1);</span>
+<span class="fc" id="L294">		sourceBuilder.sort(new FieldSortBuilder(&quot;creationTime&quot;).order(SortOrder.DESC));</span>
 
-<span class="fc" id="L293">		SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_ACN.name().toLowerCase());</span>
-<span class="fc" id="L294">		searchRequest.types(indexType);</span>
-<span class="fc" id="L295">		searchRequest.source(sourceBuilder);</span>
+<span class="fc" id="L296">		SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_ACN.name().toLowerCase());</span>
+<span class="fc" id="L297">		searchRequest.types(indexType);</span>
+<span class="fc" id="L298">		searchRequest.source(sourceBuilder);</span>
 		try {
-<span class="fc" id="L297">			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);</span>
-<span class="fc bfc" id="L298" title="All 2 branches covered.">			if (searchResponse.getHits().totalHits &gt;= 1) {</span>
-<span class="fc" id="L299">				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap());</span>
+<span class="fc" id="L300">			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);</span>
+<span class="fc bfc" id="L301" title="All 2 branches covered.">			if (searchResponse.getHits().totalHits &gt;= 1) {</span>
+<span class="fc" id="L302">				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap());</span>
 			}
-<span class="fc" id="L301">		} catch (IOException e) {</span>
-<span class="fc" id="L302">			throw new Exception(e.getMessage());</span>
-<span class="fc" id="L303">		}</span>
-<span class="fc" id="L304">		return null;</span>
+<span class="fc" id="L304">		} catch (IOException e) {</span>
+<span class="fc" id="L305">			throw new Exception(e.getMessage());</span>
+<span class="fc" id="L306">		}</span>
+<span class="fc" id="L307">		return null;</span>
 	}
 
 	private Map&lt;String, Object&gt; getRequest(String index, String productName) throws Exception {
 		try {
-<span class="fc" id="L309">			GetRequest getRequest = new GetRequest(index.toLowerCase(), indexType, productName);</span>
+<span class="fc" id="L312">			GetRequest getRequest = new GetRequest(index.toLowerCase(), indexType, productName);</span>
 
-<span class="fc" id="L311">			GetResponse response = elasticsearchDAO.get(getRequest);</span>
+<span class="fc" id="L314">			GetResponse response = elasticsearchDAO.get(getRequest);</span>
 
-<span class="fc bfc" id="L313" title="All 2 branches covered.">			if (response.isExists()) {</span>
-<span class="fc" id="L314">				return response.getSourceAsMap();</span>
+<span class="fc bfc" id="L316" title="All 2 branches covered.">			if (response.isExists()) {</span>
+<span class="fc" id="L317">				return response.getSourceAsMap();</span>
 			}
-<span class="fc" id="L316">		} catch (IOException e) {</span>
-<span class="fc" id="L317">			throw new Exception(e.getMessage());</span>
-<span class="fc" id="L318">		}</span>
-<span class="fc" id="L319">		return new HashMap&lt;&gt;();</span>
+<span class="fc" id="L319">		} catch (IOException e) {</span>
+<span class="fc" id="L320">			throw new Exception(e.getMessage());</span>
+<span class="fc" id="L321">		}</span>
+<span class="fc" id="L322">		return new HashMap&lt;&gt;();</span>
 	}
 
 	private L0AcnMetadata extractInfoForL0ACN(Map&lt;String, Object&gt; source)
 			throws MetadataMalformedException {
-<span class="fc" id="L324">		L0AcnMetadata r = new L0AcnMetadata();</span>
-<span class="fc bfc" id="L325" title="All 2 branches covered.">		if (source.containsKey(&quot;productName&quot;)) {</span>
-<span class="fc" id="L326">			r.setProductName(source.get(&quot;productName&quot;).toString());</span>
+<span class="fc" id="L327">		L0AcnMetadata r = new L0AcnMetadata();</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">		if (source.containsKey(&quot;productName&quot;)) {</span>
+<span class="fc" id="L329">			r.setProductName(source.get(&quot;productName&quot;).toString());</span>
 		} else {
-<span class="fc" id="L328">			throw new MetadataMalformedException(&quot;productName&quot;);</span>
+<span class="fc" id="L331">			throw new MetadataMalformedException(&quot;productName&quot;);</span>
 		}
-<span class="fc bfc" id="L330" title="All 2 branches covered.">        if (source.containsKey(&quot;productType&quot;)) {</span>
-<span class="fc" id="L331">            r.setProductType(source.get(&quot;productType&quot;).toString());</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">        if (source.containsKey(&quot;productType&quot;)) {</span>
+<span class="fc" id="L334">            r.setProductType(source.get(&quot;productType&quot;).toString());</span>
         } else {
-<span class="fc" id="L333">            throw new MetadataMalformedException(&quot;productType&quot;);</span>
+<span class="fc" id="L336">            throw new MetadataMalformedException(&quot;productType&quot;);</span>
         }
-<span class="fc bfc" id="L335" title="All 2 branches covered.">		if (source.containsKey(&quot;url&quot;)) {</span>
-<span class="fc" id="L336">			r.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">		if (source.containsKey(&quot;url&quot;)) {</span>
+<span class="fc" id="L339">			r.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
 		} else {
-<span class="fc" id="L338">			throw new MetadataMalformedException(&quot;url&quot;);</span>
+<span class="fc" id="L341">			throw new MetadataMalformedException(&quot;url&quot;);</span>
 		}
-<span class="fc bfc" id="L340" title="All 2 branches covered.">		if (source.containsKey(&quot;instrumentConfigurationId&quot;)) {</span>
-<span class="fc" id="L341">			r.setInstrumentConfigurationId(Integer.parseInt(source.get(&quot;instrumentConfigurationId&quot;).toString()));</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">		if (source.containsKey(&quot;instrumentConfigurationId&quot;)) {</span>
+<span class="fc" id="L344">			r.setInstrumentConfigurationId(Integer.parseInt(source.get(&quot;instrumentConfigurationId&quot;).toString()));</span>
 		} else {
-<span class="fc" id="L343">			throw new MetadataMalformedException(&quot;instrumentConfigurationId&quot;);</span>
+<span class="fc" id="L346">			throw new MetadataMalformedException(&quot;instrumentConfigurationId&quot;);</span>
 		}
-<span class="fc bfc" id="L345" title="All 2 branches covered.">		if (source.containsKey(&quot;totalNumberOfSlice&quot;)) {</span>
-<span class="fc" id="L346">			r.setNumberOfSlices(Integer.parseInt(source.get(&quot;totalNumberOfSlice&quot;).toString()));</span>
+<span class="fc bfc" id="L348" title="All 2 branches covered.">		if (source.containsKey(&quot;totalNumberOfSlice&quot;)) {</span>
+<span class="fc" id="L349">			r.setNumberOfSlices(Integer.parseInt(source.get(&quot;totalNumberOfSlice&quot;).toString()));</span>
 		} else {
-<span class="fc" id="L348">			throw new MetadataMalformedException(&quot;totalNumberOfSlice&quot;);</span>
+<span class="fc" id="L351">			throw new MetadataMalformedException(&quot;totalNumberOfSlice&quot;);</span>
 		}
-<span class="fc bfc" id="L350" title="All 2 branches covered.">		if (source.containsKey(&quot;startTime&quot;)) {</span>
-<span class="fc" id="L351">			r.setValidityStart(source.get(&quot;startTime&quot;).toString());</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">		if (source.containsKey(&quot;startTime&quot;)) {</span>
+<span class="fc" id="L354">			r.setValidityStart(source.get(&quot;startTime&quot;).toString());</span>
 		} else {
-<span class="fc" id="L353">			throw new MetadataMalformedException(&quot;startTime&quot;);</span>
+<span class="fc" id="L356">			throw new MetadataMalformedException(&quot;startTime&quot;);</span>
 		}
-<span class="fc bfc" id="L355" title="All 2 branches covered.">		if (source.containsKey(&quot;stopTime&quot;)) {</span>
-<span class="fc" id="L356">			r.setValidityStop(source.get(&quot;stopTime&quot;).toString());</span>
+<span class="fc bfc" id="L358" title="All 2 branches covered.">		if (source.containsKey(&quot;stopTime&quot;)) {</span>
+<span class="fc" id="L359">			r.setValidityStop(source.get(&quot;stopTime&quot;).toString());</span>
 		} else {
-<span class="fc" id="L358">			throw new MetadataMalformedException(&quot;stopTime&quot;);</span>
+<span class="fc" id="L361">			throw new MetadataMalformedException(&quot;stopTime&quot;);</span>
 		}
-<span class="fc bfc" id="L360" title="All 2 branches covered.">		if (source.containsKey(&quot;dataTakeId&quot;)) {</span>
-<span class="fc" id="L361">			r.setDatatakeId(source.get(&quot;dataTakeId&quot;).toString());</span>
+<span class="fc bfc" id="L363" title="All 2 branches covered.">		if (source.containsKey(&quot;dataTakeId&quot;)) {</span>
+<span class="fc" id="L364">			r.setDatatakeId(source.get(&quot;dataTakeId&quot;).toString());</span>
 		} else {
-<span class="fc" id="L363">			throw new MetadataMalformedException(&quot;dataTakeId&quot;);</span>
+<span class="fc" id="L366">			throw new MetadataMalformedException(&quot;dataTakeId&quot;);</span>
 		}
-<span class="fc" id="L365">		return r;</span>
+<span class="fc" id="L368">		return r;</span>
 	}
 
 	private L0SliceMetadata extractInfoForL0Slice(Map&lt;String, Object&gt; source, String productName)
 			throws MetadataMalformedException, MetadataNotPresentException {
 
-<span class="fc" id="L371">		L0SliceMetadata r = new L0SliceMetadata();</span>
-<span class="fc bfc" id="L372" title="All 2 branches covered.">		if(source.isEmpty()) {</span>
-<span class="fc" id="L373">			throw new MetadataNotPresentException(productName);</span>
+<span class="fc" id="L374">		L0SliceMetadata r = new L0SliceMetadata();</span>
+<span class="fc bfc" id="L375" title="All 2 branches covered.">		if(source.isEmpty()) {</span>
+<span class="fc" id="L376">			throw new MetadataNotPresentException(productName);</span>
 		}
-<span class="fc" id="L375">        r.setProductName(productName);</span>
-<span class="fc bfc" id="L376" title="All 2 branches covered.">        if (source.containsKey(&quot;productType&quot;)) {</span>
-<span class="fc" id="L377">            r.setProductType(source.get(&quot;productType&quot;).toString());</span>
+<span class="fc" id="L378">        r.setProductName(productName);</span>
+<span class="fc bfc" id="L379" title="All 2 branches covered.">        if (source.containsKey(&quot;productType&quot;)) {</span>
+<span class="fc" id="L380">            r.setProductType(source.get(&quot;productType&quot;).toString());</span>
         } else {
-<span class="fc" id="L379">            throw new MetadataMalformedException(&quot;productType&quot;);</span>
+<span class="fc" id="L382">            throw new MetadataMalformedException(&quot;productType&quot;);</span>
         }
-<span class="fc bfc" id="L381" title="All 2 branches covered.">		if (source.containsKey(&quot;url&quot;)) {</span>
-<span class="fc" id="L382">			r.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
+<span class="fc bfc" id="L384" title="All 2 branches covered.">		if (source.containsKey(&quot;url&quot;)) {</span>
+<span class="fc" id="L385">			r.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
 		} else {
-<span class="fc" id="L384">			throw new MetadataMalformedException(&quot;url&quot;);</span>
+<span class="fc" id="L387">			throw new MetadataMalformedException(&quot;url&quot;);</span>
 		}
-<span class="fc bfc" id="L386" title="All 2 branches covered.">		if (source.containsKey(&quot;instrumentConfigurationId&quot;)) {</span>
-<span class="fc" id="L387">			r.setInstrumentConfigurationId(Integer.parseInt(source.get(&quot;instrumentConfigurationId&quot;).toString()));</span>
+<span class="fc bfc" id="L389" title="All 2 branches covered.">		if (source.containsKey(&quot;instrumentConfigurationId&quot;)) {</span>
+<span class="fc" id="L390">			r.setInstrumentConfigurationId(Integer.parseInt(source.get(&quot;instrumentConfigurationId&quot;).toString()));</span>
 		} else {
-<span class="fc" id="L389">			throw new MetadataMalformedException(&quot;instrumentConfigurationId&quot;);</span>
+<span class="fc" id="L392">			throw new MetadataMalformedException(&quot;instrumentConfigurationId&quot;);</span>
 		}
-<span class="fc bfc" id="L391" title="All 2 branches covered.">		if (source.containsKey(&quot;sliceNumber&quot;)) {</span>
-<span class="fc" id="L392">			r.setNumberSlice(Integer.parseInt(source.get(&quot;sliceNumber&quot;).toString()));</span>
+<span class="fc bfc" id="L394" title="All 2 branches covered.">		if (source.containsKey(&quot;sliceNumber&quot;)) {</span>
+<span class="fc" id="L395">			r.setNumberSlice(Integer.parseInt(source.get(&quot;sliceNumber&quot;).toString()));</span>
 		} else {
-<span class="fc" id="L394">			throw new MetadataMalformedException(&quot;sliceNumber&quot;);</span>
+<span class="fc" id="L397">			throw new MetadataMalformedException(&quot;sliceNumber&quot;);</span>
 		}
-<span class="fc bfc" id="L396" title="All 2 branches covered.">		if (source.containsKey(&quot;startTime&quot;)) {</span>
-<span class="fc" id="L397">			r.setValidityStart(source.get(&quot;startTime&quot;).toString());</span>
+<span class="fc bfc" id="L399" title="All 2 branches covered.">		if (source.containsKey(&quot;startTime&quot;)) {</span>
+<span class="fc" id="L400">			r.setValidityStart(source.get(&quot;startTime&quot;).toString());</span>
 		} else {
-<span class="fc" id="L399">			throw new MetadataMalformedException(&quot;startTime&quot;);</span>
+<span class="fc" id="L402">			throw new MetadataMalformedException(&quot;startTime&quot;);</span>
 		}
-<span class="fc bfc" id="L401" title="All 2 branches covered.">		if (source.containsKey(&quot;stopTime&quot;)) {</span>
-<span class="fc" id="L402">			r.setValidityStop(source.get(&quot;stopTime&quot;).toString());</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">		if (source.containsKey(&quot;stopTime&quot;)) {</span>
+<span class="fc" id="L405">			r.setValidityStop(source.get(&quot;stopTime&quot;).toString());</span>
 		} else {
-<span class="fc" id="L404">			throw new MetadataMalformedException(&quot;stopTime&quot;);</span>
+<span class="fc" id="L407">			throw new MetadataMalformedException(&quot;stopTime&quot;);</span>
 		}
-<span class="fc bfc" id="L406" title="All 2 branches covered.">		if (source.containsKey(&quot;dataTakeId&quot;)) {</span>
-<span class="fc" id="L407">			r.setDatatakeId(source.get(&quot;dataTakeId&quot;).toString());</span>
+<span class="fc bfc" id="L409" title="All 2 branches covered.">		if (source.containsKey(&quot;dataTakeId&quot;)) {</span>
+<span class="fc" id="L410">			r.setDatatakeId(source.get(&quot;dataTakeId&quot;).toString());</span>
 		} else {
-<span class="fc" id="L409">			throw new MetadataMalformedException(&quot;dataTakeId&quot;);</span>
+<span class="fc" id="L412">			throw new MetadataMalformedException(&quot;dataTakeId&quot;);</span>
 		}
-<span class="fc" id="L411">		return r;</span>
+<span class="fc" id="L414">		return r;</span>
 	}
 
     public LevelSegmentMetadata getLevelSegment(ProductFamily family, String productName) throws Exception{
-<span class="fc" id="L415">        LevelSegmentMetadata ret = null;</span>
+<span class="fc" id="L418">        LevelSegmentMetadata ret = null;</span>
         try {
-<span class="fc" id="L417">            GetRequest getRequest = new GetRequest(family.name().toLowerCase(), indexType, productName);</span>
+<span class="fc" id="L420">            GetRequest getRequest = new GetRequest(family.name().toLowerCase(), indexType, productName);</span>
 
-<span class="fc" id="L419">            GetResponse response = elasticsearchDAO.get(getRequest);</span>
+<span class="fc" id="L422">            GetResponse response = elasticsearchDAO.get(getRequest);</span>
 
-<span class="fc bfc" id="L421" title="All 2 branches covered.">            if (response.isExists()) {</span>
-<span class="fc" id="L422">                ret = this.extractInfoForLevelSegment(response.getSourceAsMap(), productName);</span>
+<span class="fc bfc" id="L424" title="All 2 branches covered.">            if (response.isExists()) {</span>
+<span class="fc" id="L425">                ret = this.extractInfoForLevelSegment(response.getSourceAsMap(), productName);</span>
             } else {
-<span class="fc" id="L424">                throw new MetadataNotPresentException(productName);</span>
+<span class="fc" id="L427">                throw new MetadataNotPresentException(productName);</span>
             }
-<span class="nc" id="L426">        } catch (IOException e) {</span>
-<span class="nc" id="L427">            throw new Exception(e.getMessage());</span>
-<span class="fc" id="L428">        }</span>
-<span class="fc" id="L429">        return ret;</span>
+<span class="nc" id="L429">        } catch (IOException e) {</span>
+<span class="nc" id="L430">            throw new Exception(e.getMessage());</span>
+<span class="fc" id="L431">        }</span>
+<span class="fc" id="L432">        return ret;</span>
     }
 
     private LevelSegmentMetadata extractInfoForLevelSegment(Map&lt;String, Object&gt; source, String productName)
             throws MetadataMalformedException, MetadataNotPresentException {
 
-<span class="fc" id="L435">        LevelSegmentMetadata r = new LevelSegmentMetadata();</span>
-<span class="pc bpc" id="L436" title="1 of 2 branches missed.">        if(source.isEmpty()) {</span>
-<span class="nc" id="L437">            throw new MetadataNotPresentException(productName);</span>
+<span class="fc" id="L438">        LevelSegmentMetadata r = new LevelSegmentMetadata();</span>
+<span class="pc bpc" id="L439" title="1 of 2 branches missed.">        if(source.isEmpty()) {</span>
+<span class="nc" id="L440">            throw new MetadataNotPresentException(productName);</span>
         }
-<span class="fc" id="L439">        r.setProductName(productName);</span>
-<span class="fc bfc" id="L440" title="All 2 branches covered.">        if (source.containsKey(&quot;productType&quot;)) {</span>
-<span class="fc" id="L441">            r.setProductType(source.get(&quot;productType&quot;).toString());</span>
+<span class="fc" id="L442">        r.setProductName(productName);</span>
+<span class="fc bfc" id="L443" title="All 2 branches covered.">        if (source.containsKey(&quot;productType&quot;)) {</span>
+<span class="fc" id="L444">            r.setProductType(source.get(&quot;productType&quot;).toString());</span>
         } else {
-<span class="fc" id="L443">            throw new MetadataMalformedException(&quot;productType&quot;);</span>
+<span class="fc" id="L446">            throw new MetadataMalformedException(&quot;productType&quot;);</span>
         }
-<span class="fc bfc" id="L445" title="All 2 branches covered.">        if (source.containsKey(&quot;url&quot;)) {</span>
-<span class="fc" id="L446">            r.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
+<span class="fc bfc" id="L448" title="All 2 branches covered.">        if (source.containsKey(&quot;url&quot;)) {</span>
+<span class="fc" id="L449">            r.setKeyObjectStorage(source.get(&quot;url&quot;).toString());</span>
         } else {
-<span class="fc" id="L448">            throw new MetadataMalformedException(&quot;url&quot;);</span>
+<span class="fc" id="L451">            throw new MetadataMalformedException(&quot;url&quot;);</span>
         }
-<span class="fc bfc" id="L450" title="All 2 branches covered.">        if (source.containsKey(&quot;startTime&quot;)) {</span>
-<span class="fc" id="L451">            r.setValidityStart(source.get(&quot;startTime&quot;).toString());</span>
+<span class="fc bfc" id="L453" title="All 2 branches covered.">        if (source.containsKey(&quot;startTime&quot;)) {</span>
+<span class="fc" id="L454">            r.setValidityStart(source.get(&quot;startTime&quot;).toString());</span>
         } else {
-<span class="fc" id="L453">            throw new MetadataMalformedException(&quot;startTime&quot;);</span>
+<span class="fc" id="L456">            throw new MetadataMalformedException(&quot;startTime&quot;);</span>
         }
-<span class="fc bfc" id="L455" title="All 2 branches covered.">        if (source.containsKey(&quot;stopTime&quot;)) {</span>
-<span class="fc" id="L456">            r.setValidityStop(source.get(&quot;stopTime&quot;).toString());</span>
+<span class="fc bfc" id="L458" title="All 2 branches covered.">        if (source.containsKey(&quot;stopTime&quot;)) {</span>
+<span class="fc" id="L459">            r.setValidityStop(source.get(&quot;stopTime&quot;).toString());</span>
         } else {
-<span class="fc" id="L458">            throw new MetadataMalformedException(&quot;stopTime&quot;);</span>
+<span class="fc" id="L461">            throw new MetadataMalformedException(&quot;stopTime&quot;);</span>
         }
-<span class="fc bfc" id="L460" title="All 2 branches covered.">        if (source.containsKey(&quot;dataTakeId&quot;)) {</span>
-<span class="fc" id="L461">            r.setDatatakeId(source.get(&quot;dataTakeId&quot;).toString());</span>
+<span class="fc bfc" id="L463" title="All 2 branches covered.">        if (source.containsKey(&quot;dataTakeId&quot;)) {</span>
+<span class="fc" id="L464">            r.setDatatakeId(source.get(&quot;dataTakeId&quot;).toString());</span>
         } else {
-<span class="fc" id="L463">            throw new MetadataMalformedException(&quot;dataTakeId&quot;);</span>
+<span class="fc" id="L466">            throw new MetadataMalformedException(&quot;dataTakeId&quot;);</span>
         }
-<span class="fc bfc" id="L465" title="All 2 branches covered.">        if(source.containsKey(&quot;polarisation&quot;)) {</span>
-<span class="fc" id="L466">            r.setPolarisation(source.get(&quot;polarisation&quot;).toString());</span>
+<span class="fc bfc" id="L468" title="All 2 branches covered.">        if(source.containsKey(&quot;polarisation&quot;)) {</span>
+<span class="fc" id="L469">            r.setPolarisation(source.get(&quot;polarisation&quot;).toString());</span>
         } else {
-<span class="fc" id="L468">            throw new MetadataMalformedException(&quot;polarisation&quot;);</span>
+<span class="fc" id="L471">            throw new MetadataMalformedException(&quot;polarisation&quot;);</span>
         }
-<span class="fc bfc" id="L470" title="All 2 branches covered.">        if(source.containsKey(&quot;productConsolidation&quot;)) {</span>
-<span class="fc" id="L471">            r.setConsolidation(source.get(&quot;productConsolidation&quot;).toString());</span>
+<span class="fc bfc" id="L473" title="All 2 branches covered.">        if(source.containsKey(&quot;productConsolidation&quot;)) {</span>
+<span class="fc" id="L474">            r.setConsolidation(source.get(&quot;productConsolidation&quot;).toString());</span>
         } else {
-<span class="fc" id="L473">            throw new MetadataMalformedException(&quot;productConsolidation&quot;);</span>
+<span class="fc" id="L476">            throw new MetadataMalformedException(&quot;productConsolidation&quot;);</span>
         }
-<span class="fc" id="L475">        return r;</span>
+<span class="fc" id="L478">        return r;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

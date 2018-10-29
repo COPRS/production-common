@@ -40,8 +40,7 @@ public class SearchMetadataController {
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = &quot;/{productFamily}/search&quot;)
 	public ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt; search(@PathVariable(name = &quot;productFamily&quot;) String productFamily,
-	        @RequestParam(name = &quot;productType&quot;, defaultValue = &quot;NONE&quot;) String productType, 
-	        @RequestParam(name = &quot;dataTakeId&quot;, defaultValue = &quot;NONE&quot;) String dataTakeId,
+	        @RequestParam(name = &quot;productType&quot;, defaultValue = &quot;NONE&quot;) String productType,
 			@RequestParam(name = &quot;mode&quot;, defaultValue = &quot;NONE&quot;) String mode, 
 			@RequestParam(name = &quot;satellite&quot;, defaultValue = &quot;NONE&quot;) String satellite,
 			@RequestParam(name = &quot;t0&quot;) String startDate, @RequestParam(name = &quot;t1&quot;) String stopDate,
@@ -50,44 +49,44 @@ public class SearchMetadataController {
 			@RequestParam(value = &quot;dt0&quot;, defaultValue = &quot;0.0&quot;) double dt0,
 			@RequestParam(value = &quot;dt1&quot;, defaultValue = &quot;0.0&quot;) double dt1) {
 		try {
-<span class="fc" id="L53">		    List&lt;SearchMetadataDto&gt; response = new ArrayList&lt;SearchMetadataDto&gt;();</span>
-<span class="fc bfc" id="L54" title="All 2 branches covered.">			if (&quot;LatestValCover&quot;.equals(mode)) {</span>
-<span class="fc" id="L55">				SearchMetadata f = esServices.lastValCover(productType, ProductFamily.fromValue(productFamily),</span>
-<span class="fc" id="L56">						convertDateForSearch(startDate, -dt0,</span>
-<span class="fc" id="L57">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.999999&quot;)),</span>
-<span class="fc" id="L58">						convertDateForSearch(stopDate, dt1,</span>
-<span class="fc" id="L59">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.000000&quot;)),</span>
+<span class="fc" id="L52">		    List&lt;SearchMetadataDto&gt; response = new ArrayList&lt;SearchMetadataDto&gt;();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">			if (&quot;LatestValCover&quot;.equals(mode)) {</span>
+<span class="fc" id="L54">				SearchMetadata f = esServices.lastValCover(productType, ProductFamily.fromValue(productFamily),</span>
+<span class="fc" id="L55">						convertDateForSearch(startDate, -dt0,</span>
+<span class="fc" id="L56">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.999999'Z'&quot;)),</span>
+<span class="fc" id="L57">						convertDateForSearch(stopDate, dt1,</span>
+<span class="fc" id="L58">								DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.000000'Z'&quot;)),</span>
 						satellite, insConfId, processMode);
 				
-<span class="fc bfc" id="L62" title="All 2 branches covered.">				if (f != null) {</span>
-<span class="fc" id="L63">					response.add(new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),</span>
-<span class="fc" id="L64">							f.getValidityStart(), f.getValidityStop()));</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">				if (f != null) {</span>
+<span class="fc" id="L62">					response.add(new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),</span>
+<span class="fc" id="L63">							f.getValidityStart(), f.getValidityStop()));</span>
 				}
-<span class="fc" id="L66">				return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(response, HttpStatus.OK);</span>
-<span class="fc bfc" id="L67" title="All 2 branches covered.">			} else if(&quot;ValIntersect&quot;.equals(mode)) {</span>
-<span class="fc" id="L68">			    List&lt;SearchMetadata&gt; f = esServices.valIntersect(convertDateForSearch(startDate, -dt0,</span>
-<span class="fc" id="L69">                                DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.999999&quot;)),</span>
-<span class="fc" id="L70">                        convertDateForSearch(stopDate, dt1,</span>
-<span class="fc" id="L71">                                DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.000000&quot;)),</span>
-                        dataTakeId);
-<span class="fc bfc" id="L73" title="All 2 branches covered.">			    for(SearchMetadata m : f) {</span>
-<span class="fc" id="L74">			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), </span>
-<span class="fc" id="L75">			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop()));</span>
-<span class="fc" id="L76">			    }</span>
-<span class="fc" id="L77">                return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc" id="L65">				return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(response, HttpStatus.OK);</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">			} else if(&quot;ValIntersect&quot;.equals(mode)) {</span>
+<span class="fc" id="L67">			    List&lt;SearchMetadata&gt; f = esServices.valIntersect(convertDateForSearch(startDate, -dt0,</span>
+<span class="fc" id="L68">                                DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'&quot;)),</span>
+<span class="fc" id="L69">                        convertDateForSearch(stopDate, dt1,</span>
+<span class="fc" id="L70">                                DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'&quot;)),</span>
+                        productType, processMode, satellite);
+<span class="fc bfc" id="L72" title="All 2 branches covered.">			    for(SearchMetadata m : f) {</span>
+<span class="fc" id="L73">			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), </span>
+<span class="fc" id="L74">			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop()));</span>
+<span class="fc" id="L75">			    }</span>
+<span class="fc" id="L76">                return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(response, HttpStatus.OK);</span>
 			} else {
-<span class="fc" id="L79">				LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg Unknown mode]&quot;, productType,</span>
-<span class="fc" id="L80">						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);</span>
-<span class="fc" id="L81">				return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L78">				LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg Unknown mode]&quot;, productType,</span>
+<span class="fc" id="L79">						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);</span>
+<span class="fc" id="L80">				return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(HttpStatus.BAD_REQUEST);</span>
 			}
-<span class="fc" id="L83">		} catch (AbstractCodedException e) {</span>
-<span class="fc" id="L84">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] {}&quot;, productType, e.getCode().getCode(), mode,</span>
-<span class="fc" id="L85">					e.getLogMessage());</span>
-<span class="fc" id="L86">			return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(HttpStatus.BAD_REQUEST);</span>
-<span class="fc" id="L87">		} catch (Exception e) {</span>
-<span class="fc" id="L88">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg {}]&quot;, productType,</span>
-<span class="fc" id="L89">					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());</span>
-<span class="fc" id="L90">			return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L82">		} catch (AbstractCodedException e) {</span>
+<span class="fc" id="L83">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] {}&quot;, productType, e.getCode().getCode(), mode,</span>
+<span class="fc" id="L84">					e.getLogMessage());</span>
+<span class="fc" id="L85">			return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L86">		} catch (Exception e) {</span>
+<span class="fc" id="L87">			LOGGER.error(&quot;[productType {}] [code {}] [mode {}] [msg {}]&quot;, productType,</span>
+<span class="fc" id="L88">					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());</span>
+<span class="fc" id="L89">			return new ResponseEntity&lt;List&lt;SearchMetadataDto&gt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
 		}
 
 	}
@@ -95,9 +94,9 @@ public class SearchMetadataController {
 	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter)
 			throws ParseException {
 
-<span class="fc" id="L98">		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);</span>
-<span class="fc" id="L99">		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));</span>
-<span class="fc" id="L100">		return timePlus.format(outFormatter);</span>
+<span class="fc" id="L97">		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'&quot;));</span>
+<span class="fc" id="L98">		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));</span>
+<span class="fc" id="L99">		return timePlus.format(outFormatter);</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

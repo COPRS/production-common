@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
@@ -129,12 +130,19 @@ public class ExtractMetadata {
 	 * @return an int which is the number of Slices
 	 */
 	private int totalNumberOfSlice(Long startTimeLong, Long stopTimeLong, String type) {
+	    float sliceLength = this.typeSliceLength.get(type);
+	    
+	    // Case of their is no slice information in manifest
+	    if (sliceLength <= 0) {
+	        return 1;
+	    }
+
+        float overlap = this.typeOverlap.get(type);
+        
+        float tmpNumberOfSlices = (stopTimeLong - startTimeLong - overlap) / sliceLength;
+        double fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
 		int totalNumberOfSlices = 0;
-		float tmpNumberOfSlices = 0F;
-		double fracNumberOfSlices = 0.0;
-		tmpNumberOfSlices = (stopTimeLong - startTimeLong - this.typeOverlap.get(type))/this.typeSliceLength.get(type);
-		fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
-		if((fracNumberOfSlices*this.typeSliceLength.get(type)) < this.typeOverlap.get(type)){
+		if((fracNumberOfSlices * sliceLength) < overlap){
 			totalNumberOfSlices = (int) Math.floor(tmpNumberOfSlices);
 		}
 		else {
@@ -395,6 +403,11 @@ public class ExtractMetadata {
             if(metadataJSONObject.has("stopTime")) {
                 metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
             }
+            if (!metadataJSONObject.has("sliceNumber")) {
+                metadataJSONObject.put("sliceNumber", 1);
+            } else if (StringUtils.isEmpty(metadataJSONObject.get("sliceNumber").toString())) {
+                metadataJSONObject.put("sliceNumber", 1);
+            } 
 	        if(metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
 	        	metadataJSONObject.put("sliceCoordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates"))); 
 	        }	
