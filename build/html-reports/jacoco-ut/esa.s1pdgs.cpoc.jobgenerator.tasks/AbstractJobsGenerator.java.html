@@ -579,9 +579,9 @@ public abstract class AbstractJobsGenerator&lt;T&gt; implements Runnable {
 <span class="nc" id="L579">                                    .getAlternatives()) {</span>
                                 // We ignore input not DB
 <span class="nc bnc" id="L581" title="All 2 branches missed.">                                if (alt.getOrigin() == TaskTableInputOrigin.DB) {</span>
-<span class="nc" id="L582">                                    if (job.getMetadataQueries()</span>
+<span class="nc bnc" id="L582" title="All 2 branches missed.">                                    if (!CollectionUtils.isEmpty(job.getMetadataQueries()</span>
 <span class="nc" id="L583">                                            .get(alt.getIdSearchMetadataQuery())</span>
-<span class="nc bnc" id="L584" title="All 2 branches missed.">                                            .getResult() != null) {</span>
+<span class="nc" id="L584">                                            .getResult())) {</span>
 
 <span class="nc" id="L586">                                        JobOrderFileNameType type =</span>
                                                 JobOrderFileNameType.BLANK;
