@@ -57,7 +57,7 @@ public class AppDataJobService {
      */
     public List&lt;AppDataJob&gt; search(final List&lt;FilterCriterion&gt; filters,
             final ProductCategory category, final Sort sort) {
-<span class="nc" id="L60">        return appDataJobDao.search(filters, category, sort);</span>
+<span class="fc" id="L60">        return appDataJobDao.search(filters, category, sort);</span>
     }
 
     /**
@@ -82,8 +82,8 @@ public class AppDataJobService {
      */
     public AppDataJob getJob(final Long identifier)
             throws AppCatalogJobNotFoundException {
-<span class="nc" id="L85">        return appDataJobDao.findById(identifier).orElseThrow(</span>
-<span class="nc" id="L86">                () -&gt; new AppCatalogJobNotFoundException(identifier));</span>
+<span class="fc" id="L85">        return appDataJobDao.findById(identifier).orElseThrow(</span>
+<span class="fc" id="L86">                () -&gt; new AppCatalogJobNotFoundException(identifier));</span>
     }
 
     /**
@@ -96,11 +96,11 @@ public class AppDataJobService {
         // Check new job format TODO
 
         // Save it
-<span class="nc" id="L99">        newJob.setIdentifier(sequenceDao.getNextSequenceId(JOB_SEQ_KEY));</span>
-<span class="nc" id="L100">        newJob.setState(AppDataJobState.WAITING);</span>
-<span class="nc" id="L101">        newJob.setCreationDate(new Date());</span>
-<span class="nc" id="L102">        newJob.setLastUpdateDate(null);</span>
-<span class="nc" id="L103">        return appDataJobDao.save(newJob);</span>
+<span class="fc" id="L99">        newJob.setIdentifier(sequenceDao.getNextSequenceId(JOB_SEQ_KEY));</span>
+<span class="fc" id="L100">        newJob.setState(AppDataJobState.WAITING);</span>
+<span class="fc" id="L101">        newJob.setCreationDate(new Date());</span>
+<span class="fc" id="L102">        newJob.setLastUpdateDate(null);</span>
+<span class="fc" id="L103">        return appDataJobDao.save(newJob);</span>
     }
 
     /**
@@ -109,8 +109,8 @@ public class AppDataJobService {
      * @param jobId
      */
     public void deleteJob(final Long jobId) {
-<span class="nc" id="L112">        appDataJobDao.deleteById(jobId);</span>
-<span class="nc" id="L113">    }</span>
+<span class="fc" id="L112">        appDataJobDao.deleteById(jobId);</span>
+<span class="fc" id="L113">    }</span>
 
     /**
      * Patch a job
@@ -124,48 +124,48 @@ public class AppDataJobService {
     public AppDataJob patchJob(final Long jobId, final AppDataJob patchJob)
             throws AppCatalogJobNotFoundException {
         // Find if job exists
-<span class="nc" id="L127">        AppDataJob jobDb = appDataJobDao.findById(jobId)</span>
-<span class="nc" id="L128">                .orElseThrow(() -&gt; new AppCatalogJobNotFoundException(jobId));</span>
+<span class="fc" id="L127">        AppDataJob jobDb = appDataJobDao.findById(jobId)</span>
+<span class="pc" id="L128">                .orElseThrow(() -&gt; new AppCatalogJobNotFoundException(jobId));</span>
 
-<span class="nc" id="L130">        boolean update = true;</span>
+<span class="fc" id="L130">        boolean update = true;</span>
 
         // Update job general details
-<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (jobDb.getState() != patchJob.getState()) {</span>
-<span class="nc" id="L134">            update = true;</span>
-<span class="nc" id="L135">            jobDb.setState(patchJob.getState());</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        if (jobDb.getState() != patchJob.getState()) {</span>
+<span class="fc" id="L134">            update = true;</span>
+<span class="fc" id="L135">            jobDb.setState(patchJob.getState());</span>
         }
-<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (!jobDb.getPod().equals(patchJob.getPod())) {</span>
-<span class="nc" id="L138">            update = true;</span>
-<span class="nc" id="L139">            jobDb.setPod(patchJob.getPod());</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if (!jobDb.getPod().equals(patchJob.getPod())) {</span>
+<span class="fc" id="L138">            update = true;</span>
+<span class="fc" id="L139">            jobDb.setPod(patchJob.getPod());</span>
         }
 
         // Update message if needed
-<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (!CollectionUtils.isEmpty(patchJob.getMessages())) {</span>
-<span class="nc" id="L144">            update = true;</span>
-<span class="nc" id="L145">            jobDb.setMessages(patchJob.getMessages());</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(patchJob.getMessages())) {</span>
+<span class="fc" id="L144">            update = true;</span>
+<span class="fc" id="L145">            jobDb.setMessages(patchJob.getMessages());</span>
         }
 
         // Update product if needed
-<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (patchJob.getProduct() != null) {</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if (patchJob.getProduct() != null) {</span>
             // Note: we can replace all objects because the DTO and DB objects
             // have the same fields
-<span class="nc" id="L152">            update = true;</span>
-<span class="nc" id="L153">            jobDb.setProduct(patchJob.getProduct());</span>
+<span class="fc" id="L152">            update = true;</span>
+<span class="fc" id="L153">            jobDb.setProduct(patchJob.getProduct());</span>
         }
 
         // Update generations if needed
-<span class="nc bnc" id="L157" title="All 2 branches missed.">        if (!CollectionUtils.isEmpty(patchJob.getGenerations())) {</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(patchJob.getGenerations())) {</span>
             // Note: we can replace all objects because the DTO and DB objects
             // have the same fields
-<span class="nc" id="L160">            update = true;</span>
-<span class="nc" id="L161">            jobDb.setGenerations(patchJob.getGenerations());</span>
+<span class="fc" id="L160">            update = true;</span>
+<span class="fc" id="L161">            jobDb.setGenerations(patchJob.getGenerations());</span>
         }
 
-<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (update) {</span>
-<span class="nc" id="L165">            jobDb.setLastUpdateDate(new Date());</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        if (update) {</span>
+<span class="fc" id="L165">            jobDb.setLastUpdateDate(new Date());</span>
         }
 
-<span class="nc" id="L168">        return appDataJobDao.save(jobDb);</span>
+<span class="fc" id="L168">        return appDataJobDao.save(jobDb);</span>
     }
 
     public AppDataJob patchGenerationToJob(final Long jobId,
@@ -175,46 +175,46 @@ public class AppDataJobService {
             AppCatalogJobGenerationInvalidTransitionStateException,
             AppCatalogJobGenerationNotFoundException {
         // Find if job exists
-<span class="nc" id="L178">        AppDataJob jobDb = appDataJobDao.findById(jobId)</span>
-<span class="nc" id="L179">                .orElseThrow(() -&gt; new AppCatalogJobNotFoundException(jobId));</span>
+<span class="fc" id="L178">        AppDataJob jobDb = appDataJobDao.findById(jobId)</span>
+<span class="pc" id="L179">                .orElseThrow(() -&gt; new AppCatalogJobNotFoundException(jobId));</span>
 
         // Find the right generation and update it
-<span class="nc" id="L182">        AppDataJobGeneration foundGenDb = null;</span>
-<span class="nc bnc" id="L183" title="All 2 branches missed.">        for (AppDataJobGeneration genDb : jobDb.getGenerations()) {</span>
-<span class="nc bnc" id="L184" title="All 2 branches missed.">            if (genDb.getTaskTable().equals(taskTable)) {</span>
-<span class="nc" id="L185">                foundGenDb = genDb;</span>
+<span class="fc" id="L182">        AppDataJobGeneration foundGenDb = null;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        for (AppDataJobGeneration genDb : jobDb.getGenerations()) {</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">            if (genDb.getTaskTable().equals(taskTable)) {</span>
+<span class="fc" id="L185">                foundGenDb = genDb;</span>
             }
-<span class="nc" id="L187">        }</span>
+<span class="fc" id="L187">        }</span>
 
-<span class="nc bnc" id="L189" title="All 2 branches missed.">        if (foundGenDb == null) {</span>
-<span class="nc" id="L190">            throw new AppCatalogJobGenerationNotFoundException(jobId,</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (foundGenDb == null) {</span>
+<span class="fc" id="L190">            throw new AppCatalogJobGenerationNotFoundException(jobId,</span>
                     taskTable);
         }
 
         // Check format
-<span class="nc bnc" id="L195" title="All 2 branches missed.">        if (foundGenDb.getState() != patchGen.getState()) {</span>
-<span class="nc bnc" id="L196" title="All 4 branches missed.">            switch (foundGenDb.getState()) {</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if (foundGenDb.getState() != patchGen.getState()) {</span>
+<span class="pc bpc" id="L196" title="1 of 4 branches missed.">            switch (foundGenDb.getState()) {</span>
                 case INITIAL:
-<span class="nc" id="L198">                    if (patchGen</span>
-<span class="nc bnc" id="L199" title="All 2 branches missed.">                            .getState() != AppDataJobGenerationState.PRIMARY_CHECK) {</span>
-<span class="nc" id="L200">                        throw new AppCatalogJobGenerationInvalidTransitionStateException(</span>
-<span class="nc" id="L201">                                foundGenDb.getState().name(),</span>
-<span class="nc" id="L202">                                patchGen.getState().name());</span>
+<span class="fc" id="L198">                    if (patchGen</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">                            .getState() != AppDataJobGenerationState.PRIMARY_CHECK) {</span>
+<span class="fc" id="L200">                        throw new AppCatalogJobGenerationInvalidTransitionStateException(</span>
+<span class="fc" id="L201">                                foundGenDb.getState().name(),</span>
+<span class="fc" id="L202">                                patchGen.getState().name());</span>
                     }
                     break;
                 case PRIMARY_CHECK:
-<span class="nc" id="L206">                    if (patchGen</span>
-<span class="nc bnc" id="L207" title="All 2 branches missed.">                            .getState() != AppDataJobGenerationState.READY) {</span>
-<span class="nc" id="L208">                        throw new AppCatalogJobGenerationInvalidTransitionStateException(</span>
-<span class="nc" id="L209">                                foundGenDb.getState().name(),</span>
-<span class="nc" id="L210">                                patchGen.getState().name());</span>
+<span class="fc" id="L206">                    if (patchGen</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">                            .getState() != AppDataJobGenerationState.READY) {</span>
+<span class="fc" id="L208">                        throw new AppCatalogJobGenerationInvalidTransitionStateException(</span>
+<span class="fc" id="L209">                                foundGenDb.getState().name(),</span>
+<span class="fc" id="L210">                                patchGen.getState().name());</span>
                     }
                     break;
                 case READY:
-<span class="nc bnc" id="L214" title="All 2 branches missed.">                    if (patchGen.getState() != AppDataJobGenerationState.SENT) {</span>
-<span class="nc" id="L215">                        throw new AppCatalogJobGenerationInvalidTransitionStateException(</span>
-<span class="nc" id="L216">                                foundGenDb.getState().name(),</span>
-<span class="nc" id="L217">                                patchGen.getState().name());</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">                    if (patchGen.getState() != AppDataJobGenerationState.SENT) {</span>
+<span class="fc" id="L215">                        throw new AppCatalogJobGenerationInvalidTransitionStateException(</span>
+<span class="fc" id="L216">                                foundGenDb.getState().name(),</span>
+<span class="fc" id="L217">                                patchGen.getState().name());</span>
                     }
                     break;
                 default:
@@ -223,27 +223,27 @@ public class AppDataJobService {
         }
 
         // Update
-<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (patchGen.getState() == AppDataJobGenerationState.SENT) {</span>
-<span class="nc" id="L227">            return terminateGeneration(jobDb, foundGenDb);</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        if (patchGen.getState() == AppDataJobGenerationState.SENT) {</span>
+<span class="fc" id="L227">            return terminateGeneration(jobDb, foundGenDb);</span>
         } else {
-<span class="nc bnc" id="L229" title="All 2 branches missed.">            if (foundGenDb.getState() == patchGen.getState()) {</span>
-<span class="nc" id="L230">                int currentNbErrors = foundGenDb.getNbErrors();</span>
-<span class="nc bnc" id="L231" title="All 2 branches missed.">                if (currentNbErrors + 1 &gt;= maxNbErrors) {</span>
-<span class="nc" id="L232">                    terminateGeneration(jobDb, foundGenDb);</span>
-<span class="nc" id="L233">                    throw new AppCatalogJobGenerationTerminatedException(</span>
-<span class="nc" id="L234">                            jobDb.getProduct().getProductName(),</span>
-<span class="nc" id="L235">                            jobDb.getMessages());</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">            if (foundGenDb.getState() == patchGen.getState()) {</span>
+<span class="fc" id="L230">                int currentNbErrors = foundGenDb.getNbErrors();</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">                if (currentNbErrors + 1 &gt;= maxNbErrors) {</span>
+<span class="fc" id="L232">                    terminateGeneration(jobDb, foundGenDb);</span>
+<span class="fc" id="L233">                    throw new AppCatalogJobGenerationTerminatedException(</span>
+<span class="fc" id="L234">                            jobDb.getProduct().getProductName(),</span>
+<span class="fc" id="L235">                            jobDb.getMessages());</span>
                 } else {
-<span class="nc" id="L237">                    foundGenDb.setLastUpdateDate(new Date());</span>
-<span class="nc" id="L238">                    foundGenDb.setNbErrors(currentNbErrors + 1);</span>
-<span class="nc" id="L239">                    foundGenDb.setState(patchGen.getState());</span>
-<span class="nc" id="L240">                    return appDataJobDao.save(jobDb);</span>
+<span class="fc" id="L237">                    foundGenDb.setLastUpdateDate(new Date());</span>
+<span class="fc" id="L238">                    foundGenDb.setNbErrors(currentNbErrors + 1);</span>
+<span class="fc" id="L239">                    foundGenDb.setState(patchGen.getState());</span>
+<span class="fc" id="L240">                    return appDataJobDao.save(jobDb);</span>
                 }
             } else {
-<span class="nc" id="L243">                foundGenDb.setState(patchGen.getState());</span>
-<span class="nc" id="L244">                foundGenDb.setLastUpdateDate(new Date());</span>
-<span class="nc" id="L245">                foundGenDb.setNbErrors(0);</span>
-<span class="nc" id="L246">                return appDataJobDao.save(jobDb);</span>
+<span class="fc" id="L243">                foundGenDb.setState(patchGen.getState());</span>
+<span class="fc" id="L244">                foundGenDb.setLastUpdateDate(new Date());</span>
+<span class="fc" id="L245">                foundGenDb.setNbErrors(0);</span>
+<span class="fc" id="L246">                return appDataJobDao.save(jobDb);</span>
             }
         }
     }
@@ -251,25 +251,25 @@ public class AppDataJobService {
     private AppDataJob terminateGeneration(AppDataJob jobDb,
             AppDataJobGeneration genDb) {
         // Update gen
-<span class="nc" id="L254">        genDb.setState(AppDataJobGenerationState.SENT);</span>
-<span class="nc" id="L255">        genDb.setLastUpdateDate(new Date());</span>
-<span class="nc" id="L256">        genDb.setNbErrors(0);</span>
+<span class="fc" id="L254">        genDb.setState(AppDataJobGenerationState.SENT);</span>
+<span class="fc" id="L255">        genDb.setLastUpdateDate(new Date());</span>
+<span class="fc" id="L256">        genDb.setNbErrors(0);</span>
 
         // Search if all generation are terminated
-<span class="nc" id="L259">        boolean terminated = true;</span>
-<span class="nc bnc" id="L260" title="All 2 branches missed.">        for (AppDataJobGeneration gen : jobDb.getGenerations()) {</span>
-<span class="nc bnc" id="L261" title="All 2 branches missed.">            if (gen.getState() != AppDataJobGenerationState.SENT) {</span>
-<span class="nc" id="L262">                terminated = false;</span>
+<span class="fc" id="L259">        boolean terminated = true;</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">        for (AppDataJobGeneration gen : jobDb.getGenerations()) {</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">            if (gen.getState() != AppDataJobGenerationState.SENT) {</span>
+<span class="fc" id="L262">                terminated = false;</span>
             }
-<span class="nc" id="L264">        }</span>
+<span class="fc" id="L264">        }</span>
 
         // Terminate job if needed
-<span class="nc bnc" id="L267" title="All 2 branches missed.">        if (terminated) {</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if (terminated) {</span>
 <span class="nc" id="L268">            jobDb.setState(AppDataJobState.TERMINATED);</span>
 <span class="nc" id="L269">            jobDb.setLastUpdateDate(new Date());</span>
         }
 
-<span class="nc" id="L272">        return appDataJobDao.save(jobDb);</span>
+<span class="fc" id="L272">        return appDataJobDao.save(jobDb);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

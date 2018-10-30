@@ -145,51 +145,51 @@ public class JobController&lt;T&gt; {
             AppCatalogJobGenerationInvalidStateException,
             InternalErrorException {
         // Extract criterion
-<span class="nc" id="L148">        List&lt;FilterCriterion&gt; filters = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L149">        Sort sort = null;</span>
-<span class="nc bnc" id="L150" title="All 2 branches missed.">        for (String keyFilter : params.keySet()) {</span>
-<span class="nc" id="L151">            String valueFilter = params.get(keyFilter);</span>
-<span class="nc bnc" id="L152" title="All 10 branches missed.">            switch (keyFilter) {</span>
+<span class="fc" id="L148">        List&lt;FilterCriterion&gt; filters = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L149">        Sort sort = null;</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        for (String keyFilter : params.keySet()) {</span>
+<span class="fc" id="L151">            String valueFilter = params.get(keyFilter);</span>
+<span class="pc bpc" id="L152" title="2 of 10 branches missed.">            switch (keyFilter) {</span>
                 case PK_ORDER_BY_ASC:
-<span class="nc" id="L154">                    sort = new Sort(Direction.ASC, valueFilter);</span>
-<span class="nc" id="L155">                    break;</span>
+<span class="fc" id="L154">                    sort = new Sort(Direction.ASC, valueFilter);</span>
+<span class="fc" id="L155">                    break;</span>
                 case PK_ORDER_BY_DESC:
-<span class="nc" id="L157">                    sort = new Sort(Direction.DESC, valueFilter);</span>
-<span class="nc" id="L158">                    break;</span>
+<span class="fc" id="L157">                    sort = new Sort(Direction.DESC, valueFilter);</span>
+<span class="fc" id="L158">                    break;</span>
                 default:
-<span class="nc" id="L160">                    FilterCriterion criterion = FilterUtils</span>
-<span class="nc" id="L161">                            .extractCriterion(keyFilter, valueFilter);</span>
-<span class="nc bnc" id="L162" title="All 24 branches missed.">                    switch (criterion.getKey()) {</span>
+<span class="fc" id="L160">                    FilterCriterion criterion = FilterUtils</span>
+<span class="fc" id="L161">                            .extractCriterion(keyFilter, valueFilter);</span>
+<span class="pc bpc" id="L162" title="12 of 24 branches missed.">                    switch (criterion.getKey()) {</span>
                         case PK_ID:
-<span class="nc" id="L164">                            criterion.setValue(Long.decode(valueFilter));</span>
-<span class="nc" id="L165">                            break;</span>
+<span class="fc" id="L164">                            criterion.setValue(Long.decode(valueFilter));</span>
+<span class="fc" id="L165">                            break;</span>
                         case PK_MESSAGES_ID:
-<span class="nc" id="L167">                            criterion.setValue(Long.decode(valueFilter));</span>
-<span class="nc" id="L168">                            break;</span>
+<span class="fc" id="L167">                            criterion.setValue(Long.decode(valueFilter));</span>
+<span class="fc" id="L168">                            break;</span>
                         case PK_CREATION:
                         case PK_UPDATE:
-<span class="nc" id="L171">                            criterion.setValue(</span>
-<span class="nc" id="L172">                                    DateUtils.convertDateIso(valueFilter));</span>
-<span class="nc" id="L173">                            break;</span>
+<span class="fc" id="L171">                            criterion.setValue(</span>
+<span class="fc" id="L172">                                    DateUtils.convertDateIso(valueFilter));</span>
+<span class="fc" id="L173">                            break;</span>
                         case PK_PRODUCT_START:
                         case PK_PRODUCT_STOP:
-<span class="nc" id="L176">                            criterion.setValue(</span>
-<span class="nc" id="L177">                                    DateUtils.convertDateIso(valueFilter));</span>
+<span class="fc" id="L176">                            criterion.setValue(</span>
+<span class="fc" id="L177">                                    DateUtils.convertDateIso(valueFilter));</span>
                             break;
                     }
-<span class="nc" id="L180">                    filters.add(criterion);</span>
+<span class="fc" id="L180">                    filters.add(criterion);</span>
                     break;
             }
-<span class="nc" id="L183">        }</span>
+<span class="fc" id="L183">        }</span>
         // Search
-<span class="nc" id="L185">        List&lt;AppDataJob&gt; jobsDb =</span>
-<span class="nc" id="L186">                appDataJobService.search(filters, category, sort);</span>
+<span class="fc" id="L185">        List&lt;AppDataJob&gt; jobsDb =</span>
+<span class="fc" id="L186">                appDataJobService.search(filters, category, sort);</span>
         // Convert into DTO
-<span class="nc" id="L188">        List&lt;AppDataJobDto&lt;T&gt;&gt; jobsDto = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L189" title="All 2 branches missed.">        for (AppDataJob jobDb : jobsDb) {</span>
+<span class="fc" id="L188">        List&lt;AppDataJobDto&lt;T&gt;&gt; jobsDto = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">        for (AppDataJob jobDb : jobsDb) {</span>
 <span class="nc" id="L190">            jobsDto.add(jobConverter.convertJobFromDbToDto(jobDb));</span>
 <span class="nc" id="L191">        }</span>
-<span class="nc" id="L192">        return jobsDto;</span>
+<span class="fc" id="L192">        return jobsDto;</span>
     }
 
     /**
@@ -237,8 +237,8 @@ public class JobController&lt;T&gt; {
      */
     @DeleteMapping(&quot;/{jobId}&quot;)
     public void deleteJob(@PathVariable final Long jobId) {
-<span class="nc" id="L240">        appDataJobService.deleteJob(jobId);</span>
-<span class="nc" id="L241">    }</span>
+<span class="fc" id="L240">        appDataJobService.deleteJob(jobId);</span>
+<span class="fc" id="L241">    }</span>
 
     /**
      * Patch a job
@@ -257,8 +257,8 @@ public class JobController&lt;T&gt; {
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobNotFoundException,
             AppCatalogJobGenerationInvalidStateException {
-<span class="nc" id="L260">        return jobConverter.convertJobFromDbToDto(appDataJobService</span>
-<span class="nc" id="L261">                .patchJob(jobId, jobConverter.convertJobFromDtoToDb(patchJob)));</span>
+<span class="fc" id="L260">        return jobConverter.convertJobFromDbToDto(appDataJobService</span>
+<span class="fc" id="L261">                .patchJob(jobId, jobConverter.convertJobFromDtoToDb(patchJob)));</span>
     }
 
     /**
