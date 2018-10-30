@@ -184,6 +184,7 @@ public class OutputProcessor {
                 switch (family) {
                     case L0_REPORT:
                     case L1_REPORT:
+                    case L0_SEGMENT_REPORT:
                         // If report, put in a cache to send report
                         LOGGER.info(
                                 "Output {} is considered as belonging to the family {}",

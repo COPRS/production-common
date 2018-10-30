@@ -171,7 +171,7 @@ public class JobProcessor {
 <span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if (properties.getLevel() == ApplicationLevel.L0) {</span>
 <span class="fc" id="L172">            outputListFile = job.getWorkDirectory() + &quot;AIOProc.LIST&quot;;</span>
 <span class="nc bnc" id="L173" title="All 2 branches missed.">        } else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {</span>
-<span class="nc" id="L174">            outputListFile = job.getWorkDirectory() + &quot;L0ASPProcList.LIST&quot;;</span>
+<span class="nc" id="L174">            outputListFile = job.getWorkDirectory() + &quot;L0ASProcList.LIST&quot;;</span>
         }
         // Initialize the pool processor executor
 <span class="fc" id="L177">        PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties,</span>

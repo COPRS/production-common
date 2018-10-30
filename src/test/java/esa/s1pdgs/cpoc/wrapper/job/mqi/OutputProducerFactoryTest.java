@@ -85,6 +85,7 @@ public class OutputProducerFactoryTest {
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
                 new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST",
                         "work-dir", "job-order"));
+        inputMessage.setInputKey(null);
     }
 
     /**
@@ -121,6 +122,7 @@ public class OutputProducerFactoryTest {
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L0_SLICE, new LevelProductDto("test.txt",
                                 "test.txt", ProductFamily.L0_SLICE, "NRT"));
+        message.setOutputKey("L0_SLICE");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
         verify(this.senderSegments, never()).publish(Mockito.any());
@@ -159,6 +161,7 @@ public class OutputProducerFactoryTest {
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L0_ACN, new LevelProductDto("test.txt",
                                 "test.txt", ProductFamily.L0_ACN, "FAST"));
+        message.setOutputKey("L0_ACN");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
@@ -196,6 +199,7 @@ public class OutputProducerFactoryTest {
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L1_SLICE, new LevelProductDto("test.txt",
                                 "test.txt", ProductFamily.L1_SLICE, "FAST"));
+        message.setOutputKey("L1_SLICE");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
@@ -214,6 +218,7 @@ public class OutputProducerFactoryTest {
                 new GenericPublicationMessageDto<LevelProductDto>(123,
                         ProductFamily.L1_ACN, new LevelProductDto("test.txt",
                                 "test.txt", ProductFamily.L1_ACN, "NRT"));
+        message.setOutputKey("L1_ACN");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
