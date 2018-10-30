@@ -37,7 +37,7 @@ s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,MqiAuxilia
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,MqiLevelProductController,0,8,0,0,0,2,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,GenericMqiController.new Object() {...},5,35,0,0,0,1,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,MqiLevelJobController,0,8,0,0,0,2,0,1,0,1
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,GenericMqiController,50,1299,4,30,13,294,4,27,0,13
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,GenericMqiController,47,1302,4,30,12,295,4,27,0,13
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,MqiLevelSegmentController,0,8,0,0,0,2,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.converter,JobConverter,34,544,6,42,10,153,6,37,0,13
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.converter,JobConverter.new Object() {...},16,113,0,0,0,4,0,1,0,1
