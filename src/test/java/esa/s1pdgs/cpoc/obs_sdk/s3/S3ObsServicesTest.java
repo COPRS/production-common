@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -24,16 +25,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsServices;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.Upload;
 
 /**
  * Test the services to access to the OBS via the amazon S3 API
@@ -57,6 +57,15 @@ public class S3ObsServicesTest {
     private AmazonS3 s3client;
 
     /**
+     * Mock S3 transaction manager
+     */
+    @Mock
+    private TransferManager s3tm;
+
+    @Mock
+    private Upload upload;
+
+    /**
      * Service to test
      */
     private S3ObsServices service;
@@ -74,9 +83,14 @@ public class S3ObsServicesTest {
 
     /**
      * Initialization
+     * 
+     * @throws InterruptedException
+     * @throws AmazonClientException
+     * @throws AmazonServiceException
      */
     @Before
-    public void init() {
+    public void init() throws AmazonServiceException, AmazonClientException,
+            InterruptedException {
         // Init mocks
         MockitoAnnotations.initMocks(this);
 
@@ -93,8 +107,9 @@ public class S3ObsServicesTest {
         listObjects.getObjectSummaries().add(obj3);
 
         // Build service
-        service = new S3ObsServices(s3client, 3, 500);
+        service = new S3ObsServices(s3client, s3tm, 3, 500);
         mockAmazonS3Client();
+        mockAmazonS3TransactionManager();
     }
 
     /**
@@ -122,6 +137,22 @@ public class S3ObsServicesTest {
         if (file5.exists()) {
             file5.delete();
         }
+    }
+
+    private void mockAmazonS3TransactionManager() throws AmazonServiceException,
+            AmazonClientException, InterruptedException {
+
+        doReturn(upload).when(s3tm).upload(Mockito.anyString(),
+                Mockito.anyString(), Mockito.any());
+        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
+                .when(s3tm).upload(Mockito.eq(BCK_EXC_SDK), Mockito.anyString(),
+                        Mockito.any());
+        doThrow(new com.amazonaws.AmazonServiceException(
+                "amazon SDK exception")).when(s3tm).upload(
+                        Mockito.eq(BCK_EXC_AWS), Mockito.anyString(),
+                        Mockito.any());
+        doNothing().when(upload).waitForCompletion();
+
     }
 
     /**
@@ -161,16 +192,6 @@ public class S3ObsServicesTest {
         doReturn(null).when(s3client).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
 
-        // putObject
-        doReturn(null).when(s3client).putObject(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any(File.class));
-        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
-                .when(s3client).putObject(Mockito.eq(BCK_EXC_SDK),
-                        Mockito.anyString(), Mockito.any(File.class));
-        doThrow(new com.amazonaws.AmazonServiceException(
-                "amazon SDK exception")).when(s3client).putObject(
-                        Mockito.eq(BCK_EXC_AWS), Mockito.anyString(),
-                        Mockito.any(File.class));
     }
 
     // ---------------------------------------------------
@@ -416,7 +437,7 @@ public class S3ObsServicesTest {
     public void testUploadFileNominal()
             throws S3ObsServiceException, S3SdkClientException {
         service.uploadFile(BCK_OBJ_EXIST, "key-test", new File("pom.xml"));
-        verify(s3client, times(1)).putObject(Mockito.eq(BCK_OBJ_EXIST),
+        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.eq("key-test"), Mockito.eq(new File("pom.xml")));
     }
 
@@ -463,9 +484,10 @@ public class S3ObsServicesTest {
     @Test
     public void testUploadDirectoryNominalWhenFile()
             throws S3ObsServiceException, S3SdkClientException {
-        int ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", new File("pom.xml"));
+        int ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test",
+                new File("pom.xml"));
         assertEquals(1, ret);
-        verify(s3client, times(1)).putObject(Mockito.eq(BCK_OBJ_EXIST),
+        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.eq("key-test"), Mockito.eq(new File("pom.xml")));
     }
 
@@ -492,15 +514,15 @@ public class S3ObsServicesTest {
         file5.mkdirs();
 
         service.uploadDirectory(BCK_OBJ_EXIST, "key-test", new File("test"));
-        verify(s3client, times(3)).putObject(Mockito.eq(BCK_OBJ_EXIST),
+        verify(s3tm, times(3)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.anyString(), Mockito.any(File.class));
-        verify(s3client, times(1)).putObject(Mockito.eq(BCK_OBJ_EXIST),
+        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.eq("key-test" + File.separator + "key1"),
                 Mockito.eq(new File("test/key1")));
-        verify(s3client, times(1)).putObject(Mockito.eq(BCK_OBJ_EXIST),
+        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.eq("key-test" + File.separator + "key2"),
                 Mockito.eq(new File("test/key2")));
-        verify(s3client, times(1)).putObject(
+        verify(s3tm, times(1)).upload(
                 Mockito.eq(BCK_OBJ_EXIST), Mockito.eq("key-test"
                         + File.separator + "key" + File.separator + "key3"),
                 Mockito.eq(new File("test/key/key3")));
@@ -525,10 +547,11 @@ public class S3ObsServicesTest {
         File file3 = new File("test/key");
         file3.mkdirs();
 
-        int ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", new File("test/key"));
+        int ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test",
+                new File("test/key"));
         assertEquals(0, ret);
-        verify(s3client, never()).putObject(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any(File.class));
+        verify(s3tm, never()).upload(Mockito.anyString(), Mockito.anyString(),
+                Mockito.any(File.class));
 
         file3.delete();
     }

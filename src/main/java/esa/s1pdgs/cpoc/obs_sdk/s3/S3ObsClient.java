@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.transfer.TransferManager;
+
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -36,9 +39,14 @@ public class S3ObsClient extends AbstractObsClient {
     public S3ObsClient() throws ObsServiceException {
         super();
         configuration = new S3Configuration();
-        s3Services = new S3ObsServices(configuration.defaultS3Client(), 
-                configuration.getConfiguration().getInt("retry-policy.condition.max-retries"),
-                configuration.getConfiguration().getInt("retry-policy.backoff.throttled-base-delay-ms"));
+        AmazonS3 client = configuration.defaultS3Client();
+        TransferManager manager =
+                configuration.defaultS3TransferManager(client);
+        s3Services = new S3ObsServices(client, manager,
+                configuration.getConfiguration()
+                        .getInt("retry-policy.condition.max-retries"),
+                configuration.getConfiguration().getInt(
+                        "retry-policy.backoff.throttled-base-delay-ms"));
     }
 
     /**

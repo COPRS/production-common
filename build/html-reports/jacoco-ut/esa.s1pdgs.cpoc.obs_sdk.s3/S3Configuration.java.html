@@ -14,6 +14,8 @@ import com.amazonaws.retry.PredefinedBackoffStrategies;
 import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -57,6 +59,18 @@ public class S3Configuration {
     public static final String ENDPOINT_REGION = &quot;endpoint.region&quot;;
 
     /**
+     * &lt;code&gt;endpoint&lt;/code&gt;
+     */
+    public static final String TM_MP_UPLOAD_TH_MB =
+            &quot;transfer.manager.multipart-upload-threshold-mb&quot;;
+
+    /**
+     * &lt;code&gt;endpoint.region&lt;/code&gt;
+     */
+    public static final String TM_MIN_UPLOAD_PART_SIZE_MB =
+            &quot;transfer.manager.minimum-upload-part-size-mb&quot;;
+
+    /**
      * Name of the bucket dedicated to the family
      * {@link ObsFamily#AUXILIARY_FILE}
      */
@@ -93,6 +107,11 @@ public class S3Configuration {
     public static final String BCK_L0_SEGMENT = &quot;bucket.l0-segments&quot;;
 
     /**
+     * Name of the bucket dedicated to the family {@link ObsFamily#L0_BLANK}
+     */
+    public static final String BCK_L0_BLANK = &quot;bucket.l0-blanks&quot;;
+
+    /**
      * Timeout in second for shutdown a thread
      */
     public static final String TM_S_SHUTDOWN = &quot;timeout-s.shutdown&quot;;
@@ -106,48 +125,51 @@ public class S3Configuration {
      * Timeout in second of a upload execution
      */
     public static final String TM_S_UP_EXEC = &quot;timeout-s.up-exec&quot;;
-    
+
     /**
      * Number of max retries
      */
-    public static final String RETRY_POLICY_MAX_RETRIES = &quot;retry-policy.condition.max-retries&quot;;
-    
+    public static final String RETRY_POLICY_MAX_RETRIES =
+            &quot;retry-policy.condition.max-retries&quot;;
+
     /**
      * Time in millisecond of the delay
      */
-    public static final String RETRY_POLICY_BASE_DELAY_MS = &quot;retry-policy.backoff.base-delay-ms&quot;;
-    
+    public static final String RETRY_POLICY_BASE_DELAY_MS =
+            &quot;retry-policy.backoff.base-delay-ms&quot;;
+
     /**
      * Time in millisecond of the throttled delay
      */
-    public static final String RETRY_POLICY_THROTTLED_BASE_DELAY_MS = &quot;retry-policy.backoff.throttled-base-delay-ms&quot;;
-    
+    public static final String RETRY_POLICY_THROTTLED_BASE_DELAY_MS =
+            &quot;retry-policy.backoff.throttled-base-delay-ms&quot;;
+
     /**
      * Time in millisecond of max backoff
      */
-    public static final String RETRY_POLICY_MAX_BACKOFF_MS = &quot;retry-policy.backoff.max-backoff-ms&quot;;
-
+    public static final String RETRY_POLICY_MAX_BACKOFF_MS =
+            &quot;retry-policy.backoff.max-backoff-ms&quot;;
 
     /**
      * @throws ConfigurationException
      */
-<span class="fc" id="L134">    public S3Configuration() throws ObsServiceException {</span>
+<span class="fc" id="L156">    public S3Configuration() throws ObsServiceException {</span>
         try {
-<span class="fc" id="L136">            configuration = new PropertiesConfiguration(CONFIG_FILE);</span>
-<span class="fc" id="L137">            configuration</span>
-<span class="fc" id="L138">                    .setReloadingStrategy(new FileChangedReloadingStrategy());</span>
-<span class="nc" id="L139">        } catch (ConfigurationException confEx) {</span>
-<span class="nc" id="L140">            throw new ObsServiceException(</span>
-<span class="nc" id="L141">                    &quot;Properties extraction fails: &quot; + confEx.getMessage(),</span>
+<span class="fc" id="L158">            configuration = new PropertiesConfiguration(CONFIG_FILE);</span>
+<span class="fc" id="L159">            configuration</span>
+<span class="fc" id="L160">                    .setReloadingStrategy(new FileChangedReloadingStrategy());</span>
+<span class="nc" id="L161">        } catch (ConfigurationException confEx) {</span>
+<span class="nc" id="L162">            throw new ObsServiceException(</span>
+<span class="nc" id="L163">                    &quot;Properties extraction fails: &quot; + confEx.getMessage(),</span>
                     confEx);
-<span class="fc" id="L143">        }</span>
-<span class="fc" id="L144">    }</span>
+<span class="fc" id="L165">        }</span>
+<span class="fc" id="L166">    }</span>
 
     /**
      * @return
      */
     public PropertiesConfiguration getConfiguration() {
-<span class="fc" id="L150">        return configuration;</span>
+<span class="fc" id="L172">        return configuration;</span>
     }
 
     /**
@@ -160,10 +182,10 @@ public class S3Configuration {
     public int getIntOfConfiguration(final String key)
             throws ObsServiceException {
         try {
-<span class="fc" id="L163">            return configuration.getInt(key);</span>
-<span class="nc" id="L164">        } catch (ConversionException convE) {</span>
-<span class="nc" id="L165">            throw new ObsServiceException(&quot;Cannot get configuration value of &quot;</span>
-<span class="nc" id="L166">                    + key + &quot;: &quot; + convE.getMessage(), convE);</span>
+<span class="fc" id="L185">            return configuration.getInt(key);</span>
+<span class="nc" id="L186">        } catch (ConversionException convE) {</span>
+<span class="nc" id="L187">            throw new ObsServiceException(&quot;Cannot get configuration value of &quot;</span>
+<span class="nc" id="L188">                    + key + &quot;: &quot; + convE.getMessage(), convE);</span>
         }
     }
 
@@ -177,33 +199,36 @@ public class S3Configuration {
     public String getBucketForFamily(final ObsFamily family)
             throws ObsServiceException {
         String bucket;
-<span class="pc bpc" id="L180" title="1 of 8 branches missed.">        switch (family) {</span>
+<span class="pc bpc" id="L202" title="2 of 9 branches missed.">        switch (family) {</span>
             case AUXILIARY_FILE:
-<span class="fc" id="L182">                bucket = configuration.getString(BCK_AUX_FILES);</span>
-<span class="fc" id="L183">                break;</span>
+<span class="fc" id="L204">                bucket = configuration.getString(BCK_AUX_FILES);</span>
+<span class="fc" id="L205">                break;</span>
             case EDRS_SESSION:
-<span class="fc" id="L185">                bucket = configuration.getString(BCK_EDRS_SESSIONS);</span>
-<span class="fc" id="L186">                break;</span>
+<span class="fc" id="L207">                bucket = configuration.getString(BCK_EDRS_SESSIONS);</span>
+<span class="fc" id="L208">                break;</span>
             case L0_ACN:
-<span class="fc" id="L188">                bucket = configuration.getString(BCK_L0_ACNS);</span>
-<span class="fc" id="L189">                break;</span>
+<span class="fc" id="L210">                bucket = configuration.getString(BCK_L0_ACNS);</span>
+<span class="fc" id="L211">                break;</span>
             case L0_SLICE:
-<span class="fc" id="L191">                bucket = configuration.getString(BCK_L0_SLICES);</span>
-<span class="fc" id="L192">                break;</span>
+<span class="fc" id="L213">                bucket = configuration.getString(BCK_L0_SLICES);</span>
+<span class="fc" id="L214">                break;</span>
             case L1_ACN:
-<span class="fc" id="L194">                bucket = configuration.getString(BCK_L1_ACNS);</span>
-<span class="fc" id="L195">                break;</span>
+<span class="fc" id="L216">                bucket = configuration.getString(BCK_L1_ACNS);</span>
+<span class="fc" id="L217">                break;</span>
             case L1_SLICE:
-<span class="fc" id="L197">                bucket = configuration.getString(BCK_L1_SLICES);</span>
-<span class="fc" id="L198">                break;</span>
+<span class="fc" id="L219">                bucket = configuration.getString(BCK_L1_SLICES);</span>
+<span class="fc" id="L220">                break;</span>
             case L0_SEGMENT:
-<span class="nc" id="L200">                bucket = configuration.getString(BCK_L0_SEGMENT);</span>
-<span class="nc" id="L201">                break;</span>
+<span class="nc" id="L222">                bucket = configuration.getString(BCK_L0_SEGMENT);</span>
+<span class="nc" id="L223">                break;</span>
+            case L0_BLANK:
+<span class="nc" id="L225">                bucket = configuration.getString(BCK_L0_BLANK);</span>
+<span class="nc" id="L226">                break;</span>
             default:
-<span class="fc" id="L203">                throw new ObsServiceException(</span>
+<span class="fc" id="L228">                throw new ObsServiceException(</span>
                         &quot;Invalid object storage family &quot; + family);
         }
-<span class="fc" id="L206">        return bucket;</span>
+<span class="fc" id="L231">        return bucket;</span>
     }
 
     /**
@@ -213,29 +238,41 @@ public class S3Configuration {
      */
     public AmazonS3 defaultS3Client() {
         // Credentials
-<span class="fc" id="L216">        BasicAWSCredentials awsCreds =</span>
-<span class="fc" id="L217">                new BasicAWSCredentials(configuration.getString(USER_ID),</span>
-<span class="fc" id="L218">                        configuration.getString(USER_SECRET));</span>
-        
+<span class="fc" id="L241">        BasicAWSCredentials awsCreds =</span>
+<span class="fc" id="L242">                new BasicAWSCredentials(configuration.getString(USER_ID),</span>
+<span class="fc" id="L243">                        configuration.getString(USER_SECRET));</span>
+
         // Client configuration (protocol and retry policy)
-<span class="fc" id="L221">        ClientConfiguration clientConfig = new ClientConfiguration();</span>
-<span class="fc" id="L222">        clientConfig.setProtocol(Protocol.HTTP);</span>
-<span class="fc" id="L223">        RetryPolicy retryPolicy = new RetryPolicy(</span>
-<span class="fc" id="L224">                new SDKCustomDefaultRetryCondition(configuration.getInt(RETRY_POLICY_MAX_RETRIES)),</span>
-<span class="fc" id="L225">                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(configuration.getInt(RETRY_POLICY_BASE_DELAY_MS),</span>
-<span class="fc" id="L226">                        configuration.getInt(RETRY_POLICY_THROTTLED_BASE_DELAY_MS), </span>
-<span class="fc" id="L227">                        configuration.getInt(RETRY_POLICY_MAX_BACKOFF_MS)),</span>
-<span class="fc" id="L228">                configuration.getInt(RETRY_POLICY_MAX_RETRIES), true);</span>
-<span class="fc" id="L229">        clientConfig.setRetryPolicy(retryPolicy);</span>
-        
+<span class="fc" id="L246">        ClientConfiguration clientConfig = new ClientConfiguration();</span>
+<span class="fc" id="L247">        clientConfig.setProtocol(Protocol.HTTP);</span>
+<span class="fc" id="L248">        RetryPolicy retryPolicy = new RetryPolicy(</span>
+                new SDKCustomDefaultRetryCondition(
+<span class="fc" id="L250">                        configuration.getInt(RETRY_POLICY_MAX_RETRIES)),</span>
+                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(
+<span class="fc" id="L252">                        configuration.getInt(RETRY_POLICY_BASE_DELAY_MS),</span>
+                        configuration
+<span class="fc" id="L254">                                .getInt(RETRY_POLICY_THROTTLED_BASE_DELAY_MS),</span>
+<span class="fc" id="L255">                        configuration.getInt(RETRY_POLICY_MAX_BACKOFF_MS)),</span>
+<span class="fc" id="L256">                configuration.getInt(RETRY_POLICY_MAX_RETRIES), true);</span>
+<span class="fc" id="L257">        clientConfig.setRetryPolicy(retryPolicy);</span>
+
         // Amazon s3 client
-<span class="fc" id="L232">        return AmazonS3ClientBuilder.standard()</span>
-<span class="fc" id="L233">                .withClientConfiguration(clientConfig)</span>
-<span class="fc" id="L234">                .withEndpointConfiguration(new EndpointConfiguration(</span>
-<span class="fc" id="L235">                        configuration.getString(ENDPOINT),</span>
-<span class="fc" id="L236">                        configuration.getString(ENDPOINT_REGION)))</span>
-<span class="fc" id="L237">                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))</span>
-<span class="fc" id="L238">                .build();</span>
+<span class="fc" id="L260">        return AmazonS3ClientBuilder.standard()</span>
+<span class="fc" id="L261">                .withClientConfiguration(clientConfig)</span>
+<span class="fc" id="L262">                .withEndpointConfiguration(new EndpointConfiguration(</span>
+<span class="fc" id="L263">                        configuration.getString(ENDPOINT),</span>
+<span class="fc" id="L264">                        configuration.getString(ENDPOINT_REGION)))</span>
+<span class="fc" id="L265">                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))</span>
+<span class="fc" id="L266">                .build();</span>
+    }
+
+    public TransferManager defaultS3TransferManager(AmazonS3 client) {
+<span class="fc" id="L270">        return TransferManagerBuilder.standard()</span>
+<span class="fc" id="L271">                .withMinimumUploadPartSize(</span>
+<span class="fc" id="L272">                        configuration.getLong(TM_MIN_UPLOAD_PART_SIZE_MB) * 1024 * 1024)</span>
+<span class="fc" id="L273">                .withMultipartUploadThreshold(</span>
+<span class="fc" id="L274">                        configuration.getLong(TM_MP_UPLOAD_TH_MB) * 1024 * 1024)</span>
+<span class="fc" id="L275">                .withS3Client(client).build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

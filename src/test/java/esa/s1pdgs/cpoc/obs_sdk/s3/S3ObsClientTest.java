@@ -99,6 +99,10 @@ public class S3ObsClientTest {
                 .getBucketForFamily(Mockito.eq(ObsFamily.L1_SLICE));
         doReturn("l1-acns").when(configuration)
                 .getBucketForFamily(Mockito.eq(ObsFamily.L1_ACN));
+        doReturn("l0-segments").when(configuration)
+        .getBucketForFamily(Mockito.eq(ObsFamily.L0_SEGMENT));
+        doReturn("l0-blanks").when(configuration)
+        .getBucketForFamily(Mockito.eq(ObsFamily.L0_BLANK));
         doReturn(22).when(configuration).getIntOfConfiguration(
                 Mockito.eq(S3Configuration.TM_S_SHUTDOWN));
         doReturn(8).when(configuration).getIntOfConfiguration(
