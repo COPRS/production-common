@@ -45,6 +45,7 @@ public enum ProductCategory {
             case L0_SLICE:
             case L1_ACN:
             case L1_SLICE:
+            case L0_BLANK:
                 ret = ProductCategory.LEVEL_PRODUCTS;
                 break;
             case L0_SEGMENT:

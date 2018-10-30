@@ -60,6 +60,8 @@ public class ProductCategoryTest {
                 ProductCategory.fromProductFamily(ProductFamily.L1_ACN));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
                 ProductCategory.fromProductFamily(ProductFamily.L1_SLICE));
+        assertEquals(ProductCategory.LEVEL_PRODUCTS,
+                ProductCategory.fromProductFamily(ProductFamily.L0_BLANK));
         assertEquals(ProductCategory.LEVEL_JOBS,
                 ProductCategory.fromProductFamily(ProductFamily.L0_JOB));
         assertEquals(ProductCategory.LEVEL_JOBS,

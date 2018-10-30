@@ -45,17 +45,18 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
             case L0_SLICE:
             case L1_ACN:
             case L1_SLICE:
-<span class="fc" id="L48">                ret = ProductCategory.LEVEL_PRODUCTS;</span>
-<span class="fc" id="L49">                break;</span>
+            case L0_BLANK:
+<span class="fc" id="L49">                ret = ProductCategory.LEVEL_PRODUCTS;</span>
+<span class="fc" id="L50">                break;</span>
             case L0_SEGMENT:
-<span class="fc" id="L51">                ret = ProductCategory.LEVEL_SEGMENTS;</span>
-<span class="fc" id="L52">                break;</span>
+<span class="fc" id="L52">                ret = ProductCategory.LEVEL_SEGMENTS;</span>
+<span class="fc" id="L53">                break;</span>
             default:
-<span class="fc" id="L54">                throw new InternalErrorException(</span>
+<span class="fc" id="L55">                throw new InternalErrorException(</span>
                         &quot;Cannot determinate product category for family &quot;
                                 + family);
         }
-<span class="fc" id="L58">        return ret;</span>
+<span class="fc" id="L59">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
