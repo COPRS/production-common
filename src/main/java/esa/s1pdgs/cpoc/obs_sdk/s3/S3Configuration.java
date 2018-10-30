@@ -107,6 +107,11 @@ public class S3Configuration {
     public static final String BCK_L0_SEGMENT = "bucket.l0-segments";
 
     /**
+     * Name of the bucket dedicated to the family {@link ObsFamily#L0_BLANK}
+     */
+    public static final String BCK_L0_BLANK = "bucket.l0-blanks";
+
+    /**
      * Timeout in second for shutdown a thread
      */
     public static final String TM_S_SHUTDOWN = "timeout-s.shutdown";
@@ -215,6 +220,9 @@ public class S3Configuration {
                 break;
             case L0_SEGMENT:
                 bucket = configuration.getString(BCK_L0_SEGMENT);
+                break;
+            case L0_BLANK:
+                bucket = configuration.getString(BCK_L0_BLANK);
                 break;
             default:
                 throw new ObsServiceException(
