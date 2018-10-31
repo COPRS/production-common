@@ -118,7 +118,7 @@ public class ObsService {
      */
     protected ObsFamily getObsFamily(final ProductFamily family) {
         ObsFamily ret;
-<span class="pc bpc" id="L121" title="1 of 8 branches missed.">        switch (family) {</span>
+<span class="pc bpc" id="L121" title="2 of 9 branches missed.">        switch (family) {</span>
             case AUXILIARY_FILE:
 <span class="fc" id="L123">                ret = ObsFamily.AUXILIARY_FILE;</span>
 <span class="fc" id="L124">                break;</span>
@@ -140,11 +140,14 @@ public class ObsService {
             case L0_SEGMENT:
 <span class="nc" id="L141">                ret = ObsFamily.L0_SEGMENT;</span>
 <span class="nc" id="L142">                break;</span>
+            case L0_BLANK:
+<span class="nc" id="L144">                ret = ObsFamily.L0_BLANK;</span>
+<span class="nc" id="L145">                break;</span>
             default:
-<span class="fc" id="L144">                ret = ObsFamily.UNKNOWN;</span>
+<span class="fc" id="L147">                ret = ObsFamily.UNKNOWN;</span>
                 break;
         }
-<span class="fc" id="L147">        return ret;</span>
+<span class="fc" id="L150">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

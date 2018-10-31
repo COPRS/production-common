@@ -7,7 +7,7 @@ Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.status,AppStatu
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.controller,ReportsConsumer,0,106,0,0,0,30,0,3,0,3
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.controller,SlicesConsumer,0,141,0,2,0,34,0,4,0,3
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsConfig,0,5,0,0,0,2,0,2,0,2
-Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsService,3,145,2,14,2,43,2,14,0,5
-Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsService.new Object() {...},7,47,0,0,0,1,0,1,0,1
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsService,6,145,3,14,4,43,3,14,0,5
+Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives.services,ObsService.new Object() {...},8,53,0,0,0,1,0,1,0,1
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives,DevProperties,0,10,0,0,0,4,0,3,0,3
 Spring Boot Docker For S1-PDGS Archives,esa.s1pdgs.cpoc.archives,Application,0,8,0,0,0,3,0,2,0,2
