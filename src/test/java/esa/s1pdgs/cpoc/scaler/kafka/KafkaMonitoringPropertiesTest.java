@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.scaler.kafka;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,7 @@ public class KafkaMonitoringPropertiesTest {
         assertEquals(5000, properties.getRequestTimeoutMs());
         assertEquals(660000, properties.getCnxMaxIdlMs());
         assertEquals(1, properties.getTopics().size());
-        assertEquals("l1-jobs", properties.getTopics().get(SpdgsTopic.L1_JOBS));
+        assertEquals(Arrays.asList("l1-jobs"), properties.getTopics().get(SpdgsTopic.L1_JOBS));
         assertEquals(1, properties.getGroupIdPerTopic().size());
         assertEquals("l1-job-generators",
                 properties.getGroupIdPerTopic().get(SpdgsTopic.L1_JOBS));

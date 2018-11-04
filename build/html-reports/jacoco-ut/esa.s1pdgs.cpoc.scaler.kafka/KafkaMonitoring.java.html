@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerGroupsDescription;
+import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.model.SpdgsTopic;
 import esa.s1pdgs.cpoc.scaler.kafka.services.KafkaService;
@@ -36,33 +37,36 @@ public class KafkaMonitoring {
 	 * @param kafkaService
 	 */
 	@Autowired
-<span class="fc" id="L39">	public KafkaMonitoring(final KafkaMonitoringProperties kafkaProperties, final KafkaService kafkaService) {</span>
-<span class="fc" id="L40">		this.kafkaProperties = kafkaProperties;</span>
-<span class="fc" id="L41">		this.kafkaService = kafkaService;</span>
-<span class="fc" id="L42">	}</span>
+<span class="fc" id="L40">	public KafkaMonitoring(final KafkaMonitoringProperties kafkaProperties, final KafkaService kafkaService) {</span>
+<span class="fc" id="L41">		this.kafkaProperties = kafkaProperties;</span>
+<span class="fc" id="L42">		this.kafkaService = kafkaService;</span>
+<span class="fc" id="L43">	}</span>
 
-	public KafkaPerGroupPerTopicMonitor monitorL1Jobs() {
-<span class="fc" id="L45">		String groupId = kafkaProperties.getGroupIdPerTopic().get(SpdgsTopic.L1_JOBS);</span>
-<span class="fc" id="L46">		String topicName = kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS);</span>
-<span class="fc" id="L47">		return this.monitorGroupPerTopic(groupId, topicName);</span>
+	public KafkaPerGroupMonitor monitorL1Jobs() {
+<span class="fc" id="L46">        String groupId = kafkaProperties.getGroupIdPerTopic().get(SpdgsTopic.L1_JOBS);</span>
+<span class="fc" id="L47">	    KafkaPerGroupMonitor globalMonitor = new KafkaPerGroupMonitor(new Date(), groupId);</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">		for (String topicName : kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS)) {</span>
+<span class="fc" id="L49">		    globalMonitor.addMonitor(this.monitorGroupPerTopic(groupId, topicName));</span>
+<span class="fc" id="L50">		}</span>
+<span class="fc" id="L51">		return globalMonitor;</span>
 	}
 
 	private KafkaPerGroupPerTopicMonitor monitorGroupPerTopic(String groupId, String topicName) {
-<span class="fc" id="L51">		ConsumerGroupsDescription desc = this.kafkaService.describeConsumerGroup(groupId, topicName);</span>
-<span class="fc" id="L52">		KafkaPerGroupPerTopicMonitor monitor = new KafkaPerGroupPerTopicMonitor(new Date(), groupId, topicName);</span>
-<span class="fc bfc" id="L53" title="All 2 branches covered.">		if (!CollectionUtils.isEmpty(desc.getDescPerPartition())) {</span>
-<span class="fc" id="L54">			monitor.setNbPartitions(desc.getDescPerPartition().size());</span>
-<span class="fc" id="L55">			desc.getDescPerPartition().forEach((k, v) -&gt; {</span>
-<span class="fc" id="L56">				monitor.getLagPerPartition().put(Integer.valueOf(v.getId()), Long.valueOf(v.getLag()));</span>
-<span class="fc" id="L57">			});</span>
+<span class="fc" id="L55">		ConsumerGroupsDescription desc = this.kafkaService.describeConsumerGroup(groupId, topicName);</span>
+<span class="fc" id="L56">		KafkaPerGroupPerTopicMonitor monitor = new KafkaPerGroupPerTopicMonitor(new Date(), groupId, topicName);</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">		if (!CollectionUtils.isEmpty(desc.getDescPerPartition())) {</span>
+<span class="fc" id="L58">			monitor.setNbPartitions(desc.getDescPerPartition().size());</span>
+<span class="fc" id="L59">			desc.getDescPerPartition().forEach((k, v) -&gt; {</span>
+<span class="fc" id="L60">				monitor.getLagPerPartition().put(Integer.valueOf(v.getId()), Long.valueOf(v.getLag()));</span>
+<span class="fc" id="L61">			});</span>
 		}
-<span class="fc bfc" id="L59" title="All 2 branches covered.">		if (!CollectionUtils.isEmpty(desc.getDescPerConsumer())) {</span>
-<span class="fc" id="L60">			monitor.setNbConsumers(desc.getDescPerConsumer().size());</span>
-<span class="fc" id="L61">			desc.getDescPerConsumer().forEach((k, v) -&gt; {</span>
-<span class="fc" id="L62">				monitor.getLagPerConsumers().put(v.getConsumerId(), Long.valueOf(v.getTotalLag()));</span>
-<span class="fc" id="L63">			});</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">		if (!CollectionUtils.isEmpty(desc.getDescPerConsumer())) {</span>
+<span class="fc" id="L64">			monitor.setNbConsumers(desc.getDescPerConsumer().size());</span>
+<span class="fc" id="L65">			desc.getDescPerConsumer().forEach((k, v) -&gt; {</span>
+<span class="fc" id="L66">				monitor.getLagPerConsumers().put(v.getConsumerId(), Long.valueOf(v.getTotalLag()));</span>
+<span class="fc" id="L67">			});</span>
 		}
-<span class="fc" id="L65">		return monitor;</span>
+<span class="fc" id="L69">		return monitor;</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

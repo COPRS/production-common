@@ -111,71 +111,78 @@ public class K8SMonitoring {
 
     public List&lt;WrapperNodeMonitor&gt; monitorL1Wrappers()
             throws WrapperStatusException, AbstractCodedException {
-<span class="fc" id="L114">        String topic = kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS);</span>
-<span class="fc" id="L115">        List&lt;WrapperNodeMonitor&gt; monitors = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L114">        List&lt;WrapperNodeMonitor&gt; monitors = new ArrayList&lt;&gt;();</span>
 
         // Retrieve nodes dedicated to L1
-<span class="fc" id="L118">        List&lt;NodeDesc&gt; nodes = this.nodeService.getNodesWithLabel(</span>
-<span class="fc" id="L119">                wrapperProperties.getLabelWrapperConfig().getLabel(),</span>
-<span class="fc" id="L120">                wrapperProperties.getLabelWrapperConfig().getValue());</span>
+<span class="fc" id="L117">        List&lt;NodeDesc&gt; nodes = this.nodeService.getNodesWithLabel(</span>
+<span class="fc" id="L118">                wrapperProperties.getLabelWrapperConfig().getLabel(),</span>
+<span class="fc" id="L119">                wrapperProperties.getLabelWrapperConfig().getValue());</span>
 
         // Retrieve pods dedicated to L1
-<span class="fc" id="L123">        List&lt;PodDesc&gt; pods = this.podService.getPodsWithLabel(</span>
-<span class="fc" id="L124">                wrapperProperties.getLabelWrapperApp().getLabel(),</span>
-<span class="fc" id="L125">                wrapperProperties.getLabelWrapperApp().getValue());</span>
+<span class="fc" id="L122">        List&lt;PodDesc&gt; pods = this.podService.getPodsWithLabel(</span>
+<span class="fc" id="L123">                wrapperProperties.getLabelWrapperApp().getLabel(),</span>
+<span class="fc" id="L124">                wrapperProperties.getLabelWrapperApp().getValue());</span>
 
         // Reorganize pods per nodes
-<span class="fc" id="L128">        Map&lt;String, List&lt;PodDesc&gt;&gt; podsPerNodes = new HashMap&lt;&gt;();</span>
-<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(pods)) {</span>
-<span class="fc" id="L130">            pods.forEach(pod -&gt; {</span>
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">                if (!podsPerNodes.containsKey(pod.getNodeName())) {</span>
-<span class="fc" id="L132">                    podsPerNodes.put(pod.getNodeName(), new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L127">        Map&lt;String, List&lt;PodDesc&gt;&gt; podsPerNodes = new HashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(pods)) {</span>
+<span class="fc" id="L129">            pods.forEach(pod -&gt; {</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">                if (!podsPerNodes.containsKey(pod.getNodeName())) {</span>
+<span class="fc" id="L131">                    podsPerNodes.put(pod.getNodeName(), new ArrayList&lt;&gt;());</span>
                 }
-<span class="fc" id="L134">                podsPerNodes.get(pod.getNodeName()).add(pod);</span>
-<span class="fc" id="L135">            });</span>
+<span class="fc" id="L133">                podsPerNodes.get(pod.getNodeName()).add(pod);</span>
+<span class="fc" id="L134">            });</span>
         }
 
         // build monitor
-<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(nodes)) {</span>
-<span class="fc bfc" id="L140" title="All 2 branches covered.">            for (NodeDesc node : nodes) {</span>
-<span class="fc" id="L141">                WrapperNodeMonitor nodeMonitor = new WrapperNodeMonitor(node);</span>
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">                if (podsPerNodes.containsKey(node.getName())) {</span>
-<span class="fc bfc" id="L143" title="All 2 branches covered.">                    for (PodDesc pod : podsPerNodes.get(node.getName())) {</span>
-<span class="fc" id="L144">                        WrapperPodMonitor podMonitor =</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(nodes)) {</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            for (NodeDesc node : nodes) {</span>
+<span class="fc" id="L140">                WrapperNodeMonitor nodeMonitor = new WrapperNodeMonitor(node);</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">                if (podsPerNodes.containsKey(node.getName())) {</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">                    for (PodDesc pod : podsPerNodes.get(node.getName())) {</span>
+<span class="fc" id="L143">                        WrapperPodMonitor podMonitor =</span>
                                 new WrapperPodMonitor(pod);
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">                        if (pod.getStatus() == PodStatus.Running) {</span>
-<span class="fc" id="L147">                            WrapperDesc wrapper = this.wrapperService</span>
-<span class="fc" id="L148">                                    .getWrapperStatus(pod.getName(),</span>
-<span class="fc" id="L149">                                            pod.getAddresses().get(</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">                        if (pod.getStatus() == PodStatus.Running) {</span>
+<span class="fc" id="L146">                            WrapperDesc wrapper = this.wrapperService</span>
+<span class="fc" id="L147">                                    .getWrapperStatus(pod.getName(),</span>
+<span class="fc" id="L148">                                            pod.getAddresses().get(</span>
                                                     AddressType.INTERNAL_IP));
-<span class="fc" id="L151">                            long nbReadingMessage = this.appCatalogService</span>
-<span class="fc" id="L152">                                    .getNbReadingMessages(topic, pod.getName());</span>
-<span class="fc" id="L153">                            podMonitor.setLogicalStatus(wrapper.getStatus());</span>
-<span class="fc" id="L154">                            if (wrapper.getStatus()</span>
-<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                                    .equals(PodLogicalStatus.PROCESSING)) {</span>
-<span class="fc" id="L156">                                podMonitor.setPassedExecutionTime(</span>
-<span class="fc" id="L157">                                        wrapper.getTimeSinceLastChange());</span>
-<span class="fc" id="L158">                                podMonitor.setRemainingExecutionTime(</span>
-<span class="fc" id="L159">                                        wrapperProperties.getExecutionTime()</span>
-<span class="fc" id="L160">                                                .getAverageS() * 1000</span>
+<span class="fc" id="L150">                            long nbReadingMessage = getNbReadingMessage(pod.getName());</span>
+<span class="fc" id="L151">                            podMonitor.setLogicalStatus(wrapper.getStatus());</span>
+<span class="fc" id="L152">                            if (wrapper.getStatus()</span>
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">                                    .equals(PodLogicalStatus.PROCESSING)) {</span>
+<span class="fc" id="L154">                                podMonitor.setPassedExecutionTime(</span>
+<span class="fc" id="L155">                                        wrapper.getTimeSinceLastChange());</span>
+<span class="fc" id="L156">                                podMonitor.setRemainingExecutionTime(</span>
+<span class="fc" id="L157">                                        wrapperProperties.getExecutionTime()</span>
+<span class="fc" id="L158">                                                .getAverageS() * 1000</span>
                                                 - wrapper
-<span class="fc" id="L162">                                                        .getTimeSinceLastChange());</span>
+<span class="fc" id="L160">                                                        .getTimeSinceLastChange());</span>
                             }
-<span class="fc" id="L164">                            long remTime = podMonitor</span>
-<span class="fc" id="L165">                                    .getRemainingExecutionTime()</span>
+<span class="fc" id="L162">                            long remTime = podMonitor</span>
+<span class="fc" id="L163">                                    .getRemainingExecutionTime()</span>
                                     + nbReadingMessage * wrapperProperties
-<span class="fc" id="L167">                                            .getExecutionTime().getAverageS()</span>
+<span class="fc" id="L165">                                            .getExecutionTime().getAverageS()</span>
                                             * 1000;
-<span class="fc" id="L169">                            podMonitor.setRemainingExecutionTime(remTime);</span>
+<span class="fc" id="L167">                            podMonitor.setRemainingExecutionTime(remTime);</span>
                         }
-<span class="fc" id="L171">                        nodeMonitor.addWrapperPod(podMonitor);</span>
-<span class="fc" id="L172">                    }</span>
+<span class="fc" id="L169">                        nodeMonitor.addWrapperPod(podMonitor);</span>
+<span class="fc" id="L170">                    }</span>
                 }
-<span class="fc" id="L174">                monitors.add(nodeMonitor);</span>
-<span class="fc" id="L175">            }</span>
+<span class="fc" id="L172">                monitors.add(nodeMonitor);</span>
+<span class="fc" id="L173">            }</span>
         }
 
-<span class="fc" id="L178">        return monitors;</span>
+<span class="fc" id="L176">        return monitors;</span>
+    }
+    
+    private long getNbReadingMessage(String podName) throws AbstractCodedException {
+<span class="fc" id="L180">        long ret = 0;</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">        for (String topicName : kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS)) {</span>
+<span class="fc" id="L182">            ret += this.appCatalogService</span>
+<span class="fc" id="L183">                    .getNbReadingMessages(topicName, podName);</span>
+<span class="fc" id="L184">        }</span>
+<span class="fc" id="L185">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

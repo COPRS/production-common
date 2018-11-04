@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerGroupsDescription;
+import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.model.SpdgsTopic;
 import esa.s1pdgs.cpoc.scaler.kafka.services.KafkaService;
@@ -41,10 +42,13 @@ public class KafkaMonitoring {
 		this.kafkaService = kafkaService;
 	}
 
-	public KafkaPerGroupPerTopicMonitor monitorL1Jobs() {
-		String groupId = kafkaProperties.getGroupIdPerTopic().get(SpdgsTopic.L1_JOBS);
-		String topicName = kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS);
-		return this.monitorGroupPerTopic(groupId, topicName);
+	public KafkaPerGroupMonitor monitorL1Jobs() {
+        String groupId = kafkaProperties.getGroupIdPerTopic().get(SpdgsTopic.L1_JOBS);
+	    KafkaPerGroupMonitor globalMonitor = new KafkaPerGroupMonitor(new Date(), groupId);
+		for (String topicName : kafkaProperties.getTopics().get(SpdgsTopic.L1_JOBS)) {
+		    globalMonitor.addMonitor(this.monitorGroupPerTopic(groupId, topicName));
+		}
+		return globalMonitor;
 	}
 
 	private KafkaPerGroupPerTopicMonitor monitorGroupPerTopic(String groupId, String topicName) {

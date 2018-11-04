@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +77,8 @@ public class K8SMonitoringTest {
                 .thenReturn("app");
         when(wrapperProperties.getLabelWrapperApp().getValue())
                 .thenReturn("l1-wrapper");
-        Map<SpdgsTopic, String> topics = new HashMap<>();
-        topics.put(SpdgsTopic.L1_JOBS, "topic");
+        Map<SpdgsTopic, List<String>> topics = new HashMap<>();
+        topics.put(SpdgsTopic.L1_JOBS, Arrays.asList("topic"));
         Map<SpdgsTopic, String> groups = new HashMap<>();
         groups.put(SpdgsTopic.L1_JOBS, "group");
         doReturn(topics).when(kafkaProperties).getTopics();
