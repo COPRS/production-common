@@ -159,7 +159,7 @@ public class LevelSegmentDistributionControllerTest extends RestControllerTest {
      */
     @Test
     public void testPublishMessageUri() throws Exception {
-        doNothing().when(publication).publish(Mockito.any(), Mockito.any());
+        doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         GenericPublicationMessageDto<LevelSegmentDto> dto =
                 new GenericPublicationMessageDto<>(ProductFamily.L0_SEGMENT,
                         new LevelSegmentDto("product-name", "key-test",
@@ -171,6 +171,8 @@ public class LevelSegmentDistributionControllerTest extends RestControllerTest {
                         .andExpect(MockMvcResultMatchers.status().isOk());
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.LEVEL_SEGMENTS),
-                Mockito.eq(dto.getMessageToPublish()));
+                Mockito.eq(dto.getMessageToPublish()), 
+                Mockito.eq(null), 
+                Mockito.eq(null));
     }
 }

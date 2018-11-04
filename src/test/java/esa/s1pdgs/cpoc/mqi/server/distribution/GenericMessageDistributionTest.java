@@ -128,7 +128,7 @@ public class GenericMessageDistributionTest {
             throws MqiCategoryNotAvailable, MqiPublicationError, MqiRouteNotAvailable {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "publisher")).when(publication).publish(Mockito.any(),
-                        Mockito.any());
+                        Mockito.any(), Mockito.any(), Mockito.any());
         ResponseEntity<Void> message = controller.publish("log message",
                 new GenericPublicationMessageDto<String>(ProductFamily.BLANK,
                         "message"));
@@ -137,7 +137,9 @@ public class GenericMessageDistributionTest {
 
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq("message"));
+                Mockito.eq("message"),
+                Mockito.eq(null), 
+                Mockito.eq(null));
     }
 
     /**
@@ -151,7 +153,7 @@ public class GenericMessageDistributionTest {
     public void testPublishApiError()
             throws MqiCategoryNotAvailable, MqiPublicationError, MqiRouteNotAvailable {
         doThrow(MqiPublicationError.class).when(publication)
-                .publish(Mockito.any(), Mockito.any());
+                .publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         ResponseEntity<Void> message = controller.publish("log message",
                 new GenericPublicationMessageDto<String>(ProductFamily.BLANK,
                         "message"));
@@ -160,6 +162,8 @@ public class GenericMessageDistributionTest {
 
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq("message"));
+                Mockito.eq("message"), 
+                Mockito.eq(null), 
+                Mockito.eq(null));
     }
 }

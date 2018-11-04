@@ -174,7 +174,7 @@ public class AuxiliaryFilesDistributionControllerTest
      */
     @Test
     public void testPublishMessageUri() throws Exception {
-        doNothing().when(publication).publish(Mockito.any(), Mockito.any());
+        doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         GenericPublicationMessageDto<AuxiliaryFileDto> dto =
                 new GenericPublicationMessageDto<>(ProductFamily.AUXILIARY_FILE,
                         new AuxiliaryFileDto("product-name", "key-test"));
@@ -185,6 +185,8 @@ public class AuxiliaryFilesDistributionControllerTest
                         .andExpect(MockMvcResultMatchers.status().isOk());
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq(dto.getMessageToPublish()));
+                Mockito.eq(dto.getMessageToPublish()),
+                Mockito.eq(null), 
+                Mockito.eq(null));
     }
 }

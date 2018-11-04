@@ -37,6 +37,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelProductProduce
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelReportProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.LevelSegmentProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.DefaultRoute;
+import esa.s1pdgs.cpoc.mqi.server.publication.routing.Route;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.Routing;
 
 /**
@@ -178,28 +179,28 @@ public class MessagePublicationController {
      * @throws MqiCategoryNotAvailable
      * @throws MqiRouteNotAvailable
      */
-    public void publish(ProductCategory category, Object dto)
+    public void publish(ProductCategory category, Object dto, String inputKey, String outputKey)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
         if (producers.containsKey(category)) {
             switch (category) {
                 case AUXILIARY_FILES:
-                    publishAuxiliaryFiles((AuxiliaryFileDto) dto);
+                    publishAuxiliaryFiles((AuxiliaryFileDto) dto, inputKey, outputKey);
                     break;
                 case EDRS_SESSIONS:
-                    publishEdrsSessions((EdrsSessionDto) dto);
+                    publishEdrsSessions((EdrsSessionDto) dto, inputKey, outputKey);
                     break;
                 case LEVEL_JOBS:
-                    publishLevelJobs((LevelJobDto) dto);
+                    publishLevelJobs((LevelJobDto) dto, inputKey, outputKey);
                     break;
                 case LEVEL_PRODUCTS:
-                    publishLevelProducts((LevelProductDto) dto);
+                    publishLevelProducts((LevelProductDto) dto, inputKey, outputKey);
                     break;
                 case LEVEL_REPORTS:
-                    publishLevelReports((LevelReportDto) dto);
+                    publishLevelReports((LevelReportDto) dto, inputKey, outputKey);
                     break;
                 case LEVEL_SEGMENTS:
-                    publishLevelSegments((LevelSegmentDto) dto);
+                    publishLevelSegments((LevelSegmentDto) dto, inputKey, outputKey);
                     break;
             }
         } else {
@@ -217,15 +218,20 @@ public class MessagePublicationController {
      * @throws MqiRouteNotAvailable
      */
     protected String getTopic(final ProductCategory category,
-            final ProductFamily family)
+            final ProductFamily family, final String inputKey, final String outputKey)
             throws MqiCategoryNotAvailable, MqiRouteNotAvailable {
         String result = "";
         if (routing.containsKey(category)) {
-            DefaultRoute dft = routing.get(category).getDefaultRoute(family);
-            if (dft == null) {
-                throw new MqiRouteNotAvailable(category, family);
+            Route rte = routing.get(category).getRoute(inputKey, outputKey);
+            if (rte == null) {
+                DefaultRoute dft = routing.get(category).getDefaultRoute(family);
+                if (dft == null) {
+                    throw new MqiRouteNotAvailable(category, family);
+                } else {
+                    result = dft.getRouteTo().getTopic();
+                }
             } else {
-                result = dft.getRouteTo().getTopic();
+                result = rte.getRouteTo().getTopic();
             }
         } else {
             throw new MqiCategoryNotAvailable(category, "publisher");
@@ -241,14 +247,14 @@ public class MessagePublicationController {
      * @throws MqiCategoryNotAvailable
      * @throws MqiRouteNotAvailable
      */
-    protected void publishAuxiliaryFiles(final AuxiliaryFileDto dto)
+    protected void publishAuxiliaryFiles(final AuxiliaryFileDto dto, String inputKey, String outputKey)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.AUXILIARY_FILES;
         if (producers.containsKey(category)) {
             AuxiliaryFileProducer producer =
                     (AuxiliaryFileProducer) producers.get(category);
-            producer.send(getTopic(category, ProductFamily.AUXILIARY_FILE),
+            producer.send(getTopic(category, ProductFamily.AUXILIARY_FILE, inputKey, outputKey),
                     dto);
         } else {
             throw new MqiCategoryNotAvailable(category, "publisher");
@@ -263,14 +269,14 @@ public class MessagePublicationController {
      * @throws MqiCategoryNotAvailable
      * @throws MqiRouteNotAvailable
      */
-    protected void publishEdrsSessions(final EdrsSessionDto dto)
+    protected void publishEdrsSessions(final EdrsSessionDto dto, String inputKey, String outputKey)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.EDRS_SESSIONS;
         if (producers.containsKey(category)) {
             EdrsSessionsProducer producer =
                     (EdrsSessionsProducer) producers.get(category);
-            producer.send(getTopic(category, ProductFamily.EDRS_SESSION), dto);
+            producer.send(getTopic(category, ProductFamily.EDRS_SESSION, inputKey, outputKey), dto);
         } else {
             throw new MqiCategoryNotAvailable(category, "publisher");
         }
@@ -284,14 +290,14 @@ public class MessagePublicationController {
      * @throws MqiCategoryNotAvailable
      * @throws MqiRouteNotAvailable
      */
-    protected void publishLevelProducts(final LevelProductDto dto)
+    protected void publishLevelProducts(final LevelProductDto dto, String inputKey, String outputKey)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.LEVEL_PRODUCTS;
         if (producers.containsKey(category)) {
             LevelProductProducer producer =
                     (LevelProductProducer) producers.get(category);
-            producer.send(getTopic(category, dto.getFamily()), dto);
+            producer.send(getTopic(category, dto.getFamily(), inputKey, outputKey), dto);
         } else {
             throw new MqiCategoryNotAvailable(category, "publisher");
         }
@@ -305,14 +311,14 @@ public class MessagePublicationController {
      * @throws MqiCategoryNotAvailable
      * @throws MqiRouteNotAvailable
      */
-    protected void publishLevelSegments(final LevelSegmentDto dto)
+    protected void publishLevelSegments(final LevelSegmentDto dto, String inputKey, String outputKey)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.LEVEL_SEGMENTS;
         if (producers.containsKey(category)) {
             LevelSegmentProducer producer =
                     (LevelSegmentProducer) producers.get(category);
-            producer.send(getTopic(category, dto.getFamily()), dto);
+            producer.send(getTopic(category, dto.getFamily(), inputKey, outputKey), dto);
         } else {
             throw new MqiCategoryNotAvailable(category, "publisher");
         }
@@ -326,14 +332,14 @@ public class MessagePublicationController {
      * @throws MqiCategoryNotAvailable
      * @throws MqiRouteNotAvailable
      */
-    protected void publishLevelJobs(final LevelJobDto dto)
+    protected void publishLevelJobs(final LevelJobDto dto, String inputKey, String outputKey)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.LEVEL_JOBS;
         if (producers.containsKey(category)) {
             LevelJobProducer producer =
                     (LevelJobProducer) producers.get(category);
-            producer.send(getTopic(category, dto.getFamily()), dto);
+            producer.send(getTopic(category, dto.getFamily(), inputKey, outputKey), dto);
         } else {
             throw new MqiCategoryNotAvailable(category, "publisher");
         }
@@ -347,14 +353,14 @@ public class MessagePublicationController {
      * @throws MqiCategoryNotAvailable
      * @throws MqiRouteNotAvailable
      */
-    protected void publishLevelReports(final LevelReportDto dto)
+    protected void publishLevelReports(final LevelReportDto dto, String inputKey, String outputKey)
             throws MqiPublicationError, MqiCategoryNotAvailable,
             MqiRouteNotAvailable {
         ProductCategory category = ProductCategory.LEVEL_REPORTS;
         if (producers.containsKey(category)) {
             LevelReportProducer producer =
                     (LevelReportProducer) producers.get(category);
-            producer.send(getTopic(category, dto.getFamily()), dto);
+            producer.send(getTopic(category, dto.getFamily(), inputKey, "NONE"), dto);
         } else {
             throw new MqiCategoryNotAvailable(category, "publisher");
         }
