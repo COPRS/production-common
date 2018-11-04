@@ -12,7 +12,7 @@ s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.rest,LevelProdu
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.rest,LevelSegmentJobConverter,0,4,0,0,0,2,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.rest,LevelSegmentsJobController,0,36,0,0,0,10,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.rest,EdrsSessionsJobController,0,36,0,0,0,10,0,1,0,1
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.rest,JobController,254,24,38,0,49,9,30,3,6,3
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.rest,JobController,84,194,15,23,17,41,16,17,3,6
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.exception,AppCatalogJobGenerationInvalidTransitionStateException,0,37,0,0,0,8,0,4,0,4
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.exception,AppCatalogJobInvalidStateException,0,37,0,0,0,8,0,4,0,4
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.exception,AbstractAppDataException.ErrorCode,9,92,0,0,0,10,2,3,2,3
@@ -37,18 +37,18 @@ s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,MqiAuxilia
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,MqiLevelProductController,0,8,0,0,0,2,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,GenericMqiController.new Object() {...},5,35,0,0,0,1,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,MqiLevelJobController,0,8,0,0,0,2,0,1,0,1
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,GenericMqiController,50,1299,4,30,13,294,4,27,0,13
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,GenericMqiController,47,1302,4,30,12,295,4,27,0,13
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.mqi.rest,MqiLevelSegmentController,0,8,0,0,0,2,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.converter,JobConverter,34,544,6,42,10,153,6,37,0,13
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.converter,JobConverter.new Object() {...},16,113,0,0,0,4,0,1,0,1
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobProduct,0,444,0,40,0,82,0,58,0,38
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobProduct,0,448,0,40,0,84,0,59,0,39
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobFile,0,98,0,10,0,25,0,15,0,10
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobService.new Object() {...},26,0,0,0,1,0,1,0,1,0
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobService.new Object() {...},3,23,0,0,0,1,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobGeneration,0,164,0,16,0,34,0,22,0,14
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobGenerationState,0,58,0,0,0,2,0,4,0,4
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJob,0,282,0,26,0,54,0,37,0,24
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobService,351,16,42,0,85,5,32,2,10,2
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobRepositoryImpl,119,6,12,0,29,3,9,1,1,1
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobService,20,347,8,34,2,88,10,24,2,10
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobRepositoryImpl,0,125,2,10,0,32,2,8,0,2
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobState,0,58,0,0,0,2,0,4,0,4
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobRepositoryImpl.new Object() {...},40,0,0,0,1,0,1,0,1,0
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobRepositoryImpl.new Object() {...},5,35,0,0,0,1,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.status.dto,AppCatalogStatusDto,0,127,0,12,0,28,0,17,0,11

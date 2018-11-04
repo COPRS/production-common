@@ -58,8 +58,6 @@ public class JobConverterTest {
 
         Date creationDate = new Date(System.currentTimeMillis() - 152000);
         Date lastUpdateDate = new Date();
-        Date startProduct = new Date(System.currentTimeMillis() - 652000);
-        Date stopProduct = new Date(System.currentTimeMillis() - 552000);
         Date creationDateGen1 = new Date(System.currentTimeMillis() - 12000);
         Date creationDateGen2 = new Date(System.currentTimeMillis() - 99000);
         Date updateDateGen1 = new Date(System.currentTimeMillis() - 1200);
@@ -91,8 +89,8 @@ public class JobConverterTest {
             productDb.setSegmentStopDate("stop-date");
             productDb.setSessionId("session-id");
             productDb.setTotalNbOfSlice(15);
-            productDb.setStartTime(startProduct);
-            productDb.setStopTime(stopProduct);
+            productDb.setStartTime("2017-12-24T10:24:33.123456Z");
+            productDb.setStopTime("2017-12-25T10:24:33.123456Z");
             productDb.setProcessMode("FAST");
             if (!productRaw1Null) {
                 productDb.setRaws1(
@@ -143,8 +141,8 @@ public class JobConverterTest {
             productDto.setSegmentStopDate("stop-date");
             productDto.setSessionId("session-id");
             productDto.setTotalNbOfSlice(15);
-            productDto.setStartTime(startProduct);
-            productDto.setStopTime(stopProduct);
+            productDto.setStartTime("2017-12-24T10:24:33.123456Z");
+            productDto.setStopTime("2017-12-25T10:24:33.123456Z");
             productDto.setProcessMode("FAST");
             if (!productRaw1Null) {
                 productDto.setRaws1(
