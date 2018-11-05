@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.EdrsSessionFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaSessionProducer;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 
 /**
@@ -24,17 +25,17 @@ public class SessionFilesProcessor extends AbstractFileProcessor&lt;EdrsSessionD
 	 */
 	@Autowired
 	public SessionFilesProcessor(final ObsService obsService, final KafkaSessionProducer publisher,
-			final EdrsSessionFileDescriptorService extractor) {
-<span class="fc" id="L28">		super(obsService, publisher, extractor, ProductFamily.EDRS_SESSION);</span>
-<span class="fc" id="L29">	}</span>
+			final EdrsSessionFileDescriptorService extractor,final AppStatus appStatus) {
+<span class="fc" id="L29">		super(obsService, publisher, extractor, ProductFamily.EDRS_SESSION, appStatus);</span>
+<span class="fc" id="L30">	}</span>
 
 	/**
 	 * 
 	 */
 	@Override
 	protected EdrsSessionDto buildDto(final FileDescriptor descriptor) {
-<span class="fc" id="L36">		return new EdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(),</span>
-<span class="fc" id="L37">				descriptor.getProductType(), descriptor.getMissionId(), descriptor.getSatelliteId());</span>
+<span class="fc" id="L37">		return new EdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(),</span>
+<span class="fc" id="L38">				descriptor.getProductType(), descriptor.getMissionId(), descriptor.getSatelliteId());</span>
 	}
 
 }

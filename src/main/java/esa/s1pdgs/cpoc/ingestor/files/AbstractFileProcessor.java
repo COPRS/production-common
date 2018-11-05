@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ingestor.files;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,7 +75,7 @@ public abstract class AbstractFileProcessor<T> {
      */
     public void processFile(Message<File> message) {
         File file = message.getPayload();
-        if (!file.isDirectory()) {
+        if (isValidFile(file)) {
             int step = 0;
             LOGGER.info(
                     "[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]",
@@ -132,12 +134,14 @@ public abstract class AbstractFileProcessor<T> {
                 LOGGER.info(
                         "[MONITOR] [step 3] [productName {}] Starting removing file",
                         productName);
-                if (!file.delete()) {
+                try {
+                    Files.delete(Paths.get(file.getPath()));
+                } catch (Exception e) {
                     LOGGER.error(
-                            "[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage",
+                            "[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage: {}",
                             AbstractCodedException.ErrorCode.INGESTOR_CLEAN
                                     .getCode(),
-                            file.getPath());
+                            file.getPath(), e.getMessage());
                     this.appStatus.setError(family);
                 }
 
@@ -153,6 +157,20 @@ public abstract class AbstractFileProcessor<T> {
                     file.getPath());
             this.appStatus.setWaiting();
         }
+    }
+    
+    private boolean isValidFile(File file) {
+        if (file.isDirectory()) {
+            return false;
+        } else {
+            String path = file.getPath().toLowerCase();
+            if (path.endsWith("manifest.safe")) {
+                return true;
+            } else if (path.endsWith(".safe") || path.endsWith("data") || path.endsWith("support")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected abstract T buildDto(final FileDescriptor descriptor);
