@@ -181,7 +181,7 @@ public class OutputProcessor {
             } else {
 <span class="fc" id="L182">                ProductFamily family =</span>
 <span class="fc" id="L183">                        ProductFamily.fromValue(matchOutput.getFamily());</span>
-<span class="pc bpc" id="L184" title="2 of 6 branches missed.">                switch (family) {</span>
+<span class="pc bpc" id="L184" title="1 of 6 branches missed.">                switch (family) {</span>
                     case L0_REPORT:
                     case L1_REPORT:
                     case L0_SEGMENT_REPORT:
@@ -271,15 +271,15 @@ public class OutputProcessor {
                     case L1_ACN:
                         // If compatible object storage, put in a cache to
                         // upload per batch
-<span class="nc" id="L274">                        LOGGER.info(</span>
+<span class="fc" id="L274">                        LOGGER.info(</span>
                                 &quot;Output {} is considered as belonging to the family {}&quot;,
-<span class="nc" id="L276">                                productName, matchOutput.getFamily());</span>
-<span class="nc" id="L277">                        uploadBatch.add(new S3UploadFile(family, productName,</span>
+<span class="fc" id="L276">                                productName, matchOutput.getFamily());</span>
+<span class="fc" id="L277">                        uploadBatch.add(new S3UploadFile(family, productName,</span>
                                 new File(filePath)));
-<span class="nc" id="L279">                        outputToPublish.add(new ObsQueueMessage(family,</span>
-<span class="nc" id="L280">                                productName, productName, inputMessage.getBody()</span>
-<span class="nc" id="L281">                                        .getProductProcessMode()));</span>
-<span class="nc" id="L282">                        break;</span>
+<span class="fc" id="L279">                        outputToPublish.add(new ObsQueueMessage(family,</span>
+<span class="fc" id="L280">                                productName, productName, inputMessage.getBody()</span>
+<span class="fc" id="L281">                                        .getProductProcessMode()));</span>
+<span class="fc" id="L282">                        break;</span>
                     case BLANK:
 <span class="fc" id="L284">                        LOGGER.info(&quot;Output {} will be ignored&quot;, productName);</span>
 <span class="fc" id="L285">                        break;</span>

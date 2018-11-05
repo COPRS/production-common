@@ -106,12 +106,28 @@ public class OutputProcessorTest {
                 .buildAcnOutputDto(PATH_DIRECTORY_TEST + "^.*IW_RAW__0A.*$"));
         authorizedOutputs.add(TestUtils
                 .buildAcnOutputDto(PATH_DIRECTORY_TEST + "^.*EW_RAW__0A.*$"));
+        authorizedOutputs.add(TestUtils.buildL0BlankOutputDto(
+                PATH_DIRECTORY_TEST + "^.*GP_RAW__0S.*$"));
         authorizedOutputs.add(TestUtils.buildReportOutputDto(
                 PATH_DIRECTORY_TEST + "^S1[A|B|_]_OPER_REP_PASS.*.EOF$"));
         authorizedOutputs.add(TestUtils
                 .buildReportOutputDto(PATH_DIRECTORY_TEST + "^.*report.*$"));
         authorizedOutputs.add(TestUtils
                 .buildBlankOutputDto(PATH_DIRECTORY_TEST + "^.*BLANK.*$"));
+        authorizedOutputs.add(TestUtils.buildL1ProductOutputDto(
+                PATH_DIRECTORY_TEST + "^.*SM_SLC__1S.*$"));
+        authorizedOutputs.add(TestUtils.buildL1ProductOutputDto(
+                PATH_DIRECTORY_TEST + "^.*IW_SLC__1S.*$"));
+        authorizedOutputs.add(TestUtils
+                .buildL1AcnOutputDto(PATH_DIRECTORY_TEST + "^.*SM_SLC__1A.*$"));
+        authorizedOutputs.add(TestUtils
+                .buildL1AcnOutputDto(PATH_DIRECTORY_TEST + "^.*IW_SLC__1A.*$"));
+        authorizedOutputs.add(TestUtils
+                .buildL1AcnOutputDto(PATH_DIRECTORY_TEST + "^.*EW_SLC__1A.*$"));
+        authorizedOutputs.add(TestUtils
+                .buildL1ReportOutputDto(PATH_DIRECTORY_TEST + "^.*l1_rep.*$"));
+        authorizedOutputs.add(TestUtils
+                .buildSegmentReportOutputDto(PATH_DIRECTORY_TEST + "^.*l0_segment_rep.*$"));
         inputMessage.getBody().setOutputs(authorizedOutputs);
 
         // Outputs product
@@ -347,10 +363,10 @@ public class OutputProcessorTest {
      * @throws UnknownFamilyException
      */
     @Test
-    public void testSortOutputsForL1Fast() throws UnknownFamilyException {
+    public void testSortOutputsForLOSegmentFast() throws UnknownFamilyException {
         processor =
                 new OutputProcessor(obsService, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT);
         
         List<S3UploadFile> uploadBatch = new ArrayList<>();
         List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -364,17 +380,19 @@ public class OutputProcessorTest {
                 "FAST24/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DC.ISIP");
         lines.add(
                 "NRT/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.ISIP");
+        lines.add(
+                "NRT/S1A_GP_RAW__0SDV_20171213T121123_20171213T121947_019684_021735_51B2.ISIP");
         lines.add("NRT/report.xml");
         lines.add("not_match");
         lines.add("S1A_report_1.xml");
-        lines.add("S1A_report_3.xml");
+        lines.add("S1A_l0_segment_rep_3.xml");
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
                 reportToPublish);
 
         // Check products
-        assertEquals(4, uploadBatch.size());
+        assertEquals(5, uploadBatch.size());
         assertEquals(new S3UploadFile(ProductFamily.L0_ACN,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
                 new File(PATH_DIRECTORY_TEST
@@ -382,8 +400,15 @@ public class OutputProcessorTest {
                         + File.separator
                         + "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE")),
                 uploadBatch.get(0));
+        assertEquals(new S3UploadFile(ProductFamily.L0_BLANK,
+                "S1A_GP_RAW__0SDV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE",
+                new File(PATH_DIRECTORY_TEST
+                        + "NRT/S1A_GP_RAW__0SDV_20171213T121123_20171213T121947_019684_021735_51B2.ISIP"
+                        + File.separator
+                        + "S1A_GP_RAW__0SDV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE")),
+                uploadBatch.get(4));
 
-        assertEquals(4, outputToPublish.size());
+        assertEquals(5, outputToPublish.size());
         assertEquals(new ObsQueueMessage(ProductFamily.L0_ACN,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE", "FAST24"),
@@ -400,13 +425,17 @@ public class OutputProcessorTest {
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE",
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE", "FAST24"),
                 outputToPublish.get(3));
+        assertEquals(new ObsQueueMessage(ProductFamily.L0_BLANK,
+                "S1A_GP_RAW__0SDV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE",
+                "S1A_GP_RAW__0SDV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE", "FAST24"),
+                outputToPublish.get(4));
 
         // Check report
         assertEquals(3, reportToPublish.size());
         assertEquals(
-                new FileQueueMessage(ProductFamily.L0_REPORT,
-                        "S1A_report_3.xml",
-                        new File(PATH_DIRECTORY_TEST + "S1A_report_3.xml")),
+                new FileQueueMessage(ProductFamily.L0_SEGMENT_REPORT,
+                        "S1A_l0_segment_rep_3.xml",
+                        new File(PATH_DIRECTORY_TEST + "S1A_l0_segment_rep_3.xml")),
                 reportToPublish.get(2));
     }
 
@@ -477,6 +506,75 @@ public class OutputProcessorTest {
                 new FileQueueMessage(ProductFamily.L0_REPORT,
                         "S1A_report_3.xml",
                         new File(PATH_DIRECTORY_TEST + "S1A_report_3.xml")),
+                reportToPublish.get(2));
+    }
+
+    /**
+     * TEst sort outputs
+     * 
+     * @throws UnknownFamilyException
+     */
+    @Test
+    public void testSortOutputsForL1RealOutputs() throws UnknownFamilyException {
+        processor =
+                new OutputProcessor(obsService, procuderFactory, inputMessage,
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1);
+        
+        List<S3UploadFile> uploadBatch = new ArrayList<>();
+        List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+        List<FileQueueMessage> reportToPublish = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
+        lines.add(
+                "FAST24/S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP");
+        lines.add(
+                "NRT/S1A_IW_SLC__1SDV_20171213T121623_20171213T121656_019684_021735_C6DB.ISIP");
+        lines.add(
+                "FAST24/S1A_IW_SLC__1SDV_20171213T121623_20171213T121656_019684_021735_C6DC.ISIP");
+        lines.add(
+                "NRT/S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B2.ISIP");
+        lines.add("NRT/l1_rep.xml");
+        lines.add("not_match");
+        lines.add("S1A_l1_rep_1.xml");
+        lines.add("S1A_l1_rep_3.xml");
+        lines.add("S1A_BLANK_FILE.SAFE");
+
+        processor.sortOutputs(lines, uploadBatch, outputToPublish,
+                reportToPublish);
+
+        // Check products
+        assertEquals(4, uploadBatch.size());
+        assertEquals(new S3UploadFile(ProductFamily.L1_ACN,
+                "S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
+                new File(PATH_DIRECTORY_TEST
+                        + "FAST24/S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP"
+                        + File.separator
+                        + "S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE")),
+                uploadBatch.get(0));
+
+        assertEquals(4, outputToPublish.size());
+        assertEquals(new ObsQueueMessage(ProductFamily.L1_ACN,
+                "S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
+                "S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE", "FAST24"),
+                outputToPublish.get(0));
+        assertEquals(new ObsQueueMessage(ProductFamily.L1_SLICE,
+                "S1A_IW_SLC__1SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "S1A_IW_SLC__1SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", "FAST24"),
+                outputToPublish.get(1));
+        assertEquals(new ObsQueueMessage(ProductFamily.L1_SLICE,
+                "S1A_IW_SLC__1SDV_20171213T121623_20171213T121656_019684_021735_C6DC.SAFE",
+                "S1A_IW_SLC__1SDV_20171213T121623_20171213T121656_019684_021735_C6DC.SAFE", "FAST24"),
+                outputToPublish.get(2));
+        assertEquals(new ObsQueueMessage(ProductFamily.L1_ACN,
+                "S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE",
+                "S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE", "FAST24"),
+                outputToPublish.get(3));
+
+        // Check report
+        assertEquals(3, reportToPublish.size());
+        assertEquals(
+                new FileQueueMessage(ProductFamily.L1_REPORT,
+                        "S1A_l1_rep_3.xml",
+                        new File(PATH_DIRECTORY_TEST + "S1A_l1_rep_3.xml")),
                 reportToPublish.get(2));
     }
 
