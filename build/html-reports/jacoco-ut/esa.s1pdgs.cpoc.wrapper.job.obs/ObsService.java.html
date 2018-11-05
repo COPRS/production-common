@@ -169,7 +169,7 @@ public class ObsService {
      */
     protected ObsFamily getObsFamily(final ProductFamily family) {
         ObsFamily ret;
-<span class="pc bfc" id="L172" title="All 8 branches covered.">        switch (family) {</span>
+<span class="pc bpc" id="L172" title="1 of 9 branches missed.">        switch (family) {</span>
             case AUXILIARY_FILE:
 <span class="fc" id="L174">                ret = ObsFamily.AUXILIARY_FILE;</span>
 <span class="fc" id="L175">                break;</span>
@@ -182,20 +182,23 @@ public class ObsService {
             case L0_SEGMENT:
 <span class="fc" id="L183">                ret = ObsFamily.L0_SEGMENT;</span>
 <span class="fc" id="L184">                break;</span>
+            case L0_BLANK:
+<span class="nc" id="L186">                ret = ObsFamily.L0_BLANK;</span>
+<span class="nc" id="L187">                break;</span>
             case L0_ACN:
-<span class="fc" id="L186">                ret = ObsFamily.L0_ACN;</span>
-<span class="fc" id="L187">                break;</span>
-            case L1_SLICE:
-<span class="fc" id="L189">                ret = ObsFamily.L1_SLICE;</span>
+<span class="fc" id="L189">                ret = ObsFamily.L0_ACN;</span>
 <span class="fc" id="L190">                break;</span>
-            case L1_ACN:
-<span class="fc" id="L192">                ret = ObsFamily.L1_ACN;</span>
+            case L1_SLICE:
+<span class="fc" id="L192">                ret = ObsFamily.L1_SLICE;</span>
 <span class="fc" id="L193">                break;</span>
+            case L1_ACN:
+<span class="fc" id="L195">                ret = ObsFamily.L1_ACN;</span>
+<span class="fc" id="L196">                break;</span>
             default:
-<span class="fc" id="L195">                ret = ObsFamily.UNKNOWN;</span>
+<span class="fc" id="L198">                ret = ObsFamily.UNKNOWN;</span>
                 break;
         }
-<span class="fc" id="L198">        return ret;</span>
+<span class="fc" id="L201">        return ret;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

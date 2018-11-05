@@ -157,6 +157,26 @@ public class TestUtils {
         return new LevelJobOutputDto("L0_ACN", regexp);
     }
 
+    public static LevelJobOutputDto buildL0BlankOutputDto(String regexp) {
+        return new LevelJobOutputDto("L0_BLANK", regexp);
+    }
+
+    public static LevelJobOutputDto buildSegmentReportOutputDto(String regexp) {
+        return new LevelJobOutputDto("L0_SEGMENT_REPORT", regexp);
+    }
+
+    public static LevelJobOutputDto buildL1ProductOutputDto(String regexp) {
+        return new LevelJobOutputDto("L1_SLICE", regexp);
+    }
+
+    public static LevelJobOutputDto buildL1AcnOutputDto(String regexp) {
+        return new LevelJobOutputDto("L1_ACN", regexp);
+    }
+
+    public static LevelJobOutputDto buildL1ReportOutputDto(String regexp) {
+        return new LevelJobOutputDto("L1_REPORT", regexp);
+    }
+
     public static LevelJobOutputDto buildBlankOutputDto(String regexp) {
         return new LevelJobOutputDto("BLANK", regexp);
     }

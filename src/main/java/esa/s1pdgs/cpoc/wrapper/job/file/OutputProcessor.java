@@ -231,6 +231,7 @@ public class OutputProcessor {
                         }
                         break;
                     case L0_ACN:
+                    case L0_BLANK:
                         // Specific case of the L0 wrapper
                         if (appLevel == ApplicationLevel.L0) {
                             if (line.contains("NRT")) {

@@ -304,7 +304,6 @@ public class JobProcessorTest extends MockPropertiesTest {
         verify(appStatus, times(2)).setWaiting();
         doReturn(ApplicationLevel.L1).when(properties).getLevel();
     }
-
     /**
      * Nominal test case of call
      * 

@@ -1,7 +1,7 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper,Application,0,8,0,0,0,3,0,2,0,2
-S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.obs,ObsService,0,216,1,15,0,63,1,19,0,9
-S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.obs,ObsService.new Object() {...},7,47,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.obs,ObsService,3,216,2,15,2,63,2,19,0,9
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.obs,ObsService.new Object() {...},8,53,0,0,0,1,0,1,0,1
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.obs,ObsConfig,0,5,0,0,0,2,0,2,0,2
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job,MonitorLogUtils,3,172,0,11,1,33,1,11,1,1
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job,JobProcessor,108,620,8,22,28,160,7,20,0,12
@@ -25,5 +25,5 @@ S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,WrapperRestController
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,AppStatus.WrapperStatus,2,167,2,24,1,47,2,27,0,16
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,AppStatus,11,90,2,6,5,31,2,13,0,11
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,InputDownloader,5,313,2,20,1,79,2,19,0,9
-S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor,80,701,6,48,16,150,6,34,0,11
-S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor.new Object() {...},8,53,0,0,0,1,0,1,0,1
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor,47,734,5,49,9,157,5,35,0,11
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor.new Object() {...},9,59,0,0,0,1,0,1,0,1
