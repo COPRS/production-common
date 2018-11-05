@@ -75,7 +75,7 @@ public abstract class AbstractFileProcessor<T> {
      */
     public void processFile(Message<File> message) {
         File file = message.getPayload();
-        if (!file.isDirectory()) {
+        if (isValidFile(file)) {
             int step = 0;
             LOGGER.info(
                     "[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]",
@@ -157,6 +157,18 @@ public abstract class AbstractFileProcessor<T> {
                     file.getPath());
             this.appStatus.setWaiting();
         }
+    }
+    
+    private boolean isValidFile(File file) {
+        if (file.isDirectory()) {
+            return false;
+        } else {
+            String path = file.getPath().toLowerCase();
+            if (path.endsWith(".safe") || path.endsWith("data") || path.endsWith("support")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected abstract T buildDto(final FileDescriptor descriptor);

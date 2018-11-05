@@ -75,7 +75,7 @@ public abstract class AbstractFileProcessor&lt;T&gt; {
      */
     public void processFile(Message&lt;File&gt; message) {
 <span class="fc" id="L77">        File file = message.getPayload();</span>
-<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (!file.isDirectory()) {</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (isValidFile(file)) {</span>
 <span class="fc" id="L79">            int step = 0;</span>
 <span class="fc" id="L80">            LOGGER.info(</span>
                     &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]&quot;,
@@ -158,6 +158,18 @@ public abstract class AbstractFileProcessor&lt;T&gt; {
 <span class="fc" id="L158">            this.appStatus.setWaiting();</span>
         }
 <span class="fc" id="L160">    }</span>
+    
+    private boolean isValidFile(File file) {
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if (file.isDirectory()) {</span>
+<span class="fc" id="L164">            return false;</span>
+        } else {
+<span class="fc" id="L166">            String path = file.getPath().toLowerCase();</span>
+<span class="pc bpc" id="L167" title="3 of 6 branches missed.">            if (path.endsWith(&quot;.safe&quot;) || path.endsWith(&quot;data&quot;) || path.endsWith(&quot;support&quot;)) {</span>
+<span class="nc" id="L168">                return false;</span>
+            }
+        }
+<span class="fc" id="L171">        return true;</span>
+    }
 
     protected abstract T buildDto(final FileDescriptor descriptor);
 
