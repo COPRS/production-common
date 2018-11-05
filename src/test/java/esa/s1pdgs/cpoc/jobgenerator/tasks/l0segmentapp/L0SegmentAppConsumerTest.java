@@ -7,8 +7,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -191,5 +194,41 @@ public class L0SegmentAppConsumerTest {
         verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
         verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
         verify(appDataService, times(1)).newJob(eq(expectedData));
+    }
+    
+    @Test
+    public void testConsumeWhenNoMessage() throws AbstractCodedException {
+        doReturn(null).when(mqiService).next();
+        
+        consumer.consumeMessages();
+
+        verifyZeroInteractions(jobsDispatcher, appDataService);
+        verify(appStatus, never()).setProcessing(Mockito.eq(2L));
+        verify(appStatus, times(1)).setWaiting();
+    }
+    
+    @Test
+    public void testConsumeWhenNewJob() throws AbstractCodedException {
+        AppDataJobDto<LevelSegmentDto> expectedData = new AppDataJobDto<>();
+        expectedData.setLevel(processSettings.getLevel());
+        expectedData.setPod(processSettings.getHostname());
+        expectedData.setState(AppDataJobDtoState.DISPATCHING);
+        expectedData.getMessages().add(messages.get(0));
+        AppDataJobProductDto productDto = new AppDataJobProductDto();
+        productDto.setAcquisition("IW");
+        productDto.setMissionId("S1");
+        productDto.setDataTakeId("00F9CD");
+        productDto.setProductName("l0_segments_for_00F9CD");
+        productDto.setProcessMode("FAST");
+        productDto.setSatelliteId("B");
+        expectedData.setProduct(productDto);
+        
+        consumer.consumeMessages();
+        
+        verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
+        verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
+        verify(appDataService, times(1)).newJob(any());
+        verify(appDataService, times(1)).patchJob(anyLong(), any(), eq(false), eq(false), eq(false));
+        verify(jobsDispatcher).dispatch(eq(expectedData));
     }
 }

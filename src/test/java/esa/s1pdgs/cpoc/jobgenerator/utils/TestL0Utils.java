@@ -151,8 +151,10 @@ public class TestL0Utils {
         }
         product.setSessionId("L20171109175634707000125");
         product.setSatelliteId("A");
-        product.setStartTime("2017-12-13T14:59:48Z");
-        product.setStopTime("2017-12-13T15:17:25Z");
+        product.setStartTime("2017-12-13T14:59:48.123456Z");
+        product.setStopTime("2017-12-13T15:17:25.142536Z");
+        product.setInsConfId(-1);
+        product.setProcessMode("");
         ret.setProduct(product);
 
         AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();

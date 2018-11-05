@@ -76,9 +76,9 @@ public class L1AppConsumer extends AbstractGenericConsumer&lt;LevelProductDto&gt
     public void consumeMessages() {
         // First, consume message
 <span class="fc" id="L78">        GenericMessageDto&lt;LevelProductDto&gt; mqiMessage = readMessage();</span>
-<span class="pc bpc" id="L79" title="2 of 4 branches missed.">        if (mqiMessage == null || mqiMessage.getBody() == null) {</span>
-<span class="nc" id="L80">            LOGGER.trace(&quot;[MONITOR] [step 0] No message received: continue&quot;);</span>
-<span class="nc" id="L81">            return;</span>
+<span class="pc bpc" id="L79" title="1 of 4 branches missed.">        if (mqiMessage == null || mqiMessage.getBody() == null) {</span>
+<span class="fc" id="L80">            LOGGER.trace(&quot;[MONITOR] [step 0] No message received: continue&quot;);</span>
+<span class="fc" id="L81">            return;</span>
         }
         // process message
 <span class="fc" id="L84">        appStatus.setProcessing(mqiMessage.getIdentifier());</span>
@@ -101,7 +101,7 @@ public class L1AppConsumer extends AbstractGenericConsumer&lt;LevelProductDto&gt
 <span class="fc" id="L101">            LOGGER.info(</span>
                     &quot;[MONITOR] [step 2] [productName {}] Dispatching product&quot;,
 <span class="fc" id="L103">                    getProductName(mqiMessage));</span>
-<span class="pc bpc" id="L104" title="1 of 2 branches missed.">            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {</span>
 <span class="fc" id="L105">                appDataJob.setState(AppDataJobDtoState.DISPATCHING);</span>
 <span class="fc" id="L106">                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),</span>
                         appDataJob, false, false, false);
@@ -136,7 +136,7 @@ public class L1AppConsumer extends AbstractGenericConsumer&lt;LevelProductDto&gt
 <span class="fc" id="L136">        List&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt; existingJobs = appDataService</span>
 <span class="fc" id="L137">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
 
-<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
             // Job does not exists =&gt; create it
 <span class="fc" id="L141">            Matcher m = l0SLicesPattern.matcher(leveldto.getProductName());</span>
 <span class="fc bfc" id="L142" title="All 2 branches covered.">            if (!m.matches()) {</span>
@@ -183,14 +183,14 @@ public class L1AppConsumer extends AbstractGenericConsumer&lt;LevelProductDto&gt
 
         } else {
             // Update pod if needed
-<span class="nc" id="L186">            AppDataJobDto&lt;LevelProductDto&gt; jobDto = existingJobs.get(0);</span>
-<span class="nc bnc" id="L187" title="All 2 branches missed.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
-<span class="nc" id="L188">                jobDto.setPod(processSettings.getHostname());</span>
-<span class="nc" id="L189">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
+<span class="fc" id="L186">            AppDataJobDto&lt;LevelProductDto&gt; jobDto = existingJobs.get(0);</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
+<span class="fc" id="L188">                jobDto.setPod(processSettings.getHostname());</span>
+<span class="fc" id="L189">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
                         false, false, false);
             }
             // Job already exists
-<span class="nc" id="L193">            return jobDto;</span>
+<span class="fc" id="L193">            return jobDto;</span>
         }
     }
 

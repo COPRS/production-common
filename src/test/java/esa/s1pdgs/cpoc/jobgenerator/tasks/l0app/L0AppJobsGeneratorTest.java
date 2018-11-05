@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,16 +21,21 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
-import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
@@ -39,7 +45,6 @@ import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l0app.L0AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -72,6 +77,8 @@ public class L0AppJobsGeneratorTest {
 
     private TaskTable expectedTaskTable;
     private L0AppJobsGenerator generator;
+    
+    private LevelJobDto publishedJob;
 
     /**
      * Test set up
@@ -90,6 +97,8 @@ public class L0AppJobsGeneratorTest {
         this.mockJobGeneratorSettings();
         this.mockXmlConverter();
         this.mockMetadataService();
+        this.mockKafkaSender();
+        this.mockAppDataService();
 
         JobsGeneratorFactory factory = new JobsGeneratorFactory(
                 l0ProcessSettings, jobGeneratorSettings, xmlConverter,
@@ -225,6 +234,53 @@ public class L0AppJobsGeneratorTest {
         }
     }
 
+    private void mockKafkaSender() throws AbstractCodedException {
+        Mockito.doAnswer(i -> {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(new File("./tmp/inputMessageL0.json"),
+                    i.getArgument(0));
+            mapper.writeValue(new File("./tmp/jobDtoL0.json"),
+                    i.getArgument(1));
+            publishedJob = i.getArgument(1);
+            return null;
+        }).when(this.JobsSender).sendJob(Mockito.any(), Mockito.any());
+    }
+
+    private void mockAppDataService()
+            throws InternalErrorException, AbstractCodedException {
+        doReturn(Arrays.asList(TestL0Utils.buildAppDataEdrsSession(true)))
+                .when(appDataService)
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.anyString(), Mockito.anyString());
+        AppDataJobDto<EdrsSessionDto> primaryCheckAppJob =
+                TestL0Utils.buildAppDataEdrsSession(true);
+        primaryCheckAppJob.getGenerations().get(0)
+                .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
+        AppDataJobDto<EdrsSessionDto> readyAppJob =
+                TestL0Utils.buildAppDataEdrsSession(true);
+        readyAppJob.getGenerations().get(0)
+                .setState(AppDataJobGenerationDtoState.READY);
+        AppDataJobDto<EdrsSessionDto> sentAppJob =
+                TestL0Utils.buildAppDataEdrsSession(true);
+        sentAppJob.getGenerations().get(0)
+                .setState(AppDataJobGenerationDtoState.SENT);
+
+        doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
+                Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
+                Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));
+        doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
+                Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
+                Mockito.eq(AppDataJobGenerationDtoState.READY));
+        doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
+                Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
+                Mockito.eq(AppDataJobGenerationDtoState.SENT));
+        Mockito.doAnswer(i -> {
+            return i.getArgument(1);
+        }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
+                Mockito.anyBoolean(), Mockito.anyBoolean(),
+                Mockito.anyBoolean());
+    }
+
     @Test
     public void testPreSearch() {
         AppDataJobDto<EdrsSessionDto> appDataJob =
@@ -339,5 +395,31 @@ public class L0AppJobsGeneratorTest {
                 assertEquals("S2A", param.getValue());
             }
         });
+    }
+
+    @Test
+    public void testRun() {
+        try {
+            mockAppDataService();
+
+            generator.run();
+
+            Mockito.verify(JobsSender).sendJob(Mockito.any(), Mockito.any());
+            
+            assertEquals(ProductFamily.L0_JOB, publishedJob.getFamily());
+            assertEquals("", publishedJob.getProductProcessMode());
+            assertEquals("L20171109175634707000125", publishedJob.getProductIdentifier());
+            assertEquals(expectedTaskTable.getPools().size(), publishedJob.getPools().size());
+            for (int i = 0; i < expectedTaskTable.getPools().size(); i++) {
+                assertEquals(expectedTaskTable.getPools().get(i).getTasks().size(), publishedJob.getPools().get(i).getTasks().size());
+                for (int j = 0; j < expectedTaskTable.getPools().get(i).getTasks().size(); j++) {
+                    assertEquals(expectedTaskTable.getPools().get(i).getTasks().get(j).getFileName(), publishedJob.getPools().get(i).getTasks().get(j).getBinaryPath());
+                }
+            }
+
+            // TODO to improve to check dto ok
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 }

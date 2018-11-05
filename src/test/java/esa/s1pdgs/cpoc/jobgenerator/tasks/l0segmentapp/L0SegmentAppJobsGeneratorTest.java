@@ -31,11 +31,14 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
@@ -84,6 +87,8 @@ public class L0SegmentAppJobsGeneratorTest {
 
     @Mock
     private LevelJobDto mockJobDto;
+    
+    private LevelJobDto publishedJob;
 
     /**
      * Test set up
@@ -107,6 +112,7 @@ public class L0SegmentAppJobsGeneratorTest {
         this.mockJobGeneratorSettings();
         this.mockXmlConverter();
         this.mockMetadataService();
+        this.mockKafkaSender();
 
         JobsGeneratorFactory factory = new JobsGeneratorFactory(
                 l0ProcessSettings, jobGeneratorSettings, xmlConverter,
@@ -277,6 +283,18 @@ public class L0SegmentAppJobsGeneratorTest {
                 "HH", "END", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
+    }
+
+    private void mockKafkaSender() throws AbstractCodedException {
+        Mockito.doAnswer(i -> {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(new File("./tmp/inputMessageL0Segment.json"),
+                    i.getArgument(0));
+            mapper.writeValue(new File("./tmp/jobDtoL0Segment.json"),
+                    i.getArgument(1));
+            publishedJob = i.getArgument(1);
+            return null;
+        }).when(this.JobsSender).sendJob(Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -767,5 +785,31 @@ public class L0SegmentAppJobsGeneratorTest {
         assertTrue(generator.isCovered(Arrays.asList(obj2, obj3, obj4, obj5)));
         assertTrue(generator.isCovered(Arrays.asList(obj2, obj6, obj5)));
     }
+
+    /**@Test
+    public void testRun() {
+        try {
+
+            generator.run();
+
+            Mockito.verify(JobsSender).sendJob(Mockito.any(), Mockito.any());
+            
+            assertEquals(ProductFamily.L0_SEGMENT_JOB, publishedJob.getFamily());
+            assertEquals("NRT", publishedJob.getProductProcessMode());
+            assertEquals("S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE", publishedJob.getProductIdentifier());
+            assertEquals(expectedTaskTable.getPools().size(), publishedJob.getPools().size());
+            for (int i = 0; i < expectedTaskTable.getPools().size(); i++) {
+                assertEquals(expectedTaskTable.getPools().get(i).getTasks().size(), publishedJob.getPools().get(i).getTasks().size());
+                for (int j = 0; j < expectedTaskTable.getPools().get(i).getTasks().size(); j++) {
+                    assertEquals(expectedTaskTable.getPools().get(i).getTasks().get(j).getFileName(), publishedJob.getPools().get(i).getTasks().get(j).getBinaryPath());
+                }
+            }
+
+            // TODO to improve to check dto ok (do manually by reading the file
+            // ./tmp/jobDto.txt)
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }*/
 
 }

@@ -6,10 +6,16 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,17 +34,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AppConfig;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
-import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
@@ -46,7 +54,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
@@ -113,9 +120,9 @@ public class AbstractJobsGeneratorTest {
 
         this.mockAppDataService();
 
-        generator = new L1AppJobsGenerator(xmlConverter,
-                metadataService, processSettings, jobGeneratorSettings,
-                JobsSender, appDataPService);
+        generator = new L1AppJobsGenerator(xmlConverter, metadataService,
+                processSettings, jobGeneratorSettings, JobsSender,
+                appDataPService);
         generator.initialize(new File(
                 "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
         generator.setMode(ProductMode.SLICING);
@@ -264,7 +271,8 @@ public class AbstractJobsGeneratorTest {
                 }
                 return null;
             }).when(this.metadataService).search(Mockito.any(), Mockito.any(),
-                    Mockito.any(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyString());
+                    Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
+                    Mockito.anyString());
         } catch (JobGenMetadataException e) {
             fail(e.getMessage());
         }
@@ -298,8 +306,8 @@ public class AbstractJobsGeneratorTest {
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
         doReturn(TestL1Utils.buildJobGeneration(true)).when(appDataPService)
-                .patchJob(Mockito.eq(123L), Mockito.any(),
-                        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+                .patchJob(Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean(),
+                        Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataPService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
                 Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));
@@ -320,10 +328,9 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, JobGenBuildTaskTableException {
         doThrow(new IOException("IO exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        AbstractJobsGenerator<LevelProductDto> gen =
-                new L1AppJobsGenerator(xmlConverter, metadataService,
-                        processSettings, jobGeneratorSettings, JobsSender,
-                        appDataPService);
+        AbstractJobsGenerator<LevelProductDto> gen = new L1AppJobsGenerator(
+                xmlConverter, metadataService, processSettings,
+                jobGeneratorSettings, JobsSender, appDataPService);
         generator.setMode(ProductMode.SLICING);
 
         thrown.expect(JobGenBuildTaskTableException.class);
@@ -339,10 +346,9 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, JobGenBuildTaskTableException {
         doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        AbstractJobsGenerator<LevelProductDto> gen =
-                new L1AppJobsGenerator(xmlConverter, metadataService,
-                        processSettings, jobGeneratorSettings, JobsSender,
-                        appDataPService);
+        AbstractJobsGenerator<LevelProductDto> gen = new L1AppJobsGenerator(
+                xmlConverter, metadataService, processSettings,
+                jobGeneratorSettings, JobsSender, appDataPService);
         generator.setMode(ProductMode.SLICING);
 
         thrown.expect(JobGenBuildTaskTableException.class);
@@ -358,4 +364,120 @@ public class AbstractJobsGeneratorTest {
     // @see LevelProductsJobsGeneratorTest#testRun
     // ---------------------------------------------------------
 
+    @Test
+    public void testRunWhenCannotRetrieveCurrentJobs()
+            throws AbstractCodedException {
+        doThrow(new AppCatalogJobSearchApiError("uri", "msg"))
+                .when(appDataPService)
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.anyString(), Mockito.anyString());
+
+        generator.run();
+        verify(appDataPService, times(1))
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.eq("hostname"),
+                        Mockito.eq("IW_RAW__0_GRDH_1.xml"));
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+        verify(jobGeneratorSettings, never()).getWaitprimarycheck();
+        verify(jobGeneratorSettings, never()).getWaitmetadatainput();
+    }
+
+    @Test
+    public void testRunWhenNoJobs() throws AbstractCodedException {
+        doReturn(null).when(appDataPService)
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.anyString(), Mockito.anyString());
+
+        generator.run();
+        verify(appDataPService, times(1))
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.eq("hostname"),
+                        Mockito.eq("IW_RAW__0_GRDH_1.xml"));
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+        verify(jobGeneratorSettings, never()).getWaitprimarycheck();
+        verify(jobGeneratorSettings, never()).getWaitmetadatainput();
+    }
+
+    @Test
+    public void testRunWhenEmptyJobs() throws AbstractCodedException {
+        doReturn(new ArrayList<>()).when(appDataPService)
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.anyString(), Mockito.anyString());
+
+        generator.run();
+        verify(appDataPService, times(1))
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.eq("hostname"),
+                        Mockito.eq("IW_RAW__0_GRDH_1.xml"));
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+        verify(jobGeneratorSettings, never()).getWaitprimarycheck();
+        verify(jobGeneratorSettings, never()).getWaitmetadatainput();
+    }
+
+    @Test
+    public void testRunWhenInitialForNotEnoughTime() throws AbstractCodedException {
+        Mockito.doAnswer(i -> {
+            return new WaitTempo(10000, 3);
+        }).when(jobGeneratorSettings).getWaitprimarycheck();
+        Mockito.doAnswer(i -> {
+            return new WaitTempo(10000, 3);
+        }).when(jobGeneratorSettings).getWaitmetadatainput();
+        
+        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        job1.setIdentifier(12L);
+        job1.getGenerations().add(new AppDataJobGenerationDto());
+        job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
+        job1.getGenerations().get(0).setState(AppDataJobGenerationDtoState.INITIAL);
+        job1.getGenerations().get(0).setLastUpdateDate(new Date());
+
+        doReturn(Arrays.asList(job1)).when(appDataPService)
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.anyString(), Mockito.anyString());
+
+        generator.run();
+        verify(appDataPService, times(1))
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.eq("hostname"),
+                        Mockito.eq("IW_RAW__0_GRDH_1.xml"));
+        verify(jobGeneratorSettings, times(1)).getWaitprimarycheck();
+        verify(jobGeneratorSettings, never()).getWaitmetadatainput();
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+    }
+
+    @Test
+    public void testRunWhenTransitoryStateForNotEnoughTime() throws AbstractCodedException {
+        Mockito.doAnswer(i -> {
+            return new WaitTempo(10000, 3);
+        }).when(jobGeneratorSettings).getWaitprimarycheck();
+        Mockito.doAnswer(i -> {
+            return new WaitTempo(10000, 3);
+        }).when(jobGeneratorSettings).getWaitmetadatainput();
+        
+        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        job1.setIdentifier(12L);
+        job1.getGenerations().add(new AppDataJobGenerationDto());
+        job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
+        job1.getGenerations().get(0).setState(AppDataJobGenerationDtoState.INITIAL);
+        job1.getGenerations().get(0).setLastUpdateDate(new Date());
+        
+        AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
+        job2.setIdentifier(12L);
+        job2.getGenerations().add(new AppDataJobGenerationDto());
+        job2.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
+        job2.getGenerations().get(0).setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
+        job2.getGenerations().get(0).setLastUpdateDate(new Date());
+
+        doReturn(Arrays.asList(job1, job2)).when(appDataPService)
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.anyString(), Mockito.anyString());
+
+        generator.run();
+        verify(appDataPService, times(1))
+                .findNByPodAndGenerationTaskTableWithNotSentGeneration(
+                        Mockito.eq("hostname"),
+                        Mockito.eq("IW_RAW__0_GRDH_1.xml"));
+        verify(jobGeneratorSettings, times(1)).getWaitprimarycheck();
+        verify(jobGeneratorSettings, times(1)).getWaitmetadatainput();
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+    }
 }

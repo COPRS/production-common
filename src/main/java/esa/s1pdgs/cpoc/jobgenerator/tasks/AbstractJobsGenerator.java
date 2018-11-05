@@ -273,8 +273,6 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     }
 
     private void buildMetadataSearchQuery() {
-        LOGGER.info("TESTLOG: inpuit families {}",
-                this.jobGeneratorSettings.getInputfamilies());
         final AtomicInteger counter = new AtomicInteger(0);
         this.taskTable.getPools().stream()
                 .filter(pool -> !CollectionUtils.isEmpty(pool.getTasks()))
@@ -555,7 +553,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 }
             }
         });
-        LOGGER.info("TESTLOGS results {}", job.getMetadataQueries());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Search metadata queries {}",
+                    job.getMetadataQueries());
+        }
 
         // Second, for each task check if input is mandatory and if a file exist
         LOGGER.info("{} [productName {}] 2b - Try building inputs",
@@ -579,7 +580,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                     .getAlternatives()) {
                                 // We ignore input not DB
                                 if (alt.getOrigin() == TaskTableInputOrigin.DB) {
-                                    if (!CollectionUtils.isEmpty(job.getMetadataQueries()
+                                    if (!CollectionUtils.isEmpty(job
+                                            .getMetadataQueries()
                                             .get(alt.getIdSearchMetadataQuery())
                                             .getResult())) {
 
