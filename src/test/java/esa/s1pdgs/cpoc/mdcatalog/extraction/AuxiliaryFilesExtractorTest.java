@@ -222,6 +222,7 @@ public class AuxiliaryFilesExtractorTest {
         expectedDescriptor
                 .setProductName("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
         expectedDescriptor.setProductType("AUX_OBMEMC");
+        expectedDescriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
         expectedDescriptor.setRelativePath(
                 "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 

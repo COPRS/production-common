@@ -24,7 +24,6 @@ public class SearchMetadataTest {
 		obj.setKeyObjectStorage("kobs");
 		obj.setValidityStart("start");
 		obj.setValidityStop("stop");
-		
 		String str = obj.toString();
 		assertTrue(str.contains("productName= name"));
 		assertTrue(str.contains("productType= type"));

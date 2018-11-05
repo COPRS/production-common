@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LevelSegmentMetadataDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.rest.dto</a> &gt; <span class="el_source">LevelSegmentMetadataDto.java</span></div><h1>LevelSegmentMetadataDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.rest.dto;
+
+import java.util.Objects;
+
+/**
+ * Class describing the metadata of a level segment
+ * 
+ * @author Viveris Technologies
+ */
+public class LevelSegmentMetadataDto extends MetadataDto {
+
+    /**
+     * Datatake identifier
+     */
+    private String datatakeId;
+
+    /**
+     * Polarisation
+     */
+    private String polarisation;
+
+    /**
+     * Product consolidation
+     */
+    private String consolidation;
+
+    /**
+     * Constructor using fields
+     * 
+     * @param productName
+     * @param productType
+     * @param keyObjectStorage
+     * @param validityStart
+     * @param validityStop
+     */
+    public LevelSegmentMetadataDto(final String productName,
+            final String productType, final String keyObjectStorage,
+            final String validityStart, final String validityStop) {
+<span class="fc" id="L39">        super(productName, productType, keyObjectStorage, validityStart,</span>
+                validityStop);
+<span class="fc" id="L41">    }</span>
+
+    /**
+     * Constructor using clone
+     * 
+     * @param obj
+     */
+    public LevelSegmentMetadataDto(final LevelSegmentMetadataDto obj) {
+<span class="fc" id="L49">        this(obj.getProductName(), obj.getProductType(),</span>
+<span class="fc" id="L50">                obj.getKeyObjectStorage(), obj.getValidityStart(),</span>
+<span class="fc" id="L51">                obj.getValidityStop());</span>
+<span class="fc" id="L52">        this.datatakeId = obj.getDatatakeId();</span>
+<span class="fc" id="L53">        this.polarisation = obj.getPolarisation();</span>
+<span class="fc" id="L54">        this.consolidation = obj.getConsolidation();</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * @return the datatakeId
+     */
+    public String getDatatakeId() {
+<span class="fc" id="L61">        return datatakeId;</span>
+    }
+
+    /**
+     * @param datatakeId
+     *            the datatakeId to set
+     */
+    public void setDatatakeId(final String datatakeId) {
+<span class="fc" id="L69">        this.datatakeId = datatakeId;</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * @return the polarisation
+     */
+    public String getPolarisation() {
+<span class="fc" id="L76">        return polarisation;</span>
+    }
+
+    /**
+     * @param polarisation
+     *            the polarisation to set
+     */
+    public void setPolarisation(final String polarisation) {
+<span class="fc" id="L84">        this.polarisation = polarisation;</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     * @return the consolidation
+     */
+    public String getConsolidation() {
+<span class="fc" id="L91">        return consolidation;</span>
+    }
+
+    /**
+     * @param consolidation
+     *            the consolidation to set
+     */
+    public void setConsolidation(final String consolidation) {
+<span class="fc" id="L99">        this.consolidation = consolidation;</span>
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L107">        return String.format(</span>
+                &quot;{productName: %s, productType: %s, keyObjectStorage: %s, validityStart: %s, validityStop: %s, datatakeId: %s, polarisation: %s, consolidation: %s}&quot;,
+                productName, productType, keyObjectStorage, validityStart,
+                validityStop, datatakeId, polarisation, consolidation);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L118">        return Objects.hash(super.hashCode(), datatakeId, polarisation,</span>
+                consolidation);
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L129">            ret = true;</span>
+<span class="fc bfc" id="L130" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L131">            ret = false;</span>
+        } else {
+<span class="fc" id="L133">            LevelSegmentMetadataDto other = (LevelSegmentMetadataDto) obj;</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            ret = super.equals(obj)</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(datatakeId, other.datatakeId)</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(polarisation, other.polarisation)</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(consolidation, other.consolidation);</span>
+        }
+<span class="fc" id="L139">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

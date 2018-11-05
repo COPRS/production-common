@@ -61,8 +61,8 @@ public class EdrsSessionsExtractor extends GenericExtractor&lt;EdrsSessionDto&gt
      */
     @Scheduled(fixedDelayString = &quot;${file.product-categories.edrs-sessions.fixed-delay-ms}&quot;, initialDelayString = &quot;${file.product-categories.edrs-sessions.init-delay-poll-ms}&quot;)
     public void extract() {
-<span class="nc" id="L64">        super.genericExtract();</span>
-<span class="nc" id="L65">    }</span>
+<span class="fc" id="L64">        super.genericExtract();</span>
+<span class="fc" id="L65">    }</span>
 
     /**
      * @see GenericExtractor#extractProductNameFromDto(Object)

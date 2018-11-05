@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0AcnMetadataDto;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0SliceMetadataDto;
 
@@ -37,15 +37,10 @@ public class L0SliceMetadataController {
 		this.esServices = esServices;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productType}/{productName:.+}")
-	public ResponseEntity<L0SliceMetadataDto> get(@PathVariable(name = "productType") String productType,
-			@PathVariable(name = "productName") String productName) {
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}")
+	public ResponseEntity<L0SliceMetadataDto> get(@PathVariable(name = "productName") String productName) {
 		try {
-			String l0sliceProductType = productType;
-			if ("blank".equalsIgnoreCase(productType)) {
-				l0sliceProductType = productName.substring(4, 14);
-			}
-			L0SliceMetadata f = esServices.getL0Slice(l0sliceProductType, productName);
+			L0SliceMetadata f = esServices.getL0Slice(productName);
 
 			L0SliceMetadataDto response = new L0SliceMetadataDto(f.getProductName(), f.getProductType(),
 					f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
@@ -55,50 +50,40 @@ public class L0SliceMetadataController {
 			return new ResponseEntity<L0SliceMetadataDto>(response, HttpStatus.OK);
 			
 		} catch (MetadataNotPresentException em) {
-			LOGGER.warn("[productType {}] [productName {}] [code {}] {}", productType, productName,
+			LOGGER.warn("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					em.getCode().getCode(), em.getLogMessage());
 			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.NOT_FOUND);
 		} catch (AbstractCodedException ace) {
-			LOGGER.error("[productType {}] [productName {}] [code {}] {}", productType, productName,
+			LOGGER.error("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					ace.getCode().getCode(), ace.getLogMessage());
 			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exc) {
-			LOGGER.error("[productType {}] [productName {}] [code {}] [msg {}]", productType, productName,
+			LOGGER.error("[L0_SLICE] [productName {}] [code {}] [msg {}]", productName,
 					ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
 			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productType}/{productName:.+}/acns")
-	public ResponseEntity<List<L0AcnMetadataDto>> getAcns(@PathVariable(name = "productType") String productType,
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}/acns")
+	public ResponseEntity<List<L0AcnMetadataDto>> getAcns(
 			@PathVariable(name = "productName") String productName,
+			@RequestParam(name = "processMode", defaultValue = "NONE") String processMode,
 			@RequestParam(value = "mode", defaultValue = "ALL") String mode) {
 		try {
-			// retrieve product type
-			String l0sliceProductType = productType;
-			if ("blank".equalsIgnoreCase(productType)) {
-				l0sliceProductType = productName.substring(4, 14);
-			}
-			
-			// Build product type for its ACN
-			String l0aProductType = l0sliceProductType.replaceAll("0S", "0A");
-			String l0cProductType = l0sliceProductType.replaceAll("0S", "0C");
-			String l0nProductType = l0sliceProductType.replaceAll("0S", "0N");
-
-			LOGGER.info("A {} C {} N {}", l0aProductType, l0cProductType, l0nProductType);
-
 			// Retrieve slice
-			L0SliceMetadata f = esServices.getL0Slice(l0sliceProductType, productName);
+			L0SliceMetadata f = esServices.getL0Slice(productName);
 			if (f == null) {
-				LOGGER.warn("[productType {}] [productName {}] Not found", l0sliceProductType, productName);
+				LOGGER.warn("[L0_SLICE] [productName {}] Not found", productName);
 				return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
 			}
+			String productType = f.getProductType();
+			String productTypeWithoutLastChar = productType.substring(0, productType.length() - 1);
 
 			// Retrieve ACN
 			List<L0AcnMetadataDto> r = new ArrayList<>();
 
-			LOGGER.info("Call getACN for {} {}", l0aProductType, f.getDatatakeId());
-			L0AcnMetadata l0a = esServices.getL0Acn(l0aProductType, f.getDatatakeId());
+			LOGGER.info("Call getACN for {} {}", productTypeWithoutLastChar + "A", f.getDatatakeId());
+			L0AcnMetadata l0a = esServices.getL0Acn(productTypeWithoutLastChar + "A", f.getDatatakeId(), processMode);
 			if (l0a != null) {
 				L0AcnMetadataDto l0aDto = new L0AcnMetadataDto(l0a.getProductName(), l0a.getProductType(),
 						l0a.getKeyObjectStorage(), l0a.getValidityStart(), l0a.getValidityStop());
@@ -110,8 +95,8 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
-			LOGGER.info("Call getACN for {} {}", l0cProductType, f.getDatatakeId());
-			L0AcnMetadata l0c = esServices.getL0Acn(l0cProductType, f.getDatatakeId());
+            LOGGER.info("Call getACN for {} {}", productTypeWithoutLastChar + "C", f.getDatatakeId());
+			L0AcnMetadata l0c = esServices.getL0Acn(productTypeWithoutLastChar + "C", f.getDatatakeId(), processMode);
 			if (l0c != null) {
 				L0AcnMetadataDto l0cDto = new L0AcnMetadataDto(l0c.getProductName(), l0c.getProductType(),
 						l0c.getKeyObjectStorage(), l0c.getValidityStart(), l0c.getValidityStop());
@@ -123,8 +108,8 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
-			LOGGER.info("Call getACN for {} {}", l0nProductType, f.getDatatakeId());
-			L0AcnMetadata l0n = esServices.getL0Acn(l0nProductType, f.getDatatakeId());
+            LOGGER.info("Call getACN for {} {}", productTypeWithoutLastChar + "N", f.getDatatakeId());
+			L0AcnMetadata l0n = esServices.getL0Acn(productTypeWithoutLastChar + "N", f.getDatatakeId(), processMode);
 			if (l0n != null) {
 				L0AcnMetadataDto l0nDto = new L0AcnMetadataDto(l0n.getProductName(), l0n.getProductType(),
 						l0n.getKeyObjectStorage(), l0n.getValidityStart(), l0n.getValidityStop());
@@ -144,15 +129,15 @@ public class L0SliceMetadataController {
 			return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 
 		} catch (MetadataNotPresentException em) {
-			LOGGER.warn("[productType {}] [productName {}] [code {}] {}", productType, productName,
+			LOGGER.warn("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					em.getCode().getCode(), em.getLogMessage());
 			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
 		} catch (AbstractCodedException ace) {
-			LOGGER.error("[productType {}] [productName {}] [code {}] {}", productType, productName,
+			LOGGER.error("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					ace.getCode().getCode(), ace.getLogMessage());
 			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
-			LOGGER.error("[productType {}] [productName {}] [code {}] [msg {}]", productType, productName,
+			LOGGER.error("[L0_SLICE] [productName {}] [code {}] [msg {}]", productName,
 					ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
 			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}

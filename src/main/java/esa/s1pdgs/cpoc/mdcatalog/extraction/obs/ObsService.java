@@ -122,18 +122,21 @@ public class ObsService {
 		case EDRS_SESSION:
 			ret = ObsFamily.EDRS_SESSION;
 			break;
-		case L0_PRODUCT:
-			ret = ObsFamily.L0_PRODUCT;
+		case L0_SLICE:
+			ret = ObsFamily.L0_SLICE;
 			break;
 		case L0_ACN:
 			ret = ObsFamily.L0_ACN;
 			break;
-		case L1_PRODUCT:
-			ret = ObsFamily.L1_PRODUCT;
+		case L1_SLICE:
+			ret = ObsFamily.L1_SLICE;
 			break;
 		case L1_ACN:
 			ret = ObsFamily.L1_ACN;
 			break;
+		case L0_SEGMENT:
+		    ret = ObsFamily.L0_SEGMENT;
+		    break;
 		default:
 			ret = ObsFamily.UNKNOWN;
 			break;

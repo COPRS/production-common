@@ -6,8 +6,6 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import esa.s1pdgs.cpoc.test.RuntimeExceptionTestObj;
-
 public class RestExceptionHandlerTest {
 
     @Test

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.test;
+package esa.s1pdgs.cpoc.mdcatalog.rest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

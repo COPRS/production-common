@@ -41,7 +41,7 @@ public class LevelProductsExtractor extends GenericExtractor&lt;LevelProductDto&
      * Pattern for configuration files to extract data
      */
     public final static String PATTERN_CONFIG =
-            &quot;^(S1|AS)(A|B)_(S[1-6]|IW|EW|WM|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$&quot;;
+            &quot;^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$&quot;;
 
     /**
      * Amazon S3 service for configuration files
@@ -109,7 +109,7 @@ public class LevelProductsExtractor extends GenericExtractor&lt;LevelProductDto&
                         &quot;[MONITOR] [step 2] [LEVEL_PRODUCTS] [L0_ACN] [productName {}] Extracting from filename&quot;,
 <span class="fc" id="L110">                        extractProductNameFromDto(dto));</span>
 <span class="fc" id="L111">                L0OutputFileDescriptor l0AcnDesc = fileDescriptorBuilder</span>
-<span class="fc" id="L112">                        .buildL0OutputFileDescriptor(metadataFile);</span>
+<span class="fc" id="L112">                        .buildL0OutputFileDescriptor(metadataFile, dto);</span>
                 // Build metadata from file and extracted
 <span class="fc" id="L114">                LOGGER.info(</span>
                         &quot;[MONITOR] [step 3] [LEVEL_PRODUCTS] [L0_ACN] [productName {}] Extracting from file&quot;,
@@ -117,12 +117,12 @@ public class LevelProductsExtractor extends GenericExtractor&lt;LevelProductDto&
 <span class="fc" id="L117">                result = mdBuilder.buildL0AcnOutputFileMetadata(l0AcnDesc,</span>
                         metadataFile);
 <span class="fc" id="L119">                break;</span>
-            case L0_PRODUCT:
+            case L0_SLICE:
 <span class="fc" id="L121">                LOGGER.info(</span>
                         &quot;[MONITOR] [step 2] [LEVEL_PRODUCTS] [L0_PRODUCT] [productName {}] Extracting from filename&quot;,
 <span class="fc" id="L123">                        extractProductNameFromDto(dto));</span>
 <span class="fc" id="L124">                L0OutputFileDescriptor l0SliceDesc = fileDescriptorBuilder</span>
-<span class="fc" id="L125">                        .buildL0OutputFileDescriptor(metadataFile);</span>
+<span class="fc" id="L125">                        .buildL0OutputFileDescriptor(metadataFile, dto);</span>
                 // Build metadata from file and extracted
 <span class="fc" id="L127">                LOGGER.info(</span>
                         &quot;[MONITOR] [step 3] [LEVEL_PRODUCTS] [L0_PRODUCT] [productName {}] Extracting from file&quot;,
@@ -135,7 +135,7 @@ public class LevelProductsExtractor extends GenericExtractor&lt;LevelProductDto&
                         &quot;[MONITOR] [step 2] [LEVEL_PRODUCTS] [L1_ACN] [productName {}] Extracting from filename&quot;,
 <span class="fc" id="L136">                        extractProductNameFromDto(dto));</span>
 <span class="fc" id="L137">                L1OutputFileDescriptor l1AcnDesc = fileDescriptorBuilder</span>
-<span class="fc" id="L138">                        .buildL1OutputFileDescriptor(metadataFile);</span>
+<span class="fc" id="L138">                        .buildL1OutputFileDescriptor(metadataFile, dto);</span>
                 // Build metadata from file and extracted
 <span class="fc" id="L140">                LOGGER.info(</span>
                         &quot;[MONITOR] [step 3] [LEVEL_PRODUCTS] [L1_ACN] [productName {}] Extracting from file&quot;,
@@ -143,12 +143,12 @@ public class LevelProductsExtractor extends GenericExtractor&lt;LevelProductDto&
 <span class="fc" id="L143">                result = mdBuilder.buildL1AcnOutputFileMetadata(l1AcnDesc,</span>
                         metadataFile);
 <span class="fc" id="L145">                break;</span>
-            case L1_PRODUCT:
+            case L1_SLICE:
 <span class="fc" id="L147">                LOGGER.info(</span>
                         &quot;[MONITOR] [step 2] [LEVEL_PRODUCTS] [L1_PRODUCT] [productName {}] Extracting from filename&quot;,
 <span class="fc" id="L149">                        extractProductNameFromDto(dto));</span>
 <span class="fc" id="L150">                L1OutputFileDescriptor l1SliceDesc = fileDescriptorBuilder</span>
-<span class="fc" id="L151">                        .buildL1OutputFileDescriptor(metadataFile);</span>
+<span class="fc" id="L151">                        .buildL1OutputFileDescriptor(metadataFile, dto);</span>
                 // Build metadata from file and extracted
 <span class="fc" id="L153">                LOGGER.info(</span>
                         &quot;[MONITOR] [step 3] [LEVEL_PRODUCTS] [L1_PRODUCT] [productName {}] Extracting from file&quot;,

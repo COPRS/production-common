@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
@@ -119,7 +120,7 @@ public class EdrsSessionsExtractorTest {
         expectedDescriptor.setChannel(1);
         expectedDescriptor.setSessionIdentifier("123");
         expectedDescriptor.setKeyObjectStorage("S1A/123/ch01/D_123_ch01_D.RAW");
-        
+        expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         JSONObject expected = extractor.mdBuilder
                 .buildEdrsSessionFileMetadata(expectedDescriptor);
         JSONObject result = extractor.extractMetadata(inputMessage);

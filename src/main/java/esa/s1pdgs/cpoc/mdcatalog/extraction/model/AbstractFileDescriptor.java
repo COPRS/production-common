@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction.model;
 
 import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * Abstract class describing a file
@@ -44,6 +45,16 @@ public class AbstractFileDescriptor {
 	 * Key in object storage
 	 */
 	protected String keyObjectStorage;
+	
+	/**
+	 * Product Family
+	 */
+	protected ProductFamily productFamily;
+	
+	/**
+	 * Mode
+	 */
+	protected String mode;
 
 	/**
 	 * Default constructor
@@ -157,68 +168,114 @@ public class AbstractFileDescriptor {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((extension == null) ? 0 : extension.hashCode());
-		result = prime * result + ((filename == null) ? 0 : filename.hashCode());
-		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
-		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
-		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		return result;
-	}
+	/**
+     * @return the productFamily
+     */
+    public ProductFamily getProductFamily() {
+        return productFamily;
+    }
+
+    /**
+     * @param productFamily the productFamily to set
+     */
+    public void setProductFamily(ProductFamily productFamily) {
+        this.productFamily = productFamily;
+    }
+
+    /**
+     * @return the mode
+     */
+    public String getMode() {
+        return mode;
+    }
+
+    /**
+     * @param mode the mode to set
+     */
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((extension == null) ? 0 : extension.hashCode());
+        result = prime * result
+                + ((filename == null) ? 0 : filename.hashCode());
+        result = prime * result + ((keyObjectStorage == null) ? 0
+                : keyObjectStorage.hashCode());
+        result = prime * result
+                + ((missionId == null) ? 0 : missionId.hashCode());
+        result = prime * result
+                + ((productFamily == null) ? 0 : productFamily.hashCode());
+        result = prime * result
+                + ((productName == null) ? 0 : productName.hashCode());
+        result = prime * result
+                + ((relativePath == null) ? 0 : relativePath.hashCode());
+        result = prime * result
+                + ((satelliteId == null) ? 0 : satelliteId.hashCode());
+        result = prime * result
+                + ((mode == null) ? 0 : mode.hashCode());
+        return result;
+    }
 
 	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractFileDescriptor other = (AbstractFileDescriptor) obj;
-		if (extension != other.extension)
-			return false;
-		if (filename == null) {
-			if (other.filename != null)
-				return false;
-		} else if (!filename.equals(other.filename))
-			return false;
-		if (keyObjectStorage == null) {
-			if (other.keyObjectStorage != null)
-				return false;
-		} else if (!keyObjectStorage.equals(other.keyObjectStorage))
-			return false;
-		if (missionId == null) {
-			if (other.missionId != null)
-				return false;
-		} else if (!missionId.equals(other.missionId))
-			return false;
-		if (productName == null) {
-			if (other.productName != null)
-				return false;
-		} else if (!productName.equals(other.productName))
-			return false;
-		if (relativePath == null) {
-			if (other.relativePath != null)
-				return false;
-		} else if (!relativePath.equals(other.relativePath))
-			return false;
-		if (satelliteId == null) {
-			if (other.satelliteId != null)
-				return false;
-		} else if (!satelliteId.equals(other.satelliteId))
-			return false;
-		return true;
-	}
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractFileDescriptor other = (AbstractFileDescriptor) obj;
+        if (extension != other.extension)
+            return false;
+        if (filename == null) {
+            if (other.filename != null)
+                return false;
+        } else if (!filename.equals(other.filename))
+            return false;
+        if (keyObjectStorage == null) {
+            if (other.keyObjectStorage != null)
+                return false;
+        } else if (!keyObjectStorage.equals(other.keyObjectStorage))
+            return false;
+        if (missionId == null) {
+            if (other.missionId != null)
+                return false;
+        } else if (!missionId.equals(other.missionId))
+            return false;
+        if (productFamily != other.productFamily)
+            return false;
+        if (productName == null) {
+            if (other.productName != null)
+                return false;
+        } else if (!productName.equals(other.productName))
+            return false;
+        if (relativePath == null) {
+            if (other.relativePath != null)
+                return false;
+        } else if (!relativePath.equals(other.relativePath))
+            return false;
+        if (satelliteId == null) {
+            if (other.satelliteId != null)
+                return false;
+        } else if (!satelliteId.equals(other.satelliteId))
+            return false;
+        if (mode == null) {
+            if (other.mode != null)
+                return false;
+        } else if (!mode.equals(other.mode))
+            return false;
+        return true;
+    }
 
 }

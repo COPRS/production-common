@@ -133,6 +133,24 @@ public class MetadataBuilder {
 <span class="fc" id="L133">		metadataToIndex = extractor.processL0AcnProd(descriptor, file);</span>
 <span class="fc" id="L134">		return metadataToIndex;</span>
 	}
+	
+	/**
+     * Build the metadata for L0 Segment
+     * 
+     * 
+     * @param descriptor
+     * @param file
+     * 
+     * @return the JSONObject containing the metadata to index
+     * 
+     * @throws MetadataExtractionException
+     */
+    public JSONObject buildL0SegmentOutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
+            throws MetadataExtractionException {
+<span class="fc" id="L150">        JSONObject metadataToIndex = new JSONObject();</span>
+<span class="fc" id="L151">        metadataToIndex = extractor.processL0Segment(descriptor, file);</span>
+<span class="fc" id="L152">        return metadataToIndex;</span>
+    }
 
 	/**
 	 * Build metadata for L0 Slice
@@ -146,9 +164,9 @@ public class MetadataBuilder {
 	 */
 	public JSONObject buildL1SliceOutputFileMetadata(L1OutputFileDescriptor descriptor, File file)
 			throws MetadataExtractionException {
-<span class="fc" id="L149">		JSONObject metadataToIndex = new JSONObject();</span>
-<span class="fc" id="L150">		metadataToIndex = extractor.processL1SliceProd(descriptor, file);</span>
-<span class="fc" id="L151">		return metadataToIndex;</span>
+<span class="fc" id="L167">		JSONObject metadataToIndex = new JSONObject();</span>
+<span class="fc" id="L168">		metadataToIndex = extractor.processL1SliceProd(descriptor, file);</span>
+<span class="fc" id="L169">		return metadataToIndex;</span>
 	}
 
 	/**
@@ -163,9 +181,11 @@ public class MetadataBuilder {
 	 */
 	public JSONObject buildL1AcnOutputFileMetadata(L1OutputFileDescriptor descriptor, File file)
 			throws MetadataExtractionException {
-<span class="fc" id="L166">		JSONObject metadataToIndex = new JSONObject();</span>
-<span class="fc" id="L167">		metadataToIndex = extractor.processL1AProd(descriptor, file);</span>
-<span class="fc" id="L168">		return metadataToIndex;</span>
+<span class="fc" id="L184">		JSONObject metadataToIndex = new JSONObject();</span>
+<span class="fc" id="L185">		metadataToIndex = extractor.processL1AProd(descriptor, file);</span>
+<span class="fc" id="L186">		return metadataToIndex;</span>
 	}
+	
+	
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

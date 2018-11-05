@@ -8,6 +8,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -31,12 +33,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdcatalog.es.ElasticsearchDAO;
-import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.mdcatalog.es.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
 
 
@@ -88,6 +91,7 @@ public class EsServicesTest{
 		JSONObject product = new JSONObject();
 		product.put("productName", "name");
 		product.put("productType", "type");
+		product.put("productFamily", "AUXILIARY_FILE");
 		
 		//Result with boolean at true for isExist
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, null, null);
@@ -110,6 +114,7 @@ public class EsServicesTest{
 		JSONObject product = new JSONObject();
 		product.put("productName", "name");
 		product.put("productType", "type");
+        product.put("productFamily", "L0_SLICE");
 		
 		//Result with boolean at false for isExist
 		GetResult getResult = new GetResult("index", "type", "id", 0, false, null, null);
@@ -162,6 +167,7 @@ public class EsServicesTest{
 		JSONObject product = new JSONObject();
 		product.put("productName", "name");
 		product.put("productType", "type");
+		product.put("productFamily", "L0_SLICE");
 		
 		//Result
 		IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
@@ -211,7 +217,7 @@ public class EsServicesTest{
 		// Product
 		SearchMetadata expectedResult = new SearchMetadata();
 		expectedResult.setProductName("name");
-		expectedResult.setProductType("type");
+		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("validityStartTime");
 		expectedResult.setValidityStop("validityStopTime");
@@ -219,7 +225,7 @@ public class EsServicesTest{
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\"}");
+		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
@@ -231,7 +237,8 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
-			SearchMetadata result = esServices.lastValCover("type", "beginDate", "endDate", "satelliteId", 6);
+			SearchMetadata result = esServices.lastValCover("type", ProductFamily.L0_ACN, 
+			        "beginDate", "endDate", "satelliteId", 6, "NRT");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -251,7 +258,7 @@ public class EsServicesTest{
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\"}");
+		        + "\"validityStopTime\", \"productType\": \"aux_res\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
@@ -263,7 +270,8 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
-			SearchMetadata result = esServices.lastValCover("aux_res", "beginDate", "endDate", "satelliteId", -1);
+			SearchMetadata result = esServices.lastValCover("aux_res", ProductFamily.AUXILIARY_FILE, "beginDate", 
+			        "endDate", "satelliteId", -1, "NRT");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -273,7 +281,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void lastValCoverIOExceptionTest() throws Exception {
 		this.mockSearchRequestThrowIOException();
-		esServices.lastValCover("type", "beginDate", "endDate", "satelliteId", -1);
+		esServices.lastValCover("type", ProductFamily.L0_SLICE, "beginDate", "endDate", "satelliteId", -1, "NRT");
 	}
 	
 	@Test
@@ -281,7 +289,7 @@ public class EsServicesTest{
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\"}");
+		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
@@ -293,12 +301,77 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
-			SearchMetadata result = esServices.lastValCover("type", "beginDate", "endDate", "satelliteId", 6);
+			SearchMetadata result = esServices.lastValCover("type", ProductFamily.L0_ACN, "beginDate", 
+			        "endDate", "satelliteId", 6, "NRT");
 			assertEquals("Search metadata are not equals", null, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
 		}
 	}
+	
+	@Test
+    public void valIntersectTest() throws IOException {
+        // Product
+        SearchMetadata r = new SearchMetadata();
+        r.setProductName("name");
+        r.setProductType("product_type");
+        r.setKeyObjectStorage("url");
+        r.setValidityStart("validityStartTime");
+        r.setValidityStop("validityStopTime");
+        List<SearchMetadata> expectedResult = new ArrayList<>();
+        expectedResult.add(r);
+        
+        //Response
+        BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productType\": \"product_type\"}");
+        SearchHit hit = new SearchHit(1);
+        hit.sourceRef(source);
+        SearchHit[] hits = {hit};
+        SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+        SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+        SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        
+        //Mocking the search request
+        this.mockSearchRequest(response);
+        
+        try {
+            List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
+            assertEquals("Search metadata are not equals", expectedResult, result);
+        } catch (Exception e) {
+            fail("Exception occurred: " + e.getMessage());
+        }
+    }
+    
+    @Test(expected = Exception.class)
+    public void valIntersectIOExceptionTest() throws Exception {
+        this.mockSearchRequestThrowIOException();
+        esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
+    }
+    
+    @Test
+    public void valIntersectNoHitTest() throws IOException {
+        //Response
+        BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
+                + "\"validityStopTime\", \"productType\": \"product_type\"}");
+        SearchHit hit = new SearchHit(1);
+        hit.sourceRef(source);
+        SearchHit[] hits = {hit};
+        SearchHits searchHits = new SearchHits(hits, 0, 1.0F);
+        SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+        SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        
+        //Mocking the search request
+        this.mockSearchRequest(response);
+        
+        try {
+            List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
+            assertEquals("Search metadata are not equals", null, result);
+        } catch (Exception e) {
+            fail("Exception occurred: " + e.getMessage());
+        }
+    }
 	
 	@Test
 	public void getEdrsSessionTest() throws IOException {
@@ -313,7 +386,7 @@ public class EsServicesTest{
 		//Response 
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\"}");
+		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
@@ -332,7 +405,7 @@ public class EsServicesTest{
 	public void getEdrsSessionNoHitTest() throws Exception {
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\"}");
+		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, false, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
@@ -353,7 +426,7 @@ public class EsServicesTest{
 		//Expected result
 		L0SliceMetadata expectedResult = new L0SliceMetadata();
 		expectedResult.setProductName("name");
-		expectedResult.setProductType("type");
+		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("validityStartTime");
 		expectedResult.setValidityStop("validityStopTime");
@@ -364,7 +437,9 @@ public class EsServicesTest{
 		//Response 
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, "
+		        + "\"dataTakeId\":\"datatakeId\","
+		        + "\"productType\": \"product_type\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
@@ -372,7 +447,7 @@ public class EsServicesTest{
 		this.mockGetRequest(getResponse);
 		
 		try {
-			L0SliceMetadata result = esServices.getL0Slice("type", "name");
+			L0SliceMetadata result = esServices.getL0Slice("name");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -383,26 +458,28 @@ public class EsServicesTest{
 	public void getL0SliceNoHitTest() throws Exception {
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, false, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
 		this.mockGetRequest(getResponse);
 		
-		esServices.getL0Slice("type", "name");
+		esServices.getL0Slice("name");
 	}
 	
 	@Test
 	public void getL0SliceMalformedTest() throws Exception {
 		//MISSING URL
 		BytesReference source = new BytesArray("{\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice("name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -411,12 +488,13 @@ public class EsServicesTest{
 		//MISSING startTime
 		source = new BytesArray("{\"url\""
 		        + ":\"url\",\"stopTime\":\"validityStopTime\", "
-		        + "\"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice("name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -425,12 +503,13 @@ public class EsServicesTest{
 		//MISSING stopTime
 		source = new BytesArray("{\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\","
-		        + " \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + " \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice("name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -439,12 +518,13 @@ public class EsServicesTest{
 		//MISSING instrumentConfigurationId
 		source = new BytesArray("{\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice("name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -453,12 +533,13 @@ public class EsServicesTest{
 		//MISSING sliceNumber
 		source = new BytesArray("{\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice("name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -467,17 +548,32 @@ public class EsServicesTest{
 		//MISSING dataTakeId
 		source = new BytesArray("{\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2,"
+                + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
-			esServices.getL0Slice("type", "name");
+			esServices.getL0Slice("name");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
 					"dataTakeId", ((MetadataMalformedException) e).getMissingField());
 		}
+        //MISSING product type
+        source = new BytesArray("{\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getL0Slice("name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "productType", ((MetadataMalformedException) e).getMissingField());
+        }
 		
 	}
 	
@@ -486,7 +582,7 @@ public class EsServicesTest{
 		//Expected result
 		L0AcnMetadata expectedResult = new L0AcnMetadata();
 		expectedResult.setProductName("name");
-		expectedResult.setProductType("type");
+		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("validityStartTime");
 		expectedResult.setValidityStop("validityStopTime");
@@ -496,20 +592,21 @@ public class EsServicesTest{
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\"}");
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, "
+                + "\"dataTakeId\":\"datatakeId\", \"productFamily\":\"l0_acn\","
+                + "\"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
 		SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
 		SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
-		
 		//Mocking the search request
 		this.mockSearchRequest(response);
 		
 		try {
-			L0AcnMetadata result = esServices.getL0Acn("type", "datatakeId");
+			L0AcnMetadata result = esServices.getL0Acn("l0_acnA", "datatakeId", "NRT");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -520,7 +617,8 @@ public class EsServicesTest{
 	public void getL0AcnNoHitTest() throws Exception {
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"L0AcnMetadata\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"L0AcnMetadata\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
@@ -532,7 +630,7 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
-			L0AcnMetadata result = esServices.getL0Acn("type", "datatakeId");
+			L0AcnMetadata result = esServices.getL0Acn("lo_acnc", "datatakeId", "NRT");
 			assertEquals("Search metadata are not equals", null, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -542,7 +640,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void getL0AcnIOExceptionTest() throws Exception {
 		this.mockSearchRequestThrowIOException();
-		esServices.getL0Acn("type", "datatakeId");
+		esServices.getL0Acn("l0_acn_n", "datatakeId", "NRT");
 	}
 	
 	@Test
@@ -550,7 +648,8 @@ public class EsServicesTest{
 		//MISSING productName
 		BytesReference source = new BytesArray("{\"url\":\"url\",\"startTime\":\"validityStartTime\","
 				+ "\"stopTime\":\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, "
-				+ "\"dataTakeId\":\"datatakeId\"}");
+				+ "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
@@ -559,7 +658,7 @@ public class EsServicesTest{
 		SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+			esServices.getL0Acn("l0_acn_0", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -567,7 +666,8 @@ public class EsServicesTest{
 		}
 		//MISSING URL
 		source = new BytesArray("{\"productName\":\"name\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
@@ -576,7 +676,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -585,7 +685,8 @@ public class EsServicesTest{
 		//MISSING startTime
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"stopTime\":\"validityStopTime\", \"instrumentConfigurationId\":0, "
-		        + "\"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
@@ -594,7 +695,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -603,7 +704,8 @@ public class EsServicesTest{
 		//MISSING stopTime
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\","
-		        + "\"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
@@ -612,7 +714,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -621,7 +723,8 @@ public class EsServicesTest{
 		//MISSING instrumentConfigurationId
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
@@ -630,7 +733,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -639,7 +742,8 @@ public class EsServicesTest{
 		//MISSING totalNumberOfSlice
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0,\"dataTakeId\":\"datatakeId\"}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0,\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
@@ -648,7 +752,7 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
@@ -657,7 +761,8 @@ public class EsServicesTest{
 		//MISSING dataTakeId
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2}");
+		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2,"
+                + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
@@ -666,12 +771,194 @@ public class EsServicesTest{
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
 		try {
-			esServices.getL0Acn("type", "datatakeId");
+		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
 			assertEquals("Raised exception shall concern name",
 					"dataTakeId", ((MetadataMalformedException) e).getMissingField());
 		}
+        //MISSING dataTakeId
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2}");
+        hit = new SearchHit(1);
+        hit.sourceRef(source);
+        hits[0] = hit;
+        searchHits = new SearchHits(hits, 1, 1.0F);
+        searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+        response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        this.mockSearchRequest(response);
+        try {
+            esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "productType", ((MetadataMalformedException) e).getMissingField());
+        }
 		
 	}
+    
+    @Test
+    public void getLevelSegmentTest() throws IOException {
+        //Expected result
+        LevelSegmentMetadata expectedResult = new LevelSegmentMetadata();
+        expectedResult.setProductName("name");
+        expectedResult.setProductType("product_type");
+        expectedResult.setKeyObjectStorage("url");
+        expectedResult.setValidityStart("validityStartTime");
+        expectedResult.setValidityStop("validityStopTime");
+        expectedResult.setConsolidation("FULL");
+        expectedResult.setPolarisation("SV");
+        expectedResult.setDatatakeId("datatakeId");
+        
+        //Response 
+        BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        GetResult getResult = new GetResult("index", "l0_segment", "id", 0, true, source, null);
+        GetResponse getResponse = new GetResponse(getResult);
+        
+        //Mocking the get Request
+        this.mockGetRequest(getResponse);
+        
+        try {
+            LevelSegmentMetadata result = esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            assertEquals("Search metadata are not equals", expectedResult, result);
+        } catch (Exception e) {
+            fail("Exception occurred: " + e.getMessage());
+        }
+    }
+    
+    @Test(expected = MetadataNotPresentException.class)
+    public void getLevelSegmentNoHitTest() throws Exception {
+        BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        GetResult getResult = new GetResult("index", "l0_segment", "id", 0, false, source, null);
+        GetResponse getResponse = new GetResponse(getResult);
+        
+        //Mocking the get Request
+        this.mockGetRequest(getResponse);
+        
+        esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+    }
+    
+    @Test
+    public void getLevelSegmentMalformedTest() throws Exception {
+        //MISSING URL
+        BytesReference source = new BytesArray("{\"productName\":\"name\","
+                + "\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        GetResponse getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "url", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING startTime
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "startTime", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING stopTime
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\","
+                + "\"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "stopTime", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING instrumentConfigurationId
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "productConsolidation", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING sliceNumber
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "polarisation", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING dataTakeId
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"productType\": \"product_type\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "dataTakeId", ((MetadataMalformedException) e).getMissingField());
+        }
+        //MISSING product type
+        source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
+                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\"}");
+        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+        try {
+            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
+            fail("An exception should occur");
+        } catch (Exception e) {
+            assertEquals("Raised exception shall concern name",
+                    "productType", ((MetadataMalformedException) e).getMissingField());
+        }
+        
+    }
 }

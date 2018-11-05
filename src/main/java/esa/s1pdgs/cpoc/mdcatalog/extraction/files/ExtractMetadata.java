@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
@@ -92,19 +93,31 @@ public class ExtractMetadata {
 	 * @return the coordinates in good format
 	 * @throws MetadataExtractionException 
 	 */
-	private JSONArray processCoordinates(String productName, String rawCoordinates) throws MetadataExtractionException {
+	private JSONObject processCoordinates(String productName, String rawCoordinates) throws MetadataExtractionException {
+	    JSONObject geoShape = new JSONObject();
 		JSONArray coordinates = new JSONArray();
 		try {
-			for (String coord : rawCoordinates.split(" ")) {
-				coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
-			}
-			if(!rawCoordinates.split(" ")[0].equals(rawCoordinates.split(" ")[rawCoordinates.split(" ").length-1])) {
-				coordinates.put(new JSONArray("[" + (rawCoordinates.split(" ")[0].split(","))[1] + "," + (rawCoordinates.split(" ")[0].split(","))[0] + "]"));
-			}
+		    String[] coordSplitSpace = rawCoordinates.split(" ");
+		    if(coordSplitSpace.length == 2) { //BBOX type (envelope in ES)
+		        geoShape.put("type", "envelope");
+		        for (String coord : coordSplitSpace) {
+                    coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
+                }
+	            geoShape.put("coordinates", coordinates);
+		    } else { //Polygon type
+		        geoShape.put("type", "polygon");
+		        for (String coord : coordSplitSpace) {
+	                coordinates.put(new JSONArray("[" + (coord.split(","))[1] + "," + (coord.split(","))[0] + "]"));
+	            }
+	            if(!coordSplitSpace[0].equals(coordSplitSpace[coordSplitSpace.length-1])) {
+	                coordinates.put(new JSONArray("[" + (coordSplitSpace[0].split(","))[1] + "," + (coordSplitSpace[0].split(","))[0] + "]"));
+	            }
+	            geoShape.put("coordinates", new JSONArray().put(coordinates));
+		    }
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
 		}
-		return new JSONArray().put(coordinates);
+		return geoShape;
 	}
 	
 	/**
@@ -117,12 +130,19 @@ public class ExtractMetadata {
 	 * @return an int which is the number of Slices
 	 */
 	private int totalNumberOfSlice(Long startTimeLong, Long stopTimeLong, String type) {
+	    float sliceLength = this.typeSliceLength.get(type);
+	    
+	    // Case of their is no slice information in manifest
+	    if (sliceLength <= 0) {
+	        return 1;
+	    }
+
+        float overlap = this.typeOverlap.get(type);
+        
+        float tmpNumberOfSlices = (stopTimeLong - startTimeLong - overlap) / sliceLength;
+        double fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
 		int totalNumberOfSlices = 0;
-		float tmpNumberOfSlices = 0F;
-		double fracNumberOfSlices = 0.0;
-		tmpNumberOfSlices = (stopTimeLong - startTimeLong - this.typeOverlap.get(type))/this.typeSliceLength.get(type);
-		fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
-		if((fracNumberOfSlices*this.typeSliceLength.get(type)) < this.typeOverlap.get(type)){
+		if((fracNumberOfSlices * sliceLength) < overlap){
 			totalNumberOfSlices = (int) Math.floor(tmpNumberOfSlices);
 		}
 		else {
@@ -150,20 +170,17 @@ public class ExtractMetadata {
 			Source mplMetadataFile = new StreamSource(file);
 			transformerMPL.transform(mplMetadataFile, new StreamResult(new File("tmp/output.xml")));
 			// JSON creation
-			JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-			JSONObject metadataJSONObject = new JSONObject();
-			if (jsonFromXmlTmp.getJSONObject("validityStopTime").getString("content")
-					.equals("UTC=9999-99-99T99:99:99")) {
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
+			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
+			if (metadataJSONObject.getString("validityStopTime").equals("UTC=9999-99-99T99:99:99")) {
+				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
 			} else {
 				metadataJSONObject.put("validityStopTime",
-						jsonFromXmlTmp.getJSONObject("validityStopTime").get("content").toString().substring(4));
+				        metadataJSONObject.getString("validityStopTime").substring(4));
 			}
 			metadataJSONObject.put("creationTime",
-					jsonFromXmlTmp.getJSONObject("creationTime").get("content").toString().substring(4));
-			metadataJSONObject.put("validityStartTime",
-					jsonFromXmlTmp.getJSONObject("validityStartTime").get("content").toString().substring(4));
-			metadataJSONObject.put("version", jsonFromXmlTmp.getJSONObject("version").get("content"));
+			        metadataJSONObject.getString("creationTime").substring(4));
+            metadataJSONObject.put("validityStartTime",
+                    metadataJSONObject.getString("validityStartTime").substring(4));
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
 			metadataJSONObject.put("productType", descriptor.getProductType());
@@ -171,6 +188,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -211,6 +229,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -238,7 +257,7 @@ public class ExtractMetadata {
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
 			if (metadataJSONObject.getString("validityStopTime").equals("UTC=9999-99-99T99:99:99")) {
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
+				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
 			} else {
 				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("validityStopTime").substring(4));
 			}
@@ -255,6 +274,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 
 		} catch (IOException | TransformerException | JSONException e) {
@@ -281,21 +301,15 @@ public class ExtractMetadata {
 			Source auxMetadataFile = new StreamSource(file);
 			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
 			// JSON creation
-			JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-			JSONObject metadataJSONObject = new JSONObject();
-			metadataJSONObject.put("site", jsonFromXmlTmp.getJSONObject("site").getString("site"));
-			metadataJSONObject.put("instrumentConfigurationId",
-					jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").get("content"));
-			metadataJSONObject.put("creationTime", jsonFromXmlTmp.getJSONObject("creationTime").getString("content"));
-			metadataJSONObject.put("validityStartTime",
-					jsonFromXmlTmp.getJSONObject("validityStartTime").getString("content"));
-			metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59");
+			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
+			metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productType", descriptor.getProductType());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -315,12 +329,13 @@ public class ExtractMetadata {
 		try {
 			JSONObject metadataJSONObject = new JSONObject();
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productType", descriptor.getProductType());
+			metadataJSONObject.put("productType", descriptor.getProductType().name());
 			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -340,12 +355,13 @@ public class ExtractMetadata {
 		try {
 			JSONObject metadataJSONObject = new JSONObject();
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productType", descriptor.getProductType());
+			metadataJSONObject.put("productType", descriptor.getProductType().name());
 			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -380,96 +396,29 @@ public class ExtractMetadata {
 	        Source l1File = new StreamSource(file);
 	        transformerL0.transform(l1File, new StreamResult(new File(output)));
 	        //JSON creation
-	        JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
-	        JSONObject metadataJSONObject = new JSONObject();
-	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
-	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").has("content")) {
-	        	metadataJSONObject.put("theoreticalSliceLength", jsonFromXmlTmp.getJSONObject("theoreticalSliceLength").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("pass").has("content")) {
-	        	metadataJSONObject.put("pass", jsonFromXmlTmp.getJSONObject("pass").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("stopTimeANX").has("content")) {
-	        	metadataJSONObject.put("stopTimeANX", jsonFromXmlTmp.getJSONObject("stopTimeANX").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceCoordinates").has("content")) {
-	        	JSONObject coordinates = new JSONObject();
-	        	coordinates.put("type", "polygon");
-	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
-	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceNumber").has("content")) {
-	        	metadataJSONObject.put("sliceNumber", jsonFromXmlTmp.getJSONObject("sliceNumber").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").has("content")) {
-	        	metadataJSONObject.put("absoluteStopOrbit", jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("circulationFlag").has("content")) {
-	        	metadataJSONObject.put("circulationFlag", jsonFromXmlTmp.getJSONObject("circulationFlag").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("productConsolidation").has("content")) {
-	        	metadataJSONObject.put("productConsolidation", jsonFromXmlTmp.getJSONObject("productConsolidation").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").has("content")) {
-	        	metadataJSONObject.put("absoluteStartOrbit", jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").has("content")) {
-	        	metadataJSONObject.put("instrumentConfigurationId", jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceOverlap").has("content")) {
-	        	metadataJSONObject.put("sliceOverlap", jsonFromXmlTmp.getJSONObject("sliceOverlap").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("startTimeANX").has("content")) {
-	        	metadataJSONObject.put("startTimeANX", jsonFromXmlTmp.getJSONObject("startTimeANX").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("relativeStopOrbit").has("content")) {
-	        	metadataJSONObject.put("relativeStopOrbit", jsonFromXmlTmp.getJSONObject("relativeStopOrbit").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("relativeStartOrbit").has("content")) {
-	        	metadataJSONObject.put("relativeStartOrbit", jsonFromXmlTmp.getJSONObject("relativeStartOrbit").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("startTime").has("content")) {
-	        	metadataJSONObject.put("startTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
-	        	metadataJSONObject.put("validityStartTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("stopTime").has("content")) {
-	        	metadataJSONObject.put("stopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
-	        	metadataJSONObject.put("validityStopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
-	        }
+	        JSONObject metadataJSONObject = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
+	        if(metadataJSONObject.has("startTime")) {
+                metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));
+            }
+            if(metadataJSONObject.has("stopTime")) {
+                metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
+            }
+            if (!metadataJSONObject.has("sliceNumber")) {
+                metadataJSONObject.put("sliceNumber", 1);
+            } else if (StringUtils.isEmpty(metadataJSONObject.get("sliceNumber").toString())) {
+                metadataJSONObject.put("sliceNumber", 1);
+            } 
+	        if(metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
+	        	metadataJSONObject.put("sliceCoordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates"))); 
+	        }	
 	        if(descriptor.getProductClass().equals("A") || descriptor.getProductClass().equals("C") || descriptor.getProductClass().equals("N")) {
 	        	if(metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
-	        		if(descriptor.getSwathtype().matches("IW")) {
-	            		metadataJSONObject.put("totalNumberOfSlice", 
+	        		metadataJSONObject.put("totalNumberOfSlice", 
 							totalNumberOfSlice(
-									dateFormat.parse(jsonFromXmlTmp.getJSONObject("startTime").getString("content")).getTime()/1000, 
-									dateFormat.parse(jsonFromXmlTmp.getJSONObject("stopTime").getString("content")).getTime()/1000,
-									descriptor.getSwathtype()));
-	        		}	
-		        	else if (descriptor.getSwathtype().matches("EW")) {
-						metadataJSONObject.put("totalNumberOfSlice", 
-								totalNumberOfSlice(
-										dateFormat.parse(jsonFromXmlTmp.getJSONObject("startTime").getString("content")).getTime()/1000, 
-										dateFormat.parse(jsonFromXmlTmp.getJSONObject("stopTime").getString("content")).getTime()/1000,
-										descriptor.getSwathtype()));
-		        	}
-		        	else if (descriptor.getSwathtype().matches("WM")) {
-						metadataJSONObject.put("totalNumberOfSlice", 
-								totalNumberOfSlice(
-										dateFormat.parse(jsonFromXmlTmp.getJSONObject("startTime").getString("content")).getTime()/1000, 
-										dateFormat.parse(jsonFromXmlTmp.getJSONObject("stopTime").getString("content")).getTime()/1000,
-										descriptor.getSwathtype()));
-	
-		        	}
-		        	else if (descriptor.getSwathtype().matches("S[1-6]")) {
-						metadataJSONObject.put("totalNumberOfSlice", 
-								totalNumberOfSlice(
-										dateFormat.parse(jsonFromXmlTmp.getJSONObject("startTime").getString("content")).getTime()/1000, 
-										dateFormat.parse(jsonFromXmlTmp.getJSONObject("stopTime").getString("content")).getTime()/1000,
-										"SM"));
-		        	}
-	        	}
+									dateFormat.parse(metadataJSONObject.getString("startTime")).getTime()/1000, 
+									dateFormat.parse(metadataJSONObject.getString("stopTime")).getTime()/1000,
+									descriptor.getSwathtype().matches("S[1-6]") ? "SM" : descriptor.getSwathtype()));
+	        		}
 	        }
 	        metadataJSONObject.put("productName", descriptor.getProductName());
 	        metadataJSONObject.put("productClass", descriptor.getProductClass());
@@ -481,13 +430,55 @@ public class ExtractMetadata {
 	        metadataJSONObject.put("polarisation", descriptor.getPolarisation());
 	        metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 	        metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+	        metadataJSONObject.put("processMode", descriptor.getMode());
 	        String dt = dateFormat.format(new Date());
 	        metadataJSONObject.put("insertionTime", dt);
 	        metadataJSONObject.put("creationTime", dt);
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException | ParseException e) {
 			throw new MetadataExtractionException(e);
 		}
+	}
+	
+	public JSONObject processL0Segment(L0OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
+	    try {
+            //XSLT Transformation
+            String xsltFilename = this.xsltDirectory + "XSLT_L0_SEGMENT.xslt";
+            Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
+            Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);
+            Source l1File = new StreamSource(file);
+            transformerL0.transform(l1File, new StreamResult(new File("tmp/outputl0seg.xml")));
+            //JSON creation
+            JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/outputl0seg.xml", Charset.defaultCharset()));
+            if(metadataJSONObject.has("startTime")) {
+                metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));
+            }
+            if(metadataJSONObject.has("stopTime")) {
+                metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
+            }
+            if(metadataJSONObject.has("segmentCoordinates")) {
+                metadataJSONObject.put("segmentCoordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("segmentCoordinates"))); 
+            }
+            metadataJSONObject.put("productName", descriptor.getProductName());
+            metadataJSONObject.put("productClass", descriptor.getProductClass());
+            metadataJSONObject.put("productType", descriptor.getProductType());
+            metadataJSONObject.put("resolution", descriptor.getResolution());
+            metadataJSONObject.put("missionId", descriptor.getMissionId());
+            metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+            metadataJSONObject.put("swathtype", descriptor.getSwathtype());
+            metadataJSONObject.put("polarisation", descriptor.getPolarisation());
+            metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
+            metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+            metadataJSONObject.put("processMode", descriptor.getMode());
+            String dt = dateFormat.format(new Date());
+            metadataJSONObject.put("insertionTime", dt);
+            metadataJSONObject.put("creationTime", dt);
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+            return metadataJSONObject;
+        } catch (IOException | TransformerException | JSONException e) {
+            throw new MetadataExtractionException(e);
+        }
 	}
 	
 	public JSONObject processL1SliceProd(L1OutputFileDescriptor descriptor, File file) throws MetadataExtractionException {
@@ -519,57 +510,15 @@ public class ExtractMetadata {
 	        Source l1File = new StreamSource(file);
 	        transformerL1.transform(l1File, new StreamResult(new File(output)));
 	        //JSON creation
-	        JSONObject jsonFromXmlTmp = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
-	        JSONObject metadataJSONObject = new JSONObject();
-	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
-	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").get("content"));
+	        JSONObject metadataJSONObject = XML.toJSONObject(readFile(output, Charset.defaultCharset()));
+	        if(metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
+	        	metadataJSONObject.put("sliceCoordinates", processCoordinates(descriptor.getProductName(), metadataJSONObject.getString("sliceCoordinates")));       	
 	        }
-	        if(jsonFromXmlTmp.getJSONObject("pass").has("content")) {
-	        	metadataJSONObject.put("pass", jsonFromXmlTmp.getJSONObject("pass").get("content"));
+	        if(metadataJSONObject.has("startTime")) {
+	        	metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));
 	        }
-	        if(jsonFromXmlTmp.getJSONObject("stopTimeANX").has("content")) {
-	        	metadataJSONObject.put("stopTimeANX", jsonFromXmlTmp.getJSONObject("stopTimeANX").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceCoordinates").has("content")) {
-	        	JSONObject coordinates = new JSONObject();
-	        	coordinates.put("type", "polygon");
-	        	coordinates.put("coordinates", processCoordinates(descriptor.getProductName(), jsonFromXmlTmp.getJSONObject("sliceCoordinates").getString("content")));
-	        	metadataJSONObject.put("sliceCoordinates", coordinates);       	
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceNumber").has("content")) {
-	        	metadataJSONObject.put("sliceNumber", jsonFromXmlTmp.getJSONObject("sliceNumber").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("missionDataTakeId").has("content")) {
-	        	metadataJSONObject.put("missionDataTakeId", jsonFromXmlTmp.getJSONObject("missionDataTakeId").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("sliceNumber").has("content")) {
-	        	metadataJSONObject.put("sliceNumber", jsonFromXmlTmp.getJSONObject("sliceNumber").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").has("content")) {
-	        	metadataJSONObject.put("absoluteStopOrbit", jsonFromXmlTmp.getJSONObject("absoluteStopOrbit").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").has("content")) {
-	        	metadataJSONObject.put("absoluteStartOrbit", jsonFromXmlTmp.getJSONObject("absoluteStartOrbit").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").has("content")) {
-	        	metadataJSONObject.put("instrumentConfigurationId", jsonFromXmlTmp.getJSONObject("instrumentConfigurationId").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("startTimeANX").has("content")) {
-	        	metadataJSONObject.put("startTimeANX", jsonFromXmlTmp.getJSONObject("startTimeANX").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("relativeStopOrbit").has("content")) {
-	        	metadataJSONObject.put("relativeStopOrbit", jsonFromXmlTmp.getJSONObject("relativeStopOrbit").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("relativeStartOrbit").has("content")) {
-	        	metadataJSONObject.put("relativeStartOrbit", jsonFromXmlTmp.getJSONObject("relativeStartOrbit").get("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("startTime").has("content")) {
-	        	metadataJSONObject.put("startTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
-	        	metadataJSONObject.put("validityStartTime", jsonFromXmlTmp.getJSONObject("startTime").getString("content"));
-	        }
-	        if(jsonFromXmlTmp.getJSONObject("stopTime").has("content")) {
-	        	metadataJSONObject.put("stopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
-	        	metadataJSONObject.put("validityStopTime", jsonFromXmlTmp.getJSONObject("stopTime").getString("content"));
+	        if(metadataJSONObject.has("stopTime")) {
+	        	metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
 	        }
 	        metadataJSONObject.put("productName", descriptor.getProductName());
 	        metadataJSONObject.put("productClass", descriptor.getProductClass());
@@ -584,6 +533,8 @@ public class ExtractMetadata {
 	        String dt = dateFormat.format(new Date());
 	        metadataJSONObject.put("insertionTime", dt);
 	        metadataJSONObject.put("creationTime", dt);
+            metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+            metadataJSONObject.put("processMode", descriptor.getMode());
 	        return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);

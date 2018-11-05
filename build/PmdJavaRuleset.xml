@@ -13,6 +13,8 @@
    <rule ref="rulesets/java/naming.xml/BooleanGetMethodName"><priority>2</priority></rule>
    <rule ref="rulesets/java/naming.xml/PackageCase"><priority>2</priority></rule>
    <rule ref="rulesets/java/coupling.xml/LawOfDemeter"><priority>4</priority></rule>
+   <rule ref="rulesets/java/logging-jakarta-commons.xml/GuardLogStatement"><priority>4</priority></rule>
+   <rule ref="rulesets/java/logging-java.xml/GuardLogStatementJavaUtil"><priority>4</priority></rule>
    
    <!-- Default rulesets -->
    <rule ref="rulesets/java/design.xml/AbstractClassWithoutAbstractMethod"/>
@@ -143,8 +145,6 @@
    <rule ref="rulesets/java/naming.xml/GenericsNaming"/>
    <rule ref="rulesets/java/design.xml/GodClass"/>
    <rule ref="rulesets/java/logging-jakarta-commons.xml/GuardDebugLogging"/>
-   <rule ref="rulesets/java/logging-jakarta-commons.xml/GuardLogStatement"/>
-   <rule ref="rulesets/java/logging-java.xml/GuardLogStatementJavaUtil"/>
    <rule ref="rulesets/java/design.xml/IdempotentOperations"/>
    <rule ref="rulesets/java/braces.xml/IfElseStmtsMustUseBraces"/>
    <rule ref="rulesets/java/braces.xml/IfStmtsMustUseBraces"/>

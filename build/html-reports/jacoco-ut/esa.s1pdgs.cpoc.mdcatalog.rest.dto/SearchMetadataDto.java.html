@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SearchMetadataDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.rest.dto</a> &gt; <span class="el_source">SearchMetadataDto.java</span></div><h1>SearchMetadataDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.rest.dto;
 
 /**
- * Class describing the metdata of a file
+ * Class describing the metadata of a file
  * 
- * @author Cyrielle Gailliard
+ * @author Viveris Technologies
  *
  */
 public class SearchMetadataDto extends MetadataDto {
-
+    
 	public SearchMetadataDto(String productName, String productType, String keyObjectStorage,
 			String validityStart, String validityStop) {
 <span class="fc" id="L13">		super(productName, productType, keyObjectStorage, validityStart, validityStop);</span>
@@ -17,6 +17,39 @@ public class SearchMetadataDto extends MetadataDto {
 <span class="fc" id="L17">		this(obj.getProductName(), obj.getProductType(), obj.getKeyObjectStorage(), obj.getValidityStart(),</span>
 <span class="fc" id="L18">				obj.getValidityStop());</span>
 <span class="fc" id="L19">	}</span>
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L26">        return &quot;SearchMetadataDto [productName= &quot; + productName + &quot;, productType= &quot;</span>
+                + productType + &quot;, keyObjectStorage= &quot; + keyObjectStorage
+                + &quot;, validityStart= &quot; + validityStart + &quot;, validityStop= &quot;
+                + validityStop + &quot;]&quot;;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L37">        return super.hashCode();</span>
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (this == obj)</span>
+<span class="fc" id="L46">            return true;</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (!super.equals(obj))</span>
+<span class="fc" id="L48">            return false;</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (getClass() != obj.getClass())</span>
+<span class="nc" id="L50">            return false;</span>
+<span class="fc" id="L51">        return super.equals(obj);</span>
+    }
 	
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

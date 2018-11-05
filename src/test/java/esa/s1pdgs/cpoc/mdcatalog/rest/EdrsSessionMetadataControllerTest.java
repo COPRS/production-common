@@ -21,7 +21,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.rest.EdrsSessionMetadataController;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.EdrsSessionMetadataDto;
-import esa.s1pdgs.cpoc.test.RestControllerTest;
 
 public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 

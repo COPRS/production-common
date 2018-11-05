@@ -89,7 +89,7 @@ public class GenericExtractorTest {
                 new LevelProductDto(
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
-                        ProductFamily.L0_ACN));
+                        ProductFamily.L0_ACN, "NRT"));
 
         extractor = new LevelProductsExtractor(esServices, obsService,
                 mqiService, appStatus, extractorConfig,
