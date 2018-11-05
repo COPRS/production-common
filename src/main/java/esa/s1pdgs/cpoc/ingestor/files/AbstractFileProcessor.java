@@ -164,7 +164,9 @@ public abstract class AbstractFileProcessor<T> {
             return false;
         } else {
             String path = file.getPath().toLowerCase();
-            if (path.endsWith(".safe") || path.endsWith("data") || path.endsWith("support")) {
+            if (path.endsWith("manifest.safe")) {
+                return true;
+            } else if (path.endsWith(".safe") || path.endsWith("data") || path.endsWith("support")) {
                 return false;
             }
         }
