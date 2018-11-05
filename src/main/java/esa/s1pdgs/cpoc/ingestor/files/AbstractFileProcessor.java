@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ingestor.files;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -132,12 +134,14 @@ public abstract class AbstractFileProcessor<T> {
                 LOGGER.info(
                         "[MONITOR] [step 3] [productName {}] Starting removing file",
                         productName);
-                if (!file.delete()) {
+                try {
+                    Files.delete(Paths.get(file.getPath()));
+                } catch (Exception e) {
                     LOGGER.error(
-                            "[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage",
+                            "[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage: {}",
                             AbstractCodedException.ErrorCode.INGESTOR_CLEAN
                                     .getCode(),
-                            file.getPath());
+                            file.getPath(), e.getMessage());
                     this.appStatus.setError(family);
                 }
 

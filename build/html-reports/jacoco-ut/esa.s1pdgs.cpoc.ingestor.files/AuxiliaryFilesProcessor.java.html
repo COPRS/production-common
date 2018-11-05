@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 
 /**
@@ -25,17 +26,18 @@ public class AuxiliaryFilesProcessor
     @Autowired
     public AuxiliaryFilesProcessor(final ObsService obsService,
             final KafkaConfigFileProducer publisher,
-            final AuxiliaryFileDescriptorService extractor) {
-<span class="fc" id="L29">        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE);</span>
-<span class="fc" id="L30">    }</span>
+            final AuxiliaryFileDescriptorService extractor,
+            final AppStatus appStatus) {
+<span class="fc" id="L31">        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE, appStatus);</span>
+<span class="fc" id="L32">    }</span>
 
     /**
      * 
      */
     @Override
     protected AuxiliaryFileDto buildDto(final FileDescriptor descriptor) {
-<span class="fc" id="L37">        return new AuxiliaryFileDto(descriptor.getProductName(),</span>
-<span class="fc" id="L38">                descriptor.getProductName());</span>
+<span class="fc" id="L39">        return new AuxiliaryFileDto(descriptor.getProductName(),</span>
+<span class="fc" id="L40">                descriptor.getProductName());</span>
     }
 
 }

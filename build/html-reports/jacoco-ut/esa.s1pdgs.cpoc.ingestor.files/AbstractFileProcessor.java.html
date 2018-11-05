@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AbstractFileProcessor.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC ingestor</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.ingestor.files</a> &gt; <span class="el_source">AbstractFileProcessor.java</span></div><h1>AbstractFileProcessor.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.ingestor.files;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,14 +17,15 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
+import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 
 public abstract class AbstractFileProcessor&lt;T&gt; {
 
     /**
      * Logger
      */
-<span class="fc" id="L24">    private static final Logger LOGGER =</span>
-<span class="fc" id="L25">            LogManager.getLogger(AbstractFileProcessor.class);</span>
+<span class="fc" id="L27">    private static final Logger LOGGER =</span>
+<span class="fc" id="L28">            LogManager.getLogger(AbstractFileProcessor.class);</span>
 
     /**
      * Amazon S3 service for configuration files
@@ -43,16 +46,23 @@ public abstract class AbstractFileProcessor&lt;T&gt; {
      * Product family processed
      */
     private final ProductFamily family;
+    
+    /**
+     * Application status for archives
+     */
+    private final AppStatus appStatus;
 
     public AbstractFileProcessor(final ObsService obsService,
             final PublicationServices&lt;T&gt; publisher,
             final AbstractFileDescriptorService extractor,
-<span class="fc" id="L50">            final ProductFamily family) {</span>
-<span class="fc" id="L51">        this.obsService = obsService;</span>
-<span class="fc" id="L52">        this.publisher = publisher;</span>
-<span class="fc" id="L53">        this.extractor = extractor;</span>
-<span class="fc" id="L54">        this.family = family;</span>
-<span class="fc" id="L55">    }</span>
+            final ProductFamily family,
+<span class="fc" id="L59">            final AppStatus appStatus) {</span>
+<span class="fc" id="L60">        this.obsService = obsService;</span>
+<span class="fc" id="L61">        this.publisher = publisher;</span>
+<span class="fc" id="L62">        this.extractor = extractor;</span>
+<span class="fc" id="L63">        this.family = family;</span>
+<span class="fc" id="L64">        this.appStatus = appStatus;</span>
+<span class="fc" id="L65">    }</span>
 
     /**
      * Process configuration files.
@@ -64,84 +74,90 @@ public abstract class AbstractFileProcessor&lt;T&gt; {
      * @param message
      */
     public void processFile(Message&lt;File&gt; message) {
-<span class="fc" id="L67">        File file = message.getPayload();</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (!file.isDirectory()) {</span>
-<span class="fc" id="L69">            int step = 0;</span>
-<span class="fc" id="L70">            LOGGER.info(</span>
+<span class="fc" id="L77">        File file = message.getPayload();</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (!file.isDirectory()) {</span>
+<span class="fc" id="L79">            int step = 0;</span>
+<span class="fc" id="L80">            LOGGER.info(</span>
                     &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]&quot;,
-<span class="fc" id="L72">                    file.getPath(), extractor.getFamily());</span>
-<span class="fc" id="L73">            String productName = file.getName();</span>
-
+<span class="fc" id="L82">                    file.getPath(), extractor.getFamily());</span>
+<span class="fc" id="L83">            String productName = file.getName();</span>
+<span class="fc" id="L84">            this.appStatus.setProcessing(family);</span>
             // Build model file
             try {
                 try {
-<span class="fc" id="L78">                    step++;</span>
-<span class="fc" id="L79">                    FileDescriptor descriptor =</span>
-<span class="fc" id="L80">                            extractor.extractDescriptor(file);</span>
-<span class="fc" id="L81">                    productName = descriptor.getProductName();</span>
+<span class="fc" id="L88">                    step++;</span>
+<span class="fc" id="L89">                    FileDescriptor descriptor =</span>
+<span class="fc" id="L90">                            extractor.extractDescriptor(file);</span>
+<span class="fc" id="L91">                    productName = descriptor.getProductName();</span>
                     // Store in object storage
-<span class="fc" id="L83">                    LOGGER.info(</span>
+<span class="fc" id="L93">                    LOGGER.info(</span>
                             &quot;[MONITOR] [step 1] [productName {}] Starting uploading file in OBS&quot;,
                             productName);
-<span class="fc bfc" id="L86" title="All 2 branches covered.">                    if (!obsService.exist(family,</span>
-<span class="fc" id="L87">                            descriptor.getKeyObjectStorage())) {</span>
-<span class="fc" id="L88">                        obsService.uploadFile(family,</span>
-<span class="fc" id="L89">                                descriptor.getKeyObjectStorage(), file);</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">                    if (!obsService.exist(family,</span>
+<span class="fc" id="L97">                            descriptor.getKeyObjectStorage())) {</span>
+<span class="fc" id="L98">                        obsService.uploadFile(family,</span>
+<span class="fc" id="L99">                                descriptor.getKeyObjectStorage(), file);</span>
                     } else {
-<span class="fc" id="L91">                        throw new ObsAlreadyExist(family,</span>
-<span class="fc" id="L92">                                descriptor.getProductName(), new Exception(</span>
+<span class="fc" id="L101">                        throw new ObsAlreadyExist(family,</span>
+<span class="fc" id="L102">                                descriptor.getProductName(), new Exception(</span>
                                         &quot;File already exist in object storage&quot;));
                     }
                     // Send metadata
-<span class="fc" id="L96">                    step++;</span>
-<span class="fc bfc" id="L97" title="All 2 branches covered.">                    if (descriptor.isHasToBePublished()) {</span>
-<span class="fc" id="L98">                        LOGGER.info(</span>
+<span class="fc" id="L106">                    step++;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">                    if (descriptor.isHasToBePublished()) {</span>
+<span class="fc" id="L108">                        LOGGER.info(</span>
                                 &quot;[REPORT] [MONITOR] [step 2] [productName {}] [s1pdgsTask Ingestion] [STOP OK] Publishing file in topic&quot;,
                                 productName);
-<span class="fc" id="L101">                        publisher.send(buildDto(descriptor));</span>
+<span class="fc" id="L111">                        publisher.send(buildDto(descriptor));</span>
                     }
-<span class="fc" id="L103">                } catch (IngestorIgnoredFileException ce) {</span>
-<span class="fc" id="L104">                    LOGGER.debug(</span>
+<span class="fc" id="L113">                } catch (IngestorIgnoredFileException ce) {</span>
+<span class="fc" id="L114">                    LOGGER.debug(</span>
                             &quot;[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}&quot;,
-<span class="fc" id="L106">                            step, productName, ce.getCode().getCode(),</span>
-<span class="fc" id="L107">                            ce.getLogMessage());</span>
-<span class="fc" id="L108">                } catch (ObsAlreadyExist ace) {</span>
-<span class="fc" id="L109">                    LOGGER.error(</span>
+<span class="fc" id="L116">                            step, productName, ce.getCode().getCode(),</span>
+<span class="fc" id="L117">                            ce.getLogMessage());</span>
+<span class="fc" id="L118">                } catch (ObsAlreadyExist ace) {</span>
+<span class="fc" id="L119">                    LOGGER.error(</span>
                             &quot;[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}&quot;,
-<span class="fc" id="L111">                            step, productName, ace.getCode().getCode(),</span>
-<span class="fc" id="L112">                            ace.getLogMessage());</span>
-<span class="fc" id="L113">                } catch (ObsException ace) {</span>
-<span class="fc" id="L114">                    throw ace;</span>
-<span class="fc" id="L115">                } catch (AbstractCodedException ace) {</span>
-<span class="fc" id="L116">                    LOGGER.error(</span>
+<span class="fc" id="L121">                            step, productName, ace.getCode().getCode(),</span>
+<span class="fc" id="L122">                            ace.getLogMessage());</span>
+<span class="fc" id="L123">                } catch (ObsException ace) {</span>
+<span class="fc" id="L124">                    throw ace;</span>
+<span class="fc" id="L125">                } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L126">                    LOGGER.error(</span>
                             &quot;[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}&quot;,
-<span class="fc" id="L118">                            step, productName, ace.getCode().getCode(),</span>
-<span class="fc" id="L119">                            ace.getLogMessage());</span>
-<span class="fc" id="L120">                }</span>
+<span class="fc" id="L128">                            step, productName, ace.getCode().getCode(),</span>
+<span class="fc" id="L129">                            ace.getLogMessage());</span>
+<span class="fc" id="L130">                    this.appStatus.setError(family);</span>
+<span class="fc" id="L131">                }</span>
                 // Remove file
-<span class="fc" id="L122">                step++;</span>
-<span class="fc" id="L123">                LOGGER.info(</span>
+<span class="fc" id="L133">                step++;</span>
+<span class="fc" id="L134">                LOGGER.info(</span>
                         &quot;[MONITOR] [step 3] [productName {}] Starting removing file&quot;,
                         productName);
-<span class="pc bpc" id="L126" title="1 of 2 branches missed.">                if (!file.delete()) {</span>
-<span class="nc" id="L127">                    LOGGER.error(</span>
-                            &quot;[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage&quot;,
-<span class="nc" id="L129">                            AbstractCodedException.ErrorCode.INGESTOR_CLEAN</span>
-<span class="nc" id="L130">                                    .getCode(),</span>
-<span class="nc" id="L131">                            file.getPath());</span>
-                }
+                try {
+<span class="fc" id="L138">                    Files.delete(Paths.get(file.getPath()));</span>
+<span class="nc" id="L139">                } catch (Exception e) {</span>
+<span class="nc" id="L140">                    LOGGER.error(</span>
+                            &quot;[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage: {}&quot;,
+<span class="nc" id="L142">                            AbstractCodedException.ErrorCode.INGESTOR_CLEAN</span>
+<span class="nc" id="L143">                                    .getCode(),</span>
+<span class="nc" id="L144">                            file.getPath(), e.getMessage());</span>
+<span class="nc" id="L145">                    this.appStatus.setError(family);</span>
+<span class="fc" id="L146">                }</span>
 
-<span class="fc" id="L134">            } catch (AbstractCodedException ace) {</span>
-<span class="fc" id="L135">                LOGGER.error(</span>
+<span class="fc" id="L148">            } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L149">                LOGGER.error(</span>
                         &quot;[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}&quot;,
-<span class="fc" id="L137">                        step, productName, ace.getCode().getCode(),</span>
-<span class="fc" id="L138">                        ace.getLogMessage());</span>
-<span class="fc" id="L139">            }</span>
-<span class="fc" id="L140">            LOGGER.info(</span>
+<span class="fc" id="L151">                        step, productName, ace.getCode().getCode(),</span>
+<span class="fc" id="L152">                        ace.getLogMessage());</span>
+<span class="fc" id="L153">                this.appStatus.setError(family);</span>
+<span class="fc" id="L154">            }</span>
+<span class="fc" id="L155">            LOGGER.info(</span>
                     &quot;[MONITOR] [step 0] End processing of configuration file {}&quot;,
-<span class="fc" id="L142">                    file.getPath());</span>
+<span class="fc" id="L157">                    file.getPath());</span>
+<span class="fc" id="L158">            this.appStatus.setWaiting();</span>
         }
-<span class="fc" id="L144">    }</span>
+<span class="fc" id="L160">    }</span>
 
     protected abstract T buildDto(final FileDescriptor descriptor);
 
