@@ -38,7 +38,9 @@
 			<xsl:copy-of select="//*[local-name() = 'stopTimeANX']/text()"/>
 		</stopTimeANX>
 		<sliceCoordinates>
-			<xsl:copy-of select="//*[local-name() = 'coordinates']/text()"/>
+			<xsl:for-each select="//*[local-name() = 'coordinates']">
+				<xsl:value-of select="concat(., ';')"/>
+			</xsl:for-each>
 		</sliceCoordinates>
 	</xsl:template>
 </xsl:stylesheet>
