@@ -8,10 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,6 +19,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +32,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0AcnMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
+import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 
@@ -144,6 +145,85 @@ public class MetadataServiceTest {
     }
 
     // --------------------------------------------------
+    // Test around getLevelSegment
+    // --------------------------------------------------
+
+    @Test
+    public void testHostnameQueryGetLevelSegment() throws JobGenMetadataException {
+        String file =
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
+        LevelSegmentMetadata expectedResult = new LevelSegmentMetadata(
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "IW_RAW__0S",
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+                "20171213T121623", "20171213T121656", "HV", "FULL", "021735");
+        ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
+                expectedResult, HttpStatus.OK);
+        String uri = "http://" + METADATA_HOST + "/level_segment/L0_SEGMENT/" + file;
+        when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), eq(null),
+                eq(LevelSegmentMetadata.class))).thenReturn(r);
+
+        this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
+
+        verify(this.restTemplate, times(1)).exchange(eq(uri),
+                eq(HttpMethod.GET), eq(null), eq(LevelSegmentMetadata.class));
+    }
+
+    @Test
+    public void testGetLevelSegmentOk() throws JobGenMetadataException {
+        String file =
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
+        LevelSegmentMetadata expectedResult = new LevelSegmentMetadata(file, "IW_RAW__0S",
+                file, "2017-12-13T12:16:23", "2017-12-13T12:16:56", "HV", "BEGIN",
+                "021735");
+        ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
+                expectedResult, HttpStatus.OK);
+        when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
+                eq(null), eq(LevelSegmentMetadata.class))).thenReturn(r);
+
+        LevelSegmentMetadata f = this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
+
+        assertEquals("IW_RAW__0S", f.getProductType());
+        assertEquals(file, f.getProductName());
+        assertEquals(file, f.getKeyObjectStorage());
+        assertEquals("2017-12-13T12:16:23", f.getValidityStart());
+        assertEquals("2017-12-13T12:16:56", f.getValidityStop());
+        assertEquals("HV", f.getPolarisation());
+        assertEquals("BEGIN", f.getConsolidation());
+        assertEquals("021735", f.getDatatakeId());
+    }
+
+    @Test
+    public void testGetLevelSegmentKo() throws JobGenMetadataException {
+        ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
+                HttpStatus.INTERNAL_SERVER_ERROR);
+        when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
+                eq(null), eq(LevelSegmentMetadata.class))).thenReturn(r);
+
+        String file =
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
+
+        thrown.expect(JobGenMetadataException.class);
+        thrown.expectMessage("nvalid HTTP statu");
+        this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
+    }
+
+    @Test
+    public void testGetLevelSegmentRestKo() throws JobGenMetadataException {
+        doThrow(new RestClientException("rest exception")).when(restTemplate)
+                .exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null),
+                        eq(LevelSegmentMetadata.class));
+
+        String file =
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
+
+        thrown.expect(JobGenMetadataException.class);
+        thrown.expectMessage("rest exception");
+        thrown.expectCause(isA(RestClientException.class));
+        this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
+    }
+
+    // --------------------------------------------------
     // Test around getSlice
     // --------------------------------------------------
 
@@ -237,11 +317,9 @@ public class MetadataServiceTest {
                 "20171213T121623", "20171213T121656", 6, 2, "021735") };
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
                 expectedResult, HttpStatus.OK);
-        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file
-                + "/acns";
+        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file + "/acns";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-                .queryParam("mode", "ONE")
-                .queryParam("processMode", "NRT");
+                .queryParam("mode", "ONE").queryParam("processMode", "NRT");
         when(restTemplate.exchange(eq(builder.build().toUri()),
                 eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
                         .thenReturn(r);
@@ -268,11 +346,9 @@ public class MetadataServiceTest {
                 new L0AcnMetadata(fileN, "IW_RAW__0C", fileN,
                         "2017-12-13T12:16:23", "2017-12-13T12:16:56", 6, 2,
                         "021735") };
-        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file
-                + "/acns";
+        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file + "/acns";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-                .queryParam("mode", "ONE")
-                .queryParam("processMode", "NRT");
+                .queryParam("mode", "ONE").queryParam("processMode", "NRT");
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
                 expectedResult, HttpStatus.OK);
         when(restTemplate.exchange(eq(builder.build().toUri()),
@@ -298,11 +374,9 @@ public class MetadataServiceTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
                 HttpStatus.INTERNAL_SERVER_ERROR);
-        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file
-                + "/acns";
+        String uri = "http://" + METADATA_HOST + "/l0Slice/" + file + "/acns";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-                .queryParam("mode", "ONE")
-                .queryParam("processMode", "FAST");
+                .queryParam("mode", "ONE").queryParam("processMode", "FAST");
         when(restTemplate.exchange(eq(builder.build().toUri()),
                 eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
                         .thenReturn(r);
@@ -333,71 +407,74 @@ public class MetadataServiceTest {
     @Test
     public void testHostnameSearch() throws RestClientException,
             JobGenMetadataException, ParseException {
-        DateFormat format = new SimpleDateFormat("yyyyMMdd_HHmmss");
         SearchMetadata expectedFile = new SearchMetadata(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "2017-12-05T20:03:09", "2017-12-15T20:03:09");
-        ResponseEntity<SearchMetadata> r =
-                new ResponseEntity<SearchMetadata>(expectedFile, HttpStatus.OK);
+        ResponseEntity<List<SearchMetadata>> r =
+                new ResponseEntity<List<SearchMetadata>>(
+                        Arrays.asList(expectedFile), HttpStatus.OK);
         when(restTemplate.exchange(Mockito.any(), eq(HttpMethod.GET), eq(null),
-                eq(SearchMetadata.class))).thenReturn(r);
+                eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
+                }))).thenReturn(r);
 
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                format.parse("20171120_221516"),
-                format.parse("20171220_101516"), "A", -1, "FAST");
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z",
+                "A", -1, "FAST");
 
         String uri =
                 "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
                 .queryParam("productType", "AUX_OBMEMC")
                 .queryParam("mode", "LatestValCover")
-                .queryParam("t0", "2017-11-20T22:15:16")
-                .queryParam("t1", "2017-12-20T10:15:16")
+                .queryParam("t0", "2017-11-20T22:15:16.123456Z")
+                .queryParam("t1", "2017-12-20T10:15:16.654321Z")
                 .queryParam("dt0", "1.0").queryParam("dt1", "2.0")
-                .queryParam("satellite", "A")
-                .queryParam("processMode", "FAST");
+                .queryParam("satellite", "A").queryParam("processMode", "FAST");
         verify(this.restTemplate, times(1)).exchange(
                 eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
-                eq(SearchMetadata.class));
+                eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
+                }));
     }
 
     @Test
     public void testHostnameSearchWithInsConfDir()
             throws JobGenMetadataException, ParseException {
-        DateFormat format = new SimpleDateFormat("yyyyMMdd_HHmmss");
         SearchMetadata expectedFile = new SearchMetadata(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "2017-12-05T20:03:09", "2017-12-15T20:03:09");
-        ResponseEntity<SearchMetadata> r =
-                new ResponseEntity<SearchMetadata>(expectedFile, HttpStatus.OK);
+        ResponseEntity<List<SearchMetadata>> r =
+                new ResponseEntity<List<SearchMetadata>>(
+                        Arrays.asList(expectedFile), HttpStatus.OK);
         when(restTemplate.exchange(Mockito.any(), eq(HttpMethod.GET), eq(null),
-                eq(SearchMetadata.class))).thenReturn(r);
+                eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
+                }))).thenReturn(r);
 
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                format.parse("20171120_221516"),
-                format.parse("20171220_101516"), "A", 6, null);
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z", "A", 6, null);
 
         String uri =
                 "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
                 .queryParam("productType", "AUX_OBMEMC")
                 .queryParam("mode", "LatestValCover")
-                .queryParam("t0", "2017-11-20T22:15:16")
-                .queryParam("t1", "2017-12-20T10:15:16")
+                .queryParam("t0", "2017-11-20T22:15:16.123456Z")
+                .queryParam("t1", "2017-12-20T10:15:16.654321Z")
                 .queryParam("dt0", "1.0").queryParam("dt1", "2.0")
-                .queryParam("satellite", "A").queryParam("insConfId", 6)
-                ;
+                .queryParam("satellite", "A").queryParam("insConfId", 6);
         verify(this.restTemplate, times(1)).exchange(
                 eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
-                eq(SearchMetadata.class));
+                eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
+                }));
     }
 
     @Test
@@ -407,15 +484,19 @@ public class MetadataServiceTest {
                 "MPL_ORBPRE",
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "2017-12-05T20:03:09", "2017-12-15T20:03:09");
-        ResponseEntity<SearchMetadata> r =
-                new ResponseEntity<SearchMetadata>(expectedFile, HttpStatus.OK);
+        ResponseEntity<List<SearchMetadata>> r =
+                new ResponseEntity<List<SearchMetadata>>(
+                        Arrays.asList(expectedFile), HttpStatus.OK);
         when(restTemplate.exchange(Mockito.any(), eq(HttpMethod.GET), eq(null),
-                eq(SearchMetadata.class))).thenReturn(r);
+                eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
+                }))).thenReturn(r);
 
-        SearchMetadata file = this.service.search(
+        List<SearchMetadata> files = this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                new Date(), new Date(), "A", -1, null);
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z", "A", -1, null);
+        SearchMetadata file = files.get(0);
         assertEquals("MPL_ORBPRE", file.getProductType());
         assertEquals(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
@@ -430,24 +511,28 @@ public class MetadataServiceTest {
 
     @Test
     public void testSearchKo() throws JobGenMetadataException {
-        ResponseEntity<SearchMetadata> r = new ResponseEntity<SearchMetadata>(
-                HttpStatus.INTERNAL_SERVER_ERROR);
+        ResponseEntity<List<SearchMetadata>> r =
+                new ResponseEntity<List<SearchMetadata>>(
+                        HttpStatus.INTERNAL_SERVER_ERROR);
         when(restTemplate.exchange(Mockito.any(), eq(HttpMethod.GET), eq(null),
-                eq(SearchMetadata.class))).thenReturn(r);
+                eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
+                }))).thenReturn(r);
 
         thrown.expect(JobGenMetadataException.class);
         thrown.expectMessage("nvalid HTTP statu");
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                new Date(), new Date(), "A", -1, "");
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z", "A", -1, "");
     }
 
     @Test
     public void testSearchRestKo() throws JobGenMetadataException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
-                .exchange(Mockito.any(), eq(HttpMethod.GET), eq(null),
-                        eq(SearchMetadata.class));
+                .exchange(Mockito.any(), eq(HttpMethod.GET), eq(null), eq(
+                        new ParameterizedTypeReference<List<SearchMetadata>>() {
+                        }));
 
         thrown.expect(JobGenMetadataException.class);
         thrown.expectMessage("rest exception");
@@ -455,7 +540,8 @@ public class MetadataServiceTest {
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
-                new Date(), new Date(), "A", -1, "");
+                "2017-11-20T22:15:16.123456Z",
+                "2017-12-20T10:15:16.654321Z", "A", -1, "");
     }
 
 }

@@ -181,14 +181,14 @@ public class JobGeneratorSettings {
         /**
          * Number of maximal retries
          */
-        private int retries;
+        private int maxTimelifeS;
 
         /**
          * Default constructor
          */
         public WaitTempo() {
             this.tempo = 0;
-            this.retries = 0;
+            this.maxTimelifeS = 0;
         }
 
         /**
@@ -199,7 +199,7 @@ public class JobGeneratorSettings {
          */
         public WaitTempo(final int tempo, final int retries) {
             this.tempo = tempo;
-            this.retries = retries;
+            this.maxTimelifeS = retries;
         }
 
         /**
@@ -220,16 +220,16 @@ public class JobGeneratorSettings {
         /**
          * @return the retries
          */
-        public int getRetries() {
-            return retries;
+        public int getMaxTimelifeS() {
+            return maxTimelifeS;
         }
 
         /**
          * @param retries
          *            the retries to set
          */
-        public void setRetries(final int retries) {
-            this.retries = retries;
+        public void setMaxTimelifeS(final int maxTimelifeS) {
+            this.maxTimelifeS = maxTimelifeS;
         }
 
     }

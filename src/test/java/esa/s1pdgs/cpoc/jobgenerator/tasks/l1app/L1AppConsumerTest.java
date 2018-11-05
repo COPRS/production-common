@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +19,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -27,7 +30,6 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppConsumer;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -174,6 +176,109 @@ public class L1AppConsumerTest {
                 mqiStatusService, appDataService, appStatus);
         consumer.consumeMessages();
 
+        verify(appDataService, times(1)).newJob(Mockito.any());
+        verify(appDataService, times(1)).patchJob(Mockito.anyLong(), Mockito.any(),
+                Mockito.anyBoolean(), Mockito.anyBoolean(),
+                Mockito.anyBoolean());
+        verify(l0SliceJobsDispatcher, times(1)).dispatch(Mockito.any());
+        verify(appStatus, times(1)).setProcessing(Mockito.eq(1L));
+        verify(appStatus, times(2)).setWaiting();
+    }
+
+    @Test
+    public void testReceiveNull() throws AbstractCodedException {
+        doReturn(null).when(mqiService).next();
+
+        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+                l0SlicePatternSettings, processSettings, mqiService,
+                mqiStatusService, appDataService, appStatus);
+        consumer.consumeMessages();
+
+        verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
+        verify(appStatus, never()).setProcessing(Mockito.eq(2L));
+        verify(appStatus, times(1)).setWaiting();
+    }
+
+    @Test
+    public void testReceiveAlreadyExistOtherPod()
+            throws AbstractCodedException, ParseException {
+        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        job1.setIdentifier(12L);
+        job1.setPod("i-hostname");
+        AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
+        job2.setIdentifier(24L);
+        job2.setPod("other-hostname");
+        doReturn(message1).when(mqiService).next();
+        doReturn(Arrays.asList(job1, job2)).when(appDataService)
+                .findByMessagesIdentifier(Mockito.anyLong());
+
+        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+                l0SlicePatternSettings, processSettings, mqiService,
+                mqiStatusService, appDataService, appStatus);
+        consumer.consumeMessages();
+
+        job1.setPod("");
+        verify(appDataService, never()).newJob(Mockito.any());
+        verify(appDataService, times(2)).patchJob(Mockito.eq(12L), Mockito.any(),
+                Mockito.eq(false), Mockito.eq(false),
+                Mockito.eq(false));
+        verify(l0SliceJobsDispatcher, times(1)).dispatch(Mockito.any());
+        verify(appStatus, times(1)).setProcessing(Mockito.eq(1L));
+        verify(appStatus, times(2)).setWaiting();
+    }
+
+    @Test
+    public void testReceiveAlreadyExistSamePodWaiting()
+            throws AbstractCodedException, ParseException {
+        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        job1.setIdentifier(12L);
+        job1.setPod("hostname");
+        AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
+        job2.setIdentifier(24L);
+        job2.setPod("other-hostname");
+        doReturn(message1).when(mqiService).next();
+        doReturn(Arrays.asList(job1, job2)).when(appDataService)
+                .findByMessagesIdentifier(Mockito.anyLong());
+
+        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+                l0SlicePatternSettings, processSettings, mqiService,
+                mqiStatusService, appDataService, appStatus);
+        consumer.consumeMessages();
+
+        job1.setPod("");
+        verify(appDataService, never()).newJob(Mockito.any());
+        verify(appDataService, times(1)).patchJob(Mockito.eq(12L), Mockito.eq(job1),
+                Mockito.eq(false), Mockito.eq(false),
+                Mockito.eq(false));
+        verify(l0SliceJobsDispatcher, times(1)).dispatch(Mockito.any());
+        verify(appStatus, times(1)).setProcessing(Mockito.eq(1L));
+        verify(appStatus, times(2)).setWaiting();
+    }
+
+    @Test
+    public void testReceiveAlreadyExistSamePodGenerating()
+            throws AbstractCodedException, ParseException {
+        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        job1.setIdentifier(12L);
+        job1.setPod("hostname");
+        job1.setState(AppDataJobDtoState.DISPATCHING);
+        AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
+        job2.setIdentifier(24L);
+        job2.setPod("other-hostname");
+        doReturn(message1).when(mqiService).next();
+        doReturn(Arrays.asList(job1, job2)).when(appDataService)
+                .findByMessagesIdentifier(Mockito.anyLong());
+
+        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+                l0SlicePatternSettings, processSettings, mqiService,
+                mqiStatusService, appDataService, appStatus);
+        consumer.consumeMessages();
+
+        job1.setPod("");
+        verify(appDataService, never()).newJob(Mockito.any());
+        verify(appDataService, never()).patchJob(Mockito.anyLong(), Mockito.any(),
+                Mockito.anyBoolean(), Mockito.anyBoolean(),
+                Mockito.anyBoolean());
         verify(l0SliceJobsDispatcher, times(1)).dispatch(Mockito.any());
         verify(appStatus, times(1)).setProcessing(Mockito.eq(1L));
         verify(appStatus, times(2)).setWaiting();

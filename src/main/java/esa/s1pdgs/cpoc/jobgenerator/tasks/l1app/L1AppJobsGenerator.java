@@ -1,13 +1,13 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l1app;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -16,7 +16,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0AcnMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
@@ -99,17 +98,14 @@ public class L1AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
     @Override
     protected void customJobOrder(final JobGeneration<LevelProductDto> job) {
         // Rewrite job order sensing time
-        DateTimeFormatter formatterJobOrder =
-                DateTimeFormatter.ofPattern(JobOrderSensingTime.DATE_FORMAT);
-        DateTimeFormatter formatterProduct = SearchMetadata.DATE_FORMATTER;
-        LocalDateTime startDate = LocalDateTime.parse(
+        String jobOrderStart = DateUtils.convertToAnotherFormat(
                 job.getAppDataJob().getProduct().getSegmentStartDate(),
-                formatterProduct);
-        String jobOrderStart = startDate.format(formatterJobOrder);
-        LocalDateTime stopDate = LocalDateTime.parse(
+                AppDataJobProductDto.TIME_FORMATTER,
+                JobOrderSensingTime.DATETIME_FORMATTER);
+        String jobOrderStop = DateUtils.convertToAnotherFormat(
                 job.getAppDataJob().getProduct().getSegmentStopDate(),
-                formatterProduct);
-        String jobOrderStop = stopDate.format(formatterJobOrder);
+                AppDataJobProductDto.TIME_FORMATTER,
+                JobOrderSensingTime.DATETIME_FORMATTER);
         job.getJobOrder().getConf().setSensingTime(
                 new JobOrderSensingTime(jobOrderStart, jobOrderStop));
 

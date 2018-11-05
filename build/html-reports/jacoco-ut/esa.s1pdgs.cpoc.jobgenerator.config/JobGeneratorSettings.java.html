@@ -181,14 +181,14 @@ public class JobGeneratorSettings {
         /**
          * Number of maximal retries
          */
-        private int retries;
+        private int maxTimelifeS;
 
         /**
          * Default constructor
          */
 <span class="fc" id="L189">        public WaitTempo() {</span>
 <span class="fc" id="L190">            this.tempo = 0;</span>
-<span class="fc" id="L191">            this.retries = 0;</span>
+<span class="fc" id="L191">            this.maxTimelifeS = 0;</span>
 <span class="fc" id="L192">        }</span>
 
         /**
@@ -197,10 +197,10 @@ public class JobGeneratorSettings {
          * @param tempo
          * @param retries
          */
-<span class="nc" id="L200">        public WaitTempo(final int tempo, final int retries) {</span>
-<span class="nc" id="L201">            this.tempo = tempo;</span>
-<span class="nc" id="L202">            this.retries = retries;</span>
-<span class="nc" id="L203">        }</span>
+<span class="fc" id="L200">        public WaitTempo(final int tempo, final int retries) {</span>
+<span class="fc" id="L201">            this.tempo = tempo;</span>
+<span class="fc" id="L202">            this.maxTimelifeS = retries;</span>
+<span class="fc" id="L203">        }</span>
 
         /**
          * @return the tempo
@@ -220,16 +220,16 @@ public class JobGeneratorSettings {
         /**
          * @return the retries
          */
-        public int getRetries() {
-<span class="fc" id="L224">            return retries;</span>
+        public int getMaxTimelifeS() {
+<span class="fc" id="L224">            return maxTimelifeS;</span>
         }
 
         /**
          * @param retries
          *            the retries to set
          */
-        public void setRetries(final int retries) {
-<span class="fc" id="L232">            this.retries = retries;</span>
+        public void setMaxTimelifeS(final int maxTimelifeS) {
+<span class="fc" id="L232">            this.maxTimelifeS = maxTimelifeS;</span>
 <span class="fc" id="L233">        }</span>
 
     }

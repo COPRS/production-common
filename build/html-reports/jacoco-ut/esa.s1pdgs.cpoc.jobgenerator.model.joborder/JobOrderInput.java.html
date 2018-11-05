@@ -96,17 +96,17 @@ public class JobOrderInput {
 <span class="fc" id="L96">		this.fileType = fileType;</span>
 <span class="fc" id="L97">		this.fileNameType = fileNameType;</span>
 <span class="fc" id="L98">		this.family = family;</span>
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">		if (filenames != null) {</span>
-<span class="nc" id="L100">			filenames.forEach(filename -&gt; {</span>
-<span class="nc" id="L101">				this.filenames.add(new JobOrderInputFile(filename));</span>
-<span class="nc" id="L102">			});</span>
-<span class="nc" id="L103">			this.nbFilenames = this.filenames.size();</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		if (filenames != null) {</span>
+<span class="fc" id="L100">			filenames.forEach(filename -&gt; {</span>
+<span class="fc" id="L101">				this.filenames.add(new JobOrderInputFile(filename));</span>
+<span class="fc" id="L102">			});</span>
+<span class="fc" id="L103">			this.nbFilenames = this.filenames.size();</span>
 		}
-<span class="pc bpc" id="L105" title="1 of 2 branches missed.">		if (timeIntervals != null) {</span>
-<span class="nc" id="L106">			timeIntervals.forEach(timeInterval -&gt; {</span>
-<span class="nc" id="L107">				this.timeIntervals.add(new JobOrderTimeInterval(timeInterval));</span>
-<span class="nc" id="L108">			});</span>
-<span class="nc" id="L109">			this.nbTimeIntervals = this.timeIntervals.size();</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">		if (timeIntervals != null) {</span>
+<span class="fc" id="L106">			timeIntervals.forEach(timeInterval -&gt; {</span>
+<span class="fc" id="L107">				this.timeIntervals.add(new JobOrderTimeInterval(timeInterval));</span>
+<span class="fc" id="L108">			});</span>
+<span class="fc" id="L109">			this.nbTimeIntervals = this.timeIntervals.size();</span>
 		}
 <span class="fc" id="L111">	}</span>
 

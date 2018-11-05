@@ -33,8 +33,6 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l0app.L0AppJobDispatcher;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l0app.L0AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 

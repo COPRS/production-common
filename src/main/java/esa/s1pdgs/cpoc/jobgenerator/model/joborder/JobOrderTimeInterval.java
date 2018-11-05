@@ -22,7 +22,7 @@ public class JobOrderTimeInterval {
 	/**
 	 * 
 	 */
-	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSSSSS");
+	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSSSSS");
 
 	/**
 	 * Validity start time (format YYYYMMDD_HHmmssSSSSSS)

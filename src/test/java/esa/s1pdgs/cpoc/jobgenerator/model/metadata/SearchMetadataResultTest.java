@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -26,17 +28,17 @@ public class SearchMetadataResultTest {
 		SearchMetadata result = new SearchMetadata("name", "type", "kobs", "start", "stop");
 
 		SearchMetadataResult obj = new SearchMetadataResult(query);
-		obj.setResult(result);
+		obj.setResult(Arrays.asList(result));
 
 		String str = obj.toString();
 		assertTrue(str.contains("query: " + query.toString()));
-		assertTrue(str.contains("result: " + result.toString()));
+		assertTrue(str.contains("result: " + Arrays.asList(result).toString()));
 
 		obj.setQuery(query2);
 
 		str = obj.toString();
 		assertTrue(str.contains("query: " + query2.toString()));
-		assertTrue(str.contains("result: " + result.toString()));
+		assertTrue(str.contains("result: " + Arrays.asList(result).toString()));
 	}
 
 	/**

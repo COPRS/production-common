@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>L0SlicePatternSettings.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.config</a> &gt; <span class="el_source">L0SlicePatternSettings.java</span></div><h1>L0SlicePatternSettings.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.config;
 
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,8 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = &quot;pattern-l0-slices&quot;)
 public class L0SlicePatternSettings {
+    
+<span class="fc" id="L20">    public final static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyyMMdd'T'HHmmss&quot;);</span>
 
 	/**
 	 * The regular expression in Java format
@@ -49,19 +53,19 @@ public class L0SlicePatternSettings {
 	/**
 	 * Default constructor
 	 */
-<span class="fc" id="L52">	public L0SlicePatternSettings() {</span>
-<span class="fc" id="L53">		mGroupSatId = 0;</span>
-<span class="fc" id="L54">		mGroupMissionId = 0;</span>
-<span class="fc" id="L55">		mGroupAcquisition = 0;</span>
-<span class="fc" id="L56">		mGroupStartTime = 0;</span>
-<span class="fc" id="L57">		mGroupStopTime = 0;</span>
-<span class="fc" id="L58">	}</span>
+<span class="fc" id="L56">	public L0SlicePatternSettings() {</span>
+<span class="fc" id="L57">		mGroupSatId = 0;</span>
+<span class="fc" id="L58">		mGroupMissionId = 0;</span>
+<span class="fc" id="L59">		mGroupAcquisition = 0;</span>
+<span class="fc" id="L60">		mGroupStartTime = 0;</span>
+<span class="fc" id="L61">		mGroupStopTime = 0;</span>
+<span class="fc" id="L62">	}</span>
 
 	/**
 	 * @return the regexp
 	 */
 	public String getRegexp() {
-<span class="fc" id="L64">		return regexp;</span>
+<span class="fc" id="L68">		return regexp;</span>
 	}
 
 	/**
@@ -69,14 +73,14 @@ public class L0SlicePatternSettings {
 	 *            the regexp to set
 	 */
 	public void setRegexp(final String regexp) {
-<span class="fc" id="L72">		this.regexp = regexp;</span>
-<span class="fc" id="L73">	}</span>
+<span class="fc" id="L76">		this.regexp = regexp;</span>
+<span class="fc" id="L77">	}</span>
 
 	/**
 	 * @return the mGroupSatId
 	 */
 	public int getMGroupSatId() {
-<span class="fc" id="L79">		return mGroupSatId;</span>
+<span class="fc" id="L83">		return mGroupSatId;</span>
 	}
 
 	/**
@@ -84,14 +88,14 @@ public class L0SlicePatternSettings {
 	 *            the mGroupSatId to set
 	 */
 	public void setMGroupSatId(final int mGroupSatId) {
-<span class="fc" id="L87">		this.mGroupSatId = mGroupSatId;</span>
-<span class="fc" id="L88">	}</span>
+<span class="fc" id="L91">		this.mGroupSatId = mGroupSatId;</span>
+<span class="fc" id="L92">	}</span>
 
 	/**
 	 * @return the mGroupMissionId
 	 */
 	public int getMGroupMissionId() {
-<span class="fc" id="L94">		return mGroupMissionId;</span>
+<span class="fc" id="L98">		return mGroupMissionId;</span>
 	}
 
 	/**
@@ -99,14 +103,14 @@ public class L0SlicePatternSettings {
 	 *            the mGroupMissionId to set
 	 */
 	public void setMGroupMissionId(final int mGroupMissionId) {
-<span class="fc" id="L102">		this.mGroupMissionId = mGroupMissionId;</span>
-<span class="fc" id="L103">	}</span>
+<span class="fc" id="L106">		this.mGroupMissionId = mGroupMissionId;</span>
+<span class="fc" id="L107">	}</span>
 
 	/**
 	 * @return the getMGroupAcquisition
 	 */
 	public int getMGroupAcquisition() {
-<span class="fc" id="L109">		return mGroupAcquisition;</span>
+<span class="fc" id="L113">		return mGroupAcquisition;</span>
 	}
 
 	/**
@@ -114,14 +118,14 @@ public class L0SlicePatternSettings {
 	 *            the mGroupAcquisition to set
 	 */
 	public void setMGroupAcquisition(final int mGroupAcquisition) {
-<span class="fc" id="L117">		this.mGroupAcquisition = mGroupAcquisition;</span>
-<span class="fc" id="L118">	}</span>
+<span class="fc" id="L121">		this.mGroupAcquisition = mGroupAcquisition;</span>
+<span class="fc" id="L122">	}</span>
 
 	/**
 	 * @return the mGroupStartTime
 	 */
 	public int getMGroupStartTime() {
-<span class="fc" id="L124">		return mGroupStartTime;</span>
+<span class="fc" id="L128">		return mGroupStartTime;</span>
 	}
 
 	/**
@@ -129,14 +133,14 @@ public class L0SlicePatternSettings {
 	 *            the mGroupStartTime to set
 	 */
 	public void setMGroupStartTime(final int mGroupStartTime) {
-<span class="fc" id="L132">		this.mGroupStartTime = mGroupStartTime;</span>
-<span class="fc" id="L133">	}</span>
+<span class="fc" id="L136">		this.mGroupStartTime = mGroupStartTime;</span>
+<span class="fc" id="L137">	}</span>
 
 	/**
 	 * @return the mGroupStopTime
 	 */
 	public int getMGroupStopTime() {
-<span class="fc" id="L139">		return mGroupStopTime;</span>
+<span class="fc" id="L143">		return mGroupStopTime;</span>
 	}
 
 	/**
@@ -144,8 +148,8 @@ public class L0SlicePatternSettings {
 	 *            the mGroupStopTime to set
 	 */
 	public void setMGroupStopTime(final int mGroupStopTime) {
-<span class="fc" id="L147">		this.mGroupStopTime = mGroupStopTime;</span>
-<span class="fc" id="L148">	}</span>
+<span class="fc" id="L151">		this.mGroupStopTime = mGroupStopTime;</span>
+<span class="fc" id="L152">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

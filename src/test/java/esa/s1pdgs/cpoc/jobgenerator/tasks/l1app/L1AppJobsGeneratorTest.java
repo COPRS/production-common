@@ -56,9 +56,9 @@ import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 
 public class L1AppJobsGeneratorTest {
@@ -97,6 +97,8 @@ public class L1AppJobsGeneratorTest {
 
     private AppDataJobDto<LevelProductDto> appDataJobComplete;
 
+    private LevelJobDto publishedJob;
+
     /**
      * Test set up
      * 
@@ -120,10 +122,10 @@ public class L1AppJobsGeneratorTest {
         JobsGeneratorFactory factory =
                 new JobsGeneratorFactory(processSettings, jobGeneratorSettings,
                         xmlConverter, metadataService, JobsSender);
-        generator = (L1AppJobsGenerator) factory
-                .createJobGeneratorForL0Slice(new File(
+        generator = (L1AppJobsGenerator) factory.createJobGeneratorForL0Slice(
+                new File(
                         "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
-                        appDataPService);
+                appDataPService);
 
         appDataJob = TestL1Utils.buildJobGeneration(false);
         appDataJobComplete = TestL1Utils.buildJobGeneration(true);
@@ -246,61 +248,62 @@ public class L1AppJobsGeneratorTest {
             Mockito.doAnswer(i -> {
                 SearchMetadataQuery query = i.getArgument(0);
                 if ("IW_RAW__0S".equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                             "IW_RAW__0S",
                             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                            "2017-12-13T12:16:23", "2017-12-13T12:16:56");
+                            "2017-12-13T12:16:23", "2017-12-13T12:16:56"));
                 } else if ("IW_RAW__0A"
                         .equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
                             "IW_RAW__0A",
                             "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
-                            "2017-12-13T12:11:23", "2017-12-13T12:19:47");
+                            "2017-12-13T12:11:23", "2017-12-13T12:19:47"));
                 } else if ("IW_RAW__0C"
                         .equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
                             "IW_RAW__0C",
                             "S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
-                            "2017-12-13T12:11:23", "2017-12-13T12:19:47");
+                            "2017-12-13T12:11:23", "2017-12-13T12:19:47"));
                 } else if ("IW_RAW__0N"
                         .equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
                             "IW_RAW__0N",
                             "S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
-                            "2017-12-13T12:11:23", "2017-12-13T12:19:47");
+                            "2017-12-13T12:11:23", "2017-12-13T12:19:47"));
                 } else if ("AUX_CAL".equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
                             "AUX_CAL",
                             "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
-                            "2017-10-17T08:00:00", "9999-12-31T23:59:59");
+                            "2017-10-17T08:00:00", "9999-12-31T23:59:59"));
                 } else if ("AUX_INS".equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
                             "AUX_INS",
                             "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
-                            "2017-10-17T08:00:00", "9999-12-31T23:59:59");
+                            "2017-10-17T08:00:00", "9999-12-31T23:59:59"));
                 } else if ("AUX_PP1".equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
                             "AUX_PP1",
                             "S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
-                            "2017-10-17T08:00:00", "9999-12-31T23:59:59");
+                            "2017-10-17T08:00:00", "9999-12-31T23:59:59"));
                 } else if ("AUX_RESORB"
                         .equalsIgnoreCase(query.getProductType())) {
-                    return new SearchMetadata(
+                    return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
                             "AUX_OBMEMC",
                             "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
-                            "2017-12-13T10:27:37", "2017-12-13T13:45:07");
+                            "2017-12-13T10:27:37", "2017-12-13T13:45:07"));
                 }
                 return null;
             }).when(this.metadataService).search(Mockito.any(), Mockito.any(),
-                    Mockito.any(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyString());
+                    Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
+                    Mockito.anyString());
         } catch (JobGenMetadataException e) {
             fail(e.getMessage());
         }
@@ -309,8 +312,11 @@ public class L1AppJobsGeneratorTest {
     private void mockKafkaSender() throws AbstractCodedException {
         Mockito.doAnswer(i -> {
             ObjectMapper mapper = new ObjectMapper();
-            mapper.writeValue(new File("./tmp/jobDtoL1.json"),
+            mapper.writeValue(new File("./tmp/inputMessageL1.json"),
                     i.getArgument(0));
+            mapper.writeValue(new File("./tmp/jobDtoL1.json"),
+                    i.getArgument(1));
+            publishedJob = i.getArgument(1);
             return null;
         }).when(this.JobsSender).sendJob(Mockito.any(), Mockito.any());
     }
@@ -352,8 +358,7 @@ public class L1AppJobsGeneratorTest {
     public void testPresearchWhenSliceMissing()
             throws JobGenInputsMissingException, JobGenMetadataException {
         doThrow(new JobGenMetadataException("test ex"))
-                .when(this.metadataService)
-                .getL0Slice(Mockito.anyString());
+                .when(this.metadataService).getL0Slice(Mockito.anyString());
 
         thrown.expect(JobGenInputsMissingException.class);
         thrown.expectMessage("Missing inputs");
@@ -440,7 +445,65 @@ public class L1AppJobsGeneratorTest {
                 jobOrder.getConf().getProcParams().get(3).getValue());
     }
 
-    /*@Test
+    @Test
+    public void testCustomeJobOrder() {
+        AbstractJobOrderConf conf = new L0JobOrderConf();
+        conf.setProcessorName("AIO_PROCESSOR");
+        JobOrderProcParam procParam1 =
+                new JobOrderProcParam("Mission_Id", "S1B");
+        JobOrderProcParam procParam2 =
+                new JobOrderProcParam("PT_Assembly", "no");
+        JobOrderProcParam procParam3 = new JobOrderProcParam("Timeout", "360");
+        conf.addProcParam(procParam1);
+        conf.addProcParam(procParam2);
+        conf.addProcParam(procParam3);
+
+        JobOrder jobOrder = new JobOrder();
+        jobOrder.setConf(conf);
+
+        JobGeneration<LevelProductDto> job =
+                new JobGeneration<>(appDataJobComplete, "IW_RAW__0_GRDH_1.xml");
+        job.setJobOrder(jobOrder);
+
+        generator.customJobOrder(job);
+
+        assertEquals("20171213_121623224083",
+                job.getJobOrder().getConf().getSensingTime().getStart());
+        assertEquals("20171213_121656224083",
+                job.getJobOrder().getConf().getSensingTime().getStop());
+        assertEquals(8, job.getJobOrder().getConf().getNbProcParams());
+        for (JobOrderProcParam param : job.getJobOrder().getConf()
+                .getProcParams()) {
+            switch (param.getName()) {
+                case "Mission_Id":
+                    assertEquals("S1A", param.getValue());
+                    break;
+                case "PT_Assembly":
+                    assertEquals("no", param.getValue());
+                    break;
+                case "Timeout":
+                    assertEquals("360", param.getValue());
+                    break;
+                case "Slice_Number":
+                    assertEquals("3", param.getValue());
+                    break;
+                case "Total_Number_Of_Slices":
+                    assertEquals("10", param.getValue());
+                    break;
+                case "Slice_Overlap":
+                    assertEquals("7.7", param.getValue());
+                    break;
+                case "Slice_Length":
+                    assertEquals("60.0", param.getValue());
+                    break;
+                case "Slicing_Flag":
+                    assertEquals("TRUE", param.getValue());
+                    break;
+            }
+        }
+    }
+
+    @Test
     public void testRun() {
         try {
 
@@ -448,10 +511,30 @@ public class L1AppJobsGeneratorTest {
 
             Mockito.verify(JobsSender).sendJob(Mockito.any(), Mockito.any());
 
-            // TODO to improve to check dto ok (do manually by reading the file
-            // ./tmp/jobDto.txt)
+            assertEquals(ProductFamily.L1_JOB, publishedJob.getFamily());
+            assertEquals("NRT", publishedJob.getProductProcessMode());
+            assertEquals(
+                    "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
+                    publishedJob.getProductIdentifier());
+            assertEquals(expectedTaskTable.getPools().size(),
+                    publishedJob.getPools().size());
+            for (int i = 0; i < expectedTaskTable.getPools().size(); i++) {
+                assertEquals(
+                        expectedTaskTable.getPools().get(i).getTasks().size(),
+                        publishedJob.getPools().get(i).getTasks().size());
+                for (int j = 0; j < expectedTaskTable.getPools().get(i)
+                        .getTasks().size(); j++) {
+                    assertEquals(
+                            expectedTaskTable.getPools().get(i).getTasks()
+                                    .get(j).getFileName(),
+                            publishedJob.getPools().get(i).getTasks().get(j)
+                                    .getBinaryPath());
+                }
+            }
+
+            // TODO to improve to check dto ok
         } catch (Exception e) {
             fail(e.getMessage());
         }
-    }*/
+    }
 }

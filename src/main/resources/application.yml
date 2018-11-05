@@ -17,8 +17,10 @@ job-generator:
   jobgenfixedrate: 100                                             # (Fixed delay) Period between 2 generations
   waitprimarycheck:                                                # Minimal time between two execution of the following method: checking the requirements to generate a job specific to the level
     tempo: 30000
+    max-timelife-s: 600
   waitmetadatainput:                                               # Minimal time between two execution of the following method: checking the global requirements to generate a job
     tempo: 60000
+    max-timelife-s: 0
   defaultfamily: BLANK                                             # Default family of a output defined in the task table
   inputfamiliesstr: ${products_family-per-type}             # !!!!  Family assignation of a specific output
   outputfamiliesstr: ${products_family-per-type}            # !!!!  Family assignation of a specific output
@@ -90,3 +92,14 @@ pattern-l0-slices:
   m-group-acquisition: ${pattern-l0-slices_placeMatchAcquisition:4}
   m-group-start-time: ${pattern-l0-slices_placeMatchStartTime:6}
   m-group-stop-time: ${pattern-l0-slices_placeMatchStopTime:7}
+  
+app-l0-segment:
+  name-regexp-pattern: ^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$
+  name-regexp-groups:
+    missionId: 1
+    satelliteId: 2 
+    acquisition: 4
+    polarisation: 5
+    startTime: 6
+    stopTime: 7
+    datatakeId: 9

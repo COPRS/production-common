@@ -54,6 +54,8 @@ public class OutputProducerFactoryTest {
         GenericPublicationMessageDto<LevelJobDto> expected =
                 new GenericPublicationMessageDto<LevelJobDto>(123L,
                         ProductFamily.L1_JOB, dto);
+        expected.setInputKey("key");
+        expected.setOutputKey("L1_JOB");
 
         factory.sendJob(message, dto);
         verify(sender, times(1)).publish(Mockito.eq(expected));

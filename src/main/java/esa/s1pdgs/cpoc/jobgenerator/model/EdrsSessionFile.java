@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.jobgenerator.model;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,6 +22,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "DCSU_Session_Information_Block")
 @XmlAccessorType(XmlAccessType.NONE)
 public class EdrsSessionFile {
+    
+    public final static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
 	/**
 	 * Session identifier
@@ -33,13 +35,13 @@ public class EdrsSessionFile {
 	 * Acquisition start time
 	 */
 	@XmlElement(name = "time_start")
-	private Date startTime;
+	private String startTime;
 
 	/**
 	 * Acquisition stop time
 	 */
 	@XmlElement(name = "time_stop")
-	private Date stopTime;
+	private String stopTime;
 
 	/**
 	 * List of raw names
@@ -63,7 +65,7 @@ public class EdrsSessionFile {
 	 * @param stopTime
 	 * @param rawNames
 	 */
-	public EdrsSessionFile(final String sessionId, final Date startTime, final Date stopTime,
+	public EdrsSessionFile(final String sessionId, final String startTime, final String stopTime,
 			final List<EdrsSessionFileRaw> rawNames) {
 		this();
 		this.sessionId = sessionId;
@@ -105,7 +107,7 @@ public class EdrsSessionFile {
 	/**
 	 * @return the startTime
 	 */
-	public Date getStartTime() {
+	public String getStartTime() {
 		return startTime;
 	}
 
@@ -113,14 +115,14 @@ public class EdrsSessionFile {
 	 * @param startTime
 	 *            the startTime to set
 	 */
-	public void setStartTime(final Date startTime) {
+	public void setStartTime(final String startTime) {
 		this.startTime = startTime;
 	}
 
 	/**
 	 * @return the stopTime
 	 */
-	public Date getStopTime() {
+	public String getStopTime() {
 		return stopTime;
 	}
 
@@ -128,7 +130,7 @@ public class EdrsSessionFile {
 	 * @param stopTime
 	 *            the stopTime to set
 	 */
-	public void setStopTime(final Date stopTime) {
+	public void setStopTime(final String stopTime) {
 		this.stopTime = stopTime;
 	}
 

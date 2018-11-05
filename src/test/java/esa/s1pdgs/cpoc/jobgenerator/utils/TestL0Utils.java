@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.jobgenerator.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
@@ -82,15 +81,10 @@ public class TestL0Utils {
     public static EdrsSessionFile createEdrsSessionFileChannel1(
             boolean xmlOnlyForRaws) {
 
-        Calendar start1 = Calendar.getInstance();
-        start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
-        Calendar stop1 = Calendar.getInstance();
-        stop1.set(2017, Calendar.DECEMBER, 13, 15, 17, 25);
-
         EdrsSessionFile r = new EdrsSessionFile();
         r.setSessionId("L20171109175634707000125");
-        r.setStartTime(start1.getTime());
-        r.setStopTime(stop1.getTime());
+        r.setStartTime("2017-12-13T14:59:48Z");
+        r.setStopTime("2017-12-13T15:17:25Z");
         r.setRawNames(
                 TestL0Utils.getEdrsSessionFileRawsChannel1(xmlOnlyForRaws));
         return r;
@@ -99,15 +93,10 @@ public class TestL0Utils {
     public static EdrsSessionFile createEdrsSessionFileChannel2(
             boolean xmlOnlyForRaws) {
 
-        Calendar start1 = Calendar.getInstance();
-        start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
-        Calendar stop1 = Calendar.getInstance();
-        stop1.set(2017, Calendar.DECEMBER, 13, 15, 17, 25);
-
         EdrsSessionFile r = new EdrsSessionFile();
         r.setSessionId("L20171109175634707000125");
-        r.setStartTime(start1.getTime());
-        r.setStopTime(stop1.getTime());
+        r.setStartTime("2017-12-13T14:59:48Z");
+        r.setStopTime("2017-12-13T15:17:25Z");
         r.setRawNames(
                 TestL0Utils.getEdrsSessionFileRawsChannel2(xmlOnlyForRaws));
         return r;
@@ -151,10 +140,6 @@ public class TestL0Utils {
         }
         ret.setMessages(messages);
 
-        Calendar start1 = Calendar.getInstance();
-        start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
-        Calendar stop1 = Calendar.getInstance();
-        stop1.set(2017, Calendar.DECEMBER, 13, 15, 17, 25);
         AppDataJobProductDto product = new AppDataJobProductDto();
         product.setMissionId(missionId);
         product.setProductName("L20171109175634707000125");
@@ -166,8 +151,10 @@ public class TestL0Utils {
         }
         product.setSessionId("L20171109175634707000125");
         product.setSatelliteId("A");
-        product.setStartTime(start1.getTime());
-        product.setStopTime(stop1.getTime());
+        product.setStartTime("2017-12-13T14:59:48.123456Z");
+        product.setStopTime("2017-12-13T15:17:25.142536Z");
+        product.setInsConfId(-1);
+        product.setProcessMode("");
         ret.setProduct(product);
 
         AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();

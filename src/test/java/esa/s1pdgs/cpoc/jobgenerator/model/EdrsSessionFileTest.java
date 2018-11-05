@@ -6,12 +6,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.Date;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
-import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFileRaw;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -35,15 +32,13 @@ public class EdrsSessionFileTest {
 		assertNotNull(file.getRawNames());
 		assertTrue(file.getRawNames().size() == 0);
 
-		Date start = new Date(System.currentTimeMillis() - 10000);
-		Date stop = new Date(System.currentTimeMillis());
 		EdrsSessionFileRaw raw1 = new EdrsSessionFileRaw("raw1");
 		EdrsSessionFileRaw raw2 = new EdrsSessionFileRaw("raw2");
 		EdrsSessionFileRaw raw3 = new EdrsSessionFileRaw("raw3");
-		file = new EdrsSessionFile("session-id", start, stop, Arrays.asList(raw1, raw2, raw3));
+		file = new EdrsSessionFile("session-id", "2014-12-04T14:59:20Z", "2014-12-04T15:22:20Z", Arrays.asList(raw1, raw2, raw3));
 		assertEquals("session-id", file.getSessionId());
-		assertEquals(start, file.getStartTime());
-		assertEquals(stop, file.getStopTime());
+		assertEquals("2014-12-04T14:59:20Z", file.getStartTime());
+		assertEquals("2014-12-04T15:22:20Z", file.getStopTime());
 		assertNotNull(file.getRawNames());
 		assertTrue(file.getRawNames().size() == 3);
 		assertEquals(raw2, file.getRawNames().get(1));
@@ -54,23 +49,20 @@ public class EdrsSessionFileTest {
 	 */
 	@Test
 	public void testToString() {
-
-		Date start = new Date(System.currentTimeMillis() - 10000);
-		Date stop = new Date(System.currentTimeMillis());
 		EdrsSessionFileRaw raw1 = new EdrsSessionFileRaw("raw1");
 		EdrsSessionFileRaw raw2 = new EdrsSessionFileRaw("raw2");
 		EdrsSessionFileRaw raw3 = new EdrsSessionFileRaw("raw3");
 		
 		EdrsSessionFile file = new EdrsSessionFile();
 		file.setSessionId("session-id");
-		file.setStartTime(start);
-		file.setStopTime(stop);
+		file.setStartTime("2014-12-04T14:59:20Z");
+		file.setStopTime("2014-12-04T15:22:20Z");
 		file.setRawNames(Arrays.asList(raw1, raw2, raw3));
 		
 		String str = file.toString();
 		assertTrue(str.contains("sessionId: session-id"));
-		assertTrue(str.contains("startTime: " + start.toString()));
-		assertTrue(str.contains("stopTime: " + stop.toString()));
+		assertTrue(str.contains("startTime: 2014-12-04T14:59:20Z"));
+		assertTrue(str.contains("stopTime: 2014-12-04T15:22:20Z"));
 		assertTrue(str.contains("rawNames: "));
 		assertTrue(str.contains(raw3.toString()));
 	}

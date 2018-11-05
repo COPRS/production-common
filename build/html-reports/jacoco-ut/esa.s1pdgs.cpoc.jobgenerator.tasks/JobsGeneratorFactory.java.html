@@ -122,14 +122,14 @@ public class JobsGeneratorFactory {
             final File xmlFile,
             final AbstractAppCatalogJobService&lt;LevelSegmentDto&gt; appDataService)
             throws JobGenBuildTaskTableException {
-<span class="nc" id="L125">        AbstractJobsGenerator&lt;LevelSegmentDto&gt; processor =</span>
+<span class="fc" id="L125">        AbstractJobsGenerator&lt;LevelSegmentDto&gt; processor =</span>
                 new L0SegmentAppJobsGenerator(this.xmlConverter,
                         this.metadataService, this.l0ProcessSettings,
                         this.jobGeneratorSettings, this.outputFactory,
                         appDataService);
-<span class="nc" id="L130">        processor.setMode(ProductMode.SLICING);</span>
-<span class="nc" id="L131">        processor.initialize(xmlFile);</span>
-<span class="nc" id="L132">        return processor;</span>
+<span class="fc" id="L130">        processor.setMode(ProductMode.SLICING);</span>
+<span class="fc" id="L131">        processor.initialize(xmlFile);</span>
+<span class="fc" id="L132">        return processor;</span>
     }
 
 }

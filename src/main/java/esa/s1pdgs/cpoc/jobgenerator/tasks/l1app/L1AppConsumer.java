@@ -167,10 +167,12 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             productDto.setProductName(leveldto.getProductName());
             productDto.setProcessMode(leveldto.getMode());
             productDto.setSatelliteId(satelliteId);
-            productDto.setStartTime(DateUtils
-                    .convertWithSimpleDateFormat(startTime, DATE_FORMAT));
-            productDto.setStopTime(DateUtils
-                    .convertWithSimpleDateFormat(stopTime, DATE_FORMAT));
+            productDto.setStartTime(DateUtils.convertToAnotherFormat(startTime,
+                    L0SlicePatternSettings.TIME_FORMATTER,
+                    AppDataJobProductDto.TIME_FORMATTER));
+            productDto.setStopTime(DateUtils.convertToAnotherFormat(stopTime,
+                    L0SlicePatternSettings.TIME_FORMATTER,
+                    AppDataJobProductDto.TIME_FORMATTER));
             jobDto.setProduct(productDto);
 
             LOGGER.info(

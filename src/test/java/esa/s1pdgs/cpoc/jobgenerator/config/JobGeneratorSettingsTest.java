@@ -40,9 +40,9 @@ public class JobGeneratorSettingsTest {
 		assertEquals("Invalid maxnumberoftasktables", 2, jobGenSettings.getMaxnboftasktable());
 		assertEquals("Invalid maxnumberofjobs", 20, jobGenSettings.getMaxnumberofjobs());
 		assertEquals("Invalid waitmedataraw tempo", 2000, jobGenSettings.getWaitprimarycheck().getTempo());
-		assertEquals("Invalid waitmedataraw retries", 2, jobGenSettings.getWaitprimarycheck().getRetries());
+		assertEquals("Invalid waitmedataraw retries", 2, jobGenSettings.getWaitprimarycheck().getMaxTimelifeS());
 		assertEquals("Invalid waitmedataraw tempo", 3000, jobGenSettings.getWaitmetadatainput().getTempo());
-		assertEquals("Invalid waitmedatainput retries", 5, jobGenSettings.getWaitmetadatainput().getRetries());
+		assertEquals("Invalid waitmedatainput retries", 5, jobGenSettings.getWaitmetadatainput().getMaxTimelifeS());
 		assertEquals("Invalid default output family", "L0_ACN", jobGenSettings.getDefaultfamily());
 		assertEquals("Invalid size of output families", 8, jobGenSettings.getInputfamilies().size());
         assertEquals("Invalid size of input families", 18, jobGenSettings.getOutputfamilies().size());

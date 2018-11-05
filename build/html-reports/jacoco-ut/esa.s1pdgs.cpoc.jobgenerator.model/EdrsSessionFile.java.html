@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>EdrsSessionFile.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Spring Boot Docker For Job Generator App</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.jobgenerator.model</a> &gt; <span class="el_source">EdrsSessionFile.java</span></div><h1>EdrsSessionFile.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.jobgenerator.model;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,6 +22,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = &quot;DCSU_Session_Information_Block&quot;)
 @XmlAccessorType(XmlAccessType.NONE)
 public class EdrsSessionFile {
+    
+<span class="fc" id="L26">    public final static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd'T'HH:mm:ss'Z'&quot;);</span>
 
 	/**
 	 * Session identifier
@@ -33,13 +35,13 @@ public class EdrsSessionFile {
 	 * Acquisition start time
 	 */
 	@XmlElement(name = &quot;time_start&quot;)
-	private Date startTime;
+	private String startTime;
 
 	/**
 	 * Acquisition stop time
 	 */
 	@XmlElement(name = &quot;time_stop&quot;)
-	private Date stopTime;
+	private String stopTime;
 
 	/**
 	 * List of raw names
@@ -51,9 +53,9 @@ public class EdrsSessionFile {
 	/**
 	 * Default constructor
 	 */
-<span class="fc" id="L54">	public EdrsSessionFile() {</span>
-<span class="fc" id="L55">		this.rawNames = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L56">	}</span>
+<span class="fc" id="L56">	public EdrsSessionFile() {</span>
+<span class="fc" id="L57">		this.rawNames = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L58">	}</span>
 
 	/**
 	 * Constructor using fields
@@ -63,20 +65,20 @@ public class EdrsSessionFile {
 	 * @param stopTime
 	 * @param rawNames
 	 */
-	public EdrsSessionFile(final String sessionId, final Date startTime, final Date stopTime,
+	public EdrsSessionFile(final String sessionId, final String startTime, final String stopTime,
 			final List&lt;EdrsSessionFileRaw&gt; rawNames) {
-<span class="fc" id="L68">		this();</span>
-<span class="fc" id="L69">		this.sessionId = sessionId;</span>
-<span class="fc" id="L70">		this.startTime = startTime;</span>
-<span class="fc" id="L71">		this.stopTime = stopTime;</span>
-<span class="fc" id="L72">		this.rawNames.addAll(rawNames);</span>
-<span class="fc" id="L73">	}</span>
+<span class="fc" id="L70">		this();</span>
+<span class="fc" id="L71">		this.sessionId = sessionId;</span>
+<span class="fc" id="L72">		this.startTime = startTime;</span>
+<span class="fc" id="L73">		this.stopTime = stopTime;</span>
+<span class="fc" id="L74">		this.rawNames.addAll(rawNames);</span>
+<span class="fc" id="L75">	}</span>
 
 	/**
 	 * @return the sessionId
 	 */
 	public String getSessionId() {
-<span class="fc" id="L79">		return sessionId;</span>
+<span class="fc" id="L81">		return sessionId;</span>
 	}
 
 	/**
@@ -84,14 +86,14 @@ public class EdrsSessionFile {
 	 *            the sessionId to set
 	 */
 	public void setSessionId(final String sessionId) {
-<span class="fc" id="L87">		this.sessionId = sessionId;</span>
-<span class="fc" id="L88">	}</span>
+<span class="fc" id="L89">		this.sessionId = sessionId;</span>
+<span class="fc" id="L90">	}</span>
 
 	/**
 	 * @return the rawNames
 	 */
 	public List&lt;EdrsSessionFileRaw&gt; getRawNames() {
-<span class="fc" id="L94">		return rawNames;</span>
+<span class="fc" id="L96">		return rawNames;</span>
 	}
 
 	/**
@@ -99,45 +101,45 @@ public class EdrsSessionFile {
 	 *            the rawNames to set
 	 */
 	public void setRawNames(final List&lt;EdrsSessionFileRaw&gt; rawNames) {
-<span class="fc" id="L102">		this.rawNames = rawNames;</span>
-<span class="fc" id="L103">	}</span>
+<span class="fc" id="L104">		this.rawNames = rawNames;</span>
+<span class="fc" id="L105">	}</span>
 
 	/**
 	 * @return the startTime
 	 */
-	public Date getStartTime() {
-<span class="fc" id="L109">		return startTime;</span>
+	public String getStartTime() {
+<span class="fc" id="L111">		return startTime;</span>
 	}
 
 	/**
 	 * @param startTime
 	 *            the startTime to set
 	 */
-	public void setStartTime(final Date startTime) {
-<span class="fc" id="L117">		this.startTime = startTime;</span>
-<span class="fc" id="L118">	}</span>
+	public void setStartTime(final String startTime) {
+<span class="fc" id="L119">		this.startTime = startTime;</span>
+<span class="fc" id="L120">	}</span>
 
 	/**
 	 * @return the stopTime
 	 */
-	public Date getStopTime() {
-<span class="fc" id="L124">		return stopTime;</span>
+	public String getStopTime() {
+<span class="fc" id="L126">		return stopTime;</span>
 	}
 
 	/**
 	 * @param stopTime
 	 *            the stopTime to set
 	 */
-	public void setStopTime(final Date stopTime) {
-<span class="fc" id="L132">		this.stopTime = stopTime;</span>
-<span class="fc" id="L133">	}</span>
+	public void setStopTime(final String stopTime) {
+<span class="fc" id="L134">		this.stopTime = stopTime;</span>
+<span class="fc" id="L135">	}</span>
 
 	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-<span class="fc" id="L140">		return String.format(&quot;{sessionId: %s, startTime: %s, stopTime: %s, rawNames: %s}&quot;, sessionId, startTime,</span>
+<span class="fc" id="L142">		return String.format(&quot;{sessionId: %s, startTime: %s, stopTime: %s, rawNames: %s}&quot;, sessionId, startTime,</span>
 				stopTime, rawNames);
 	}
 
@@ -146,7 +148,7 @@ public class EdrsSessionFile {
 	 */
 	@Override
 	public int hashCode() {
-<span class="fc" id="L149">		return Objects.hash(sessionId, startTime, stopTime, rawNames);</span>
+<span class="fc" id="L151">		return Objects.hash(sessionId, startTime, stopTime, rawNames);</span>
 	}
 
 	/**
@@ -155,16 +157,16 @@ public class EdrsSessionFile {
 	@Override
 	public boolean equals(final Object obj) {
 		boolean ret;
-<span class="fc bfc" id="L158" title="All 2 branches covered.">		if (this == obj) {</span>
-<span class="fc" id="L159">			ret = true;</span>
-<span class="fc bfc" id="L160" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
-<span class="fc" id="L161">			ret = false;</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L161">			ret = true;</span>
+<span class="fc bfc" id="L162" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L163">			ret = false;</span>
 		} else {
-<span class="fc" id="L163">			EdrsSessionFile other = (EdrsSessionFile) obj;</span>
-<span class="fc bfc" id="L164" title="All 4 branches covered.">			ret = Objects.equals(sessionId, other.sessionId) &amp;&amp; Objects.equals(startTime, other.startTime)</span>
-<span class="fc bfc" id="L165" title="All 4 branches covered.">					&amp;&amp; Objects.equals(stopTime, other.stopTime) &amp;&amp; Objects.equals(rawNames, other.rawNames);</span>
+<span class="fc" id="L165">			EdrsSessionFile other = (EdrsSessionFile) obj;</span>
+<span class="fc bfc" id="L166" title="All 4 branches covered.">			ret = Objects.equals(sessionId, other.sessionId) &amp;&amp; Objects.equals(startTime, other.startTime)</span>
+<span class="fc bfc" id="L167" title="All 4 branches covered.">					&amp;&amp; Objects.equals(stopTime, other.stopTime) &amp;&amp; Objects.equals(rawNames, other.rawNames);</span>
 		}
-<span class="fc" id="L167">		return ret;</span>
+<span class="fc" id="L169">		return ret;</span>
 	}
 
 }
