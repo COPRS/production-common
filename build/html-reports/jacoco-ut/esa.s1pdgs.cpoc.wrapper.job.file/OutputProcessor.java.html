@@ -361,40 +361,53 @@ public class OutputProcessor {
     protected void processProducts(final List&lt;S3UploadFile&gt; uploadBatch,
             final List&lt;ObsQueueMessage&gt; outputToPublish)
             throws AbstractCodedException {
-<span class="fc" id="L364">        LOGGER.info(</span>
-                &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [START] 3 - Starting processing object storage compatible outputs&quot;,
-                prefixMonitorLogs, this.appLevel);
+<span class="fc" id="L364">        String listoutputs = uploadBatch.stream().map(S3UploadFile::getKey)</span>
+<span class="fc" id="L365">                .collect(Collectors.joining(&quot;,&quot;));</span>
+<span class="fc" id="L366">        LOGGER.info(</span>
+                &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [START] 3 - Starting processing object storage compatible outputs [inputs {}]&quot;,
+                prefixMonitorLogs, appLevel, listoutputs);
 
-<span class="fc" id="L368">        double size = Double.valueOf(uploadBatch.size());</span>
-<span class="fc" id="L369">        double nbPool = Math.ceil(size / sizeUploadBatch);</span>
+<span class="fc" id="L370">        double size = Double.valueOf(uploadBatch.size());</span>
+<span class="fc" id="L371">        double nbPool = Math.ceil(size / sizeUploadBatch);</span>
 
-<span class="fc bfc" id="L371" title="All 2 branches covered.">        for (int i = 0; i &lt; nbPool; i++) {</span>
-<span class="fc" id="L372">            int lastIndex =</span>
-<span class="fc" id="L373">                    Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());</span>
-<span class="fc" id="L374">            List&lt;S3UploadFile&gt; sublist =</span>
-<span class="fc" id="L375">                    uploadBatch.subList(i * sizeUploadBatch, lastIndex);</span>
-
-<span class="fc bfc" id="L377" title="All 2 branches covered.">            if (i &gt; 0) {</span>
-<span class="fc" id="L378">                this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(),</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">        for (int i = 0; i &lt; nbPool; i++) {</span>
+<span class="fc" id="L374">            int lastIndex =</span>
+<span class="fc" id="L375">                    Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());</span>
+<span class="fc" id="L376">            List&lt;S3UploadFile&gt; sublist =</span>
+<span class="fc" id="L377">                    uploadBatch.subList(i * sizeUploadBatch, lastIndex);</span>
+<span class="fc" id="L378">            String listProducts = sublist.stream().map(S3UploadFile::getKey)</span>
+<span class="fc" id="L379">                    .collect(Collectors.joining(&quot;,&quot;));</span>
+<span class="fc bfc" id="L380" title="All 2 branches covered.">            if (i &gt; 0) {</span>
+<span class="fc" id="L381">                this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(),</span>
                         outputToPublish);
             }
-<span class="fc" id="L381">            LOGGER.info(&quot;{} 3 - Uploading batch {} &quot;, prefixMonitorLogs, i);</span>
-<span class="pc bpc" id="L382" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
-<span class="nc" id="L383">                throw new InternalErrorException(</span>
-                        &quot;The current thread as been interrupted&quot;);
-            } else {
-<span class="fc" id="L386">                this.obsService.uploadFilesPerBatch(sublist);</span>
-            }
+            try {
+<span class="pc bpc" id="L385" title="1 of 2 branches missed.">                if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L386">                    throw new InternalErrorException(</span>
+                            &quot;The current thread as been interrupted&quot;);
+                } else {
+<span class="fc" id="L389">                    LOGGER.info(</span>
+                            &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [START] 3 - Uploading batch {} [inputs {}]&quot;,
+<span class="fc" id="L391">                            prefixMonitorLogs, appLevel, i, listProducts);</span>
+<span class="fc" id="L392">                    this.obsService.uploadFilesPerBatch(sublist);</span>
+<span class="fc" id="L393">                    LOGGER.info(</span>
+                            &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [STOP OK] 3 - batch {} successfully uploaded [outputs {}]&quot;,
+<span class="fc" id="L395">                            prefixMonitorLogs, appLevel, i, listProducts);</span>
+                }
+<span class="nc" id="L397">            } catch (AbstractCodedException ace) {</span>
+<span class="nc" id="L398">                LOGGER.error(</span>
+                        &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [STOP KO] 3 - Error occurred during batch {} upload {} &quot;,
+<span class="nc" id="L400">                        prefixMonitorLogs, this.appLevel, i,</span>
+<span class="nc" id="L401">                        ace.getLogMessage());</span>
+<span class="nc" id="L402">                throw ace;</span>
+<span class="fc" id="L403">            }</span>
         }
-<span class="fc" id="L389">        String listoutputs = &quot;&quot;;</span>
-<span class="fc bfc" id="L390" title="All 2 branches covered.">        for (int i = 0; i &lt; size; i++) {</span>
-<span class="fc" id="L391">            listoutputs = listoutputs + &quot; &quot; + uploadBatch.get(i).getKey();</span>
-        }
-<span class="fc" id="L393">        LOGGER.info(</span>
-                &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch [outputs {}]&quot;,
+<span class="fc" id="L405">        publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);</span>
+        
+<span class="fc" id="L407">        LOGGER.info(</span>
+                &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Outputs successfully processed [outputs {}]&quot;,
                 this.prefixMonitorLogs, this.appLevel, listoutputs);
-<span class="fc" id="L396">        publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);</span>
-<span class="fc" id="L397">    }</span>
+<span class="fc" id="L410">    }</span>
 
     /**
      * Public uploaded files, i.e. unitl the output to publish is the next key
@@ -409,32 +422,42 @@ public class OutputProcessor {
             final String nextKeyUpload,
             final List&lt;ObsQueueMessage&gt; outputToPublish)
             throws AbstractCodedException {
-<span class="fc" id="L412">        LOGGER.info(&quot;{} 3 - Publishing KAFKA messages for batch {}&quot;,</span>
-<span class="fc" id="L413">                prefixMonitorLogs, nbBatch);</span>
-<span class="fc" id="L414">        Iterator&lt;ObsQueueMessage&gt; iter = outputToPublish.iterator();</span>
-<span class="fc" id="L415">        boolean stop = false;</span>
-<span class="fc bfc" id="L416" title="All 4 branches covered.">        while (!stop &amp;&amp; iter.hasNext()) {</span>
-<span class="pc bpc" id="L417" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
-<span class="nc" id="L418">                throw new InternalErrorException(</span>
+<span class="fc" id="L425">        LOGGER.info(&quot;{} 3 - Publishing KAFKA messages for batch {}&quot;,</span>
+<span class="fc" id="L426">                prefixMonitorLogs, nbBatch);</span>
+<span class="fc" id="L427">        Iterator&lt;ObsQueueMessage&gt; iter = outputToPublish.iterator();</span>
+<span class="fc" id="L428">        boolean stop = false;</span>
+<span class="fc bfc" id="L429" title="All 4 branches covered.">        while (!stop &amp;&amp; iter.hasNext()) {</span>
+<span class="pc bpc" id="L430" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L431">                throw new InternalErrorException(</span>
                         &quot;The current thread as been interrupted&quot;);
             } else {
-<span class="fc" id="L421">                ObsQueueMessage msg = iter.next();</span>
-<span class="fc bfc" id="L422" title="All 2 branches covered.">                if (nextKeyUpload.startsWith(msg.getKeyObs())) {</span>
-<span class="fc" id="L423">                    stop = true;</span>
+<span class="fc" id="L434">                ObsQueueMessage msg = iter.next();</span>
+<span class="fc bfc" id="L435" title="All 2 branches covered.">                if (nextKeyUpload.startsWith(msg.getKeyObs())) {</span>
+<span class="fc" id="L436">                    stop = true;</span>
                 } else {
-<span class="fc" id="L425">                    LOGGER.info(&quot;{} 3 - Publishing message for output {}&quot;,</span>
-<span class="fc" id="L426">                            prefixMonitorLogs, msg.getProductName());</span>
+<span class="fc" id="L438">                    LOGGER.info(</span>
+                            &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [START] 3 - Publishing message [inputs {}]&quot;,
+<span class="fc" id="L440">                            prefixMonitorLogs, appLevel, msg.getProductName());</span>
                     try {
-<span class="fc" id="L428">                        procuderFactory.sendOutput(msg, inputMessage);</span>
-<span class="fc" id="L429">                    } catch (MqiPublicationError ace) {</span>
-<span class="fc" id="L430">                        LOGGER.error(&quot;{} [code {}] {}&quot;, prefixMonitorLogs,</span>
-<span class="fc" id="L431">                                ace.getCode().getCode(), ace.getLogMessage());</span>
-<span class="fc" id="L432">                    }</span>
-<span class="fc" id="L433">                    iter.remove();</span>
+<span class="fc" id="L442">                        procuderFactory.sendOutput(msg, inputMessage);</span>
+<span class="fc" id="L443">                        LOGGER.info(</span>
+                                &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [STOP OK] 3 - Message published [outputs {}]&quot;,
+                                prefixMonitorLogs, appLevel,
+<span class="fc" id="L446">                                msg.getProductName());</span>
+<span class="fc" id="L447">                    } catch (MqiPublicationError ace) {</span>
+<span class="fc" id="L448">                        LOGGER.error(&quot;{} [code {}] {}&quot;, prefixMonitorLogs,</span>
+<span class="fc" id="L449">                                ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L450">                        LOGGER.error(</span>
+                                &quot;[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [STOP K0] [code {}] 3 - Message not published {} [outputs {}]&quot;,
+                                prefixMonitorLogs, appLevel,
+<span class="fc" id="L453">                                ace.getCode().getCode(), ace.getLogMessage(),</span>
+<span class="fc" id="L454">                                msg.getProductName());</span>
+<span class="fc" id="L455">                    }</span>
+<span class="fc" id="L456">                    iter.remove();</span>
                 }
-<span class="fc" id="L435">            }</span>
+<span class="fc" id="L458">            }</span>
         }
-<span class="fc" id="L437">    }</span>
+<span class="fc" id="L460">    }</span>
 
     /**
      * Publish reports in message queue system
@@ -445,30 +468,30 @@ public class OutputProcessor {
     protected void processReports(final List&lt;FileQueueMessage&gt; reportToPublish)
             throws AbstractCodedException {
 
-<span class="fc" id="L448">        LOGGER.info(</span>
+<span class="fc" id="L471">        LOGGER.info(</span>
                 &quot;{} 4 - Starting processing not object storage compatible outputs&quot;,
                 prefixMonitorLogs);
-<span class="fc bfc" id="L451" title="All 2 branches covered.">        if (!reportToPublish.isEmpty()) {</span>
-<span class="fc bfc" id="L452" title="All 2 branches covered.">            for (FileQueueMessage msg : reportToPublish) {</span>
-<span class="pc bpc" id="L453" title="1 of 2 branches missed.">                if (Thread.currentThread().isInterrupted()) {</span>
-<span class="nc" id="L454">                    throw new InternalErrorException(</span>
+<span class="fc bfc" id="L474" title="All 2 branches covered.">        if (!reportToPublish.isEmpty()) {</span>
+<span class="fc bfc" id="L475" title="All 2 branches covered.">            for (FileQueueMessage msg : reportToPublish) {</span>
+<span class="pc bpc" id="L476" title="1 of 2 branches missed.">                if (Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L477">                    throw new InternalErrorException(</span>
                             &quot;The current thread as been interrupted&quot;);
                 } else {
-<span class="fc" id="L457">                    LOGGER.info(&quot;{} 4 - Publishing KAFKA message for output {}&quot;,</span>
-<span class="fc" id="L458">                            prefixMonitorLogs, msg.getProductName());</span>
+<span class="fc" id="L480">                    LOGGER.info(&quot;{} 4 - Publishing KAFKA message for output {}&quot;,</span>
+<span class="fc" id="L481">                            prefixMonitorLogs, msg.getProductName());</span>
                     try {
-<span class="fc" id="L460">                        procuderFactory.sendOutput(msg, inputMessage);</span>
-<span class="fc" id="L461">                    } catch (MqiPublicationError ace) {</span>
-<span class="fc" id="L462">                        String message = String.format(&quot;%s [code %d] %s&quot;,</span>
-<span class="fc" id="L463">                                prefixMonitorLogs, ace.getCode().getCode(),</span>
-<span class="fc" id="L464">                                ace.getLogMessage());</span>
-<span class="fc" id="L465">                        LOGGER.error(message);</span>
-<span class="fc" id="L466">                        procuderFactory.sendError(message);</span>
-<span class="fc" id="L467">                    }</span>
+<span class="fc" id="L483">                        procuderFactory.sendOutput(msg, inputMessage);</span>
+<span class="fc" id="L484">                    } catch (MqiPublicationError ace) {</span>
+<span class="fc" id="L485">                        String message = String.format(&quot;%s [code %d] %s&quot;,</span>
+<span class="fc" id="L486">                                prefixMonitorLogs, ace.getCode().getCode(),</span>
+<span class="fc" id="L487">                                ace.getLogMessage());</span>
+<span class="fc" id="L488">                        LOGGER.error(message);</span>
+<span class="fc" id="L489">                        procuderFactory.sendError(message);</span>
+<span class="fc" id="L490">                    }</span>
                 }
-<span class="fc" id="L469">            }</span>
+<span class="fc" id="L492">            }</span>
         }
-<span class="fc" id="L471">    }</span>
+<span class="fc" id="L494">    }</span>
 
     /**
      * Function which process all the output of L0 process
@@ -479,20 +502,20 @@ public class OutputProcessor {
     public void processOutput() throws AbstractCodedException {
 
         // Extract files
-<span class="fc" id="L482">        List&lt;String&gt; lines = extractFiles();</span>
+<span class="fc" id="L505">        List&lt;String&gt; lines = extractFiles();</span>
 
         // Sort outputs
-<span class="fc" id="L485">        List&lt;S3UploadFile&gt; uploadBatch = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L486">        List&lt;ObsQueueMessage&gt; outputToPublish = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L487">        List&lt;FileQueueMessage&gt; reportToPublish = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L488">        sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish);</span>
+<span class="fc" id="L508">        List&lt;S3UploadFile&gt; uploadBatch = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L509">        List&lt;ObsQueueMessage&gt; outputToPublish = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L510">        List&lt;FileQueueMessage&gt; reportToPublish = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L511">        sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish);</span>
 
         // Upload per batch the output
-<span class="fc" id="L491">        processProducts(uploadBatch, outputToPublish);</span>
+<span class="fc" id="L514">        processProducts(uploadBatch, outputToPublish);</span>
 
         // Publish reports
-<span class="fc" id="L494">        processReports(reportToPublish);</span>
-<span class="fc" id="L495">    }</span>
+<span class="fc" id="L517">        processReports(reportToPublish);</span>
+<span class="fc" id="L518">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>

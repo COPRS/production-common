@@ -361,9 +361,11 @@ public class OutputProcessor {
     protected void processProducts(final List<S3UploadFile> uploadBatch,
             final List<ObsQueueMessage> outputToPublish)
             throws AbstractCodedException {
+        String listoutputs = uploadBatch.stream().map(S3UploadFile::getKey)
+                .collect(Collectors.joining(","));
         LOGGER.info(
-                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [START] 3 - Starting processing object storage compatible outputs",
-                prefixMonitorLogs, this.appLevel);
+                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [START] 3 - Starting processing object storage compatible outputs [inputs {}]",
+                prefixMonitorLogs, appLevel, listoutputs);
 
         double size = Double.valueOf(uploadBatch.size());
         double nbPool = Math.ceil(size / sizeUploadBatch);
@@ -373,27 +375,38 @@ public class OutputProcessor {
                     Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());
             List<S3UploadFile> sublist =
                     uploadBatch.subList(i * sizeUploadBatch, lastIndex);
-
+            String listProducts = sublist.stream().map(S3UploadFile::getKey)
+                    .collect(Collectors.joining(","));
             if (i > 0) {
                 this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(),
                         outputToPublish);
             }
-            LOGGER.info("{} 3 - Uploading batch {} ", prefixMonitorLogs, i);
-            if (Thread.currentThread().isInterrupted()) {
-                throw new InternalErrorException(
-                        "The current thread as been interrupted");
-            } else {
-                this.obsService.uploadFilesPerBatch(sublist);
+            try {
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new InternalErrorException(
+                            "The current thread as been interrupted");
+                } else {
+                    LOGGER.info(
+                            "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [START] 3 - Uploading batch {} [inputs {}]",
+                            prefixMonitorLogs, appLevel, i, listProducts);
+                    this.obsService.uploadFilesPerBatch(sublist);
+                    LOGGER.info(
+                            "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [STOP OK] 3 - batch {} successfully uploaded [outputs {}]",
+                            prefixMonitorLogs, appLevel, i, listProducts);
+                }
+            } catch (AbstractCodedException ace) {
+                LOGGER.error(
+                        "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [STOP KO] 3 - Error occurred during batch {} upload {} ",
+                        prefixMonitorLogs, this.appLevel, i,
+                        ace.getLogMessage());
+                throw ace;
             }
         }
-        String listoutputs = "";
-        for (int i = 0; i < size; i++) {
-            listoutputs = listoutputs + " " + uploadBatch.get(i).getKey();
-        }
-        LOGGER.info(
-                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Publishing KAFKA messages for the last batch [outputs {}]",
-                this.prefixMonitorLogs, this.appLevel, listoutputs);
         publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);
+        
+        LOGGER.info(
+                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Outputs successfully processed [outputs {}]",
+                this.prefixMonitorLogs, this.appLevel, listoutputs);
     }
 
     /**
@@ -422,13 +435,23 @@ public class OutputProcessor {
                 if (nextKeyUpload.startsWith(msg.getKeyObs())) {
                     stop = true;
                 } else {
-                    LOGGER.info("{} 3 - Publishing message for output {}",
-                            prefixMonitorLogs, msg.getProductName());
+                    LOGGER.info(
+                            "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [START] 3 - Publishing message [inputs {}]",
+                            prefixMonitorLogs, appLevel, msg.getProductName());
                     try {
                         procuderFactory.sendOutput(msg, inputMessage);
+                        LOGGER.info(
+                                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [STOP OK] 3 - Message published [outputs {}]",
+                                prefixMonitorLogs, appLevel,
+                                msg.getProductName());
                     } catch (MqiPublicationError ace) {
                         LOGGER.error("{} [code {}] {}", prefixMonitorLogs,
                                 ace.getCode().getCode(), ace.getLogMessage());
+                        LOGGER.error(
+                                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [STOP K0] [code {}] 3 - Message not published {} [outputs {}]",
+                                prefixMonitorLogs, appLevel,
+                                ace.getCode().getCode(), ace.getLogMessage(),
+                                msg.getProductName());
                     }
                     iter.remove();
                 }

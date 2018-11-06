@@ -25,5 +25,5 @@ S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,WrapperRestController
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,AppStatus.WrapperStatus,2,167,2,24,1,47,2,27,0,16
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.status,AppStatus,11,90,2,6,5,31,2,13,0,11
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,InputDownloader,5,313,2,20,1,79,2,19,0,9
-S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor,47,734,5,49,9,157,5,35,0,11
+S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor,61,767,5,47,14,167,5,34,0,11
 S1-PDGS Cloud POC - Wrapper,esa.s1pdgs.cpoc.wrapper.job.file,OutputProcessor.new Object() {...},9,59,0,0,0,1,0,1,0,1
