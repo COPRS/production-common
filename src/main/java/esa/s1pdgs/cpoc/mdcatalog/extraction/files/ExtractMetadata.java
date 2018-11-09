@@ -108,6 +108,7 @@ public class ExtractMetadata {
 
                 if (coordinatesTmp.length <= 2) { // BBOX type (envelope in ES)
                     geoShape.put("type", "envelope");
+                    geoShape.put("orientation", "clockwise");
                     for (String coord : coordinatesTmp) {
                         String[] tmp = coord.split(",");
                         coordinates.put(new JSONArray(
@@ -116,6 +117,7 @@ public class ExtractMetadata {
                     geoShape.put("coordinates", coordinates);
                 } else { // Polygon type
                     geoShape.put("type", "polygon");
+                    geoShape.put("orientation", "clockwise");
                     for (String coord : coordinatesTmp) {
                         String[] tmp = coord.split(",");
                         coordinates.put(new JSONArray(
@@ -134,6 +136,7 @@ public class ExtractMetadata {
             } else {
                 // Several coordinates
                 geoShape.put("type", "polygon");
+                geoShape.put("orientation", "clockwise");
                 // Le premier point doit être extrait à partir de l’avant dernier coordinate, et avec le premier point.
                 String[] coordinatesTmp1 = coordinatesArray[nbCoordinates - 2].split(" ");
                 String[] tmp1 = coordinatesTmp1[0].split(",");
