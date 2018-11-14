@@ -32,7 +32,7 @@ S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsServices,36,
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.es,EsClientConfiguration.new RestClientBuilder.RequestConfigCallback() {...},0,16,0,0,0,3,0,2,0,2
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,FileDescriptorBuilder,42,783,11,39,6,168,12,20,1,6
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,MetadataBuilder.new Object() {...},5,39,0,0,0,2,0,1,0,1
-S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,ExtractMetadata,38,1793,20,40,9,361,20,27,0,17
+S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,ExtractMetadata,126,1987,21,43,18,380,21,28,0,17
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.files,MetadataBuilder,8,155,1,8,1,40,1,14,0,9
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.extraction.mqi,MqiConfiguration,0,82,0,0,0,15,0,6,0,6
 S1-PDGS Cloud POC - Metadata catalog,esa.s1pdgs.cpoc.mdcatalog.rest.dto,EdrsSessionMetadataDto,0,21,0,0,0,5,0,2,0,2

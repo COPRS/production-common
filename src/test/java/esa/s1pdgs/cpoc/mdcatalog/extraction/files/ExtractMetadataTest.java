@@ -825,6 +825,46 @@ public class ExtractMetadataTest {
         }
     }
 
+    @Test
+    public void testProcessL1SlicesWVFile3raw() {
+        
+        L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();
+        descriptor.setExtension(FileExtension.SAFE);
+        descriptor.setFilename("manifest.safe");
+        descriptor.setKeyObjectStorage(
+                "S1A_WV_GRDM_1ASV_20180913T214338_20180913T214410_023685_0294F4_70D1.SAFE");
+        descriptor.setMissionId("S1");
+        descriptor.setSatelliteId("A");
+        descriptor.setProductName(
+                "S1A_WV_GRDM_1ASV_20180913T214338_20180913T214410_023685_0294F4_70D1.SAFE");
+        descriptor.setRelativePath(
+                "S1A_WV_GRDM_1ASV_20180913T214338_20180913T214410_023685_0294F4_70D1.SAFE");
+        descriptor.setSwathtype("WV");
+        descriptor.setResolution("M");
+        descriptor.setProductClass("S");
+        descriptor.setProductType("WV_GRDM_1S");
+        descriptor.setPolarisation("SV");
+        descriptor.setDataTakeId("0294F4");
+        descriptor.setProductFamily(ProductFamily.L1_SLICE);
+
+        File file = new File(
+                "test/workDir/S1A_WV_GRDM_1ASV_20180913T214338_20180913T214410_023685_0294F4_70D1.SAFE/manifest.safe");
+
+        try {
+            JSONObject result = extractor.processL1SliceProd(descriptor, file);
+
+            assertNotNull("JSON object should not be null", result);
+            assertEquals("polygon", result.getJSONObject("sliceCoordinates").getString("type"));
+            assertEquals(new JSONArray("[98.145752,-63.219410]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(0).toString());
+            assertEquals(new JSONArray("[101.982521,-63.093563]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(1).toString());
+            assertEquals(new JSONArray("[102.146751,-62.931400]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
+            assertEquals(new JSONArray("[100.111465,-61.471767]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
+            assertEquals(new JSONArray("[98.145752,-63.219410]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
+        } catch (AbstractCodedException fe) {
+            fail("Exception occurred: " + fe.getMessage());
+        }
+    }
+
     @Test(expected = AbstractCodedException.class)
     public void testProcessL1SlicesMissingFileFail()
             throws MetadataExtractionException {
