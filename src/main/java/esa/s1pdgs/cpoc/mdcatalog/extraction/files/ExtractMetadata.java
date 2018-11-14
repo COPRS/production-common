@@ -133,6 +133,44 @@ public class ExtractMetadata {
                     geoShape.put("coordinates",
                             new JSONArray().put(coordinates));
                 }
+            } else if (nbCoordinates == 2) {
+                geoShape.put("type", "envelope");
+                geoShape.put("orientation", "clockwise");
+                // Le premier point doit être extrait à partir de l’avant dernier coordinate, et avec le premier point.
+                String[] coordinatesTmp1 = coordinatesArray[1].split(" ");
+                String[] tmp1 = coordinatesTmp1[1].split(",");
+                coordinates.put(new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
+                // Le second point doit être extrait à partir du dernier coordinate, et avec le second point
+                String[] coordinatesTmp2 = coordinatesArray[0].split(" ");
+                String[] tmp2 = coordinatesTmp2[3].split(",");
+                coordinates.put(new JSONArray("[" + tmp2[1] + "," + tmp2[0] + "]"));
+                geoShape.put("coordinates", coordinates);
+                
+            } else if (nbCoordinates == 3) {
+                // Several coordinates
+                geoShape.put("type", "polygon");
+                geoShape.put("orientation", "clockwise");
+                // Le premier point = 1er coordonnée du 3eme point.
+                String[] coordinatesTmp1 = coordinatesArray[2].split(" ");
+                String[] tmp1 = coordinatesTmp1[0].split(",");
+                coordinates.put(new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
+                // Le second point = 2eme coordonnée du 2eme point
+                String[] coordinatesTmp2 = coordinatesArray[1].split(" ");
+                String[] tmp2 = coordinatesTmp2[1].split(",");
+                coordinates.put(new JSONArray("[" + tmp2[1] + "," + tmp2[0] + "]"));
+                // Le troisième point = 3eme coordonnée du 2eme point
+                String[] coordinatesTmp3 = coordinatesArray[1].split(" ");
+                String[] tmp3 = coordinatesTmp3[2].split(",");
+                coordinates.put(new JSONArray("[" + tmp3[1] + "," + tmp3[0] + "]"));
+                // Le quatrième point = 4eme coordonnée du 1er point
+                String[] coordinatesTmp4 = coordinatesArray[0].split(" ");
+                String[] tmp4 = coordinatesTmp4[3].split(",");
+                coordinates.put(new JSONArray("[" + tmp4[1] + "," + tmp4[0] + "]"));
+                // On ferme le polygon
+                coordinates.put(new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
+                geoShape.put("coordinates",
+                        new JSONArray().put(coordinates));
+                
             } else {
                 // Several coordinates
                 geoShape.put("type", "polygon");
