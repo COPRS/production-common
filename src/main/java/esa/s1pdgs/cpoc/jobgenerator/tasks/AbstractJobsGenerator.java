@@ -679,15 +679,23 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                                             .getStopTime(),
                                                     AppDataJobProductDto.TIME_FORMATTER,
                                                     outFormatter);
+                                    String filename = alt.getFileType();
+                                    if (this.jobGeneratorSettings
+                                            .getMapTypeMeta()
+                                            .containsKey(alt.getFileType())) {
+                                        filename = this.jobGeneratorSettings
+                                                .getMapTypeMeta()
+                                                .get(alt.getFileType());
+                                    }
                                     inputsToAdd.add(new JobOrderInput(
                                             alt.getFileType(),
                                             JobOrderFileNameType.REGEXP,
                                             Arrays.asList(new JobOrderInputFile(
-                                                    alt.getFileType(), "")),
+                                                    filename, "")),
                                             Arrays.asList(
                                                     new JobOrderTimeInterval(
                                                             startDate, stopDate,
-                                                            alt.getFileType(),
+                                                            filename,
                                                             outFormatter)),
                                             ProductFamily.BLANK));
                                 }

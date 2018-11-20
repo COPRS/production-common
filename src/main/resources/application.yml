@@ -44,6 +44,7 @@ job-generator:
     AN_RAW__0A: N[1-6]_RAW__0A
     AN_RAW__0C: N[1-6]_RAW__0C
     AN_RAW__0N: N[1-6]_RAW__0N
+    SM_SL1__1_: S[1-6]_SL1__1_
     
     
 status:
