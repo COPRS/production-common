@@ -77,10 +77,10 @@ public abstract class AbstractFileProcessor<T> {
         File file = message.getPayload();
         if (isValidFile(file)) {
             int step = 0;
+            String productName = file.getName();
             LOGGER.info(
                     "[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]",
-                    file.getPath(), extractor.getFamily());
-            String productName = file.getName();
+                    productName, extractor.getFamily());
             this.appStatus.setProcessing(family);
             // Build model file
             try {

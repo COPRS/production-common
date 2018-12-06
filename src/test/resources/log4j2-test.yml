@@ -63,6 +63,6 @@ Configuration:
           - ref: STDOUT
           - ref: FILE
     Root:
-      level: error
+      level: info
       AppenderRef:
         ref: STDOUT
