@@ -46,6 +46,6 @@ Configuration:
           - ref: STDOUT
           - ref: FILE
     Root:
-      level: ${env:job_logging_level_root:-error}
+      level: info
       AppenderRef:
         ref: STDOUT

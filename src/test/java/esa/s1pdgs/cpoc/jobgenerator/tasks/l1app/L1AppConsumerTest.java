@@ -21,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -205,9 +206,13 @@ public class L1AppConsumerTest {
         AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
         job1.setIdentifier(12L);
         job1.setPod("i-hostname");
+        job1.setProduct(new AppDataJobProductDto());
+        job1.getProduct().setProductName("p1");
         AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
+        job2.setProduct(new AppDataJobProductDto());
+        job2.getProduct().setProductName("p2");
         doReturn(message1).when(mqiService).next();
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
@@ -233,9 +238,13 @@ public class L1AppConsumerTest {
         AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
         job1.setIdentifier(12L);
         job1.setPod("hostname");
+        job1.setProduct(new AppDataJobProductDto());
+        job1.getProduct().setProductName("p1");
         AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
+        job2.setProduct(new AppDataJobProductDto());
+        job2.getProduct().setProductName("p2");
         doReturn(message1).when(mqiService).next();
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
@@ -262,9 +271,13 @@ public class L1AppConsumerTest {
         job1.setIdentifier(12L);
         job1.setPod("hostname");
         job1.setState(AppDataJobDtoState.DISPATCHING);
+        job1.setProduct(new AppDataJobProductDto());
+        job1.getProduct().setProductName("p1");
         AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
+        job2.setProduct(new AppDataJobProductDto());
+        job2.getProduct().setProductName("p1");
         doReturn(message1).when(mqiService).next();
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());

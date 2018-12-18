@@ -63,15 +63,16 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
 
         // Second process message
         EdrsSessionDto leveldto = mqiMessage.getBody();
+        String productName = leveldto.getObjectStorageKey();
 
         if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
 
             int step = 0;
             boolean ackOk = false;
             String errorMessage = "";
-            LOGGER.info(
-                    "[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] Starting job generation",
-                    step, getProductName(mqiMessage));
+            // Note: the report log of consume and global log is raised during
+            // building job to get the session identifier which is the real
+            // product name
             appStatus.setProcessing(mqiMessage.getIdentifier());
 
             try {
@@ -83,17 +84,21 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                         step, leveldto.getObjectStorageKey());
                 if (leveldto.getChannelId() != 1
                         && leveldto.getChannelId() != 2) {
+                    LOGGER.info(
+                            "[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                            step, productName);
                     throw new InvalidFormatProduct("Invalid channel identifier "
                             + leveldto.getChannelId());
                 }
                 AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
+                productName = appDataJob.getProduct().getProductName();
 
                 // Dispatch
                 step++;
                 if (appDataJob.getMessages().size() == 2) {
                     LOGGER.info(
                             "[MONITOR] [step 2] [productName {}] Dispatching product",
-                            getProductName(mqiMessage));
+                            productName);
                     if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
                         appDataJob.setState(AppDataJobDtoState.DISPATCHING);
                         appDataJob = appDataService.patchJob(
@@ -111,12 +116,12 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 ackOk = false;
                 errorMessage = String.format(
                         "[MONITOR] [step %d] [productName %s] [code %d] %s",
-                        step, getProductName(mqiMessage),
-                        ace.getCode().getCode(), ace.getLogMessage());
+                        step, productName, ace.getCode().getCode(),
+                        ace.getLogMessage());
             }
 
             // Ack and check if application shall stopped
-            ackProcessing(mqiMessage, ackOk, errorMessage);
+            ackProcessing(mqiMessage, ackOk, productName, errorMessage);
 
             step = 0;
             LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,
@@ -174,9 +179,14 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 }
 
                 jobDto.setProduct(productDto);
+
                 LOGGER.info(
                         "[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [START] [productName {}] Starting job generation",
-                        jobDto.getProduct().getProductName());
+                        productDto.getProductName());
+                LOGGER.info(
+                        "[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                        productDto.getProductName(),
+                        mqiMessage.getBody().getObjectStorageKey());
                 return appDataService.newJob(jobDto);
 
             } else {
@@ -187,6 +197,10 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 boolean updateProduct = false;
                 AppDataJobDto<EdrsSessionDto> jobDto =
                         existingJobsForSession.get(0);
+                LOGGER.info(
+                        "[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                        jobDto.getProduct().getProductName(),
+                        mqiMessage.getBody().getObjectStorageKey());
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
                     update = true;
@@ -229,6 +243,10 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             boolean updateMessage = false;
             boolean updateProduct = false;
             AppDataJobDto<EdrsSessionDto> jobDto = existingJobs.get(0);
+            LOGGER.info(
+                    "[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                    jobDto.getProduct().getProductName(),
+                    mqiMessage.getBody().getObjectStorageKey());
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
                 update = true;
@@ -242,11 +260,6 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             return jobDto;
         }
 
-    }
-
-    @Override
-    protected String getProductName(GenericMessageDto<EdrsSessionDto> dto) {
-        return dto.getBody().getObjectStorageKey();
     }
 
     @Override

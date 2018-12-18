@@ -82,121 +82,121 @@ public class L1AppConsumer extends AbstractGenericConsumer&lt;LevelProductDto&gt
         }
         // process message
 <span class="fc" id="L84">        appStatus.setProcessing(mqiMessage.getIdentifier());</span>
-<span class="fc" id="L85">        LOGGER.info(</span>
-                &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] Starting job generation&quot;,
-<span class="fc" id="L87">                getProductName(mqiMessage));</span>
-<span class="fc" id="L88">        int step = 1;</span>
-<span class="fc" id="L89">        boolean ackOk = false;</span>
-<span class="fc" id="L90">        String errorMessage = &quot;&quot;;</span>
+<span class="fc" id="L85">        int step = 1;</span>
+<span class="fc" id="L86">        boolean ackOk = false;</span>
+<span class="fc" id="L87">        String errorMessage = &quot;&quot;;</span>
+<span class="fc" id="L88">        String productName = mqiMessage.getBody().getProductName();</span>
 
         try {
 
             // Check if a job is already created for message identifier
-<span class="fc" id="L95">            LOGGER.info(&quot;[MONITOR] [step 1] [productName {}] Creating job&quot;,</span>
-<span class="fc" id="L96">                    getProductName(mqiMessage));</span>
-<span class="fc" id="L97">            AppDataJobDto&lt;LevelProductDto&gt; appDataJob = buildJob(mqiMessage);</span>
+<span class="fc" id="L93">            LOGGER.info(&quot;[MONITOR] [step 1] [productName {}] Creating job&quot;,</span>
+                    productName);
+<span class="fc" id="L95">            AppDataJobDto&lt;LevelProductDto&gt; appDataJob = buildJob(mqiMessage);</span>
+<span class="fc" id="L96">            productName = appDataJob.getProduct().getProductName();</span>
 
             // Dispatch job
-<span class="fc" id="L100">            step++;</span>
-<span class="fc" id="L101">            LOGGER.info(</span>
+<span class="fc" id="L99">            step++;</span>
+<span class="fc" id="L100">            LOGGER.info(</span>
                     &quot;[MONITOR] [step 2] [productName {}] Dispatching product&quot;,
-<span class="fc" id="L103">                    getProductName(mqiMessage));</span>
-<span class="fc bfc" id="L104" title="All 2 branches covered.">            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {</span>
-<span class="fc" id="L105">                appDataJob.setState(AppDataJobDtoState.DISPATCHING);</span>
-<span class="fc" id="L106">                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),</span>
+                    productName);
+<span class="fc bfc" id="L103" title="All 2 branches covered.">            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {</span>
+<span class="fc" id="L104">                appDataJob.setState(AppDataJobDtoState.DISPATCHING);</span>
+<span class="fc" id="L105">                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),</span>
                         appDataJob, false, false, false);
             }
-<span class="fc" id="L109">            jobsDispatcher.dispatch(appDataJob);</span>
+<span class="fc" id="L108">            jobsDispatcher.dispatch(appDataJob);</span>
 
             // Ack
-<span class="fc" id="L112">            step++;</span>
-<span class="fc" id="L113">            ackOk = true;</span>
+<span class="fc" id="L111">            step++;</span>
+<span class="fc" id="L112">            ackOk = true;</span>
 
-<span class="fc" id="L115">        } catch (AbstractCodedException ace) {</span>
-<span class="fc" id="L116">            ackOk = false;</span>
-<span class="fc" id="L117">            errorMessage = String.format(</span>
-<span class="fc" id="L118">                    &quot;[MONITOR] [step %d] [productName %s] [code %d] %s&quot;, step,</span>
-<span class="fc" id="L119">                    getProductName(mqiMessage), ace.getCode().getCode(),</span>
-<span class="fc" id="L120">                    ace.getLogMessage());</span>
-<span class="fc" id="L121">        }</span>
+<span class="fc" id="L114">        } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L115">            ackOk = false;</span>
+<span class="fc" id="L116">            errorMessage = String.format(</span>
+<span class="fc" id="L117">                    &quot;[MONITOR] [step %d] [productName %s] [code %d] %s&quot;, step,</span>
+<span class="fc" id="L118">                    productName, ace.getCode().getCode(), ace.getLogMessage());</span>
+<span class="fc" id="L119">        }</span>
 
         // Ack and check if application shall stopped
-<span class="fc" id="L124">        ackProcessing(mqiMessage, ackOk, errorMessage);</span>
+<span class="fc" id="L122">        ackProcessing(mqiMessage, ackOk, productName, errorMessage);</span>
 
-<span class="fc" id="L126">        LOGGER.info(&quot;[MONITOR] [step 0] [productName {}] End&quot;,</span>
-<span class="fc" id="L127">                getProductName(mqiMessage));</span>
-<span class="fc" id="L128">    }</span>
+<span class="fc" id="L124">        LOGGER.info(&quot;[MONITOR] [step 0] [productName {}] End&quot;, productName);</span>
+<span class="fc" id="L125">    }</span>
 
     protected AppDataJobDto&lt;LevelProductDto&gt; buildJob(
             GenericMessageDto&lt;LevelProductDto&gt; mqiMessage)
             throws AbstractCodedException {
-<span class="fc" id="L133">        LevelProductDto leveldto = mqiMessage.getBody();</span>
+<span class="fc" id="L130">        LevelProductDto leveldto = mqiMessage.getBody();</span>
 
         // Check if a job is already created for message identifier
-<span class="fc" id="L136">        List&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt; existingJobs = appDataService</span>
-<span class="fc" id="L137">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
+<span class="fc" id="L133">        List&lt;AppDataJobDto&lt;LevelProductDto&gt;&gt; existingJobs = appDataService</span>
+<span class="fc" id="L134">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
 
-<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
             // Job does not exists =&gt; create it
-<span class="fc" id="L141">            Matcher m = l0SLicesPattern.matcher(leveldto.getProductName());</span>
-<span class="fc bfc" id="L142" title="All 2 branches covered.">            if (!m.matches()) {</span>
-<span class="fc" id="L143">                throw new InvalidFormatProduct(</span>
+<span class="fc" id="L138">            Matcher m = l0SLicesPattern.matcher(leveldto.getProductName());</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            if (!m.matches()) {</span>
+<span class="fc" id="L140">                throw new InvalidFormatProduct(</span>
                         &quot;Don't match with regular expression &quot;
-<span class="fc" id="L145">                                + this.patternSettings.getRegexp());</span>
+<span class="fc" id="L142">                                + this.patternSettings.getRegexp());</span>
             }
-<span class="fc" id="L147">            String satelliteId = m.group(this.patternSettings.getMGroupSatId());</span>
-<span class="fc" id="L148">            String missionId =</span>
-<span class="fc" id="L149">                    m.group(this.patternSettings.getMGroupMissionId());</span>
-<span class="fc" id="L150">            String acquisition =</span>
-<span class="fc" id="L151">                    m.group(this.patternSettings.getMGroupAcquisition());</span>
-<span class="fc" id="L152">            String startTime =</span>
-<span class="fc" id="L153">                    m.group(this.patternSettings.getMGroupStartTime());</span>
-<span class="fc" id="L154">            String stopTime = m.group(this.patternSettings.getMGroupStopTime());</span>
+<span class="fc" id="L144">            String satelliteId = m.group(this.patternSettings.getMGroupSatId());</span>
+<span class="fc" id="L145">            String missionId =</span>
+<span class="fc" id="L146">                    m.group(this.patternSettings.getMGroupMissionId());</span>
+<span class="fc" id="L147">            String acquisition =</span>
+<span class="fc" id="L148">                    m.group(this.patternSettings.getMGroupAcquisition());</span>
+<span class="fc" id="L149">            String startTime =</span>
+<span class="fc" id="L150">                    m.group(this.patternSettings.getMGroupStartTime());</span>
+<span class="fc" id="L151">            String stopTime = m.group(this.patternSettings.getMGroupStopTime());</span>
 
             // Create the JOB
-<span class="fc" id="L157">            AppDataJobDto&lt;LevelProductDto&gt; jobDto = new AppDataJobDto&lt;&gt;();</span>
+<span class="fc" id="L154">            AppDataJobDto&lt;LevelProductDto&gt; jobDto = new AppDataJobDto&lt;&gt;();</span>
             // General details
-<span class="fc" id="L159">            jobDto.setLevel(processSettings.getLevel());</span>
-<span class="fc" id="L160">            jobDto.setPod(processSettings.getHostname());</span>
+<span class="fc" id="L156">            jobDto.setLevel(processSettings.getLevel());</span>
+<span class="fc" id="L157">            jobDto.setPod(processSettings.getHostname());</span>
             // Messages
-<span class="fc" id="L162">            jobDto.getMessages().add(mqiMessage);</span>
+<span class="fc" id="L159">            jobDto.getMessages().add(mqiMessage);</span>
             // Product
-<span class="fc" id="L164">            AppDataJobProductDto productDto = new AppDataJobProductDto();</span>
-<span class="fc" id="L165">            productDto.setAcquisition(acquisition);</span>
-<span class="fc" id="L166">            productDto.setMissionId(missionId);</span>
-<span class="fc" id="L167">            productDto.setProductName(leveldto.getProductName());</span>
-<span class="fc" id="L168">            productDto.setProcessMode(leveldto.getMode());</span>
-<span class="fc" id="L169">            productDto.setSatelliteId(satelliteId);</span>
-<span class="fc" id="L170">            productDto.setStartTime(DateUtils.convertToAnotherFormat(startTime,</span>
+<span class="fc" id="L161">            AppDataJobProductDto productDto = new AppDataJobProductDto();</span>
+<span class="fc" id="L162">            productDto.setAcquisition(acquisition);</span>
+<span class="fc" id="L163">            productDto.setMissionId(missionId);</span>
+<span class="fc" id="L164">            productDto.setProductName(leveldto.getProductName());</span>
+<span class="fc" id="L165">            productDto.setProcessMode(leveldto.getMode());</span>
+<span class="fc" id="L166">            productDto.setSatelliteId(satelliteId);</span>
+<span class="fc" id="L167">            productDto.setStartTime(DateUtils.convertToAnotherFormat(startTime,</span>
                     L0SlicePatternSettings.TIME_FORMATTER,
                     AppDataJobProductDto.TIME_FORMATTER));
-<span class="fc" id="L173">            productDto.setStopTime(DateUtils.convertToAnotherFormat(stopTime,</span>
+<span class="fc" id="L170">            productDto.setStopTime(DateUtils.convertToAnotherFormat(stopTime,</span>
                     L0SlicePatternSettings.TIME_FORMATTER,
                     AppDataJobProductDto.TIME_FORMATTER));
-<span class="fc" id="L176">            jobDto.setProduct(productDto);</span>
+<span class="fc" id="L173">            jobDto.setProduct(productDto);</span>
 
-<span class="fc" id="L178">            LOGGER.info(</span>
+<span class="fc" id="L175">            LOGGER.info(</span>
                     &quot;[REPORT] [MONITOR] [s1pdgsTask L1JobGeneration] [START] [productName {}] Starting job generation&quot;,
-<span class="fc" id="L180">                    jobDto.getProduct().getProductName());</span>
+<span class="fc" id="L177">                    jobDto.getProduct().getProductName());</span>
+<span class="fc" id="L178">            LOGGER.info(</span>
+                    &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+<span class="fc" id="L180">                    jobDto.getProduct().getProductName(),</span>
+<span class="fc" id="L181">                    leveldto.getProductName());</span>
 
-<span class="fc" id="L182">            return appDataService.newJob(jobDto);</span>
+<span class="fc" id="L183">            return appDataService.newJob(jobDto);</span>
 
         } else {
             // Update pod if needed
-<span class="fc" id="L186">            AppDataJobDto&lt;LevelProductDto&gt; jobDto = existingJobs.get(0);</span>
-<span class="fc bfc" id="L187" title="All 2 branches covered.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
-<span class="fc" id="L188">                jobDto.setPod(processSettings.getHostname());</span>
-<span class="fc" id="L189">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
+<span class="fc" id="L187">            AppDataJobDto&lt;LevelProductDto&gt; jobDto = existingJobs.get(0);</span>
+<span class="fc" id="L188">            LOGGER.info(</span>
+                    &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+<span class="fc" id="L190">                    jobDto.getProduct().getProductName(),</span>
+<span class="fc" id="L191">                    leveldto.getProductName());</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
+<span class="fc" id="L193">                jobDto.setPod(processSettings.getHostname());</span>
+<span class="fc" id="L194">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
                         false, false, false);
             }
             // Job already exists
-<span class="fc" id="L193">            return jobDto;</span>
+<span class="fc" id="L198">            return jobDto;</span>
         }
-    }
-
-    protected String getProductName(
-            final GenericMessageDto&lt;LevelProductDto&gt; dto) {
-<span class="fc" id="L199">        return dto.getBody().getProductName();</span>
     }
 
     @Override

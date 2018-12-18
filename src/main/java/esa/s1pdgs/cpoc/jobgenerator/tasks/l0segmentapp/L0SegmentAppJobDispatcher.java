@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
@@ -91,7 +92,7 @@ public class L0SegmentAppJobDispatcher
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return "L0SegmentJobGeneration";
+        return ApplicationLevel.L0_SEGMENT.name() + "JobGeneration";
     }
 
 }
