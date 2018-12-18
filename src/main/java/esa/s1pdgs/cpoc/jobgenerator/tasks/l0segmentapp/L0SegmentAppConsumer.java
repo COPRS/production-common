@@ -79,26 +79,28 @@ public class L0SegmentAppConsumer
         }
         // process message
         appStatus.setProcessing(mqiMessage.getIdentifier());
-        LOGGER.info(
-                "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0SegmentJobGeneration] [subTask Consume] [START] [productName {}] Starting job generation",
-                getProductName(mqiMessage));
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
+        String productName = mqiMessage.getBody().getName();
+        // Note: the report log of consume and global log is raised during
+        // building job to get the datatake identifier which is the real
+        // product name
 
         try {
 
             // Check if a job is already created for message identifier
             LOGGER.info(
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
-                    getProductName(mqiMessage));
+                    productName);
             AppDataJobDto<LevelSegmentDto> appDataJob = buildJob(mqiMessage);
+            productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
             step++;
             LOGGER.info(
                     "[MONITOR] [step 2] [productName {}] Dispatching product",
-                    getProductName(mqiMessage));
+                    productName);
             if (appDataJob.getState() == AppDataJobDtoState.WAITING
                     || appDataJob
                             .getState() == AppDataJobDtoState.DISPATCHING) {
@@ -109,7 +111,7 @@ public class L0SegmentAppConsumer
             } else {
                 LOGGER.info(
                         "[MONITOR] [step 2] [productName {}] Job for datatake already dispatched",
-                        getProductName(mqiMessage));
+                        productName);
             }
 
             // Ack
@@ -120,15 +122,15 @@ public class L0SegmentAppConsumer
             ackOk = false;
             errorMessage = String.format(
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
-                    getProductName(mqiMessage), ace.getCode().getCode(),
+                    productName, ace.getCode().getCode(),
                     ace.getLogMessage());
         }
 
         // Ack and check if application shall stopped
-        ackProcessing(mqiMessage, ackOk, errorMessage);
+        ackProcessing(mqiMessage, ackOk, productName, errorMessage);
 
         LOGGER.info("[MONITOR] [step 0] [productName {}] End",
-                getProductName(mqiMessage));
+                productName);
     }
 
     protected AppDataJobDto<LevelSegmentDto> buildJob(
@@ -178,13 +180,19 @@ public class L0SegmentAppConsumer
                 jobDto.setProduct(productDto);
 
                 LOGGER.info(
-                        "[REPORT] [MONITOR] [s1pdgsTask L0SegmentJobGeneration] [START] [datatake {}] Starting job generation",
-                        jobDto.getProduct().getDataTakeId());
+                        "[REPORT] [MONITOR] [s1pdgsTask L0_SEGMENTJobGeneration] [START] [productName {}] Starting job generation",
+                        productDto.getProductName());
+                LOGGER.info(
+                        "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                        productDto.getProductName(), leveldto.getName());
 
                 return appDataService.newJob(jobDto);
             } else {
                 AppDataJobDto<LevelSegmentDto> jobDto =
                         existingJobsForDatatake.get(0);
+                LOGGER.info(
+                        "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                        jobDto.getProduct().getProductName(), leveldto.getName());
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
                 }
@@ -197,6 +205,9 @@ public class L0SegmentAppConsumer
         } else {
             // Update pod if needed
             AppDataJobDto<LevelSegmentDto> jobDto = existingJobs.get(0);
+            LOGGER.info(
+                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                    jobDto.getProduct().getProductName(), leveldto.getName());
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
                 jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
@@ -207,13 +218,8 @@ public class L0SegmentAppConsumer
         }
     }
 
-    protected String getProductName(
-            final GenericMessageDto<LevelSegmentDto> dto) {
-        return dto.getBody().getName();
-    }
-
     @Override
     protected String getTaskForFunctionalLog() {
-        return "L0SegmentJobGeneration";
+        return "L0_SEGMENTJobGeneration";
     }
 }

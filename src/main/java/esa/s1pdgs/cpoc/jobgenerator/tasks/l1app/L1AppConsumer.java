@@ -82,25 +82,24 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
         }
         // process message
         appStatus.setProcessing(mqiMessage.getIdentifier());
-        LOGGER.info(
-                "[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] Starting job generation",
-                getProductName(mqiMessage));
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
+        String productName = mqiMessage.getBody().getProductName();
 
         try {
 
             // Check if a job is already created for message identifier
             LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job",
-                    getProductName(mqiMessage));
+                    productName);
             AppDataJobDto<LevelProductDto> appDataJob = buildJob(mqiMessage);
+            productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
             step++;
             LOGGER.info(
                     "[MONITOR] [step 2] [productName {}] Dispatching product",
-                    getProductName(mqiMessage));
+                    productName);
             if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
                 appDataJob.setState(AppDataJobDtoState.DISPATCHING);
                 appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
@@ -116,15 +115,13 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             ackOk = false;
             errorMessage = String.format(
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
-                    getProductName(mqiMessage), ace.getCode().getCode(),
-                    ace.getLogMessage());
+                    productName, ace.getCode().getCode(), ace.getLogMessage());
         }
 
         // Ack and check if application shall stopped
-        ackProcessing(mqiMessage, ackOk, errorMessage);
+        ackProcessing(mqiMessage, ackOk, productName, errorMessage);
 
-        LOGGER.info("[MONITOR] [step 0] [productName {}] End",
-                getProductName(mqiMessage));
+        LOGGER.info("[MONITOR] [step 0] [productName {}] End", productName);
     }
 
     protected AppDataJobDto<LevelProductDto> buildJob(
@@ -178,12 +175,20 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             LOGGER.info(
                     "[REPORT] [MONITOR] [s1pdgsTask L1JobGeneration] [START] [productName {}] Starting job generation",
                     jobDto.getProduct().getProductName());
+            LOGGER.info(
+                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                    jobDto.getProduct().getProductName(),
+                    leveldto.getProductName());
 
             return appDataService.newJob(jobDto);
 
         } else {
             // Update pod if needed
             AppDataJobDto<LevelProductDto> jobDto = existingJobs.get(0);
+            LOGGER.info(
+                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                    jobDto.getProduct().getProductName(),
+                    leveldto.getProductName());
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
                 jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
@@ -192,11 +197,6 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             // Job already exists
             return jobDto;
         }
-    }
-
-    protected String getProductName(
-            final GenericMessageDto<LevelProductDto> dto) {
-        return dto.getBody().getProductName();
     }
 
     @Override

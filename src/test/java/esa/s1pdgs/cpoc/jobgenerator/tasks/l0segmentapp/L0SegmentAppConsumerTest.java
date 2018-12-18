@@ -163,15 +163,8 @@ public class L0SegmentAppConsumerTest {
 
     @Test
     public void testGetTaskForFunctionalLog() {
-        assertEquals("L0SegmentJobGeneration",
+        assertEquals("L0_SEGMENTJobGeneration",
                 consumer.getTaskForFunctionalLog());
-    }
-
-    @Test
-    public void testGetProductName() {
-        assertEquals(
-                "S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
-                consumer.getProductName(messages.get(0)));
     }
 
     @Test

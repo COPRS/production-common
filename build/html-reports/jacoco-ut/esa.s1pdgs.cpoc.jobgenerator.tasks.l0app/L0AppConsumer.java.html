@@ -63,195 +63,208 @@ public class L0AppConsumer extends AbstractGenericConsumer&lt;EdrsSessionDto&gt;
 
         // Second process message
 <span class="fc" id="L65">        EdrsSessionDto leveldto = mqiMessage.getBody();</span>
+<span class="fc" id="L66">        String productName = leveldto.getObjectStorageKey();</span>
 
-<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {</span>
 
-<span class="fc" id="L69">            int step = 0;</span>
-<span class="fc" id="L70">            boolean ackOk = false;</span>
-<span class="fc" id="L71">            String errorMessage = &quot;&quot;;</span>
-<span class="fc" id="L72">            LOGGER.info(</span>
-                    &quot;[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] Starting job generation&quot;,
-<span class="fc" id="L74">                    step, getProductName(mqiMessage));</span>
-<span class="fc" id="L75">            appStatus.setProcessing(mqiMessage.getIdentifier());</span>
+<span class="fc" id="L70">            int step = 0;</span>
+<span class="fc" id="L71">            boolean ackOk = false;</span>
+<span class="fc" id="L72">            String errorMessage = &quot;&quot;;</span>
+            // Note: the report log of consume and global log is raised during
+            // building job to get the session identifier which is the real
+            // product name
+<span class="fc" id="L76">            appStatus.setProcessing(mqiMessage.getIdentifier());</span>
 
             try {
 
                 // Create the EdrsSessionFile object from the consumed message
-<span class="fc" id="L80">                step = 1;</span>
-<span class="fc" id="L81">                LOGGER.info(</span>
+<span class="fc" id="L81">                step = 1;</span>
+<span class="fc" id="L82">                LOGGER.info(</span>
                         &quot;[MONITOR] [step {}] [productName {}] Building product&quot;,
-<span class="fc" id="L83">                        step, leveldto.getObjectStorageKey());</span>
-<span class="fc bfc" id="L84" title="All 2 branches covered.">                if (leveldto.getChannelId() != 1</span>
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">                        &amp;&amp; leveldto.getChannelId() != 2) {</span>
-<span class="fc" id="L86">                    throw new InvalidFormatProduct(&quot;Invalid channel identifier &quot;</span>
-<span class="fc" id="L87">                            + leveldto.getChannelId());</span>
+<span class="fc" id="L84">                        step, leveldto.getObjectStorageKey());</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">                if (leveldto.getChannelId() != 1</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">                        &amp;&amp; leveldto.getChannelId() != 2) {</span>
+<span class="fc" id="L87">                    LOGGER.info(</span>
+                            &quot;[REPORT] [MONITOR] [step {}] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+<span class="fc" id="L89">                            step, productName);</span>
+<span class="fc" id="L90">                    throw new InvalidFormatProduct(&quot;Invalid channel identifier &quot;</span>
+<span class="fc" id="L91">                            + leveldto.getChannelId());</span>
                 }
-<span class="fc" id="L89">                AppDataJobDto&lt;EdrsSessionDto&gt; appDataJob = buildJob(mqiMessage);</span>
+<span class="fc" id="L93">                AppDataJobDto&lt;EdrsSessionDto&gt; appDataJob = buildJob(mqiMessage);</span>
+<span class="fc" id="L94">                productName = appDataJob.getProduct().getProductName();</span>
 
                 // Dispatch
-<span class="fc" id="L92">                step++;</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                if (appDataJob.getMessages().size() == 2) {</span>
-<span class="nc" id="L94">                    LOGGER.info(</span>
+<span class="fc" id="L97">                step++;</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">                if (appDataJob.getMessages().size() == 2) {</span>
+<span class="nc" id="L99">                    LOGGER.info(</span>
                             &quot;[MONITOR] [step 2] [productName {}] Dispatching product&quot;,
-<span class="nc" id="L96">                            getProductName(mqiMessage));</span>
-<span class="nc bnc" id="L97" title="All 2 branches missed.">                    if (appDataJob.getState() == AppDataJobDtoState.WAITING) {</span>
-<span class="nc" id="L98">                        appDataJob.setState(AppDataJobDtoState.DISPATCHING);</span>
-<span class="nc" id="L99">                        appDataJob = appDataService.patchJob(</span>
-<span class="nc" id="L100">                                appDataJob.getIdentifier(), appDataJob, false,</span>
+                            productName);
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                    if (appDataJob.getState() == AppDataJobDtoState.WAITING) {</span>
+<span class="nc" id="L103">                        appDataJob.setState(AppDataJobDtoState.DISPATCHING);</span>
+<span class="nc" id="L104">                        appDataJob = appDataService.patchJob(</span>
+<span class="nc" id="L105">                                appDataJob.getIdentifier(), appDataJob, false,</span>
                                 false, false);
                     }
-<span class="nc" id="L103">                    jobsDispatcher.dispatch(appDataJob);</span>
+<span class="nc" id="L108">                    jobsDispatcher.dispatch(appDataJob);</span>
                 }
 
                 // Ack
-<span class="fc" id="L107">                step++;</span>
-<span class="fc" id="L108">                ackOk = true;</span>
+<span class="fc" id="L112">                step++;</span>
+<span class="fc" id="L113">                ackOk = true;</span>
 
-<span class="fc" id="L110">            } catch (AbstractCodedException ace) {</span>
-<span class="fc" id="L111">                ackOk = false;</span>
-<span class="fc" id="L112">                errorMessage = String.format(</span>
+<span class="fc" id="L115">            } catch (AbstractCodedException ace) {</span>
+<span class="fc" id="L116">                ackOk = false;</span>
+<span class="fc" id="L117">                errorMessage = String.format(</span>
                         &quot;[MONITOR] [step %d] [productName %s] [code %d] %s&quot;,
-<span class="fc" id="L114">                        step, getProductName(mqiMessage),</span>
-<span class="fc" id="L115">                        ace.getCode().getCode(), ace.getLogMessage());</span>
-<span class="fc" id="L116">            }</span>
+<span class="fc" id="L119">                        step, productName, ace.getCode().getCode(),</span>
+<span class="fc" id="L120">                        ace.getLogMessage());</span>
+<span class="fc" id="L121">            }</span>
 
             // Ack and check if application shall stopped
-<span class="fc" id="L119">            ackProcessing(mqiMessage, ackOk, errorMessage);</span>
+<span class="fc" id="L124">            ackProcessing(mqiMessage, ackOk, productName, errorMessage);</span>
 
-<span class="fc" id="L121">            step = 0;</span>
-<span class="fc" id="L122">            LOGGER.info(&quot;[MONITOR] [step 0] [productName {}] End&quot;, step,</span>
-<span class="fc" id="L123">                    leveldto.getObjectStorageKey());</span>
+<span class="fc" id="L126">            step = 0;</span>
+<span class="fc" id="L127">            LOGGER.info(&quot;[MONITOR] [step 0] [productName {}] End&quot;, step,</span>
+<span class="fc" id="L128">                    leveldto.getObjectStorageKey());</span>
 
         }
 
-<span class="fc" id="L127">    }</span>
+<span class="fc" id="L132">    }</span>
 
     protected AppDataJobDto&lt;EdrsSessionDto&gt; buildJob(
             GenericMessageDto&lt;EdrsSessionDto&gt; mqiMessage)
             throws AbstractCodedException {
         // Check if a job is already created for message identifier
-<span class="fc" id="L133">        List&lt;AppDataJobDto&lt;EdrsSessionDto&gt;&gt; existingJobs = appDataService</span>
-<span class="fc" id="L134">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
+<span class="fc" id="L138">        List&lt;AppDataJobDto&lt;EdrsSessionDto&gt;&gt; existingJobs = appDataService</span>
+<span class="fc" id="L139">                .findByMessagesIdentifier(mqiMessage.getIdentifier());</span>
 
-<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
-<span class="fc" id="L137">            EdrsSessionFile file = edrsService.createSessionFile(</span>
-<span class="fc" id="L138">                    mqiMessage.getBody().getObjectStorageKey());</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (CollectionUtils.isEmpty(existingJobs)) {</span>
+<span class="fc" id="L142">            EdrsSessionFile file = edrsService.createSessionFile(</span>
+<span class="fc" id="L143">                    mqiMessage.getBody().getObjectStorageKey());</span>
 
             // Search if session is already in progress
-<span class="fc" id="L141">            List&lt;AppDataJobDto&lt;EdrsSessionDto&gt;&gt; existingJobsForSession =</span>
-<span class="fc" id="L142">                    appDataService.findByProductSessionId(file.getSessionId());</span>
+<span class="fc" id="L146">            List&lt;AppDataJobDto&lt;EdrsSessionDto&gt;&gt; existingJobsForSession =</span>
+<span class="fc" id="L147">                    appDataService.findByProductSessionId(file.getSessionId());</span>
 
-<span class="fc bfc" id="L144" title="All 2 branches covered.">            if (CollectionUtils.isEmpty(existingJobsForSession)) {</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">            if (CollectionUtils.isEmpty(existingJobsForSession)) {</span>
 
                 // Create the JOB
-<span class="fc" id="L147">                AppDataJobDto&lt;EdrsSessionDto&gt; jobDto = new AppDataJobDto&lt;&gt;();</span>
+<span class="fc" id="L152">                AppDataJobDto&lt;EdrsSessionDto&gt; jobDto = new AppDataJobDto&lt;&gt;();</span>
                 // General details
-<span class="fc" id="L149">                jobDto.setLevel(processSettings.getLevel());</span>
-<span class="fc" id="L150">                jobDto.setPod(processSettings.getHostname());</span>
+<span class="fc" id="L154">                jobDto.setLevel(processSettings.getLevel());</span>
+<span class="fc" id="L155">                jobDto.setPod(processSettings.getHostname());</span>
                 // Messages
-<span class="fc" id="L152">                jobDto.getMessages().add(mqiMessage);</span>
+<span class="fc" id="L157">                jobDto.getMessages().add(mqiMessage);</span>
                 // Product
-<span class="fc" id="L154">                AppDataJobProductDto productDto = new AppDataJobProductDto();</span>
-<span class="fc" id="L155">                productDto.setSessionId(file.getSessionId());</span>
-<span class="fc" id="L156">                productDto.setMissionId(mqiMessage.getBody().getMissionId());</span>
-<span class="fc" id="L157">                productDto.setProductName(file.getSessionId());</span>
-<span class="fc" id="L158">                productDto</span>
-<span class="fc" id="L159">                        .setSatelliteId(mqiMessage.getBody().getSatelliteId());</span>
-<span class="fc" id="L160">                productDto.setStartTime(DateUtils.convertToAnotherFormat(</span>
-<span class="fc" id="L161">                        file.getStartTime(), EdrsSessionFile.TIME_FORMATTER,</span>
+<span class="fc" id="L159">                AppDataJobProductDto productDto = new AppDataJobProductDto();</span>
+<span class="fc" id="L160">                productDto.setSessionId(file.getSessionId());</span>
+<span class="fc" id="L161">                productDto.setMissionId(mqiMessage.getBody().getMissionId());</span>
+<span class="fc" id="L162">                productDto.setProductName(file.getSessionId());</span>
+<span class="fc" id="L163">                productDto</span>
+<span class="fc" id="L164">                        .setSatelliteId(mqiMessage.getBody().getSatelliteId());</span>
+<span class="fc" id="L165">                productDto.setStartTime(DateUtils.convertToAnotherFormat(</span>
+<span class="fc" id="L166">                        file.getStartTime(), EdrsSessionFile.TIME_FORMATTER,</span>
                         AppDataJobProductDto.TIME_FORMATTER));
-<span class="fc" id="L163">                productDto.setStopTime(DateUtils.convertToAnotherFormat(</span>
-<span class="fc" id="L164">                        file.getStopTime(), EdrsSessionFile.TIME_FORMATTER,</span>
+<span class="fc" id="L168">                productDto.setStopTime(DateUtils.convertToAnotherFormat(</span>
+<span class="fc" id="L169">                        file.getStopTime(), EdrsSessionFile.TIME_FORMATTER,</span>
                         AppDataJobProductDto.TIME_FORMATTER));
-<span class="pc bpc" id="L166" title="1 of 2 branches missed.">                if (mqiMessage.getBody().getChannelId() == 1) {</span>
-<span class="fc" id="L167">                    productDto.setRaws1(file.getRawNames().stream().map(</span>
-<span class="fc" id="L168">                            rawI -&gt; new AppDataJobFileDto(rawI.getFileName()))</span>
-<span class="fc" id="L169">                            .collect(Collectors.toList()));</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">                if (mqiMessage.getBody().getChannelId() == 1) {</span>
+<span class="fc" id="L172">                    productDto.setRaws1(file.getRawNames().stream().map(</span>
+<span class="fc" id="L173">                            rawI -&gt; new AppDataJobFileDto(rawI.getFileName()))</span>
+<span class="fc" id="L174">                            .collect(Collectors.toList()));</span>
                 } else {
-<span class="nc" id="L171">                    productDto.setRaws2(file.getRawNames().stream().map(</span>
-<span class="nc" id="L172">                            rawI -&gt; new AppDataJobFileDto(rawI.getFileName()))</span>
-<span class="nc" id="L173">                            .collect(Collectors.toList()));</span>
+<span class="nc" id="L176">                    productDto.setRaws2(file.getRawNames().stream().map(</span>
+<span class="nc" id="L177">                            rawI -&gt; new AppDataJobFileDto(rawI.getFileName()))</span>
+<span class="nc" id="L178">                            .collect(Collectors.toList()));</span>
                 }
 
-<span class="fc" id="L176">                jobDto.setProduct(productDto);</span>
-<span class="fc" id="L177">                LOGGER.info(</span>
+<span class="fc" id="L181">                jobDto.setProduct(productDto);</span>
+
+<span class="fc" id="L183">                LOGGER.info(</span>
                         &quot;[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [START] [productName {}] Starting job generation&quot;,
-<span class="fc" id="L179">                        jobDto.getProduct().getProductName());</span>
-<span class="fc" id="L180">                return appDataService.newJob(jobDto);</span>
+<span class="fc" id="L185">                        productDto.getProductName());</span>
+<span class="fc" id="L186">                LOGGER.info(</span>
+                        &quot;[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+<span class="fc" id="L188">                        productDto.getProductName(),</span>
+<span class="fc" id="L189">                        mqiMessage.getBody().getObjectStorageKey());</span>
+<span class="fc" id="L190">                return appDataService.newJob(jobDto);</span>
 
             } else {
 
                 // Update pod if needed
-<span class="fc" id="L185">                boolean update = false;</span>
-<span class="fc" id="L186">                boolean updateMessage = false;</span>
-<span class="fc" id="L187">                boolean updateProduct = false;</span>
-<span class="fc" id="L188">                AppDataJobDto&lt;EdrsSessionDto&gt; jobDto =</span>
-<span class="fc" id="L189">                        existingJobsForSession.get(0);</span>
-<span class="fc bfc" id="L190" title="All 2 branches covered.">                if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
-<span class="fc" id="L191">                    jobDto.setPod(processSettings.getHostname());</span>
-<span class="fc" id="L192">                    update = true;</span>
+<span class="fc" id="L195">                boolean update = false;</span>
+<span class="fc" id="L196">                boolean updateMessage = false;</span>
+<span class="fc" id="L197">                boolean updateProduct = false;</span>
+<span class="fc" id="L198">                AppDataJobDto&lt;EdrsSessionDto&gt; jobDto =</span>
+<span class="fc" id="L199">                        existingJobsForSession.get(0);</span>
+<span class="fc" id="L200">                LOGGER.info(</span>
+                        &quot;[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+<span class="fc" id="L202">                        jobDto.getProduct().getProductName(),</span>
+<span class="fc" id="L203">                        mqiMessage.getBody().getObjectStorageKey());</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">                if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
+<span class="fc" id="L205">                    jobDto.setPod(processSettings.getHostname());</span>
+<span class="fc" id="L206">                    update = true;</span>
                 }
                 // Updates messages if needed
-<span class="fc bfc" id="L195" title="All 2 branches covered.">                if (jobDto.getMessages().size() == 1 &amp;&amp; jobDto.getMessages()</span>
-<span class="fc" id="L196">                        .get(0).getBody().getChannelId() != mqiMessage.getBody()</span>
-<span class="pc bpc" id="L197" title="1 of 2 branches missed.">                                .getChannelId()) {</span>
-<span class="fc" id="L198">                    jobDto.getMessages().add(mqiMessage);</span>
-<span class="pc bpc" id="L199" title="1 of 2 branches missed.">                    if (mqiMessage.getBody().getChannelId() == 1) {</span>
-<span class="fc" id="L200">                        jobDto.getProduct()</span>
-<span class="fc" id="L201">                                .setRaws1(file.getRawNames().stream()</span>
-<span class="fc" id="L202">                                        .map(rawI -&gt; new AppDataJobFileDto(</span>
-<span class="fc" id="L203">                                                rawI.getFileName()))</span>
-<span class="fc" id="L204">                                        .collect(Collectors.toList()));</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">                if (jobDto.getMessages().size() == 1 &amp;&amp; jobDto.getMessages()</span>
+<span class="fc" id="L210">                        .get(0).getBody().getChannelId() != mqiMessage.getBody()</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">                                .getChannelId()) {</span>
+<span class="fc" id="L212">                    jobDto.getMessages().add(mqiMessage);</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">                    if (mqiMessage.getBody().getChannelId() == 1) {</span>
+<span class="fc" id="L214">                        jobDto.getProduct()</span>
+<span class="fc" id="L215">                                .setRaws1(file.getRawNames().stream()</span>
+<span class="fc" id="L216">                                        .map(rawI -&gt; new AppDataJobFileDto(</span>
+<span class="fc" id="L217">                                                rawI.getFileName()))</span>
+<span class="fc" id="L218">                                        .collect(Collectors.toList()));</span>
                     } else {
-<span class="nc" id="L206">                        jobDto.getProduct()</span>
-<span class="nc" id="L207">                                .setRaws2(file.getRawNames().stream()</span>
-<span class="nc" id="L208">                                        .map(rawI -&gt; new AppDataJobFileDto(</span>
-<span class="nc" id="L209">                                                rawI.getFileName()))</span>
-<span class="nc" id="L210">                                        .collect(Collectors.toList()));</span>
+<span class="nc" id="L220">                        jobDto.getProduct()</span>
+<span class="nc" id="L221">                                .setRaws2(file.getRawNames().stream()</span>
+<span class="nc" id="L222">                                        .map(rawI -&gt; new AppDataJobFileDto(</span>
+<span class="nc" id="L223">                                                rawI.getFileName()))</span>
+<span class="nc" id="L224">                                        .collect(Collectors.toList()));</span>
                     }
-<span class="fc" id="L212">                    update = true;</span>
-<span class="fc" id="L213">                    updateMessage = true;</span>
-<span class="fc" id="L214">                    updateProduct = true;</span>
+<span class="fc" id="L226">                    update = true;</span>
+<span class="fc" id="L227">                    updateMessage = true;</span>
+<span class="fc" id="L228">                    updateProduct = true;</span>
                 }
                 // Update
-<span class="pc bpc" id="L217" title="1 of 2 branches missed.">                if (update) {</span>
-<span class="fc" id="L218">                    jobDto = appDataService.patchJob(jobDto.getIdentifier(),</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">                if (update) {</span>
+<span class="fc" id="L232">                    jobDto = appDataService.patchJob(jobDto.getIdentifier(),</span>
                             jobDto, updateMessage, updateProduct, false);
                 }
                 // Return object
-<span class="fc" id="L222">                return jobDto;</span>
+<span class="fc" id="L236">                return jobDto;</span>
 
             }
 
         } else {
             // Update pod if needed
-<span class="fc" id="L228">            boolean update = false;</span>
-<span class="fc" id="L229">            boolean updateMessage = false;</span>
-<span class="fc" id="L230">            boolean updateProduct = false;</span>
-<span class="fc" id="L231">            AppDataJobDto&lt;EdrsSessionDto&gt; jobDto = existingJobs.get(0);</span>
-<span class="fc bfc" id="L232" title="All 2 branches covered.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
-<span class="fc" id="L233">                jobDto.setPod(processSettings.getHostname());</span>
-<span class="fc" id="L234">                update = true;</span>
+<span class="fc" id="L242">            boolean update = false;</span>
+<span class="fc" id="L243">            boolean updateMessage = false;</span>
+<span class="fc" id="L244">            boolean updateProduct = false;</span>
+<span class="fc" id="L245">            AppDataJobDto&lt;EdrsSessionDto&gt; jobDto = existingJobs.get(0);</span>
+<span class="fc" id="L246">            LOGGER.info(</span>
+                    &quot;[REPORT] [MONITOR] [s1pdgsTask L0JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+<span class="fc" id="L248">                    jobDto.getProduct().getProductName(),</span>
+<span class="fc" id="L249">                    mqiMessage.getBody().getObjectStorageKey());</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
+<span class="fc" id="L251">                jobDto.setPod(processSettings.getHostname());</span>
+<span class="fc" id="L252">                update = true;</span>
             }
             // Update
-<span class="fc bfc" id="L237" title="All 2 branches covered.">            if (update) {</span>
-<span class="fc" id="L238">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">            if (update) {</span>
+<span class="fc" id="L256">                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,</span>
                         updateMessage, updateProduct, false);
             }
             // Retrun object
-<span class="fc" id="L242">            return jobDto;</span>
+<span class="fc" id="L260">            return jobDto;</span>
         }
 
     }
 
     @Override
-    protected String getProductName(GenericMessageDto&lt;EdrsSessionDto&gt; dto) {
-<span class="fc" id="L249">        return dto.getBody().getObjectStorageKey();</span>
-    }
-
-    @Override
     protected String getTaskForFunctionalLog() {
-<span class="fc" id="L254">        return &quot;L0JobGeneration&quot;;</span>
+<span class="fc" id="L267">        return &quot;L0JobGeneration&quot;;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

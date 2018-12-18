@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
@@ -54,9 +55,9 @@ public class L0SegmentAppJobDispatcher
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
             @Qualifier(&quot;appCatalogServiceForLevelSegments&quot;) final AbstractAppCatalogJobService&lt;LevelSegmentDto&gt; appDataService) {
-<span class="fc" id="L57">        super(settings, processSettings, factory, taskScheduler,</span>
+<span class="fc" id="L58">        super(settings, processSettings, factory, taskScheduler,</span>
                 appDataService);
-<span class="fc" id="L59">    }</span>
+<span class="fc" id="L60">    }</span>
 
     /**
      * @throws AbstractCodedException
@@ -64,8 +65,8 @@ public class L0SegmentAppJobDispatcher
     @PostConstruct
     public void initialize() throws AbstractCodedException {
         // Init job generators from task tables
-<span class="fc" id="L67">        super.initTaskTables();</span>
-<span class="fc" id="L68">    }</span>
+<span class="fc" id="L68">        super.initTaskTables();</span>
+<span class="fc" id="L69">    }</span>
 
     /**
      * 
@@ -73,7 +74,7 @@ public class L0SegmentAppJobDispatcher
     @Override
     protected AbstractJobsGenerator&lt;LevelSegmentDto&gt; createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
-<span class="fc" id="L76">        return this.factory.createJobGeneratorForL0Segment(xmlFile,</span>
+<span class="fc" id="L77">        return this.factory.createJobGeneratorForL0Segment(xmlFile,</span>
                 appDataService);
     }
 
@@ -86,12 +87,12 @@ public class L0SegmentAppJobDispatcher
     protected List&lt;String&gt; getTaskTables(
             final AppDataJobDto&lt;LevelSegmentDto&gt; job)
             throws JobGenMissingRoutingEntryException {
-<span class="fc" id="L89">        return Arrays.asList(TASK_TABLE_NAME);</span>
+<span class="fc" id="L90">        return Arrays.asList(TASK_TABLE_NAME);</span>
     }
 
     @Override
     protected String getTaskForFunctionalLog() {
-<span class="nc" id="L94">        return &quot;L0SegmentJobGeneration&quot;;</span>
+<span class="nc" id="L95">        return ApplicationLevel.L0_SEGMENT.name() + &quot;JobGeneration&quot;;</span>
     }
 
 }
