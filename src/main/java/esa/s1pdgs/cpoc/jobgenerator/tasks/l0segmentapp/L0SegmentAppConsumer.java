@@ -183,7 +183,7 @@ public class L0SegmentAppConsumer
                         "[REPORT] [MONITOR] [s1pdgsTask L0_SEGMENTJobGeneration] [START] [productName {}] Starting job generation",
                         productDto.getProductName());
                 LOGGER.info(
-                        "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                        "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
                         productDto.getProductName(), leveldto.getName());
 
                 return appDataService.newJob(jobDto);
@@ -191,7 +191,7 @@ public class L0SegmentAppConsumer
                 AppDataJobDto<LevelSegmentDto> jobDto =
                         existingJobsForDatatake.get(0);
                 LOGGER.info(
-                        "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                        "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
                         jobDto.getProduct().getProductName(), leveldto.getName());
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
@@ -206,7 +206,7 @@ public class L0SegmentAppConsumer
             // Update pod if needed
             AppDataJobDto<LevelSegmentDto> jobDto = existingJobs.get(0);
             LOGGER.info(
-                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
+                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
                     jobDto.getProduct().getProductName(), leveldto.getName());
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
