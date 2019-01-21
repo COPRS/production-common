@@ -24,6 +24,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * KAFKA consumer configuration
@@ -32,7 +33,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
  */
 @Configuration
 @EnableKafka
-<span class="fc" id="L35">public class KafkaConsumerConfig {</span>
+<span class="fc" id="L36">public class KafkaConsumerConfig {</span>
 
     /**
      * URI of KAFKA cluster
@@ -68,26 +69,26 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
      * @return
      */
     @Bean
-    public Map&lt;String, Object&gt; consumerConfigs() {
-<span class="fc" id="L72">        Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L73">        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);</span>
-<span class="fc" id="L74">        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,</span>
+    public Map&lt;String, Object&gt; consumerConfigs(String id) {
+<span class="fc" id="L73">        Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L74">        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);</span>
+<span class="fc" id="L75">        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,</span>
                 StringDeserializer.class);
-<span class="fc" id="L76">        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,</span>
+<span class="fc" id="L77">        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,</span>
                 JsonDeserializer.class);
-<span class="fc" id="L78">        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);</span>
-<span class="fc" id="L79">        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, kafkaMaxPoolRecords);</span>
-<span class="fc" id="L80">        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,</span>
-<span class="fc" id="L81">                kafkaSessionTimeoutMs);</span>
-<span class="fc" id="L82">        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);</span>
+<span class="fc" id="L79">        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);</span>
+<span class="fc" id="L80">        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, kafkaMaxPoolRecords);</span>
+<span class="fc" id="L81">        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,</span>
+<span class="fc" id="L82">                kafkaSessionTimeoutMs);</span>
+<span class="fc" id="L83">        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);</span>
         try {
-<span class="fc" id="L84">            InetAddress myHost = InetAddress.getLocalHost();</span>
-<span class="fc" id="L85">            String hostname = myHost.getHostName();</span>
-<span class="fc" id="L86">            props.put(ConsumerConfig.CLIENT_ID_CONFIG, hostname);</span>
-<span class="nc" id="L87">        } catch (UnknownHostException ex) {</span>
-<span class="nc" id="L88">            props.put(ConsumerConfig.CLIENT_ID_CONFIG, this.kafkaClientId);</span>
-<span class="fc" id="L89">        }</span>
-<span class="fc" id="L90">        return props;</span>
+<span class="fc" id="L85">            InetAddress myHost = InetAddress.getLocalHost();</span>
+<span class="fc" id="L86">            String hostname = myHost.getHostName();</span>
+<span class="fc" id="L87">            props.put(ConsumerConfig.CLIENT_ID_CONFIG, hostname + id);</span>
+<span class="nc" id="L88">        } catch (UnknownHostException ex) {</span>
+<span class="nc" id="L89">            props.put(ConsumerConfig.CLIENT_ID_CONFIG, this.kafkaClientId + id);</span>
+<span class="fc" id="L90">        }</span>
+<span class="fc" id="L91">        return props;</span>
     }
 
     // ------------------------------------------------------------------------
@@ -103,7 +104,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
      */
     @Bean
     public ConsumerFactory&lt;String, LevelProductDto&gt; consumerFactory() {
-<span class="fc" id="L106">        return new DefaultKafkaConsumerFactory&lt;&gt;(consumerConfigs(),</span>
+<span class="fc" id="L107">        return new DefaultKafkaConsumerFactory&lt;&gt;(consumerConfigs(&quot;&quot;),</span>
                 new StringDeserializer(),
                 new JsonDeserializer&lt;&gt;(LevelProductDto.class));
     }
@@ -115,13 +116,13 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
      */
     @Bean
     public KafkaListenerContainerFactory&lt;ConcurrentMessageListenerContainer&lt;String, LevelProductDto&gt;&gt; kafkaListenerContainerFactory() {
-<span class="fc" id="L118">        ConcurrentKafkaListenerContainerFactory&lt;String, LevelProductDto&gt; factory =</span>
+<span class="fc" id="L119">        ConcurrentKafkaListenerContainerFactory&lt;String, LevelProductDto&gt; factory =</span>
                 new ConcurrentKafkaListenerContainerFactory&lt;&gt;();
-<span class="fc" id="L120">        factory.setConsumerFactory(consumerFactory());</span>
-<span class="fc" id="L121">        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);</span>
-<span class="fc" id="L122">        factory.getContainerProperties().setAckMode(</span>
+<span class="fc" id="L121">        factory.setConsumerFactory(consumerFactory());</span>
+<span class="fc" id="L122">        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);</span>
+<span class="fc" id="L123">        factory.getContainerProperties().setAckMode(</span>
                 AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
-<span class="fc" id="L124">        return factory;</span>
+<span class="fc" id="L125">        return factory;</span>
     }
 
     // ------------------------------------------------------------------------
@@ -137,7 +138,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
      */
     @Bean(name = &quot;reportConsumerFactory&quot;)
     public ConsumerFactory&lt;String, LevelReportDto&gt; reportConsumerFactory() {
-<span class="fc" id="L140">        return new DefaultKafkaConsumerFactory&lt;&gt;(consumerConfigs(),</span>
+<span class="fc" id="L141">        return new DefaultKafkaConsumerFactory&lt;&gt;(consumerConfigs(&quot;&quot;),</span>
                 new StringDeserializer(),
                 new JsonDeserializer&lt;&gt;(LevelReportDto.class));
     }
@@ -149,13 +150,47 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
      */
     @Bean(name = &quot;reportKafkaListenerContainerFactory&quot;)
     public KafkaListenerContainerFactory&lt;ConcurrentMessageListenerContainer&lt;String, LevelReportDto&gt;&gt; reportKafkaListenerContainerFactory() {
-<span class="fc" id="L152">        ConcurrentKafkaListenerContainerFactory&lt;String, LevelReportDto&gt; factory =</span>
+<span class="fc" id="L153">        ConcurrentKafkaListenerContainerFactory&lt;String, LevelReportDto&gt; factory =</span>
                 new ConcurrentKafkaListenerContainerFactory&lt;&gt;();
-<span class="fc" id="L154">        factory.setConsumerFactory(reportConsumerFactory());</span>
-<span class="fc" id="L155">        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);</span>
-<span class="fc" id="L156">        factory.getContainerProperties().setAckMode(</span>
+<span class="fc" id="L155">        factory.setConsumerFactory(reportConsumerFactory());</span>
+<span class="fc" id="L156">        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);</span>
+<span class="fc" id="L157">        factory.getContainerProperties().setAckMode(</span>
                 AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
-<span class="fc" id="L158">        return factory;</span>
+<span class="fc" id="L159">        return factory;</span>
+    }
+
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // SEGMENTS
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Consumer factory
+     * 
+     * @return
+     */
+    @Bean(name = &quot;segmentConsumerFactory&quot;)
+    public ConsumerFactory&lt;String, LevelSegmentDto&gt; segmentConsumerFactory() {
+<span class="fc" id="L175">        return new DefaultKafkaConsumerFactory&lt;&gt;(consumerConfigs(&quot;-segment&quot;),</span>
+                new StringDeserializer(),
+                new JsonDeserializer&lt;&gt;(LevelSegmentDto.class));
+    }
+
+    /**
+     * Listener containers factory
+     * 
+     * @return
+     */
+    @Bean(name = &quot;segmentKafkaListenerContainerFactory&quot;)
+    public KafkaListenerContainerFactory&lt;ConcurrentMessageListenerContainer&lt;String, LevelSegmentDto&gt;&gt; segmentKafkaListenerContainerFactory() {
+<span class="fc" id="L187">        ConcurrentKafkaListenerContainerFactory&lt;String, LevelSegmentDto&gt; factory =</span>
+                new ConcurrentKafkaListenerContainerFactory&lt;&gt;();
+<span class="fc" id="L189">        factory.setConsumerFactory(segmentConsumerFactory());</span>
+<span class="fc" id="L190">        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);</span>
+<span class="fc" id="L191">        factory.getContainerProperties().setAckMode(</span>
+                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+<span class="fc" id="L193">        return factory;</span>
     }
 
 }

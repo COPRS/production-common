@@ -24,6 +24,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
  * KAFKA consumer configuration
@@ -68,7 +69,7 @@ public class KafkaConsumerConfig {
      * @return
      */
     @Bean
-    public Map<String, Object> consumerConfigs() {
+    public Map<String, Object> consumerConfigs(String id) {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
@@ -83,9 +84,9 @@ public class KafkaConsumerConfig {
         try {
             InetAddress myHost = InetAddress.getLocalHost();
             String hostname = myHost.getHostName();
-            props.put(ConsumerConfig.CLIENT_ID_CONFIG, hostname);
+            props.put(ConsumerConfig.CLIENT_ID_CONFIG, hostname + id);
         } catch (UnknownHostException ex) {
-            props.put(ConsumerConfig.CLIENT_ID_CONFIG, this.kafkaClientId);
+            props.put(ConsumerConfig.CLIENT_ID_CONFIG, this.kafkaClientId + id);
         }
         return props;
     }
@@ -103,7 +104,7 @@ public class KafkaConsumerConfig {
      */
     @Bean
     public ConsumerFactory<String, LevelProductDto> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(),
+        return new DefaultKafkaConsumerFactory<>(consumerConfigs(""),
                 new StringDeserializer(),
                 new JsonDeserializer<>(LevelProductDto.class));
     }
@@ -137,7 +138,7 @@ public class KafkaConsumerConfig {
      */
     @Bean(name = "reportConsumerFactory")
     public ConsumerFactory<String, LevelReportDto> reportConsumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(),
+        return new DefaultKafkaConsumerFactory<>(consumerConfigs(""),
                 new StringDeserializer(),
                 new JsonDeserializer<>(LevelReportDto.class));
     }
@@ -152,6 +153,40 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, LevelReportDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(reportConsumerFactory());
+        factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
+        factory.getContainerProperties().setAckMode(
+                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+        return factory;
+    }
+
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // SEGMENTS
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+
+    /**
+     * Consumer factory
+     * 
+     * @return
+     */
+    @Bean(name = "segmentConsumerFactory")
+    public ConsumerFactory<String, LevelSegmentDto> segmentConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(consumerConfigs("-segment"),
+                new StringDeserializer(),
+                new JsonDeserializer<>(LevelSegmentDto.class));
+    }
+
+    /**
+     * Listener containers factory
+     * 
+     * @return
+     */
+    @Bean(name = "segmentKafkaListenerContainerFactory")
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, LevelSegmentDto>> segmentKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, LevelSegmentDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(segmentConsumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
         factory.getContainerProperties().setAckMode(
                 AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);

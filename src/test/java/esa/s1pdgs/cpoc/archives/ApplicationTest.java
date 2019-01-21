@@ -15,14 +15,16 @@ import esa.s1pdgs.cpoc.archives.Application;
 @DirtiesContext
 public class ApplicationTest {
 
-	/**
-	 * Embedded Kafka
-	 */
-	@ClassRule
-	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "t-pdgs-l0-jobs");
+    /**
+     * Embedded Kafka
+     */
+    @ClassRule
+    public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true,
+            "t-pdgs-l0-slices-nrt", 
+            "t-pdgs-l0-segments");
 
-	@Test
-	public void applicationContextTest() {
-		Application.main(new String[] {});
-	}
+    @Test
+    public void applicationContextTest() {
+        Application.main(new String[] {});
+    }
 }
