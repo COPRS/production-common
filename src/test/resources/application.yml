@@ -17,9 +17,11 @@ kafka:
   topics:
     slices: t-pdgs-l0-slices,t-pdgs-l1-slices
     reports: t-pdgs-l0-reports,t-pdgs-l1-reports
+    segments: t-pdgs-l0-segments
   enable-consumer:
     slice: true
     report: false
+    segments: true
     
 status:
   delete-fixed-delay-ms: 3000
@@ -33,6 +35,8 @@ file:
     local-directory: test/data/slices/ # Must contains the last /
   reports:
     local-directory: test/data/reports/ # Must contains the last /
+  segments:
+    local-directory: test/data/segments/ # Must contains the last /
 
 dev:
   activations:

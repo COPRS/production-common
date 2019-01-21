@@ -17,9 +17,11 @@ kafka:
   topics:
     slices: ${archives_kafka_topic_slices}
     reports: ${archives_kafka_topic_report}
+    segments: ${archives_kafka_topic_segment}
   enable-consumer:
     slice: true
     report: false
+    segments: false
     
 status:
   delete-fixed-delay-ms: 3000
@@ -32,6 +34,8 @@ file:
     local-directory: /data/slices/ # Must contains the last /
   reports:
     local-directory: /data/reports/ # Must contains the last /
+  segments:
+    local-directory: /data/segments/ # Must contains the last /
 
 dev:
   activations:
