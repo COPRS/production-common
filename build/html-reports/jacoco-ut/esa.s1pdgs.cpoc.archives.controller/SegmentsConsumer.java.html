@@ -63,7 +63,7 @@ public class SegmentsConsumer {
 <span class="fc" id="L63">        this.appStatus = appStatus;</span>
 <span class="fc" id="L64">    }</span>
 
-    @KafkaListener(topics = &quot;#{'${kafka.topics.segments}'.split(',')}&quot;, groupId = &quot;${kafka.group-id}&quot;, containerFactory = &quot;kafkaListenerContainerFactory&quot;)
+    @KafkaListener(topics = &quot;#{'${kafka.topics.segments}'.split(',')}&quot;, groupId = &quot;${kafka.group-id}&quot;, containerFactory = &quot;segmentKafkaListenerContainerFactory&quot;)
     public void receive(final LevelSegmentDto dto,
             final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
