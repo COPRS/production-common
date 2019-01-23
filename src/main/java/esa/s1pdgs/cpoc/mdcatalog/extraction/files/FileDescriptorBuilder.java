@@ -306,8 +306,8 @@ public class FileDescriptorBuilder {
 			l1Descriptor.setRelativePath(relativePath);
 			l1Descriptor.setFilename(filename);
 			l1Descriptor.setMode(product.getMode());
-			l1Descriptor.setMissionId(m.group(1) + m.group(2));
-			// l1Descriptor.setSatelliteId(m.group(2));
+			l1Descriptor.setMissionId(m.group(1));
+			l1Descriptor.setSatelliteId(m.group(2));
 			l1Descriptor.setSwathtype(m.group(3));
 			l1Descriptor.setResolution(m.group(5));
 			l1Descriptor.setProductClass(m.group(7));

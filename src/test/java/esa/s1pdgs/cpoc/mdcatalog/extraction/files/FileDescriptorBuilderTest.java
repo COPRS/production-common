@@ -274,8 +274,8 @@ public class FileDescriptorBuilderTest {
         expectedResult.setFilename("manifest.safe");
         expectedResult.setKeyObjectStorage(
                 "S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE");
-        expectedResult.setMissionId("S1A");
-        expectedResult.setSatelliteId(null);
+        expectedResult.setMissionId("S1");
+        expectedResult.setSatelliteId("A");
         expectedResult.setProductName(
                 "S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE");
         expectedResult.setRelativePath(
