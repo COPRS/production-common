@@ -335,7 +335,8 @@ public class LevelProductsExtractorTest {
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
         descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
-        descriptor.setMissionId("S1A");
+        descriptor.setMissionId("S1");
+        descriptor.setSatelliteId("A");
         descriptor.setProductName("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
         descriptor.setRelativePath("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
         descriptor.setSwathtype("IW");
@@ -386,7 +387,8 @@ public class LevelProductsExtractorTest {
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
         descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
-        descriptor.setMissionId("S1A");
+        descriptor.setMissionId("S1");
+        descriptor.setSatelliteId("A");
         descriptor.setProductName("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
         descriptor.setRelativePath("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
         descriptor.setSwathtype("IW");
