@@ -284,7 +284,7 @@ public class L0SegmentAppJobsGenerator
             }
         } else {
             // Check consolidation first
-            if ("BEGIN".equals(sortedSegments.get(0).getConsolidation())
+            if ("START".equals(sortedSegments.get(0).getConsolidation())
                     && "END".equals(
                             sortedSegments.get(sortedSegments.size() - 1)
                                     .getConsolidation())) {

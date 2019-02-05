@@ -416,11 +416,11 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         updateState(job,
                                 AppDataJobGenerationDtoState.PRIMARY_CHECK);
                     } catch (AbstractCodedException e) {
-                        updateState(job, AppDataJobGenerationDtoState.INITIAL);
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
+                        updateState(job, AppDataJobGenerationDtoState.INITIAL);
                     }
                 }
 
@@ -434,12 +434,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         this.inputsSearch(job);
                         updateState(job, AppDataJobGenerationDtoState.READY);
                     } catch (AbstractCodedException e) {
-                        updateState(job,
-                                AppDataJobGenerationDtoState.PRIMARY_CHECK);
                         LOGGER.error(
                                 "{} [productName {}] 2 - Inputs not found: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
+                        updateState(job,
+                                AppDataJobGenerationDtoState.PRIMARY_CHECK);
                     }
                 }
 
@@ -457,10 +457,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         this.send(job);
                         updateState(job, AppDataJobGenerationDtoState.SENT);
                     } catch (AbstractCodedException e) {
-                        updateState(job, AppDataJobGenerationDtoState.READY);
                         LOGGER.error("{} [productName {}] 3 - Job not send: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
+                        updateState(job, AppDataJobGenerationDtoState.READY);
                     }
                 }
             } catch (AbstractCodedException ace) {
@@ -477,10 +477,27 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     protected void updateState(JobGeneration<T> job,
             AppDataJobGenerationDtoState newState)
             throws AbstractCodedException {
+        LOGGER.debug(
+                "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [productName {}] Job generation before update: {} - {} - {} - {}",
+                this.prefixLogMonitor, this.taskTable.getLevel(),
+                job.getAppDataJob().getProduct().getProductName(),
+                job.getAppDataJob().getIdentifier(),
+                job.getGeneration().getTaskTable(), newState,
+                job.getGeneration());
         AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
+        LOGGER.debug(
+                "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [productName {}] Modified job generations: {}",
+                this.prefixLogMonitor, this.taskTable.getLevel(),
+                job.getAppDataJob().getProduct().getProductName(),
+                modifiedJob.getGenerations());
         job.updateAppDataJob(modifiedJob, taskTableXmlName);
+        LOGGER.debug(
+                "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [productName {}] Job generation after update: {}",
+                this.prefixLogMonitor, this.taskTable.getLevel(),
+                job.getAppDataJob().getProduct().getProductName(),
+                job.getGeneration());
 
         // Log functional logs
         if (job.getGeneration()
