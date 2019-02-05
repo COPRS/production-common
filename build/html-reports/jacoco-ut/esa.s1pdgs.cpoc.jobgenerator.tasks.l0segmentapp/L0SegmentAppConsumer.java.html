@@ -183,7 +183,7 @@ public class L0SegmentAppConsumer
                         &quot;[REPORT] [MONITOR] [s1pdgsTask L0_SEGMENTJobGeneration] [START] [productName {}] Starting job generation&quot;,
 <span class="fc" id="L184">                        productDto.getProductName());</span>
 <span class="fc" id="L185">                LOGGER.info(</span>
-                        &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+                        &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
 <span class="fc" id="L187">                        productDto.getProductName(), leveldto.getName());</span>
 
 <span class="fc" id="L189">                return appDataService.newJob(jobDto);</span>
@@ -191,7 +191,7 @@ public class L0SegmentAppConsumer
 <span class="nc" id="L191">                AppDataJobDto&lt;LevelSegmentDto&gt; jobDto =</span>
 <span class="nc" id="L192">                        existingJobsForDatatake.get(0);</span>
 <span class="nc" id="L193">                LOGGER.info(</span>
-                        &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+                        &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
 <span class="nc" id="L195">                        jobDto.getProduct().getProductName(), leveldto.getName());</span>
 <span class="nc bnc" id="L196" title="All 2 branches missed.">                if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
 <span class="nc" id="L197">                    jobDto.setPod(processSettings.getHostname());</span>
@@ -206,7 +206,7 @@ public class L0SegmentAppConsumer
             // Update pod if needed
 <span class="nc" id="L207">            AppDataJobDto&lt;LevelSegmentDto&gt; jobDto = existingJobs.get(0);</span>
 <span class="nc" id="L208">            LOGGER.info(</span>
-                    &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
+                    &quot;[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation&quot;,
 <span class="nc" id="L210">                    jobDto.getProduct().getProductName(), leveldto.getName());</span>
 <span class="nc bnc" id="L211" title="All 2 branches missed.">            if (!jobDto.getPod().equals(processSettings.getHostname())) {</span>
 <span class="nc" id="L212">                jobDto.setPod(processSettings.getHostname());</span>

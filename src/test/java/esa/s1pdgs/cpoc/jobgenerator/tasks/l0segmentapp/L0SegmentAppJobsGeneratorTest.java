@@ -213,7 +213,7 @@ public class L0SegmentAppJobsGeneratorTest {
                 "WV_RAW__0S",
                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE",
                 "2018-09-13T23:44:52.000000Z", "2018-09-13T23:55:38.000000Z",
-                "SV", "BEGIN", "0294FC")).when(metadataService).getLevelSegment(
+                "SV", "START", "0294FC")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
@@ -255,34 +255,50 @@ public class L0SegmentAppJobsGeneratorTest {
                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                "2018-09-13T23:55:33.000000Z", "2018-09-13T23:55:55.000000Z",
-                "HV", "BEGIN", "000001")).when(metadataService).getLevelSegment(
+                "2019-01-21T05:43:26.195854Z", "2019-01-21T05:47:18.047569Z",
+                "HV", "START", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
-                "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
+                "S1A_IW_RAW__0SHV_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
                 "IW_RAW__0S",
-                "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
-                "2018-09-13T23:55:50.000000Z", "2018-09-13T23:58:01.000000Z",
+                "S1A_IW_RAW__0SHV_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
+                "2019-01-21T05:57:07.384773Z", "2019-01-21T05:57:26.287514Z",
                 "HV", "END", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
-                                "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
+                                "S1A_IW_RAW__0SHV_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                "2018-09-13T23:55:33.000000Z", "2018-09-13T23:55:55.000000Z",
-                "HH", "BEGIN", "000001")).when(metadataService).getLevelSegment(
+                "2019-01-21T05:43:26.195854Z", "2019-01-21T05:47:18.047569Z",
+                "HH", "START", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
                                 "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE"));
         doReturn(new LevelSegmentMetadata(
-                "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
+                "S1A_IW_RAW__0SHH_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
                 "IW_RAW__0S",
-                "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
-                "2018-09-13T23:55:50.000000Z", "2018-09-13T23:58:01.000000Z",
+                "S1A_IW_RAW__0SHH_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
+                "2019-01-21T05:57:07.384773Z", "2019-01-21T05:57:26.287514Z",
                 "HH", "END", "000001")).when(metadataService).getLevelSegment(
                         Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
-                                "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
+                                "S1A_IW_RAW__0SHH_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE"));
+        doReturn(new LevelSegmentMetadata(
+                "S1A_IW_RAW__0SHH_20180913T235550_20180913T235555_023686_000005_1BDE.SAFE",
+                "IW_RAW__0S",
+                "S1A_IW_RAW__0SHH_20180913T235550_20180913T235555_023686_000005_1BDE.SAFE",
+                "2019-01-21T05:47:12.277580Z", "2019-01-21T05:57:12.431404Z",
+                "HH", "MIDDLE", "000001")).when(metadataService).getLevelSegment(
+                        Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
+                                "S1A_IW_RAW__0SHH_20180913T235550_20180913T235655_023686_000005_1BDE.SAFE"));
+        doReturn(new LevelSegmentMetadata(
+                "S1A_IW_RAW__0SHV_20180913T235550_20180913T235655_023686_000005_1BDE.SAFE",
+                "IW_RAW__0S",
+                "S1A_IW_RAW__0SHV_20180913T235550_20180913T235655_023686_000005_1BDE.SAFE",
+                "2019-01-21T05:47:12.277580Z", "2019-01-21T05:57:12.431404Z",
+                "HV", "MIDDLE", "000001")).when(metadataService).getLevelSegment(
+                        Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq(
+                                "S1A_IW_RAW__0SHV_20180913T235550_20180913T235655_023686_000005_1BDE.SAFE"));
     }
 
     private void mockKafkaSender() throws AbstractCodedException {
@@ -436,6 +452,7 @@ public class L0SegmentAppJobsGeneratorTest {
                 .asList("S1A_IW_RAW__0SVH_20180913T235533_20180913T235555_023686_000002_1BDE.SAFE"));
         try {
             generator.preSearch(job);
+            fail("The vocerage shall be not checked");
         } catch (JobGenInputsMissingException e) {
             assertEquals(1, e.getMissingMetadata().size());
             assertTrue(e.getMissingMetadata()
@@ -453,6 +470,7 @@ public class L0SegmentAppJobsGeneratorTest {
                         "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_011111_1BDE.SAFE"));
         try {
             generator.preSearch(job);
+            fail("The vocerage shall be not checked");
         } catch (JobGenInputsMissingException e) {
             assertEquals(1, e.getMissingMetadata().size());
             assertTrue(e.getMissingMetadata()
@@ -467,9 +485,10 @@ public class L0SegmentAppJobsGeneratorTest {
         TestL0SegmentUtils.setMessageToBuildData(job.getAppDataJob(),
                 Arrays.asList(
                         "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                        "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
+                        "S1A_IW_RAW__0SHH_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE"));
         try {
             generator.preSearch(job);
+            fail("The vocerage shall be not checked");
         } catch (JobGenInputsMissingException e) {
             assertEquals(1, e.getMissingMetadata().size());
             assertTrue(e.getMissingMetadata()
@@ -485,10 +504,12 @@ public class L0SegmentAppJobsGeneratorTest {
         TestL0SegmentUtils.setMessageToBuildData(job.getAppDataJob(),
                 Arrays.asList(
                         "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                        "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
-                        "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE"));
+                        "S1A_IW_RAW__0SHH_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
+                        "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
+                        "S1A_IW_RAW__0SHH_20180913T235550_20180913T235655_023686_000005_1BDE.SAFE"));
         try {
             generator.preSearch(job);
+            fail("The vocerage shall be not checked");
         } catch (JobGenInputsMissingException e) {
             assertEquals(1, e.getMissingMetadata().size());
             assertTrue(e.getMissingMetadata()
@@ -504,10 +525,12 @@ public class L0SegmentAppJobsGeneratorTest {
         TestL0SegmentUtils.setMessageToBuildData(job.getAppDataJob(),
                 Arrays.asList(
                         "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                        "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
-                        "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
+                        "S1A_IW_RAW__0SHH_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
+                        "S1A_IW_RAW__0SHV_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
+                        "S1A_IW_RAW__0SHV_20180913T235550_20180913T235655_023686_000005_1BDE.SAFE"));
         try {
             generator.preSearch(job);
+            fail("The vocerage shall be not checked");
         } catch (JobGenInputsMissingException e) {
             assertEquals(1, e.getMissingMetadata().size());
             assertTrue(e.getMissingMetadata()
@@ -537,13 +560,15 @@ public class L0SegmentAppJobsGeneratorTest {
         TestL0SegmentUtils.setMessageToBuildData(job.getAppDataJob(),
                 Arrays.asList(
                         "S1A_IW_RAW__0SHV_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                        "S1A_IW_RAW__0SHH_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE",
+                        "S1A_IW_RAW__0SHH_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
                         "S1A_IW_RAW__0SHH_20180913T235533_20180913T235555_023686_000005_1BDE.SAFE",
-                        "S1A_IW_RAW__0SHV_20180913T235550_20180913T235801_023686_000005_1BDE.SAFE"));
+                        "S1A_IW_RAW__0SHV_20180913T235650_20180913T235801_023686_000005_1BDE.SAFE",
+                        "S1A_IW_RAW__0SHV_20180913T235550_20180913T235655_023686_000005_1BDE.SAFE",
+                        "S1A_IW_RAW__0SHH_20180913T235550_20180913T235655_023686_000005_1BDE.SAFE"));
         generator.preSearch(job);
-        assertEquals("2018-09-13T23:55:33.000000Z",
+        assertEquals("2019-01-21T05:43:26.195854Z",
                 job.getAppDataJob().getProduct().getStartTime());
-        assertEquals("2018-09-13T23:58:01.000000Z",
+        assertEquals("2019-01-21T05:57:26.287514Z",
                 job.getAppDataJob().getProduct().getStopTime());
     }
 
@@ -733,7 +758,7 @@ public class L0SegmentAppJobsGeneratorTest {
                 "2018-10-12T18:55:00", "SH", "FULL", "14256");
         LevelSegmentMetadata obj2 = new LevelSegmentMetadata("name1",
                 "IW_RAW_0S", "key1", "2018-10-12T13:12:04",
-                "2018-10-12T16:55:00", "SH", "BEGIN", "14256");
+                "2018-10-12T16:55:00", "SH", "START", "14256");
         LevelSegmentMetadata obj3 = new LevelSegmentMetadata("name1",
                 "IW_RAW_0S", "key1", "2018-10-12T13:12:05",
                 "2018-10-12T18:58:06", "SH", "END", "14256");
@@ -742,7 +767,7 @@ public class L0SegmentAppJobsGeneratorTest {
                 Arrays.asList(obj1, obj2, obj3);
 
         String expected = "FULL 2018-10-12T12:55:00 2018-10-12T18:55:00 | "
-                + "BEGIN 2018-10-12T13:12:04 2018-10-12T16:55:00 | "
+                + "START 2018-10-12T13:12:04 2018-10-12T16:55:00 | "
                 + "END 2018-10-12T13:12:05 2018-10-12T18:58:06 | ";
 
         assertEquals(expected, generator.extractConsolidation(listSortedFull));
@@ -759,7 +784,7 @@ public class L0SegmentAppJobsGeneratorTest {
                 "2018-10-12T18:55:00.000000Z", "SH", "FULL", "14256");
         LevelSegmentMetadata obj2 = new LevelSegmentMetadata("name1",
                 "IW_RAW_0S", "key1", "2018-10-12T12:55:00.000000Z",
-                "2018-10-12T18:55:00.000152Z", "SH", "BEGIN", "14256");
+                "2018-10-12T18:55:00.000152Z", "SH", "START", "14256");
         LevelSegmentMetadata obj3 = new LevelSegmentMetadata("name1",
                 "IW_RAW_0S", "key1", "2018-10-12T17:55:00.000000Z",
                 "2018-10-12T18:55:01.000000Z", "SH", "PARTIAL", "14256");

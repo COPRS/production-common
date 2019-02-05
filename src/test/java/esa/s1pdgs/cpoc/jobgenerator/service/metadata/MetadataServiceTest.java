@@ -174,7 +174,7 @@ public class MetadataServiceTest {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         LevelSegmentMetadata expectedResult = new LevelSegmentMetadata(file, "IW_RAW__0S",
-                file, "2017-12-13T12:16:23", "2017-12-13T12:16:56", "HV", "BEGIN",
+                file, "2017-12-13T12:16:23", "2017-12-13T12:16:56", "HV", "START",
                 "021735");
         ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
                 expectedResult, HttpStatus.OK);
@@ -189,7 +189,7 @@ public class MetadataServiceTest {
         assertEquals("2017-12-13T12:16:23", f.getValidityStart());
         assertEquals("2017-12-13T12:16:56", f.getValidityStop());
         assertEquals("HV", f.getPolarisation());
-        assertEquals("BEGIN", f.getConsolidation());
+        assertEquals("START", f.getConsolidation());
         assertEquals("021735", f.getDatatakeId());
     }
 
