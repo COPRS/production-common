@@ -228,48 +228,54 @@ public class AppDataJobService {
         } else {
 <span class="fc bfc" id="L229" title="All 2 branches covered.">            if (foundGenDb.getState() == patchGen.getState()) {</span>
 <span class="fc" id="L230">                int currentNbErrors = foundGenDb.getNbErrors();</span>
-<span class="fc bfc" id="L231" title="All 2 branches covered.">                if (currentNbErrors + 1 &gt;= maxNbErrors) {</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">                if (currentNbErrors + 1 &gt;= maxNbErrors) {</span>
 <span class="fc" id="L232">                    terminateGeneration(jobDb, foundGenDb);</span>
 <span class="fc" id="L233">                    throw new AppCatalogJobGenerationTerminatedException(</span>
 <span class="fc" id="L234">                            jobDb.getProduct().getProductName(),</span>
 <span class="fc" id="L235">                            jobDb.getMessages());</span>
                 } else {
-<span class="fc" id="L237">                    foundGenDb.setLastUpdateDate(new Date());</span>
-<span class="fc" id="L238">                    foundGenDb.setNbErrors(currentNbErrors + 1);</span>
-<span class="fc" id="L239">                    foundGenDb.setState(patchGen.getState());</span>
-<span class="fc" id="L240">                    return appDataJobDao.save(jobDb);</span>
+<span class="nc" id="L237">                    foundGenDb.setLastUpdateDate(new Date());</span>
+<span class="nc" id="L238">                    foundGenDb.setNbErrors(currentNbErrors + 1);</span>
+<span class="nc" id="L239">                    foundGenDb.setState(patchGen.getState());</span>
+<span class="nc" id="L240">                    appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), foundGenDb);</span>
+<span class="nc" id="L241">                    return jobDb;</span>
                 }
             } else {
-<span class="fc" id="L243">                foundGenDb.setState(patchGen.getState());</span>
-<span class="fc" id="L244">                foundGenDb.setLastUpdateDate(new Date());</span>
-<span class="fc" id="L245">                foundGenDb.setNbErrors(0);</span>
-<span class="fc" id="L246">                return appDataJobDao.save(jobDb);</span>
+<span class="fc" id="L244">                foundGenDb.setState(patchGen.getState());</span>
+<span class="fc" id="L245">                foundGenDb.setLastUpdateDate(new Date());</span>
+<span class="fc" id="L246">                foundGenDb.setNbErrors(0);</span>
+<span class="fc" id="L247">                appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), foundGenDb);</span>
+<span class="fc" id="L248">                return jobDb;</span>
             }
         }
     }
 
     private AppDataJob terminateGeneration(AppDataJob jobDb,
-            AppDataJobGeneration genDb) {
+            AppDataJobGeneration genDb) throws AppCatalogJobNotFoundException {
         // Update gen
-<span class="fc" id="L254">        genDb.setState(AppDataJobGenerationState.SENT);</span>
-<span class="fc" id="L255">        genDb.setLastUpdateDate(new Date());</span>
-<span class="fc" id="L256">        genDb.setNbErrors(0);</span>
+<span class="fc" id="L256">        genDb.setState(AppDataJobGenerationState.SENT);</span>
+<span class="fc" id="L257">        genDb.setLastUpdateDate(new Date());</span>
+<span class="fc" id="L258">        genDb.setNbErrors(0);</span>
+<span class="fc" id="L259">        appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), genDb);</span>
 
         // Search if all generation are terminated
-<span class="fc" id="L259">        boolean terminated = true;</span>
-<span class="fc bfc" id="L260" title="All 2 branches covered.">        for (AppDataJobGeneration gen : jobDb.getGenerations()) {</span>
-<span class="fc bfc" id="L261" title="All 2 branches covered.">            if (gen.getState() != AppDataJobGenerationState.SENT) {</span>
-<span class="fc" id="L262">                terminated = false;</span>
+<span class="fc" id="L262">        AppDataJob refreshJobDb = appDataJobDao.findById(jobDb.getIdentifier())</span>
+<span class="pc" id="L263">                .orElseThrow(() -&gt; new AppCatalogJobNotFoundException(jobDb.getIdentifier()));</span>
+<span class="fc" id="L264">        boolean terminated = true;</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        for (AppDataJobGeneration gen : refreshJobDb.getGenerations()) {</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">            if (gen.getState() != AppDataJobGenerationState.SENT) {</span>
+<span class="fc" id="L267">                terminated = false;</span>
             }
-<span class="fc" id="L264">        }</span>
+<span class="fc" id="L269">        }</span>
 
         // Terminate job if needed
-<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if (terminated) {</span>
-<span class="nc" id="L268">            jobDb.setState(AppDataJobState.TERMINATED);</span>
-<span class="nc" id="L269">            jobDb.setLastUpdateDate(new Date());</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">        if (terminated) {</span>
+<span class="fc" id="L273">            refreshJobDb.setState(AppDataJobState.TERMINATED);</span>
+<span class="fc" id="L274">            refreshJobDb.setLastUpdateDate(new Date());</span>
+<span class="fc" id="L275">            return appDataJobDao.save(refreshJobDb);</span>
         }
 
-<span class="fc" id="L272">        return appDataJobDao.save(jobDb);</span>
+<span class="fc" id="L278">        return refreshJobDb;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

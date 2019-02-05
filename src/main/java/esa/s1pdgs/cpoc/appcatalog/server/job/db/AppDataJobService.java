@@ -237,27 +237,32 @@ public class AppDataJobService {
                     foundGenDb.setLastUpdateDate(new Date());
                     foundGenDb.setNbErrors(currentNbErrors + 1);
                     foundGenDb.setState(patchGen.getState());
-                    return appDataJobDao.save(jobDb);
+                    appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), foundGenDb);
+                    return jobDb;
                 }
             } else {
                 foundGenDb.setState(patchGen.getState());
                 foundGenDb.setLastUpdateDate(new Date());
                 foundGenDb.setNbErrors(0);
-                return appDataJobDao.save(jobDb);
+                appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), foundGenDb);
+                return jobDb;
             }
         }
     }
 
     private AppDataJob terminateGeneration(AppDataJob jobDb,
-            AppDataJobGeneration genDb) {
+            AppDataJobGeneration genDb) throws AppCatalogJobNotFoundException {
         // Update gen
         genDb.setState(AppDataJobGenerationState.SENT);
         genDb.setLastUpdateDate(new Date());
         genDb.setNbErrors(0);
+        appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), genDb);
 
         // Search if all generation are terminated
+        AppDataJob refreshJobDb = appDataJobDao.findById(jobDb.getIdentifier())
+                .orElseThrow(() -> new AppCatalogJobNotFoundException(jobDb.getIdentifier()));
         boolean terminated = true;
-        for (AppDataJobGeneration gen : jobDb.getGenerations()) {
+        for (AppDataJobGeneration gen : refreshJobDb.getGenerations()) {
             if (gen.getState() != AppDataJobGenerationState.SENT) {
                 terminated = false;
             }
@@ -265,10 +270,11 @@ public class AppDataJobService {
 
         // Terminate job if needed
         if (terminated) {
-            jobDb.setState(AppDataJobState.TERMINATED);
-            jobDb.setLastUpdateDate(new Date());
+            refreshJobDb.setState(AppDataJobState.TERMINATED);
+            refreshJobDb.setLastUpdateDate(new Date());
+            return appDataJobDao.save(refreshJobDb);
         }
 
-        return appDataJobDao.save(jobDb);
+        return refreshJobDb;
     }
 }

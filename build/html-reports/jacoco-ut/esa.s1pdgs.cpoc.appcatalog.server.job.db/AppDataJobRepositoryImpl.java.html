@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -19,53 +20,70 @@ public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-<span class="fc" id="L22">    public AppDataJobRepositoryImpl(final MongoTemplate mongoTemplate) {</span>
-<span class="fc" id="L23">        this.mongoTemplate = mongoTemplate;</span>
-<span class="fc" id="L24">    }</span>
+<span class="fc" id="L23">    public AppDataJobRepositoryImpl(final MongoTemplate mongoTemplate) {</span>
+<span class="fc" id="L24">        this.mongoTemplate = mongoTemplate;</span>
+<span class="fc" id="L25">    }</span>
 
     @Override
     public List&lt;AppDataJob&gt; search(List&lt;FilterCriterion&gt; filters,
             ProductCategory category, Sort sort) {
-<span class="fc" id="L29">        final Query query = new Query();</span>
-<span class="fc" id="L30">        final List&lt;Criteria&gt; criteria = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L31">        criteria.add(Criteria.where(&quot;category&quot;).is(category));</span>
-<span class="fc bfc" id="L32" title="All 2 branches covered.">        for (FilterCriterion criterion : filters) {</span>
-<span class="pc bfc" id="L33" title="All 6 branches covered.">            switch (criterion.getOperator()) {</span>
+<span class="fc" id="L30">        final Query query = new Query();</span>
+<span class="fc" id="L31">        final List&lt;Criteria&gt; criteria = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L32">        criteria.add(Criteria.where(&quot;category&quot;).is(category));</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        for (FilterCriterion criterion : filters) {</span>
+<span class="pc bfc" id="L34" title="All 6 branches covered.">            switch (criterion.getOperator()) {</span>
                 case LT:
-<span class="fc" id="L35">                    criteria.add(Criteria.where(criterion.getKey())</span>
-<span class="fc" id="L36">                            .lt(criterion.getValue()));</span>
-<span class="fc" id="L37">                    break;</span>
+<span class="fc" id="L36">                    criteria.add(Criteria.where(criterion.getKey())</span>
+<span class="fc" id="L37">                            .lt(criterion.getValue()));</span>
+<span class="fc" id="L38">                    break;</span>
                 case LTE:
-<span class="fc" id="L39">                    criteria.add(Criteria.where(criterion.getKey())</span>
-<span class="fc" id="L40">                            .lte(criterion.getValue()));</span>
-<span class="fc" id="L41">                    break;</span>
+<span class="fc" id="L40">                    criteria.add(Criteria.where(criterion.getKey())</span>
+<span class="fc" id="L41">                            .lte(criterion.getValue()));</span>
+<span class="fc" id="L42">                    break;</span>
                 case GT:
-<span class="fc" id="L43">                    criteria.add(Criteria.where(criterion.getKey())</span>
-<span class="fc" id="L44">                            .gt(criterion.getValue()));</span>
-<span class="fc" id="L45">                    break;</span>
+<span class="fc" id="L44">                    criteria.add(Criteria.where(criterion.getKey())</span>
+<span class="fc" id="L45">                            .gt(criterion.getValue()));</span>
+<span class="fc" id="L46">                    break;</span>
                 case GTE:
-<span class="fc" id="L47">                    criteria.add(Criteria.where(criterion.getKey())</span>
-<span class="fc" id="L48">                            .gte(criterion.getValue()));</span>
-<span class="fc" id="L49">                    break;</span>
+<span class="fc" id="L48">                    criteria.add(Criteria.where(criterion.getKey())</span>
+<span class="fc" id="L49">                            .gte(criterion.getValue()));</span>
+<span class="fc" id="L50">                    break;</span>
                 case NEQ:
-<span class="fc" id="L51">                    criteria.add(Criteria.where(criterion.getKey())</span>
-<span class="fc" id="L52">                            .ne(criterion.getValue()));</span>
-<span class="fc" id="L53">                    break;</span>
+<span class="fc" id="L52">                    criteria.add(Criteria.where(criterion.getKey())</span>
+<span class="fc" id="L53">                            .ne(criterion.getValue()));</span>
+<span class="fc" id="L54">                    break;</span>
                 default:
-<span class="fc" id="L55">                    criteria.add(Criteria.where(criterion.getKey())</span>
-<span class="fc" id="L56">                            .is(criterion.getValue()));</span>
+<span class="fc" id="L56">                    criteria.add(Criteria.where(criterion.getKey())</span>
+<span class="fc" id="L57">                            .is(criterion.getValue()));</span>
                     break;
             }
-<span class="fc" id="L59">        }</span>
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (!criteria.isEmpty()) {</span>
-<span class="fc" id="L61">            query.addCriteria(new Criteria().andOperator(</span>
-<span class="fc" id="L62">                    criteria.toArray(new Criteria[criteria.size()])));</span>
+<span class="fc" id="L60">        }</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (!criteria.isEmpty()) {</span>
+<span class="fc" id="L62">            query.addCriteria(new Criteria().andOperator(</span>
+<span class="fc" id="L63">                    criteria.toArray(new Criteria[criteria.size()])));</span>
         }
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (sort != null) {</span>
-<span class="fc" id="L65">            query.with(sort);</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (sort != null) {</span>
+<span class="fc" id="L66">            query.with(sort);</span>
         }
-<span class="fc" id="L67">        return mongoTemplate.find(query, AppDataJob.class);</span>
+<span class="fc" id="L68">        return mongoTemplate.find(query, AppDataJob.class);</span>
     }
+
+    @Override
+    public void udpateJobGeneration(Long jobId,
+            AppDataJobGeneration newGeneration) {
+     // db.jobs.updateOne(
+     //         { _id: jobId, &quot;generations.taskTable&quot;: &quot;taskTAble&quot; },
+     //         { $set: { &quot;generations.$.lastUpdateDate&quot; : 6,  &quot;generations.$.state&quot; : 6, &quot;generations.$.nbErrors&quot; : 6} }
+      //       )
+        // filter: _id = jobId, generations.taskTabgle: taskTableName
+<span class="nc" id="L79">        Query query = new Query();</span>
+<span class="nc" id="L80">        query.addCriteria(Criteria.where(&quot;_id&quot;).is(jobId));</span>
+<span class="nc" id="L81">        Update update = new Update();</span>
+<span class="nc" id="L82">        update.set(&quot;generations.$.lastUpdateDate&quot;, newGeneration.getLastUpdateDate());</span>
+<span class="nc" id="L83">        update.set(&quot;generations.$.state&quot;, newGeneration.getState());</span>
+<span class="nc" id="L84">        update.set(&quot;generations.$.nbErrors&quot;, newGeneration.getNbErrors());</span>
+<span class="nc" id="L85">        mongoTemplate.updateFirst(query, update, AppDataJob.class);</span>
+<span class="nc" id="L86">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
