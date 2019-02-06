@@ -10,6 +10,7 @@ import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.compute.Server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
 import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc;
@@ -27,8 +28,8 @@ public class OpenStackAdministration {
     /**
      * Logger
      */
-<span class="fc" id="L30">    private static final Logger LOGGER =</span>
-<span class="fc" id="L31">            LogManager.getLogger(OpenStackAdministration.class);</span>
+<span class="fc" id="L31">    private static final Logger LOGGER =</span>
+<span class="fc" id="L32">            LogManager.getLogger(OpenStackAdministration.class);</span>
 
     /**
      * OS client factory
@@ -56,7 +57,7 @@ public class OpenStackAdministration {
      * @return
      */
     private OSClientV3 osClient() {
-<span class="fc" id="L59">        return osClientFactory.osClient(osProperties);</span>
+<span class="fc" id="L60">        return osClientFactory.osClient(osProperties);</span>
     }
 
     /**
@@ -68,12 +69,12 @@ public class OpenStackAdministration {
     public OpenStackAdministration(final OpenStackClientFactory osClientFactory,
             final OpenStackServerProperties osProperties,
             final ServerService serverService,
-<span class="fc" id="L71">            final VolumeService volumeService) {</span>
-<span class="fc" id="L72">        this.osClientFactory = osClientFactory;</span>
-<span class="fc" id="L73">        this.osProperties = osProperties;</span>
-<span class="fc" id="L74">        this.serverService = serverService;</span>
-<span class="fc" id="L75">        this.volumeService = volumeService;</span>
-<span class="fc" id="L76">    }</span>
+<span class="fc" id="L72">            final VolumeService volumeService) {</span>
+<span class="fc" id="L73">        this.osClientFactory = osClientFactory;</span>
+<span class="fc" id="L74">        this.osProperties = osProperties;</span>
+<span class="fc" id="L75">        this.serverService = serverService;</span>
+<span class="fc" id="L76">        this.volumeService = volumeService;</span>
+<span class="fc" id="L77">    }</span>
 
     /**
      * Remove the server with given identifier
@@ -82,25 +83,29 @@ public class OpenStackAdministration {
      * @throws OsEntityException
      */
     public void deleteServer(final String serverId) throws OsEntityException {
-<span class="fc" id="L85">        final OSClientV3 osClient = osClient();</span>
-<span class="fc" id="L86">        final Server s = serverService.get(osClient, serverId);</span>
-<span class="fc" id="L87">        final OpenStackServerProperties.ServerProperties serverProperties =</span>
-<span class="fc" id="L88">                osProperties.getServerWrapper();</span>
-<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (serverProperties.isFloatActivation()) {</span>
-<span class="fc" id="L90">            String floatingIPID =</span>
-<span class="fc" id="L91">                    serverService.getFloatingIpIdForServer(osClient, serverId);</span>
-<span class="fc" id="L92">            LOGGER.debug(&quot;[serverId {}] Deleting floating ip {}&quot;, serverId,</span>
-                    floatingIPID);
-<span class="fc" id="L94">            serverService.deleteFloatingIp(osClient, floatingIPID);</span>
+<span class="fc" id="L86">        final OSClientV3 osClient = osClient();</span>
+<span class="fc" id="L87">        final Server s = serverService.get(osClient, serverId);</span>
+<span class="fc" id="L88">        final OpenStackServerProperties.ServerProperties serverProperties =</span>
+<span class="fc" id="L89">                osProperties.getServerWrapper();</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (serverProperties.isFloatActivation()) {</span>
+<span class="fc" id="L91">            String floatingIPID =</span>
+<span class="fc" id="L92">                    serverService.getFloatingIpIdForServer(osClient, serverId);</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">            if (StringUtils.isEmpty(floatingIPID)) {</span>
+<span class="nc" id="L94">                LOGGER.debug(&quot;[serverId {}] No floating ip to delete&quot;, serverId);</span>
+            } else {
+<span class="fc" id="L96">                LOGGER.debug(&quot;[serverId {}] Deleting floating ip {}&quot;, serverId,</span>
+                        floatingIPID);
+<span class="fc" id="L98">                serverService.deleteFloatingIp(osClient, floatingIPID);</span>
+            }
         }
-<span class="fc" id="L96">        serverService.delete(osClient, serverId);</span>
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (serverProperties.isBootableOnVolume()) {</span>
-<span class="fc bfc" id="L98" title="All 2 branches covered.">            for (String v : s.getOsExtendedVolumesAttached()) {</span>
-<span class="fc" id="L99">                LOGGER.debug(&quot;[serverId {}] Deleting volume {}&quot;, serverId, v);</span>
-<span class="fc" id="L100">                volumeService.deleteVolume(osClient, v);</span>
-<span class="fc" id="L101">            }</span>
+<span class="fc" id="L101">        serverService.delete(osClient, serverId);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (serverProperties.isBootableOnVolume()) {</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">            for (String v : s.getOsExtendedVolumesAttached()) {</span>
+<span class="fc" id="L104">                LOGGER.debug(&quot;[serverId {}] Deleting volume {}&quot;, serverId, v);</span>
+<span class="fc" id="L105">                volumeService.deleteVolume(osClient, v);</span>
+<span class="fc" id="L106">            }</span>
         }
-<span class="fc" id="L103">    }</span>
+<span class="fc" id="L108">    }</span>
 
     /**
      * Create a server named with given prefix
@@ -112,9 +117,9 @@ public class OpenStackAdministration {
      */
     public String createServerForL1Wrappers(final String logPrefix,
             final AtomicInteger uniqueVMID) throws OsEntityException {
-<span class="fc" id="L115">        String vmID = uniqueVMID.getAndIncrement() + &quot;-&quot;</span>
-<span class="fc" id="L116">                + UUID.randomUUID().toString().substring(0, 4);</span>
-<span class="fc" id="L117">        return createServerForL1Wrappers(logPrefix, vmID);</span>
+<span class="fc" id="L120">        String vmID = uniqueVMID.getAndIncrement() + &quot;-&quot;</span>
+<span class="fc" id="L121">                + UUID.randomUUID().toString().substring(0, 4);</span>
+<span class="fc" id="L122">        return createServerForL1Wrappers(logPrefix, vmID);</span>
     }
 
     /**
@@ -127,57 +132,57 @@ public class OpenStackAdministration {
      */
     protected String createServerForL1Wrappers(final String logPrefix,
             String vmID) throws OsEntityException {
-<span class="fc" id="L130">        OSClientV3 osClient = osClient();</span>
-<span class="fc" id="L131">        OpenStackServerProperties.VolumeProperties volumeProperties =</span>
-<span class="fc" id="L132">                osProperties.getVolumeWrapper();</span>
-<span class="fc" id="L133">        OpenStackServerProperties.ServerProperties serverProperties =</span>
-<span class="fc" id="L134">                osProperties.getServerWrapper();</span>
-<span class="fc" id="L135">        String serverName = serverProperties.getPrefixName() + &quot;-&quot; + vmID;</span>
-<span class="fc" id="L136">        String volumeName =</span>
-<span class="fc" id="L137">                volumeProperties.getPrefixName() + &quot;-&quot; + vmID + &quot;-volume&quot;;</span>
+<span class="fc" id="L135">        OSClientV3 osClient = osClient();</span>
+<span class="fc" id="L136">        OpenStackServerProperties.VolumeProperties volumeProperties =</span>
+<span class="fc" id="L137">                osProperties.getVolumeWrapper();</span>
+<span class="fc" id="L138">        OpenStackServerProperties.ServerProperties serverProperties =</span>
+<span class="fc" id="L139">                osProperties.getServerWrapper();</span>
+<span class="fc" id="L140">        String serverName = serverProperties.getPrefixName() + &quot;-&quot; + vmID;</span>
+<span class="fc" id="L141">        String volumeName =</span>
+<span class="fc" id="L142">                volumeProperties.getPrefixName() + &quot;-&quot; + vmID + &quot;-volume&quot;;</span>
 
         // Create volume
-<span class="fc" id="L140">        String volumeId = &quot;&quot;;</span>
-<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (serverProperties.isBootableOnVolume()) {</span>
-<span class="fc" id="L142">            LOGGER.info(&quot;{} [serverName {}] Starting creating volume {}&quot;,</span>
+<span class="fc" id="L145">        String volumeId = &quot;&quot;;</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        if (serverProperties.isBootableOnVolume()) {</span>
+<span class="fc" id="L147">            LOGGER.info(&quot;{} [serverName {}] Starting creating volume {}&quot;,</span>
                     logPrefix, serverName, volumeName);
-<span class="fc" id="L144">            VolumeDesc v = VolumeDesc.builder().name(volumeName).bootable(true)</span>
-<span class="fc" id="L145">                    .description(volumeProperties.getDescription())</span>
-<span class="fc" id="L146">                    .imageRef(serverProperties.getImageRef())</span>
-<span class="fc" id="L147">                    .size(volumeProperties.getSize())</span>
-<span class="fc" id="L148">                    .volumeType(volumeProperties.getVolumeType())</span>
-<span class="fc" id="L149">                    .zone(volumeProperties.getZone()).build();</span>
-<span class="fc" id="L150">            volumeId = volumeService.createVolumeAndBoot(osClient, v);</span>
+<span class="fc" id="L149">            VolumeDesc v = VolumeDesc.builder().name(volumeName).bootable(true)</span>
+<span class="fc" id="L150">                    .description(volumeProperties.getDescription())</span>
+<span class="fc" id="L151">                    .imageRef(serverProperties.getImageRef())</span>
+<span class="fc" id="L152">                    .size(volumeProperties.getSize())</span>
+<span class="fc" id="L153">                    .volumeType(volumeProperties.getVolumeType())</span>
+<span class="fc" id="L154">                    .zone(volumeProperties.getZone()).build();</span>
+<span class="fc" id="L155">            volumeId = volumeService.createVolumeAndBoot(osClient, v);</span>
         }
 
         // Create server and boot on given volume
-<span class="fc" id="L154">        LOGGER.info(&quot;{} [serverName {}] Starting creating server and booting&quot;,</span>
+<span class="fc" id="L159">        LOGGER.info(&quot;{} [serverName {}] Starting creating server and booting&quot;,</span>
                 logPrefix, serverName);
-<span class="fc" id="L156">        ServerDescBuilder builderS = ServerDesc.builder().name(serverName)</span>
-<span class="fc" id="L157">                .keySecurity(serverProperties.getKeySecurity())</span>
-<span class="fc" id="L158">                .securityGroups(serverProperties.getSecurityGroups())</span>
-<span class="fc" id="L159">                .flavor(serverProperties.getFlavor())</span>
-<span class="fc" id="L160">                .availableZone(serverProperties.getAvailableZone())</span>
-<span class="fc" id="L161">                .networks(serverProperties.getNetworks());</span>
-<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (serverProperties.isBootableOnVolume()) {</span>
-<span class="fc" id="L163">            builderS.bootOnVolumeInformation(volumeId,</span>
-<span class="fc" id="L164">                    serverProperties.getBootDeviceName());</span>
+<span class="fc" id="L161">        ServerDescBuilder builderS = ServerDesc.builder().name(serverName)</span>
+<span class="fc" id="L162">                .keySecurity(serverProperties.getKeySecurity())</span>
+<span class="fc" id="L163">                .securityGroups(serverProperties.getSecurityGroups())</span>
+<span class="fc" id="L164">                .flavor(serverProperties.getFlavor())</span>
+<span class="fc" id="L165">                .availableZone(serverProperties.getAvailableZone())</span>
+<span class="fc" id="L166">                .networks(serverProperties.getNetworks());</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (serverProperties.isBootableOnVolume()) {</span>
+<span class="fc" id="L168">            builderS.bootOnVolumeInformation(volumeId,</span>
+<span class="fc" id="L169">                    serverProperties.getBootDeviceName());</span>
         } else {
-<span class="fc" id="L166">            builderS.imageRef(serverProperties.getImageRef());</span>
+<span class="fc" id="L171">            builderS.imageRef(serverProperties.getImageRef());</span>
         }
-<span class="fc" id="L168">        String serverId =</span>
-<span class="fc" id="L169">                serverService.createAndBootServer(osClient, builderS.build());</span>
+<span class="fc" id="L173">        String serverId =</span>
+<span class="fc" id="L174">                serverService.createAndBootServer(osClient, builderS.build());</span>
 
         // Create floating IP
-<span class="fc bfc" id="L172" title="All 2 branches covered.">        if (serverProperties.isFloatActivation()) {</span>
-<span class="fc" id="L173">            LOGGER.info(</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        if (serverProperties.isFloatActivation()) {</span>
+<span class="fc" id="L178">            LOGGER.info(</span>
                     &quot;{} [serverName {}] [serverId {}] Starting creating floating ip&quot;,
                     logPrefix, serverName, serverId);
-<span class="fc" id="L176">            serverService.createFloatingIp(osClient, serverId,</span>
-<span class="fc" id="L177">                    serverProperties.getFloatingNetwork());</span>
+<span class="fc" id="L181">            serverService.createFloatingIp(osClient, serverId,</span>
+<span class="fc" id="L182">                    serverProperties.getFloatingNetwork());</span>
         }
 
-<span class="fc" id="L180">        return serverId;</span>
+<span class="fc" id="L185">        return serverId;</span>
     }
 
     /**
@@ -186,18 +191,18 @@ public class OpenStackAdministration {
      * @throws OsEntityException
      */
     public void deleteInvalidServers() throws OsEntityException {
-<span class="fc" id="L189">        OSClientV3 osClient = this.osClient();</span>
-<span class="fc" id="L190">        OpenStackServerProperties.ServerProperties serverProperties =</span>
-<span class="fc" id="L191">                osProperties.getServerWrapper();</span>
-<span class="fc" id="L192">        Map&lt;String, String&gt; invalidServers = serverService.getServerIds(</span>
-<span class="fc" id="L193">                osClient, serverProperties.getPrefixName(), &quot;ERROR&quot;);</span>
-<span class="fc bfc" id="L194" title="All 2 branches covered.">        for (String serverId : invalidServers.keySet()) {</span>
-<span class="fc" id="L195">            LOGGER.info(&quot;Deletion of invalid server {}&quot;,</span>
-<span class="fc" id="L196">                    invalidServers.get(serverId));</span>
-<span class="fc" id="L197">            deleteServer(serverId);</span>
-<span class="fc" id="L198">        }</span>
+<span class="fc" id="L194">        OSClientV3 osClient = this.osClient();</span>
+<span class="fc" id="L195">        OpenStackServerProperties.ServerProperties serverProperties =</span>
+<span class="fc" id="L196">                osProperties.getServerWrapper();</span>
+<span class="fc" id="L197">        Map&lt;String, String&gt; invalidServers = serverService.getServerIds(</span>
+<span class="fc" id="L198">                osClient, serverProperties.getPrefixName(), &quot;ERROR&quot;);</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        for (String serverId : invalidServers.keySet()) {</span>
+<span class="fc" id="L200">            LOGGER.info(&quot;Deletion of invalid server {}&quot;,</span>
+<span class="fc" id="L201">                    invalidServers.get(serverId));</span>
+<span class="fc" id="L202">            deleteServer(serverId);</span>
+<span class="fc" id="L203">        }</span>
 
-<span class="fc" id="L200">    }</span>
+<span class="fc" id="L205">    }</span>
 
     /**
      * delete the invalid volumes
@@ -205,18 +210,18 @@ public class OpenStackAdministration {
      * @throws OsEntityException
      */
     public void deleteInvalidVolumes() throws OsEntityException {
-<span class="fc" id="L208">        OSClientV3 osClient = this.osClient();</span>
-<span class="fc" id="L209">        OpenStackServerProperties.VolumeProperties volumeProperties =</span>
-<span class="fc" id="L210">                osProperties.getVolumeWrapper();</span>
-<span class="fc" id="L211">        Map&lt;String, String&gt; invalidVolumes = volumeService.getVolumeIds(</span>
-<span class="fc" id="L212">                osClient, volumeProperties.getPrefixName(), &quot;ERROR&quot;);</span>
-<span class="fc bfc" id="L213" title="All 2 branches covered.">        for (String volumeId : invalidVolumes.keySet()) {</span>
-<span class="fc" id="L214">            LOGGER.info(&quot;Deletion of invalid server {}&quot;,</span>
-<span class="fc" id="L215">                    invalidVolumes.get(volumeId));</span>
-<span class="fc" id="L216">            volumeService.deleteVolume(osClient, volumeId);</span>
-<span class="fc" id="L217">        }</span>
+<span class="fc" id="L213">        OSClientV3 osClient = this.osClient();</span>
+<span class="fc" id="L214">        OpenStackServerProperties.VolumeProperties volumeProperties =</span>
+<span class="fc" id="L215">                osProperties.getVolumeWrapper();</span>
+<span class="fc" id="L216">        Map&lt;String, String&gt; invalidVolumes = volumeService.getVolumeIds(</span>
+<span class="fc" id="L217">                osClient, volumeProperties.getPrefixName(), &quot;ERROR&quot;);</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">        for (String volumeId : invalidVolumes.keySet()) {</span>
+<span class="fc" id="L219">            LOGGER.info(&quot;Deletion of invalid server {}&quot;,</span>
+<span class="fc" id="L220">                    invalidVolumes.get(volumeId));</span>
+<span class="fc" id="L221">            volumeService.deleteVolume(osClient, volumeId);</span>
+<span class="fc" id="L222">        }</span>
 
-<span class="fc" id="L219">    }</span>
+<span class="fc" id="L224">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

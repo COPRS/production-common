@@ -163,28 +163,30 @@ public class ServerService {
             final String serverId) {
 <span class="fc" id="L164">        List&lt;? extends InterfaceAttachment&gt; nicID =</span>
 <span class="fc" id="L165">                osClient.compute().servers().interfaces().list(serverId);</span>
-<span class="fc" id="L166">        String portid = nicID.get(0).getPortId();</span>
-<span class="fc" id="L167">        List&lt;? extends NetFloatingIP&gt; fips =</span>
-<span class="fc" id="L168">                osClient.networking().floatingip().list();</span>
-<span class="fc bfc" id="L169" title="All 2 branches covered.">        for (NetFloatingIP netFloatingIP : fips) {</span>
-<span class="fc bfc" id="L170" title="All 2 branches covered.">            if (netFloatingIP.getPortId() != null</span>
-<span class="fc bfc" id="L171" title="All 2 branches covered.">                    &amp;&amp; netFloatingIP.getPortId().equals(portid)) {</span>
-<span class="fc" id="L172">                return netFloatingIP.getId();</span>
-            }
-<span class="fc" id="L174">        }</span>
-<span class="fc" id="L175">        return &quot;&quot;;</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">        if (!CollectionUtils.isEmpty(nicID)) {</span>
+<span class="fc" id="L167">            String portid = nicID.get(0).getPortId();</span>
+<span class="fc" id="L168">            List&lt;? extends NetFloatingIP&gt; fips =</span>
+<span class="fc" id="L169">                    osClient.networking().floatingip().list();</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">            for (NetFloatingIP netFloatingIP : fips) {</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                if (netFloatingIP.getPortId() != null</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">                        &amp;&amp; netFloatingIP.getPortId().equals(portid)) {</span>
+<span class="fc" id="L173">                    return netFloatingIP.getId();</span>
+                }
+<span class="fc" id="L175">            }</span>
+        }
+<span class="fc" id="L177">        return &quot;&quot;;</span>
     }
 
     public Map&lt;String, String&gt; getServerIds(final OSClientV3 osClient,
             final String prefix, final String status) {
-<span class="fc" id="L180">        Map&lt;String, String&gt; ret = new HashMap&lt;String, String&gt;();</span>
-<span class="fc" id="L181">        Map&lt;String, String&gt; filter = new HashMap&lt;String, String&gt;();</span>
-<span class="fc" id="L182">        filter.put(&quot;status&quot;, status);</span>
-<span class="fc" id="L183">        filter.put(&quot;name&quot;, &quot;^&quot; + prefix + &quot;*&quot;);</span>
-<span class="fc bfc" id="L184" title="All 2 branches covered.">        for (Server server : osClient.compute().servers().list(filter)) {</span>
-<span class="fc" id="L185">            ret.put(server.getId(), server.getName());</span>
-<span class="fc" id="L186">        }</span>
-<span class="fc" id="L187">        return ret;</span>
+<span class="fc" id="L182">        Map&lt;String, String&gt; ret = new HashMap&lt;String, String&gt;();</span>
+<span class="fc" id="L183">        Map&lt;String, String&gt; filter = new HashMap&lt;String, String&gt;();</span>
+<span class="fc" id="L184">        filter.put(&quot;status&quot;, status);</span>
+<span class="fc" id="L185">        filter.put(&quot;name&quot;, &quot;^&quot; + prefix + &quot;*&quot;);</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        for (Server server : osClient.compute().servers().list(filter)) {</span>
+<span class="fc" id="L187">            ret.put(server.getId(), server.getName());</span>
+<span class="fc" id="L188">        }</span>
+<span class="fc" id="L189">        return ret;</span>
     }
 
 }
