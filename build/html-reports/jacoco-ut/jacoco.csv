@@ -47,8 +47,8 @@ s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobSe
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobGeneration,0,164,0,16,0,34,0,22,0,14
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobGenerationState,0,58,0,0,0,2,0,4,0,4
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJob,0,282,0,26,0,54,0,37,0,24
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobService,20,347,8,34,2,88,10,24,2,10
-s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobRepositoryImpl,0,125,2,10,0,32,2,8,0,2
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobService,41,358,8,34,5,91,11,24,3,10
+s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobRepositoryImpl,48,125,2,10,11,32,3,8,1,2
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobState,0,58,0,0,0,2,0,4,0,4
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.job.db,AppDataJobRepositoryImpl.new Object() {...},5,35,0,0,0,1,0,1,0,1
 s1pdgs-applicative-catalog,esa.s1pdgs.cpoc.appcatalog.server.status.dto,AppCatalogStatusDto,0,127,0,12,0,28,0,17,0,11

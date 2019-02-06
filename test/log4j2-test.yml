@@ -52,6 +52,6 @@ Configuration:
           - ref: STDOUT
           - ref: FILE
     Root:
-      level: error
+      level: debug
       AppenderRef:
         ref: STDOUT

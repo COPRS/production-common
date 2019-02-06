@@ -3,8 +3,11 @@
  */
 package esa.s1pdgs.cpoc.appcatalog.server.job.db;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -180,9 +183,18 @@ public class AppDataJobServiceTest {
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
-        this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen1, 3);
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
+        AppDataJobGeneration newGen = new AppDataJobGeneration();
+        newGen.setTaskTable("task-table-1");
+        newGen.setState(AppDataJobGenerationState.PRIMARY_CHECK);
+        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" , newGen, 3);
         verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
-        verify(appDataJobDao, times(1)).save(Mockito.eq(obj));
+        verify(appDataJobDao, never()).save(Mockito.any());
+        verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
+        assertEquals(AppDataJobGenerationState.PRIMARY_CHECK, newJob.getGenerations().get(0).getState());
+        assertEquals(0, newJob.getGenerations().get(0).getNbErrors());
+        assertEquals("task-table-1", newJob.getGenerations().get(0).getTaskTable());
+        assertNotNull(newJob.getGenerations().get(0).getLastUpdateDate());
     }
     
     @Test
@@ -215,9 +227,15 @@ public class AppDataJobServiceTest {
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
-        this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen4, 3);
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
+        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen4, 3);
         verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
-        verify(appDataJobDao, times(1)).save(Mockito.eq(obj));
+        verify(appDataJobDao, never()).save(Mockito.any());
+        verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
+        assertEquals(AppDataJobGenerationState.PRIMARY_CHECK, newJob.getGenerations().get(0).getState());
+        assertEquals(0, newJob.getGenerations().get(0).getNbErrors());
+        assertEquals("task-table-1", newJob.getGenerations().get(0).getTaskTable());
+        assertNotNull(newJob.getGenerations().get(0).getLastUpdateDate());
     }
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
@@ -251,6 +269,7 @@ public class AppDataJobServiceTest {
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
         this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen5, 3);
     }
     
@@ -285,9 +304,15 @@ public class AppDataJobServiceTest {
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
-        this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen5, 3);
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
+        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen5, 3);
         verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
-        verify(appDataJobDao, times(1)).save(Mockito.eq(obj));
+        verify(appDataJobDao, never()).save(Mockito.any());
+        verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
+        assertEquals(AppDataJobGenerationState.READY, newJob.getGenerations().get(0).getState());
+        assertEquals(0, newJob.getGenerations().get(0).getNbErrors());
+        assertEquals("task-table-1", newJob.getGenerations().get(0).getTaskTable());
+        assertNotNull(newJob.getGenerations().get(0).getLastUpdateDate());
     }
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
@@ -321,6 +346,7 @@ public class AppDataJobServiceTest {
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
         this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen5, 3);
     }
     
@@ -355,9 +381,60 @@ public class AppDataJobServiceTest {
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
-        this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen6, 3);
-        verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
-        verify(appDataJobDao, times(1)).save(Mockito.eq(obj));
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
+        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen6, 3);
+        verify(appDataJobDao, times(2)).findById(Mockito.eq(123L));
+        verify(appDataJobDao, never()).save(Mockito.any());
+        verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
+        assertEquals(AppDataJobGenerationState.SENT, newJob.getGenerations().get(0).getState());
+        assertEquals(0, newJob.getGenerations().get(0).getNbErrors());
+        assertEquals("task-table-1", newJob.getGenerations().get(0).getTaskTable());
+        assertNotNull(newJob.getGenerations().get(0).getLastUpdateDate());
+    }
+    
+    @Test
+    public void patchGenerationToJobGenAllSent() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
+        AppDataJob obj = new AppDataJob();
+        AppDataJobProduct product = new AppDataJobProduct();
+        product.setSessionId("session-id");
+        AppDataJobGeneration gen1 = new AppDataJobGeneration();
+        gen1.setTaskTable("task-table-1");
+        gen1.setState(AppDataJobGenerationState.READY);
+        AppDataJobGeneration gen2 = new AppDataJobGeneration();
+        gen2.setTaskTable("task-table-2");
+        gen2.setState(AppDataJobGenerationState.SENT);
+        AppDataJobGeneration gen3 = new AppDataJobGeneration();
+        gen3.setTaskTable("task-table-3");
+        gen3.setState(AppDataJobGenerationState.SENT);
+        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
+        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        obj.setIdentifier(123);
+        obj.setLevel(ApplicationLevel.L1);
+        obj.setPod("pod-name");
+        obj.setState(AppDataJobState.WAITING);
+        obj.setCreationDate(new Date());
+        obj.setLastUpdateDate(new Date());
+        obj.setProduct(product);
+        obj.setMessages(Arrays.asList(message1, message2));
+        obj.setGenerations(Arrays.asList(gen1, gen2, gen3));
+        obj.setCategory(ProductCategory.AUXILIARY_FILES);
+        
+        AppDataJobGeneration gen6 = new AppDataJobGeneration();
+        gen6.setTaskTable("task-table-4");
+        gen6.setState(AppDataJobGenerationState.SENT);
+        
+        doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
+        doReturn(obj).when(appDataJobDao).save(Mockito.any());
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
+        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen6, 3);
+        verify(appDataJobDao, times(2)).findById(Mockito.eq(123L));
+        verify(appDataJobDao, times(1)).save(Mockito.any());
+        verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
+        assertEquals(AppDataJobGenerationState.SENT, newJob.getGenerations().get(0).getState());
+        assertEquals(0, newJob.getGenerations().get(0).getNbErrors());
+        assertEquals("task-table-1", newJob.getGenerations().get(0).getTaskTable());
+        assertNotNull(newJob.getGenerations().get(0).getLastUpdateDate());
+        assertEquals(AppDataJobState.TERMINATED, newJob.getState());
     }
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
@@ -390,6 +467,7 @@ public class AppDataJobServiceTest {
         gen5.setState(AppDataJobGenerationState.SENT);
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
         this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen5, 3);
     }
@@ -420,6 +498,7 @@ public class AppDataJobServiceTest {
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
         this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen1, 1);
     }
     
@@ -449,6 +528,7 @@ public class AppDataJobServiceTest {
         
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
+        doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
         this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen1, 1);
     }
     

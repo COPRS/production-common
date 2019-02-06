@@ -11,4 +11,7 @@ public interface AppDataJobRepositoryCustom {
 
     public List<AppDataJob> search(List<FilterCriterion> filters,
             ProductCategory category, Sort sort);
+
+    public void udpateJobGeneration(Long jobId,
+            AppDataJobGeneration newGeneration);
 }
