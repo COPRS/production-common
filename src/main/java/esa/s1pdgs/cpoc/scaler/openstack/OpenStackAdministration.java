@@ -10,6 +10,7 @@ import org.openstack4j.api.OSClient.OSClientV3;
 import org.openstack4j.model.compute.Server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
 import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc;
@@ -89,9 +90,13 @@ public class OpenStackAdministration {
         if (serverProperties.isFloatActivation()) {
             String floatingIPID =
                     serverService.getFloatingIpIdForServer(osClient, serverId);
-            LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId,
-                    floatingIPID);
-            serverService.deleteFloatingIp(osClient, floatingIPID);
+            if (StringUtils.isEmpty(floatingIPID)) {
+                LOGGER.warn("[serverId {}] No floating ip to delete", serverId);
+            } else {
+                LOGGER.debug("[serverId {}] Deleting floating ip {}", serverId,
+                        floatingIPID);
+                serverService.deleteFloatingIp(osClient, floatingIPID);
+            }
         }
         serverService.delete(osClient, serverId);
         if (serverProperties.isBootableOnVolume()) {

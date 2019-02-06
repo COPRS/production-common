@@ -163,13 +163,15 @@ public class ServerService {
             final String serverId) {
         List<? extends InterfaceAttachment> nicID =
                 osClient.compute().servers().interfaces().list(serverId);
-        String portid = nicID.get(0).getPortId();
-        List<? extends NetFloatingIP> fips =
-                osClient.networking().floatingip().list();
-        for (NetFloatingIP netFloatingIP : fips) {
-            if (netFloatingIP.getPortId() != null
-                    && netFloatingIP.getPortId().equals(portid)) {
-                return netFloatingIP.getId();
+        if (!CollectionUtils.isEmpty(nicID)) {
+            String portid = nicID.get(0).getPortId();
+            List<? extends NetFloatingIP> fips =
+                    osClient.networking().floatingip().list();
+            for (NetFloatingIP netFloatingIP : fips) {
+                if (netFloatingIP.getPortId() != null
+                        && netFloatingIP.getPortId().equals(portid)) {
+                    return netFloatingIP.getId();
+                }
             }
         }
         return "";
