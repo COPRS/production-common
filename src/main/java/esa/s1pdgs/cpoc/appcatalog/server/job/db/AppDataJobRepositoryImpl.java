@@ -71,15 +71,19 @@ public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
     @Override
     public void udpateJobGeneration(Long jobId,
             AppDataJobGeneration newGeneration) {
-     // db.jobs.updateOne(
-     //         { _id: jobId, "generations.taskTable": "taskTAble" },
-     //         { $set: { "generations.$.lastUpdateDate" : 6,  "generations.$.state" : 6, "generations.$.nbErrors" : 6} }
-      //       )
+        // db.jobs.updateOne(
+        // { _id: jobId, "generations.taskTable": "taskTAble" },
+        // { $set: { "generations.$.lastUpdateDate" : 6, "generations.$.state" :
+        // 6, "generations.$.nbErrors" : 6} }
+        // )
         // filter: _id = jobId, generations.taskTabgle: taskTableName
         Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(jobId));
+        query.addCriteria(Criteria.where("_id").is(jobId))
+                .addCriteria(Criteria.where("generations.taskTable")
+                        .is(newGeneration.getTaskTable()));
         Update update = new Update();
-        update.set("generations.$.lastUpdateDate", newGeneration.getLastUpdateDate());
+        update.set("generations.$.lastUpdateDate",
+                newGeneration.getLastUpdateDate());
         update.set("generations.$.state", newGeneration.getState());
         update.set("generations.$.nbErrors", newGeneration.getNbErrors());
         mongoTemplate.updateFirst(query, update, AppDataJob.class);

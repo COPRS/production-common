@@ -71,19 +71,23 @@ public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
     @Override
     public void udpateJobGeneration(Long jobId,
             AppDataJobGeneration newGeneration) {
-     // db.jobs.updateOne(
-     //         { _id: jobId, &quot;generations.taskTable&quot;: &quot;taskTAble&quot; },
-     //         { $set: { &quot;generations.$.lastUpdateDate&quot; : 6,  &quot;generations.$.state&quot; : 6, &quot;generations.$.nbErrors&quot; : 6} }
-      //       )
+        // db.jobs.updateOne(
+        // { _id: jobId, &quot;generations.taskTable&quot;: &quot;taskTAble&quot; },
+        // { $set: { &quot;generations.$.lastUpdateDate&quot; : 6, &quot;generations.$.state&quot; :
+        // 6, &quot;generations.$.nbErrors&quot; : 6} }
+        // )
         // filter: _id = jobId, generations.taskTabgle: taskTableName
-<span class="nc" id="L79">        Query query = new Query();</span>
-<span class="nc" id="L80">        query.addCriteria(Criteria.where(&quot;_id&quot;).is(jobId));</span>
-<span class="nc" id="L81">        Update update = new Update();</span>
-<span class="nc" id="L82">        update.set(&quot;generations.$.lastUpdateDate&quot;, newGeneration.getLastUpdateDate());</span>
-<span class="nc" id="L83">        update.set(&quot;generations.$.state&quot;, newGeneration.getState());</span>
-<span class="nc" id="L84">        update.set(&quot;generations.$.nbErrors&quot;, newGeneration.getNbErrors());</span>
-<span class="nc" id="L85">        mongoTemplate.updateFirst(query, update, AppDataJob.class);</span>
-<span class="nc" id="L86">    }</span>
+<span class="nc" id="L80">        Query query = new Query();</span>
+<span class="nc" id="L81">        query.addCriteria(Criteria.where(&quot;_id&quot;).is(jobId))</span>
+<span class="nc" id="L82">                .addCriteria(Criteria.where(&quot;generations.taskTable&quot;)</span>
+<span class="nc" id="L83">                        .is(newGeneration.getTaskTable()));</span>
+<span class="nc" id="L84">        Update update = new Update();</span>
+<span class="nc" id="L85">        update.set(&quot;generations.$.lastUpdateDate&quot;,</span>
+<span class="nc" id="L86">                newGeneration.getLastUpdateDate());</span>
+<span class="nc" id="L87">        update.set(&quot;generations.$.state&quot;, newGeneration.getState());</span>
+<span class="nc" id="L88">        update.set(&quot;generations.$.nbErrors&quot;, newGeneration.getNbErrors());</span>
+<span class="nc" id="L89">        mongoTemplate.updateFirst(query, update, AppDataJob.class);</span>
+<span class="nc" id="L90">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
