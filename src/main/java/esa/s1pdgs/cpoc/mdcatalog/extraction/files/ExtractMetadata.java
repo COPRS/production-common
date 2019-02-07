@@ -36,6 +36,9 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
  */
 public class ExtractMetadata {
 
+    private static final String PASS_ASC = "ASCENDING";
+    private static final String PASS_DFT = "DESCENDING";
+
     /**
      * XSLT transformer factory
      */
@@ -92,7 +95,8 @@ public class ExtractMetadata {
      * @throws MetadataExtractionException
      */
     private JSONObject processCoordinates(String productName,
-            String rawCoordinates) throws MetadataExtractionException {
+            String rawCoordinates, String pass)
+            throws MetadataExtractionException {
         JSONObject geoShape = new JSONObject();
         JSONArray coordinates = new JSONArray();
         try {
@@ -100,24 +104,27 @@ public class ExtractMetadata {
             // coordinates)
             String[] coordinatesArray = rawCoordinates.split(";");
             int nbCoordinates = coordinatesArray.length;
-
+    
             if (nbCoordinates <= 1) {
                 // Only one coordinates
-
+    
                 String[] coordinatesTmp = coordinatesArray[0].split(" ");
-
+    
                 if (coordinatesTmp.length <= 2) { // BBOX type (envelope in ES)
                     geoShape.put("type", "envelope");
-                    geoShape.put("orientation", "clockwise");
                     for (String coord : coordinatesTmp) {
                         String[] tmp = coord.split(",");
                         coordinates.put(new JSONArray(
                                 "[" + tmp[1] + "," + tmp[0] + "]"));
                     }
+                    if (PASS_ASC.equals(pass)) {
+                        geoShape.put("orientation", "counterclockwise");
+                    } else {
+                        geoShape.put("orientation", "clockwise");
+                    }
                     geoShape.put("coordinates", coordinates);
                 } else { // Polygon type
                     geoShape.put("type", "polygon");
-                    geoShape.put("orientation", "clockwise");
                     for (String coord : coordinatesTmp) {
                         String[] tmp = coord.split(",");
                         coordinates.put(new JSONArray(
@@ -130,71 +137,94 @@ public class ExtractMetadata {
                         coordinates.put(new JSONArray(
                                 "[" + tmp[1] + "," + tmp[0] + "]"));
                     }
+                    geoShape.put("orientation", "clockwise");
                     geoShape.put("coordinates",
                             new JSONArray().put(coordinates));
                 }
             } else if (nbCoordinates == 2) {
                 geoShape.put("type", "envelope");
-                geoShape.put("orientation", "clockwise");
-                // Le premier point doit être extrait à partir de l’avant dernier coordinate, et avec le premier point.
+                // Le premier point doit être extrait à partir de l’avant
+                // dernier coordinate, et avec le premier point.
                 String[] coordinatesTmp1 = coordinatesArray[1].split(" ");
                 String[] tmp1 = coordinatesTmp1[1].split(",");
-                coordinates.put(new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
-                // Le second point doit être extrait à partir du dernier coordinate, et avec le second point
+                coordinates.put(
+                        new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
+                // Le second point doit être extrait à partir du dernier
+                // coordinate, et avec le second point
                 String[] coordinatesTmp2 = coordinatesArray[0].split(" ");
                 String[] tmp2 = coordinatesTmp2[3].split(",");
-                coordinates.put(new JSONArray("[" + tmp2[1] + "," + tmp2[0] + "]"));
+                coordinates.put(
+                        new JSONArray("[" + tmp2[1] + "," + tmp2[0] + "]"));
+                if (PASS_ASC.equals(pass)) {
+                    geoShape.put("orientation", "counterclockwise");
+                } else {
+                    geoShape.put("orientation", "clockwise");
+                }
                 geoShape.put("coordinates", coordinates);
-                
+    
             } else if (nbCoordinates == 3) {
                 // Several coordinates
                 geoShape.put("type", "polygon");
-                geoShape.put("orientation", "clockwise");
                 // Le premier point = 1er coordonnée du 3eme point.
                 String[] coordinatesTmp1 = coordinatesArray[2].split(" ");
                 String[] tmp1 = coordinatesTmp1[0].split(",");
-                coordinates.put(new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
+                coordinates.put(
+                        new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
                 // Le second point = 2eme coordonnée du 2eme point
                 String[] coordinatesTmp2 = coordinatesArray[1].split(" ");
                 String[] tmp2 = coordinatesTmp2[1].split(",");
-                coordinates.put(new JSONArray("[" + tmp2[1] + "," + tmp2[0] + "]"));
+                coordinates.put(
+                        new JSONArray("[" + tmp2[1] + "," + tmp2[0] + "]"));
                 // Le troisième point = 3eme coordonnée du 2eme point
                 String[] coordinatesTmp3 = coordinatesArray[1].split(" ");
                 String[] tmp3 = coordinatesTmp3[2].split(",");
-                coordinates.put(new JSONArray("[" + tmp3[1] + "," + tmp3[0] + "]"));
+                coordinates.put(
+                        new JSONArray("[" + tmp3[1] + "," + tmp3[0] + "]"));
                 // Le quatrième point = 4eme coordonnée du 1er point
                 String[] coordinatesTmp4 = coordinatesArray[0].split(" ");
                 String[] tmp4 = coordinatesTmp4[3].split(",");
-                coordinates.put(new JSONArray("[" + tmp4[1] + "," + tmp4[0] + "]"));
+                coordinates.put(
+                        new JSONArray("[" + tmp4[1] + "," + tmp4[0] + "]"));
                 // On ferme le polygon
-                coordinates.put(new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
-                geoShape.put("coordinates",
-                        new JSONArray().put(coordinates));
-                
+                coordinates.put(
+                        new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
+                geoShape.put("orientation", "counterclockwise");
+                geoShape.put("coordinates", new JSONArray().put(coordinates));
+    
             } else {
                 // Several coordinates
                 geoShape.put("type", "polygon");
-                geoShape.put("orientation", "clockwise");
-                // Le premier point doit être extrait à partir de l’avant dernier coordinate, et avec le premier point.
-                String[] coordinatesTmp1 = coordinatesArray[nbCoordinates - 2].split(" ");
+                // Le premier point doit être extrait à partir de l’avant
+                // dernier coordinate, et avec le premier point.
+                String[] coordinatesTmp1 =
+                        coordinatesArray[nbCoordinates - 2].split(" ");
                 String[] tmp1 = coordinatesTmp1[0].split(",");
-                coordinates.put(new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
-                // Le second point doit être extrait à partir du dernier coordinate, et avec le second point
-                String[] coordinatesTmp2 = coordinatesArray[nbCoordinates - 1].split(" ");
+                coordinates.put(
+                        new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
+                // Le second point doit être extrait à partir du dernier
+                // coordinate, et avec le second point
+                String[] coordinatesTmp2 =
+                        coordinatesArray[nbCoordinates - 1].split(" ");
                 String[] tmp2 = coordinatesTmp2[1].split(",");
-                coordinates.put(new JSONArray("[" + tmp2[1] + "," + tmp2[0] + "]"));
-                // Le troisième point doit être extrait à partir du second coordinate, et avec le troisième point.
+                coordinates.put(
+                        new JSONArray("[" + tmp2[1] + "," + tmp2[0] + "]"));
+                // Le troisième point doit être extrait à partir du second
+                // coordinate, et avec le troisième point.
                 String[] coordinatesTmp3 = coordinatesArray[1].split(" ");
                 String[] tmp3 = coordinatesTmp3[2].split(",");
-                coordinates.put(new JSONArray("[" + tmp3[1] + "," + tmp3[0] + "]"));
-                // Le quatrième point doit être extrait à partir du premier coordinate, et avec le quatrième point.
+                coordinates.put(
+                        new JSONArray("[" + tmp3[1] + "," + tmp3[0] + "]"));
+                // Le quatrième point doit être extrait à partir du premier
+                // coordinate, et avec le quatrième point.
                 String[] coordinatesTmp4 = coordinatesArray[0].split(" ");
                 String[] tmp4 = coordinatesTmp4[3].split(",");
-                coordinates.put(new JSONArray("[" + tmp4[1] + "," + tmp4[0] + "]"));
+                coordinates.put(
+                        new JSONArray("[" + tmp4[1] + "," + tmp4[0] + "]"));
                 // On ferme le polygon
-                coordinates.put(new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
-                geoShape.put("coordinates",
-                        new JSONArray().put(coordinates));
+                coordinates.put(
+                        new JSONArray("[" + tmp1[1] + "," + tmp1[0] + "]"));
+                geoShape.put("orientation", "counterclockwise");
+                geoShape.put("coordinates", new JSONArray().put(coordinates));
             }
         } catch (JSONException e) {
             throw new MetadataExtractionException(e);
@@ -553,12 +583,18 @@ public class ExtractMetadata {
                     metadataJSONObject.get("sliceNumber").toString())) {
                 metadataJSONObject.put("sliceNumber", 1);
             }
+            String pass = PASS_DFT;
+            if (metadataJSONObject.has("sliceCoordinates")
+                    && !metadataJSONObject.getString("pass").isEmpty()) {
+                pass = metadataJSONObject.getString("pass");
+            }
             if (metadataJSONObject.has("sliceCoordinates")
                     && !metadataJSONObject.getString("sliceCoordinates")
                             .isEmpty()) {
                 metadataJSONObject.put("sliceCoordinates", processCoordinates(
                         descriptor.getProductName(),
-                        metadataJSONObject.getString("sliceCoordinates")));
+                        metadataJSONObject.getString("sliceCoordinates"),
+                        pass));
             }
             if (descriptor.getProductClass().equals("A")
                     || descriptor.getProductClass().equals("C")
@@ -627,10 +663,17 @@ public class ExtractMetadata {
                 metadataJSONObject.put("validityStopTime",
                         metadataJSONObject.getString("stopTime"));
             }
+            String pass = PASS_DFT;
+            if (metadataJSONObject.has("sliceCoordinates")
+                    && !metadataJSONObject.getString("pass").isEmpty()) {
+                pass = metadataJSONObject.getString("pass");
+            }
             if (metadataJSONObject.has("segmentCoordinates")) {
-                metadataJSONObject.put("segmentCoordinates", processCoordinates(
-                        descriptor.getProductName(),
-                        metadataJSONObject.getString("segmentCoordinates")));
+                metadataJSONObject.put("segmentCoordinates",
+                        processCoordinates(
+                                descriptor.getProductName(), metadataJSONObject
+                                        .getString("segmentCoordinates"),
+                                pass));
             }
             metadataJSONObject.put("productName", descriptor.getProductName());
             metadataJSONObject.put("productClass",
@@ -688,12 +731,18 @@ public class ExtractMetadata {
             // JSON creation
             JSONObject metadataJSONObject = XML
                     .toJSONObject(readFile(output, Charset.defaultCharset()));
+            String pass = PASS_DFT;
+            if (metadataJSONObject.has("sliceCoordinates")
+                    && !metadataJSONObject.getString("pass").isEmpty()) {
+                pass = metadataJSONObject.getString("pass");
+            }
             if (metadataJSONObject.has("sliceCoordinates")
                     && !metadataJSONObject.getString("sliceCoordinates")
                             .isEmpty()) {
                 metadataJSONObject.put("sliceCoordinates", processCoordinates(
                         descriptor.getProductName(),
-                        metadataJSONObject.getString("sliceCoordinates")));
+                        metadataJSONObject.getString("sliceCoordinates"),
+                        pass));
             }
             if (metadataJSONObject.has("startTime")) {
                 metadataJSONObject.put("validityStartTime",
