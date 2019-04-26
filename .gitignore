@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 /.project
-=======
 /.settings/
 /.vscode/
 /.idea/
@@ -17,4 +15,3 @@
 .pmd
 .pmdruleset.xml
 .factory*
->>>>>>> 80fcb9a6c70a41fff3d7c75d16c04ba9c05bae61
