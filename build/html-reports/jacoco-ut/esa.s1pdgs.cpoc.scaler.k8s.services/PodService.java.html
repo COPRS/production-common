@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>PodService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.k8s.services</a> &gt; <span class="el_source">PodService.java</span></div><h1>PodService.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.k8s.services;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import esa.s1pdgs.cpoc.common.errors.k8s.K8sUnknownResourceException;
+import esa.s1pdgs.cpoc.common.errors.k8s.PodResourceException;
+import esa.s1pdgs.cpoc.scaler.k8s.model.PodDesc;
+import esa.s1pdgs.cpoc.scaler.k8s.model.converter.K8SPodToPodDesc;
+import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.Resource;
+
+@Service
+public class PodService {
+
+<span class="fc" id="L35">	private static final Logger LOGGER = LogManager.getLogger(PodService.class);</span>
+
+	private final KubernetesClient k8sClient;
+
+	private final K8SPodToPodDesc podConverter;
+
+	@Autowired
+<span class="fc" id="L42">	public PodService(final KubernetesClient k8sClient) {</span>
+<span class="fc" id="L43">		this.k8sClient = k8sClient;</span>
+<span class="fc" id="L44">		this.podConverter = new K8SPodToPodDesc();</span>
+<span class="fc" id="L45">	}</span>
+
+	public List&lt;PodDesc&gt; getPodsWithLabel(String label, String value) {
+<span class="fc" id="L48">		List&lt;PodDesc&gt; r = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L49">		PodList pods = k8sClient.pods().withLabel(label, value).list();</span>
+<span class="fc bfc" id="L50" title="All 4 branches covered.">		if (pods != null &amp;&amp; !CollectionUtils.isEmpty(pods.getItems())) {</span>
+<span class="fc" id="L51">			pods.getItems().forEach(pod -&gt; {</span>
+<span class="fc" id="L52">				r.add(this.podConverter.apply(pod));</span>
+<span class="fc" id="L53">			});</span>
+		}
+<span class="fc" id="L55">		return r;</span>
+	}
+
+	public List&lt;PodDesc&gt; getPodsWithLabelAndStatusPhase(String label, String value, String phase) {
+<span class="fc" id="L59">		List&lt;PodDesc&gt; r = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L60">		PodList pods = k8sClient.pods().withLabel(label, value).withField(&quot;status.phase&quot;, phase).list();</span>
+<span class="pc bpc" id="L61" title="2 of 4 branches missed.">		if (pods != null &amp;&amp; !CollectionUtils.isEmpty(pods.getItems())) {</span>
+<span class="fc" id="L62">			pods.getItems().forEach(pod -&gt; {</span>
+<span class="fc" id="L63">				r.add(this.podConverter.apply(pod));</span>
+<span class="fc" id="L64">			});</span>
+		}
+<span class="fc" id="L66">		return r;</span>
+	}
+
+	protected List&lt;HasMetadata&gt; loadRessourcesFromFile(String fileName, String suffixe)
+			throws PodResourceException, K8sUnknownResourceException {
+
+<span class="fc" id="L72">		List&lt;HasMetadata&gt; resources = null;</span>
+		try {
+<span class="fc" id="L74">			resources = this.k8sClient.load(new FileInputStream(fileName)).get();</span>
+<span class="fc" id="L75">		} catch (FileNotFoundException e) {</span>
+<span class="fc" id="L76">			throw new PodResourceException(&quot;File not found &quot; + fileName, e);</span>
+<span class="fc" id="L77">		}</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">		if (CollectionUtils.isEmpty(resources)) {</span>
+<span class="fc" id="L80">			throw new PodResourceException(&quot;No resources loaded from file &quot; + fileName);</span>
+		}
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">		for (HasMetadata resource : resources) {</span>
+<span class="pc bpc" id="L84" title="2 of 10 branches missed.">			switch (resource.getKind()) {</span>
+			case &quot;PersistentVolumeClaim&quot;:
+<span class="fc" id="L86">				PersistentVolumeClaim volume = (PersistentVolumeClaim) resource;</span>
+<span class="fc" id="L87">				volume.getMetadata().setName(volume.getMetadata().getName() + suffixe);</span>
+<span class="fc" id="L88">				break;</span>
+			case &quot;Pod&quot;:
+<span class="fc" id="L90">				Pod pod = (Pod) resource;</span>
+<span class="fc" id="L91">				pod.getMetadata().setName(pod.getMetadata().getName() + suffixe);</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">				if (!CollectionUtils.isEmpty(pod.getSpec().getVolumes())) {</span>
+<span class="fc" id="L93">					Volume v = pod.getSpec().getVolumes().get(0);</span>
+<span class="fc" id="L94">					v.getPersistentVolumeClaim().setClaimName(v.getPersistentVolumeClaim().getClaimName() + suffixe);</span>
+				}
+<span class="fc" id="L96">				pod.getSpec().setHostname(pod.getSpec().getHostname() + suffixe);</span>
+<span class="fc" id="L97">				break;</span>
+			default:
+<span class="fc" id="L99">				throw new K8sUnknownResourceException(&quot;Unknown kind &quot; + resource.getKind());</span>
+			}
+<span class="fc" id="L101">		}</span>
+
+<span class="fc" id="L103">		return resources;</span>
+	}
+
+	public void createPodFromTemplate(String templateFile, int uniquePODID) throws PodResourceException, K8sUnknownResourceException {
+<span class="fc" id="L107">		String namespace = &quot;default&quot;;</span>
+
+		// Load resources and update names
+<span class="fc" id="L110">		String suffixe = &quot;-&quot; + uniquePODID + &quot;-&quot; + UUID.randomUUID().toString().substring(0, 4);</span>
+<span class="fc" id="L111">		List&lt;HasMetadata&gt; resources = this.loadRessourcesFromFile(templateFile, suffixe);</span>
+
+		// create resources
+<span class="fc bfc" id="L114" title="All 2 branches covered.">		for (HasMetadata resource : resources) {</span>
+<span class="pc bpc" id="L115" title="4 of 10 branches missed.">			switch (resource.getKind()) {</span>
+			case &quot;PersistentVolumeClaim&quot;:
+<span class="fc" id="L117">				PersistentVolumeClaim volume = (PersistentVolumeClaim) resource;</span>
+<span class="fc" id="L118">				NonNamespaceOperation&lt;PersistentVolumeClaim, PersistentVolumeClaimList, DoneablePersistentVolumeClaim, Resource&lt;PersistentVolumeClaim, DoneablePersistentVolumeClaim&gt;&gt; volumes = this.k8sClient</span>
+<span class="fc" id="L119">						.persistentVolumeClaims().inNamespace(namespace);</span>
+<span class="fc" id="L120">				PersistentVolumeClaim resultVolume = volumes.create(volume);</span>
+<span class="fc" id="L121">				LOGGER.info(&quot;[MONITOR] [step 4] Volume created : {}&quot;, resultVolume.getMetadata().getName());</span>
+<span class="fc" id="L122">				break;</span>
+			case &quot;Pod&quot;:
+<span class="fc" id="L124">				Pod pod = (Pod) resource;</span>
+<span class="fc" id="L125">				NonNamespaceOperation&lt;Pod, PodList, DoneablePod, PodResource&lt;Pod, DoneablePod&gt;&gt; pods = this.k8sClient</span>
+<span class="fc" id="L126">						.pods().inNamespace(namespace);</span>
+<span class="fc" id="L127">				Pod resultPod = pods.create(pod);</span>
+<span class="fc" id="L128">				LOGGER.info(&quot;[MONITOR] [step 4] Pod created : {}&quot;, resultPod.getMetadata().getName());</span>
+				break;
+			}
+<span class="fc" id="L131">		}</span>
+<span class="fc" id="L132">	}</span>
+
+	public Boolean deletePodFromTemplate(String templateFile, String suffixe)
+			throws PodResourceException, K8sUnknownResourceException {
+<span class="fc" id="L136">		String namespace = &quot;default&quot;;</span>
+<span class="fc" id="L137">		Boolean resultVolume = false;</span>
+<span class="fc" id="L138">		Boolean resultPod = false;</span>
+
+		// Load resources and update names
+<span class="fc" id="L141">		List&lt;HasMetadata&gt; resources = this.loadRessourcesFromFile(templateFile, suffixe);</span>
+
+		// create resources
+<span class="fc bfc" id="L144" title="All 2 branches covered.">		for (HasMetadata resource : resources) {</span>
+<span class="pc bpc" id="L145" title="4 of 10 branches missed.">			switch (resource.getKind()) {</span>
+			case &quot;PersistentVolumeClaim&quot;:
+<span class="fc" id="L147">				PersistentVolumeClaim volume = (PersistentVolumeClaim) resource;</span>
+<span class="fc" id="L148">				NonNamespaceOperation&lt;PersistentVolumeClaim, PersistentVolumeClaimList, DoneablePersistentVolumeClaim, Resource&lt;PersistentVolumeClaim, DoneablePersistentVolumeClaim&gt;&gt; volumes = this.k8sClient</span>
+<span class="fc" id="L149">						.persistentVolumeClaims().inNamespace(namespace);</span>
+<span class="fc" id="L150">				resultVolume = volumes.delete(volume);</span>
+<span class="fc" id="L151">				LOGGER.info(&quot;[MONITOR] [step 4] Volume deleted : {} {}&quot;, volume.getMetadata().getName(), resultVolume);</span>
+<span class="fc" id="L152">				break;</span>
+			case &quot;Pod&quot;:
+<span class="fc" id="L154">				Pod pod = (Pod) resource;</span>
+<span class="fc" id="L155">				NonNamespaceOperation&lt;Pod, PodList, DoneablePod, PodResource&lt;Pod, DoneablePod&gt;&gt; pods = this.k8sClient</span>
+<span class="fc" id="L156">						.pods().inNamespace(namespace);</span>
+<span class="fc" id="L157">				resultPod = pods.delete(pod);</span>
+<span class="fc" id="L158">				LOGGER.info(&quot;[MONITOR] [step 4] Pod deleted : {} {}&quot;, pod.getMetadata().getName(), resultPod);</span>
+				break;
+			}
+<span class="fc" id="L161">		}</span>
+
+<span class="fc bfc" id="L163" title="All 4 branches covered.">		return resultPod &amp;&amp; resultVolume;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

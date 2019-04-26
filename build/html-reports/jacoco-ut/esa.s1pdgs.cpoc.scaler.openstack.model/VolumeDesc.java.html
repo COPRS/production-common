@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>VolumeDesc.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.openstack.model</a> &gt; <span class="el_source">VolumeDesc.java</span></div><h1>VolumeDesc.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.openstack.model;
+
+import java.util.Objects;
+
+public class VolumeDesc {
+
+    private String id;
+
+    private String name;
+
+    private String imageRef;
+
+    private String volumeType;
+
+    private String zone;
+
+    private int size;
+
+    private boolean bootable;
+
+    private String description;
+
+<span class="fc" id="L23">    public VolumeDesc() {</span>
+        // TODO Auto-generated constructor stub
+<span class="fc" id="L25">    }</span>
+
+    /**
+     * @return the id
+     */
+    public String getId() {
+<span class="fc" id="L31">        return id;</span>
+    }
+
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(String id) {
+<span class="fc" id="L39">        this.id = id;</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+<span class="fc" id="L46">        return name;</span>
+    }
+
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+<span class="fc" id="L54">        this.name = name;</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * @return the imageRef
+     */
+    public String getImageRef() {
+<span class="fc" id="L61">        return imageRef;</span>
+    }
+
+    /**
+     * @param imageRef
+     *            the imageRef to set
+     */
+    public void setImageRef(String imageRef) {
+<span class="fc" id="L69">        this.imageRef = imageRef;</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * @return the volumeType
+     */
+    public String getVolumeType() {
+<span class="fc" id="L76">        return volumeType;</span>
+    }
+
+    /**
+     * @param volumeType
+     *            the volumeType to set
+     */
+    public void setVolumeType(String volumeType) {
+<span class="fc" id="L84">        this.volumeType = volumeType;</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     * @return the zone
+     */
+    public String getZone() {
+<span class="fc" id="L91">        return zone;</span>
+    }
+
+    /**
+     * @param zone
+     *            the zone to set
+     */
+    public void setZone(String zone) {
+<span class="fc" id="L99">        this.zone = zone;</span>
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * @return the size
+     */
+    public int getSize() {
+<span class="fc" id="L106">        return size;</span>
+    }
+
+    /**
+     * @param size
+     *            the size to set
+     */
+    public void setSize(int size) {
+<span class="fc" id="L114">        this.size = size;</span>
+<span class="fc" id="L115">    }</span>
+
+    /**
+     * @return the bootable
+     */
+    public boolean isBootable() {
+<span class="fc" id="L121">        return bootable;</span>
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+<span class="fc" id="L128">        return description;</span>
+    }
+
+    /**
+     * @param description
+     *            the description to set
+     */
+    public void setDescription(String description) {
+<span class="fc" id="L136">        this.description = description;</span>
+<span class="fc" id="L137">    }</span>
+
+    /**
+     * @param bootable
+     *            the bootable to set
+     */
+    public void setBootable(boolean bootable) {
+<span class="fc" id="L144">        this.bootable = bootable;</span>
+<span class="fc" id="L145">    }</span>
+
+    /**
+     * hashcode
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L152">        return Objects.hash(id, name, imageRef, volumeType, zone, size,</span>
+<span class="fc" id="L153">                bootable, description);</span>
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L162">        return String.format(</span>
+                &quot;{id: %s, name: %s, imageRef: %s, volumeType: %s, zone: %s, size: %s, bootable: %s, description: %s}&quot;,
+<span class="fc" id="L164">                id, name, imageRef, volumeType, zone, size, bootable,</span>
+                description);
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L175">            ret = true;</span>
+<span class="fc bfc" id="L176" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L177">            ret = false;</span>
+        } else {
+<span class="fc" id="L179">            VolumeDesc other = (VolumeDesc) obj;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            ret = Objects.equals(id, other.id)</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(name, other.name)</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(imageRef, other.imageRef)</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(volumeType, other.volumeType)</span>
+<span class="fc bfc" id="L184" title="All 6 branches covered.">                    &amp;&amp; Objects.equals(zone, other.zone) &amp;&amp; size == other.size</span>
+                    &amp;&amp; bootable == other.bootable
+<span class="fc bfc" id="L186" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(description, other.description);</span>
+        }
+<span class="fc" id="L188">        return ret;</span>
+    }
+
+    /**
+     * @return the Volume Builder
+     */
+    public static VolumeDescBuilder builder() {
+<span class="fc" id="L195">        return new VolumeDescBuilder();</span>
+    }
+
+    public static class VolumeDescBuilder {
+        private VolumeDesc m;
+
+        VolumeDescBuilder() {
+<span class="fc" id="L202">            this(new VolumeDesc());</span>
+<span class="fc" id="L203">        }</span>
+
+<span class="fc" id="L205">        VolumeDescBuilder(VolumeDesc m) {</span>
+<span class="fc" id="L206">            this.m = m;</span>
+<span class="fc" id="L207">        }</span>
+
+        public VolumeDescBuilder id(String id) {
+<span class="fc" id="L210">            this.m.setId(id);</span>
+<span class="fc" id="L211">            return this;</span>
+        }
+
+        public VolumeDescBuilder name(String name) {
+<span class="fc" id="L215">            this.m.setName(name);</span>
+<span class="fc" id="L216">            return this;</span>
+        }
+
+        public VolumeDescBuilder imageRef(String imageRef) {
+<span class="fc" id="L220">            this.m.setImageRef(imageRef);</span>
+<span class="fc" id="L221">            return this;</span>
+        }
+
+        public VolumeDescBuilder volumeType(String volumeType) {
+<span class="fc" id="L225">            this.m.setVolumeType(volumeType);</span>
+<span class="fc" id="L226">            return this;</span>
+        }
+
+        public VolumeDescBuilder description(String description) {
+<span class="fc" id="L230">            this.m.setDescription(description);</span>
+<span class="fc" id="L231">            return this;</span>
+        }
+
+        public VolumeDescBuilder zone(String zone) {
+<span class="fc" id="L235">            this.m.setZone(zone);</span>
+<span class="fc" id="L236">            return this;</span>
+        }
+
+        public VolumeDescBuilder size(int size) {
+<span class="fc" id="L240">            this.m.setSize(size);</span>
+<span class="fc" id="L241">            return this;</span>
+        }
+
+        public VolumeDescBuilder bootable(boolean bootable) {
+<span class="fc" id="L245">            this.m.setBootable(bootable);</span>
+<span class="fc" id="L246">            return this;</span>
+        }
+
+        public VolumeDesc build() {
+<span class="fc" id="L250">            return m;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

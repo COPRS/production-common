@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ConsumerDescription.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.kafka.model</a> &gt; <span class="el_source">ConsumerDescription.java</span></div><h1>ConsumerDescription.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.kafka.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Description of a consumer
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class ConsumerDescription {
+
+	/**
+	 * Client identifier
+	 */
+	private String clientId;
+
+	/**
+	 * Consumer identifier
+	 */
+	private String consumerId;
+
+	/**
+	 * Sum of all its lags on partitions
+	 */
+	private long totalLag;
+
+	/**
+	 * List of assigned partitions
+	 */
+	private final List&lt;PartitionDescription&gt; partitions;
+
+	/**
+	 * Default constructor
+	 */
+<span class="fc" id="L38">	public ConsumerDescription() {</span>
+<span class="fc" id="L39">		partitions = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L40">	}</span>
+
+	/**
+	 * 
+	 * @param clientId
+	 * @param consumerId
+	 */
+	public ConsumerDescription(final String clientId, final String consumerId) {
+<span class="fc" id="L48">		this();</span>
+<span class="fc" id="L49">		this.clientId = clientId;</span>
+<span class="fc" id="L50">		this.consumerId = consumerId;</span>
+<span class="fc" id="L51">	}</span>
+
+	/**
+	 * @return the clientId
+	 */
+	public String getClientId() {
+<span class="fc" id="L57">		return clientId;</span>
+	}
+
+	/**
+	 * @param clientId
+	 *            the clientId to set
+	 */
+	public void setClientId(final String clientId) {
+<span class="fc" id="L65">		this.clientId = clientId;</span>
+<span class="fc" id="L66">	}</span>
+
+	/**
+	 * @return the consumerId
+	 */
+	public String getConsumerId() {
+<span class="fc" id="L72">		return consumerId;</span>
+	}
+
+	/**
+	 * @param consumerId
+	 *            the consumerId to set
+	 */
+	public void setConsumerId(final String consumerId) {
+<span class="fc" id="L80">		this.consumerId = consumerId;</span>
+<span class="fc" id="L81">	}</span>
+
+	/**
+	 * @return the totalLag
+	 */
+	public long getTotalLag() {
+<span class="fc" id="L87">		return totalLag;</span>
+	}
+
+	/**
+	 * @return the partitions
+	 */
+	public List&lt;PartitionDescription&gt; getPartitions() {
+<span class="fc" id="L94">		return partitions;</span>
+	}
+
+	/**
+	 * @param partitions
+	 *            the partitions to set
+	 */
+	public void addPartition(final PartitionDescription partition) {
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">		if (partition != null) {</span>
+<span class="fc" id="L103">			this.partitions.add(partition);</span>
+<span class="fc" id="L104">			partition.setConsumerId(this.consumerId);</span>
+<span class="fc" id="L105">			totalLag += partition.getLag();</span>
+		}
+<span class="fc" id="L107">	}</span>
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L114">		return String.format(&quot;{clientId: %s, consumerId: %s, totalLag: %s, partitions: %s}&quot;, clientId, consumerId,</span>
+<span class="fc" id="L115">				totalLag, partitions);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+<span class="fc" id="L123">		return Objects.hash(clientId, consumerId, totalLag, partitions);</span>
+	}
+
+	/**
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		boolean ret;
+<span class="fc bfc" id="L132" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L133">			ret = true;</span>
+<span class="fc bfc" id="L134" title="All 4 branches covered.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L135">			ret = false;</span>
+		} else {
+<span class="fc" id="L137">			final ConsumerDescription other = (ConsumerDescription) obj;</span>
+<span class="fc bfc" id="L138" title="All 6 branches covered.">			ret = Objects.equals(clientId, other.clientId) &amp;&amp; Objects.equals(consumerId, other.consumerId)</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">					&amp;&amp; totalLag == other.totalLag &amp;&amp; Objects.equals(partitions, other.partitions);</span>
+		}
+<span class="fc" id="L141">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

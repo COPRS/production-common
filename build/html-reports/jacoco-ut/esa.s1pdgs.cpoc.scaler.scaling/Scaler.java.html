@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Scaler.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Scaler</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.scaler.scaling</a> &gt; <span class="el_source">Scaler.java</span></div><h1>Scaler.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.scaler.scaling;
+
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.errors.k8s.K8sUnknownResourceException;
+import esa.s1pdgs.cpoc.common.errors.k8s.PodResourceException;
+import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStopException;
+import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
+import esa.s1pdgs.cpoc.scaler.DevProperties;
+import esa.s1pdgs.cpoc.scaler.k8s.K8SAdministration;
+import esa.s1pdgs.cpoc.scaler.k8s.K8SMonitoring;
+import esa.s1pdgs.cpoc.scaler.k8s.WrapperProperties;
+import esa.s1pdgs.cpoc.scaler.k8s.model.AddressType;
+import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperNodeMonitor;
+import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperPodMonitor;
+import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoring;
+import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
+import esa.s1pdgs.cpoc.scaler.openstack.OpenStackAdministration;
+
+/**
+ * L1 resources scaler
+ * 
+ * @author Cyrielle Gailliard
+ */
+@Component
+public class Scaler {
+
+    /**
+     * Logger
+     */
+<span class="fc" id="L53">    private static final Logger LOGGER = LogManager.getLogger(Scaler.class);</span>
+
+    /**
+     * Service for monitoring KAFKA
+     */
+    private final KafkaMonitoring kafkaMonitoring;
+
+    private final K8SMonitoring k8SMonitoring;
+
+    private final K8SAdministration k8SAdministration;
+
+    private final OpenStackAdministration osAdministration;
+
+    private final WrapperProperties wrapperProperties;
+
+    private final DevProperties devProperties;
+
+<span class="fc" id="L70">    private AtomicInteger uniqueVMID = new AtomicInteger(0);</span>
+<span class="fc" id="L71">    private AtomicInteger uniquePODID = new AtomicInteger(0);</span>
+
+<span class="pc" id="L73">    public enum ScalingAction {</span>
+<span class="fc" id="L74">        ALLOC, FREE, NOTHING, ERROR</span>
+    };
+
+    /**
+     * Constructor
+     * 
+     * @param kafkaMonitoring
+     * @param properties
+     */
+    @Autowired
+    public Scaler(final KafkaMonitoring kafkaMonitoring,
+            final K8SMonitoring k8SMonitoring,
+            final K8SAdministration k8SAdministration,
+            final OpenStackAdministration osAdministration,
+            final WrapperProperties wrapperProperties,
+<span class="fc" id="L89">            final DevProperties devProperties) {</span>
+<span class="fc" id="L90">        this.kafkaMonitoring = kafkaMonitoring;</span>
+<span class="fc" id="L91">        this.k8SMonitoring = k8SMonitoring;</span>
+<span class="fc" id="L92">        this.k8SAdministration = k8SAdministration;</span>
+<span class="fc" id="L93">        this.osAdministration = osAdministration;</span>
+<span class="fc" id="L94">        this.wrapperProperties = wrapperProperties;</span>
+<span class="fc" id="L95">        this.devProperties = devProperties;</span>
+<span class="fc" id="L96">    }</span>
+
+    @PostConstruct
+    public void initscale() {
+        try {
+            // Listing all the L1 wrappers pods
+<span class="fc" id="L102">            List&lt;WrapperNodeMonitor&gt; wrapperNodeMonitors = new ArrayList&lt;&gt;();</span>
+            int initpoolpod;
+<span class="fc" id="L104">            int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">            if (devProperties.getActivations().get(&quot;init-scaling&quot;)) {</span>
+<span class="fc" id="L106">                LOGGER.info(&quot;[INIT] Starting monitoring K8S&quot;);</span>
+<span class="fc" id="L107">                wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();</span>
+<span class="fc" id="L108">                LOGGER.debug(&quot;[INIT] Monitored information {}&quot;,</span>
+                        wrapperNodeMonitors);
+<span class="fc" id="L110">                List&lt;WrapperPodMonitor&gt; activeWrapperPods = wrapperNodeMonitors</span>
+<span class="fc" id="L111">                        .stream()</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                        .filter(nodeMonitor -&gt; nodeMonitor != null</span>
+                                &amp;&amp; !CollectionUtils
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">                                        .isEmpty(nodeMonitor.getWrapperPods()))</span>
+<span class="fc" id="L115">                        .flatMap(nodeMonitor -&gt; nodeMonitor.getActivesPods()</span>
+<span class="fc" id="L116">                                .stream())</span>
+<span class="fc" id="L117">                        .collect(Collectors.toList());</span>
+
+<span class="fc" id="L119">                long numberWrappers = activeWrapperPods.stream().count();</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">                if (numberWrappers &lt; this.wrapperProperties.getNbMinServers()</span>
+                        * nbPodsPerServer) {
+<span class="fc" id="L122">                    initpoolpod =</span>
+<span class="fc" id="L123">                            (int) (this.wrapperProperties.getNbMinServers()</span>
+                                    - numberWrappers);
+<span class="fc" id="L125">                    LOGGER.info(&quot;[INIT] Create {} missing pods&quot;, initpoolpod);</span>
+<span class="fc" id="L126">                    this.addRessources(wrapperNodeMonitors, initpoolpod);</span>
+                }
+<span class="fc bfc" id="L128" title="All 2 branches covered.">                if (numberWrappers &gt; this.wrapperProperties.getNbMaxServers()</span>
+                        * nbPodsPerServer) {
+<span class="fc" id="L130">                    initpoolpod = (int) (numberWrappers</span>
+<span class="fc" id="L131">                            - this.wrapperProperties.getNbMaxServers());</span>
+<span class="fc" id="L132">                    LOGGER.info(&quot;[INIT] Delete {} pods&quot;, initpoolpod);</span>
+<span class="fc" id="L133">                    this.freeRessources(wrapperNodeMonitors, initpoolpod);</span>
+                }
+<span class="fc" id="L135">            } else {</span>
+<span class="fc" id="L136">                LOGGER.info(&quot;[INIT] Starting monitoring K8S bypassed&quot;);</span>
+            }
+
+<span class="fc" id="L139">        } catch (AbstractCodedException e) {</span>
+<span class="fc" id="L140">            LOGGER.error(&quot;[INIT] [code {}] {}&quot;, e.getCode().getCode(),</span>
+<span class="fc" id="L141">                    e.getLogMessage());</span>
+<span class="fc" id="L142">        } catch (Exception e) {</span>
+<span class="fc" id="L143">            LOGGER.error(&quot;[INIT] [code {}] [msg {}]&quot;,</span>
+<span class="fc" id="L144">                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage(), e);</span>
+<span class="fc" id="L145">        }</span>
+
+<span class="fc" id="L147">    }</span>
+
+    @Scheduled(fixedRateString = &quot;${wrapper.tempo-integrity-volumeserver-ms}&quot;)
+    public void deleteinvalidressources() {
+<span class="fc" id="L151">        LOGGER.debug(&quot;[INTEGRITY] Check for invalid server or volumes&quot;);</span>
+        try {
+<span class="fc" id="L153">            this.osAdministration.deleteInvalidServers();</span>
+<span class="fc" id="L154">        } catch (OsEntityException e) {</span>
+<span class="fc" id="L155">            LOGGER.error(&quot;[INTEGRITY] [code {}] {}&quot;, e.getCode().getCode(),</span>
+<span class="fc" id="L156">                    e.getLogMessage());</span>
+<span class="fc" id="L157">        }</span>
+        try {
+<span class="fc" id="L159">            this.osAdministration.deleteInvalidVolumes();</span>
+<span class="fc" id="L160">        } catch (OsEntityException e2) {</span>
+<span class="fc" id="L161">            LOGGER.error(&quot;[INTEGRITY] [code {}] {}&quot;, e2.getCode().getCode(),</span>
+<span class="fc" id="L162">                    e2.getLogMessage());</span>
+<span class="fc" id="L163">        }</span>
+<span class="fc" id="L164">    }</span>
+
+    /**
+     * &lt;ul&gt;
+     * Scaling:
+     * &lt;li&gt;1: Monitor topic of L1 jobs&lt;/li&gt;
+     * &lt;li&gt;2: Monitor L1 wrappers&lt;/li&gt;
+     * &lt;li&gt;3: Calculate the value&lt;/li&gt;
+     * &lt;li&gt;4: Scales the L1 resources&lt;/li&gt;
+     * &lt;ul&gt;
+     */
+    @Scheduled(fixedRateString = &quot;${wrapper.tempo-pooling-ms}&quot;, initialDelayString = &quot;${wrapper.tempo-initial-delay-ms}&quot;)
+    public void scale() {
+<span class="fc" id="L177">        LOGGER.info(&quot;[MONITOR] [step 0] Starting scaling&quot;);</span>
+<span class="fc" id="L178">        int step = 0;</span>
+
+        try {
+
+            // Delete pod in succeeded state
+<span class="fc" id="L183">            step++;</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">            if (devProperties.getActivations().get(&quot;pod-deletion&quot;)) {</span>
+<span class="fc" id="L185">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 1] Deleting L1 wrapper pods in K8S succeeded phase&quot;);
+<span class="fc" id="L187">                List&lt;String&gt; deletedPods = this.removeSucceededPods();</span>
+<span class="fc" id="L188">                LOGGER.debug(&quot;[MONITOR] [Step 1] Delete pods {}&quot;, deletedPods);</span>
+<span class="fc" id="L189">            } else {</span>
+<span class="fc" id="L190">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 1] Deleting L1 wrapper pods in K8S succeeded phase bypassed&quot;);
+            }
+
+            // Monitor KAFKA
+<span class="fc" id="L195">            step++;</span>
+<span class="fc" id="L196">            KafkaPerGroupMonitor monitorKafka = null;</span>
+<span class="fc" id="L197">            int nbPartitions = 0;</span>
+<span class="fc" id="L198">            int counter = 0;</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">            if (devProperties.getActivations().get(&quot;kafka-monitoring&quot;)) {</span>
+<span class="fc" id="L200">                LOGGER.info(&quot;[MONITOR] [step 2] Starting monitoring KAFKA&quot;);</span>
+<span class="fc bfc" id="L201" title="All 4 branches covered.">                while (nbPartitions == 0 &amp;&amp; counter &lt; 2) {</span>
+<span class="fc" id="L202">                    monitorKafka = this.kafkaMonitoring.monitorL1Jobs();</span>
+<span class="fc" id="L203">                    LOGGER.debug(&quot;[MONITOR] [step 2] Monitored information {}&quot;,</span>
+                            monitorKafka);
+<span class="fc bfc" id="L205" title="All 2 branches covered.">                    if (monitorKafka.getNbPartitions() == 0) {</span>
+<span class="fc" id="L206">                        LOGGER.debug(</span>
+                                &quot;[MONITOR] [step 2] Nb partitions null retry&quot;);
+<span class="fc" id="L208">                        Thread.sleep(15000);</span>
+                    }
+<span class="fc" id="L210">                    nbPartitions = monitorKafka.getNbPartitions();</span>
+<span class="fc" id="L211">                    counter++;</span>
+                }
+            } else {
+<span class="fc" id="L214">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 2] Starting monitoring KAFKA bypassed&quot;);
+            }
+<span class="fc bfc" id="L217" title="All 2 branches covered.">            if (nbPartitions == 0) {</span>
+<span class="fc" id="L218">                throw new InternalErrorException(</span>
+                        &quot;Cannot retrieve Kafka monitors&quot;);
+            }
+
+            // Monitor K8S
+            // Listing all the L1 wrappers pods
+<span class="fc" id="L224">            step++;</span>
+<span class="fc" id="L225">            List&lt;WrapperNodeMonitor&gt; wrapperNodeMonitors = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">            if (devProperties.getActivations().get(&quot;k8s-monitoring&quot;)) {</span>
+<span class="fc" id="L227">                LOGGER.info(&quot;[MONITOR] [step 3] Starting monitoring K8S&quot;);</span>
+<span class="fc" id="L228">                wrapperNodeMonitors = this.k8SMonitoring.monitorL1Wrappers();</span>
+<span class="fc" id="L229">                wrapperNodeMonitors.forEach(monitor -&gt; {</span>
+<span class="fc" id="L230">                    LOGGER.debug(&quot;[MONITOR] [step 3] Monitored information {}&quot;,</span>
+                            monitor);
+<span class="fc" id="L232">                });</span>
+
+            } else {
+<span class="fc" id="L235">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 3] Starting monitoring K8S bypassed&quot;);
+            }
+
+            // Calculate value for scaling
+<span class="fc" id="L240">            step++;</span>
+<span class="fc" id="L241">            double monitoredValue = -1;</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">            if (devProperties.getActivations().get(&quot;value-monitored&quot;)) {</span>
+<span class="fc" id="L243">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 4] Starting determinating scaling action&quot;);
+<span class="fc" id="L245">                monitoredValue = this.calculateMonitoredValue(monitorKafka,</span>
+                        wrapperNodeMonitors);
+<span class="fc" id="L247">                LOGGER.debug(&quot;[MONITOR] [step 4] Monitored value {}&quot;,</span>
+<span class="fc" id="L248">                        monitoredValue);</span>
+            } else {
+<span class="fc" id="L250">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 4] Starting determinating scaling action bypassed&quot;);
+            }
+
+            // Scale
+<span class="fc" id="L255">            step++;</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">            if (devProperties.getActivations().get(&quot;scaling&quot;)) {</span>
+<span class="fc" id="L257">                ScalingAction scalingAction = this.needScaling(monitoredValue);</span>
+<span class="fc" id="L258">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 5] Starting applying scaling action {}&quot;,
+<span class="fc" id="L260">                        scalingAction.name());</span>
+<span class="pc bfc" id="L261" title="All 3 branches covered.">                switch (scalingAction) {</span>
+                    case ALLOC:
+<span class="fc" id="L263">                        this.addRessources(wrapperNodeMonitors,</span>
+<span class="fc" id="L264">                                this.wrapperProperties.getNbPoolingPods());</span>
+<span class="fc" id="L265">                        break;</span>
+                    case FREE:
+<span class="fc" id="L267">                        this.freeRessources(wrapperNodeMonitors,</span>
+<span class="fc" id="L268">                                this.wrapperProperties.getNbPoolingPods());</span>
+<span class="fc" id="L269">                        break;</span>
+                    default:
+<span class="fc" id="L271">                        LOGGER.debug(</span>
+                                &quot;[MONITOR] [step 5] Scaling bypassed this loop&quot;);
+                        break;
+                }
+<span class="fc" id="L275">            } else {</span>
+<span class="fc" id="L276">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 5] Starting applying scaling action bypassed&quot;);
+            }
+
+            // Delete unused resources
+<span class="fc" id="L281">            step++;</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">            if (devProperties.getActivations()</span>
+<span class="fc" id="L283">                    .get(&quot;unused-ressources-deletion&quot;)) {</span>
+<span class="fc" id="L284">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 6] Starting removing unused resources&quot;);
+<span class="fc" id="L286">                this.deleteUnusedResources();</span>
+            } else {
+<span class="fc" id="L288">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 6] Starting removing unused resources bypassed&quot;);
+            }
+<span class="fc" id="L291">        } catch (AbstractCodedException e) {</span>
+<span class="fc" id="L292">            LOGGER.error(&quot;[MONITOR] [step {}] [code {}] {}&quot;, step,</span>
+<span class="fc" id="L293">                    e.getCode().getCode(), e.getLogMessage());</span>
+<span class="fc" id="L294">        } catch (Exception e) {</span>
+<span class="fc" id="L295">            LOGGER.error(&quot;[MONITOR] [step {}] [code {}] [msg {}]&quot;, step,</span>
+<span class="fc" id="L296">                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage(), e);</span>
+<span class="fc" id="L297">        }</span>
+<span class="fc" id="L298">        LOGGER.info(&quot;[MONITOR] [step 0] End&quot;);</span>
+<span class="fc" id="L299">    }</span>
+
+    protected List&lt;String&gt; removeSucceededPods()
+            throws InternalErrorException, FileNotFoundException,
+            PodResourceException, K8sUnknownResourceException {
+<span class="fc" id="L304">        List&lt;String&gt; deletedPods =</span>
+<span class="fc" id="L305">                this.k8SAdministration.deleteTerminatedWrapperPods();</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">        if (!CollectionUtils.isEmpty(deletedPods)) {</span>
+            try {
+<span class="fc" id="L308">                Thread.sleep(10000);</span>
+<span class="nc" id="L309">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L310">                throw new InternalErrorException(</span>
+                        &quot;Interrupted exception occurred&quot;, e);
+<span class="fc" id="L312">            }</span>
+        } else {
+<span class="fc" id="L314">            LOGGER.debug(&quot;No succeeded pod to delete&quot;);</span>
+        }
+<span class="fc" id="L316">        return deletedPods;</span>
+    }
+
+    protected double calculateMonitoredValue(
+            KafkaPerGroupMonitor monitorKafka,
+            List&lt;WrapperNodeMonitor&gt; wrapperNodeMonitors) {
+<span class="fc" id="L322">        long totalLag = monitorKafka.getLagPerPartition().values().stream()</span>
+<span class="fc" id="L323">                .mapToLong(Long::longValue).sum();</span>
+<span class="fc" id="L324">        long averageExecutionTime =</span>
+<span class="fc" id="L325">                this.wrapperProperties.getExecutionTime().getAverageS();</span>
+<span class="fc" id="L326">        List&lt;WrapperPodMonitor&gt; activeWrapperPods = wrapperNodeMonitors.stream()</span>
+<span class="pc bpc" id="L327" title="1 of 2 branches missed.">                .filter(nodeMonitor -&gt; nodeMonitor != null &amp;&amp; !CollectionUtils</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">                        .isEmpty(nodeMonitor.getWrapperPods()))</span>
+<span class="fc" id="L329">                .flatMap(nodeMonitor -&gt; nodeMonitor.getActivesPods().stream())</span>
+<span class="fc" id="L330">                .collect(Collectors.toList());</span>
+<span class="fc" id="L331">        long totalRemainingTime = activeWrapperPods.stream()</span>
+<span class="fc" id="L332">                .mapToLong(wrapperPod -&gt; wrapperPod.getRemainingExecutionTime())</span>
+<span class="fc" id="L333">                .sum();</span>
+<span class="fc" id="L334">        long numberWrappers = activeWrapperPods.stream().count();</span>
+
+<span class="fc" id="L336">        double monitoredValue = 0;</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">        if (numberWrappers &gt; 0) {</span>
+<span class="fc" id="L338">            monitoredValue = ((totalLag * averageExecutionTime)</span>
+                    + (totalRemainingTime / 1000)) / numberWrappers;
+        }
+<span class="fc" id="L341">        LOGGER.debug(</span>
+                &quot;[MONITOR] [Step 4] [totalLag {}] [averageExecutionTime {}] [totalRemainingTime {}] [numberWrappers {}] [monitoredValue {}]&quot;,
+<span class="fc" id="L343">                totalLag, averageExecutionTime, totalRemainingTime / 1000,</span>
+<span class="fc" id="L344">                numberWrappers, monitoredValue);</span>
+
+<span class="fc" id="L346">        return monitoredValue;</span>
+    }
+
+    protected ScalingAction needScaling(double monitoredValue) {
+<span class="fc" id="L350">        if (monitoredValue &lt; this.wrapperProperties.getExecutionTime()</span>
+<span class="fc bfc" id="L351" title="All 2 branches covered.">                .getMinThresholdS()) {</span>
+<span class="fc" id="L352">            return ScalingAction.FREE;</span>
+        }
+<span class="fc" id="L354">        if (monitoredValue &gt; this.wrapperProperties.getExecutionTime()</span>
+<span class="fc bfc" id="L355" title="All 2 branches covered.">                .getMaxThresholdS()) {</span>
+<span class="fc" id="L356">            return ScalingAction.ALLOC;</span>
+        }
+<span class="fc" id="L358">        return ScalingAction.NOTHING;</span>
+    }
+
+    protected void addRessources(List&lt;WrapperNodeMonitor&gt; wrapperNodeMonitors,
+            int nbPoolingPods) throws AbstractCodedException {
+<span class="fc" id="L363">        int nbPodsPerServer = this.wrapperProperties.getNbPodsPerServer();</span>
+<span class="fc" id="L364">        int maxNbServers = this.wrapperProperties.getNbMaxServers();</span>
+<span class="fc" id="L365">        int nbServers = wrapperNodeMonitors.size();</span>
+<span class="fc" id="L366">        float div = nbPoolingPods / nbPodsPerServer;</span>
+<span class="fc" id="L367">        int nbNeededServer = Math.round(div);</span>
+
+        // Check if one or several of our nodes can be reaffected
+<span class="fc" id="L370">        LOGGER.info(&quot;[MONITOR] [step 5] 1 - Starting setting reusable nodes&quot;);</span>
+<span class="fc" id="L371">        List&lt;WrapperNodeMonitor&gt; reusableNodes = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L372" title="All 2 branches covered.">        for (WrapperNodeMonitor nodeMonitor : wrapperNodeMonitors) {</span>
+<span class="fc" id="L373">            String valueWrapperConfig = nodeMonitor.getDescription().getLabels()</span>
+<span class="fc" id="L374">                    .get(this.wrapperProperties.getLabelWrapperStateUnused()</span>
+<span class="fc" id="L375">                            .getLabel());</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">            if (valueWrapperConfig != null</span>
+<span class="fc bfc" id="L377" title="All 2 branches covered.">                    &amp;&amp; valueWrapperConfig.equals(this.wrapperProperties</span>
+<span class="fc" id="L378">                            .getLabelWrapperStateUnused().getValue())) {</span>
+<span class="fc" id="L379">                reusableNodes.add(nodeMonitor);</span>
+            }
+<span class="fc" id="L381">        }</span>
+<span class="fc" id="L382">        int nbAllocatedServer = 0;</span>
+<span class="fc" id="L383">        int nbReusableNodes = reusableNodes.size();</span>
+<span class="fc bfc" id="L384" title="All 2 branches covered.">        if (nbReusableNodes &gt; 0) {</span>
+<span class="fc" id="L385">            int nbNodesToReused = Math.min(nbReusableNodes, nbNeededServer);</span>
+<span class="fc bfc" id="L386" title="All 2 branches covered.">            for (int i = 0; i &lt; nbNodesToReused; i++) {</span>
+<span class="fc" id="L387">                String nodeName =</span>
+<span class="fc" id="L388">                        reusableNodes.get(i).getDescription().getName();</span>
+<span class="fc" id="L389">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 5] 1 - Starting setting reusable for node {}&quot;,
+                        nodeName);
+<span class="fc" id="L392">                this.k8SAdministration.setWrapperNodeUsable(nodeName);</span>
+<span class="fc" id="L393">                this.k8SAdministration.launchWrapperPodsPool(1, uniquePODID);</span>
+<span class="fc" id="L394">                nbAllocatedServer++;</span>
+            }
+<span class="fc" id="L396">        } else {</span>
+<span class="pc bpc" id="L397" title="1 of 2 branches missed.">            if (LOGGER.isDebugEnabled()) {</span>
+<span class="nc" id="L398">                LOGGER.debug(&quot;[MONITOR] [step 5] 1 - No unused nodes to reuse&quot;);</span>
+            }
+        }
+
+        // Create VM and POD
+<span class="fc" id="L403">        LOGGER.info(&quot;[MONITOR] [step 5] 2 - Starting creating servers&quot;);</span>
+<span class="fc" id="L404">        int nbCreatedServer = 0;</span>
+<span class="fc bfc" id="L405" title="All 2 branches covered.">        if (nbNeededServer &gt; nbAllocatedServer) {</span>
+<span class="fc bfc" id="L406" title="All 2 branches covered.">            if (nbServers &gt;= maxNbServers) {</span>
+<span class="fc" id="L407">                LOGGER.warn(</span>
+                        &quot;[MONITOR] [step 5] 2 - Maximal number of servers reached, cannot create another one&quot;);
+            } else {
+<span class="pc bpc" id="L410" title="1 of 4 branches missed.">                while ((nbNeededServer &gt; nbAllocatedServer + nbCreatedServer)</span>
+                        &amp;&amp; (nbServers + nbCreatedServer &lt; maxNbServers)) {
+<span class="fc" id="L412">                    nbCreatedServer++;</span>
+                }
+<span class="fc" id="L414">                ExecutorService createResoucesExecutorService =</span>
+<span class="fc" id="L415">                        Executors.newFixedThreadPool(nbCreatedServer);</span>
+<span class="fc" id="L416">                CompletionService&lt;String&gt; createResoucesCompletionServices =</span>
+                        new ExecutorCompletionService&lt;&gt;(
+                                createResoucesExecutorService);
+<span class="fc bfc" id="L419" title="All 2 branches covered.">                for (int i = 0; i &lt; nbCreatedServer; i++) {</span>
+<span class="fc" id="L420">                    createResoucesCompletionServices</span>
+<span class="fc" id="L421">                            .submit(new CreateResources(k8SAdministration,</span>
+                                    osAdministration, uniqueVMID, uniquePODID));
+                }
+<span class="fc" id="L424">                waitForServerCreationcompletion(</span>
+                        createResoucesCompletionServices, nbCreatedServer);
+<span class="fc" id="L426">            }</span>
+
+        } else {
+<span class="fc" id="L429">            LOGGER.debug(</span>
+                    &quot;[MONITOR] [step 5] 2 - No need to create new servers&quot;);
+        }
+<span class="fc" id="L432">    }</span>
+
+    private void waitForServerCreationcompletion(
+            CompletionService&lt;String&gt; completionService, int nbCreatedServer)
+            throws AbstractCodedException {
+        try {
+<span class="fc bfc" id="L438" title="All 2 branches covered.">            for (int i = 0; i &lt; nbCreatedServer; i++) {</span>
+<span class="fc" id="L439">                String result = completionService.take().get();</span>
+<span class="fc bfc" id="L440" title="All 2 branches covered.">                if (result != null) {</span>
+<span class="fc" id="L441">                    LOGGER.info(</span>
+                            &quot;[MONITOR] [step 5] 3 - Volume, server and pod {} launched&quot;,
+                            result);
+                } else {
+<span class="fc" id="L445">                    LOGGER.error(</span>
+                            &quot;[MONITOR] [step 5] 3 - Volume, server and pod {} fail to create&quot;,
+                            result);
+                }
+            }
+<span class="fc" id="L450">        } catch (ExecutionException execE) {</span>
+<span class="fc bfc" id="L451" title="All 2 branches covered.">            if (execE.getCause() instanceof AbstractCodedException) {</span>
+<span class="fc" id="L452">                throw (AbstractCodedException) execE.getCause();</span>
+            } else {
+<span class="fc" id="L454">                throw new InternalErrorException(execE.getMessage(), execE);</span>
+            }
+<span class="nc" id="L456">        } catch (InterruptedException intE) {</span>
+<span class="nc" id="L457">            throw new InternalErrorException(intE.getMessage(), intE);</span>
+<span class="fc" id="L458">        }</span>
+<span class="fc" id="L459">    }</span>
+
+    protected void freeRessources(List&lt;WrapperNodeMonitor&gt; wrapperNodeMonitors,
+            int nbPoolingPods) throws WrapperStopException {
+<span class="fc" id="L463">        int minNbServers = this.wrapperProperties.getNbMinServers();</span>
+<span class="fc" id="L464">        List&lt;WrapperNodeMonitor&gt; localWrapperNodeMonitors = wrapperNodeMonitors</span>
+<span class="fc" id="L465">                .stream()</span>
+<span class="fc" id="L466">                .filter(node -&gt; hasLabels(node.getDescription().getLabels()))</span>
+<span class="fc" id="L467">                .collect(Collectors.toList());</span>
+<span class="fc" id="L468">        int nbServers = localWrapperNodeMonitors.size();</span>
+<span class="fc" id="L469">        int nbFreeServer = 0;</span>
+<span class="fc" id="L470">        int nbFreePods = 0;</span>
+
+<span class="fc" id="L472">        LOGGER.info(&quot;[MONITOR] [step 5] 1 - Starting freeing ressources&quot;);</span>
+<span class="fc bfc" id="L473" title="All 4 branches covered.">        while ((nbServers - nbFreeServer &gt; minNbServers)</span>
+                &amp;&amp; (nbFreePods &lt; nbPoolingPods)) {
+            // We determine the VM to free
+<span class="fc" id="L476">            WrapperNodeMonitor nodeToFree = localWrapperNodeMonitors.stream()</span>
+<span class="fc" id="L477">                    .collect(Collectors.minBy((n1, n2) -&gt; Long.compare(</span>
+<span class="fc" id="L478">                            n1.getMaxRemainingExecTimeForActivesPods(),</span>
+<span class="fc" id="L479">                            n2.getMaxRemainingExecTimeForActivesPods())))</span>
+<span class="fc" id="L480">                    .get();</span>
+<span class="fc" id="L481">            List&lt;WrapperPodMonitor&gt; activePods = nodeToFree.getActivesPods();</span>
+<span class="fc" id="L482">            int nbVmActivesPods = activePods.size();</span>
+<span class="fc" id="L483">            LOGGER.info(</span>
+                    &quot;[MONITOR] [step 5] 1 - Starting freeing ressources of node {} with {} active pods&quot;,
+<span class="fc" id="L485">                    nodeToFree.getDescription().getName(), nbVmActivesPods);</span>
+<span class="pc bpc" id="L486" title="1 of 2 branches missed.">            if (nbVmActivesPods + nbFreePods &gt; nbPoolingPods) {</span>
+                // We stop nbPoolingPods pods by settings their status to
+                // STOPPING
+<span class="nc" id="L489">                this.k8SAdministration.stopWrapperPods(activePods.stream()</span>
+<span class="nc bnc" id="L490" title="All 2 branches missed.">                        .filter(pod -&gt; pod.getDescription() != null</span>
+<span class="nc bnc" id="L491" title="All 2 branches missed.">                                &amp;&amp; !CollectionUtils.isEmpty(</span>
+<span class="nc" id="L492">                                        pod.getDescription().getAddresses()))</span>
+<span class="nc" id="L493">                        .map(pod -&gt; pod.getDescription().getAddresses()</span>
+<span class="nc" id="L494">                                .get(AddressType.INTERNAL_IP))</span>
+<span class="nc" id="L495">                        .collect(Collectors.toList())</span>
+<span class="nc" id="L496">                        .subList(0, nbPoolingPods - nbFreePods));</span>
+<span class="nc" id="L497">                nbFreePods = nbPoolingPods;</span>
+            } else {
+                // We stop nbVmActivesPods pods by settings their status to
+                // STOPPING
+<span class="fc" id="L501">                this.k8SAdministration.stopWrapperPods(activePods.stream()</span>
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">                        .filter(pod -&gt; pod.getDescription() != null</span>
+<span class="pc bpc" id="L503" title="1 of 2 branches missed.">                                &amp;&amp; !CollectionUtils.isEmpty(</span>
+<span class="fc" id="L504">                                        pod.getDescription().getAddresses()))</span>
+<span class="fc" id="L505">                        .map(pod -&gt; pod.getDescription().getAddresses()</span>
+<span class="fc" id="L506">                                .get(AddressType.INTERNAL_IP))</span>
+<span class="fc" id="L507">                        .collect(Collectors.toList()));</span>
+<span class="fc" id="L508">                nbFreePods += nbVmActivesPods;</span>
+                // We deactivate the server by setting its label wrapperstate to
+                // unused
+<span class="fc" id="L511">                this.k8SAdministration.setWrapperNodeUnusable(</span>
+<span class="fc" id="L512">                        nodeToFree.getDescription().getName());</span>
+<span class="fc" id="L513">                nbFreeServer++;</span>
+            }
+<span class="fc" id="L515">            localWrapperNodeMonitors = localWrapperNodeMonitors.stream()</span>
+<span class="fc" id="L516">                    .filter(node -&gt; !node.getDescription().getName()</span>
+<span class="fc bfc" id="L517" title="All 2 branches covered.">                            .equals(nodeToFree.getDescription().getName()))</span>
+<span class="fc" id="L518">                    .collect(Collectors.toList());</span>
+<span class="fc" id="L519">        }</span>
+
+<span class="fc bfc" id="L521" title="All 2 branches covered.">        if (nbFreePods &lt; nbPoolingPods) {</span>
+<span class="fc" id="L522">            int t = nbPoolingPods - nbFreePods;</span>
+<span class="fc" id="L523">            int s = nbServers - nbFreeServer;</span>
+<span class="fc" id="L524">            LOGGER.warn(</span>
+                    &quot;[MONITOR] [step 5] 1 - Cannot stop {} pods because minimal number of servers {} reached&quot;,
+<span class="fc" id="L526">                    t, s);</span>
+        }
+<span class="fc" id="L528">    }</span>
+
+    protected boolean hasLabels(Map&lt;String, String&gt; labels) {
+<span class="fc bfc" id="L531" title="All 2 branches covered.">        return labels.containsKey(</span>
+<span class="fc" id="L532">                this.wrapperProperties.getLabelWrapperStateUsed().getLabel())</span>
+<span class="fc bfc" id="L533" title="All 2 branches covered.">                &amp;&amp; labels.containsValue(this.wrapperProperties</span>
+<span class="fc" id="L534">                        .getLabelWrapperStateUsed().getValue());</span>
+    }
+
+    protected void deleteUnusedResources()
+            throws InternalErrorException, FileNotFoundException,
+            PodResourceException, K8sUnknownResourceException {
+        // Remove pods in succeeded state if necessary
+<span class="fc" id="L541">        LOGGER.info(</span>
+                &quot;[MONITOR] [step 6] 1 - Starting removing pods in succeeded phase&quot;);
+<span class="fc" id="L543">        this.removeSucceededPods();</span>
+
+        // Retrieve K8S workers set in pause with no active pods
+<span class="fc" id="L546">        LOGGER.info(</span>
+                &quot;[MONITOR] [step 6] 2 - Starting retrieving nodes to delete&quot;);
+<span class="fc" id="L548">        List&lt;WrapperNodeMonitor&gt; nodesToDelete =</span>
+<span class="fc" id="L549">                this.k8SMonitoring.monitorNodesToDelete();</span>
+
+        // Remove the corresponding VM
+<span class="fc bfc" id="L552" title="All 2 branches covered.">        if (!CollectionUtils.isEmpty(nodesToDelete)) {</span>
+<span class="fc" id="L553">            nodesToDelete.forEach(node -&gt; {</span>
+<span class="fc" id="L554">                LOGGER.info(</span>
+                        &quot;[MONITOR] [step 6] [serverId {}] 3 - Starting removing server&quot;,
+<span class="fc" id="L556">                        node.getDescription().getExternalId());</span>
+                try {
+<span class="fc" id="L558">                    this.osAdministration.deleteServer(</span>
+<span class="fc" id="L559">                            node.getDescription().getExternalId());</span>
+<span class="fc" id="L560">                } catch (OsEntityException e) {</span>
+<span class="fc" id="L561">                    LOGGER.error(&quot;[MONITOR] [step 6] [code {}] {}&quot;,</span>
+<span class="fc" id="L562">                            e.getCode().getCode(), e.getLogMessage());</span>
+<span class="fc" id="L563">                }</span>
+<span class="fc" id="L564">            });</span>
+        }
+<span class="fc" id="L566">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
