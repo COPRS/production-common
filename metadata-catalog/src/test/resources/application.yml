@@ -1,0 +1,63 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-metadata-catalog
+    
+# Logging
+logging:
+  config: test/log4j2-test.yml
+
+# Elastic Search
+elasticsearch:
+  host: es-svc
+  port: 25000
+  index-type: metadata  
+  connect-timeout-ms: 2000
+  socket-timeout-ms: 10000
+  max-retry-timeout-ms: 30000
+    
+# File
+file:
+  file-with-manifest-ext: .safe
+  manifest-filename: manifest.safe
+  mqi:
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempo-retry-ms: 1000
+  product-categories:
+    auxiliary-files:
+      local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    edrs_sessions:
+      local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    level-products:
+      local-directory: /data/local-catalog/level_products/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    level-segments:
+      local-directory: /data/local-catalog/level_segments/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    
+# Metadata Extractor
+mdextractor:
+  type-overlap: 
+    EW: 8.2F
+    IW: 7.4F
+    SM: 7.7F
+    WV: 0.0F
+  type-slice-length:
+    EW: 60.0F
+    IW: 25.0F
+    SM: 25.0F
+    WV: 0.0F
+  xslt-directory: config/xsltDir/ # Must contains the last /
+      
+status:
+  max-error-counter-processing: 3
+  max-error-counter-mqi: 30
+  
+  

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AppStatus.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.status</a> &gt; <span class="el_source">AppStatus.java</span></div><h1>AppStatus.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.status;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import esa.s1pdgs.cpoc.common.AppState;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
+/**
+ * Application status
+ * 
+ * @author Viveris Technologies
+ */
+@Component
+public class AppStatus {
+
+    /**
+     * Maximal number of consecutive errors for processing
+     */
+    private final int maxErrorCounterProcessing;
+    
+    /**
+     * Maximal number of consecutive errors for MQI
+     */
+    private final int maxErrorCounterNextMessage;
+
+	/**
+	 * Identifier of the processing message
+	 */
+	private Map&lt;ProductCategory, StatusPerCategory&gt; status;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param maxErrorCounter
+	 */
+	@Autowired
+	public AppStatus(@Value(&quot;${status.max-error-counter-processing}&quot;) final int maxErrorCounterProcessing, 
+<span class="fc" id="L43">	        @Value(&quot;${status.max-error-counter-mqi}&quot;) final int maxErrorCounterNextMessage) {</span>
+<span class="fc" id="L44">		this.maxErrorCounterProcessing = maxErrorCounterProcessing;</span>
+<span class="fc" id="L45">		this.maxErrorCounterNextMessage = maxErrorCounterNextMessage;</span>
+<span class="fc" id="L46">		this.status = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L47">		this.status.put(ProductCategory.AUXILIARY_FILES, new StatusPerCategory(ProductCategory.AUXILIARY_FILES));</span>
+<span class="fc" id="L48">		this.status.put(ProductCategory.EDRS_SESSIONS, new StatusPerCategory(ProductCategory.EDRS_SESSIONS));</span>
+<span class="fc" id="L49">		this.status.put(ProductCategory.LEVEL_PRODUCTS, new StatusPerCategory(ProductCategory.LEVEL_PRODUCTS));</span>
+<span class="fc" id="L50">	}</span>
+
+	/**
+	 * @return the status
+	 */
+	public synchronized Map&lt;ProductCategory, StatusPerCategory&gt; getStatus() {
+<span class="fc" id="L56">		return status;</span>
+	}
+
+	/**
+	 * Get the global application status
+	 * @return the status
+	 */
+	public AppState getGlobalAppState() {
+<span class="fc" id="L64">		boolean isFatalError = false;</span>
+<span class="fc" id="L65">		boolean isError = false;</span>
+<span class="fc" id="L66">		boolean isProcessing = false;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">		for (StatusPerCategory catStatus : status.values()) {</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">			if (catStatus.isFatalError()) {</span>
+<span class="fc" id="L69">				isFatalError = true;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">			} else if (catStatus.isError()) {</span>
+<span class="fc" id="L71">				isError = true;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">			} else if (catStatus.isProcessing()) {</span>
+<span class="fc" id="L73">				isProcessing = true;</span>
+			}
+<span class="fc" id="L75">		}</span>
+<span class="fc" id="L76">		AppState ret = AppState.WAITING;</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">		if (isFatalError) {</span>
+<span class="fc" id="L78">			ret = AppState.FATALERROR;</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">		} else if (isError) {</span>
+<span class="fc" id="L80">			ret = AppState.ERROR;</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">		} else if (isProcessing) {</span>
+<span class="fc" id="L82">			ret = AppState.PROCESSING;</span>
+		}
+<span class="fc" id="L84">		return ret;</span>
+	}
+
+	/**
+	 * True if one category is in FATAL ERROR
+	 * @return
+	 */
+	public boolean isFatalError() {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">		return getGlobalAppState() == AppState.FATALERROR;</span>
+	}
+
+	/**
+	 * @return the processingMsgId
+	 */
+	public long getProcessingMsgId(final ProductCategory category) {
+<span class="fc" id="L99">		long ret = 0;</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">		if (status.containsKey(category)) {</span>
+<span class="fc" id="L101">			ret = status.get(category).getProcessingMsgId();</span>
+		}
+<span class="fc" id="L103">		return ret;</span>
+	}
+
+	/**
+	 * Set application as waiting
+	 */
+	public synchronized void setWaiting(final ProductCategory category) {
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">		if (status.containsKey(category)) {</span>
+<span class="fc" id="L111">			status.get(category).setWaiting();</span>
+		}
+<span class="fc" id="L113">	}</span>
+
+	/**
+	 * Set application as processing
+	 */
+	public synchronized void setProcessing(final ProductCategory category, final long processingMsgId) {
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">		if (status.containsKey(category)) {</span>
+<span class="fc" id="L120">			status.get(category).setProcessing(processingMsgId);</span>
+		}
+<span class="fc" id="L122">	}</span>
+
+	/**
+	 * Set application as error
+	 */
+	public synchronized void setError(final ProductCategory category, final String ErrorType) {
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">		if (status.containsKey(category)) {</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">		    if(ErrorType.equals(&quot;PROCESSING&quot;)) {</span>
+<span class="fc" id="L130">		        status.get(category).setErrorProcessing(maxErrorCounterProcessing);</span>
+		    }
+<span class="fc bfc" id="L132" title="All 2 branches covered.">		    if(ErrorType.equals(&quot;NEXT_MESSAGE&quot;)) {</span>
+<span class="fc" id="L133">		        status.get(category).setErrorNextMessage(maxErrorCounterNextMessage);</span>
+		    }
+		}
+<span class="fc" id="L136">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

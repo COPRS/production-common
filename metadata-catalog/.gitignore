@@ -1,0 +1,16 @@
+/.settings/
+/.vscode/
+/.idea/
+/.metadata/
+/.mvn/
+/target/
+/reports/
+.project
+.classpath
+.jdk8
+.springBeans
+*.log
+.eclipse-pmd
+.pmd
+.pmdruleset.xml
+.factory*

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>FileDescriptorBuilder.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.extraction.files</a> &gt; <span class="el_source">FileDescriptorBuilder.java</span></div><h1>FileDescriptorBuilder.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.extraction.files;
+
+import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+
+/**
+ * Service to build file descriptor
+ * 
+ * @author Cyrielle Gailliard
+ *
+ */
+public class FileDescriptorBuilder {
+
+	/**
+	 * Pattern for files to extract data
+	 */
+	private final Pattern pattern;
+
+	/**
+	 * Local directory for files
+	 */
+	private final String localDirectory;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param localDirectory
+	 * @param pattern
+	 */
+<span class="fc" id="L44">	public FileDescriptorBuilder(final String localDirectory, final Pattern pattern) {</span>
+<span class="fc" id="L45">		this.localDirectory = localDirectory;</span>
+<span class="fc" id="L46">		this.pattern = pattern;</span>
+<span class="fc" id="L47">	}</span>
+
+	public String toString() {
+<span class="nc" id="L50">		return String.format(&quot;localDirectory : %s, pattern : %s&quot;, localDirectory, pattern.toString());</span>
+	}
+
+	/**
+	 * Build descriptor for configuration files from path file
+	 * 
+	 * @param file
+	 * 
+	 * @return the config file descriptor
+	 * 
+	 * @throws FilePathException
+	 *             if we have
+	 */
+	public ConfigFileDescriptor buildConfigFileDescriptor(File file) throws MetadataFilePathException, MetadataIgnoredFileException {
+
+		// Extract object storage key
+<span class="fc" id="L66">		String absolutePath = file.getAbsolutePath();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">		if (absolutePath.length() &lt;= localDirectory.length()) {</span>
+<span class="fc" id="L68">			throw new MetadataFilePathException(absolutePath, &quot;CONFIG&quot;, &quot;File is not in root directory&quot;);</span>
+		}
+<span class="fc" id="L70">		String relativePath = absolutePath.substring(localDirectory.length());</span>
+<span class="fc" id="L71">		relativePath = relativePath.replace(&quot;\\&quot;, &quot;/&quot;);</span>
+
+		// Ignored if directory
+<span class="fc bfc" id="L74" title="All 2 branches covered.">		if (file.isDirectory()) {</span>
+<span class="fc" id="L75">			throw new MetadataIgnoredFileException(file.getName());</span>
+		}
+
+		// Check if key matches the pattern
+<span class="fc" id="L79">		ConfigFileDescriptor configFile = null;</span>
+<span class="fc" id="L80">		Matcher m = pattern.matcher(relativePath);</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">		if (m.matches()) {</span>
+			// Extract product name
+<span class="fc" id="L83">			String productName = relativePath;</span>
+<span class="fc" id="L84">			int indexFirstSeparator = relativePath.indexOf(&quot;/&quot;);</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">			if (indexFirstSeparator != -1) {</span>
+<span class="fc" id="L86">				productName = relativePath.substring(0, indexFirstSeparator);</span>
+			}
+			// Extract filename
+<span class="fc" id="L89">			String filename = relativePath;</span>
+<span class="fc" id="L90">			int indexLastSeparator = relativePath.lastIndexOf(&quot;/&quot;);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">			if (indexFirstSeparator != -1) {</span>
+<span class="fc" id="L92">				filename = relativePath.substring(indexLastSeparator + 1);</span>
+			}
+			// Build descriptor
+<span class="fc" id="L95">			configFile = new ConfigFileDescriptor();</span>
+<span class="fc" id="L96">			configFile.setFilename(filename);</span>
+<span class="fc" id="L97">			configFile.setRelativePath(relativePath);</span>
+<span class="fc" id="L98">			configFile.setKeyObjectStorage(productName);</span>
+<span class="fc" id="L99">			configFile.setProductName(productName);</span>
+<span class="fc" id="L100">			configFile.setMissionId(m.group(1));</span>
+<span class="fc" id="L101">			configFile.setSatelliteId(m.group(2));</span>
+<span class="fc" id="L102">			configFile.setProductClass(m.group(4));</span>
+<span class="fc" id="L103">			configFile.setProductType(m.group(5));</span>
+<span class="fc" id="L104">			configFile.setProductFamily(ProductFamily.AUXILIARY_FILE);</span>
+<span class="fc" id="L105">			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));</span>
+
+<span class="fc" id="L107">		} else {</span>
+<span class="fc" id="L108">			throw new MetadataFilePathException(relativePath, &quot;CONFIG&quot;,</span>
+					&quot;File does not match the configuration file pattern&quot;);
+		}
+
+<span class="fc" id="L112">		return configFile;</span>
+	}
+
+	/**
+	 * Function which build the file descriptor for edrs session or raw file
+	 * 
+	 * @param file
+	 * 
+	 * @return the edrs file descriptor
+	 * 
+	 * @throws FilePathException
+	 * @throws IgnoredFileException
+	 * @throws IllegalFileExtension
+	 */
+	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(File file)
+			throws MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtension {
+		// Extract relative path
+<span class="fc" id="L129">		String absolutePath = file.getAbsolutePath();</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">		if (absolutePath.length() &lt;= localDirectory.length()) {</span>
+<span class="fc" id="L131">			throw new MetadataFilePathException(absolutePath, &quot;SESSION&quot;, &quot;File is not in root directory&quot;);</span>
+		}
+<span class="fc" id="L133">		String relativePath = absolutePath.substring(localDirectory.length());</span>
+<span class="fc" id="L134">		relativePath = relativePath.replace(&quot;\\&quot;, &quot;/&quot;);</span>
+
+		// Ignored if directory
+<span class="fc bfc" id="L137" title="All 2 branches covered.">		if (file.isDirectory()) {</span>
+<span class="fc" id="L138">			throw new MetadataIgnoredFileException(file.getName());</span>
+		}
+
+<span class="fc" id="L141">		Matcher m = pattern.matcher(relativePath);</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">		if (m.matches()) {</span>
+<span class="fc" id="L143">			EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();</span>
+<span class="fc" id="L144">			descriptor.setFilename(m.group(9));</span>
+<span class="fc" id="L145">			descriptor.setRelativePath(relativePath);</span>
+<span class="fc" id="L146">			descriptor.setProductName(m.group(9));</span>
+<span class="fc" id="L147">			descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));</span>
+<span class="fc" id="L148">			descriptor.setProductType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));</span>
+<span class="fc" id="L149">			descriptor.setMissionId(m.group(1));</span>
+<span class="fc" id="L150">			descriptor.setSatelliteId(m.group(2));</span>
+<span class="fc" id="L151">			descriptor.setChannel(Integer.parseInt(m.group(7)));</span>
+<span class="fc" id="L152">			descriptor.setSessionIdentifier(m.group(4));</span>
+<span class="fc" id="L153">			descriptor.setKeyObjectStorage(relativePath);</span>
+<span class="fc" id="L154">			descriptor.setProductFamily(ProductFamily.EDRS_SESSION);</span>
+
+<span class="fc" id="L156">			return descriptor;</span>
+		} else {
+<span class="fc" id="L158">			throw new MetadataFilePathException(relativePath, &quot;SESSION&quot;,</span>
+					&quot;File does not match the configuration file pattern&quot;);
+		}
+	}
+
+	public L0OutputFileDescriptor buildL0OutputFileDescriptor(File file, LevelProductDto product)
+			throws MetadataFilePathException, MetadataIgnoredFileException {
+		// Extract relative path
+<span class="fc" id="L166">		String absolutePath = file.getAbsolutePath();</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">		if (absolutePath.length() &lt;= localDirectory.length()) {</span>
+<span class="fc" id="L168">			throw new MetadataFilePathException(absolutePath, &quot;L0_PRODUCT&quot;, &quot;File is not in root directory&quot;);</span>
+		}
+<span class="fc" id="L170">		String relativePath = absolutePath.substring(localDirectory.length());</span>
+<span class="fc" id="L171">		relativePath = relativePath.replace(&quot;\\&quot;, &quot;/&quot;);</span>
+
+		// Ignored if directory
+<span class="fc bfc" id="L174" title="All 2 branches covered.">		if (file.isDirectory()) {</span>
+<span class="fc" id="L175">			throw new MetadataIgnoredFileException(file.getName());</span>
+		}
+<span class="fc" id="L177">		L0OutputFileDescriptor l0Descriptor = null;</span>
+<span class="fc" id="L178">		Matcher m = pattern.matcher(relativePath);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">		if (m.matches()) {</span>
+			// Extract product name
+<span class="fc" id="L181">			String productName = relativePath;</span>
+<span class="fc" id="L182">			int indexFirstSeparator = relativePath.indexOf(&quot;/&quot;);</span>
+<span class="pc bpc" id="L183" title="1 of 2 branches missed.">			if (indexFirstSeparator != -1) {</span>
+<span class="fc" id="L184">				productName = relativePath.substring(0, indexFirstSeparator);</span>
+			}
+			// Extract filename
+<span class="fc" id="L187">			String filename = relativePath;</span>
+<span class="fc" id="L188">			int indexLastSeparator = relativePath.lastIndexOf(&quot;/&quot;);</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">			if (indexFirstSeparator != -1) {</span>
+<span class="fc" id="L190">				filename = relativePath.substring(indexLastSeparator + 1);</span>
+			}
+<span class="fc" id="L192">			l0Descriptor = new L0OutputFileDescriptor();</span>
+<span class="fc" id="L193">			l0Descriptor.setProductName(productName);</span>
+<span class="fc" id="L194">			l0Descriptor.setRelativePath(relativePath);</span>
+<span class="fc" id="L195">			l0Descriptor.setFilename(filename);</span>
+<span class="fc" id="L196">			l0Descriptor.setMode(product.getMode());</span>
+<span class="fc" id="L197">			l0Descriptor.setMissionId(m.group(1));</span>
+<span class="fc" id="L198">			l0Descriptor.setSatelliteId(m.group(2));</span>
+<span class="fc" id="L199">			l0Descriptor.setSwathtype(m.group(3));</span>
+<span class="fc" id="L200">			l0Descriptor.setResolution(m.group(5));</span>
+<span class="fc" id="L201">			l0Descriptor.setProductClass(m.group(7));</span>
+<span class="fc" id="L202">			l0Descriptor.setProductType(m.group(3) + &quot;_&quot; + m.group(4) + m.group(5) + &quot;_&quot; + m.group(6) + m.group(7));</span>
+<span class="fc" id="L203">			l0Descriptor.setPolarisation(m.group(8));</span>
+<span class="fc" id="L204">			l0Descriptor.setDataTakeId(m.group(12));</span>
+<span class="fc" id="L205">			l0Descriptor.setKeyObjectStorage(productName);</span>
+<span class="fc" id="L206">			l0Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));</span>
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">			if(&quot;S&quot;.equals(m.group(7))) {</span>
+<span class="fc" id="L208">	            l0Descriptor.setProductFamily(ProductFamily.L0_SLICE);</span>
+			} else {
+<span class="nc" id="L210">			    l0Descriptor.setProductFamily(ProductFamily.L0_ACN);</span>
+			}
+
+<span class="fc" id="L213">		} else {</span>
+<span class="fc" id="L214">			throw new MetadataFilePathException(relativePath, &quot;L0_PRODUCT&quot;,</span>
+					&quot;File does not match the configuration file pattern&quot;);
+		}
+
+<span class="fc" id="L218">		return l0Descriptor;</span>
+	}
+	
+	public L0OutputFileDescriptor buildL0SegmentFileDescriptor(File file, LevelSegmentDto product)
+            throws MetadataFilePathException, MetadataIgnoredFileException {
+        // Extract relative path
+<span class="fc" id="L224">        String absolutePath = file.getAbsolutePath();</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        if (absolutePath.length() &lt;= localDirectory.length()) {</span>
+<span class="nc" id="L226">            throw new MetadataFilePathException(absolutePath, &quot;L0_SEGMENT&quot;, &quot;File is not in root directory&quot;);</span>
+        }
+<span class="fc" id="L228">        String relativePath = absolutePath.substring(localDirectory.length());</span>
+<span class="fc" id="L229">        relativePath = relativePath.replace(&quot;\\&quot;, &quot;/&quot;);</span>
+
+        // Ignored if directory
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if (file.isDirectory()) {</span>
+<span class="nc" id="L233">            throw new MetadataIgnoredFileException(file.getName());</span>
+        }
+<span class="fc" id="L235">        L0OutputFileDescriptor l0Descriptor = null;</span>
+<span class="fc" id="L236">        Matcher m = pattern.matcher(relativePath);</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        if (m.matches()) {</span>
+            // Extract product name
+<span class="fc" id="L239">            String productName = relativePath;</span>
+<span class="fc" id="L240">            int indexFirstSeparator = relativePath.indexOf(&quot;/&quot;);</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">            if (indexFirstSeparator != -1) {</span>
+<span class="fc" id="L242">                productName = relativePath.substring(0, indexFirstSeparator);</span>
+            }
+            // Extract filename
+<span class="fc" id="L245">            String filename = relativePath;</span>
+<span class="fc" id="L246">            int indexLastSeparator = relativePath.lastIndexOf(&quot;/&quot;);</span>
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">            if (indexFirstSeparator != -1) {</span>
+<span class="fc" id="L248">                filename = relativePath.substring(indexLastSeparator + 1);</span>
+            }
+<span class="fc" id="L250">            l0Descriptor = new L0OutputFileDescriptor();</span>
+<span class="fc" id="L251">            l0Descriptor.setProductName(productName);</span>
+<span class="fc" id="L252">            l0Descriptor.setRelativePath(relativePath);</span>
+<span class="fc" id="L253">            l0Descriptor.setFilename(filename);</span>
+<span class="fc" id="L254">            l0Descriptor.setMode(product.getMode());</span>
+<span class="fc" id="L255">            l0Descriptor.setMissionId(m.group(1));</span>
+<span class="fc" id="L256">            l0Descriptor.setSatelliteId(m.group(2));</span>
+<span class="fc" id="L257">            l0Descriptor.setSwathtype(m.group(3));</span>
+<span class="fc" id="L258">            l0Descriptor.setResolution(m.group(5));</span>
+<span class="fc" id="L259">            l0Descriptor.setProductClass(m.group(7));</span>
+<span class="fc" id="L260">            l0Descriptor.setProductType(m.group(3) + &quot;_&quot; + m.group(4) + m.group(5) + &quot;_&quot; + m.group(6) + m.group(7));</span>
+<span class="fc" id="L261">            l0Descriptor.setPolarisation(m.group(8));</span>
+<span class="fc" id="L262">            l0Descriptor.setDataTakeId(m.group(12));</span>
+<span class="fc" id="L263">            l0Descriptor.setKeyObjectStorage(productName);</span>
+<span class="fc" id="L264">            l0Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));</span>
+<span class="fc" id="L265">            l0Descriptor.setProductFamily(ProductFamily.L0_SEGMENT);</span>
+
+<span class="fc" id="L267">        } else {</span>
+<span class="nc" id="L268">            throw new MetadataFilePathException(relativePath, &quot;L0_SEGMENT&quot;,</span>
+                    &quot;File does not match the configuration file pattern&quot;);
+        }
+
+<span class="fc" id="L272">        return l0Descriptor;</span>
+    }
+
+	public L1OutputFileDescriptor buildL1OutputFileDescriptor(File file, LevelProductDto product)
+			throws MetadataFilePathException, MetadataIgnoredFileException {
+		// Extract relative path
+<span class="fc" id="L278">		String absolutePath = file.getAbsolutePath();</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">		if (absolutePath.length() &lt;= localDirectory.length()) {</span>
+<span class="fc" id="L280">			throw new MetadataFilePathException(absolutePath, &quot;L1_PRODUCT&quot;, &quot;File is not in root directory&quot;);</span>
+		}
+<span class="fc" id="L282">		String relativePath = absolutePath.substring(localDirectory.length());</span>
+<span class="fc" id="L283">		relativePath = relativePath.replace(&quot;\\&quot;, &quot;/&quot;);</span>
+
+		// Ignored if directory
+<span class="fc bfc" id="L286" title="All 2 branches covered.">		if (file.isDirectory()) {</span>
+<span class="fc" id="L287">			throw new MetadataIgnoredFileException(file.getName());</span>
+		}
+<span class="fc" id="L289">		L1OutputFileDescriptor l1Descriptor = null;</span>
+<span class="fc" id="L290">		Matcher m = pattern.matcher(relativePath);</span>
+<span class="fc bfc" id="L291" title="All 2 branches covered.">		if (m.matches()) {</span>
+			// Extract product name
+<span class="fc" id="L293">			String productName = relativePath;</span>
+<span class="fc" id="L294">			int indexFirstSeparator = relativePath.indexOf(&quot;/&quot;);</span>
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">			if (indexFirstSeparator != -1) {</span>
+<span class="fc" id="L296">				productName = relativePath.substring(0, indexFirstSeparator);</span>
+			}
+			// Extract filename
+<span class="fc" id="L299">			String filename = relativePath;</span>
+<span class="fc" id="L300">			int indexLastSeparator = relativePath.lastIndexOf(&quot;/&quot;);</span>
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">			if (indexFirstSeparator != -1) {</span>
+<span class="fc" id="L302">				filename = relativePath.substring(indexLastSeparator + 1);</span>
+			}
+<span class="fc" id="L304">			l1Descriptor = new L1OutputFileDescriptor();</span>
+<span class="fc" id="L305">			l1Descriptor.setProductName(productName);</span>
+<span class="fc" id="L306">			l1Descriptor.setRelativePath(relativePath);</span>
+<span class="fc" id="L307">			l1Descriptor.setFilename(filename);</span>
+<span class="fc" id="L308">			l1Descriptor.setMode(product.getMode());</span>
+<span class="fc" id="L309">			l1Descriptor.setMissionId(m.group(1));</span>
+<span class="fc" id="L310">			l1Descriptor.setSatelliteId(m.group(2));</span>
+<span class="fc" id="L311">			l1Descriptor.setSwathtype(m.group(3));</span>
+<span class="fc" id="L312">			l1Descriptor.setResolution(m.group(5));</span>
+<span class="fc" id="L313">			l1Descriptor.setProductClass(m.group(7));</span>
+<span class="fc" id="L314">			l1Descriptor.setProductType(m.group(3) + &quot;_&quot; + m.group(4) + m.group(5) + &quot;_&quot; + m.group(6) + m.group(7));</span>
+<span class="fc" id="L315">			l1Descriptor.setPolarisation(m.group(8));</span>
+<span class="fc" id="L316">			l1Descriptor.setDataTakeId(m.group(12));</span>
+<span class="fc" id="L317">			l1Descriptor.setKeyObjectStorage(productName);</span>
+<span class="fc" id="L318">			l1Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));</span>
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">			if(&quot;S&quot;.equals(m.group(7))) {</span>
+<span class="fc" id="L320">                l1Descriptor.setProductFamily(ProductFamily.L1_SLICE);</span>
+            } else {
+<span class="nc" id="L322">                l1Descriptor.setProductFamily(ProductFamily.L1_ACN);</span>
+            }
+
+<span class="fc" id="L325">		} else {</span>
+<span class="fc" id="L326">			throw new MetadataFilePathException(relativePath, &quot;L1_PRODUCT&quot;,</span>
+					&quot;File does not match the configuration file pattern&quot;);
+		}
+<span class="fc" id="L329">		return l1Descriptor;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

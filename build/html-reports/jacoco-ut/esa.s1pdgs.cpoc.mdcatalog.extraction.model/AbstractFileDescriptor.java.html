@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AbstractFileDescriptor.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.extraction.model</a> &gt; <span class="el_source">AbstractFileDescriptor.java</span></div><h1>AbstractFileDescriptor.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.extraction.model;
+
+import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+/**
+ * Abstract class describing a file
+ * 
+ * @author Cyrielle
+ *
+ */
+public class AbstractFileDescriptor {
+
+	/**
+	 * Filename with path from the session path
+	 */
+	protected String relativePath;
+
+	/**
+	 * Filename
+	 */
+	protected String filename;
+
+	/**
+	 * File extension
+	 */
+	protected FileExtension extension;
+
+	/**
+	 * Product name (here filename)
+	 */
+	protected String productName;
+
+	/**
+	 * Mission identifier
+	 */
+	protected String missionId;
+
+	/**
+	 * Satellite identifier
+	 */
+	protected String satelliteId;
+
+	/**
+	 * Key in object storage
+	 */
+	protected String keyObjectStorage;
+	
+	/**
+	 * Product Family
+	 */
+	protected ProductFamily productFamily;
+	
+	/**
+	 * Mode
+	 */
+	protected String mode;
+
+	/**
+	 * Default constructor
+	 */
+<span class="fc" id="L62">	public AbstractFileDescriptor() {</span>
+
+<span class="fc" id="L64">	}</span>
+
+	/**
+	 * @return the relativePath
+	 */
+	public String getRelativePath() {
+<span class="nc" id="L70">		return relativePath;</span>
+	}
+
+	/**
+	 * @param relativePath
+	 *            the relativePath to set
+	 */
+	public void setRelativePath(String relativePath) {
+<span class="fc" id="L78">		this.relativePath = relativePath;</span>
+<span class="fc" id="L79">	}</span>
+
+	/**
+	 * @return the filename
+	 */
+	public String getFilename() {
+<span class="nc" id="L85">		return filename;</span>
+	}
+
+	/**
+	 * @param filename
+	 *            the filename to set
+	 */
+	public void setFilename(String filename) {
+<span class="fc" id="L93">		this.filename = filename;</span>
+<span class="fc" id="L94">	}</span>
+
+	/**
+	 * @return the extension
+	 */
+	public FileExtension getExtension() {
+<span class="fc" id="L100">		return extension;</span>
+	}
+
+	/**
+	 * @param extension
+	 *            the extension to set
+	 */
+	public void setExtension(FileExtension extension) {
+<span class="fc" id="L108">		this.extension = extension;</span>
+<span class="fc" id="L109">	}</span>
+
+	/**
+	 * @return the productName
+	 */
+	public String getProductName() {
+<span class="fc" id="L115">		return productName;</span>
+	}
+
+	/**
+	 * @param productName
+	 *            the productName to set
+	 */
+	public void setProductName(String productName) {
+<span class="fc" id="L123">		this.productName = productName;</span>
+<span class="fc" id="L124">	}</span>
+
+	/**
+	 * @return the missionId
+	 */
+	public String getMissionId() {
+<span class="fc" id="L130">		return missionId;</span>
+	}
+
+	/**
+	 * @param missionId
+	 *            the missionId to set
+	 */
+	public void setMissionId(String missionId) {
+<span class="fc" id="L138">		this.missionId = missionId;</span>
+<span class="fc" id="L139">	}</span>
+
+	/**
+	 * @return the satelliteId
+	 */
+	public String getSatelliteId() {
+<span class="fc" id="L145">		return satelliteId;</span>
+	}
+
+	/**
+	 * @param satelliteId
+	 *            the satelliteId to set
+	 */
+	public void setSatelliteId(String satelliteId) {
+<span class="fc" id="L153">		this.satelliteId = satelliteId;</span>
+<span class="fc" id="L154">	}</span>
+
+	/**
+	 * @return the keyObjectStorage
+	 */
+	public String getKeyObjectStorage() {
+<span class="fc" id="L160">		return keyObjectStorage;</span>
+	}
+
+	/**
+	 * @param keyObjectStorage
+	 *            the keyObjectStorage to set
+	 */
+	public void setKeyObjectStorage(String keyObjectStorage) {
+<span class="fc" id="L168">		this.keyObjectStorage = keyObjectStorage;</span>
+<span class="fc" id="L169">	}</span>
+
+	/**
+     * @return the productFamily
+     */
+    public ProductFamily getProductFamily() {
+<span class="fc" id="L175">        return productFamily;</span>
+    }
+
+    /**
+     * @param productFamily the productFamily to set
+     */
+    public void setProductFamily(ProductFamily productFamily) {
+<span class="fc" id="L182">        this.productFamily = productFamily;</span>
+<span class="fc" id="L183">    }</span>
+
+    /**
+     * @return the mode
+     */
+    public String getMode() {
+<span class="fc" id="L189">        return mode;</span>
+    }
+
+    /**
+     * @param mode the mode to set
+     */
+    public void setMode(String mode) {
+<span class="fc" id="L196">        this.mode = mode;</span>
+<span class="fc" id="L197">    }</span>
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L204">        final int prime = 31;</span>
+<span class="fc" id="L205">        int result = 1;</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L207">                + ((extension == null) ? 0 : extension.hashCode());</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L209">                + ((filename == null) ? 0 : filename.hashCode());</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        result = prime * result + ((keyObjectStorage == null) ? 0</span>
+<span class="fc" id="L211">                : keyObjectStorage.hashCode());</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L213">                + ((missionId == null) ? 0 : missionId.hashCode());</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L215">                + ((productFamily == null) ? 0 : productFamily.hashCode());</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L217">                + ((productName == null) ? 0 : productName.hashCode());</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L219">                + ((relativePath == null) ? 0 : relativePath.hashCode());</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L221">                + ((satelliteId == null) ? 0 : satelliteId.hashCode());</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        result = prime * result</span>
+<span class="fc" id="L223">                + ((mode == null) ? 0 : mode.hashCode());</span>
+<span class="fc" id="L224">        return result;</span>
+    }
+
+	/* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if (this == obj)</span>
+<span class="nc" id="L233">            return true;</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">        if (obj == null)</span>
+<span class="fc" id="L235">            return false;</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (getClass() != obj.getClass())</span>
+<span class="fc" id="L237">            return false;</span>
+<span class="fc" id="L238">        AbstractFileDescriptor other = (AbstractFileDescriptor) obj;</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        if (extension != other.extension)</span>
+<span class="fc" id="L240">            return false;</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if (filename == null) {</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">            if (other.filename != null)</span>
+<span class="fc" id="L243">                return false;</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        } else if (!filename.equals(other.filename))</span>
+<span class="fc" id="L245">            return false;</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">        if (keyObjectStorage == null) {</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">            if (other.keyObjectStorage != null)</span>
+<span class="fc" id="L248">                return false;</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        } else if (!keyObjectStorage.equals(other.keyObjectStorage))</span>
+<span class="fc" id="L250">            return false;</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">        if (missionId == null) {</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">            if (other.missionId != null)</span>
+<span class="fc" id="L253">                return false;</span>
+<span class="fc bfc" id="L254" title="All 2 branches covered.">        } else if (!missionId.equals(other.missionId))</span>
+<span class="fc" id="L255">            return false;</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">        if (productFamily != other.productFamily)</span>
+<span class="fc" id="L257">            return false;</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        if (productName == null) {</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">            if (other.productName != null)</span>
+<span class="fc" id="L260">                return false;</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        } else if (!productName.equals(other.productName))</span>
+<span class="fc" id="L262">            return false;</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">        if (relativePath == null) {</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">            if (other.relativePath != null)</span>
+<span class="fc" id="L265">                return false;</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        } else if (!relativePath.equals(other.relativePath))</span>
+<span class="fc" id="L267">            return false;</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        if (satelliteId == null) {</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">            if (other.satelliteId != null)</span>
+<span class="fc" id="L270">                return false;</span>
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        } else if (!satelliteId.equals(other.satelliteId))</span>
+<span class="fc" id="L272">            return false;</span>
+<span class="fc bfc" id="L273" title="All 2 branches covered.">        if (mode == null) {</span>
+<span class="fc bfc" id="L274" title="All 2 branches covered.">            if (other.mode != null)</span>
+<span class="fc" id="L275">                return false;</span>
+<span class="fc bfc" id="L276" title="All 2 branches covered.">        } else if (!mode.equals(other.mode))</span>
+<span class="fc" id="L277">            return false;</span>
+<span class="fc" id="L278">        return true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

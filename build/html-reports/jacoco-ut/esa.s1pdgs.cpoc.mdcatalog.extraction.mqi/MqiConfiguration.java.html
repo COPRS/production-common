@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MqiConfiguration.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Metadata catalog</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mdcatalog.extraction.mqi</a> &gt; <span class="el_source">MqiConfiguration.java</span></div><h1>MqiConfiguration.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mdcatalog.extraction.mqi;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+import esa.s1pdgs.cpoc.mqi.client.AuxiliaryFilesMqiService;
+import esa.s1pdgs.cpoc.mqi.client.EdrsSessionMqiService;
+import esa.s1pdgs.cpoc.mqi.client.ErrorService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
+import esa.s1pdgs.cpoc.mqi.client.LevelSegmentsMqiService;
+import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+
+/**
+ * Configuration of MQI client.&lt;br/&gt;
+ * Creation of 3 services: LEVEL_PRODUCTS, LEVEL_REPORTS, LEVEL_JOBS
+ * 
+ * @author Viveris Technologies
+ */
+@Configuration
+public class MqiConfiguration {
+
+    /**
+     * Host URI for the MQI server
+     */
+    private final String hostUri;
+
+    /**
+     * Maximal number of retries when query fails
+     */
+    private final int maxRetries;
+
+    /**
+     * Temporisation in ms between 2 retries
+     */
+    private final int tempoRetryMs;
+
+    /**
+     * Constructor
+     * 
+     * @param hostUri
+     * @param maxRetries
+     * @param tempoRetryMs
+     */
+    @Autowired
+    public MqiConfiguration(@Value(&quot;${file.mqi.host-uri}&quot;) final String hostUri,
+            @Value(&quot;${file.mqi.max-retries}&quot;) final int maxRetries,
+<span class="fc" id="L55">            @Value(&quot;${file.mqi.tempo-retry-ms}&quot;) final int tempoRetryMs) {</span>
+<span class="fc" id="L56">        this.hostUri = hostUri;</span>
+<span class="fc" id="L57">        this.maxRetries = maxRetries;</span>
+<span class="fc" id="L58">        this.tempoRetryMs = tempoRetryMs;</span>
+<span class="fc" id="L59">    }</span>
+
+    /**
+     * Service for querying MQI for LEVEL_SEGMENT category
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = &quot;mqiServiceForLevelSegments&quot;)
+    public GenericMqiService&lt;LevelSegmentDto&gt; mqiServiceForLevelSegments(
+            final RestTemplateBuilder builder) {
+<span class="fc" id="L70">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L71">        return new LevelSegmentsMqiService(template, hostUri, maxRetries,</span>
+                tempoRetryMs);
+    }
+
+    /**
+     * Service for querying MQI for LEVEL_PRODUCT category
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = &quot;mqiServiceForLevelProducts&quot;)
+    public GenericMqiService&lt;LevelProductDto&gt; mqiServiceForLevelProducts(
+            final RestTemplateBuilder builder) {
+<span class="fc" id="L84">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L85">        return new LevelProductsMqiService(template, hostUri, maxRetries,</span>
+                tempoRetryMs);
+    }
+
+    /**
+     * Service for querying MQI for LEVEL_REPORTS category
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = &quot;mqiServiceForAuxiliaryFiles&quot;)
+    public GenericMqiService&lt;AuxiliaryFileDto&gt; mqiServiceForAuxiliaryFiles(
+            final RestTemplateBuilder builder) {
+<span class="fc" id="L98">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L99">        return new AuxiliaryFilesMqiService(template, hostUri, maxRetries,</span>
+                tempoRetryMs);
+    }
+
+    /**
+     * Service for querying MQI for LEVEL_JOBS category
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = &quot;mqiServiceForEdrsSessions&quot;)
+    public GenericMqiService&lt;EdrsSessionDto&gt; mqiServiceForEdrsSessions(
+            final RestTemplateBuilder builder) {
+<span class="fc" id="L112">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L113">        return new EdrsSessionMqiService(template, hostUri, maxRetries,</span>
+                tempoRetryMs);
+    }
+
+    /**
+     * Service for publishing errors
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = &quot;mqiServiceForErrors&quot;)
+    public ErrorService mqiServiceForErrors(final RestTemplateBuilder builder) {
+<span class="fc" id="L125">        RestTemplate template = builder.build();</span>
+<span class="fc" id="L126">        return new ErrorService(template, hostUri, maxRetries, tempoRetryMs);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
