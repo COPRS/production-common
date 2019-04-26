@@ -7,7 +7,16 @@
   
   
   <modules>
-    <module>lib-commons</module>
-    <module>metadata-catalog</module>
+	<module>applicative-catalog</module>
+	<module>archives</module>
+	<module>ingestor</module>
+	<module>job-generator</module>
+	<module>lib-commons</module>
+	<module>metadata-catalog</module>
+	<module>mqi-client</module>
+	<module>mqi-server</module>
+	<module>obs-sdk</module>
+	<module>scaler</module>
+	<module>wrapper</module>    
   </modules>
 </project>
