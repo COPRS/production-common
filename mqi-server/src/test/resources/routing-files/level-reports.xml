@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routing description="routing for publishing product of category LEVEL_REPORTS">
+	<default_route description="default route of product family L0_REPORT">
+		<family>L0_REPORT</family>
+		<route_to>
+			<topic>t-pdgs-l0-reports</topic>
+		</route_to>
+	</default_route>
+	<default_route description="default route of product family L1_REPORT">
+		<family>L1_REPORT</family>
+		<route_to>
+			<topic>t-pdgs-l1-reports</topic>
+		</route_to>
+	</default_route>
+</routing>

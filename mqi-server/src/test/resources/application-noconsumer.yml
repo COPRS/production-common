@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: s1pdgs-mqi-app
+    
+logging:
+  config: ./src/test/resources/log4j2.yml
+  
+# Kafka
+kafka:
+  bootstrap-servers: ${spring.embedded.kafka.brokers}
+  hostname: wrapper-0
+  client-id: wrapper
+  error-topic: t-pdgs-errors
+  consumer:
+    group-id: wrappers
+    max-poll-interval-ms: 3600000
+    max-poll-records: 1
+    session-timeout-ms: 10000
+    heartbeat-intv-ms: 3000
+    auto-offset-reset: latest
+    offset-dft-mode: -2
+  listener:
+    poll-timeout-ms: 500
+  producer:
+    max-retries: 10
+    
+application:
+  hostname: wrapper-0
+  max-error-counter: 3
+  stop-fixed-delay-ms: 3000
+  wait-next-ms: 500
+  product-categories:
+    auxiliary-files:
+      consumption:
+        enable: false
+        topics-with-priority:
+          unknown: 0
+      publication:
+        enable: false
+    edrs-sessions:
+      consumption:
+        enable: false
+        topics-with-priority:
+          unknown: 0
+      publication:
+        enable: false
+    level-products:
+      consumption:
+        enable: false
+        topics-with-priority:
+          unknown: 0
+      publication:
+        enable: false
+    level-reports:
+      consumption:
+        enable: false
+        topics-with-priority:
+          unknown: 0
+      publication:
+        enable: false
+    level-jobs:
+      consumption:
+        enable: false
+        topics-with-priority:
+          unknown: 0
+      publication:
+        enable: false
+    level-segments:
+      consumption:
+        enable: false
+        topics-with-priority:
+          unknown: 0
+      publication:
+        enable: false
+server:
+  port: 8081
+persistence:
+  host-uri-catalog: http://app-catalog:8080
+  port-uri-other-app: 8080
+  max-retries: 3
+  tempo-retry-ms: 500
+  suffix-uri-other-app: .processing.default.svc.cluster.local
+  other-app:
+    suffix-uri: .processing.default.svc.cluster.local
+    begin-uri-processing: /status/
