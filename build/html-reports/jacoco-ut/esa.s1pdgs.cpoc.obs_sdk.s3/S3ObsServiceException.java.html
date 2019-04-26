@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>S3ObsServiceException.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC - Object storage client</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.obs_sdk.s3</a> &gt; <span class="el_source">S3ObsServiceException.java</span></div><h1>S3ObsServiceException.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.obs_sdk.s3;
+
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+
+/**
+ * ObsException dedicated to the access via the AmazonS3 API for a given object
+ * 
+ * @author Viveris Technologies
+ */
+public class S3ObsServiceException extends ObsServiceException {
+
+    /**
+     * Serial version
+     */
+    private static final long serialVersionUID = 5199880165421562120L;
+
+    /**
+     * Key in the object storage of the failed object
+     */
+    private final String key;
+
+    /**
+     * Bucket where the object is stored
+     */
+    private final String bucket;
+
+    /**
+     * Constructor
+     * 
+     * @param key
+     * @param bucket
+     * @param cause
+     */
+    public S3ObsServiceException(final String bucket, final String key,
+            final String message) {
+<span class="fc" id="L36">        super(message);</span>
+<span class="fc" id="L37">        this.key = key;</span>
+<span class="fc" id="L38">        this.bucket = bucket;</span>
+<span class="fc" id="L39">    }</span>
+
+    /**
+     * Constructor
+     * 
+     * @param key
+     * @param bucket
+     * @param cause
+     */
+    public S3ObsServiceException(final String bucket, final String key,
+            final String message, final Throwable cause) {
+<span class="fc" id="L50">        super(message, cause);</span>
+<span class="fc" id="L51">        this.key = key;</span>
+<span class="fc" id="L52">        this.bucket = bucket;</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * @return the key
+     */
+    public String getKey() {
+<span class="fc" id="L59">        return key;</span>
+    }
+
+    /**
+     * @return the bucket
+     */
+    public String getBucket() {
+<span class="fc" id="L66">        return bucket;</span>
+    }
+
+    /**
+     * Override the getMessage function
+     * 
+     * @return
+     */
+    public String getMessage() {
+<span class="fc" id="L75">        return String.format(</span>
+                &quot;{'bucket': \&quot;%s\&quot;, 'key': \&quot;%s\&quot;, 'msg': \&quot;%s\&quot; }&quot;, bucket,
+<span class="fc" id="L77">                key, super.getMessage());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
