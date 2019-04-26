@@ -1,0 +1,43 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-archives
+    
+logging:
+  config: log4j2.yml
+    
+# KAFKA
+kafka:
+  bootstrap-servers: kafka-svc:9093
+  group-id: archives
+  client-id: archives
+  poll-timeout: 500
+  max-pool-records: 1
+  session-timeout-ms: 120000
+  topics:
+    slices: ${archives_kafka_topic_slices}
+    reports: ${archives_kafka_topic_report}
+    segments: ${archives_kafka_topic_segment}
+  enable-consumer:
+    slice: true
+    report: false
+    segments: false
+    
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-slices: 3
+  max-error-counter-reports: 3
+    
+# File
+file:
+  slices:
+    local-directory: /data/slices/ # Must contains the last /
+  reports:
+    local-directory: /data/reports/ # Must contains the last /
+  segments:
+    local-directory: /data/segments/ # Must contains the last /
+
+dev:
+  activations:
+    download-all : false
+    
