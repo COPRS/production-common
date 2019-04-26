@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ProductCategory.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.common</a> &gt; <span class="el_source">ProductCategory.java</span></div><h1>ProductCategory.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.common;
+
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+
+/**
+ * Group products per category
+ * 
+ * @author Viveris Technologie
+ */
+<span class="fc" id="L10">public enum ProductCategory {</span>
+<span class="fc" id="L11">    AUXILIARY_FILES, EDRS_SESSIONS, LEVEL_JOBS, LEVEL_PRODUCTS, LEVEL_REPORTS, LEVEL_SEGMENTS;</span>
+
+    /**
+     * Get the category for a given product family
+     * 
+     * @param family
+     * @return
+     * @throws InternalErrorException
+     */
+    public static ProductCategory fromProductFamily(final ProductFamily family)
+            throws InternalErrorException {
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (family == null) {</span>
+<span class="fc" id="L23">            throw new InternalErrorException(</span>
+                    &quot;Cannot determinate product category for a null family&quot;);
+        }
+<span class="fc" id="L26">        ProductCategory ret = null;</span>
+<span class="pc bfc" id="L27" title="All 7 branches covered.">        switch (family) {</span>
+            case AUXILIARY_FILE:
+<span class="fc" id="L29">                ret = ProductCategory.AUXILIARY_FILES;</span>
+<span class="fc" id="L30">                break;</span>
+            case EDRS_SESSION:
+<span class="fc" id="L32">                ret = ProductCategory.EDRS_SESSIONS;</span>
+<span class="fc" id="L33">                break;</span>
+            case L0_JOB:
+            case L1_JOB:
+            case L0_SEGMENT_JOB:
+<span class="fc" id="L37">                ret = ProductCategory.LEVEL_JOBS;</span>
+<span class="fc" id="L38">                break;</span>
+            case L0_REPORT:
+            case L1_REPORT:
+            case L0_SEGMENT_REPORT:
+<span class="fc" id="L42">                ret = ProductCategory.LEVEL_REPORTS;</span>
+<span class="fc" id="L43">                break;</span>
+            case L0_ACN:
+            case L0_SLICE:
+            case L1_ACN:
+            case L1_SLICE:
+            case L0_BLANK:
+<span class="fc" id="L49">                ret = ProductCategory.LEVEL_PRODUCTS;</span>
+<span class="fc" id="L50">                break;</span>
+            case L0_SEGMENT:
+<span class="fc" id="L52">                ret = ProductCategory.LEVEL_SEGMENTS;</span>
+<span class="fc" id="L53">                break;</span>
+            default:
+<span class="fc" id="L55">                throw new InternalErrorException(</span>
+                        &quot;Cannot determinate product category for family &quot;
+                                + family);
+        }
+<span class="fc" id="L59">        return ret;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

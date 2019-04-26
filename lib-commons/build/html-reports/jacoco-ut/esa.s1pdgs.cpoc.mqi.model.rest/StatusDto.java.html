@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>StatusDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.model.rest</a> &gt; <span class="el_source">StatusDto.java</span></div><h1>StatusDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.model.rest;
+
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.AppState;
+
+/**
+ * @author Viveris Technologies
+ */
+public class StatusDto {
+
+    /**
+     * Status
+     */
+    private AppState status;
+
+    /**
+     * Number of milliseconds passed for the last modification
+     */
+    private long msLastChange;
+
+    /**
+     * Number of error for the last modification of status
+     */
+    private int errorCounter;
+
+    /**
+     * Constrcutor
+     */
+<span class="fc" id="L30">    public StatusDto() {</span>
+<span class="fc" id="L31">        msLastChange = 0;</span>
+<span class="fc" id="L32">        errorCounter = 0;</span>
+<span class="fc" id="L33">    }</span>
+
+    /**
+     * @param state
+     * @param lastChange
+     * @param errorCounter
+     */
+    public StatusDto(final AppState state, final long msLastChange,
+            final int errorCounter) {
+<span class="fc" id="L42">        super();</span>
+<span class="fc" id="L43">        this.status = state;</span>
+<span class="fc" id="L44">        this.msLastChange = msLastChange;</span>
+<span class="fc" id="L45">        this.errorCounter = errorCounter;</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * @return the status
+     */
+    public AppState getStatus() {
+<span class="fc" id="L52">        return status;</span>
+    }
+
+    /**
+     * @param status
+     *            the status to set
+     */
+    public void setStatus(final AppState status) {
+<span class="fc" id="L60">        this.status = status;</span>
+<span class="fc" id="L61">    }</span>
+
+    /**
+     * @return the msLastChange
+     */
+    public long getMsLastChange() {
+<span class="fc" id="L67">        return msLastChange;</span>
+    }
+
+    /**
+     * @param msLastChange
+     *            the msLastChange to set
+     */
+    public void setMsLastChange(final long msLastChange) {
+<span class="fc" id="L75">        this.msLastChange = msLastChange;</span>
+<span class="fc" id="L76">    }</span>
+
+    /**
+     * @return the errorCounter
+     */
+    public int getErrorCounter() {
+<span class="fc" id="L82">        return errorCounter;</span>
+    }
+
+    /**
+     * @param errorCounter
+     *            the errorCounter to set
+     */
+    public void setErrorCounter(final int errorCounter) {
+<span class="fc" id="L90">        this.errorCounter = errorCounter;</span>
+<span class="fc" id="L91">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L98">        return String.format(&quot;{status: %s, msLastChange: %d, errorCounter: %d}&quot;,</span>
+<span class="fc" id="L99">                status, msLastChange, errorCounter);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L107">        return Objects.hash(status, msLastChange, errorCounter);</span>
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L117">            ret = true;</span>
+<span class="fc bfc" id="L118" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L119">            ret = false;</span>
+        } else {
+<span class="fc" id="L121">            StatusDto other = (StatusDto) obj;</span>
+            // field comparison
+<span class="fc bfc" id="L123" title="All 6 branches covered.">            ret = Objects.equals(status, other.status)</span>
+                    &amp;&amp; msLastChange == other.msLastChange
+                    &amp;&amp; errorCounter == other.errorCounter;
+        }
+<span class="fc" id="L127">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

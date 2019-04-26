@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>GenericPublicationMessageDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.model.rest</a> &gt; <span class="el_source">GenericPublicationMessageDto.java</span></div><h1>GenericPublicationMessageDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.model.rest;
+
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+/**
+ * Message to send to the MQI for publishing a message
+ * 
+ * @author Viveris Technologies
+ * @param &lt;T&gt;
+ */
+public class GenericPublicationMessageDto&lt;T&gt; {
+
+    /**
+     * Identifier of the input message if exists
+     */
+    private long inputMessageId;
+
+    /**
+     * Key of the input (if exists) to use for routing the message
+     */
+    private String inputKey;
+
+    /**
+     * Family of the output
+     */
+    private ProductFamily family;
+
+    /**
+     * Key of the output to use for routing the message
+     */
+    private String outputKey;
+
+    /**
+     * Message to publish
+     */
+    private T messageToPublish;
+
+    /**
+     * Default constructor
+     */
+<span class="fc" id="L43">    public GenericPublicationMessageDto() {</span>
+<span class="fc" id="L44">        family = ProductFamily.BLANK;</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Constructor
+     */
+    public GenericPublicationMessageDto(final ProductFamily family,
+<span class="fc" id="L51">            final T messageToPublish) {</span>
+<span class="fc" id="L52">        this.family = family;</span>
+<span class="fc" id="L53">        this.messageToPublish = messageToPublish;</span>
+<span class="fc" id="L54">        this.inputMessageId = 0;</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Constructor
+     */
+    public GenericPublicationMessageDto(final long inputMessageId,
+<span class="fc" id="L61">            final ProductFamily family, final T messageToPublish) {</span>
+<span class="fc" id="L62">        this.family = family;</span>
+<span class="fc" id="L63">        this.messageToPublish = messageToPublish;</span>
+<span class="fc" id="L64">        this.inputMessageId = inputMessageId;</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * @return the inputMessageId
+     */
+    public long getInputMessageId() {
+<span class="fc" id="L71">        return inputMessageId;</span>
+    }
+
+    /**
+     * @param inputMessageId
+     *            the inputMessageId to set
+     */
+    public void setInputMessageId(final long inputMessageId) {
+<span class="fc" id="L79">        this.inputMessageId = inputMessageId;</span>
+<span class="fc" id="L80">    }</span>
+
+    /**
+     * @return the inputKey
+     */
+    public String getInputKey() {
+<span class="fc" id="L86">        return inputKey;</span>
+    }
+
+    /**
+     * @param inputKey
+     *            the inputKey to set
+     */
+    public void setInputKey(final String inputKey) {
+<span class="fc" id="L94">        this.inputKey = inputKey;</span>
+<span class="fc" id="L95">    }</span>
+
+    /**
+     * @return the family
+     */
+    public ProductFamily getFamily() {
+<span class="fc" id="L101">        return family;</span>
+    }
+
+    /**
+     * @param family
+     *            the family to set
+     */
+    public void setFamily(final ProductFamily family) {
+<span class="fc" id="L109">        this.family = family;</span>
+<span class="fc" id="L110">    }</span>
+
+    /**
+     * @return the outputKey
+     */
+    public String getOutputKey() {
+<span class="fc" id="L116">        return outputKey;</span>
+    }
+
+    /**
+     * @param outputKey
+     *            the outputKey to set
+     */
+    public void setOutputKey(final String outputKey) {
+<span class="fc" id="L124">        this.outputKey = outputKey;</span>
+<span class="fc" id="L125">    }</span>
+
+    /**
+     * @return the messageToPublish
+     */
+    public T getMessageToPublish() {
+<span class="fc" id="L131">        return messageToPublish;</span>
+    }
+
+    /**
+     * @param messageToPublish
+     *            the messageToPublish to set
+     */
+    public void setMessageToPublish(final T messageToPublish) {
+<span class="fc" id="L139">        this.messageToPublish = messageToPublish;</span>
+<span class="fc" id="L140">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L147">        return String.format(</span>
+                &quot;{inputMessageId: %s, inputKey: %s, family: %s, outputKey: %s, messageToPublish: %s}&quot;,
+<span class="fc" id="L149">                inputMessageId, inputKey, family, outputKey, messageToPublish);</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L157">        return Objects.hash(inputMessageId, inputKey, family, outputKey,</span>
+                messageToPublish);
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L168">            ret = true;</span>
+<span class="fc bfc" id="L169" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L170">            ret = false;</span>
+        } else {
+<span class="fc" id="L172">            GenericPublicationMessageDto&lt;?&gt; other =</span>
+                    (GenericPublicationMessageDto&lt;?&gt;) obj;
+<span class="fc bfc" id="L174" title="All 2 branches covered.">            ret = inputMessageId == other.inputMessageId</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(inputKey, other.inputKey)</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(family, other.family)</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(outputKey, other.outputKey)</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(messageToPublish, other.messageToPublish);</span>
+        }
+<span class="fc" id="L180">        return ret;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

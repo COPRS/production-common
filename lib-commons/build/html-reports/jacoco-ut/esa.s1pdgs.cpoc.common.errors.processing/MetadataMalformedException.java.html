@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>MetadataMalformedException.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.common.errors.processing</a> &gt; <span class="el_source">MetadataMalformedException.java</span></div><h1>MetadataMalformedException.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.common.errors.processing;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+
+/**
+ * @author Viveris Technlogies
+ */
+public class MetadataMalformedException extends AbstractCodedException {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 2939784030412076416L;
+
+    /**
+     * Generic message
+     */
+    private static final String MESSAGE = &quot;Metadata malformed&quot;;
+
+    /**
+     * Nalme of missing field
+     */
+    private final String missingField;
+
+    /**
+     * @param productName
+     */
+    public MetadataMalformedException(final String missingField) {
+<span class="fc" id="L29">        super(ErrorCode.METADATA_MALFORMED_ERROR, MESSAGE);</span>
+<span class="fc" id="L30">        this.missingField = missingField;</span>
+<span class="fc" id="L31">    }</span>
+
+    /**
+     * @return the missingField
+     */
+    public String getMissingField() {
+<span class="fc" id="L37">        return missingField;</span>
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public String getLogMessage() {
+<span class="fc" id="L45">        return String.format(&quot;[missingField %s] [msg %s]&quot;, missingField,</span>
+<span class="fc" id="L46">                getMessage());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

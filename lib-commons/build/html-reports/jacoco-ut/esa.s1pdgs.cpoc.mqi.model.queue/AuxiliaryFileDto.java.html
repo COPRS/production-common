@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AuxiliaryFileDto.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">S1-PDGS Cloud POC common library</a> &gt; <a href="index.source.html" class="el_package">esa.s1pdgs.cpoc.mqi.model.queue</a> &gt; <span class="el_source">AuxiliaryFileDto.java</span></div><h1>AuxiliaryFileDto.java</h1><pre class="source lang-java linenums">package esa.s1pdgs.cpoc.mqi.model.queue;
+
+import java.util.Objects;
+
+/**
+ * DTO object used to transfer auxiliary files between MQI and application
+ * 
+ * @author Viveris Technologies
+ */
+public class AuxiliaryFileDto {
+
+    /**
+     * Product name
+     */
+    private String productName;
+
+    /**
+     * Key in the OBS
+     */
+    private String keyObjectStorage;
+
+    /**
+     * Constructor from all fields
+     * 
+     * @param action
+     * @param metadata
+     */
+    public AuxiliaryFileDto() {
+<span class="fc" id="L29">        super();</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Constructor from all fields
+     * 
+     * @param action
+     * @param metadata
+     */
+    public AuxiliaryFileDto(final String productName,
+<span class="fc" id="L39">            final String keyObjectStorage) {</span>
+<span class="fc" id="L40">        this.productName = productName;</span>
+<span class="fc" id="L41">        this.keyObjectStorage = keyObjectStorage;</span>
+<span class="fc" id="L42">    }</span>
+
+    /**
+     * @return the productName
+     */
+    public String getProductName() {
+<span class="fc" id="L48">        return productName;</span>
+    }
+
+    /**
+     * @param productName
+     *            the productName to set
+     */
+    public void setProductName(final String productName) {
+<span class="fc" id="L56">        this.productName = productName;</span>
+<span class="fc" id="L57">    }</span>
+
+    /**
+     * @return the keyObjectStorage
+     */
+    public String getKeyObjectStorage() {
+<span class="fc" id="L63">        return keyObjectStorage;</span>
+    }
+
+    /**
+     * @param keyObjectStorage
+     *            the keyObjectStorage to set
+     */
+    public void setKeyObjectStorage(final String keyObjectStorage) {
+<span class="fc" id="L71">        this.keyObjectStorage = keyObjectStorage;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L79">        return String.format(&quot;{productName: %s, keyObjectStorage: %s}&quot;,</span>
+                productName, keyObjectStorage);
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L90">            ret = true;</span>
+<span class="fc bfc" id="L91" title="All 4 branches covered.">        } else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="fc" id="L92">            ret = false;</span>
+        } else {
+<span class="fc" id="L94">            AuxiliaryFileDto other = (AuxiliaryFileDto) obj;</span>
+            // field comparison
+<span class="fc bfc" id="L96" title="All 2 branches covered.">            ret = Objects.equals(productName, other.productName)</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">                    &amp;&amp; Objects.equals(keyObjectStorage, other.keyObjectStorage);</span>
+        }
+<span class="fc" id="L99">        return ret;</span>
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L107">        return Objects.hash(productName, keyObjectStorage);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
