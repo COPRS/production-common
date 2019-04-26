@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: s1pdgs-wrapper-app
+    
+logging:
+  config: ${wrapper_logging_config:./build/log4j2-test.yml}
+    
+server:
+  port: ${wrapper_rest_server_port:8080}
+  
+process:
+  level: L0
+  fixed-delay-ms: 500
+  init-delay-poll-ms: 1000
+  tm-proc-one-task-s: 600
+  tm-proc-all-tasks-s: 1800
+  tm-proc-stop-s: 300
+  tm-proc-check-stop-s: 60
+  size-batch-upload:  20
+  size-batch-download: 5
+  wap-nb-max-loop: 12
+  wap-tempo-s: 10
+  mqi:
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempo-retry-ms: 1000
+
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-processing: 3
+  max-error-counter-mqi: 30
+    
+dev:
+  steps-activation:
+    download: ${wrapper_process_dev-steps-activation_download:true}
+    upload: ${wrapper_process_dev-steps-activation_upload:true}
+    erasing: ${wrapper_process_dev-steps-activation_erasing:true}

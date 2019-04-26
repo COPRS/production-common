@@ -1,0 +1,23 @@
+kafka:
+  group-id: l1-wrappers
+  client-id: l1-wrapper
+  enable-consumer:
+    l0-jobs: false
+    l1-jobs: true
+    
+process:
+  level: L1
+  fixed-delay-ms: 500
+  init-delay-poll-ms: 1000
+  tm-proc-one-task-s: 480
+  tm-proc-all-tasks-s: 900
+  tm-proc-stop-s: 300
+  tm-proc-check-stop-s: 60
+  size-batch-upload:  5
+  size-batch-download: 5
+  wap-nb-max-loop: 60
+  wap-tempo-s: 10
+  mqi:
+    host-uri: http://localhost:8081
+    max-retries: 3
+    tempo-retry-ms: 1000
