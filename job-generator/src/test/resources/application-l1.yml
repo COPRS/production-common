@@ -1,0 +1,33 @@
+kafka:
+  group-id: l1-jobgenerators
+  client-id: l1-job-generator
+  enable-consumer:
+    edrs-sessions: false
+    l0-slices: true
+
+job-generator:
+  diroftasktables: ./test/data/l1_config/task_tables/
+  maxnboftasktable: 40
+  
+process:
+  level: L1
+  params: 
+    Processing_Mode: NRT
+    Timeout: 10
+  loglevelstdout: DEBUG
+  loglevelstderr: INFO
+  processingstation: WILE
+  outputregexp: 
+    SM_RAW__0S: ^S1[A-B]_S[1-6]_RAW__0S.*$
+    AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$
+    ZS_RAW__0S: ^S1[A-B]_Z[1-6]_RAW__0S.*$
+    REP_L0PSA_: ^S1[A|B|_]_OPER_REP_ACQ.*$
+    REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$
+    
+pattern-l0-slices:
+  regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
+  m-group-sat-id: 2
+  m-group-mission-id: 1
+  m-group-acquisition: 4
+  m-group-start-time: 6
+  m-group-stop-time: 7
