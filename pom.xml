@@ -4,8 +4,7 @@
   <artifactId>s1itc-core</artifactId>
   <version>0.00.00-SNAPSHOT</version>
   <packaging>pom</packaging>
-  
-  
+    
   <modules>
 	<module>applicative-catalog</module>
 	<module>archives</module>
