@@ -1,7 +1,3 @@
-rspec:
-  stage: build
-  script: bundle exec rspec
-
 staging:  
   stage: build
-  trigger: app-cataog-client
+  trigger: app-catalog-client
