@@ -1,3 +1,2 @@
-staging:  
-  stage: build
-  trigger: app-catalog-client
+include:
+  - local: app-catalog-client/.gitlab-ci.yml
