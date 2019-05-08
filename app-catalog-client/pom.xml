@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1itc-core</artifactId>
-	  <version>0.00.00-SNAPSHOT</version>
+		<groupId>de.werum.s1pdgs</groupId>
+		<artifactId>s1itc-core</artifactId>
+		<version>0.00.00-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1itc-core-app-catalog-client</artifactId>
 	<packaging>jar</packaging>
@@ -25,15 +26,23 @@
 	</repositories>
 
 
-<!-- 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.0.RELEASE</version>
-		<relativePath />
-	</parent> -->
+	<!-- <parent> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-parent</artifactId> 
+		<version>2.0.0.RELEASE</version> <relativePath /> </parent> -->
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
-
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-web -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -137,7 +146,7 @@
 				<version>3.8</version>
 				<configuration>
 					<rulesets>
-						<ruleset>${basedir}/build/PmdJavaRuleset.xml</ruleset>
+						<ruleset>${basedir}/../PmdJavaRuleset.xml</ruleset>
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>

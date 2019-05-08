@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1itc-core</artifactId>
-	  <version>0.00.00-SNAPSHOT</version>
+		<groupId>de.werum.s1pdgs</groupId>
+		<artifactId>s1itc-core</artifactId>
+		<version>0.00.00-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>s1itc-core-archives</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Boot Docker For S1-PDGS Archives</name>
 
-<!-- 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.0.RELEASE</version>
-		<relativePath />
-	</parent> -->
+	<!-- <parent> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-parent</artifactId> 
+		<version>2.0.0.RELEASE</version> <relativePath /> </parent> -->
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -36,8 +33,20 @@
 		</repository>
 	</repositories>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	
 	<dependencies>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -52,7 +61,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jetty</artifactId>
@@ -106,8 +115,8 @@
 
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
-			<artifactId>obs-clients</artifactId>
-			<version>1.2.0</version>
+			<artifactId>s1itc-core-obs-sdk</artifactId>
+			<version>${obssdk.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
