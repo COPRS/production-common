@@ -6,7 +6,7 @@
 	<parent>
 	  <groupId>de.werum.s1pdgs</groupId>
 	  <artifactId>s1pro-core</artifactId>
-	  <version>0.00.00-SNAPSHOT</version>
+	  <version>0.2.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1pro-core-job-generator</artifactId>
 	<packaging>jar</packaging>
