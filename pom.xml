@@ -11,7 +11,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		
-		<spring.version>2.0.0.RELEASE</spring.version>
+		<spring.version>2.0.3.RELEASE</spring.version>
 		
 		<app-catalog-client>0.00.00-SNAPSHOT</app-catalog-client>
 		<obssdk.version>0.00.00-SNAPSHOT</obssdk.version>
