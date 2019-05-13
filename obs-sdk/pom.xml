@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1itc-core</artifactId>
+	  <artifactId>s1pro-core</artifactId>
 	  <version>0.00.00-SNAPSHOT</version>
 	</parent>	
 	<groupId>spdgs-sdk</groupId>
-	<artifactId>s1itc-core-obs-sdk</artifactId>
+	<artifactId>s1pro-core-obs-sdk</artifactId>
 	<packaging>jar</packaging>
 
 	<properties>		

@@ -3,10 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1itc-core</artifactId>
+	  <artifactId>s1pro-core</artifactId>
 	  <version>0.00.00-SNAPSHOT</version>
 	</parent>
-	<artifactId>s1itc-core-app-catalog-client</artifactId>
+	<artifactId>s1pro-core-app-catalog-client</artifactId>
 	<packaging>jar</packaging>
 
 	<properties>
