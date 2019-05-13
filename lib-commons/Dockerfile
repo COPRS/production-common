@@ -1,4 +1,4 @@
-FROM repo-maven-external:master as build
+FROM registry.tools.s1pdgs.eu/wo7/repo-maven-external:latest as build
 WORKDIR /app
 COPY pom.xml /app
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
