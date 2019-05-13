@@ -32,19 +32,6 @@
 		</repository>
 	</repositories>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<!-- Import dependency management from Spring Boot -->
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 		<!-- Spring Boot starter -->
 		<dependency>
@@ -124,7 +111,7 @@
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-app-catalog-client</artifactId>
-			<version>${app-catalog-client}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- Tests -->

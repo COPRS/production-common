@@ -9,13 +9,34 @@
 
 	<properties>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		
-		<spring.version>2.0.3.RELEASE</spring.version>
-		
-		<app-catalog-client>0.00.00-SNAPSHOT</app-catalog-client>
-		<obssdk.version>0.00.00-SNAPSHOT</obssdk.version>
+		<maven.compiler.source>1.8</maven.compiler.source>		
+		<spring.boot.version>2.0.3.RELEASE</spring.boot.version>
 	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring.boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<modules>
 		<module>applicative-catalog</module>
