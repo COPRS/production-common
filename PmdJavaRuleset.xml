@@ -176,7 +176,6 @@
    <rule ref="rulesets/java/migrating.xml/LongInstantiation"/>
    <rule ref="rulesets/java/naming.xml/LongVariable"/>
    <rule ref="rulesets/java/coupling.xml/LooseCoupling"/>
-   <rule ref="rulesets/java/coupling.xml/LoosePackageCoupling"/>
    <rule ref="rulesets/java/j2ee.xml/MDBAndSessionBeanNamingConvention"/>
    <rule ref="rulesets/java/optimizations.xml/MethodArgumentCouldBeFinal"/>
    <rule ref="rulesets/java/naming.xml/MethodNamingConventions"/>
