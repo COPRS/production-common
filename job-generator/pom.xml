@@ -93,7 +93,7 @@
 
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>mqi-client</artifactId>
+			<artifactId>s1pro-core-mqi-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
