@@ -122,9 +122,9 @@
 			<version>${version.spdgs.commons}</version>
 		</dependency>
 		<dependency>
-			<groupId>spdgs-sdk</groupId>
-			<artifactId>app-catalog-client</artifactId>
-			<version>${version.spdgs.app-catalog-client}</version>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-app-catalog-client</artifactId>
+			<version>${app-catalog-client}</version>
 		</dependency>
 
 		<!-- Tests -->
@@ -197,7 +197,7 @@
 				<version>${version.mvn-pmd}</version>
 				<configuration>
 					<rulesets>
-						<ruleset>${basedir}/build/PmdJavaRuleset.xml</ruleset>
+						<ruleset>${basedir}/../PmdJavaRuleset.xml</ruleset>
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>

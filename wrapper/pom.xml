@@ -197,7 +197,7 @@
 				<version>3.8</version>
 				<configuration>
 					<rulesets>
-						<ruleset>${basedir}/build/PmdJavaRuleset.xml</ruleset>
+						<ruleset>${basedir}/../PmdJavaRuleset.xml</ruleset>
 					</rulesets>
 					<verbose>true</verbose>
 					<failurePriority>2</failurePriority>
