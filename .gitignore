@@ -15,4 +15,5 @@
 *.pmd
 *.pmdruleset.xml
 *.factory*
+*.attach_pid*
 *build/html-reports
