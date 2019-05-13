@@ -89,9 +89,9 @@
 			<version>${obssdk.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>spdgs-sdk</groupId>
-			<artifactId>commons</artifactId>
-			<version>1.1.1</version>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-lib-commons</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>spdgs-sdk</groupId>

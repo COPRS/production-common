@@ -7,7 +7,6 @@
 	  <artifactId>s1pro-core</artifactId>
 	  <version>0.00.00-SNAPSHOT</version>
 	</parent>	
-	<groupId>spdgs-sdk</groupId>
 	<artifactId>s1pro-core-obs-sdk</artifactId>
 	<packaging>jar</packaging>
 
@@ -83,9 +82,9 @@
 
 		<!-- Internal libraries -->
 		<dependency>
-			<groupId>spdgs-sdk</groupId>
-			<artifactId>commons</artifactId>
-			<version>1.1.1</version>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-lib-commons</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- Tests -->
