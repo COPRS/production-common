@@ -82,7 +82,7 @@ public class L0SliceMetadataController {
 			// Retrieve ACN
 			List<L0AcnMetadataDto> r = new ArrayList<>();
 
-			LOGGER.info("Call getACN for {} {}", productTypeWithoutLastChar + "A", f.getDatatakeId());
+			LOGGER.info("Call getACN for {}A {}", productTypeWithoutLastChar, f.getDatatakeId());
 			L0AcnMetadata l0a = esServices.getL0Acn(productTypeWithoutLastChar + "A", f.getDatatakeId(), processMode);
 			if (l0a != null) {
 				L0AcnMetadataDto l0aDto = new L0AcnMetadataDto(l0a.getProductName(), l0a.getProductType(),
@@ -95,7 +95,7 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
-            LOGGER.info("Call getACN for {} {}", productTypeWithoutLastChar + "C", f.getDatatakeId());
+            LOGGER.info("Call getACN for {}C {}", productTypeWithoutLastChar, f.getDatatakeId());
 			L0AcnMetadata l0c = esServices.getL0Acn(productTypeWithoutLastChar + "C", f.getDatatakeId(), processMode);
 			if (l0c != null) {
 				L0AcnMetadataDto l0cDto = new L0AcnMetadataDto(l0c.getProductName(), l0c.getProductType(),
@@ -108,7 +108,7 @@ public class L0SliceMetadataController {
 					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
 				}
 			}
-            LOGGER.info("Call getACN for {} {}", productTypeWithoutLastChar + "N", f.getDatatakeId());
+            LOGGER.info("Call getACN for {}N {}", productTypeWithoutLastChar, f.getDatatakeId());
 			L0AcnMetadata l0n = esServices.getL0Acn(productTypeWithoutLastChar + "N", f.getDatatakeId(), processMode);
 			if (l0n != null) {
 				L0AcnMetadataDto l0nDto = new L0AcnMetadataDto(l0n.getProductName(), l0n.getProductType(),
