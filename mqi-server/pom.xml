@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1pro-core</artifactId>
-	  <version>0.00.00-SNAPSHOT</version>
+		<groupId>de.werum.s1pdgs</groupId>
+		<artifactId>s1pro-core</artifactId>
+		<version>0.00.00-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1pro-core-mqi-server</artifactId>
 
@@ -31,12 +32,18 @@
 		</repository>
 	</repositories>
 
-
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.3.RELEASE</version>
-	</parent>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<!-- Spring Boot starter -->
@@ -85,7 +92,7 @@
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
-		
+
 		<!-- XML converter -->
 		<dependency>
 			<groupId>org.springframework</groupId>

@@ -136,12 +136,12 @@
 		<!-- Internal libraries -->
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
-			<artifactId>s1itc-core-obs-sdk</artifactId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
 			<version>${obssdk.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1itc-core-app-catalog-client</artifactId>
+			<artifactId>s1pro-core-app-catalog-client</artifactId>
 			<version>${app-catalog-client}</version>
 		</dependency>
 

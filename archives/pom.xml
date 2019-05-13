@@ -115,7 +115,7 @@
 
 		<dependency>
 			<groupId>spdgs-sdk</groupId>
-			<artifactId>s1itc-core-obs-sdk</artifactId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
 			<version>${obssdk.version}</version>
 		</dependency>
 		<dependency>
