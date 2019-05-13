@@ -11,25 +11,11 @@
 	<artifactId>s1pro-core-wrapper</artifactId>
 	<packaging>jar</packaging>
 
-	<!-- <parent> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-parent</artifactId> 
-		<version>2.0.0.RELEASE</version> </parent> -->
-
 	<properties>
-		<java.version>1.8</java.version>
-		<aws-java-sdk.version>1.11.271</aws-java-sdk.version>
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-wrapper-app</project.build.finalName>
 		<project.artifactId>s1pdgs-wrapper-app</project.artifactId>
-		<jacoco.version>0.8.1</jacoco.version>
 	</properties>
-
-	<repositories>
-		<repository>
-			<id>in-project</id>
-			<name>In Project Repo</name>
-			<url>file://${project.basedir}/libs</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -89,7 +75,6 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20171018</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.ws</groupId>
@@ -106,7 +91,6 @@
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>org.eclipse.persistence.moxy</artifactId>
-			<version>2.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -116,14 +100,11 @@
 		<dependency>
 			<groupId>com.github.grantneale</groupId>
 			<artifactId>kafka-lag-based-assignor</artifactId>
-			<version>1.1.0</version>
 		</dependency>
-
 
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
-			<version>2.4.6</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -133,41 +114,18 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>build/html-reports</directory>
-						</fileset>
-					</filesets>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-surefire-plugin</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>3.0.4</version>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Low</threshold>
-					<maxRank>15</maxRank>
-					<includeTests>true</includeTests>
-				</configuration>
 				<executions>
 					<execution>
 						<phase>compile</phase>
@@ -180,16 +138,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.8</version>
-				<configuration>
-					<rulesets>
-						<ruleset>${basedir}/../PmdJavaRuleset.xml</ruleset>
-					</rulesets>
-					<verbose>true</verbose>
-					<failurePriority>2</failurePriority>
-					<includeTests>false</includeTests>
-					<outputDirectory>build/html-reports</outputDirectory>
-				</configuration>
 				<executions>
 					<execution>
 						<id>pmd_pmd</id>
@@ -213,7 +161,6 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.version}</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -238,18 +185,11 @@
 							<!-- Sets the path to the file which contains the execution data. -->
 							<dataFile>target/jacoco.exec</dataFile>
 							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>build/html-reports/jacoco-ut</outputDirectory>
+							<outputDirectory>target/html-reports/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<systemPropertyVariables>
-						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-					</systemPropertyVariables>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-
-	<description>Template java application with Spring Boot and Docker</description>
 </project>

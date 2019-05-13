@@ -11,18 +11,16 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jacoco.version>0.7.5.201505241946</jacoco.version>
 	</properties>
-
+	
+	
 	<dependencies>
 		<!-- Spring utils -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 		</dependency>
-
 
 		<!-- Tests -->
 		<dependency>
@@ -43,10 +41,8 @@
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
-			<version>2.4.6</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 
 
@@ -54,30 +50,15 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>build/html-reports</directory>
-						</fileset>
-					</filesets>
-				</configuration>
+				<artifactId>maven-clean-plugin</artifactId>			
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>3.0.4</version>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Low</threshold>
-					<maxRank>15</maxRank>
-					<includeTests>false</includeTests>
-				</configuration>
 				<executions>
 					<execution>
 						<phase>compile</phase>
@@ -90,16 +71,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.8</version>
-				<configuration>
-					<rulesets>
-						<ruleset>${basedir}/../PmdJavaRuleset.xml</ruleset>
-					</rulesets>
-					<verbose>true</verbose>
-					<failurePriority>2</failurePriority>
-					<includeTests>false</includeTests>
-					<outputDirectory>build/html-reports</outputDirectory>
-				</configuration>
 				<executions>
 					<execution>
 						<id>pmd_pmd</id>
@@ -123,7 +94,6 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.version}</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -148,15 +118,10 @@
 							<!-- Sets the path to the file which contains the execution data. -->
 							<dataFile>target/jacoco.exec</dataFile>
 							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>build/html-reports/jacoco-ut</outputDirectory>
+							<outputDirectory>target/html-reports/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<systemPropertyVariables>
-						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-					</systemPropertyVariables>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

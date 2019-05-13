@@ -15,21 +15,10 @@
 		<version>2.0.0.RELEASE</version> <relativePath /> </parent> -->
 
 	<properties>
-		<java.version>1.8</java.version>
-		<aws-java-sdk.version>1.11.271</aws-java-sdk.version>
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-job-generator-app</project.build.finalName>
 		<project.artifactId>s1pdgs-job-generator-app</project.artifactId>
-		<jacoco.version>0.7.5.201505241946</jacoco.version>
 	</properties>
-
-	<repositories>
-		<repository>
-			<id>in-project</id>
-			<name>In Project Repo</name>
-			<url>file://${project.basedir}/libs</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -63,7 +52,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-xml</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
@@ -76,7 +69,7 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-
+		
 
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
@@ -102,25 +95,16 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20171018</version>
 		</dependency>
 
-
-		<!-- spring oxm -->
-		<!-- http://mvnrepository.com/artifact/org.springframework/spring-oxm -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-oxm</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.ws</groupId>
-			<artifactId>spring-xml</artifactId>
-			<version>2.0.3.RELEASE</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>org.eclipse.persistence.moxy</artifactId>
-			<version>2.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -130,7 +114,6 @@
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
-			<version>2.4.6</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -140,13 +123,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>build/html-reports</directory>
-						</fileset>
-					</filesets>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -163,18 +139,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>3.0.4</version>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Low</threshold>
-					<maxRank>15</maxRank>
-					<includeTests>true</includeTests>
-				</configuration>
 				<executions>
 					<execution>
 						<phase>compile</phase>
@@ -187,16 +155,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.8</version>
-				<configuration>
-					<rulesets>
-						<ruleset>${basedir}/../PmdJavaRuleset.xml</ruleset>
-					</rulesets>
-					<verbose>true</verbose>
-					<failurePriority>2</failurePriority>
-					<includeTests>false</includeTests>
-					<outputDirectory>build/html-reports</outputDirectory>
-				</configuration>
 				<executions>
 					<execution>
 						<id>pmd_pmd</id>
@@ -220,7 +178,6 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.version}</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -245,15 +202,10 @@
 							<!-- Sets the path to the file which contains the execution data. -->
 							<dataFile>target/jacoco.exec</dataFile>
 							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>build/html-reports/jacoco-ut</outputDirectory>
+							<outputDirectory>target/html-reports/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<systemPropertyVariables>
-						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-					</systemPropertyVariables>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
