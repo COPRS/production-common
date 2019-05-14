@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ingestor;
 
+import java.io.File;
+
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +24,10 @@ public class ApplicationTest {
 	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "t-pdgs-l0-jobs");
 
 	@Test
-	public void applicationContextTest() {
+	public void applicationContextTest() {		
+		new File("/tmp/local-ingestor/erds_sessions/").mkdirs();
+		new File("/tmp/local-ingestor/auxiliary_files/").mkdirs();
+		
 		Application.main(new String[] {});
 	}
 }

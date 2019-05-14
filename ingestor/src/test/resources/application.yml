@@ -25,7 +25,7 @@ status:
 # File
 file:
   auxiliary-files:
-    local-directory: /data/local-ingestor/auxiliary_files/ # Must contains the last /
+    local-directory: /tmp/local-ingestor/auxiliary_files/ # Must contains the last /
     poll-fixed-delay: 1000
     max-msg-per-poll: 5
     executor-pool-size: 5
@@ -33,7 +33,7 @@ file:
     clean-empty-min-age: 13000
     cache-max-capacity: 10
   session-files:
-    local-directory: /data/local-ingestor/erds_sessions/
+    local-directory: /tmp/local-ingestor/erds_sessions/
     poll-fixed-delay: 1000
     max-msg-per-poll: 5
     executor-pool-size: 5
