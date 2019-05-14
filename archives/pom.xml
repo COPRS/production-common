@@ -69,16 +69,25 @@
 
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
+			<artifactId>spring-kafka</artifactId>			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka_2.11</artifactId>
+			<version>1.0.1</version>
+			<classifier>test</classifier>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-log4j-appender</artifactId>
+			<version>1.0.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
