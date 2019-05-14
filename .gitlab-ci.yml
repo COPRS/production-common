@@ -5,6 +5,37 @@ services:
    
 variables:
   DOCKER_HOST: tcp://localhost:2375
+  MODUL: s1pro-core
+  
+  # These variables are normally set by the environment. For some reason this is not working for the develop branch however.
+  # This is a workaround to ensure it is working in both branches (S1PRO-59)
+  CI_REGISTRY_USERNAME: git_werum
+  CI_REGISTRY: registry.tools.s1pdgs.eu
 
+before_script:
+    #- docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    
+    # Passwort set as project specific build environment. 
+    # This is a workaround to ensure it is working in both branches (S1PRO-59)
+    - docker login -u "$CI_REGISTRY_USERNAME" -p "$TEMP_PWD" $CI_REGISTRY   
+    
+# Build procedure for master branch
+build-master:
+  stage: build
+  script:
+    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL"
+  only:
+    - master
+
+# Build procedure for develop branch (and all others)
+build-develop:
+  stage: build
+  script:
+    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL:$CI_COMMIT_REF_SLUG"
+  except:
+    - master
+            
 include:
   - local: app-catalog-client/.gitlab-ci.yml
