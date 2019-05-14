@@ -245,6 +245,8 @@ public class S3Configuration {
         // Client configuration (protocol and retry policy)
         ClientConfiguration clientConfig = new ClientConfiguration();
         clientConfig.setProtocol(Protocol.HTTP);
+        //clientConfig.setProxyHost("proxy.net.werum");
+        //clientConfig.setProxyPort(8080);
         RetryPolicy retryPolicy = new RetryPolicy(
                 new SDKCustomDefaultRetryCondition(
                         configuration.getInt(RETRY_POLICY_MAX_RETRIES)),
