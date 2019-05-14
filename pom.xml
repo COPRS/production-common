@@ -22,7 +22,7 @@
 		<equalsverifier.version>2.4.6</equalsverifier.version>
 		<aws.version>1.11.271</aws.version>
 		<kafka.version>1.1.0</kafka.version>
-		
+		<elasticsearch.version>6.1.3</elasticsearch.version>
 	</properties>
 
 	<!-- TODO: check if this is still required -->
@@ -191,7 +191,12 @@
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>6.1.3</version>
+				<version>${elasticsearch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.elasticsearch</groupId>
+				<artifactId>elasticsearch</artifactId>
+				<version>${elasticsearch.version}</version>
 			</dependency>
 			
 			<dependency>
