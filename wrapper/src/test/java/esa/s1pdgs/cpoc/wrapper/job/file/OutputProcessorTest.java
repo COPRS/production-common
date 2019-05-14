@@ -45,7 +45,7 @@ public class OutputProcessorTest {
     /**
      * Test directory
      */
-    private static final String PATH_DIRECTORY_TEST = "./build/outputs/";
+    private static final String PATH_DIRECTORY_TEST = "./test/outputs/";
 
     /**
      * Processor to test
