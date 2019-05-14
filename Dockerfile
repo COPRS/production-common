@@ -22,8 +22,7 @@ RUN find /app
 RUN echo "content of /usr/share/maven/ref/settings-docker.xml:"
 RUN cat /usr/share/maven/ref/settings-docker.xml
 # RUN find /usr/share/maven/ref/repository
-RUN mvn --debug -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
-#RUN mvn --debug -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml package
+RUN mvn --debug -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install
 RUN find /usr/share/maven/ref/repository
 
 #ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
