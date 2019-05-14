@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
+import java.util.regex.Pattern;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.ConversionException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -245,8 +247,23 @@ public class S3Configuration {
         // Client configuration (protocol and retry policy)
         ClientConfiguration clientConfig = new ClientConfiguration();
         clientConfig.setProtocol(Protocol.HTTP);
-        //clientConfig.setProxyHost("proxy.net.werum");
-        //clientConfig.setProxyPort(8080);
+       
+        // set proxy if defined in environmental
+        final String proxyConfig = System.getenv("https_proxy");
+        
+		if (proxyConfig != null && !proxyConfig.equals("")) {
+			final String removedProtocol = proxyConfig
+					.replaceAll(Pattern.quote("http://"), "")
+					.replaceAll(Pattern.quote("https://"), "")
+					.replaceAll(Pattern.quote("/"), ""); // remove trailing slash
+
+			final String host = removedProtocol.substring(0, removedProtocol.indexOf(':'));
+			final int port = Integer.parseInt(removedProtocol.substring(removedProtocol.indexOf(':') + 1, 
+					removedProtocol.length()));
+			clientConfig.setProxyHost(host);
+	        clientConfig.setProxyPort(port);			
+		}
+       
         RetryPolicy retryPolicy = new RetryPolicy(
                 new SDKCustomDefaultRetryCondition(
                         configuration.getInt(RETRY_POLICY_MAX_RETRIES)),
