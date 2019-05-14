@@ -20,7 +20,7 @@ public abstract class AbstractKafkaService<T> implements PublicationServices<T> 
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LogManager.getLogger(KafkaConfigFileProducer.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractKafkaService.class);
 
 	/**
 	 * KAFKA template
