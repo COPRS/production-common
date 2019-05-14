@@ -19,8 +19,12 @@ COPY scaler/ /app/scaler
 COPY wrapper/ /app/wrapper
 
 RUN find /app
-
-RUN mvn -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml package
+RUN echo "content of /usr/share/maven/ref/settings-docker.xml:"
+RUN cat /usr/share/maven/ref/settings-docker.xml
+# RUN find /usr/share/maven/ref/repository
+RUN mvn --debug -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
+#RUN mvn --debug -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml package
+RUN find /usr/share/maven/ref/repository
 
 #ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
 #CMD ["mvn"]
