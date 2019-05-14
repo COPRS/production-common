@@ -29,7 +29,7 @@ build-master:
     - master
 
 # Build procedure for develop branch (and all others)
-build-master:
+build-develop:
   stage: build
   script:
     - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL:$CI_COMMIT_REF_SLUG" .
