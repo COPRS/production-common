@@ -3,6 +3,7 @@ FROM maven:3.5.3-jdk-8
 WORKDIR /app
 
 COPY pom.xml /app
+COPY PmdJavaRuleset.xml /app
 
 COPY app-catalog-client/ /app/app-catalog-client
 COPY applicative-catalog/ /app/applicative-catalog
