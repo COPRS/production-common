@@ -1,7 +1,7 @@
 image: docker:latest
 
 services:
-  - docker:dind
+  - name: docker:dind
     command: ["--mtu=1400"]
 
    
