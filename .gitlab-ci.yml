@@ -4,7 +4,8 @@ services:
   - docker:dind
    
 variables:
-  DOCKER_HOST: "tcp://localhost:2375 --mtu=1400"
+  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_OPTS: --mtu=1400
   MODUL: s1pro-core
   
   # These variables are normally set by the environment. For some reason this is not working for the develop branch however.
