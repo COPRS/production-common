@@ -1,10 +1,10 @@
 FROM maven:3.5.3-jdk-8
 
-ENV https_proxy=http://proxy.net.werum:8080/
+#ENV https_proxy=http://proxy.net.werum:8080/
 
 WORKDIR /app
 
-COPY test.xml /usr/share/maven/ref/settings-docker.xml
+#COPY test.xml /usr/share/maven/ref/settings-docker.xml
 
 COPY pom.xml /app
 COPY PmdJavaRuleset.xml /app
