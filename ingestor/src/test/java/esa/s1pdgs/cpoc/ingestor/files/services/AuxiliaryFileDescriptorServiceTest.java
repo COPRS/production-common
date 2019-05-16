@@ -104,6 +104,10 @@ public class AuxiliaryFileDescriptorServiceTest {
 		checkMatchOk("S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE");
 		checkMatchOk("S1A_AUX_CAL_V20140908T000000_G20140909T130257.SAFE");
 		checkMatchOk("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
+		checkMatchOk("S1__AUX_WND_V20160610T210000_G20160612T055501.SAFE");
+		checkMatchOk("S1__AUX_ICE_V20160516T120000_G20160517T043645.SAFE");
+		checkMatchOk("S1__AUX_WAV_V20160510T120000_G20160505T043353.SAFE");
+		checkMatchOk("S1__AUX_ICE_V20160516T120000_G20160517T043645.SAFE/support");
 
 		checkMatchKo("S1B_AUX_CALL_V20160422T000000_G20170116T134142.SAFE/manifest.safe");
 		checkMatchKo("SA_OPER_MPL_ORBPRE_20171215T200330_20171222T200330_0001.EOF");
@@ -153,6 +157,9 @@ public class AuxiliaryFileDescriptorServiceTest {
 		assertEquals("Invalid file descriptor for RPATH_AUX_OBMEMC",
 				FileUtils.getFileDescriptorForAuxiliary(FileUtils.RPATH_AUX_OBMEMC),
 				service.buildDescriptor(FileUtils.RPATH_AUX_OBMEMC));
+		assertEquals("Invalid file descriptor for RPATH_AUX_WAV",
+				FileUtils.getFileDescriptorForAuxiliary(FileUtils.RPATH_AUX_WAV),
+				service.buildDescriptor(FileUtils.RPATH_AUX_WAV));
 	}
 
 }
