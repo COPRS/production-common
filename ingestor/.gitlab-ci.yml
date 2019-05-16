@@ -13,7 +13,7 @@ variables:
 before_script:
   - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
-build-master:
+ingestor-build-master:
   stage: build
   script:
     - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" .
@@ -21,7 +21,7 @@ build-master:
   only:
     - master
 
-build:
+ingestor-build:
   stage: build
   script:
     - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG" .
