@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -74,17 +73,10 @@ public class TaskCallable implements Callable<TaskResult> {
             builder.directory(new File(workDirectory));
 
             process = builder.start();
-            
             StreamGobbler streamGobblerStdout =
-                    new StreamGobbler(process.getInputStream(), m -> {
-                    	LOGGER.debug(m);
-    					System.out.println(m);
-                    }) ;
+                    new StreamGobbler(process.getInputStream(), LOGGER::debug);
             StreamGobbler streamGobblerStderr =
-                    new StreamGobbler(process.getErrorStream(), m -> {
-                    	LOGGER.debug(m);
-    					System.err.println(m);
-                    });
+                    new StreamGobbler(process.getErrorStream(), LOGGER::debug);
             Executors.newSingleThreadExecutor().submit(streamGobblerStdout);
             Executors.newSingleThreadExecutor().submit(streamGobblerStderr);
             r = process.waitFor();
