@@ -1,6 +1,10 @@
 FROM maven:3.5.3-jdk-8
 
+ENV https_proxy=http://proxy.net.werum:8080/
+
 WORKDIR /app
+
+COPY test.xml /usr/share/maven/ref/settings-docker.xml
 
 COPY pom.xml /app
 COPY PmdJavaRuleset.xml /app
@@ -18,12 +22,9 @@ COPY obs-sdk/ /app/obs-sdk
 COPY scaler/ /app/scaler
 COPY wrapper/ /app/wrapper
 
-RUN find /app
-RUN echo "content of /usr/share/maven/ref/settings-docker.xml:"
 RUN cat /usr/share/maven/ref/settings-docker.xml
 # RUN find /usr/share/maven/ref/repository
-RUN mvn --debug -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install
-RUN find /usr/share/maven/ref/repository
+RUN mvn -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 
-#ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
-#CMD ["mvn"]
+ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
+CMD ["mvn"]

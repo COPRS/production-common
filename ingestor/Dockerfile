@@ -1,4 +1,5 @@
-FROM registry.tools.s1pdgs.eu/wo7/repo-maven-all:latest as build
+FROM s1pro-core:latest as build
+
 WORKDIR /app
 COPY pom.xml /app
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
@@ -9,7 +10,7 @@ RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/s1pdgs-ingestor-1.0.0.jar s1pdgs-ingestor.jar
+COPY --from=build /app/target/s1pro-core-ingestor-0.2.0-SNAPSHOT.jar s1pdgs-ingestor.jar
 RUN apk update && apk add wget
 COPY /config/start.sh start.sh
 ENTRYPOINT "/app/start.sh"
