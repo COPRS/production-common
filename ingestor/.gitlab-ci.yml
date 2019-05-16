@@ -3,10 +3,12 @@
 image: docker:latest
 
 services:
-  - docker:dind
+  - name: docker:dind
+    command: ["--mtu=1300"]
   
 variables:
   DOCKER_HOST: tcp://localhost:2375
+  MODUL: s1pro-core-ingestor
 
 before_script:
   - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY

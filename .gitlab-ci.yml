@@ -39,5 +39,5 @@ build-develop:
   except:
     - master
             
-#include:
-  #- local: app-catalog-client/.gitlab-ci.yml
+include:
+  - local: ingestor/.gitlab-ci.yml
