@@ -16,6 +16,7 @@ before_script:
 ingestor-build-master:
   stage: module
   script:
+    - cd ingestor
     - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE"
   only:
@@ -24,6 +25,7 @@ ingestor-build-master:
 ingestor-build:
   stage: module
   script:
+    - cd ingestor
     - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
   except:
