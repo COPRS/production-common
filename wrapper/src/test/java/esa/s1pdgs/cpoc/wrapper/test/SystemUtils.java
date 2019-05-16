@@ -1,5 +1,18 @@
 package esa.s1pdgs.cpoc.wrapper.test;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+
+import org.apache.commons.io.IOUtils;
+
 public class SystemUtils {
 
     public static String getCmdMkdir() {
@@ -61,5 +74,30 @@ public class SystemUtils {
         }
         return command;
     }
+    
+    
+	public static final InputStream getInputStream(final String _filename) throws IOException {
+		final File input = new File(_filename);
 
+		InputStream result = SystemUtils.class.getClassLoader().getResourceAsStream(_filename);
+
+		// not resolvable via classpath --> try to resolve it via filesystem
+		if ((result == null) && input.exists()) {
+			result = newFileInputStream(input);
+		}
+
+		// still not resolvable --> error
+		if (result == null) {
+			throw new IOException("Resource " + _filename + " could not be found");
+		}
+		return result;
+	}
+	
+	public static final InputStream newFileInputStream(final File _in) throws IOException {
+		return new BufferedInputStream(new FileInputStream(_in));
+	}
+	
+	public static final OutputStream newFileOutputStream(final File _in) throws IOException {
+		return new BufferedOutputStream(new FileOutputStream(_in));
+	}
 }

@@ -2,17 +2,23 @@ image: docker:latest
 
 services:
   - name: docker:dind
-    command: ["--mtu=1400"]
+    command: ["--mtu=1300"]
 
    
 variables:
   DOCKER_HOST: tcp://localhost:2375
-  MODUL: s1pro-core
+  MODULE: s1pro-core
   
   # These variables are normally set by the environment. For some reason this is not working for the develop branch however.
   # This is a workaround to ensure it is working in both branches (S1PRO-59)
   CI_REGISTRY_USERNAME: git_werum
   CI_REGISTRY: registry.tools.s1pdgs.eu
+  
+stages:
+  - build
+  - module
+  - test
+  - deploy
 
 before_script:
     #- docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
@@ -25,8 +31,8 @@ before_script:
 build-master:
   stage: build
   script:
-    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL"
+    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE"
   only:
     - master
 
@@ -34,10 +40,10 @@ build-master:
 build-develop:
   stage: build
   script:
-    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODUL:$CI_COMMIT_REF_SLUG"
+    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
   except:
     - master
             
-#include:
-  #- local: app-catalog-client/.gitlab-ci.yml
+include:
+  - local: ingestor/.gitlab-ci.yml
