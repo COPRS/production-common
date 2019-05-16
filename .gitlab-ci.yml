@@ -13,6 +13,12 @@ variables:
   # This is a workaround to ensure it is working in both branches (S1PRO-59)
   CI_REGISTRY_USERNAME: git_werum
   CI_REGISTRY: registry.tools.s1pdgs.eu
+  
+stages:
+  - build
+  - modul
+  - test
+  - deploy
 
 before_script:
     #- docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
