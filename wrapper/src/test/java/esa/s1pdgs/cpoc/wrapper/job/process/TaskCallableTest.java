@@ -1,99 +1,76 @@
 package esa.s1pdgs.cpoc.wrapper.job.process;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.wrapper.job.process.TaskCallable;
-import esa.s1pdgs.cpoc.wrapper.job.process.TaskResult;
 import esa.s1pdgs.cpoc.wrapper.test.SystemUtils;
 
 public class TaskCallableTest {
-    
-    private File testDir = new File("./3");
-    
-    @Before
-    public void init() {
-        if (testDir.exists()) {
-            testDir.delete();
-        }
-    }
-    
-    @After
-    public void clean() {
-        if (testDir.exists()) {
-            testDir.delete();
-        }
-    }
+
+	private File testDir;
+	private File ipf;
+	
+	private CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(
+			Executors.newSingleThreadExecutor()
+    );
+
+	@Before
+	public final void setUp() throws IOException {
+		testDir = Files.createTempDirectory("tmp").toFile();
+		ipf = new File(testDir, "dummyIpf.sh");
+		    	
+    	try (final InputStream in = SystemUtils.getInputStream("ipf.sh");
+    		 final OutputStream out = SystemUtils.newFileOutputStream(ipf))
+    	{
+        	IOUtils.copy(in,out);
+    	}
+    	ipf.setExecutable(true);
+	}
+
+	@After
+	public final void tearDown() throws IOException {
+		ipf.delete();
+		testDir.delete();
+	}
 	
 	@Test
-	public void testRun() throws InterruptedException, ExecutionException {
-        // Command dir/ls
-        String command = SystemUtils.getCmdMkdir();
-        
-		assertTrue(!(new File("./3")).exists());
-		ExecutorService service = Executors.newSingleThreadExecutor();
-		CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
-		completionService.submit(new TaskCallable(command, "3", "./", ""));
-		Future<TaskResult> future = completionService.take();
-		TaskResult r = future.get();
-		assertEquals(command, r.getBinary());
-		assertEquals(0, r.getExitCode());
-		assertTrue((new File("./3")).isDirectory());
-		
-		command = SystemUtils.getCmdRmdir();
-		completionService.submit(new TaskCallable(command, "3", "./", ""));
-		completionService.take();
-		assertTrue(!(new File("./3")).exists());
+	public void testRun_Nominal() throws Exception {		
+		final Future<TaskResult> future = completionService.submit(
+				new TaskCallable(ipf.getPath(), "0", testDir.getPath(), "")
+		);
+		final TaskResult result = future.get();
+		assertEquals(ipf.getPath(), result.getBinary());
+		assertEquals(0, result.getExitCode());
 	}
+	
+	@Test
+	public final void testRun_ConsumptionOfLog() throws Exception {
+		final StringBuilder builder = new StringBuilder();
 
-    @Test
-	public void testExitCode() throws InterruptedException, ExecutionException {
-		// Command dir/ls
-		String command = SystemUtils.getCmdLs();
+		final Consumer<String> outputConsumer = m -> builder.append(m).append(';');
+
+		final Future<TaskResult> future = completionService
+				.submit(new TaskCallable(ipf.getPath(), "0", testDir.getPath(), "", outputConsumer, outputConsumer));
+		final TaskResult result = future.get();
+		assertEquals(ipf.getPath(), result.getBinary());
+		assertEquals(0, result.getExitCode());
 		
-		// Test when folder do not exist
-		ExecutorService service = Executors.newSingleThreadExecutor();
-		CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
-		completionService.submit(new TaskCallable(command, "not_exist", "./src/main/", ""));
-		Future<TaskResult> future = completionService.take();
-		TaskResult r = future.get();
-		assertNotEquals(0, r.getExitCode());
-		// Test when folder exist
-		completionService.submit(new TaskCallable(command, "resources", "./src/main/", ""));
-		Future<TaskResult> future2 = completionService.take();
-		TaskResult r2 = future2.get();
-		assertEquals(0, r2.getExitCode());
+		// check that logs have been consumed
+		assertEquals("hello;world;", builder.toString()); 
 	}
-    
-    @Test
-    public void testRunWithInterrupted() throws InterruptedException, ExecutionException {
-        // Command dir/ls
-        String command = SystemUtils.getCmdSleep();
-        
-        assertTrue(!(new File("./3")).exists());
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<TaskResult> completionService = new ExecutorCompletionService<>(service);
-        completionService.submit(new TaskCallable(command, "3", "./", ""));
-        
-        // Interrupt
-        service.shutdownNow();
-        Future<TaskResult> future = completionService.take();
-        TaskResult r = future.get();
-        assertEquals(command, r.getBinary());
-        assertEquals(-1, r.getExitCode());
-    }
-
 }
