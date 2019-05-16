@@ -2,13 +2,8 @@
 # Official docker image.
 image: docker:latest
 
-services:
-  - name: docker:dind
-    command: ["--mtu=1300"]
-  
 variables:
-  DOCKER_HOST: tcp://localhost:2375
-  MODULE: s1pro-core-ingestor
+  MODULE_INGESTOR: s1pro-core-ingestor
 
 before_script:
   - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
@@ -17,8 +12,8 @@ ingestor-build-master:
   stage: module
   script:
     - cd ingestor
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE"
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INGESTOR" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INGESTOR"
   only:
     - master
 
@@ -26,7 +21,7 @@ ingestor-build:
   stage: module
   script:
     - cd ingestor
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INGESTOR:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INGESTOR:$CI_COMMIT_REF_SLUG"
   except:
     - master
