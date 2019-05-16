@@ -74,9 +74,9 @@ public class TaskCallable implements Callable<TaskResult> {
 
             process = builder.start();
             StreamGobbler streamGobblerStdout =
-                    new StreamGobbler(process.getInputStream(), LOGGER::debug);
+                    new StreamGobbler(process.getInputStream(), LOGGER::info);
             StreamGobbler streamGobblerStderr =
-                    new StreamGobbler(process.getErrorStream(), LOGGER::debug);
+                    new StreamGobbler(process.getErrorStream(), LOGGER::info);
             Executors.newSingleThreadExecutor().submit(streamGobblerStdout);
             Executors.newSingleThreadExecutor().submit(streamGobblerStderr);
             r = process.waitFor();
