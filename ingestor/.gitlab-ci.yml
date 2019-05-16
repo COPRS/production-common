@@ -5,9 +5,6 @@ image: docker:latest
 variables:
   MODULE_INGESTOR: s1pro-core-ingestor
 
-before_script:
-  - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-
 ingestor-build-master:
   stage: module
   script:
