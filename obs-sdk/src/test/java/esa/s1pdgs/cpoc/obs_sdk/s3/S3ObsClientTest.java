@@ -226,17 +226,17 @@ public class S3ObsClientTest {
      */
     @Test
     public void testUploadObjectDirectory() throws ObsServiceException, SdkClientException {
-        int ret = client.uploadObject(new ObsUploadObject("key-exist", ObsFamily.L0_ACN, new File("test")));
+        int ret = client.uploadObject(new ObsUploadObject("key-exist", ObsFamily.L0_ACN, new File("target")));
         assertEquals(2, ret);
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
-                Mockito.eq("key-exist"), Mockito.eq(new File("test")));
+                Mockito.eq("key-exist"), Mockito.eq(new File("target")));
         verify(service, never()).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
         
-        ret = client.uploadObject(new ObsUploadObject("key-not-exist", ObsFamily.L0_ACN, new File("test")));
+        ret = client.uploadObject(new ObsUploadObject("key-not-exist", ObsFamily.L0_ACN, new File("target")));
         assertEquals(0, ret);
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
-                Mockito.eq("key-not-exist"), Mockito.eq(new File("test")));
+                Mockito.eq("key-not-exist"), Mockito.eq(new File("target")));
         verify(service, never()).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
     }
