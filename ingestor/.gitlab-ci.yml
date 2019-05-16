@@ -8,7 +8,7 @@ services:
   
 variables:
   DOCKER_HOST: tcp://localhost:2375
-  MODUL: s1pro-core-ingestor
+  MODULE: s1pro-core-ingestor
 
 before_script:
   - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
