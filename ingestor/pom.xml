@@ -15,6 +15,7 @@
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-ingestor-app</project.build.finalName>
 		<project.artifactId>s1pdgs-ingestor-app</project.artifactId>
+		<start-class>esa.s1pdgs.cpoc.ingestor.Application</start-class>
 	</properties>
 
 	<dependencies>
@@ -129,6 +130,16 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<configuration>
+							<mainClass>${start-class}</mainClass>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
