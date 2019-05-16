@@ -59,6 +59,16 @@
 							</exclude>
 						</excludes>
 					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>repackage</goal>
+							</goals>
+							<configuration>
+								<mainClass>${start-class}</mainClass>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
