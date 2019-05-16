@@ -2,7 +2,7 @@ image: docker:latest
 
 services:
   - name: docker:dind
-    command: ["--mtu=1400"]
+    command: ["--mtu=1300"]
 
    
 variables:
