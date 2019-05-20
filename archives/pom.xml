@@ -19,6 +19,7 @@
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-archives-app</project.build.finalName>
 		<project.artifactId>s1pdgs-archives-app</project.artifactId>
+		<start-class>esa.s1pdgs.cpoc.archives.Application</start-class>
 	</properties>
 	
 	<dependencies>
