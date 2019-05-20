@@ -2,7 +2,7 @@ image: docker:latest
 
 services:
   - name: docker:dind
-    command: ["--mtu=1300"]
+#    command: ["--mtu=1300"]
 
    
 variables:
@@ -31,7 +31,7 @@ before_script:
 build-master:
   stage: build
   script:
-    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE"
   only:
     - master
@@ -40,7 +40,7 @@ build-master:
 build-develop:
   stage: build
   script:
-    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
   except:
     - master
