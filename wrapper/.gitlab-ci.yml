@@ -2,41 +2,23 @@
 # Official docker image.
 image: docker:latest
 
-services:
-  - docker:dind
-  
 variables:
-  DOCKER_HOST: tcp://localhost:2375
+  MODULE_WRAPPER: s1pro-core-wrapper
 
-before_script:
-  - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-
-build-master:
-  stage: build
+wrapper-l0-build-master:
+  stage: module
   script:
-    - cp config/dockerfiles/Dockerfile_L0 Dockerfile
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0"
-    - cp config/dockerfiles/Dockerfile_L1 Dockerfile
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1"
-    - cp config/dockerfiles/Dockerfile_L0_segment Dockerfile
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment"
+    - cd wrapper
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0" -f config/dockerfiles/Dockerfile_L0 Dockerfile
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0"
   only:
     - master
 
-build:
-  stage: build
+wrapper-l0-build:
+  stage: module
   script:
-    - cp config/dockerfiles/Dockerfile_L0 Dockerfile
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0:$CI_COMMIT_REF_SLUG"
-    - cp config/dockerfiles/Dockerfile_L1 Dockerfile
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l1:$CI_COMMIT_REF_SLUG"
-    - cp config/dockerfiles/Dockerfile_L0_segment Dockerfile
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/l0_segment:$CI_COMMIT_REF_SLUG"
+    - cd wrapper
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0:$CI_COMMIT_REF_SLUG" -f config/dockerfiles/Dockerfile_L0 Dockerfile
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0:$CI_COMMIT_REF_SLUG"
   except:
     - master

@@ -17,6 +17,7 @@ variables:
 stages:
   - build
   - module
+  - wrapper
   - test
   - deploy
 
@@ -46,10 +47,11 @@ build-develop:
     - master
             
 include:
-  - local: applicative-catalog/.gitlab-ci.yml
-  - local: archives/.gitlab-ci.yml
-  - local: ingestor/.gitlab-ci.yml
-  - local: job-generator/.gitlab-ci.yml
-  - local: metadata-catalog/.gitlab-ci.yml
-  - local: mqi-server/.gitlab-ci.yml
-  - local: scaler/.gitlab-ci.yml
+#  - local: applicative-catalog/.gitlab-ci.yml
+#  - local: archives/.gitlab-ci.yml
+#  - local: ingestor/.gitlab-ci.yml
+#  - local: job-generator/.gitlab-ci.yml
+#  - local: metadata-catalog/.gitlab-ci.yml
+#  - local: mqi-server/.gitlab-ci.yml
+#  - local: scaler/.gitlab-ci.yml
+  - local: wrapper/.gitlab-ci.yml
