@@ -44,7 +44,7 @@ public class AuxiliaryFilesExtractor
      * Pattern for configuration files to extract data
      */
     private final static String PATTERN_CONFIG =
-            "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
+    		"^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|WV_OCN_2S|WV_OCN_2A)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
 
     /**
      * Amazon S3 service for configuration files
