@@ -2,27 +2,23 @@
 # Official docker image.
 image: docker:latest
 
-services:
-  - docker:dind
-  
 variables:
-  DOCKER_HOST: tcp://localhost:2375
+  MODULE_METADATA_CATALOG: s1pro-core-metdata-catalog
 
-before_script:
-  - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-
-build-master:
-  stage: build
+metadata-catalog-build-master:
+  stage: module
   script:
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
+    - cd metadata-catalog
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG"
   only:
     - master
 
-build:
-  stage: build
+metadata-catalog-build:
+  stage: module
   script:
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG"
+    - cd metadata-catalog
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG:$CI_COMMIT_REF_SLUG"
   except:
     - master
