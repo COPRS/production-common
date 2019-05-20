@@ -40,18 +40,19 @@ build-master:
 build-develop:
   stage: build
   script:
-    echo "Test"
-    #- docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
-    #- docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
+    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
   except:
     - master
             
 include:
-#  - local: applicative-catalog/.gitlab-ci.yml
-#  - local: archives/.gitlab-ci.yml
-#  - local: ingestor/.gitlab-ci.yml
-#  - local: job-generator/.gitlab-ci.yml
-#  - local: metadata-catalog/.gitlab-ci.yml
-#  - local: mqi-server/.gitlab-ci.yml
-#  - local: scaler/.gitlab-ci.yml
-  - local: wrapper/.gitlab-ci.yml
+  - local: applicative-catalog/.gitlab-ci.yml
+  - local: archives/.gitlab-ci.yml
+  - local: ingestor/.gitlab-ci.yml
+  - local: job-generator/.gitlab-ci.yml
+  - local: metadata-catalog/.gitlab-ci.yml
+  - local: mqi-server/.gitlab-ci.yml
+  - local: scaler/.gitlab-ci.yml
+
+# Wrapper is currently not building correctly.
+#  - local: wrapper/.gitlab-ci.yml
