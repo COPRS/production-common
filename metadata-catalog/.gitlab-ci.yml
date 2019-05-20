@@ -3,7 +3,7 @@
 image: docker:latest
 
 variables:
-  MODULE_METADATA_CATALOG: s1pro-core-metdata-catalog
+  MODULE_METADATA_CATALOG: s1pro-core-metadata-catalog
 
 metadata-catalog-build-master:
   stage: module
