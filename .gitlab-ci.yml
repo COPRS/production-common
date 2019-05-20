@@ -11,8 +11,8 @@ variables:
   
   # These variables are normally set by the environment. For some reason this is not working for the develop branch however.
   # This is a workaround to ensure it is working in both branches (S1PRO-59)
-  CI_REGISTRY_USERNAME: git_werum
-  CI_REGISTRY: registry.tools.s1pdgs.eu
+  #CI_REGISTRY_USERNAME: git_werum
+  #CI_REGISTRY: registry.tools.s1pdgs.eu
   
 stages:
   - build
@@ -21,11 +21,11 @@ stages:
   - deploy
 
 before_script:
-    #- docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     
     # Passwort set as project specific build environment. 
     # This is a workaround to ensure it is working in both branches (S1PRO-59)
-    - docker login -u "$CI_REGISTRY_USERNAME" -p "$TEMP_PWD" $CI_REGISTRY   
+    #- docker login -u "$CI_REGISTRY_USERNAME" -p "$TEMP_PWD" $CI_REGISTRY   
     
 # Build procedure for master branch
 build-master:
