@@ -3,7 +3,7 @@
 image: docker:latest
 
 variables:
-  MODULE_MQI_SERVER: s1pro-core-applicative-catalog
+  MODULE_MQI_SERVER: s1pro-core-mqi-server
 
 mqi-server-build-master:
   stage: module
