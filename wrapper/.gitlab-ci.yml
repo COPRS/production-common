@@ -9,7 +9,7 @@ wrapper-l0-build-master:
   stage: module
   script:
     - cd wrapper
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0" -f wrapper/config/dockerfiles/Dockerfile_L0 Dockerfile
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0" -f config/dockerfiles/Dockerfile_L0 Dockerfile
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0"
   only:
     - master
@@ -27,7 +27,7 @@ wrapper-l0-segment-build:
   stage: module
   script:
     - cd wrapper
-    - docker --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment:$CI_COMMIT_REF_SLUG" build - < config/dockerfiles/Dockerfile_L0_segment
+    - cat config/dockerfiles/Dockerfile_L0_segment | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment:$CI_COMMIT_REF_SLUG" -
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1:$CI_COMMIT_REF_SLUG"
   except:
     - master
@@ -36,7 +36,7 @@ wrapper-l1-build:
   stage: module
   script:
     - cd wrapper
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1:$CI_COMMIT_REF_SLUG" - < config/dockerfiles/Dockerfile_L1 Dockerfile
+    - cat config/dockerfiles/Dockerfile_L1 Dockerfile | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1:$CI_COMMIT_REF_SLUG" -
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1:$CI_COMMIT_REF_SLUG"
   except:
     - master
