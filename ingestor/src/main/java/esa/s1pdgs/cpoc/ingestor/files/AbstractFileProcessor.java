@@ -10,6 +10,7 @@ import org.springframework.messaging.Message;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsAlreadyExist;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.processing.IngestorIgnoredFileException;
@@ -74,92 +75,115 @@ public abstract class AbstractFileProcessor<T> {
      * @param message
      */
     public void processFile(Message<File> message) {
-        File file = message.getPayload();
-        if (isValidFile(file)) {
-            int step = 0;
-            String productName = file.getName();
-            LOGGER.info(
-                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]",
-                    productName, extractor.getFamily());
-            this.appStatus.setProcessing(family);
-            // Build model file
-            try {
-                try {
-                    step++;
-                    FileDescriptor descriptor =
-                            extractor.extractDescriptor(file);
-                    productName = descriptor.getProductName();
-                    // Store in object storage
-                    LOGGER.info(
-                            "[MONITOR] [step 1] [productName {}] Starting uploading file in OBS",
-                            productName);
-                    if (!obsService.exist(family,
-                            descriptor.getKeyObjectStorage())) {
-                        obsService.uploadFile(family,
-                                descriptor.getKeyObjectStorage(), file);
-                    } else {
-                        throw new ObsAlreadyExist(family,
-                                descriptor.getProductName(), new Exception(
-                                        "File already exist in object storage"));
-                    }
-                    // Send metadata
-                    step++;
-                    if (descriptor.isHasToBePublished()) {
-                        LOGGER.info(
-                                "[REPORT] [MONITOR] [step 2] [productName {}] [s1pdgsTask Ingestion] [STOP OK] Publishing file in topic",
-                                productName);
-                        publisher.send(buildDto(descriptor));
-                    }
-                } catch (IngestorIgnoredFileException ce) {
-                    LOGGER.debug(
-                            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
-                            step, productName, ce.getCode().getCode(),
-                            ce.getLogMessage());
-                } catch (ObsAlreadyExist ace) {
-                    LOGGER.error(
-                            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
-                            step, productName, ace.getCode().getCode(),
-                            ace.getLogMessage());
-                } catch (ObsException ace) {
-                    throw ace;
-                } catch (AbstractCodedException ace) {
-                    LOGGER.error(
-                            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
-                            step, productName, ace.getCode().getCode(),
-                            ace.getLogMessage());
-                    this.appStatus.setError(family);
-                }
-                // Remove file
-                step++;
-                LOGGER.info(
-                        "[MONITOR] [step 3] [productName {}] Starting removing file",
-                        productName);
-                try {
-                    Files.delete(Paths.get(file.getPath()));
-                } catch (Exception e) {
-                    LOGGER.error(
-                            "[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage: {}",
-                            AbstractCodedException.ErrorCode.INGESTOR_CLEAN
-                                    .getCode(),
-                            file.getPath(), e.getMessage());
-                    this.appStatus.setError(family);
-                }
-
-            } catch (AbstractCodedException ace) {
-                LOGGER.error(
-                        "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [step {}] [productName {}] [code {}] {}",
-                        step, productName, ace.getCode().getCode(),
-                        ace.getLogMessage());
-                this.appStatus.setError(family);
-            }
-            LOGGER.info(
-                    "[MONITOR] [step 0] End processing of configuration file {}",
-                    file.getPath());
-            this.appStatus.setWaiting();
+        final File file = message.getPayload();
+        
+        if (!isValidFile(file)) {
+        	return;
         }
+        
+        final String productName = file.getName();
+        LOGGER.info(
+                "[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]",
+                productName, extractor.getFamily());
+        this.appStatus.setProcessing(family);
+        
+        // Build model file
+        handleFile(file);
+        LOGGER.info(
+                "[MONITOR] [step 0] End processing of configuration file {}",
+                file.getPath());
+        this.appStatus.setWaiting();
+
     }
+
+	private final void handleFile(File file) {
+		try {			
+		    final String productName = uploadAndPublish(file);
+		    // Remove file
+		    delete(file, productName);
+
+		} catch (AbstractCodedException ace) {
+		    LOGGER.error(
+		            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [productName {}] [code {}] {}",
+		            file.getName(), ace.getCode().getCode(),
+		            ace.getLogMessage());
+		    this.appStatus.setError(family);
+		}
+	}
+
+	private String uploadAndPublish(File file) throws ObsException {
+		String productName = file.getName();
+		try {
+		    FileDescriptor descriptor = extractor.extractDescriptor(file);
+		    productName = descriptor.getProductName();
+		    // Store in object storage
+		    upload(file, productName, descriptor);
+		    // Send metadata
+		    publish(productName, descriptor);
+		} catch (IngestorIgnoredFileException ce) {
+		    LOGGER.debug(
+		            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [productName {}] [code {}] {}",
+		            productName, ce.getCode().getCode(),
+		            ce.getLogMessage());
+		} catch (ObsAlreadyExist ace) {
+		    LOGGER.error(
+		            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [productName {}] [code {}] {}",
+		            productName, ace.getCode().getCode(),
+		            ace.getLogMessage());
+		} catch (ObsException ace) {
+		    throw ace;
+		} catch (AbstractCodedException ace) {
+		    LOGGER.error(
+		            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [productName {}] [code {}] {}",
+		            productName, ace.getCode().getCode(),
+		            ace.getLogMessage());
+		    this.appStatus.setError(family);
+		}
+		return productName;
+	}
+
+	private final void upload(File file, String productName, FileDescriptor descriptor)
+			throws ObsException, ObsAlreadyExist {
+		LOGGER.info(
+		        "[MONITOR] [step 1] [productName {}] Starting uploading file in OBS",
+		        productName);
+		if (!obsService.exist(family,
+		        descriptor.getKeyObjectStorage())) {
+		    obsService.uploadFile(family,
+		            descriptor.getKeyObjectStorage(), file);
+		} else {
+		    throw new ObsAlreadyExist(family,
+		            descriptor.getProductName(), new Exception(
+		                    "File already exist in object storage"));
+		}
+	}
+
+	private final void publish(String productName, FileDescriptor descriptor) throws MqiPublicationError {
+		if (descriptor.isHasToBePublished()) {
+		    LOGGER.info(
+		            "[REPORT] [MONITOR] [step 2] [productName {}] [s1pdgsTask Ingestion] [STOP OK] Publishing file in topic",
+		            productName);
+		    publisher.send(buildDto(descriptor));
+		}
+	}
+
+	private final void delete(File file, String productName) {
+		LOGGER.info(
+		        "[MONITOR] [step 3] [productName {}] Starting removing file",
+		        productName);
+		try {
+		    Files.delete(Paths.get(file.getPath()));
+		} catch (Exception e) {
+		    LOGGER.error(
+		            "[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage: {}",
+		            AbstractCodedException.ErrorCode.INGESTOR_CLEAN
+		                    .getCode(),
+		            file.getPath(), e.getMessage());
+		    this.appStatus.setError(family);
+		}
+	}
     
-    private boolean isValidFile(File file) {
+    private final boolean isValidFile(File file) {
         if (file.isDirectory()) {
             return false;
         } else {
