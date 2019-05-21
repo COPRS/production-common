@@ -29,7 +29,6 @@ import esa.s1pdgs.cpoc.scaler.k8s.services.PodService;
 import esa.s1pdgs.cpoc.scaler.k8s.services.WrapperService;
 import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoringProperties;
 import esa.s1pdgs.cpoc.scaler.kafka.model.SpdgsTopic;
-import esa.s1pdgs.cpoc.scaler.kafka.services.KafkaService;
 
 @Service
 public class K8SMonitoring {
