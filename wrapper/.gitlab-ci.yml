@@ -5,15 +5,35 @@ image: docker:latest
 variables:
   MODULE_WRAPPER: s1pro-core-wrapper
 
+# Build wrapper for master branch
 wrapper-l0-build-master:
   stage: module
   script:
     - cd wrapper
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0" -f config/dockerfiles/Dockerfile_L0 Dockerfile
+    - cat config/dockerfiles/Dockerfile_L0 Dockerfile | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0"
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0"
   only:
     - master
-
+    
+wrapper-l0-segment-build-master:
+  stage: module
+  script:
+    - cd wrapper
+    - cat config/dockerfiles/Dockerfile_L0_segment | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment"
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment"
+  only:
+    - master
+    
+wrapper-l1-build-master:
+  stage: module
+  script:
+    - cd wrapper
+    - cat config/dockerfiles/Dockerfile_L1 Dockerfile | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1"
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1"
+  only:
+    - master
+    
+# Build wrapper for develop and other branches
 wrapper-l0-build:
   stage: module
   script:
@@ -40,5 +60,4 @@ wrapper-l1-build:
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1:$CI_COMMIT_REF_SLUG"
   except:
     - master
-    
     
