@@ -4,7 +4,7 @@ WORKDIR /app
 
 FROM registry.tools.s1pdgs.eu/wo7/docker_l0asp:dev
 RUN yum install -y java-1.8.0-openjdk wget exec && yum clean all
-WORKDIR /app
+WORKDIR /app/wrapper
 COPY --from=build /app/wrapper/target/s1pro-core-wrapper-0.2.0-SNAPSHOT.jar s1pdgs-wrapper.jar
 COPY --from=build /app/wrapper/config/start/start_l0_segment.sh start_l0_segment.sh
 RUN chmod +x /app/wrapper/start_l0_segment.sh
