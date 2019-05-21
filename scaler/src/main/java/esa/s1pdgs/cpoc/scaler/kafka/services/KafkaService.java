@@ -75,6 +75,7 @@ public class KafkaService {
         KafkaConsumer<String, String> consumer = null;
 
         try {
+        	LOGGER.debug("describeConsumerGroup is using groupid {}",groupId);
             consumer = createKafkaConsumer(groupId);
 
             List<ConsumerSummary> groupSummaries =
@@ -111,8 +112,9 @@ public class KafkaService {
             String limitTopic, KafkaConsumer<String, String> consumer) {
         ConsumerDescription cd = new ConsumerDescription(summary.clientId(),
                 summary.consumerId());
-        for (TopicPartition tp : topicPartitions) {
+        for (TopicPartition tp : topicPartitions) {        	
             if (limitTopic.equalsIgnoreCase(tp.topic())) {
+            	LOGGER.debug("Using topic partition {}",tp);
                 // Calculate offset and lag
                 long currentOffset = consumer.committed(tp).offset();
                 consumer.assign(Arrays.asList(tp));
