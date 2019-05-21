@@ -14,14 +14,18 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.test.SystemUtils;
 
 public class TaskCallableTest {
-
+	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(TaskCallableTest.class), "TestProcessing");
+	  
 	private File testDir;
 	private File ipf;
 	
@@ -51,7 +55,7 @@ public class TaskCallableTest {
 	@Test
 	public void testRun_Nominal() throws Exception {		
 		final Future<TaskResult> future = completionService.submit(
-				new TaskCallable(ipf.getPath(), "0", testDir.getPath(), "")
+				new TaskCallable(ipf.getPath(), "0", testDir.getPath(), reportingFactory.newReporting(0))
 		);
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());
@@ -65,7 +69,7 @@ public class TaskCallableTest {
 		final Consumer<String> outputConsumer = m -> builder.append(m).append(';');
 
 		final Future<TaskResult> future = completionService
-				.submit(new TaskCallable(ipf.getPath(), "0", testDir.getPath(), "", outputConsumer, outputConsumer));
+				.submit(new TaskCallable(ipf.getPath(), "0", testDir.getPath(), outputConsumer, outputConsumer, reportingFactory.newReporting(0)));
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());
 		assertEquals(0, result.getExitCode());

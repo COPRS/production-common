@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessExecutionException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * Launch tasks in parallel of a job pool
@@ -96,18 +97,18 @@ public class PoolProcessor {
      * 
      * @throws AbstractCodedException
      */
-    public void process() throws AbstractCodedException {
-        boolean stopAllProcessCall = false;
-        String prefixReport;
+    public void process(final Reporting.Factory reportingFactory) throws AbstractCodedException {
+        boolean stopAllProcessCall = false;     
         int j=0;
         try {
             try {
                 LOGGER.info("{} 1 - Submitting tasks {}", prefixLogs,
                         pool.getTasks());
                 for (LevelJobTaskDto task : pool.getTasks()) {
-                	prefixReport= "[REPORT] " + prefixLogs + "[subTask processing] [taskCounter " + j + "]";
+                	final Reporting reporting = reportingFactory.newReporting(j+1);
+                	
                     completionSrv.submit(new TaskCallable(task.getBinaryPath(),
-                            jobOrderPath, workDirectory, prefixReport));
+                            jobOrderPath, workDirectory, reporting));
                     j++;
                 }
                 LOGGER.info("{} 2 - Waiting for tasks execution", prefixLogs);

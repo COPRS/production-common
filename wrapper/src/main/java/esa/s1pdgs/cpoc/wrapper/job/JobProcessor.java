@@ -31,6 +31,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
 import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
@@ -158,8 +160,11 @@ public class JobProcessor {
         // Initialize processing
         // ------------------------------------------------------
         LevelJobDto job = message.getBody();
-        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [START] Start job processing",
-        		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_READ, job), job.getProductIdentifier());
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobProcessing");
+        
+        final Reporting report = reportingFactory.newReporting(0);
+        report.reportStart("Start job processing");
+
         File workdir = new File(job.getWorkDirectory());
         // Remove working directory if exist
         if (workdir.exists()) {
@@ -195,11 +200,9 @@ public class JobProcessor {
         // Process message
         // ----------------------------------------------------------
         processJob(message, inputDownloader, outputProcessor, procExecutorSrv,
-                procCompletionSrv, procExecutor);
-
-        LOGGER.info("[REPORT] [s1pdgsTask {}Processing] [subTask messageProcessing] {} [productName {}] [STOP OK] End job processing",
-        		properties.getLevel(), getPrefixMonitorLog(MonitorLogUtils.LOG_END, job), job.getProductIdentifier());
-
+                procCompletionSrv, procExecutor, report);
+        
+        report.reportStop("End job processing");
     }
 
     /**
@@ -227,7 +230,8 @@ public class JobProcessor {
             final OutputProcessor outputProcessor,
             final ExecutorService procExecutorSrv,
             final ExecutorCompletionService<Boolean> procCompletionSrv,
-            final PoolExecutorCallable procExecutor) {
+            final PoolExecutorCallable procExecutor,
+            final Reporting report) {
         boolean poolProcessing = false;
         LevelJobDto job = message.getBody();
         int step = 0;
@@ -269,19 +273,22 @@ public class JobProcessor {
 
         } catch (AbstractCodedException ace) {
             ackOk = false;
-            errorMessage = String.format("[REPORT] [s1pdgsTask %sProcessing] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s",
+            
+            errorMessage = String.format("[s1pdgsTask %sProcessing] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s",
             		properties.getLevel(),
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
+            report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
         } catch (InterruptedException e) {
             ackOk = false;
             errorMessage = String.format(
-                    "[REPORT] %s [step %d] %s [code %d] [s1pdgsTask %sProcessing] [STOP KO] [subTask processing] [msg interrupted exception]",
+                    "%s [step %d] %s [code %d] [s1pdgsTask %sProcessing] [STOP KO] [subTask processing] [msg interrupted exception]",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ErrorCode.INTERNAL_ERROR.getCode(),
                     properties.getLevel());
+            report.reportError("Interrupted job processing");
         } finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
@@ -416,7 +423,6 @@ public class JobProcessor {
             final String errorMessage) {
         LOGGER.info("{} Acknowledging negatively",
                 getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
-        LOGGER.error(errorMessage);
         try {
             mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
                     errorMessage, stop));

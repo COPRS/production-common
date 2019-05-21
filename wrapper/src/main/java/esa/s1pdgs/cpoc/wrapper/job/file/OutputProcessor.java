@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.wrapper.job.file;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,6 +24,8 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3UploadFile;
@@ -157,12 +160,14 @@ public class OutputProcessor {
      * @param reportToPublish
      * @throws UnknownFamilyException
      */
-    protected void sortOutputs(final List<String> lines,
+    final long sortOutputs(final List<String> lines,
             final List<S3UploadFile> uploadBatch,
             final List<ObsQueueMessage> outputToPublish,
             final List<FileQueueMessage> reportToPublish)
-            throws UnknownFamilyException {
+            throws AbstractCodedException {
 
+    	long productSize = 0;
+    	
         LOGGER.info("{} 2 - Starting organizing outputs", prefixMonitorLogs);
 
         for (String line : lines) {
@@ -181,6 +186,9 @@ public class OutputProcessor {
             } else {
                 ProductFamily family =
                         ProductFamily.fromValue(matchOutput.getFamily());
+                
+                final File file = new File(filePath);
+                                
                 switch (family) {
                     case L0_REPORT:
                     case L1_REPORT:
@@ -188,9 +196,9 @@ public class OutputProcessor {
                         // If report, put in a cache to send report
                         LOGGER.info(
                                 "Output {} is considered as belonging to the family {}",
-                                productName, matchOutput.getFamily());
-                        reportToPublish.add(new FileQueueMessage(family,
-                                productName, new File(filePath)));
+                                productName, matchOutput.getFamily());                   
+                        reportToPublish.add(new FileQueueMessage(family, productName, file));
+                        productSize += size(file);
                         break;
                     case L0_SLICE:
                         // Specific case of the L0 wrapper
@@ -199,35 +207,28 @@ public class OutputProcessor {
                                 LOGGER.info(
                                         "Output {} is considered as belonging to the family {}",
                                         productName, matchOutput.getFamily());
-                                uploadBatch.add(new S3UploadFile(family,
-                                        productName, new File(filePath)));
-                                outputToPublish.add(new ObsQueueMessage(family,
-                                        productName, productName, "NRT"));
+                                
+                                uploadBatch.add(new S3UploadFile(family, productName, file));
+                                outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
+                                productSize += size(file);
+                                
                             } else if (line.contains("FAST24")) {
                                 LOGGER.info(
                                         "Output {} is considered as belonging to the family {}",
                                         productName, ProductFamily.L0_SEGMENT);
-                                uploadBatch.add(new S3UploadFile(
-                                        ProductFamily.L0_SEGMENT, productName,
-                                        new File(filePath)));
-                                outputToPublish.add(new ObsQueueMessage(
-                                        ProductFamily.L0_SEGMENT, productName,
-                                        productName, "FAST24"));
+                                uploadBatch.add(new S3UploadFile(ProductFamily.L0_SEGMENT, productName,file));
+                                outputToPublish.add(new ObsQueueMessage( ProductFamily.L0_SEGMENT, productName, productName, "FAST24"));
+                                productSize += size(file);
                             } else {
-                                LOGGER.warn(
-                                        "Output {} ignored because unknown mode",
-                                        productName);
+                                LOGGER.warn( "Output {} ignored because unknown mode", productName);
                             }
                         } else {
                             LOGGER.info(
                                     "Output {} is considered as belonging to the family {}",
                                     productName, matchOutput.getFamily());
-                            uploadBatch.add(new S3UploadFile(family,
-                                    productName, new File(filePath)));
-                            outputToPublish.add(
-                                    new ObsQueueMessage(family, productName,
-                                            productName, inputMessage.getBody()
-                                                    .getProductProcessMode()));
+                            uploadBatch.add(new S3UploadFile(family, productName, file));
+                            outputToPublish.add( new ObsQueueMessage(family, productName, productName, inputMessage.getBody().getProductProcessMode()));
+                            productSize += size(file);
                         }
                         break;
                     case L0_ACN:
@@ -238,18 +239,16 @@ public class OutputProcessor {
                                 LOGGER.info(
                                         "Output {} is considered as belonging to the family {}",
                                         productName, matchOutput.getFamily());
-                                uploadBatch.add(new S3UploadFile(family,
-                                        productName, new File(filePath)));
-                                outputToPublish.add(new ObsQueueMessage(family,
-                                        productName, productName, "NRT"));
+                                uploadBatch.add(new S3UploadFile(family,  productName, file));
+                                outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
+                                productSize += size(file);
                             } else if (line.contains("FAST24")) {
                                 LOGGER.info(
                                         "Output {} is considered as belonging to the family {}",
                                         productName, matchOutput.getFamily());
-                                uploadBatch.add(new S3UploadFile(family,
-                                        productName, new File(filePath)));
-                                outputToPublish.add(new ObsQueueMessage(family,
-                                        productName, productName, "FAST24"));
+                                uploadBatch.add(new S3UploadFile(family, productName, file));
+                                outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
+                                productSize += size(file);
                             } else {
                                 LOGGER.warn(
                                         "Output {} ignored because unknown mode",
@@ -259,12 +258,12 @@ public class OutputProcessor {
                             LOGGER.info(
                                     "Output {} is considered as belonging to the family {}",
                                     productName, matchOutput.getFamily());
-                            uploadBatch.add(new S3UploadFile(family,
-                                    productName, new File(filePath)));
+                            uploadBatch.add(new S3UploadFile(family, productName,file));
                             outputToPublish.add(
                                     new ObsQueueMessage(family, productName,
                                             productName, inputMessage.getBody()
                                                     .getProductProcessMode()));
+                            productSize += size(file);
                         }
                         break;
                     case L1_SLICE:
@@ -275,10 +274,11 @@ public class OutputProcessor {
                                 "Output {} is considered as belonging to the family {}",
                                 productName, matchOutput.getFamily());
                         uploadBatch.add(new S3UploadFile(family, productName,
-                                new File(filePath)));
+                                file));
                         outputToPublish.add(new ObsQueueMessage(family,
                                 productName, productName, inputMessage.getBody()
                                         .getProductProcessMode()));
+                        productSize += size(file);
                         break;
                     case BLANK:
                         LOGGER.info("Output {} will be ignored", productName);
@@ -291,9 +291,10 @@ public class OutputProcessor {
             }
 
         }
+        return productSize;
     }
 
-    /**
+	/**
      * Extract the product name from the line of the result file
      * 
      * @param line
@@ -358,55 +359,41 @@ public class OutputProcessor {
      * @param outputToPublish
      * @throws AbstractCodedException
      */
-    protected void processProducts(final List<S3UploadFile> uploadBatch,
+    final void processProducts(
+    		final Reporting.Factory reportingFactory,
+    		final List<S3UploadFile> uploadBatch,
             final List<ObsQueueMessage> outputToPublish)
             throws AbstractCodedException {
-        String listoutputs = uploadBatch.stream().map(S3UploadFile::getKey)
-                .collect(Collectors.joining(","));
-        LOGGER.info(
-                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [START] 3 - Starting processing object storage compatible outputs [inputs {}]",
-                prefixMonitorLogs, appLevel, listoutputs);
 
         double size = Double.valueOf(uploadBatch.size());
         double nbPool = Math.ceil(size / sizeUploadBatch);
 
         for (int i = 0; i < nbPool; i++) {
-            int lastIndex =
-                    Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());
-            List<S3UploadFile> sublist =
-                    uploadBatch.subList(i * sizeUploadBatch, lastIndex);
-            String listProducts = sublist.stream().map(S3UploadFile::getKey)
-                    .collect(Collectors.joining(","));
+            int lastIndex = Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());
+            List<S3UploadFile> sublist =uploadBatch.subList(i * sizeUploadBatch, lastIndex);
+            String listProducts = sublist.stream().map(S3UploadFile::getKey).collect(Collectors.joining(","));
+            
             if (i > 0) {
-                this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(),
-                        outputToPublish);
+                this.publishAccordingUploadFiles(reportingFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
             }
-            try {
+            final Reporting report = reportingFactory
+        			.product(null, null)            			
+        			.newReporting(2);
+            try { 
+            	report.reportStart("Start uploading batch " + i + " of outputs " + listProducts);
+            	
                 if (Thread.currentThread().isInterrupted()) {
-                    throw new InternalErrorException(
-                            "The current thread as been interrupted");
-                } else {
-                    LOGGER.info(
-                            "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [START] 3 - Uploading batch {} [inputs {}]",
-                            prefixMonitorLogs, appLevel, i, listProducts);
-                    this.obsService.uploadFilesPerBatch(sublist);
-                    LOGGER.info(
-                            "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [STOP OK] 3 - batch {} successfully uploaded [outputs {}]",
-                            prefixMonitorLogs, appLevel, i, listProducts);
-                }
-            } catch (AbstractCodedException ace) {
-                LOGGER.error(
-                        "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyUploadBatch] [STOP KO] 3 - Error occurred during batch {} upload {} ",
-                        prefixMonitorLogs, this.appLevel, i,
-                        ace.getLogMessage());
-                throw ace;
+                    throw new InternalErrorException("The current thread as been interrupted");
+                } 
+                this.obsService.uploadFilesPerBatch(sublist);
+                report.reportStop("End uploading batch " + i + " of outputs " + listProducts);
+              
+            } catch (AbstractCodedException e) {
+    			report.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+                throw e;
             }
         }
-        publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);
-        
-        LOGGER.info(
-                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopy] [STOP OK] 3 - Outputs successfully processed [outputs {}]",
-                this.prefixMonitorLogs, this.appLevel, listoutputs);
+        publishAccordingUploadFiles(reportingFactory, nbPool - 1, NOT_KEY_OBS, outputToPublish);
     }
 
     /**
@@ -418,10 +405,13 @@ public class OutputProcessor {
      * @param outputToPublish
      * @throws AbstractCodedException
      */
-    private void publishAccordingUploadFiles(final double nbBatch,
+    private void publishAccordingUploadFiles(
+    		final Reporting.Factory reportingFactory,
+    		final double nbBatch,
             final String nextKeyUpload,
             final List<ObsQueueMessage> outputToPublish)
             throws AbstractCodedException {
+    	
         LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}",
                 prefixMonitorLogs, nbBatch);
         Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
@@ -430,32 +420,25 @@ public class OutputProcessor {
             if (Thread.currentThread().isInterrupted()) {
                 throw new InternalErrorException(
                         "The current thread as been interrupted");
+            } 
+            ObsQueueMessage msg = iter.next();
+            if (nextKeyUpload.startsWith(msg.getKeyObs())) {
+                stop = true;
             } else {
-                ObsQueueMessage msg = iter.next();
-                if (nextKeyUpload.startsWith(msg.getKeyObs())) {
-                    stop = true;
-                } else {
-                    LOGGER.info(
-                            "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [START] 3 - Publishing message [inputs {}]",
-                            prefixMonitorLogs, appLevel, msg.getProductName());
-                    try {
-                        procuderFactory.sendOutput(msg, inputMessage);
-                        LOGGER.info(
-                                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [STOP OK] 3 - Message published [outputs {}]",
-                                prefixMonitorLogs, appLevel,
-                                msg.getProductName());
-                    } catch (MqiPublicationError ace) {
-                        LOGGER.error("{} [code {}] {}", prefixMonitorLogs,
-                                ace.getCode().getCode(), ace.getLogMessage());
-                        LOGGER.error(
-                                "[REPORT] {} [s1pdgsTask {}Processing] [subTask outputCopyPublish] [STOP K0] [code {}] 3 - Message not published {} [outputs {}]",
-                                prefixMonitorLogs, appLevel,
-                                ace.getCode().getCode(), ace.getLogMessage(),
-                                msg.getProductName());
-                    }
-                    iter.remove();
+            	final Reporting report = reportingFactory
+            			.product(null, msg.getProductName())            			
+            			.newReporting(1);
+            	
+            	report.reportStart("Start publishing message");
+                try {
+                    procuderFactory.sendOutput(msg, inputMessage);
+                    report.reportStop("End publishing message");
+                } catch (MqiPublicationError ace) {                	
+                	report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
                 }
+                iter.remove();
             }
+          
         }
     }
 
@@ -499,8 +482,9 @@ public class OutputProcessor {
      * @throws ObsException
      * @throws IOException
      */
-    public void processOutput() throws AbstractCodedException {
-
+    public void processOutput() throws AbstractCodedException {    	        
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "OutputHandling");
+        
         // Extract files
         List<String> lines = extractFiles();
 
@@ -508,13 +492,38 @@ public class OutputProcessor {
         List<S3UploadFile> uploadBatch = new ArrayList<>();
         List<ObsQueueMessage> outputToPublish = new ArrayList<>();
         List<FileQueueMessage> reportToPublish = new ArrayList<>();
-        sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish);
+    	final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish);
+        
+        final String listoutputs = uploadBatch.stream().map(S3UploadFile::getKey)
+                .collect(Collectors.joining(","));
+        
+        final Reporting reporting = reportingFactory.newReporting(0);
+        reporting.reportStart("Start handling of outputs " + listoutputs);
+        
+        try {
+			// Upload per batch the output        
+			processProducts(reportingFactory, uploadBatch, outputToPublish);			
+			 // Publish reports
+	        processReports(reportToPublish);
+	        
+	        reporting.reportStopWithTransfer("End handling of outputs " + listoutputs, size);
+		} catch (AbstractCodedException e) {
+			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			throw e;
+		}       
+    }    
 
-        // Upload per batch the output
-        processProducts(uploadBatch, outputToPublish);
-
-        // Publish reports
-        processReports(reportToPublish);
-    }
-
+    private long size(File file) throws InternalErrorException {
+        try {
+			final Path folder = file.toPath();
+			return Files.walk(folder)
+			  .filter(p -> p.toFile().isFile())
+			  .mapToLong(p -> p.toFile().length())
+			  .sum();
+			
+		} catch (IOException e) {
+			// TODO to have the tests running without actual files
+			return 0L;
+		}
+	}
 }

@@ -2,8 +2,6 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
@@ -20,6 +19,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * KAFKA consumer. Consume on a topic defined in L1 slices
@@ -28,13 +28,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  */
 @Service
 public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(LevelSegmentsExtractor.class);
-
     /**
      * Pattern for configuration files to extract data
      */
@@ -89,30 +82,27 @@ public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
      */
     @Override
     protected JSONObject extractMetadata(
+    		final Reporting.Factory reportingFactory, 
             final GenericMessageDto<LevelSegmentDto> message)
             throws AbstractCodedException {
-        LevelSegmentDto dto = message.getBody();
-        // Upload file
-        String keyObs = getKeyObs(message);
-        LOGGER.info(
-                "[MONITOR] [step 1] [LEVEL_PRODUCTS] [family {}] [productName {}] Downloading file {}",
-                message.getBody().getFamily(), extractProductNameFromDto(dto),
-                keyObs);
-        File metadataFile = obsService.downloadFile(
-                message.getBody().getFamily(), keyObs, this.localDirectory);
+    	
+        final LevelSegmentDto dto = message.getBody();
+        final String keyObs = getKeyObs(message);        
+        final String productName = extractProductNameFromDto(dto);
+        final ProductFamily family = message.getBody().getFamily();
+        
+        reportingFactory.product(family.toString(), productName);
+        
+        final File metadataFile = download(reportingFactory, obsService, family, productName, keyObs);  
 
-        // Extract description from pattern
-        LOGGER.info(
-                "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L0_SEGMENT] [productName {}] Extracting from filename",
-                extractProductNameFromDto(dto));
-        L0OutputFileDescriptor l0SegmentDesc = fileDescriptorBuilder
-                .buildL0SegmentFileDescriptor(metadataFile, dto);
-        // Build metadata from file and extracted
-        LOGGER.info(
-                "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L0_SEGMENT] [productName {}] Extracting from file",
-                extractProductNameFromDto(dto));
-        return mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc,
-                metadataFile);
+    	final L0OutputFileDescriptor l0SegmentDesc = extractFromFilename(
+    			reportingFactory, 
+    			() -> fileDescriptorBuilder.buildL0SegmentFileDescriptor(metadataFile, dto)
+    	);
+    	return extractFromFile(
+    			reportingFactory, 
+    			() -> mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc, metadataFile)
+    	); 
     }
 
     /**

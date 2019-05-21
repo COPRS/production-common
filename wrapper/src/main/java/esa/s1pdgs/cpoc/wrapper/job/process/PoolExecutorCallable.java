@@ -12,6 +12,8 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 
 /**
@@ -109,15 +111,24 @@ public class PoolExecutorCallable implements Callable<Boolean> {
                                 + counter * properties.getWapTempoS()
                                 + " seconds");
             }
-
-            LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask processing] [START] Start launching processes", prefixMonitorLogs, this.appLevel);
-            for (PoolProcessor poolProcessor : processors) {
-                if (isInterrupted()) {
-                    throw new InternalErrorException(
-                            "Current thread has been interrupted");
-                }
-                poolProcessor.process();
-            }
+            final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Processing");
+            
+            final Reporting reporting = reportingFactory.newReporting(0);
+            reporting.reportStart("Start " + appLevel + " processing");
+                       
+            try {
+				for (PoolProcessor poolProcessor : processors) {
+				    if (isInterrupted()) {
+				        throw new InternalErrorException(
+				                "Current thread has been interrupted");
+				    }
+				    poolProcessor.process(reportingFactory);
+				}
+			} catch (AbstractCodedException e) {
+				reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				throw e;
+			}
+            reporting.reportStop("End " + appLevel + " processing");
             return true;
         }
         return false;

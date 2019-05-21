@@ -5,8 +5,6 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,6 +22,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * KAFKA consumer. Consume on a topic defined in configuration file
@@ -33,12 +32,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 @Controller
 public class AuxiliaryFilesExtractor
         extends GenericExtractor<AuxiliaryFileDto> {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(AuxiliaryFilesExtractor.class);
 
     /**
      * Pattern for configuration files to extract data
@@ -87,35 +80,42 @@ public class AuxiliaryFilesExtractor
     public void extract() {
         super.genericExtract();
     }
+    
+    
+
 
     /**
      * @see GenericExtractor#extractMetadata(GenericMessageDto)
      */
     @Override
     protected JSONObject extractMetadata(
+    		final Reporting.Factory reportingFactory, 
             final GenericMessageDto<AuxiliaryFileDto> message)
             throws AbstractCodedException {
         // Upload file
-        String keyObs = getKeyObs(message);
-        LOGGER.info(
-                "[MONITOR] [step 1] [AUXILIARY_FILES] [productName {}] Downloading file {}",
-                extractProductNameFromDto(message.getBody()), keyObs);
-        File metadataFile = obsService.downloadFile(
-                ProductFamily.AUXILIARY_FILE, keyObs, this.localDirectory);
+        final String keyObs = getKeyObs(message);
+        final String productName = extractProductNameFromDto(message.getBody());
+        
+        reportingFactory
+            	.product(ProductFamily.AUXILIARY_FILE.toString(), productName);
+        
+        final File metadataFile = download(reportingFactory, obsService, ProductFamily.AUXILIARY_FILE, productName, keyObs);
 
         // Extract description from pattern
-        LOGGER.info(
-                "[MONITOR] [step 2] [AUXILIARY_FILES] [productName {}] Extracting from filename",
-                extractProductNameFromDto(message.getBody()));
-        ConfigFileDescriptor configFileDesc =
-                fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile);
+        final ConfigFileDescriptor configFileDesc = extractFromFilename(
+        		reportingFactory, 
+        		() -> fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile)
+        );        		
 
         // Build metadata from file and extracted
-        LOGGER.info(
-                "[MONITOR] [step 3] [AUXILIARY_FILES] [productName {}] Extracting from file",
-                extractProductNameFromDto(message.getBody()));
-        return mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile);
+        final JSONObject obj = extractFromFile(
+        		reportingFactory, 
+        		() -> mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile)
+        );        
+        return obj;
     }
+
+
 
     /**
      * Get the OBS key of the file used for extracting metadata for this product

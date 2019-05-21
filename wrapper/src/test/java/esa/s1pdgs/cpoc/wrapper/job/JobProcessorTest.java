@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,8 +37,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
-import esa.s1pdgs.cpoc.wrapper.job.JobProcessor;
 import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.wrapper.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
@@ -105,6 +107,9 @@ public class JobProcessorTest extends MockPropertiesTest {
      */
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    
+    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(JobProcessorTest.class), "TestOutputHandling");
+	
 
     /**
      * Initialization
@@ -312,9 +317,11 @@ public class JobProcessorTest extends MockPropertiesTest {
     @Test
     public void testCall() throws Exception {
         mockAllStep(false);
+        
+        
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor);
+                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -342,7 +349,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDevProperties(false, true, true, true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor);
+                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -370,7 +377,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDevProperties(true, true, false, true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor);
+                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -399,7 +406,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDevProperties(true, true, true, false);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor);
+                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -430,7 +437,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockAllStep(true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor);
+                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
 
         // Check step 3
         verify(procExecutor, times(1)).call();

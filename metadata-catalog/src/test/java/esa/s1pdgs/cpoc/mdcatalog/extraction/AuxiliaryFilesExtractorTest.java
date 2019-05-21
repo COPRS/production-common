@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class AuxiliaryFilesExtractorTest {
 
@@ -206,7 +208,11 @@ public class AuxiliaryFilesExtractorTest {
         File file = new File(
                 (new File("./test/workDir/")).getAbsolutePath() + File.separator
                         + "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-
+        
+        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
+        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
+        		.product("test", file.getName());
+        
         doReturn(file).when(obsService).downloadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.anyString());
 
@@ -228,7 +234,7 @@ public class AuxiliaryFilesExtractorTest {
 
         JSONObject expected = extractor.mdBuilder
                 .buildConfigFileMetadata(expectedDescriptor, file);
-        JSONObject result = extractor.extractMetadata(inputMessageAux);
+        JSONObject result = extractor.extractMetadata(reportingFactory,inputMessageAux);
         for (String key : expected.keySet()) {
             if (!"insertionTime".equals(key)) {
                 assertEquals(expected.get(key), result.get(key));

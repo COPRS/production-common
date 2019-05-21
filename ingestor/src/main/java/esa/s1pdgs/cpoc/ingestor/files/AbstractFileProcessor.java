@@ -19,6 +19,8 @@ import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public abstract class AbstractFileProcessor<T> {
 
@@ -74,111 +76,105 @@ public abstract class AbstractFileProcessor<T> {
      * 
      * @param message
      */
-    public void processFile(Message<File> message) {
+    public void processFile(final Message<File> message) {
         final File file = message.getPayload();
         
         if (!isValidFile(file)) {
         	return;
-        }
-        
-        final String productName = file.getName();
-        LOGGER.info(
-                "[REPORT] [MONITOR] [step 0] [s1pdgsTask Ingestion] [START] Start processing of file [productName {}] for [family {}]",
-                productName, extractor.getFamily());
-        this.appStatus.setProcessing(family);
-        
+        }        
         // Build model file
-        handleFile(file);
-        LOGGER.info(
-                "[MONITOR] [step 0] End processing of configuration file {}",
-                file.getPath());
-        this.appStatus.setWaiting();
-
+        handleFile(file); 
     }
 
-	private final void handleFile(File file) {
+	private final void handleFile(final File file) {
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Ingestion")
+        		.product(extractor.getFamily(), file.getName());
+        
+        final Reporting reportProcessing = reportingFactory.newReporting(0);        
+        reportProcessing.reportStart("Start processing of " + file.getName());
+        this.appStatus.setProcessing(family);
+		
 		try {			
-		    final String productName = uploadAndPublish(file);
-		    // Remove file
-		    delete(file, productName);
-
-		} catch (AbstractCodedException ace) {
-		    LOGGER.error(
-		            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [productName {}] [code {}] {}",
-		            file.getName(), ace.getCode().getCode(),
-		            ace.getLogMessage());
+		    uploadAndPublish(reportingFactory, reportProcessing, file);
+		    delete(reportingFactory, file);
+		
+		// this is done to bypass product deletion on OBS upload errors. Don't know why, though
+		} catch (ObsException ace) {
+			// is already logged
 		    this.appStatus.setError(family);
 		}
+	   reportProcessing.reportStop("End processing of " + file.getName());
+       this.appStatus.setWaiting();
 	}
 
-	private String uploadAndPublish(File file) throws ObsException {
+	private final void uploadAndPublish(final Reporting.Factory reportingFactory,  final Reporting reportProcessing, final File file) throws ObsException {
 		String productName = file.getName();
 		try {
 		    FileDescriptor descriptor = extractor.extractDescriptor(file);
 		    productName = descriptor.getProductName();
+		    reportingFactory.product(extractor.getFamily(), productName);
+		    
+		    final Reporting reportUpload = reportingFactory.newReporting(1);		    
+		    reportUpload.reportStart("Start uploading file " + file.getName() +" in OBS");
+		    		    
 		    // Store in object storage
-		    upload(file, productName, descriptor);
+		    try {
+				upload(file, productName, descriptor);
+				reportUpload.reportStop("End uploading file " + file.getName() +" in OBS");
+			} catch (ObsAlreadyExist ace) {
+				reportUpload.reportError("file {} already exist in OBS", file.getName());
+				return;
+			} catch (ObsException e) {
+				reportUpload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				throw e;
+			}
 		    // Send metadata
-		    publish(productName, descriptor);
+		    publish(reportingFactory, productName, descriptor);
+		    
 		} catch (IngestorIgnoredFileException ce) {
-		    LOGGER.debug(
-		            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [productName {}] [code {}] {}",
-		            productName, ce.getCode().getCode(),
-		            ce.getLogMessage());
-		} catch (ObsAlreadyExist ace) {
-		    LOGGER.error(
-		            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [productName {}] [code {}] {}",
-		            productName, ace.getCode().getCode(),
-		            ace.getLogMessage());
-		} catch (ObsException ace) {
+			reportProcessing.reportDebug("[code {}] {}", ce.getCode().getCode(), ce.getLogMessage());
+		} catch (ObsException ace) {	
+			// this is done to bypass product deletion on OBS upload errors. Don't know why, though
 		    throw ace;
 		} catch (AbstractCodedException ace) {
-		    LOGGER.error(
-		            "[REPORT] [MONITOR] [s1pdgsTask Ingestion] [STOP KO] [productName {}] [code {}] {}",
-		            productName, ace.getCode().getCode(),
-		            ace.getLogMessage());
 		    this.appStatus.setError(family);
 		}
-		return productName;
 	}
 
-	private final void upload(File file, String productName, FileDescriptor descriptor)
-			throws ObsException, ObsAlreadyExist {
-		LOGGER.info(
-		        "[MONITOR] [step 1] [productName {}] Starting uploading file in OBS",
-		        productName);
-		if (!obsService.exist(family,
-		        descriptor.getKeyObjectStorage())) {
-		    obsService.uploadFile(family,
-		            descriptor.getKeyObjectStorage(), file);
-		} else {
-		    throw new ObsAlreadyExist(family,
-		            descriptor.getProductName(), new Exception(
-		                    "File already exist in object storage"));
+	private final void upload(final File file, final String productName, final FileDescriptor descriptor) throws ObsException, ObsAlreadyExist {		
+		if (obsService.exist(family,descriptor.getKeyObjectStorage())) {
+			throw new ObsAlreadyExist(family, descriptor.getProductName(), new Exception("File already exist in object storage"));
+		}
+		obsService.uploadFile(family,descriptor.getKeyObjectStorage(), file);
+	}
+
+	private final void publish(final Reporting.Factory reportingFactory, final String productName, final FileDescriptor descriptor) throws MqiPublicationError {
+		if (descriptor.isHasToBePublished()) {			
+			final Reporting reportPublish= reportingFactory.newReporting(2);	
+			reportPublish.reportStart("Start publishing file in topic");		    
+			try {
+				publisher.send(buildDto(descriptor));
+				reportPublish.reportStop("End publishing file in topic");
+			} catch (MqiPublicationError e) {
+				reportPublish.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				throw e;
+			}
 		}
 	}
 
-	private final void publish(String productName, FileDescriptor descriptor) throws MqiPublicationError {
-		if (descriptor.isHasToBePublished()) {
-		    LOGGER.info(
-		            "[REPORT] [MONITOR] [step 2] [productName {}] [s1pdgsTask Ingestion] [STOP OK] Publishing file in topic",
-		            productName);
-		    publisher.send(buildDto(descriptor));
-		}
-	}
-
-	private final void delete(File file, String productName) {
-		LOGGER.info(
-		        "[MONITOR] [step 3] [productName {}] Starting removing file",
-		        productName);
+	private final void delete(final Reporting.Factory reportingFactory, final File file) {		
+		final Reporting reportDelete = reportingFactory.newReporting(3);	
+		reportDelete.reportStart("Start removing file " + file.getName());
 		try {
 		    Files.delete(Paths.get(file.getPath()));
+			reportDelete.reportStop("End removing file " + file.getName());
 		} catch (Exception e) {
-		    LOGGER.error(
-		            "[MONITOR] [step 3] [code {}] [file {}] File cannot be removed from FTP storage: {}",
-		            AbstractCodedException.ErrorCode.INGESTOR_CLEAN
-		                    .getCode(),
-		            file.getPath(), e.getMessage());
+			reportDelete.reportError(
+					"[code {}] file {} cannot be removed from FTP storage: {}", 
+		            AbstractCodedException.ErrorCode.INGESTOR_CLEAN .getCode(),
+		            file.getPath(), 
+		            e.getMessage()
+		    );
 		    this.appStatus.setError(family);
 		}
 	}

@@ -27,6 +27,8 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 @Component
 @ConditionalOnProperty(name = "process.level", havingValue = "L0_SEGMENT")
@@ -70,13 +72,17 @@ public class L0SegmentAppConsumer
      * Periodic function for processing messages
      */
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
-    public void consumeMessages() {
+    public void consumeMessages() {    	
+    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L0_SEGMENTJobGeneration"); 
+    	
         // First, consume message
         GenericMessageDto<LevelSegmentDto> mqiMessage = readMessage();
         if (mqiMessage == null || mqiMessage.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;
         }
+        final Reporting reporting = reportingFactory.newReporting(0);
+        
         // process message
         appStatus.setProcessing(mqiMessage.getIdentifier());
         int step = 1;
@@ -93,6 +99,7 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
+            reporting.reportStart("Start job generation using " + mqiMessage.getBody().getName());
             AppDataJobDto<LevelSegmentDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
@@ -124,6 +131,7 @@ public class L0SegmentAppConsumer
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(),
                     ace.getLogMessage());
+            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
         }
 
         // Ack and check if application shall stopped
@@ -131,6 +139,8 @@ public class L0SegmentAppConsumer
 
         LOGGER.info("[MONITOR] [step 0] [productName {}] End",
                 productName);
+        
+        reporting.reportStop("End job generation using " + mqiMessage.getBody().getName());
     }
 
     protected AppDataJobDto<LevelSegmentDto> buildJob(
@@ -179,20 +189,11 @@ public class L0SegmentAppConsumer
                 productDto.setSatelliteId(satelliteId);
                 jobDto.setProduct(productDto);
 
-                LOGGER.info(
-                        "[REPORT] [MONITOR] [s1pdgsTask L0_SEGMENTJobGeneration] [START] [productName {}] Starting job generation",
-                        productDto.getProductName());
-                LOGGER.info(
-                        "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
-                        productDto.getProductName(), leveldto.getName());
-
                 return appDataService.newJob(jobDto);
             } else {
                 AppDataJobDto<LevelSegmentDto> jobDto =
                         existingJobsForDatatake.get(0);
-                LOGGER.info(
-                        "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
-                        jobDto.getProduct().getProductName(), leveldto.getName());
+
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
                 }
@@ -205,9 +206,7 @@ public class L0SegmentAppConsumer
         } else {
             // Update pod if needed
             AppDataJobDto<LevelSegmentDto> jobDto = existingJobs.get(0);
-            LOGGER.info(
-                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask L0_SEGMENTJobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
-                    jobDto.getProduct().getProductName(), leveldto.getName());
+
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
                 jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,

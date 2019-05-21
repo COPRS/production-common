@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
 
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class EdrsSessionsExtractorTest {
 
@@ -110,6 +112,7 @@ public class EdrsSessionsExtractorTest {
     public void testExtractMetadata() throws MetadataExtractionException, AbstractCodedException {
         EdrsSessionFileDescriptor expectedDescriptor =
                 new EdrsSessionFileDescriptor();
+        
         expectedDescriptor.setFilename("D_123_ch01_D.RAW");
         expectedDescriptor.setRelativePath("S1A/123/ch01/D_123_ch01_D.RAW");
         expectedDescriptor.setProductName("D_123_ch01_D.RAW");
@@ -121,9 +124,14 @@ public class EdrsSessionsExtractorTest {
         expectedDescriptor.setSessionIdentifier("123");
         expectedDescriptor.setKeyObjectStorage("S1A/123/ch01/D_123_ch01_D.RAW");
         expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
+        
+        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
+        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
+        		.product(ProductFamily.EDRS_SESSION.toString(), "D_123_ch01_D.RAW");
+        
         JSONObject expected = extractor.mdBuilder
                 .buildEdrsSessionFileMetadata(expectedDescriptor);
-        JSONObject result = extractor.extractMetadata(inputMessage);
+        JSONObject result = extractor.extractMetadata(reportingFactory, inputMessage);
         for (String key: expected.keySet()) {
             if (!"insertionTime".equals(key)) {
                 assertEquals(expected.get(key), result.get(key));

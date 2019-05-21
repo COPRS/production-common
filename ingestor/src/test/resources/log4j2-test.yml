@@ -7,7 +7,7 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-ingestor-app:1.0.0 %-5level: %msg [%thread] %n"
+        Pattern: "%msg %n"
     RollingFile:
       name: FILE
       fileName: ${env:ingestor_logging_file:-./s1pdgs-ingestor.log}

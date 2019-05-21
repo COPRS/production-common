@@ -17,6 +17,8 @@ import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * @author Viveris Technologies
@@ -67,9 +69,12 @@ public class SegmentsConsumer {
     public void receive(final LevelSegmentDto dto,
             final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
-        LOGGER.info(
-                "[REPORT] [MONITOR] [step 0] [family {}] [productName {}] [s1pdgsTask Archiver] [START] Start distribution",
-                dto.getFamily(), dto.getName());
+    	
+    	final Reporting reporting = new LoggerReporting.Factory(LOGGER, "Archiver")
+    			.product(dto.getFamily().toString(), dto.getName())
+    			.newReporting(0);
+    	
+    	reporting.reportStart("Start Distribution");    	
         this.appStatus.setProcessing("SLICES");
         try {
             if (!devProperties.getActivations().get("download-all")) {
@@ -83,22 +88,14 @@ public class SegmentsConsumer {
                                 + dto.getFamily().name().toLowerCase());
             }
             acknowledgment.acknowledge();
-        } catch (ObsException e) {
-            LOGGER.error(
-                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask Archiver] [STOP KO] [family {}] [productName {}] [resuming {}] {}",
-                    dto.getFamily(), dto.getName(),
-                    new ResumeDetails(topic, dto), e.getMessage());
+        } catch (ObsException e) {        	
+        	reporting.reportError("[resuming {}] {}", new ResumeDetails(topic, dto), e.getMessage());
             this.appStatus.setError("SLICES");
         } catch (Exception exc) {
-            LOGGER.error(
-                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask Archiver] [STOP KO] [family {}] [productName {}] [code {}] Exception occurred during acknowledgment {}",
-                    dto.getFamily(), dto.getName(),
-                    ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
+        	reporting.reportError("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
             this.appStatus.setError("SLICES");
         }
-        LOGGER.info(
-                "[REPORT] [MONITOR] [step 0] [family {}] [productName {}] [s1pdgsTask Archiver] [STOP OK] End Distribution",
-                dto.getFamily(), dto.getName());
+    	reporting.reportStop("End Distribution");
         this.appStatus.setWaiting();
     }
 }

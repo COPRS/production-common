@@ -130,9 +130,6 @@ public abstract class AbstractGenericConsumer<T> {
     protected void ackNegatively(final boolean stop,
             final GenericMessageDto<T> dto, final String productName,
             final String errorMessage) {
-        LOGGER.error(
-                "[REPORT] [MONITOR] [step 3] [s1pdgsTask {}] [subTask Consume] [productName {}] [STOP K0] Acknowledging negatively: {}",
-                getTaskForFunctionalLog(), productName, errorMessage);
         LOGGER.error(errorMessage);
         appStatus.setError("NEXT_MESSAGE");
         try {
@@ -149,7 +146,7 @@ public abstract class AbstractGenericConsumer<T> {
 
         // Log for functional monitoring
         LOGGER.info(
-                "[REPORT] [MONITOR] [step 3] [s1pdgsTask {}] [subTask Consume] [productName {}] [STOP OK] Acknowledging positively",
+                "[MONITOR] [step 3] [s1pdgsTask {}] [subTask Consume] [productName {}] [STOP OK] Acknowledging positively",
                 getTaskForFunctionalLog(), productName);
         try {
             mqiService.ack(

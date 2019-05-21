@@ -1,6 +1,10 @@
 package esa.s1pdgs.cpoc.wrapper.job.file;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +18,8 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
 import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
@@ -116,12 +122,28 @@ public class InputDownloader {
         // Create necessary directories and download input with content in
         // message
         List<S3DownloadFile> downloadToBatch = sortInputs();
+        
+        final Reporting reporting = new LoggerReporting.Factory(LOGGER, "InputDownloader")
+        		.newReporting(0);
+        
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (final S3DownloadFile input : downloadToBatch) {
+        	stringBuilder.append(input.getKey()).append(' ');
+        }        
+        final String listinputs = stringBuilder.toString().trim();
+  
+        reporting.reportStart("Start download of products " + listinputs);
 
         // Download input from object storage in batch
-        downloadInputs(downloadToBatch);
-
-        // Complete download
-        completeDownload();
+        try {
+			downloadInputs(downloadToBatch);
+			 // Complete download
+	        completeDownload();	      	
+	        reporting.reportStopWithTransfer("End download of products " + listinputs, getWorkdirSize());			
+		} catch (AbstractCodedException e) {
+			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			throw e;
+		}       
     }
 
     /**
@@ -145,9 +167,7 @@ public class InputDownloader {
      * 
      * @throws InternalErrorException
      */
-    protected void completeDownload() throws InternalErrorException {
-        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [STOP OK] 5 - Updating status.txt file with COMPLETED",
-                prefixMonitorLogs, this.appLevel);
+    private final void completeDownload() throws InternalErrorException {
         this.writeStatusFile(STATUS_COMPLETION);
         poolProcExecutor.setActive(true);
     }
@@ -228,28 +248,19 @@ public class InputDownloader {
      * @param downloadToBatch
      * @throws AbstractCodedException
      */
-    protected void downloadInputs(final List<S3DownloadFile> downloadToBatch)
+    private final void downloadInputs(final List<S3DownloadFile> downloadToBatch)
             throws AbstractCodedException {
-        double size = Double.valueOf(downloadToBatch.size());
-        String listinputs="";
-        for (int i = 0; i < size; i++) {
-        	listinputs =  listinputs + " " + downloadToBatch.get(i).getKey();
-        }
-        LOGGER.info("[REPORT] {} [s1pdgsTask {}Processing] [subTask contextCopy] [START] 4 - Starting downloading inputs from object storage [inputs {}]",
-                prefixMonitorLogs, this.appLevel, listinputs);
-        double nbPool = Math.ceil(size / sizeDownBatch);
+
+        final int numberOfBatches = (int) Math.ceil(((double) downloadToBatch.size()) / ((double) sizeDownBatch));
+
         int nbUploadedRaw = 0;
-        for (int i = 0; i < nbPool; i++) {
+        for (int i = 0; i < numberOfBatches; i++) {
             if (Thread.currentThread().isInterrupted()) {
-                throw new InternalErrorException(
-                        "The current thread as been interrupted");
+                throw new InternalErrorException("The current thread as been interrupted");
             } else {
-                LOGGER.info("{} 4 - Starting downloading batch {}",
-                        prefixMonitorLogs, i);
-                int lastIndex = Math.min((i + 1) * sizeDownBatch,
-                        downloadToBatch.size());
-                List<S3DownloadFile> subListS3 =
-                        downloadToBatch.subList(i * sizeDownBatch, lastIndex);
+                LOGGER.info("{} 4 - Starting downloading batch {}", prefixMonitorLogs, i);
+                int lastIndex = Math.min((i + 1) * sizeDownBatch, downloadToBatch.size());                
+                List<S3DownloadFile> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
                 this.obsService.downloadFilesPerBatch(subListS3);
                 if (appLevel == ApplicationLevel.L0 && nbUploadedRaw < 2) {
                     nbUploadedRaw += subListS3.stream().filter(
@@ -266,5 +277,22 @@ public class InputDownloader {
                 }
             }
         }
+    }
+    
+    private final long getWorkdirSize() throws InternalErrorException
+    {
+        try {
+			final Path folder = Paths.get(localWorkingDir);
+			return Files.walk(folder)
+			  .filter(p -> p.toFile().isFile())
+			  .mapToLong(p -> p.toFile().length())
+			  .sum();
+			
+		} catch (IOException e) {
+			throw new InternalErrorException(
+					String.format("Error on determining size of %s: %s", localWorkingDir, e.getMessage()),
+					e
+			);
+		}
     }
 }

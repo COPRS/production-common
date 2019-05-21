@@ -5,17 +5,22 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolProcessor;
 import esa.s1pdgs.cpoc.wrapper.test.SystemUtils;
 
 public class PoolProcessorTest {
 
+	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(PoolProcessorTest.class), "TestProcessing");
+	  
     private File testDir = new File("./3");
 
     @After
@@ -31,7 +36,7 @@ public class PoolProcessorTest {
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdMkdir()));
         PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60);
         assertFalse(testDir.exists());
-        processor.process();
+        processor.process(reportingFactory);
         assertTrue(testDir.exists() && testDir.isDirectory());
     }
 
@@ -42,7 +47,7 @@ public class PoolProcessorTest {
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdLs()));
         PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60);
         assertFalse(testDir.exists());
-        processor.process();
+        processor.process(reportingFactory);
         assertTrue(testDir.exists() && testDir.isDirectory());
     }
 
@@ -55,6 +60,6 @@ public class PoolProcessorTest {
         LevelJobPoolDto dto = new LevelJobPoolDto();
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdFalse()));
         PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60);
-        processor.process();
+        processor.process(reportingFactory);
     }
 }

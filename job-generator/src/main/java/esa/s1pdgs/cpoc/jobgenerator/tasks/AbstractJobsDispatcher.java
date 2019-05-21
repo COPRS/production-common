@@ -21,6 +21,8 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * Job dispatcher<br/>
@@ -170,12 +172,13 @@ public abstract class AbstractJobsDispatcher<T> {
     public void dispatch(final AppDataJobDto<T> job)
             throws AbstractCodedException {
         String productName = job.getProduct().getProductName();
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Dispatch")
+    			.product(job.getProduct().getProductType(), productName);
+    	
+    	final Reporting reporting = reportingFactory.newReporting(0); 
+    	reporting.reportStart("Start dispatching product");
+    	
         try {
-            LOGGER.info(
-                    "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [START] Dispatching product",
-                    productName,
-                    getTaskForFunctionalLog());
-
             List<String> taskTables = getTaskTables(job);
             List<String> notDealTaskTables = new ArrayList<>(taskTables);
             List<AppDataJobGenerationDto> jobGens = job.getGenerations();
@@ -220,17 +223,11 @@ public abstract class AbstractJobsDispatcher<T> {
                 appDataService.patchJob(job.getIdentifier(), job, false, false,
                         true);
             }
+            reporting.reportStop("End dispatching product");
 
-            LOGGER.info(
-                    "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [STOP OK] [outputs {}] Product dispatched",
-                    productName,
-                    getTaskForFunctionalLog(), taskTables);
 
         } catch (AbstractCodedException ace) {
-            LOGGER.error(
-                    "[REPORT] [productName {}] [s1pdgsTask {}] [subTask Dispatch] [STOP KO] {} Dispatching product failed ",
-                    productName,
-                    getTaskForFunctionalLog(), ace.getLogMessage());
+        	reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
             throw ace;
         }
     }

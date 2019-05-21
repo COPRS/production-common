@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class LevelProductsExtractorTest {
 
@@ -85,7 +87,7 @@ public class LevelProductsExtractorTest {
      * Job to process
      */
     private GenericMessageDto<LevelProductDto> inputMessageAux;
-
+    
     /**
      * Initialization
      * 
@@ -242,7 +244,12 @@ public class LevelProductsExtractorTest {
 
         JSONObject expected = extractor.mdBuilder
                 .buildL0SliceOutputFileMetadata(descriptor, file);
-        JSONObject result = extractor.extractMetadata(inputMessageSafe);
+        
+        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
+        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
+        		.product(ProductFamily.L0_SLICE.toString(), "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+        
+        JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
         for (String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
                     || "creationTime".equals(key))) {
@@ -297,7 +304,11 @@ public class LevelProductsExtractorTest {
 
         JSONObject expected = extractor.mdBuilder
                 .buildL0SliceOutputFileMetadata(descriptor, file);
-        JSONObject result = extractor.extractMetadata(inputMessageSafe);
+        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
+        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
+        		.product(ProductFamily.L0_ACN.toString(), "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+        
+        JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
         for (String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
                     || "creationTime".equals(key))) {
@@ -349,7 +360,12 @@ public class LevelProductsExtractorTest {
 
         JSONObject expected = extractor.mdBuilder
                 .buildL1SliceOutputFileMetadata(descriptor, file);
-        JSONObject result = extractor.extractMetadata(inputMessageSafe);
+        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
+        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
+        		.product(ProductFamily.L1_SLICE.toString(), "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+        
+        
+        JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
         for (String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
                     || "creationTime".equals(key))) {
@@ -401,7 +417,13 @@ public class LevelProductsExtractorTest {
 
         JSONObject expected = extractor.mdBuilder
                 .buildL1SliceOutputFileMetadata(descriptor, file);
-        JSONObject result = extractor.extractMetadata(inputMessageSafe);
+        
+        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
+        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
+        		.product(ProductFamily.L1_ACN.toString(), "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+        
+        
+        JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
         for (String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) 
                     || "creationTime".equals(key))) {

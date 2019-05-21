@@ -27,6 +27,8 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 @Component
 @ConditionalOnProperty(name = "process.level", havingValue = "L1")
@@ -74,6 +76,9 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
      */
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {
+    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L1JobGeneration"); 
+    	final Reporting reporting = reportingFactory.newReporting(0);
+    	
         // First, consume message
         GenericMessageDto<LevelProductDto> mqiMessage = readMessage();
         if (mqiMessage == null || mqiMessage.getBody() == null) {
@@ -92,6 +97,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             // Check if a job is already created for message identifier
             LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job",
                     productName);
+            reporting.reportStart("Start job generation using " + mqiMessage.getBody().getProductName());
             AppDataJobDto<LevelProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
@@ -116,12 +122,14 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             errorMessage = String.format(
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(), ace.getLogMessage());
+            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
         }
 
         // Ack and check if application shall stopped
         ackProcessing(mqiMessage, ackOk, productName, errorMessage);
 
         LOGGER.info("[MONITOR] [step 0] [productName {}] End", productName);
+        reporting.reportStart("End job generation using " + mqiMessage.getBody().getProductName());
     }
 
     protected AppDataJobDto<LevelProductDto> buildJob(
@@ -172,23 +180,12 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
                     AppDataJobProductDto.TIME_FORMATTER));
             jobDto.setProduct(productDto);
 
-            LOGGER.info(
-                    "[REPORT] [MONITOR] [s1pdgsTask L1JobGeneration] [START] [productName {}] Starting job generation",
-                    jobDto.getProduct().getProductName());
-            LOGGER.info(
-                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
-                    jobDto.getProduct().getProductName(),
-                    leveldto.getProductName());
-
             return appDataService.newJob(jobDto);
 
         } else {
             // Update pod if needed
             AppDataJobDto<LevelProductDto> jobDto = existingJobs.get(0);
-            LOGGER.info(
-                    "[REPORT] [MONITOR] [step 0] [s1pdgsTask L1JobGeneration] [subTask Consume] [START] [productName {}] [inputs {}] Starting job generation",
-                    jobDto.getProduct().getProductName(),
-                    leveldto.getProductName());
+
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
                 jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,

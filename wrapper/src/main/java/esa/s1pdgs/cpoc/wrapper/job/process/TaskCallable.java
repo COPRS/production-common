@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * Execute one process and wait for its completion
@@ -43,13 +44,10 @@ public class TaskCallable implements Callable<TaskResult> {
      */
     private final String workDirectory;
     
-    /**
-     * Prefix for REPORT
-     */
-    private final String prefixReport;
-    
     private final Consumer<String> stdOutConsumer;
     private final Consumer<String> stdErrConsumer;
+    
+    private final Reporting reporting;
 
     /**
      * @param binaryPath
@@ -57,33 +55,32 @@ public class TaskCallable implements Callable<TaskResult> {
      * @param workDirectory
      */
     public TaskCallable(final String binaryPath, final String jobOrderPath,
-            final String workDirectory, final String prefixReport) {
-    	this(binaryPath, jobOrderPath, workDirectory, prefixReport, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER);
+            final String workDirectory, final Reporting reporting) {
+    	this(binaryPath, jobOrderPath, workDirectory, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER, reporting);
     }
     
     TaskCallable(
     		String binaryPath, 
     		String jobOrderPath, 
     		String workDirectory, 
-    		String prefixReport,
 			Consumer<String> stdOutConsumer, 
-			Consumer<String> stdErrConsumer
+			Consumer<String> stdErrConsumer,
+			Reporting reporting
 	) {
 		this.binaryPath = binaryPath;
 		this.jobOrderPath = jobOrderPath;
 		this.workDirectory = workDirectory;
-		this.prefixReport = prefixReport;
 		this.stdOutConsumer = stdOutConsumer;
 		this.stdErrConsumer = stdErrConsumer;
+		this.reporting = reporting;
 	}
 
 	/**
      * Execution of the binary
      */
     @Override
-    public TaskResult call() throws InternalErrorException {
-        LOGGER.info("{} [task {}] [workDirectory {}] [START] Starting call",
-                prefixReport, binaryPath, workDirectory);
+    public TaskResult call() throws InternalErrorException {        
+        reporting.reportStart("Start Task " + binaryPath);
 
         int r = -1;
 
@@ -107,21 +104,24 @@ public class TaskCallable implements Callable<TaskResult> {
 			err.get();
 
 		} catch (InterruptedException ie) {
+			reporting.reportError("Interrupted Task " + binaryPath);
 			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException {}", binaryPath, workDirectory,
 					ie.getMessage());
 			Thread.currentThread().interrupt();
 		} catch (IOException ioe) {
-			throw new InternalErrorException("Cannot build the command for the task " + binaryPath, ioe);
+			final InternalErrorException ex = new InternalErrorException("Cannot build the command for the task " + binaryPath, ioe);
+			reporting.reportError("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage());
+			throw ex;
 		} catch (ExecutionException e) {
-			throw new InternalErrorException("Error on consuming stdout/stderr of task " + binaryPath, e);
+			final InternalErrorException ex =  new InternalErrorException("Error on consuming stdout/stderr of task " + binaryPath, e);
+			reporting.reportError("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage());
+			throw ex;
 		} finally {
 			if (process != null) {
 				process.destroy();
 			}
-		}
-        LOGGER.info(
-                "{} [task {}] [workDirectory {}] [STOP OK] Ending call with exit code {}",
-                this.prefixReport, binaryPath, workDirectory, r);
+		}        
+        reporting.reportStop("End Task " + binaryPath + " with exit code " + r);
 
         return new TaskResult(binaryPath, r);
     }

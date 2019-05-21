@@ -5,8 +5,6 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
@@ -22,6 +21,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * KAFKA consumer. Consume on a topic defined in configuration file
@@ -30,12 +30,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  */
 @Service
 public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(EdrsSessionsExtractor.class);
 
     /**
      * Pattern for ERDS session files to extract data
@@ -77,20 +71,25 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
      */
     @Override
     protected JSONObject extractMetadata(
+     		final Reporting.Factory reportingFactory, 
             final GenericMessageDto<EdrsSessionDto> message)
             throws AbstractCodedException {
-        LOGGER.info(
-                "[MONITOR] [step 2] [EDRS_SESSIONS] [obs {}] Extracting from filename",
-                extractProductNameFromDto(message.getBody()));
-        EdrsSessionFileDescriptor edrsFileDescriptor = fileDescriptorBuilder
-                .buildEdrsSessionFileDescriptor(new File(this.localDirectory
-                        + extractProductNameFromDto(message.getBody())));
+    	
+        final String productName = extractProductNameFromDto(message.getBody());
+        final ProductFamily family = ProductFamily.EDRS_SESSION;
+        
+        reportingFactory.product(family.toString(), productName); 
+        
+        final EdrsSessionFileDescriptor edrsFileDescriptor = extractFromFilename(
+        		reportingFactory, 
+        		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(this.localDirectory + productName))
+        );
 
-        // Build metadata from file and extracted
-        LOGGER.info(
-                "[MONITOR] [step 3] [EDRS_SESSIONS] [obs {}] Extracting from file",
-                extractProductNameFromDto(message.getBody()));
-        return mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor);
+        final JSONObject obj = extractFromFile(
+        		reportingFactory,
+        		() -> mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor)
+        );
+		return obj;
     }
 
     /**

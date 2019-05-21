@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class LevelSegmentsExtractorTest {
 
@@ -242,7 +244,13 @@ public class LevelSegmentsExtractorTest {
 
         JSONObject expected = extractor.mdBuilder
                 .buildL0SegmentOutputFileMetadata(descriptor, file);
-        JSONObject result = extractor.extractMetadata(inputMessageSafe);
+        
+        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
+        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
+        		.product(ProductFamily.L0_SEGMENT.toString(), "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE");
+        
+        
+        JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
         for (String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) 
                     || "creationTime".equals(key))) {

@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -23,11 +24,12 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
@@ -80,6 +82,9 @@ public class OutputProcessorTest {
      * Reports output to publish
      */
     private List<FileQueueMessage> reportToPublish;
+    
+    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(OutputProcessorTest.class), "TestOutputHandling");
+	
 
     /**
      * Initialization
@@ -294,11 +299,10 @@ public class OutputProcessorTest {
 
     /**
      * TEst sort outputs
-     * 
-     * @throws UnknownFamilyException
+     * @throws AbstractCodedException 
      */
     @Test
-    public void testSortOutputsForL0() throws UnknownFamilyException {
+    public void testSortOutputsForL0() throws AbstractCodedException {
         List<S3UploadFile> uploadBatch = new ArrayList<>();
         List<ObsQueueMessage> outputToPublish = new ArrayList<>();
         List<FileQueueMessage> reportToPublish = new ArrayList<>();
@@ -359,11 +363,10 @@ public class OutputProcessorTest {
 
     /**
      * TEst sort outputs
-     * 
-     * @throws UnknownFamilyException
+     * @throws AbstractCodedException 
      */
     @Test
-    public void testSortOutputsForLOSegmentFast() throws UnknownFamilyException {
+    public void testSortOutputsForLOSegmentFast() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsService, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT);
@@ -441,11 +444,10 @@ public class OutputProcessorTest {
 
     /**
      * TEst sort outputs
-     * 
-     * @throws UnknownFamilyException
+     * @throws AbstractCodedException 
      */
     @Test
-    public void testSortOutputsForL1Nrt() throws UnknownFamilyException {
+    public void testSortOutputsForL1Nrt() throws AbstractCodedException {
         inputMessage.getBody().setProductProcessMode("NRT");
         processor =
                 new OutputProcessor(obsService, procuderFactory, inputMessage,
@@ -511,11 +513,10 @@ public class OutputProcessorTest {
 
     /**
      * TEst sort outputs
-     * 
-     * @throws UnknownFamilyException
+     * @throws AbstractCodedException 
      */
     @Test
-    public void testSortOutputsForL1RealOutputs() throws UnknownFamilyException {
+    public void testSortOutputsForL1RealOutputs() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsService, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1);
@@ -630,13 +631,12 @@ public class OutputProcessorTest {
 
     @Test
     public void testPublishAccordingUploadFiles1() throws Exception {
-        Method method = getMethodForPublishAccodingUpload();
-
-        method.invoke(processor, 2, "", new ArrayList<>());
+        Method method = getMethodForPublishAccodingUpload();        
+        method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
 
-        method.invoke(processor, 2, "o2", outputToPublish);
+        method.invoke(processor, reportingFactory, 2, "o2", outputToPublish);
         verify(procuderFactory, times(1))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(Mockito
@@ -649,11 +649,11 @@ public class OutputProcessorTest {
     public void testPublishAccordingUploadFiles2() throws Exception {
         Method method = getMethodForPublishAccodingUpload();
 
-        method.invoke(processor, 2, "", new ArrayList<>());
+        method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
 
-        method.invoke(processor, 2, OutputProcessor.NOT_KEY_OBS,
+        method.invoke(processor, reportingFactory, 2, OutputProcessor.NOT_KEY_OBS,
                 outputToPublish);
         verify(procuderFactory, times(3))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
@@ -670,11 +670,11 @@ public class OutputProcessorTest {
 
         Method method = getMethodForPublishAccodingUpload();
 
-        method.invoke(processor, 2, "", new ArrayList<>());
+        method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
 
-        method.invoke(processor, 2, OutputProcessor.NOT_KEY_OBS,
+        method.invoke(processor, reportingFactory, 2, OutputProcessor.NOT_KEY_OBS,
                 outputToPublish);
         verify(procuderFactory, times(3))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
@@ -684,15 +684,15 @@ public class OutputProcessorTest {
     private Method getMethodForPublishAccodingUpload()
             throws NoSuchMethodException, SecurityException {
         Method method = processor.getClass().getDeclaredMethod(
-                "publishAccordingUploadFiles", double.class, String.class,
+                "publishAccordingUploadFiles", Reporting.Factory.class, double.class, String.class,
                 List.class);
         method.setAccessible(true);
         return method;
     }
 
     @Test
-    public void testProcessProducts() throws AbstractCodedException {
-        processor.processProducts(uploadBatch, outputToPublish);
+    public void testProcessProducts() throws AbstractCodedException {    	
+        processor.processProducts(reportingFactory,uploadBatch, outputToPublish);
 
         // check publication
         verify(procuderFactory, times(3))

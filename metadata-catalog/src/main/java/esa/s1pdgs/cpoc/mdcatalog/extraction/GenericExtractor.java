@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -7,22 +8,31 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * @author Viveris Technologies
  * @param <T>
  */
 public abstract class GenericExtractor<T> {
+	
+    interface ThrowingSupplier<E>
+    {
+    	E get() throws AbstractCodedException;
+    }
 
     /**
      * Logger
@@ -125,52 +135,59 @@ public abstract class GenericExtractor<T> {
         // Process Message
         // ----------------------------------------------------------
         T dto = message.getBody();
-        LOGGER.info(
-                "[REPORT] [Step 0] [{}] [s1pdgsTask MetadataExtraction] [START] [productName {}] Starting metadata extraction",
-                category, extractProductNameFromDto(dto));
+        
+        final String productName = extractProductNameFromDto(dto);
+        
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "MetadataExtraction")
+        		.product(category.toString(), productName);
+        
+        final Reporting report = reportingFactory.newReporting(0);        
+        report.reportStart("Starting metadata extraction");        
         appStatus.setProcessing(category, message.getIdentifier());
 
-        try {
-            JSONObject metadata = extractMetadata(message);
+        try { 	
+        	
+            final JSONObject metadata = extractMetadata(reportingFactory, message);
+            
+            final Reporting reportPublish = reportingFactory.newReporting(4);            
+            reportPublish.reportStart("Start publishing metadata");
 
-            // Publish metadata
-            LOGGER.info(
-                    "[MONITOR] [step 4] [{}] [productName {}] Publishing metadata",
-                    category, extractProductNameFromDto(dto));
-            if (!esServices.isMetadataExist(metadata)) {
-                esServices.createMetadata(metadata);
-            }
-
+            try {
+				if (!esServices.isMetadataExist(metadata)) {
+				    esServices.createMetadata(metadata);
+				}
+			    reportPublish.reportStop("End publishing metadata");
+				
+			} catch (Exception e) {
+				reportPublish.reportError("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
+				throw e;
+			}
             // Acknowledge
-            ackPositively(message);
+            ackPositively(reportingFactory, message);
 
         } catch (AbstractCodedException e1) {
             String errorMessage = String.format(
                     "[MONITOR] [%s] [productName %s] [code %s] %s", category,
                     extractProductNameFromDto(dto), e1.getCode().getCode(),
                     e1.getLogMessage());
-            ackNegatively(message, errorMessage);
+            ackNegatively(reportingFactory, message, errorMessage);
         } catch (Exception e) {
             String errorMessage = String.format(
                     "[MONITOR] [%s] [productName %s] [code %s] [msg %s]",
                     category, extractProductNameFromDto(dto),
                     ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
-            ackNegatively(message, errorMessage);
+            ackNegatively(reportingFactory, message, errorMessage);
         } finally {
             this.cleanProcessing(message);
         }
 
-        LOGGER.info(
-                "[MONITOR] [step 6] [{}] [productName {}] Checking status consumer",
-                category, extractProductNameFromDto(dto));
         if (appStatus.isFatalError()) {
+            report.reportError("Fatal error");
             System.exit(-1);
         } else {
             appStatus.setWaiting(category);
-        }
-
-        LOGGER.info("[MONITOR] [step 0] [{}] [productName {}] End", category,
-                extractProductNameFromDto(dto));
+        }        
+        report.reportStop("End metadata extraction");
     }
 
     /**
@@ -179,20 +196,18 @@ public abstract class GenericExtractor<T> {
      * @param dto
      * @param errorMessage
      */
-    protected void ackNegatively(final GenericMessageDto<T> message,
+    final void ackNegatively(
+    		final Reporting.Factory reportingFactory, 
+    		final GenericMessageDto<T> message,
             final String errorMessage) {
-        LOGGER.info(
-                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP KO] [productName {}] Acknowledging negatively",
-                category, extractProductNameFromDto(message.getBody()));
-        LOGGER.error(errorMessage);
+    	
+        final Reporting reportAck = reportingFactory.newReporting(5);            
+        reportAck.reportStart("Start acknowledging negatively");
         try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR,
-                    errorMessage, false));
+            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false));
+            reportAck.reportStop("End acknowledging negatively");
         } catch (AbstractCodedException ace) {
-            LOGGER.error(
-                    "[MONITOR] [step 5] [{}] [productName {}] [code {}] {}",
-                    category, extractProductNameFromDto(message.getBody()),
-                    ace.getCode().getCode(), ace.getLogMessage());
+        	reportAck.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());     
         }
         appStatus.setError(category, "PROCESSING");
     }
@@ -202,18 +217,16 @@ public abstract class GenericExtractor<T> {
      * 
      * @param dto
      */
-    protected void ackPositively(final GenericMessageDto<T> message) {
-        LOGGER.info(
-                "[REPORT] [step 5] [{}] [s1pdgsTask MetadataExtraction] [STOP OK] [productName {}] Acknowledging positively",
-                category, extractProductNameFromDto(message.getBody()));
+    final void ackPositively(final Reporting.Factory reportingFactory, final GenericMessageDto<T> message) {
+    	
+        final Reporting reportAck = reportingFactory.newReporting(5);            
+        reportAck.reportStart("Start acknowledging positively");
+
         try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK,
-                    null, false));
-        } catch (AbstractCodedException ace) {
-            LOGGER.error(
-                    "[MONITOR] [step 5] [{}] [productName {}] [code {}] {}",
-                    category, extractProductNameFromDto(message.getBody()),
-                    ace.getCode().getCode(), ace.getLogMessage());
+            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false));
+            reportAck.reportStop("End acknowledging positively");            
+        } catch (AbstractCodedException ace) {            
+        	reportAck.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());            
             appStatus.setError(category, "PROCESSING");
         }
     }
@@ -233,7 +246,7 @@ public abstract class GenericExtractor<T> {
      * @return
      * @throws AbstractCodedException
      */
-    protected abstract JSONObject extractMetadata(GenericMessageDto<T> message)
+    protected abstract JSONObject extractMetadata(final Reporting.Factory reportingFactory, GenericMessageDto<T> message)
             throws AbstractCodedException;
 
     /**
@@ -243,4 +256,69 @@ public abstract class GenericExtractor<T> {
      */
     protected abstract void cleanProcessing(GenericMessageDto<T> message);
 
+    final File download(
+    		final Reporting.Factory reportingFactory,
+    		final ObsService obsService,
+    		final ProductFamily family, 
+    		final String productName,
+    		final String keyObs
+    ) 
+    	throws AbstractCodedException
+    {
+        final Reporting reportDownload = reportingFactory
+            	.product(family.toString(), productName)        
+            	.newReporting(1);
+            
+        reportDownload.reportStart("Starting download of " + keyObs);
+
+		try {
+			final File metadataFile = obsService.downloadFile(family, keyObs, this.localDirectory);
+			reportDownload.reportStop("End download of " + keyObs);
+			return metadataFile;
+		} catch (AbstractCodedException e) {
+			reportDownload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			throw e;
+		}         
+    }
+    
+    final <E> E extractFromFilename(
+			final Reporting.Factory reportingFactory,
+			final ThrowingSupplier<E> supplier
+	) 
+		throws AbstractCodedException 
+	{
+    	return extractFrom(reportingFactory, 2, "filename", supplier);
+	}
+    
+    final JSONObject extractFromFile(
+			final Reporting.Factory reportingFactory,
+			final ThrowingSupplier<JSONObject> supplier
+	) 
+		throws AbstractCodedException 
+	{
+    	return extractFrom(reportingFactory, 3, "file", supplier);
+	}
+    
+	private final <E> E extractFrom(
+			final Reporting.Factory reportingFactory,
+			final int step,
+			final String extraction,
+			final ThrowingSupplier<E> supplier
+	) 
+		throws AbstractCodedException 
+	{
+		final Reporting reportExtractingFromFilename = reportingFactory.newReporting(step);
+		reportExtractingFromFilename.reportStart("Start extraction from " + extraction);
+		try {
+			E res = supplier.get();
+					//;
+			reportExtractingFromFilename.reportStop("End extraction from " + extraction);
+			return res;
+		} catch (AbstractCodedException e) {
+			reportExtractingFromFilename.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			throw e;
+		}
+	
+
+	}
 }

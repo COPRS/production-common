@@ -2,8 +2,6 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
@@ -22,6 +21,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * KAFKA consumer. Consume on a topic defined in L1 slices
@@ -30,12 +30,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  */
 @Service
 public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(LevelProductsExtractor.class);
 
     /**
      * Pattern for configuration files to extract data
@@ -90,77 +84,72 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
      */
     @Override
     protected JSONObject extractMetadata(
+    		final Reporting.Factory reportingFactory, 
             final GenericMessageDto<LevelProductDto> message)
             throws AbstractCodedException {
         LevelProductDto dto = message.getBody();
         // Upload file
         String keyObs = getKeyObs(message);
-        LOGGER.info(
-                "[MONITOR] [step 1] [LEVEL_PRODUCTS] [family {}] [productName {}] Downloading file {}",
-                message.getBody().getFamily(), extractProductNameFromDto(dto), keyObs);
-        File metadataFile = obsService.downloadFile(
-                message.getBody().getFamily(), keyObs, this.localDirectory);
-
-        // Extract description from pattern
-        JSONObject result = null;
+        
+        final String productName = extractProductNameFromDto(dto);
+        final ProductFamily family = message.getBody().getFamily();
+        
+        reportingFactory.product(family.toString(), productName);
+        
+        final File metadataFile = download(reportingFactory, obsService, family, productName, keyObs);        
+        return extract(reportingFactory, dto, metadataFile, productName, family);
+    }
+    
+    private final JSONObject extract(	
+    		final Reporting.Factory reportingFactory, 
+    		final LevelProductDto dto,
+    		final File metadataFile,
+            final String productName,
+            final ProductFamily family
+    ) 
+    	throws AbstractCodedException
+    {
         switch (dto.getFamily()) {
-            case L0_ACN:
-                LOGGER.info(
-                        "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L0_ACN] [productName {}] Extracting from filename",
-                        extractProductNameFromDto(dto));
-                L0OutputFileDescriptor l0AcnDesc = fileDescriptorBuilder
-                        .buildL0OutputFileDescriptor(metadataFile, dto);
-                // Build metadata from file and extracted
-                LOGGER.info(
-                        "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L0_ACN] [productName {}] Extracting from file",
-                        extractProductNameFromDto(dto));
-                result = mdBuilder.buildL0AcnOutputFileMetadata(l0AcnDesc,
-                        metadataFile);
-                break;
-            case L0_SLICE:
-                LOGGER.info(
-                        "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L0_PRODUCT] [productName {}] Extracting from filename",
-                        extractProductNameFromDto(dto));
-                L0OutputFileDescriptor l0SliceDesc = fileDescriptorBuilder
-                        .buildL0OutputFileDescriptor(metadataFile, dto);
-                // Build metadata from file and extracted
-                LOGGER.info(
-                        "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L0_PRODUCT] [productName {}] Extracting from file",
-                        extractProductNameFromDto(dto));
-                result = mdBuilder.buildL0SliceOutputFileMetadata(l0SliceDesc,
-                        metadataFile);
-                break;
-            case L1_ACN:
-                LOGGER.info(
-                        "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L1_ACN] [productName {}] Extracting from filename",
-                        extractProductNameFromDto(dto));
-                L1OutputFileDescriptor l1AcnDesc = fileDescriptorBuilder
-                        .buildL1OutputFileDescriptor(metadataFile, dto);
-                // Build metadata from file and extracted
-                LOGGER.info(
-                        "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L1_ACN] [productName {}] Extracting from file",
-                        extractProductNameFromDto(dto));
-                result = mdBuilder.buildL1AcnOutputFileMetadata(l1AcnDesc,
-                        metadataFile);
-                break;
-            case L1_SLICE:
-                LOGGER.info(
-                        "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L1_PRODUCT] [productName {}] Extracting from filename",
-                        extractProductNameFromDto(dto));
-                L1OutputFileDescriptor l1SliceDesc = fileDescriptorBuilder
-                        .buildL1OutputFileDescriptor(metadataFile, dto);
-                // Build metadata from file and extracted
-                LOGGER.info(
-                        "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L1_PRODUCT] [productName {}] Extracting from file",
-                        extractProductNameFromDto(dto));
-                result = mdBuilder.buildL1SliceOutputFileMetadata(l1SliceDesc,
-                        metadataFile);
-                break;
-            default:
-                throw new UnknownFamilyException(dto.getFamily().name(),
-                        "Family not managed by the catalog for the category LEVEL_PRODUCTS");
-        }
-        return result;
+	        case L0_ACN:        	
+	        	final L0OutputFileDescriptor l0AcnDesc = extractFromFilename(
+	        			reportingFactory, 
+	        			() -> fileDescriptorBuilder.buildL0OutputFileDescriptor(metadataFile, dto)
+	        	);
+	        	return extractFromFile(
+	        			reportingFactory, 
+	        			() -> mdBuilder.buildL0AcnOutputFileMetadata(l0AcnDesc,metadataFile)
+	        	); 
+	        case L0_SLICE:
+	        	final L0OutputFileDescriptor l0Desc = extractFromFilename(
+	        			reportingFactory, 
+	        			() -> fileDescriptorBuilder.buildL0OutputFileDescriptor(metadataFile, dto)
+	        	);
+	        	return extractFromFile(
+	        			reportingFactory, 
+	        			() -> mdBuilder.buildL0SliceOutputFileMetadata(l0Desc,metadataFile)
+	        	);
+	        case L1_ACN:        	
+	        	final L1OutputFileDescriptor l1AcnDesc = extractFromFilename(
+	        			reportingFactory, 
+	        			() -> fileDescriptorBuilder.buildL1OutputFileDescriptor(metadataFile, dto)
+	        	);
+	        	return extractFromFile(
+	        			reportingFactory, 
+	        			() -> mdBuilder.buildL1AcnOutputFileMetadata(l1AcnDesc,metadataFile)
+	        	);
+	        case L1_SLICE:
+	        	final L1OutputFileDescriptor l1SliceDesc = extractFromFilename(
+	        			reportingFactory, 
+	        			() -> fileDescriptorBuilder.buildL1OutputFileDescriptor(metadataFile, dto)
+	        	);
+	        	return extractFromFile(
+	        			reportingFactory, 
+	        			() -> mdBuilder.buildL1SliceOutputFileMetadata(l1SliceDesc,metadataFile)
+	        	);
+	        default:
+	            throw new UnknownFamilyException(dto.getFamily().name(),
+	                    "Family not managed by the catalog for the category LEVEL_PRODUCTS");
+	    }
     }
 
     /**
