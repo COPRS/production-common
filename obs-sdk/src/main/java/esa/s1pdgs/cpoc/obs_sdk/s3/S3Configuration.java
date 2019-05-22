@@ -112,7 +112,15 @@ public class S3Configuration {
      * Name of the bucket dedicated to the family {@link ObsFamily#L0_BLANK}
      */
     public static final String BCK_L0_BLANK = "bucket.l0-blanks";
-
+    
+    /**
+     * Name of the bucket dedicated to the family {@link ObsFamily#L2_SLICE}
+     */
+    public static final String BCK_L2_SLICES = "bucket.l2-slices";
+    /**
+     * Name of the bucket dedicated to the family {@link ObsFamily#L2_ACN}
+     */
+    public static final String BCK_L2_ACNS = "bucket.l2-acns";
     /**
      * Timeout in second for shutdown a thread
      */
@@ -226,6 +234,12 @@ public class S3Configuration {
             case L0_BLANK:
                 bucket = configuration.getString(BCK_L0_BLANK);
                 break;
+            case L2_SLICE:
+            	bucket = configuration.getString(BCK_L2_SLICES);
+            	break;
+            case L2_ACN:
+            	bucket = configuration.getString(BCK_L2_ACNS);
+            	break;
             default:
                 throw new ObsServiceException(
                         "Invalid object storage family " + family);
