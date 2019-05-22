@@ -21,7 +21,7 @@ public class AppDataJobDto<T> {
     private long identifier;
 
     /**
-     * Application Level: L0 or L1
+     * Application Level: L0, L1 or L2
      */
     private ApplicationLevel level;
 

@@ -47,6 +47,23 @@ public class LevelSegmentDtoTest {
     }
 
     /**
+     * Test toString methods and setters
+     */
+    @Test
+    public void testToStringAndSettersL2() {
+        LevelSegmentDto dto = new LevelSegmentDto();
+        dto.setName("product-name");
+        dto.setKeyObs("key-obs");
+        dto.setFamily(ProductFamily.L2_SLICE);
+        dto.setMode("fast");
+        String str = dto.toString();
+        assertTrue(str.contains("name: product-name"));
+        assertTrue(str.contains("keyObs: key-obs"));
+        assertTrue(str.contains("family: L2_SLICE"));
+        assertTrue(str.contains("mode: FAST"));
+    }
+    
+    /**
      * Test equals and hashcode
      */
     @Test

@@ -51,6 +51,19 @@ public class GenericPublicationMessageDtoTest {
         assertEquals("othey-input", dto.getInputKey());
         assertEquals("otheyoutput", dto.getOutputKey());
         assertEquals(ProductFamily.L1_ACN, dto.getFamily());
+        
+        dto = new GenericPublicationMessageDto<String>();
+        dto.setInputMessageId(321);
+        dto.setInputKey("othey-input");
+        dto.setOutputKey("otheyoutput");
+        dto.setFamily(ProductFamily.L2_ACN);
+        dto.setMessageToPublish("topublish");
+        assertEquals(321, dto.getInputMessageId());
+        assertEquals("topublish", dto.getMessageToPublish());
+        assertEquals("othey-input", dto.getInputKey());
+        assertEquals("otheyoutput", dto.getOutputKey());
+        assertEquals(ProductFamily.L2_ACN, dto.getFamily());
+        
     }
 
     /**

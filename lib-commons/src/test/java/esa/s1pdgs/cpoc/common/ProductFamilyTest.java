@@ -18,7 +18,7 @@ public class ProductFamilyTest {
      */
     @Test
     public void testBasic() {
-        assertEquals(16, ProductFamily.values().length);
+        assertEquals(20, ProductFamily.values().length);
         assertEquals(ProductFamily.L0_SLICE, ProductFamily.valueOf("L0_SLICE"));
     }
 
@@ -32,6 +32,7 @@ public class ProductFamilyTest {
 		assertEquals(ProductFamily.BLANK, ProductFamily.fromValue("edrs_session"));
 		assertEquals(ProductFamily.EDRS_SESSION, ProductFamily.fromValue("EDRS_SESSION"));
 		assertEquals(ProductFamily.L1_REPORT, ProductFamily.fromValue("L1_REPORT"));
+		assertEquals(ProductFamily.L2_REPORT, ProductFamily.fromValue("L2_REPORT"));
 		assertEquals(ProductFamily.BLANK, ProductFamily.fromValue("L1_REPORTd"));
 	}
 }

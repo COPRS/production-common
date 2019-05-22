@@ -71,6 +71,16 @@ public class ProductCategoryTest {
         assertEquals(ProductCategory.LEVEL_SEGMENTS,
                 ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT));
 
+
+        assertEquals(ProductCategory.LEVEL_REPORTS,
+                ProductCategory.fromProductFamily(ProductFamily.L2_REPORT));
+        assertEquals(ProductCategory.LEVEL_JOBS,
+                ProductCategory.fromProductFamily(ProductFamily.L2_JOB));
+        assertEquals(ProductCategory.LEVEL_PRODUCTS,
+                ProductCategory.fromProductFamily(ProductFamily.L2_ACN));
+        assertEquals(ProductCategory.LEVEL_PRODUCTS,
+                ProductCategory.fromProductFamily(ProductFamily.L2_SLICE));
+        
         try {
             ProductCategory.fromProductFamily(null);
             fail("an InternalErrorException shall be raised");

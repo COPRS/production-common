@@ -11,7 +11,8 @@ public enum ProductFamily {
     L0_REPORT, L1_REPORT, L0_SEGMENT_REPORT,
     L0_SEGMENT,
     L0_JOB, L1_JOB, L0_SEGMENT_JOB,
-    JOB_ORDER, BLANK;
+    JOB_ORDER, BLANK,
+    L2_ACN, L2_SLICE, L2_JOB, L2_REPORT;
 
     /**
      * Get product family from value in string format
