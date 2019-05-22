@@ -25,4 +25,16 @@
 			<topic>t-pdgs-l1-acns</topic>
 		</route_to>
 	</default_route>
+	<default_route description="default route of product family L2_PRODUCT">
+		<family>L2_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-l2-slices</topic>
+		</route_to>
+	</default_route>
+	<default_route description="default route of product family L2_ACN">
+		<family>L2_ACN</family>
+		<route_to>
+			<topic>t-pdgs-l2-acns</topic>
+		</route_to>
+	</default_route>
 </routing>

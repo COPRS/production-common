@@ -143,6 +143,12 @@ public class ObsService {
             case L0_BLANK:
                 ret = ObsFamily.L0_BLANK;
                 break;
+            case L2_SLICE:
+                ret = ObsFamily.L2_SLICE;
+                break;
+            case L2_ACN:
+                ret = ObsFamily.L2_ACN;
+                break;
             default:
                 ret = ObsFamily.UNKNOWN;
                 break;

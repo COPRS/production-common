@@ -13,4 +13,10 @@
 			<topic>t-pdgs-l1-reports</topic>
 		</route_to>
 	</default_route>
+	<default_route description="default route of product family L2_REPORT">
+		<family>L2_REPORT</family>
+		<route_to>
+			<topic>t-pdgs-l2-reports</topic>
+		</route_to>
+	</default_route>
 </routing>

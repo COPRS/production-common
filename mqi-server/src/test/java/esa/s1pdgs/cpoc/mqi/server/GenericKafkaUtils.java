@@ -43,7 +43,12 @@ public class GenericKafkaUtils<T> {
     public final static String TOPIC_EDRS_SESSIONS = "t-pdgs-edrs-sessions";
     public final static String TOPIC_AUXILIARY_FILES = "t-pdgs-auxiliary-files";
     public final static String TOPIC_L0_SEGMENTS = "t-pdgs-l0-segments";
-
+    
+    public final static String TOPIC_L2_JOBS = "t-pdgs-l2-jobs";
+    public final static String TOPIC_L2_PRODUCTS = "t-pdgs-l2-slices";
+    public final static String TOPIC_L2_ACNS = "t-pdgs-l2-acns";
+    public final static String TOPIC_L2_REPORTS = "t-pdgs-l2-reports";
+    
     private final KafkaEmbedded embeddedKafka;
 
     public GenericKafkaUtils(final KafkaEmbedded embeddedKafka) {

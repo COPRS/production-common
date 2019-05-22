@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -146,11 +147,30 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
 	        			reportingFactory, 
 	        			() -> mdBuilder.buildL1SliceOutputFileMetadata(l1SliceDesc,metadataFile)
 	        	);
+	        case L2_ACN:
+	        	final L2OutputFileDescriptor l2AcnDesc = extractFromFilename(
+	        			reportingFactory,
+	        			() -> fileDescriptorBuilder.buildL2OutputFileDescriptor(metadataFile, dto)
+	        	);	        	
+	        	return extractFromFile(
+	        			reportingFactory, 
+	        			() -> mdBuilder.buildL2AcnOutputFileMetadata(l2AcnDesc, metadataFile)
+	        	);	  
+	        case L2_SLICE:
+	        	final L2OutputFileDescriptor l2SliceDesc = extractFromFilename(
+	        			reportingFactory,
+	        			() -> fileDescriptorBuilder.buildL2OutputFileDescriptor(metadataFile, dto)
+	        	);	  
+	        	return extractFromFile(
+	        			reportingFactory, 
+	        			() -> mdBuilder.buildL2SliceOutputFileMetadata(l2SliceDesc,metadataFile)
+	        	);	  
 	        default:
 	            throw new UnknownFamilyException(dto.getFamily().name(),
 	                    "Family not managed by the catalog for the category LEVEL_PRODUCTS");
 	    }
     }
+    
 
     /**
      * Get the OBS key of the file used for extracting metadata for this product

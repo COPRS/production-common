@@ -1,47 +1,24 @@
-before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+# This file is a template, and might need editing before it works on your project.
+# Official docker image.
+image: docker:latest
 
-stages:
-  - build
-  - push_dev
-  - push_master
-  - push_tag
+variables:
+  MODULE_MQI_SERVER: s1pro-core-mqi-server
 
-build:
-  stage: build
-  tags:
-  - docker
+mqi-server-build-master:
+  stage: module
   script:
-  - docker build -t $CI_PROJECT_NAME:$CI_COMMIT_REF_NAME .
+    - cd mqi-server
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER"
+  only:
+    - master
 
-push_dev:
-  stage: push_dev
-  tags:
-  - docker
+mqi-server-build:
+  stage: module
+  script:
+    - cd mqi-server
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER:$CI_COMMIT_REF_SLUG"
   except:
-    - tags
     - master
-  script:
-    - docker tag $CI_PROJECT_NAME:$CI_COMMIT_REF_NAME $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
-    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
-
-push_master:
-  stage: push_master
-  tags:
-  - docker
-  only:
-    - master
-  script:
-    - docker tag $CI_PROJECT_NAME:$CI_COMMIT_REF_NAME $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest
-    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest
-
-push_tag:
-  stage: push_tag
-  tags:
-  - docker
-  only:
-    - tags
-  script:
-    - docker tag $CI_PROJECT_NAME:$CI_COMMIT_TAG $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_TAG
-    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_TAG
-

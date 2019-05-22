@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,12 @@ import esa.s1pdgs.cpoc.scaler.kafka.model.SpdgsTopic;
 
 @Service
 public class K8SMonitoring {
-
+    /**
+     * Logger
+     */
+    private static final Logger LOGGER =
+            LogManager.getLogger(K8SMonitoring.class);
+    
     private final WrapperProperties wrapperProperties;
 
     private final NodeService nodeService;
@@ -114,16 +121,19 @@ public class K8SMonitoring {
         List<WrapperNodeMonitor> monitors = new ArrayList<>();
 
         // Retrieve nodes dedicated to L1
+        LOGGER.debug("Retrieve nodes dedicated to L1");
         List<NodeDesc> nodes = this.nodeService.getNodesWithLabel(
                 wrapperProperties.getLabelWrapperConfig().getLabel(),
                 wrapperProperties.getLabelWrapperConfig().getValue());
 
         // Retrieve pods dedicated to L1
+        LOGGER.debug("Retrieve pods dedicated to L1");
         List<PodDesc> pods = this.podService.getPodsWithLabel(
                 wrapperProperties.getLabelWrapperApp().getLabel(),
                 wrapperProperties.getLabelWrapperApp().getValue());
 
         // Reorganize pods per nodes
+        LOGGER.debug("Reorganize pods per nodes");
         Map<String, List<PodDesc>> podsPerNodes = new HashMap<>();
         if (!CollectionUtils.isEmpty(pods)) {
             pods.forEach(pod -> {
@@ -135,6 +145,7 @@ public class K8SMonitoring {
         }
 
         // build monitor
+        LOGGER.debug("Build monitor");
         if (!CollectionUtils.isEmpty(nodes)) {
             for (NodeDesc node : nodes) {
                 WrapperNodeMonitor nodeMonitor = new WrapperNodeMonitor(node);

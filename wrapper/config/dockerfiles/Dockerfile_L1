@@ -1,15 +1,11 @@
-FROM registry.geohub.space/wo7/repo-maven-all:latest as build
-WORKDIR /app
-COPY pom.xml /app
-RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
-COPY src/ /app/src/
-COPY build/ /app/build/
-COPY config/ /app/config/
-RUN	mvn -B -s /usr/share/maven/ref/settings-docker.xml package
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:develop as build
 
-FROM registry.geohub.space/wo7/docker_l1:dev
+WORKDIR /app
+
+FROM registry.tools.s1pdgs.eu/wo7/docker_l1:dev
 RUN yum install -y java-1.8.0-openjdk wget && yum clean all
 WORKDIR /app
-COPY --from=build /app/target/s1pdgs-wrapper-2.0.0.jar s1pdgs-wrapper.jar
-COPY /config/start/start_l1.sh start_l1.sh
+COPY --from=build /app/wrapper/target/s1pro-core-wrapper-0.2.0-SNAPSHOT.jar s1pdgs-wrapper.jar
+COPY --from=build /app/wrapper/config/start/start_l1.sh /app/start_l1.sh
+RUN chmod +x /app/start_l1.sh
 ENTRYPOINT "/app/start_l1.sh"

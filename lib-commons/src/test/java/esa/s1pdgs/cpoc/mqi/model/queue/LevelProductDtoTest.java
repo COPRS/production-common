@@ -47,6 +47,23 @@ public class LevelProductDtoTest {
     }
 
     /**
+     * Test toString methods and setters
+     */
+    @Test
+    public void testToStringAndSettersL2() {
+        LevelProductDto dto = new LevelProductDto();
+        dto.setProductName("product-name");
+        dto.setKeyObjectStorage("key-obs");
+        dto.setFamily(ProductFamily.L2_SLICE);
+        dto.setMode("fast");
+        String str = dto.toString();
+        assertTrue(str.contains("productName: product-name"));
+        assertTrue(str.contains("keyObjectStorage: key-obs"));
+        assertTrue(str.contains("family: L2_SLICE"));
+        assertTrue(str.contains("mode: FAST"));
+    }
+    
+    /**
      * Test equals and hashcode
      */
     @Test

@@ -71,7 +71,12 @@ public class MessagePublicationControllerTest {
             GenericKafkaUtils.TOPIC_L1_ACNS, GenericKafkaUtils.TOPIC_L1_REPORTS,
             GenericKafkaUtils.TOPIC_L0_JOBS, GenericKafkaUtils.TOPIC_L1_JOBS,
             GenericKafkaUtils.TOPIC_EDRS_SESSIONS,
-            GenericKafkaUtils.TOPIC_L0_SEGMENTS);
+            GenericKafkaUtils.TOPIC_L0_SEGMENTS,
+            GenericKafkaUtils.TOPIC_L2_JOBS,
+            GenericKafkaUtils.TOPIC_L2_REPORTS,
+            GenericKafkaUtils.TOPIC_L2_PRODUCTS,
+            GenericKafkaUtils.TOPIC_L2_ACNS
+            );
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -174,7 +179,7 @@ public class MessagePublicationControllerTest {
     public void testPostConstruct() {
         assertEquals(2, autowiredController.producers.size());
         assertEquals(2, autowiredController.routing.size());
-        assertEquals(4, autowiredController.routing
+        assertEquals(6, autowiredController.routing
                 .get(ProductCategory.LEVEL_PRODUCTS).getDefaultRoutes().size());
         assertNotNull(
                 autowiredController.routing.get(ProductCategory.LEVEL_PRODUCTS)
@@ -182,7 +187,7 @@ public class MessagePublicationControllerTest {
         assertNotNull(
                 autowiredController.routing.get(ProductCategory.LEVEL_PRODUCTS)
                         .getDefaultRoute(ProductFamily.L0_SLICE));
-        assertEquals(2, autowiredController.routing
+        assertEquals(3, autowiredController.routing
                 .get(ProductCategory.LEVEL_REPORTS).getDefaultRoutes().size());
         assertNotNull(
                 autowiredController.routing.get(ProductCategory.LEVEL_REPORTS)
@@ -411,6 +416,20 @@ public class MessagePublicationControllerTest {
     }
 
     @Test
+    public void publishLevelJobsL2() throws Exception {
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L2_JOB, "product-name", "FAST",
+                "work-directory", "job-order");
+        initCustomControllerForAllPublication();
+
+        customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
+
+        ConsumerRecord<String, LevelJobDto> record = kafkaUtilsJobs
+                .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L2_JOBS);
+
+        assertEquals(dto, record.value());
+    }
+    
+    @Test
     public void publishLevelJobsNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
         LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
@@ -451,12 +470,27 @@ public class MessagePublicationControllerTest {
 
         assertEquals(dto, record.value());
     }
+    
+    @Test
+    public void publishLevelReportsL2() throws Exception {
+        LevelReportDto dto = new LevelReportDto("product-name2", "content2",
+                ProductFamily.L2_REPORT);
+        initCustomControllerForAllPublication();
+
+        customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE", "NONE");
+
+        ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
+                .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L2_REPORTS);
+
+        assertEquals(dto, record.value());
+    }
+    
 
     @Test
     public void publishLevelReportsNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
         LevelReportDto dto = new LevelReportDto("product-name", "content",
-                ProductFamily.L0_REPORT);
+                ProductFamily.L2_REPORT);
         initCustomControllerForNoPublication();
 
         thrown.expect(MqiCategoryNotAvailable.class);

@@ -13,4 +13,10 @@
 			<topic>t-pdgs-l1-jobs</topic>
 		</route_to>
 	</default_route>
+	<default_route description="default route of product family L2_JOB">
+		<family>L2_JOB</family>
+		<route_to>
+			<topic>t-pdgs-l2-jobs</topic>
+		</route_to>
+	</default_route>
 </routing>

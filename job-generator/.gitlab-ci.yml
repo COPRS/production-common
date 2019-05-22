@@ -2,27 +2,23 @@
 # Official docker image.
 image: docker:latest
 
-services:
-  - docker:dind
-  
 variables:
-  DOCKER_HOST: tcp://localhost:2375
+  MODULE_JOB_GENERATOR: s1pro-core-job-generator
 
-before_script:
-  - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-
-build-master:
-  stage: build
+job-generator-build-master:
+  stage: module
   script:
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
+    - cd job-generator
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR"
   only:
     - master
 
-build:
-  stage: build
+job-generator-build:
+  stage: module
   script:
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG"
+    - cd job-generator
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR:$CI_COMMIT_REF_SLUG"
   except:
     - master
