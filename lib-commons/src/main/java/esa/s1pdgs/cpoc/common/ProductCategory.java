@@ -33,11 +33,13 @@ public enum ProductCategory {
                 break;
             case L0_JOB:
             case L1_JOB:
+            case L2_JOB:
             case L0_SEGMENT_JOB:
                 ret = ProductCategory.LEVEL_JOBS;
                 break;
             case L0_REPORT:
             case L1_REPORT:
+            case L2_REPORT:            	
             case L0_SEGMENT_REPORT:
                 ret = ProductCategory.LEVEL_REPORTS;
                 break;
@@ -46,6 +48,8 @@ public enum ProductCategory {
             case L1_ACN:
             case L1_SLICE:
             case L0_BLANK:
+            case L2_SLICE:
+            case L2_ACN:
                 ret = ProductCategory.LEVEL_PRODUCTS;
                 break;
             case L0_SEGMENT:
