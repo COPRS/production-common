@@ -43,6 +43,18 @@ public class RouteTest {
         
     }
     
+
+    @Test
+    public void testToStringL2() {
+        RouteTo rte1 = new RouteTo();
+        rte1.setTopic("topic-l2-slices");
+        Route rte = new Route("inputKey", "L2_SLICE", rte1);
+        String str = rte.toString();
+        assertTrue(str.contains("inputKey="+"inputKey"));
+        assertTrue(str.contains("outputKey="+"L2_SLICE"));
+        assertTrue(str.contains("routeTo={topic: "+rte1.getTopic()));
+        
+    }
     /**
      * Check equals and hashcode methods
      */

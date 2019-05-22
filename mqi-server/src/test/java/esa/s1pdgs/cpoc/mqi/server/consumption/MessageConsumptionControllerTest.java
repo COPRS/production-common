@@ -535,6 +535,41 @@ public class MessageConsumptionControllerTest {
                 .get("topic").isPaused());
     }
 
+    
+    @Test
+    public void testAckWhenStopAskL2()
+            throws AbstractCodedException, InterruptedException {
+
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L2_JOB, "product-name", "NRT",
+                "work-dir", "job-order");
+        MqiGenericMessageDto<LevelJobDto> message =
+                new MqiGenericMessageDto<LevelJobDto>(
+                        ProductCategory.LEVEL_JOBS, 123, "topic5", 1, 22, dto);
+
+        doReturn(true).when(persistLevelJobsService).ack(Mockito.eq(123L),
+                Mockito.any());
+        doReturn(message).when(persistLevelJobsService).get(Mockito.eq(123L));
+        doReturn(0).when(persistLevelJobsService)
+                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
+
+        ResumeDetails expectedRd = new ResumeDetails("topic5", dto);
+
+        Thread.sleep(2000);
+        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").pause();
+
+        Thread.sleep(2000);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic").isPaused());
+        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
+                Ack.OK, true);
+        assertEquals(expectedRd, rd);
+
+        // Check resume call
+        Thread.sleep(2000);
+        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
+                .get("topic").isPaused());
+    }
+    
     /**
      * Test send when message is READ
      * 

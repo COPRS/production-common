@@ -75,10 +75,17 @@ public class XmlConverterTest {
         routeTo1.setTopic("t-pdgs-l1-jobs");
         route1.setFamily(ProductFamily.L1_JOB);
         route1.setRouteTo(routeTo1);
+       
+        DefaultRoute route2 = new DefaultRoute();
+        RouteTo routeTo2 = new RouteTo();
+        routeTo2.setTopic("t-pdgs-l2-jobs");
+        route2.setFamily(ProductFamily.L2_JOB);
+        route2.setRouteTo(routeTo2);
         
-        assertEquals(2, routing.getDefaultRoutes().size());
+        assertEquals(3, routing.getDefaultRoutes().size());
         
         assertEquals(route0, routing.getDefaultRoute(ProductFamily.L0_JOB));
         assertEquals(route1, routing.getDefaultRoute(ProductFamily.L1_JOB));
+        assertEquals(route2, routing.getDefaultRoute(ProductFamily.L2_JOB));
     }
 }
