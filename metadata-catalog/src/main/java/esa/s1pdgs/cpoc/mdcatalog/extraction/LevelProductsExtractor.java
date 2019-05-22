@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -156,6 +157,32 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
                 result = mdBuilder.buildL1SliceOutputFileMetadata(l1SliceDesc,
                         metadataFile);
                 break;
+            case L2_ACN:
+            	LOGGER.info(
+                        "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L2_ACN] [productName {}] Extracting from filename",
+                        extractProductNameFromDto(dto));
+                L2OutputFileDescriptor l2AcnDesc = fileDescriptorBuilder
+                        .buildL2OutputFileDescriptor(metadataFile, dto);
+                // Build metadata from file and extracted
+                LOGGER.info(
+                        "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L2_ACN] [productName {}] Extracting from file",
+                        extractProductNameFromDto(dto));
+                result = mdBuilder.buildL2AcnOutputFileMetadata(l2AcnDesc,
+                        metadataFile);
+            	break;
+            case L2_SLICE:
+            	LOGGER.info(
+                        "[MONITOR] [step 2] [LEVEL_PRODUCTS] [L2_PRODUCT] [productName {}] Extracting from filename",
+                        extractProductNameFromDto(dto));
+                L2OutputFileDescriptor l2SliceDesc = fileDescriptorBuilder
+                        .buildL2OutputFileDescriptor(metadataFile, dto);
+                // Build metadata from file and extracted
+                LOGGER.info(
+                        "[MONITOR] [step 3] [LEVEL_PRODUCTS] [L2_PRODUCT] [productName {}] Extracting from file",
+                        extractProductNameFromDto(dto));
+                result = mdBuilder.buildL2SliceOutputFileMetadata(l2SliceDesc,
+                        metadataFile);
+            	break;
             default:
                 throw new UnknownFamilyException(dto.getFamily().name(),
                         "Family not managed by the catalog for the category LEVEL_PRODUCTS");

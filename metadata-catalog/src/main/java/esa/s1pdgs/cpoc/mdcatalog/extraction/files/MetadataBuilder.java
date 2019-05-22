@@ -10,6 +10,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
 
 /**
  * Class to build metadata for configuration and ERDS session files
@@ -153,7 +154,7 @@ public class MetadataBuilder {
     }
 
 	/**
-	 * Build metadata for L0 Slice
+	 * Build metadata for L1 Slice
 	 * 
 	 * @param descriptor
 	 * @param file
@@ -170,7 +171,7 @@ public class MetadataBuilder {
 	}
 
 	/**
-	 * Build metadata for L0 Annotations
+	 * Build metadata for L1 Annotations
 	 * 
 	 * @param descriptor
 	 * @param file
@@ -183,6 +184,40 @@ public class MetadataBuilder {
 			throws MetadataExtractionException {
 		JSONObject metadataToIndex = new JSONObject();
 		metadataToIndex = extractor.processL1AProd(descriptor, file);
+		return metadataToIndex;
+	}
+	
+	/**
+	 * Build metadata for L2 Slice
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL2SliceOutputFileMetadata(L2OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+		JSONObject metadataToIndex = new JSONObject();
+		metadataToIndex = extractor.processL2SliceProd(descriptor, file);
+		return metadataToIndex;
+	}
+
+	/**
+	 * Build metadata for L2 ACN
+	 * 
+	 * @param descriptor
+	 * @param file
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject buildL2AcnOutputFileMetadata(L2OutputFileDescriptor descriptor, File file)
+			throws MetadataExtractionException {
+		JSONObject metadataToIndex = new JSONObject();
+		metadataToIndex = extractor.processL2AProd(descriptor, file);
 		return metadataToIndex;
 	}
 	

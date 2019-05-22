@@ -14,6 +14,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
@@ -327,5 +328,62 @@ public class FileDescriptorBuilder {
 					"File does not match the configuration file pattern");
 		}
 		return l1Descriptor;
+	}
+	
+	public L2OutputFileDescriptor buildL2OutputFileDescriptor(File file, LevelProductDto product)
+			throws MetadataFilePathException, MetadataIgnoredFileException {
+		// Extract relative path
+		String absolutePath = file.getAbsolutePath();
+		if (absolutePath.length() <= localDirectory.length()) {
+			throw new MetadataFilePathException(absolutePath, "L2_PRODUCT", "File is not in root directory");
+		}
+		String relativePath = absolutePath.substring(localDirectory.length());
+		relativePath = relativePath.replace("\\", "/");
+
+		// Ignored if directory
+		if (file.isDirectory()) {
+			throw new MetadataIgnoredFileException(file.getName());
+		}
+		L2OutputFileDescriptor l2Descriptor = null;
+		Matcher m = pattern.matcher(relativePath);
+		if (m.matches()) {
+			// Extract product name
+			String productName = relativePath;
+			int indexFirstSeparator = relativePath.indexOf("/");
+			if (indexFirstSeparator != -1) {
+				productName = relativePath.substring(0, indexFirstSeparator);
+			}
+			// Extract filename
+			String filename = relativePath;
+			int indexLastSeparator = relativePath.lastIndexOf("/");
+			if (indexFirstSeparator != -1) {
+				filename = relativePath.substring(indexLastSeparator + 1);
+			}
+			l2Descriptor = new L2OutputFileDescriptor();
+			l2Descriptor.setProductName(productName);
+			l2Descriptor.setRelativePath(relativePath);
+			l2Descriptor.setFilename(filename);
+			l2Descriptor.setMode(product.getMode());
+			l2Descriptor.setMissionId(m.group(1));
+			l2Descriptor.setSatelliteId(m.group(2));
+			l2Descriptor.setSwathtype(m.group(3));
+			l2Descriptor.setResolution(m.group(5));
+			l2Descriptor.setProductClass(m.group(7));
+			l2Descriptor.setProductType(m.group(3) + "_" + m.group(4) + m.group(5) + "_" + m.group(6) + m.group(7));
+			l2Descriptor.setPolarisation(m.group(8));
+			l2Descriptor.setDataTakeId(m.group(12));
+			l2Descriptor.setKeyObjectStorage(productName);
+			l2Descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(13)));
+			if ("S".equals(m.group(7))) {
+				l2Descriptor.setProductFamily(ProductFamily.L2_SLICE);
+			} else {
+				l2Descriptor.setProductFamily(ProductFamily.L2_ACN);
+			}
+
+		} else {
+			throw new MetadataFilePathException(relativePath, "L2_PRODUCT",
+					"File does not match the configuration file pattern");
+		}
+		return l2Descriptor;
 	}
 }
