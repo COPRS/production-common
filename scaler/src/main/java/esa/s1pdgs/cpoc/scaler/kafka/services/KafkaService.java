@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.logging.log4j.LogManager;
@@ -114,9 +115,16 @@ public class KafkaService {
                 summary.consumerId());
         for (TopicPartition tp : topicPartitions) {        	
             if (limitTopic.equalsIgnoreCase(tp.topic())) {
-            	LOGGER.debug("Using topic partition {}",tp);
-                // Calculate offset and lag
-                long currentOffset = consumer.committed(tp).offset();
+            	// Calculate offset and lag
+            	OffsetAndMetadata lastCommitedOffset = consumer.committed(tp);
+            	if (lastCommitedOffset == null) {
+            		// A returning null value means no prior messages commited, we can ignore this case
+            		LOGGER.debug("topic partition {} does not contain prior messages, skipping",tp);
+            		continue;
+            	}
+                long currentOffset = lastCommitedOffset.offset();
+                LOGGER.debug("topic partition {} current offset is {}",currentOffset);
+                
                 consumer.assign(Arrays.asList(tp));
                 consumer.seekToEnd(Arrays.asList(tp));
                 long logEndOffset = consumer.position(tp);
