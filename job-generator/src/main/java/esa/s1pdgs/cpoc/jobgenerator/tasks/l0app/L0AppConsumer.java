@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,7 +16,6 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -33,7 +31,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.wrapper.job.JobProcessorTest;
 
 @Component
 @ConditionalOnProperty(name = "process.level", havingValue = "L0")
