@@ -1,0 +1,70 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+   <xfdu:XFDU version="esa/safe/sentinel-1.0/sentinel-1/auxiliary/sar/ice" xmlns:safe="http://www.esa.int/safe/sentinel-1.0" xmlns:xfdu="urn:ccsds:schema:xfdu:1" xmlns:s1auxsar="http://www.esa.int/safe/sentinel-1.0/sentinel-1/auxiliary/sar" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:ccsds:schema:xfdu:1 xsd/int/esa/safe/sentinel-1.0/sentinel-1/auxiliary/sar/ice/xfdu.xsd">
+      <informationPackageMap>
+         <xfdu:contentUnit unitType="SAFE Archive Information Package Map" textInfo="Sentinel-1 L2 Auxilary ICE Parameters" dmdID="platform generalProductInformation" pdiID="processing">
+            <xfdu:contentUnit unitType="Measurement Data Unit" textInfo="Auxiliary Data" repID="auxSchema">
+               <dataObjectPointer dataObjectID="auxData1"/>
+            </xfdu:contentUnit>
+            <xfdu:contentUnit unitType="Measurement Data Unit" textInfo="Auxiliary Data" repID="auxSchema">
+               <dataObjectPointer dataObjectID="auxData2"/>
+            </xfdu:contentUnit>
+         </xfdu:contentUnit>
+      </informationPackageMap>
+      <metadataSection>
+         <metadataObject ID="generalProductInformation" classification="DESCRIPTION" category="DMD">
+            <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="General Product Information">
+               <xmlData>
+               	<s1auxsar:standAloneProductInformation>
+               		<s1auxsar:auxProductType>AUX_ICE</s1auxsar:auxProductType>
+               		<s1auxsar:validity>2016-05-01T12:00:00.000000</s1auxsar:validity>
+               		<s1auxsar:generation>2016-05-02T04:36:07.059812</s1auxsar:generation>
+               		<s1auxsar:instrumentConfigurationId>1</s1auxsar:instrumentConfigurationId>
+               	</s1auxsar:standAloneProductInformation>
+               </xmlData>
+            </metadataWrap>
+         </metadataObject>
+         <metadataObject ID="platform" classification="DESCRIPTION" category="DMD">
+            <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="Platform Description">
+               <xmlData>
+               	<safe:platform>
+               		<safe:nssdcIdentifier>2014-016A</safe:nssdcIdentifier>
+               		<safe:familyName>SENTINEL-1</safe:familyName>
+               		<safe:number>1</safe:number>
+               		<safe:instrument>
+               			<safe:familyName abbreviation="SAR">Synthetic Aperture Radar</safe:familyName>
+               		</safe:instrument>
+               	</safe:platform>
+               </xmlData>
+            </metadataWrap>
+         </metadataObject>
+         <metadataObject ID="processing" classification="PROVENANCE" category="PDI">
+            <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="Processing">
+               <xmlData>
+               	<safe:processing name="S1_AUX_ICE_RFMT" start="2016-05-02T04:36:07.036303" stop="2016-05-02T04:36:07.059812">
+               		<safe:facility name="S1_AUX_ICE_RFMT" organisation="ESA" site="PDMC" country="Italy"/>
+               		<safe:resource name="Sentinel-1 IPF Auxiliary Product Specification S1-RS-MDA-52-7443" role="Applicable Document"/>
+               		<safe:resource name="ice_edge_nh_polstere-100_multi_201605011200.nc" role="Input file" href="/data_SPEED/ADH-1.0/tld_productions/43464/ice_edge_nh_polstere-100_multi_201605011200.nc"/>
+               		<safe:resource name="ice_edge_sh_polstere-100_multi_201605011200.nc" role="Input file" href="/data_SPEED/ADH-1.0/tld_productions/43464/ice_edge_sh_polstere-100_multi_201605011200.nc"/>
+               	</safe:processing>
+               </xmlData>
+            </metadataWrap>
+         </metadataObject>
+         <metadataObject ID="auxSchema" classification="SYNTAX" category="REP">
+            <metadataReference mimeType="text/xml" vocabularyName="SDF" locatorType="URL" href="./support/s1-aux-ice.xsd"/>
+         </metadataObject>
+      </metadataSection>
+      <dataObjectSection>
+         <dataObject ID="auxData1" repID="auxSchema">
+            <byteStream mimeType="application/octetstream" size="9383900">
+               <fileLocation locatorType="URL" textInfo="Auxiliary Data" href="./data/ice_edge_nh_polstere-100_multi_201605011200.nc"/>
+               <checksum checksumName="MD5">df9bea0d298bd85940debdf4ab1c7a7a</checksum>
+            </byteStream>
+         </dataObject>
+         <dataObject ID="auxData2" repID="auxSchema">
+            <byteStream mimeType="application/octetstream" size="7231320">
+               <fileLocation locatorType="URL" textInfo="Auxiliary Data" href="./data/ice_edge_sh_polstere-100_multi_201605011200.nc"/>
+               <checksum checksumName="MD5">385749bf6806efc4cd4ae7b2f95e240e</checksum>
+            </byteStream>
+         </dataObject>
+      </dataObjectSection>
+   </xfdu:XFDU>

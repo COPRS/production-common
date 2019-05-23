@@ -200,52 +200,88 @@ public class AuxiliaryFilesExtractorTest {
 
         FileUtils.delete("./test/workDir2");
     }
-
+    
     @Test
-    public void testExtractMetadata()
-            throws MetadataExtractionException, AbstractCodedException {
+	public void testExtractMetadataAuxOBMEMC() throws MetadataExtractionException, AbstractCodedException {
 
-        File file = new File(
-                (new File("./test/workDir/")).getAbsolutePath() + File.separator
-                        + "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-        
-        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
+		String fileName = "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml";
+
+		testExtractMetadata(inputMessageAux, fileName, fileName, FileExtension.XML, "S1", "A", "OPER", "AUX_OBMEMC");
+
+	}
+
+	@Test
+	public void testExtractMetadataAuxWAV() throws AbstractCodedException {
+
+		String fileName = "S1__AUX_WAV_V20110801T000000_G20111026T141850.SAFE";
+
+		GenericMessageDto<AuxiliaryFileDto> inputMessageAuxWAV = new GenericMessageDto<AuxiliaryFileDto>(123, "",
+				new AuxiliaryFileDto(fileName, fileName));
+
+		testExtractMetadata(inputMessageAuxWAV, fileName, fileName + File.separator + "manifest.safe",
+				FileExtension.SAFE, "S1", "_", null, "AUX_WAV");
+
+	}
+
+	@Test
+	public void testExtractMetadataAuxICE() throws AbstractCodedException {
+
+		String fileName = "S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE";
+
+		GenericMessageDto<AuxiliaryFileDto> inputMessageAuxICE = new GenericMessageDto<AuxiliaryFileDto>(123, "",
+				new AuxiliaryFileDto(fileName, fileName));
+
+		testExtractMetadata(inputMessageAuxICE, fileName, fileName + File.separator + "manifest.safe",
+				FileExtension.SAFE, "S1", "_", null, "AUX_ICE");
+
+	}
+
+	@Test
+	public void testExtractMetadataAuxWND() throws AbstractCodedException {
+
+		String fileName = "S1__AUX_WND_V20160423T120000_G20160422T060059.SAFE";
+
+		GenericMessageDto<AuxiliaryFileDto> inputMessageAuxWND = new GenericMessageDto<AuxiliaryFileDto>(123, "",
+				new AuxiliaryFileDto(fileName, fileName));
+
+		testExtractMetadata(inputMessageAuxWND, fileName, fileName + File.separator + "manifest.safe",
+				FileExtension.SAFE, "S1", "_", null, "AUX_WND");
+
+	}
+
+	private void testExtractMetadata(GenericMessageDto<AuxiliaryFileDto> inputMessage, String productFileName,
+			String metadataFile, FileExtension fileExtension, String missionId, String satelliteId, String productClass,
+			String productType) throws AbstractCodedException {
+		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + metadataFile);
+		
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
         		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
         		.product("test", file.getName());
-        
-        doReturn(file).when(obsService).downloadFile(Mockito.any(),
-                Mockito.anyString(), Mockito.anyString());
 
-        ConfigFileDescriptor expectedDescriptor = new ConfigFileDescriptor();
-        expectedDescriptor.setExtension(FileExtension.XML);
-        expectedDescriptor
-                .setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-        expectedDescriptor.setKeyObjectStorage(
-                "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-        expectedDescriptor.setMissionId("S1");
-        expectedDescriptor.setSatelliteId("A");
-        expectedDescriptor.setProductClass("OPER");
-        expectedDescriptor
-                .setProductName("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-        expectedDescriptor.setProductType("AUX_OBMEMC");
-        expectedDescriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
-        expectedDescriptor.setRelativePath(
-                "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
-        JSONObject expected = extractor.mdBuilder
-                .buildConfigFileMetadata(expectedDescriptor, file);
-        JSONObject result = extractor.extractMetadata(reportingFactory,inputMessageAux);
-        for (String key : expected.keySet()) {
-            if (!"insertionTime".equals(key)) {
-                assertEquals(expected.get(key), result.get(key));
-            }
-        }
+		ConfigFileDescriptor expectedDescriptor = new ConfigFileDescriptor();
+		expectedDescriptor.setExtension(fileExtension);
+		expectedDescriptor.setFilename(productFileName);
+		expectedDescriptor.setKeyObjectStorage(productFileName);
+		expectedDescriptor.setMissionId(missionId);
+		expectedDescriptor.setSatelliteId(satelliteId);
+		expectedDescriptor.setProductClass(productClass);
+		expectedDescriptor.setProductName(productFileName);
+		expectedDescriptor.setProductType(productType);
+		expectedDescriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
+		expectedDescriptor.setRelativePath(productFileName);
 
-        verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.AUXILIARY_FILE),
-                Mockito.eq("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"),
-                Mockito.eq(extractor.localDirectory));
+		JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, file);
+		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessage);
+		for (String key : expected.keySet()) {
+			if (!"insertionTime".equals(key)) {
+				assertEquals(expected.get(key), result.get(key));
+			}
+		}
 
-    }
+		verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(metadataFile),
+				Mockito.eq(extractor.localDirectory));
+	}
 
 }
