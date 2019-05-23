@@ -63,6 +63,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * Class for processing product for a given task table
@@ -324,6 +326,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     @Override
     public void run() {
         JobGeneration<T> job = null;
+        
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobGenerator");
+        final Reporting reporting = reportingFactory.newReporting(0);
+        reporting.reportStart("Start job generation");
 
         // Get a job to generate
         try {
@@ -387,7 +393,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         if (job != null) {
             String productName =
                     job.getAppDataJob().getProduct().getProductName();
-
+                  
             try {
                 LOGGER.debug(
                         "{} [productName {}] [status {}] Trying job generation",
@@ -395,15 +401,13 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         job.getGeneration().getState());
 
                 // Check primary input
-                if (job.getGeneration()
-                        .getState() == AppDataJobGenerationDtoState.INITIAL) {
-                    try {
-                        if (job.getGeneration().getNbErrors() == 0) {
-                            LOGGER.info(
-                                    "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [START] [productName {}] [inputs {}] Trying job generation",
-                                    this.prefixLogMonitor,
-                                    this.taskTable.getLevel(), productName,
-                                    job.getGeneration().getTaskTable());
+                if (job.getGeneration().getState() == AppDataJobGenerationDtoState.INITIAL) {
+                 	final Reporting reportInit = reportingFactory
+                			.product(null, productName)                        			
+                			.newReporting(1);
+                    try {                    	
+                        if (job.getGeneration().getNbErrors() == 0) { 
+                        	reportInit.reportStart("Start init job generation");
                         }
                         LOGGER.info(
                                 "{} [productName {}] 1 - Checking the pre-requirements",
@@ -413,39 +417,54 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                 job.getAppDataJob().getIdentifier(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
-                        updateState(job,
-                                AppDataJobGenerationDtoState.PRIMARY_CHECK);
+                        updateState(job, AppDataJobGenerationDtoState.PRIMARY_CHECK, reportInit);
+                        reportInit.reportStop("End init job generation");
                     } catch (AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
                                 this.prefixLogMonitor, productName,
-                                e.getLogMessage());
-                        updateState(job, AppDataJobGenerationDtoState.INITIAL);
+                                e.getLogMessage());                      
+                        updateState(job, AppDataJobGenerationDtoState.INITIAL, reportInit);
+                        reportInit.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
                     }
                 }
 
                 // Search input
-                if (job.getGeneration()
-                        .getState() == AppDataJobGenerationDtoState.PRIMARY_CHECK) {
+                if (job.getGeneration().getState() == AppDataJobGenerationDtoState.PRIMARY_CHECK) {
+                	
+                	final Reporting reportInputs = reportingFactory
+                			.product(null, productName)                        			
+                			.newReporting(2);
+                	
+                	reportInputs.reportStart("Start searching inputs");
+                	
                     try {
                         LOGGER.info("{} [productName {}] 2 - Searching inputs",
                                 this.prefixLogMonitor, job.getAppDataJob()
                                         .getProduct().getProductName());
                         this.inputsSearch(job);
-                        updateState(job, AppDataJobGenerationDtoState.READY);
+                        updateState(job, AppDataJobGenerationDtoState.READY, reportInputs);
+                        reportInputs.reportStop("End searching inputs");
+                        
                     } catch (AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 2 - Inputs not found: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
-                        updateState(job,
-                                AppDataJobGenerationDtoState.PRIMARY_CHECK);
+                        updateState(job,AppDataJobGenerationDtoState.PRIMARY_CHECK, reportInputs);
+                        reportInputs.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
                     }
                 }
 
                 // Prepare and send job if ready
-                if (job.getGeneration()
-                        .getState() == AppDataJobGenerationDtoState.READY) {
+                if (job.getGeneration().getState() == AppDataJobGenerationDtoState.READY) {
+                	
+                  	final Reporting reportPrep = reportingFactory
+                			.product(null, productName)                        			
+                			.newReporting(3);
+                  	
+                  	reportPrep.reportStart("Start job preparation and sending");
+                	
                     try {
                         LOGGER.info("{} [productName {}] 2 - Searching inputs",
                                 this.prefixLogMonitor, job.getAppDataJob()
@@ -455,73 +474,62 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                 this.prefixLogMonitor, job.getAppDataJob()
                                         .getProduct().getProductName());
                         this.send(job);
-                        updateState(job, AppDataJobGenerationDtoState.SENT);
+                
+                        updateState(job, AppDataJobGenerationDtoState.SENT, reporting);
+                       
+						if (job.getGeneration().getState() == AppDataJobGenerationDtoState.SENT) {
+							reportPrep.reportStop("End job preparation and sending");
+
+						} else {
+							reportPrep.reportError("Job generation finished but job not sent");
+						}
                     } catch (AbstractCodedException e) {
                         LOGGER.error("{} [productName {}] 3 - Job not send: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
-                        updateState(job, AppDataJobGenerationDtoState.READY);
+                        updateState(job, AppDataJobGenerationDtoState.READY, reportPrep);
+                        reportPrep.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
                     }
                 }
+                reporting.reportStop("End job generation");
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "{} [productName {}] [code ] Cannot generate job: {}",
                         this.prefixLogMonitor, productName,
                         ace.getCode().getCode(), ace.getLogMessage());
-            }
-
-            LOGGER.info("{} End", this.prefixLogMonitor);
+                reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            }        
         }
     }
 
-    protected void updateState(JobGeneration<T> job,
-            AppDataJobGenerationDtoState newState)
-            throws AbstractCodedException {
-        LOGGER.debug(
-                "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [productName {}] Job generation before update: {} - {} - {} - {}",
-                this.prefixLogMonitor, this.taskTable.getLevel(),
-                job.getAppDataJob().getProduct().getProductName(),
-                job.getAppDataJob().getIdentifier(),
-                job.getGeneration().getTaskTable(), newState,
-                job.getGeneration());
+    private void updateState(JobGeneration<T> job,
+            AppDataJobGenerationDtoState newState,
+            Reporting report
+    )
+        throws AbstractCodedException {
+    	
+    	report.reportDebug("Job generation before update: {} - {} - {} - {}", 
+    			job.getAppDataJob().getIdentifier(),
+                job.getGeneration().getTaskTable(), 
+                newState,
+                job.getGeneration()
+        );
         AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
-        LOGGER.debug(
-                "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [productName {}] Modified job generations: {}",
-                this.prefixLogMonitor, this.taskTable.getLevel(),
-                job.getAppDataJob().getProduct().getProductName(),
-                modifiedJob.getGenerations());
-        job.updateAppDataJob(modifiedJob, taskTableXmlName);
-        LOGGER.debug(
-                "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [productName {}] Job generation after update: {}",
-                this.prefixLogMonitor, this.taskTable.getLevel(),
-                job.getAppDataJob().getProduct().getProductName(),
-                job.getGeneration());
+        
+    	report.reportDebug("Modified job generations: {}",  modifiedJob.getGenerations());
+        job.updateAppDataJob(modifiedJob, taskTableXmlName);        
+    	report.reportDebug("Job generation after update: {}", job.getGeneration());
 
-        // Log functional logs
-        if (job.getGeneration()
-                .getState() == AppDataJobGenerationDtoState.SENT) {
-            if (newState == AppDataJobGenerationDtoState.SENT) {
-                // TODO addoutputs
-                LOGGER.info(
-                        "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [STOP OK] [productName {}] Job generation successfully finished",
-                        this.prefixLogMonitor, this.taskTable.getLevel(),
-                        job.getAppDataJob().getProduct().getProductName());
-            } else {
-                LOGGER.error(
-                        "{} [REPORT] [s1pdgsTask {}JobGeneration] [subTask Generation] [STOP KO] [productName {}] Job generation finished but job not sent",
-                        this.prefixLogMonitor, this.taskTable.getLevel(),
-                        job.getAppDataJob().getProduct().getProductName());
-            }
-        }
+        // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {
-            List<String> taskTables = new ArrayList<>();
-            job.getAppDataJob().getGenerations().stream().forEach(gen -> {
-                taskTables.add(gen.getTaskTable());
-            });
+            final List<String> taskTables = job.getAppDataJob().getGenerations().stream()
+            	.map(g -> g.getTaskTable())
+            	.collect(Collectors.toList());
+
             LOGGER.info(
-                    "{} [REPORT] [s1pdgsTask {}JobGeneration] [STOP OK] [productName {}] [outputs {}] Job finished",
+                    "{} [s1pdgsTask {}JobGeneration] [STOP OK] [productName {}] [outputs {}] Job finished",
                     this.prefixLogMonitor, this.taskTable.getLevel(),
                     job.getAppDataJob().getProduct().getProductName(),
                     taskTables);

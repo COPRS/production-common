@@ -248,6 +248,19 @@ public class AuxiliaryFilesExtractorTest {
 				FileExtension.SAFE, "S1", "_", null, "AUX_WND");
 
 	}
+	
+	@Test
+	public void testExtractMetadataAuxPP2() throws AbstractCodedException {
+
+		String fileName = "S1A_AUX_PP2_V20171017T080000_G20171013T101254.SAFE";
+
+		GenericMessageDto<AuxiliaryFileDto> inputMessageAuxWND = new GenericMessageDto<AuxiliaryFileDto>(123, "",
+				new AuxiliaryFileDto(fileName, fileName));
+
+		testExtractMetadata(inputMessageAuxWND, fileName, fileName + File.separator + "manifest.safe",
+				FileExtension.SAFE, "S1", "A", null, "AUX_PP2");
+
+	}
 
 	private void testExtractMetadata(GenericMessageDto<AuxiliaryFileDto> inputMessage, String productFileName,
 			String metadataFile, FileExtension fileExtension, String missionId, String satelliteId, String productClass,
