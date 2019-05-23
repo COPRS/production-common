@@ -401,14 +401,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         job.getGeneration().getState());
 
                 // Check primary input
-                if (job.getGeneration()
-                        .getState() == AppDataJobGenerationDtoState.INITIAL) {
+                if (job.getGeneration().getState() == AppDataJobGenerationDtoState.INITIAL) {
                  	final Reporting reportInit = reportingFactory
                 			.product(null, productName)                        			
                 			.newReporting(1);
                     try {                    	
-                        if (job.getGeneration().getNbErrors() == 0) {       
-                        	
+                        if (job.getGeneration().getNbErrors() == 0) { 
                         	reportInit.reportStart("Start init job generation");
                         }
                         LOGGER.info(
@@ -500,16 +498,15 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         this.prefixLogMonitor, productName,
                         ace.getCode().getCode(), ace.getLogMessage());
                 reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
-            }
-        
+            }        
         }
     }
 
     private void updateState(JobGeneration<T> job,
             AppDataJobGenerationDtoState newState,
             Reporting report
-            )
-            throws AbstractCodedException {
+    )
+        throws AbstractCodedException {
     	
     	report.reportDebug("Job generation before update: {} - {} - {} - {}", 
     			job.getAppDataJob().getIdentifier(),
@@ -523,14 +520,14 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         
     	report.reportDebug("Modified job generations: {}",  modifiedJob.getGenerations());
         job.updateAppDataJob(modifiedJob, taskTableXmlName);        
-    	report.reportDebug("Job generation after update: {}",  job.getGeneration());
+    	report.reportDebug("Job generation after update: {}", job.getGeneration());
 
-        // Log functional logs
+        // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {
-            List<String> taskTables = new ArrayList<>();
-            job.getAppDataJob().getGenerations().stream().forEach(gen -> {
-                taskTables.add(gen.getTaskTable());
-            });
+            final List<String> taskTables = job.getAppDataJob().getGenerations().stream()
+            	.map(g -> g.getTaskTable())
+            	.collect(Collectors.toList());
+
             LOGGER.info(
                     "{} [s1pdgsTask {}JobGeneration] [STOP OK] [productName {}] [outputs {}] Job finished",
                     this.prefixLogMonitor, this.taskTable.getLevel(),
