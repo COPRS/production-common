@@ -268,6 +268,8 @@ public class OutputProcessor {
                         break;
                     case L1_SLICE:
                     case L1_ACN:
+                    case L2_SLICE:
+                    case L2_ACN:
                         // If compatible object storage, put in a cache to
                         // upload per batch
                         LOGGER.info(
