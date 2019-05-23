@@ -231,5 +231,43 @@ public class SlicesConsumerTest {
                 new LevelProductDto("productName", "kobs", ProductFamily.BLANK, "NRT"),
                 ack, "topic");
     }
+    
+    @Test
+    public void testReceiveL2Slice()
+            throws ObsException, ObsUnknownObject {
+        SlicesConsumer consumer =
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
+        File expectedResult =
+                new File("test/data/slices/l2_slice/productName");
+        this.mockSliceDownloadFiles(expectedResult);
+        doNothing().when(ack).acknowledge();
+        consumer.receive(
+                new LevelProductDto("productName", "kobs", ProductFamily.L2_SLICE, "NRT"),
+                ack, "topic");
+        verify(ack, times(1)).acknowledge();
+        verify(obsService, times(1)).downloadFile(
+                Mockito.eq(ProductFamily.L2_SLICE), Mockito.eq("kobs/manifest.safe"),
+                Mockito.eq("test/data/slices/l2_slice"));
+    }
+    
+    @Test
+    public void testReceiveL2Acn()
+            throws ObsException, ObsUnknownObject {
+        SlicesConsumer consumer =
+                new SlicesConsumer(obsService, "test/data/slices", devProperties,
+                        appStatus);
+        File expectedResult =
+                new File("test/data/slices/l2_acn/productName");
+        this.mockSliceDownloadFiles(expectedResult);
+        doNothing().when(ack).acknowledge();
+        consumer.receive(
+                new LevelProductDto("productName", "kobs", ProductFamily.L2_ACN, "NRT"),
+                ack, "topic");
+        verify(ack, times(1)).acknowledge();
+        verify(obsService, times(1)).downloadFile(
+                Mockito.eq(ProductFamily.L2_ACN), Mockito.eq("kobs/manifest.safe"),
+                Mockito.eq("test/data/slices/l2_acn"));
+    }
 
 }
