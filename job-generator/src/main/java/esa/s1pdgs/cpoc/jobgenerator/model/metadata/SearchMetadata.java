@@ -21,6 +21,10 @@ public class SearchMetadata extends AbstractMetadata {
 			final String validityStart, final String validityStop) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
 	}
+	
+	public SearchMetadata() {
+		
+	}
 
 	/**
 	 * @see java.lang.Object#toString()

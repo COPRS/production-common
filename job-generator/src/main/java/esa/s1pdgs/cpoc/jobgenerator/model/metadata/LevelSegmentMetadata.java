@@ -26,6 +26,10 @@ public class LevelSegmentMetadata extends AbstractMetadata {
         this.consolidation = consolidation;
         this.datatakeId = datatakeId;
     }
+    
+    public LevelSegmentMetadata() {
+    	
+    }
 
     /**
      * @return the polarisation

@@ -31,6 +31,10 @@ public class L0AcnMetadata extends AbstractMetadata {
 		this.numberOfSlices = numberOfSlices;
 		this.datatakeId = dataTakeId;
 	}
+	
+	public L0AcnMetadata() {
+		
+	}
 
 	/**
 	 * @return the instrumentConfigurationId

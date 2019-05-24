@@ -30,6 +30,10 @@ public class SearchMetadataResult {
 	public SearchMetadataResult(final SearchMetadataQuery query) {
 		this.query = query;
 	}
+	
+	public SearchMetadataResult() {
+		
+	}
 
 	/**
 	 * @return the query

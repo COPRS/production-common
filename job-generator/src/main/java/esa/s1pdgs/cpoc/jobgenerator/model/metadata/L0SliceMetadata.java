@@ -36,7 +36,10 @@ public class L0SliceMetadata extends AbstractMetadata {
 		this.numberSlice = numberSlice;
 		this.datatakeId = dataTakeId;
 	}
-
+	
+	public L0SliceMetadata() {
+		
+	}
 	/**
 	 * @return the instrumentConfigurationId
 	 */

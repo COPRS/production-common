@@ -64,6 +64,15 @@ public class MetadataServiceTest {
         service = new MetadataService(restTemplate, METADATA_HOST, nbRetry,
                 tempoRetry);
     }
+    
+    @Test
+    public void test() {
+    	String uri = "http://localhost/test.json";
+    	
+    	RestTemplate template = new RestTemplate();
+    	template.exchange(uri, HttpMethod.GET, null,
+                EdrsSessionMetadata.class);
+    }
 
     // --------------------------------------------------
     // Test around getEdrsSession
