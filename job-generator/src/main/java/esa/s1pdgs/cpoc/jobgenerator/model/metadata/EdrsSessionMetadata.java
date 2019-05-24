@@ -18,5 +18,9 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 			final String validityStart, final String validityStop) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
 	}
+	
+	public EdrsSessionMetadata() {
+		super();
+	}
 
 }

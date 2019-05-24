@@ -70,6 +70,10 @@ public abstract class AbstractMetadata {
         this.validityStart = validityStart;
         this.validityStop = validityStop;
     }
+    
+    protected AbstractMetadata() {
+    	
+    }
 
     /**
      * @return the productName
