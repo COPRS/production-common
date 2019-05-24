@@ -71,7 +71,7 @@ public abstract class AbstractMetadata {
         this.validityStop = validityStop;
     }
     
-    protected AbstractMetadata() {
+    public AbstractMetadata() {
     	
     }
 

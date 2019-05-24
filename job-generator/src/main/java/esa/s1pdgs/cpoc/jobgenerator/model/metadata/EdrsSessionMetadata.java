@@ -22,5 +22,4 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	public EdrsSessionMetadata() {
 		super();
 	}
-
 }
