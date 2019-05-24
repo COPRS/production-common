@@ -327,9 +327,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     public void run() {
         JobGeneration<T> job = null;
         
+        // TODO: Too verbose
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobGenerator");
         final Reporting reporting = reportingFactory.newReporting(0);
-        reporting.reportStart("Start job generation");
+        //reporting.reportStart("Start job generation");
 
         // Get a job to generate
         try {
