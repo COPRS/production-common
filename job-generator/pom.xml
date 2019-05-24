@@ -19,6 +19,7 @@
 		<project.build.finalName>s1pdgs-job-generator-app</project.build.finalName>
 		<project.artifactId>s1pdgs-job-generator-app</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.jobgenerator.Application</start-class>
+		<spring.boot.version>2.0.0.RELEASE</spring.boot.version>
 	</properties>
 
 	<dependencies>
@@ -56,6 +57,7 @@
 		<dependency>
 			<groupId>org.springframework.ws</groupId>
 			<artifactId>spring-xml</artifactId>
+			<version>2.0.3.RELEASE</version>
 		</dependency>
 		
 		<dependency>
