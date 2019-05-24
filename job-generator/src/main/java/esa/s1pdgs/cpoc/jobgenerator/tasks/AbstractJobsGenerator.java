@@ -326,14 +326,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     @Override
     public void run() {
         JobGeneration<T> job = null;
-        
-        // TODO: Too verbose
+        // Get a job to generate
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobGenerator");
         final Reporting reporting = reportingFactory.newReporting(0);
-        //reporting.reportStart("Start job generation");
-
-        // Get a job to generate
+        
         try {
+        	
             List<AppDataJobDto<T>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
@@ -348,6 +346,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                     job = new JobGeneration<>(appDataJob, taskTableXmlName);
                     switch (job.getGeneration().getState()) {
                         case INITIAL:
+                            reporting.reportStart("Start job generation");
                             if (job.getGeneration().getLastUpdateDate() == null
                                     || job.getGeneration().getLastUpdateDate()
                                             .getTime() < currentTimestamp
