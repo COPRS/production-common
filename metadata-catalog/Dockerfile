@@ -6,5 +6,6 @@ FROM openjdk:8-jre-alpine
 WORKDIR /app
 COPY --from=build /app/metadata-catalog/target/s1pro-core-metadata-catalog-0.2.0-SNAPSHOT.jar s1pdgs-metadata-catalog.jar
 RUN apk update && apk add wget
+RUN mkdir tmp
 COPY /config/start.sh start.sh
 ENTRYPOINT "/app/start.sh"
