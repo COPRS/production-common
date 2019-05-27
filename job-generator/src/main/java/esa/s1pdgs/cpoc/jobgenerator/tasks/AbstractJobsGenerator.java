@@ -345,8 +345,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                     boolean todo = false;
                     job = new JobGeneration<>(appDataJob, taskTableXmlName);
                     switch (job.getGeneration().getState()) {
-                        case INITIAL:
-                            reporting.reportStart("Start job generation");
+                        case INITIAL:                 
                             if (job.getGeneration().getLastUpdateDate() == null
                                     || job.getGeneration().getLastUpdateDate()
                                             .getTime() < currentTimestamp
@@ -405,10 +404,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                  	final Reporting reportInit = reportingFactory
                 			.product(null, productName)                        			
                 			.newReporting(1);
+                 	
                     try {                    	
                         if (job.getGeneration().getNbErrors() == 0) { 
+                            reporting.reportStart("Start job generation");
                         	reportInit.reportStart("Start init job generation");
-                        }
+                        }                        
                         LOGGER.info(
                                 "{} [productName {}] 1 - Checking the pre-requirements",
                                 this.prefixLogMonitor, productName);
