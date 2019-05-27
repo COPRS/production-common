@@ -476,7 +476,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                         .getProduct().getProductName());
                         this.send(job);
                 
-                        updateState(job, AppDataJobGenerationDtoState.SENT, reporting);
+                        updateState(job, AppDataJobGenerationDtoState.SENT, reportPrep);
                        
 						if (job.getGeneration().getState() == AppDataJobGenerationDtoState.SENT) {
 							reportPrep.reportStop("End job preparation and sending");
