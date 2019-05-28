@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction.files;
 
 import java.io.File;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
@@ -20,6 +22,9 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
  */
 public class MetadataBuilder {
 
+	private static final Logger LOGGER =
+            LogManager.getLogger(MetadataBuilder.class);
+	
 	/**
 	 * Metadata extractor
 	 */
@@ -149,8 +154,8 @@ public class MetadataBuilder {
     public JSONObject buildL0SegmentOutputFileMetadata(L0OutputFileDescriptor descriptor, File file)
             throws MetadataExtractionException {
         JSONObject metadataToIndex = new JSONObject();
-        metadataToIndex = extractor.processL0Segment(descriptor, file);
-        System.out.println("JSON OBJECT:" +metadataToIndex.toString());
+        metadataToIndex = extractor.processL0Segment(descriptor, file);        
+        LOGGER.debug("JSON OBJECT:" +metadataToIndex.toString());
         return metadataToIndex;
     }
 
