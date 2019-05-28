@@ -92,8 +92,8 @@ public final class LoggerReporting implements Reporting  {
 		final long deltaTMillis = stopTime - actionStart;
 				
 		report(Level.INFO, "[STOP OK] [DURATION " + duration(deltaTMillis) + 
-				"] [SIZE:" + size(transferAmount) +"] [RATE " + 
-				rate(transferAmount, deltaTMillis)+ "]" + comment);			
+				"] [SIZE " + size(transferAmount) +"] [RATE " + 
+				rate(transferAmount, deltaTMillis)+ "] " + comment);			
 	}
 
 	@Override
