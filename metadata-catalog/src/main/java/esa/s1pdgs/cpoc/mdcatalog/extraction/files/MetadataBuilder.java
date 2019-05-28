@@ -155,7 +155,7 @@ public class MetadataBuilder {
             throws MetadataExtractionException {
         JSONObject metadataToIndex = new JSONObject();
         metadataToIndex = extractor.processL0Segment(descriptor, file);        
-        LOGGER.debug("JSON OBJECT:" +metadataToIndex.toString());
+        LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }
 
