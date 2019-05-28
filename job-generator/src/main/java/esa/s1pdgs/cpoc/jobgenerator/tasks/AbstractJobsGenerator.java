@@ -519,6 +519,11 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
         
+        if (modifiedJob == null)
+        {
+        	throw new InternalErrorException("Catalog query returned null");
+        }       
+        
     	report.reportDebug("Modified job generations: {}",  modifiedJob.getGenerations());
         job.updateAppDataJob(modifiedJob, taskTableXmlName);        
     	report.reportDebug("Job generation after update: {}", job.getGeneration());
