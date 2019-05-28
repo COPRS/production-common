@@ -543,15 +543,14 @@ public class ExtractMetadata {
 			if (metadataJSONObject.has("stopTime")) {
 				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
 			}
-//			String pass = PASS_DFT;
-			//FIXME: Removed JSON for coordinates for testing purposes
-			/*if (metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("pass").isEmpty()) {
+			String pass = PASS_DFT;
+			if (metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("pass").isEmpty()) {
 				pass = metadataJSONObject.getString("pass");
 			}
 			if (metadataJSONObject.has("segmentCoordinates")) {
 				metadataJSONObject.put("segmentCoordinates", processCoordinates(descriptor.getProductName(),
 						metadataJSONObject.getString("segmentCoordinates"), pass));
-			}*/
+			}
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
 			metadataJSONObject.put("productType", descriptor.getProductType());
