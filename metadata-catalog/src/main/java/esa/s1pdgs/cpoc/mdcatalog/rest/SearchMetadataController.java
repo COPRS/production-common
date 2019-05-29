@@ -64,11 +64,13 @@ public class SearchMetadataController {
 				}
 				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
 			} else if("ValIntersect".equals(mode)) {
+				LOGGER.debug("Using val intersect with productType={}, mode={}, t0={}, t1={}, proccessingMode={}, insConfId={}, dt0={}, dt1={}",productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1);
 			    List<SearchMetadata> f = esServices.valIntersect(convertDateForSearch(startDate, -dt0,
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
                         convertDateForSearch(stopDate, dt1,
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
                         productType, processMode, satellite);
+			    LOGGER.debug("Query returned {} results",f.size());
 			    for(SearchMetadata m : f) {
 			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), 
 			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop()));
