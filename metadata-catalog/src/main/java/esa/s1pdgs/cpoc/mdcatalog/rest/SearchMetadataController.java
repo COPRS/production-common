@@ -70,7 +70,11 @@ public class SearchMetadataController {
                         convertDateForSearch(stopDate, dt1,
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
                         productType, processMode, satellite);
-			    LOGGER.debug("Query returned {} results",f.size());
+			    
+			    if (f != null) {
+			    	LOGGER.debug("Query returned {} results",f.size());
+			    }
+			    
 			    for(SearchMetadata m : f) {
 			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), 
 			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop()));
