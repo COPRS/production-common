@@ -86,6 +86,8 @@ public class SearchMetadataController {
 					e.getLogMessage());
 			return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			//TODO Temp test
+			e.printStackTrace();
 			LOGGER.error("[productType {}] [code {}] [mode {}] [msg {}]", productType,
 					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());
 			return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
