@@ -69,11 +69,13 @@ public class SearchMetadataController {
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
                         convertDateForSearch(stopDate, dt1,
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-                        productType, processMode, satellite);
+                        productType, processMode, satellite);			   			    
 			    
-			    if (f != null) {
-			    	LOGGER.debug("Query returned {} results",f.size());
+			    if (f == null) {			    	
+			    	return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
 			    }
+			    
+			    LOGGER.debug("Query returned {} results",f.size());
 			    
 			    for(SearchMetadata m : f) {
 			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), 
