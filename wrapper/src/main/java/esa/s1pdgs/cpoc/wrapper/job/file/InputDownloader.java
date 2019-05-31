@@ -221,6 +221,8 @@ public class InputDownloader {
                 case "L0_SEGMENT":
                 case "L1_SLICE":
                 case "L1_ACN":
+                case "L2_ACN":
+                case "L2_SLICE":
                     LOGGER.info("Input {}-{} will be stored in {}",
                             input.getFamily(), input.getContentRef(),
                             input.getLocalPath());
