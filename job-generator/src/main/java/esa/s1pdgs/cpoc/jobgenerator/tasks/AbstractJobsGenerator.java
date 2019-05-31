@@ -826,6 +826,9 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
             case L1:
                 family = ProductFamily.L1_JOB;
                 break;
+            case L2:
+                family = ProductFamily.L2_JOB;
+                break;
         }
         final LevelJobDto r = new LevelJobDto(family,
                 job.getAppDataJob().getProduct().getProductName(),
