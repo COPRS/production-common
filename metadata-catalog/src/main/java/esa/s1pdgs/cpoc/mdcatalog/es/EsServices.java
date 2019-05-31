@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -47,8 +49,11 @@ import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
 public class EsServices {
 
     /**
-     * Logger
-
+     * Logger */
+	private static final Logger LOGGER =
+            LogManager.getLogger(EsServices.class);
+	
+	
 	/**
 	 * Elasticsearch client
 	 */
@@ -198,6 +203,167 @@ public class EsServices {
 		return null;
 	}
 	
+	
+	/*
+	 * ClosestStartValidity
+		This policy uses a centre time, calculated as (t0-t1) / 2
+		to determinate auxiliary data, which is located nearest
+		to the centre time. In order to do this, it checks the
+		product located directly before and behind the centre
+		time and selects the one with the smallest distance. If
+		both distances are equal, the product before will be
+		choose.
+		select from File_Type where startTime <
+		centreTime and there exists no corresponding
+		File_Type with greater startTime where
+		startTime < centreTime
+		select from File_Type where startTime >=
+		centreTime and there exists no corresponding
+		File_Type with lesser startTime where
+		startTime >= centreTime
+		//TODO pseudo implementation.Needs to be implemented properly
+	 */
+	public SearchMetadata closestStartValidity(String productType, ProductFamily productFamily, String beginDate, 
+	        String endDate, String satelliteId,	int instrumentConfId, String processMode) throws Exception {
+		//FIXME date pattern should be define in somewhere common
+		//TODO getAverageOfDates(startDate,StopDate);
+		
+		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {} ",productType);
+		
+       ProductCategory category = ProductCategory.fromProductFamily(productFamily);
+       SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+	    // Generic fields
+	    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+               // .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+                .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
+	    // Product type
+        if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
+            queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+        } else {
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery("productType.keyword", productType));
+        }
+	    // Instrument configuration id
+	    if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
+	        queryBuilder = queryBuilder.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId));
+	    }
+	    // Process mode
+	    if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
+	        queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+	    }
+	    sourceBuilder.query(queryBuilder);
+	    
+		String index = null;
+        if(ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
+            index = productType.toLowerCase();
+        } else {
+            index = productFamily.name().toLowerCase();
+        }
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.DESC));
+
+		SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.types(indexType);
+		searchRequest.source(sourceBuilder);
+		try {
+			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (searchResponse.getHits().totalHits >= 1) {
+				Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
+				SearchMetadata r = new SearchMetadata();
+				r.setProductName(source.get("productName").toString());
+				r.setProductType(source.get("productType").toString());
+				r.setKeyObjectStorage(source.get("url").toString());
+				if (source.containsKey("validityStartTime")) {
+					r.setValidityStart(source.get("validityStartTime").toString());
+				}
+				if (source.containsKey("validityStopTime")) {
+					r.setValidityStop(source.get("validityStopTime").toString());
+				}
+				LOGGER.debug(" Product {} found using selection policy 'closestStartValidity'",source.get("productName").toString());
+				return r;
+			}
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return null;
+	}
+	
+	/*
+	 *  ClosestStopValidity
+		Similar to 'ClosestStartValidity', this policy uses a
+		centre time calculated as (t0-t1) / 2 to determine
+		auxiliary data, which is located closest to the centre
+		time but using stopTime as the reference instead of
+		startTime
+		//TODO pseudo implementation.Needs to be implemented properly
+	 */
+	public SearchMetadata closestStopValidity(String productType, ProductFamily productFamily, String beginDate, 
+	        String endDate, String satelliteId,	int instrumentConfId, String processMode) throws Exception {
+  	  //FIXME date pattern should be define in somewhere common
+	  //FIXME date pattern should be define in somewhere common
+		
+		LOGGER.debug("Searching products via selection policy 'closestStopValidity' for {} ",productType);
+		
+       ProductCategory category = ProductCategory.fromProductFamily(productFamily);
+      SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+	    // Generic fields
+	    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+	    		//.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+                .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
+                .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
+	    // Product type
+        if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
+            queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+        } else {
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery("productType.keyword", productType));
+        }
+	    // Instrument configuration id
+	    if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
+	        queryBuilder = queryBuilder.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId));
+	    }
+	    // Process mode
+	    if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
+	        queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+	    }
+	    sourceBuilder.query(queryBuilder);
+	    
+		String index = null;
+        if(ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
+            index = productType.toLowerCase();
+        } else {
+            index = productFamily.name().toLowerCase();
+        }
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("closestStopValidity").order(SortOrder.ASC));
+
+		SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.types(indexType);
+		searchRequest.source(sourceBuilder);
+		try {
+			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (searchResponse.getHits().totalHits >= 1) {
+				Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
+				SearchMetadata r = new SearchMetadata();
+				r.setProductName(source.get("productName").toString());
+				r.setProductType(source.get("productType").toString());
+				r.setKeyObjectStorage(source.get("url").toString());
+				if (source.containsKey("validityStartTime")) {
+					r.setValidityStart(source.get("validityStartTime").toString());
+				}
+				if (source.containsKey("validityStopTime")) {
+					r.setValidityStop(source.get("validityStopTime").toString());
+				}
+				LOGGER.debug(" Product {} found using selection policy 'closestStopValidity'",source.get("productName").toString());
+				return r;
+			}
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return null;
+	}
+	
+	
+	
+	
 	/**
 	 * Function which returns the list of all the Segments for a specific datatakeid and start/stop time
 	 * 
@@ -306,6 +472,19 @@ public class EsServices {
 		}
 		return null;
 	}
+	
+
+//	private String getAverageOfDates(String startDate, String stopDate)
+//			throws ParseException {
+//		SimpleDateFormat formatter = new SimpleDateFormat(
+//				"yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+//		Date date1 = formatter.parse(startDate);
+//		Date date2 = formatter.parse(stopDate);
+//		long millis = (date1.getTime()+ date2.getTime() );
+//		Date averageDate = new Date( millis / 2);
+//		String formattedDateStr = formatter.format(averageDate);
+//		return formattedDateStr;
+//	}
 
 	private Map<String, Object> getRequest(String index, String productName) throws Exception {
 		try {
