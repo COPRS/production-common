@@ -60,7 +60,14 @@ public class JobOrder {
 	 */
 	public JobOrder(final JobOrder obj, final ApplicationLevel applicationLevel) {
 		this();
-		this.conf = applicationLevel == ApplicationLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());
+		//this.conf = applicationLevel == ApplicationLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());
+		if (applicationLevel == ApplicationLevel.L0) {
+			this.conf = new L0JobOrderConf();
+		} else if (applicationLevel == ApplicationLevel.L2) {
+			this.conf = new L2JobOrderConf();
+		} else {
+			this.conf = new L1JobOrderConf();
+		}
 		this.procs.addAll(obj.getProcs().stream().filter(item -> item != null).map(item -> new JobOrderProc(item))
 				.collect(Collectors.toList()));
 		this.nbProcs = this.procs.size();

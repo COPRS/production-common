@@ -9,6 +9,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.L0JobOrderConf;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.L1JobOrderConf;
+import esa.s1pdgs.cpoc.jobgenerator.model.joborder.L2JobOrderConf;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
@@ -39,7 +40,15 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
 		final TaskTableTaskToJobOrderProc procConv = new TaskTableTaskToJobOrderProc();
 
 		final JobOrder order = new JobOrder();
-		AbstractJobOrderConf conf = tObj.getLevel() == ApplicationLevel.L0 ? new L0JobOrderConf() : new L1JobOrderConf();
+	//	AbstractJobOrderConf conf = tObj.getLevel() == ApplicationLevel.L0 ? new L0JobOrderConf() : new L1JobOrderConf();
+		AbstractJobOrderConf conf = null;
+		if (tObj.getLevel() == ApplicationLevel.L0) {
+			conf = new L0JobOrderConf();
+		} else if (tObj.getLevel() == ApplicationLevel.L2) {
+			conf = new L2JobOrderConf();
+		} else {
+			conf = new L1JobOrderConf();
+		}
 		conf.setProcessorName(tObj.getProcessorName());
 		conf.setVersion(tObj.getVersion());
 		if (tObj.getTest() == TaskTableTestEnum.YES) {

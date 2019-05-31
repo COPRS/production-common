@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
@@ -118,10 +119,9 @@ public class L2AppJobDispatcher
      */
     @Override
     protected AbstractJobsGenerator<LevelProductDto> createJobGenerator(
-            final File xmlFile) throws AbstractCodedException {
-        return this.factory.createJobGeneratorForL0Slice(xmlFile,
-                appDataService);
-    }
+			final File xmlFile) throws AbstractCodedException {
+		return this.factory.createJobGeneratorForL0Slice(xmlFile, ApplicationLevel.L2, appDataService);
+	}
 
     /**
      * Get task tables to generate for given job

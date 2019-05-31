@@ -153,7 +153,7 @@ public class L1AppJobDispatcherTest {
                 }
                 return this.mockGeneratorOther;
             }).when(jobsGeneratorFactory)
-                    .createJobGeneratorForL0Slice(Mockito.any(), Mockito.any());
+                    .createJobGeneratorForL0Slice(Mockito.any(),  any(),Mockito.any());
         } catch (JobGenBuildTaskTableException e) {
             fail("Exception occurred: " + e.getMessage());
         }
@@ -249,9 +249,9 @@ public class L1AppJobDispatcherTest {
         try {
             this.dispatcher.createJobGenerator(taskTable1);
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(any(), any());
+                    .createJobGeneratorForL0Slice(any(), any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable1), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable1),any(), any());
         } catch (AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
@@ -273,15 +273,15 @@ public class L1AppJobDispatcherTest {
             verify(jobsGeneratorFactory, never())
                     .createJobGeneratorForEdrsSession(any(), any());
             verify(jobsGeneratorFactory, times(this.nbTaskTables))
-                    .createJobGeneratorForL0Slice(any(), any());
+                    .createJobGeneratorForL0Slice(any(), any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable1), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable1), any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable2), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable2), any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable3), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable3), any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable4), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable4),  any(), any());
             assertTrue(dispatcher.getGenerators().size() == this.nbTaskTables);
             assertTrue(dispatcher.getGenerators()
                     .containsKey(taskTable1.getName()));

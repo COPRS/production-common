@@ -398,7 +398,8 @@ public class JobsGeneratorFactoryTest {
 
             AbstractJobsGenerator<LevelProductDto> generator =
                     factory.createJobGeneratorForL0Slice(new File(
-                            "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"), appDataPService);
+                            "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
+                    		 ApplicationLevel.L2,appDataPService);
 
             // Check Task table
             this.checkInitializeWithTaskTableIWTaskTable(expectedTaskTable,

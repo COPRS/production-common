@@ -381,6 +381,60 @@ public class TestGenericUtils {
 		t.addPool(pool5);
 		return t;
 	}
+	
+	
+	public static TaskTable buildTaskTableWV() {
+
+		TaskTable t = new TaskTable();
+		t.setProcessorName("WV_RAW__0_OCN__2");
+		t.setVersion("02.84");
+		t.setTest(TaskTableTestEnum.NO);
+		t.setLevel(ApplicationLevel.L2);
+
+		t.addDynProcParam(new TaskTableDynProcParam("Application_LUT", "String", "WV_Default"));
+		t.addDynProcParam(new TaskTableDynProcParam("Timeliness_Category", "String", "FAST"));
+		t.addDynProcParam(new TaskTableDynProcParam("Mission_Id", "String", "S1A"));
+		t.addDynProcParam(new TaskTableDynProcParam("Dem", "String", "coarse"));
+		t.addDynProcParam(new TaskTableDynProcParam("Slicing_Flag", "String", "TRUE"));
+		t.addDynProcParam(new TaskTableDynProcParam("Slice_Number", "Number", "1"));
+		t.addDynProcParam(new TaskTableDynProcParam("Total_Number_Of_Slices", "Number", "1"));
+		t.addDynProcParam(new TaskTableDynProcParam("Slice_Length", "Number", "25.0"));
+		t.addDynProcParam(new TaskTableDynProcParam("Slice_Overlap", "Number", "7.4"));
+
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/components/S1IPF/etc/processorConfiguration.xml", "02.84"));
+
+		TaskTablePool pool1 = new TaskTablePool();
+		pool1.setDetached(false);
+		pool1.setKillingSignal(15);
+		pool1.addTask(buildTaskIWPCS());
+		t.addPool(pool1);
+
+		TaskTablePool pool2 = new TaskTablePool();
+		pool2.setDetached(false);
+		pool2.setKillingSignal(15);
+		pool2.addTask(buildTaskIWMDC());
+		t.addPool(pool2);
+
+		TaskTablePool pool3 = new TaskTablePool();
+		pool3.setDetached(false);
+		pool3.setKillingSignal(15);
+		pool3.addTask(buildTaskIWWPC());
+		t.addPool(pool3);
+
+		TaskTablePool pool4 = new TaskTablePool();
+		pool4.setDetached(false);
+		pool4.setKillingSignal(15);
+		pool4.addTask(buildTaskIWLPC1());
+		t.addPool(pool4);
+
+		TaskTablePool pool5 = new TaskTablePool();
+		pool5.setDetached(false);
+		pool5.setKillingSignal(15);
+		pool5.addTask(buildTaskIWStats());
+		t.addPool(pool5);
+		return t;
+	}
+
 
 	private static TaskTableTask buildTaskIWPCS() {
 

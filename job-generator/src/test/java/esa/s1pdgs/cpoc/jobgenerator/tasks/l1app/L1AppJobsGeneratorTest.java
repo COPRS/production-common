@@ -125,7 +125,7 @@ public class L1AppJobsGeneratorTest {
         generator = (L1AppJobsGenerator) factory.createJobGeneratorForL0Slice(
                 new File(
                         "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
-                appDataPService);
+                ApplicationLevel.L1, appDataPService);
 
         appDataJob = TestL1Utils.buildJobGeneration(false);
         appDataJobComplete = TestL1Utils.buildJobGeneration(true);

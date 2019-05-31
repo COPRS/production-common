@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
@@ -16,6 +17,7 @@ import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l0app.L0AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp.L0SegmentAppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobsGenerator;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.l2app.L2AppJobsGenerator;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
@@ -90,27 +92,36 @@ public class JobsGeneratorFactory {
         return processor;
     }
 
+
     /**
-     * 
      * @param xmlFile
+     * @param applicationLevel
      * @param appDataService
      * @return
      * @throws JobGenBuildTaskTableException
      */
-    public AbstractJobsGenerator<LevelProductDto> createJobGeneratorForL0Slice(
+	public AbstractJobsGenerator<LevelProductDto> createJobGeneratorForL0Slice(
             final File xmlFile,
+            final ApplicationLevel applicationLevel,
             final AbstractAppCatalogJobService<LevelProductDto> appDataService)
             throws JobGenBuildTaskTableException {
-        AbstractJobsGenerator<LevelProductDto> processor =
-                new L1AppJobsGenerator(this.xmlConverter,
-                        this.metadataService, this.l0ProcessSettings,
-                        this.jobGeneratorSettings, this.outputFactory,
-                        appDataService);
-        processor.setMode(ProductMode.SLICING);
-        processor.initialize(xmlFile);
+    	
+		AbstractJobsGenerator<LevelProductDto> processor = null;
+		if (applicationLevel == ApplicationLevel.L2) {
+			processor = new L2AppJobsGenerator(this.xmlConverter, this.metadataService, this.l0ProcessSettings,
+					this.jobGeneratorSettings, this.outputFactory, appDataService);
+			processor.setMode(ProductMode.SLICING);
+			processor.initialize(xmlFile);
+		} else { // FIXME default L1
+			processor = new L1AppJobsGenerator(this.xmlConverter, this.metadataService, this.l0ProcessSettings,
+					this.jobGeneratorSettings, this.outputFactory, appDataService);
+			processor.setMode(ProductMode.SLICING);
+			processor.initialize(xmlFile);
+		}
         return processor;
     }
 
+    
     /**
      * 
      * @param xmlFile
