@@ -270,8 +270,9 @@ public class EsServicesTest{
 		this.mockSearchRequest(response);
 		
 		try {
+			//"yyyy-MM-dd'T'HH:mm:ss.999999'Z'
 			SearchMetadata result = esServices.closestStartValidity("type", ProductFamily.L0_ACN, 
-			        "beginDate", "endDate", "satelliteId", 6, "NRT");
+			        "2012-05-05T10:10:12.00012Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -304,7 +305,7 @@ public class EsServicesTest{
 		
 		try {
 			SearchMetadata result = esServices.closestStopValidity("type", ProductFamily.L2_ACN, 
-			        "beginDate", "endDate", "satelliteId", 6, "NRT");
+			        "2012-05-05T10:10:12.00012Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());

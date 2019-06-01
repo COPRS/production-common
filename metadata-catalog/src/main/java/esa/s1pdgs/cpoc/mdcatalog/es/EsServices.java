@@ -227,15 +227,16 @@ public class EsServices {
 	        String endDate, String satelliteId,	int instrumentConfId, String processMode) throws Exception {
 		//FIXME date pattern should be define in somewhere common
 		//TODO getAverageOfDates(startDate,StopDate);
-		
-		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {} ",productType);
+		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {}, startDate {}, endDate {} ",
+				productType,beginDate,endDate);
 		
        ProductCategory category = ProductCategory.fromProductFamily(productFamily);
        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 	    // Generic fields
-	    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+	    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("validityStartTime").gt(beginDate));
                // .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-                .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
+	             //FIXME 
+               // .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
 	    // Product type
         if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
             queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
@@ -259,9 +260,11 @@ public class EsServices {
             index = productFamily.name().toLowerCase();
         }
 		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.DESC));
+		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.ASC));
 
-		SearchRequest searchRequest = new SearchRequest(index);
+		LOGGER.debug("query composed using closestStartValidity {}", queryBuilder);
+		
+		SearchRequest searchRequest   = new SearchRequest(index);
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
@@ -299,17 +302,15 @@ public class EsServices {
 	public SearchMetadata closestStopValidity(String productType, ProductFamily productFamily, String beginDate, 
 	        String endDate, String satelliteId,	int instrumentConfId, String processMode) throws Exception {
   	  //FIXME date pattern should be define in somewhere common
-	  //FIXME date pattern should be define in somewhere common
-		
-		LOGGER.debug("Searching products via selection policy 'closestStopValidity' for {} ",productType);
-		
+		LOGGER.debug("Searching products via selection policy 'closestStopValidity' for {}, startDate {}, endDate {} ",
+				productType,beginDate,endDate);	
        ProductCategory category = ProductCategory.fromProductFamily(productFamily);
       SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 	    // Generic fields
 	    BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 	    		//.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-                .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-                .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
+                .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate));
+    
 	    // Product type
         if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
             queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
@@ -333,8 +334,10 @@ public class EsServices {
             index = productFamily.name().toLowerCase();
         }
 		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("closestStopValidity").order(SortOrder.ASC));
-
+		sourceBuilder.sort(new FieldSortBuilder("validityStopTime").order(SortOrder.ASC));
+	    
+		LOGGER.debug("query composed using closestStopValidity {}", queryBuilder);
+	    
 		SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
