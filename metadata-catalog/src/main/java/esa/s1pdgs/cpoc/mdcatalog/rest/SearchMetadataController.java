@@ -63,7 +63,7 @@ public class SearchMetadataController {
 							f.getValidityStart(), f.getValidityStop()));
 				}
 				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
-			} else if("ValIntersect".equals(mode) || "ClosestStartValidity".equals(mode)) {
+			} else if("ValIntersect".equals(mode)) {
 				LOGGER.debug("Using val intersect with productType={}, mode={}, t0={}, t1={}, proccessingMode={}, insConfId={}, dt0={}, dt1={}",productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1);
 			    List<SearchMetadata> f = esServices.valIntersect(convertDateForSearch(startDate, -dt0,
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
@@ -82,7 +82,36 @@ public class SearchMetadataController {
 			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop()));
 			    }
                 return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
-			} else {
+			}
+			else if ("ClosestStartValidity".equals(mode)) {
+				SearchMetadata f = esServices.closestStartValidity(productType, ProductFamily.fromValue(productFamily),
+						convertDateForSearch(startDate, -dt0,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'")),
+						convertDateForSearch(stopDate, dt1,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'")),
+						satellite, insConfId, processMode);
+				
+				if (f != null) {
+					response.add(new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
+							f.getValidityStart(), f.getValidityStop()));
+				}
+				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
+			}
+			else if ("ClosestStopValidity".equals(mode)) {
+				SearchMetadata f = esServices.closestStopValidity(productType, ProductFamily.fromValue(productFamily),
+						convertDateForSearch(startDate, -dt0,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'")),
+						convertDateForSearch(stopDate, dt1,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'")),
+						satellite, insConfId, processMode);
+				
+				if (f != null) {
+					response.add(new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
+							f.getValidityStart(), f.getValidityStop()));
+				}
+				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
+			}
+			else {
 				LOGGER.error("[productType {}] [code {}] [mode {}] [msg Unknown mode]", productType,
 						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);
 				return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.BAD_REQUEST);

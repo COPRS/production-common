@@ -8,7 +8,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -272,6 +271,39 @@ public class EsServicesTest{
 		
 		try {
 			SearchMetadata result = esServices.closestStartValidity("type", ProductFamily.L0_ACN, 
+			        "beginDate", "endDate", "satelliteId", 6, "NRT");
+			assertEquals("Search metadata are not equals", expectedResult, result);
+		} catch (Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public void closestStopValidityTest() throws IOException {
+		// Product
+		SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("validityStartTime");
+		expectedResult.setValidityStop("validityStopTime");
+		
+		//Response
+		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
+		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
+		SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		SearchHit[] hits = {hit};
+		SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			SearchMetadata result = esServices.closestStopValidity("type", ProductFamily.L2_ACN, 
 			        "beginDate", "endDate", "satelliteId", 6, "NRT");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
