@@ -62,11 +62,11 @@ public class JobOrder {
 		this();
 		//this.conf = applicationLevel == ApplicationLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());
 		if (applicationLevel == ApplicationLevel.L0) {
-			this.conf = new L0JobOrderConf();
+			this.conf = new L0JobOrderConf(obj.getConf());
 		} else if (applicationLevel == ApplicationLevel.L2) {
-			this.conf = new L2JobOrderConf();
+			this.conf = new L2JobOrderConf(obj.getConf());
 		} else {
-			this.conf = new L1JobOrderConf();
+			this.conf = new L1JobOrderConf(obj.getConf());
 		}
 		this.procs.addAll(obj.getProcs().stream().filter(item -> item != null).map(item -> new JobOrderProc(item))
 				.collect(Collectors.toList()));
