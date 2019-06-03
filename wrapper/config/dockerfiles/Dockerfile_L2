@@ -2,7 +2,7 @@ FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:develop as build
 
 WORKDIR /app
 
-FROM registry.tools.s1pdgs.eu/wo7/docker_l2:latest
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-l2:develop
 RUN yum install -y java-1.8.0-openjdk wget && yum clean all
 WORKDIR /app
 COPY --from=build /app/wrapper/target/s1pro-core-wrapper-0.2.0-SNAPSHOT.jar s1pdgs-wrapper.jar
