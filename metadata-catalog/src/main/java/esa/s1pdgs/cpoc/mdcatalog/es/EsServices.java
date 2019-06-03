@@ -55,8 +55,7 @@ public class EsServices {
 	 * Logger
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(EsServices.class);
-	// FIXME date pattern should be define in somewhere common
-	private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+	
 
 	/**
 	 * Elasticsearch client
@@ -511,6 +510,7 @@ public class EsServices {
 	}
 
 	private String calculateCentreTime(String startDate, String stopDate) throws ParseException {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 		Date date1 = formatter.parse(startDate);
 		Date date2 = formatter.parse(stopDate);
 		long millis = (date1.getTime() + date2.getTime());
