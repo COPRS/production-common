@@ -259,7 +259,7 @@ public class EsServices {
 			index = productFamily.name().toLowerCase();
 		}
 		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.DESC));
+		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.ASC));
 
 		LOGGER.debug("query composed using closestStartValidity {}", queryBuilder);
 
@@ -335,7 +335,7 @@ public class EsServices {
 			index = productFamily.name().toLowerCase();
 		}
 		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("validityStopTime").order(SortOrder.ASC));
+		sourceBuilder.sort(new FieldSortBuilder("validityStopTime").order(SortOrder.DESC));
 
 		LOGGER.debug("query composed using closestStopValidity {}", queryBuilder);
 
