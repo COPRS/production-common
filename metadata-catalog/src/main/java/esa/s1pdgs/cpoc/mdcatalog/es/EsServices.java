@@ -51,6 +51,8 @@ import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
 @Service
 public class EsServices {
 
+	private static final String PRODUCT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
+
 	/**
 	 * Logger
 	 */
@@ -259,15 +261,23 @@ public class EsServices {
 			index = productFamily.name().toLowerCase();
 		}
 		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.ASC));
+		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.DESC));
 
 		LOGGER.debug("query composed using closestStartValidity {}", queryBuilder);
 
 		SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
+		
+		
 		try {
 			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			LOGGER.debug("Total Hits Found {}", searchResponse.getHits().totalHits);
+			 for (SearchHit hit : searchResponse.getHits()) {
+				 Map<String, Object> source = hit.getSourceAsMap();
+					LOGGER.debug("Found query result vi closestStart {}", source.get("productName").toString());
+			}
+			
 			if (searchResponse.getHits().totalHits >= 1) {
 				//SearchHit hit = findNearestHit( formatter.parse(centreTime),  searchResponse.getHits(),"ClosestStartValidity");
 				SearchHit hit =  searchResponse.getHits().getAt(0);
@@ -335,7 +345,7 @@ public class EsServices {
 			index = productFamily.name().toLowerCase();
 		}
 		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("validityStopTime").order(SortOrder.DESC));
+		sourceBuilder.sort(new FieldSortBuilder("validityStopTime").order(SortOrder.ASC));
 
 		LOGGER.debug("query composed using closestStopValidity {}", queryBuilder);
 
@@ -345,6 +355,12 @@ public class EsServices {
 		try {
 			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 
+			LOGGER.debug("closestStop Total Hits Found {}", searchResponse.getHits().totalHits);
+				 for (SearchHit hit : searchResponse.getHits()) {
+					 Map<String, Object> source = hit.getSourceAsMap();
+					 LOGGER.debug("Found query result vi closestStop {}", source.get("productName").toString());
+				}
+				 
 			if (searchResponse.getHits().totalHits >= 1) {
 				
 //				String centreTime = calculateCentreTime(beginDate, endDate);
@@ -381,16 +397,18 @@ public class EsServices {
 //		SearchHit nearest = hits.getAt(0);
 //		// FIXME not a good idea to iterate over all hits. Elasticsearch's
 //		// decay_function() or other type of queries should be used
+//		SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
 //		for (int i = 1; i < hits.totalHits; i++) {
 //			Map<String, Object> source = hits.getAt(i).getSourceAsMap();
 //			Date date = null;
 //			if (strategy.equals("ClosestStartValidity")) {
-//				date = formatter.parse(source.get("startTime").toString());
+//				date = formatter.parse(source.get("validityStartTime").toString());
 //			} else {
-//				date = formatter.parse(source.get("stopTime").toString());
+//				date = formatter.parse(source.get("validityStopTime").toString());
 //			}
 //			long diff = Math.abs(date.getTime() - centreTime.getTime());
-//			if (lowestDiff <= diff) {
+//			//FIXME if diff is equal
+//			if (lowestDiff >= diff) {
 //				lowestDiff = diff;
 //				nearest = hits.getAt(i);
 //			}
@@ -510,7 +528,7 @@ public class EsServices {
 	}
 
 	private String calculateCentreTime(String startDate, String stopDate) throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+		SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
 		Date date1 = formatter.parse(startDate);
 		Date date2 = formatter.parse(stopDate);
 		long millis = (date1.getTime() + date2.getTime());
