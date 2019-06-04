@@ -246,19 +246,19 @@ public class EsServicesTest{
 	}
 	
 	@Test
-	public void closestStartValidityTest() throws IOException {
+	public void closestStartValidityTest() throws Exception {
 		// Product
 		SearchMetadata expectedResult = new SearchMetadata();
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("validityStartTime");
-		expectedResult.setValidityStop("validityStopTime");
+		expectedResult.setValidityStart("2012-05-05T10:10:12.00012Z");
+		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
+		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.00012Z\",\"validityStopTime\":"
+		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
@@ -268,15 +268,12 @@ public class EsServicesTest{
 		
 		//Mocking the search request
 		this.mockSearchRequest(response);
-		
-		try {
-			//"yyyy-MM-dd'T'HH:mm:ss.999999'Z'
-			SearchMetadata result = esServices.closestStartValidity("type", ProductFamily.L0_ACN, 
-			        "2012-05-05T10:10:12.00012Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
-			assertEquals("Search metadata are not equals", expectedResult, result);
-		} catch (Exception e) {
-			fail("Exception occurred: " + e.getMessage());
-		}
+
+		//"yyyy-MM-dd'T'HH:mm:ss.999999'Z'
+		SearchMetadata result = esServices.closestStartValidity("type", ProductFamily.L0_ACN, 
+		        "2012-05-05T10:10:12.00012Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
+		assertEquals("Search metadata are not equals", expectedResult, result);
+
 	}
 	
 	@Test
@@ -286,13 +283,13 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("validityStartTime");
-		expectedResult.setValidityStop("validityStopTime");
+		expectedResult.setValidityStart("2012-05-05T10:10:12.00012Z");
+		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
+		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.00012Z\",\"validityStopTime\":"
+		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};

@@ -20,8 +20,10 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
@@ -226,19 +229,96 @@ public class EsServices {
 			String endDate, String satelliteId, int instrumentConfId, String processMode) throws Exception {
 		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {}, startDate {}, endDate {} ",
 				productType, beginDate, endDate);
+		
+		// mimic the same behaviour used in the old processing system	
+		final String centreTime = calculateCentreTime(beginDate, endDate);
+		final SearchRequest beforeRequest = newQueryFor(
+				productType, 
+				productFamily, 
+				instrumentConfId, 
+				processMode, 
+				QueryBuilders.rangeQuery("validityStartTime").lt(centreTime), 
+				new FieldSortBuilder("validityStartTime").order(SortOrder.DESC)				
+		);
+		final SearchRequest afterRequest = newQueryFor(
+				productType, 
+				productFamily, 
+				instrumentConfId, 
+				processMode, 
+				QueryBuilders.rangeQuery("validityStartTime").gte(centreTime), 
+				new FieldSortBuilder("validityStartTime").order(SortOrder.ASC)	
+		);		
+		try {
+			final SearchResponse beforeResponse = elasticsearchDAO.search(beforeRequest);
+			final SearchResponse afterResponse = elasticsearchDAO.search(afterRequest);
+			
+			final SearchHits before = beforeResponse.getHits();
+			final SearchHits after = afterResponse.getHits();
+			
+			LOGGER.debug("Total Hits Found before {} and after {}", before.totalHits, after.totalHits);
+			
+			if (before.totalHits == 0 && after.totalHits > 0) {
+				final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
+				LOGGER.debug("Candidate after was the best result, {}", metaAfter.getProductName());
+				return metaAfter;
+			}
+			else if (before.totalHits > 0 && after.totalHits == 0) {				
+				final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
+				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
+				return metaBefore;
+			}
+			else if (before.totalHits == 0 && after.totalHits == 0)	{
+				return null;
+			}
+			
+			// "merge" functionality from old processing system implementation 
+			final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
+			final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
+			
+			// only use millisecond precision here to avoid copying too much code from the old implementation
+			// TODO evaluate if this is sufficient			
+			final SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
+			final long centreTimeLong = formatter.parse(centreTime).getTime();
+			
+			final long millisBefore = Math.abs(formatter.parse(metaBefore.getValidityStart()).getTime() - centreTimeLong);
+			final long millisAfter = Math.abs(formatter.parse(metaBefore.getValidityStart()).getTime() - centreTimeLong);
+			
+			if (millisBefore <= millisAfter) {
+				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
+				return metaBefore;
+			}
+			else {
+				LOGGER.debug("Candidate after was the best result, {}", metaAfter.getProductName());
+				return metaAfter;
+			}
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
 	
+	private final SearchMetadata toSearchMetadata(final SearchHit hit)
+	{
+		final Map<String, Object> source = hit.getSourceAsMap();
+		final SearchMetadata r = new SearchMetadata();
+		r.setProductName(source.get("productName").toString());
+		r.setProductType(source.get("productType").toString());
+		r.setKeyObjectStorage(source.get("url").toString());
+		if (source.containsKey("validityStartTime")) {
+			r.setValidityStart(source.get("validityStartTime").toString());
+		}
+		if (source.containsKey("validityStopTime")) {
+			r.setValidityStop(source.get("validityStopTime").toString());
+		}		
+		return r;
+	}
 
+	private final SearchRequest newQueryFor(String productType, ProductFamily productFamily, int instrumentConfId,
+			String processMode, RangeQueryBuilder rangeQueryBuilder, FieldSortBuilder sortOrder) throws InternalErrorException {
 		ProductCategory category = ProductCategory.fromProductFamily(productFamily);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		String centreTime = calculateCentreTime(beginDate, endDate);
-		// Generic fields
-		//FIXME limit resultset of queries
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("validityStartTime").lt(centreTime));
-		// .must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-		// FIXME
-		// .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
-		// Product type
+				.must(rangeQueryBuilder);
+
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 		} else {
@@ -261,45 +341,14 @@ public class EsServices {
 			index = productFamily.name().toLowerCase();
 		}
 		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.DESC));
+		sourceBuilder.sort(sortOrder);
 
-		LOGGER.debug("query composed using closestStartValidity {}", queryBuilder);
+		LOGGER.debug("query composed is {}", queryBuilder);
 
-		SearchRequest searchRequest = new SearchRequest(index);
+		final SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
-		
-		
-		try {
-			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("Total Hits Found {}", searchResponse.getHits().totalHits);
-			 for (SearchHit hit : searchResponse.getHits()) {
-				 Map<String, Object> source = hit.getSourceAsMap();
-					LOGGER.debug("Found query result vi closestStart {}", source.get("productName").toString());
-			}
-			
-			if (searchResponse.getHits().totalHits >= 1) {
-				//SearchHit hit = findNearestHit( formatter.parse(centreTime),  searchResponse.getHits(),"ClosestStartValidity");
-				SearchHit hit =  searchResponse.getHits().getAt(0);
-				Map<String, Object> source = hit.getSourceAsMap();
-				SearchMetadata r = new SearchMetadata();
-				r.setProductName(source.get("productName").toString());
-				r.setProductType(source.get("productType").toString());
-				r.setKeyObjectStorage(source.get("url").toString());
-				if (source.containsKey("validityStartTime")) {
-					r.setValidityStart(source.get("validityStartTime").toString());
-				}
-				if (source.containsKey("validityStopTime")) {
-					r.setValidityStop(source.get("validityStopTime").toString());
-				}
-				LOGGER.debug(" Product {} found using selection policy 'closestStartValidity'",
-						source.get("productName").toString());
-				return r;
-			}
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
-		}
-		return null;
+		return searchRequest;
 	}
 
 	/*
@@ -310,111 +359,70 @@ public class EsServices {
 	 */
 	public SearchMetadata closestStopValidity(String productType, ProductFamily productFamily, String beginDate,
 			String endDate, String satelliteId, int instrumentConfId, String processMode) throws Exception {
-
-		LOGGER.debug("Searching products via selection policy 'closestStopValidity' for {}, startDate {}, endDate {} ",
+		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {}, startDate {}, endDate {} ",
 				productType, beginDate, endDate);
 		
-		ProductCategory category = ProductCategory.fromProductFamily(productFamily);
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		String centreTime = calculateCentreTime(beginDate, endDate);
-		// Generic fields
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				// .must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-				.must(QueryBuilders.rangeQuery("validityStopTime").gt(centreTime));
-
-		// Product type
-		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
-			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
-		} else {
-			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("productType.keyword", productType));
-		}
-		// Instrument configuration id
-		if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
-			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId));
-		}
-		// Process mode
-		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
-			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
-		}
-		sourceBuilder.query(queryBuilder);
-
-		String index = null;
-		if (ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
-			index = productType.toLowerCase();
-		} else {
-			index = productFamily.name().toLowerCase();
-		}
-		sourceBuilder.size(1);
-		sourceBuilder.sort(new FieldSortBuilder("validityStopTime").order(SortOrder.ASC));
-
-		LOGGER.debug("query composed using closestStopValidity {}", queryBuilder);
-
-		SearchRequest searchRequest = new SearchRequest(index);
-		searchRequest.types(indexType);
-		searchRequest.source(sourceBuilder);
+		// mimic the same behaviour used in the old processing system	
+		final String centreTime = calculateCentreTime(beginDate, endDate);
+		final SearchRequest beforeRequest = newQueryFor(
+				productType, 
+				productFamily, 
+				instrumentConfId, 
+				processMode, 
+				QueryBuilders.rangeQuery("validityStopTime").lt(centreTime), 
+				new FieldSortBuilder("validityStopTime").order(SortOrder.DESC)	
+		);
+		final SearchRequest afterRequest = newQueryFor(
+				productType, 
+				productFamily, 
+				instrumentConfId, 
+				processMode, 
+				QueryBuilders.rangeQuery("validityStopTime").gte(centreTime), 
+				new FieldSortBuilder("validityStopTime").order(SortOrder.ASC)	
+		);		
 		try {
-			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-
-			LOGGER.debug("closestStop Total Hits Found {}", searchResponse.getHits().totalHits);
-				 for (SearchHit hit : searchResponse.getHits()) {
-					 Map<String, Object> source = hit.getSourceAsMap();
-					 LOGGER.debug("Found query result vi closestStop {}", source.get("productName").toString());
-				}
-				 
-			if (searchResponse.getHits().totalHits >= 1) {
-				
-//				String centreTime = calculateCentreTime(beginDate, endDate);
-//				SearchHit hit = findNearestHit( formatter.parse(centreTime),  searchResponse.getHits(),"ClosestStopValidity");
-				SearchHit hit =  searchResponse.getHits().getAt(0);
+			final SearchResponse beforeResponse = elasticsearchDAO.search(beforeRequest);
+			final SearchResponse afterResponse = elasticsearchDAO.search(afterRequest);
 			
-				//SearchHit hit = searchResponse.getHits().getAt(0);
-				Map<String, Object> source = hit.getSourceAsMap();
-				SearchMetadata r = new SearchMetadata();
-				r.setProductName(source.get("productName").toString());
-				r.setProductType(source.get("productType").toString());
-				r.setKeyObjectStorage(source.get("url").toString());
-				if (source.containsKey("validityStartTime")) {
-					r.setValidityStart(source.get("validityStartTime").toString());
-				}
-				if (source.containsKey("validityStopTime")) {
-					r.setValidityStop(source.get("validityStopTime").toString());
-				}
-				LOGGER.debug(" Product {} found using selection policy 'closestStopValidity'",
-						source.get("productName").toString());
-				return r;
+			final SearchHits before = beforeResponse.getHits();
+			final SearchHits after = afterResponse.getHits();
+			
+			LOGGER.debug("Total Hits Found before {} and after {}", before.totalHits, after.totalHits);
+			
+			if (before.totalHits == 0 && after.totalHits > 0) {
+				return toSearchMetadata(after.getAt(0));
+			}
+			else if (before.totalHits > 0 && after.totalHits == 0) {
+				return toSearchMetadata(before.getAt(0));
+			}
+			else if (before.totalHits == 0 && after.totalHits == 0)	{
+				return null;
+			}
+			
+			// "merge" functionality from old processing system implementation 
+			final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
+			final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
+			
+			// only use millisecond precision here to avoid copying too much code from the old implementation
+			// TODO evaluate if this is sufficient			
+			final SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
+			final long centreTimeLong = formatter.parse(centreTime).getTime();
+			
+			final long millisBefore = Math.abs(formatter.parse(metaBefore.getValidityStop()).getTime() - centreTimeLong);
+			final long millisAfter = Math.abs(formatter.parse(metaBefore.getValidityStop()).getTime() - centreTimeLong);
+			
+			if (millisBefore <= millisAfter) {
+				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
+				return metaBefore;
+			}
+			else {
+				LOGGER.debug("Candidate after was the best result, {}", metaAfter.getProductName());
+				return metaAfter;
 			}
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
-		return null;
 	}
-
-//	private SearchHit findNearestHit(Date centreTime, SearchHits hits, String strategy) throws ParseException {
-//		if (hits.totalHits == 1) {
-//			return hits.getAt(0);
-//		}
-//		long lowestDiff = Long.MAX_VALUE;
-//		SearchHit nearest = hits.getAt(0);
-//		// FIXME not a good idea to iterate over all hits. Elasticsearch's
-//		// decay_function() or other type of queries should be used
-//		SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
-//		for (int i = 1; i < hits.totalHits; i++) {
-//			Map<String, Object> source = hits.getAt(i).getSourceAsMap();
-//			Date date = null;
-//			if (strategy.equals("ClosestStartValidity")) {
-//				date = formatter.parse(source.get("validityStartTime").toString());
-//			} else {
-//				date = formatter.parse(source.get("validityStopTime").toString());
-//			}
-//			long diff = Math.abs(date.getTime() - centreTime.getTime());
-//			//FIXME if diff is equal
-//			if (lowestDiff >= diff) {
-//				lowestDiff = diff;
-//				nearest = hits.getAt(i);
-//			}
-//		}
-//		return nearest;
-//	}
 
 	/**
 	 * Function which returns the list of all the Segments for a specific datatakeid
@@ -706,4 +714,5 @@ public class EsServices {
 		}
 		return r;
 	}
+
 }
