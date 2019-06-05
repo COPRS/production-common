@@ -242,5 +242,6 @@
 		<module>obs-sdk</module>
 		<module>scaler</module>
 		<module>wrapper</module>
+		<module>s1pro-core-error-repository</module>
 	</modules>
 </project>
