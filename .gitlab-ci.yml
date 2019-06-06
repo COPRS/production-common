@@ -37,6 +37,7 @@ build-develop:
 include:
   - local: applicative-catalog/.gitlab-ci.yml
   - local: archives/.gitlab-ci.yml
+  - local: compression/.gitlab-ci.yml
   - local: ingestor/.gitlab-ci.yml
   - local: job-generator/.gitlab-ci.yml
   - local: metadata-catalog/.gitlab-ci.yml

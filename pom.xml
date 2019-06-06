@@ -233,6 +233,7 @@
 		<module>applicative-catalog</module>
 		<module>app-catalog-client</module>
 		<module>archives</module>
+		<module>compression</module>
 		<module>ingestor</module>
 		<module>job-generator</module>
 		<module>lib-commons</module>
