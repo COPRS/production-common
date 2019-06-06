@@ -277,11 +277,9 @@ public class EsServices {
 			
 			// only use millisecond precision here to avoid copying too much code from the old implementation
 			// TODO evaluate if this is sufficient			
-			final SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
-			final long centreTimeLong = formatter.parse(centreTime).getTime();
-			
-			final long millisBefore = Math.abs(formatter.parse(metaBefore.getValidityStart()).getTime() - centreTimeLong);
-			final long millisAfter = Math.abs(formatter.parse(metaBefore.getValidityStart()).getTime() - centreTimeLong);
+			final long centreTimeLong =parseDate(centreTime).getTime();
+			final long millisBefore = Math.abs(parseDate(metaBefore.getValidityStart()).getTime() - centreTimeLong);
+			final long millisAfter = Math.abs(parseDate(metaBefore.getValidityStart()).getTime() - centreTimeLong);
 			
 			if (millisBefore <= millisAfter) {
 				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
@@ -295,6 +293,8 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 	}
+
+
 	
 	private final SearchMetadata toSearchMetadata(final SearchHit hit)
 	{
@@ -404,11 +404,10 @@ public class EsServices {
 			final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
 			
 			// only use millisecond precision here to avoid copying too much code from the old implementation
-			final SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
-			final long centreTimeLong = formatter.parse(centreTime).getTime();
-			
-			final long millisBefore = Math.abs(formatter.parse(metaBefore.getValidityStop()).getTime() - centreTimeLong);
-			final long millisAfter = Math.abs(formatter.parse(metaBefore.getValidityStop()).getTime() - centreTimeLong);
+			final long centreTimeLong =parseDate(centreTime).getTime();
+			final long millisBefore = Math.abs(parseDate(metaBefore.getValidityStart()).getTime() - centreTimeLong);
+			final long millisAfter = Math.abs(parseDate(metaBefore.getValidityStart()).getTime() - centreTimeLong);
+		
 			
 			if (millisBefore <= millisAfter) {
 				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
