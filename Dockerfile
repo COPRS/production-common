@@ -14,6 +14,7 @@ COPY PmdJavaRuleset.xml /app
 COPY app-catalog-client/ /app/app-catalog-client
 COPY applicative-catalog/ /app/applicative-catalog
 COPY archives/ /app/archives
+COPY compression/ /app/compression
 COPY ingestor/ /app/ingestor
 COPY job-generator/ /app/job-generator
 COPY lib-commons/ /app/lib-commons
