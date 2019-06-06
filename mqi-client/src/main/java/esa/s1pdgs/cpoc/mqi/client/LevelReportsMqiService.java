@@ -31,8 +31,10 @@ public class LevelReportsMqiService extends GenericMqiService<LevelReportDto> {
     public LevelReportsMqiService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.LEVEL_REPORTS, hostUri, maxRetries,
-                tempoRetryMs);
+        super(restTemplate, ProductCategory.LEVEL_REPORTS, hostUri,
+        		"/messages/" + ProductCategory.LEVEL_REPORTS.name().toLowerCase() + "/ack",
+        		"/messages/" + ProductCategory.LEVEL_REPORTS.name().toLowerCase() + "/publish",
+        		maxRetries, tempoRetryMs);
     }
 
     /**

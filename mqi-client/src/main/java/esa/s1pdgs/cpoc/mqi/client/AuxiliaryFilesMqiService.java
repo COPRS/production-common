@@ -33,6 +33,8 @@ public class AuxiliaryFilesMqiService
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
         super(restTemplate, ProductCategory.AUXILIARY_FILES, hostUri,
+        		"/messages/" + ProductCategory.AUXILIARY_FILES.name().toLowerCase() + "/ack",
+        		"/messages/" + ProductCategory.AUXILIARY_FILES.name().toLowerCase() + "/publish",
                 maxRetries, tempoRetryMs);
     }
 

@@ -32,7 +32,10 @@ public class LevelProductsMqiService
     public LevelProductsMqiService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.LEVEL_PRODUCTS, hostUri, maxRetries,
+        super(restTemplate, ProductCategory.LEVEL_PRODUCTS, hostUri,
+        		"/messages/" + ProductCategory.LEVEL_PRODUCTS.name().toLowerCase() + "/ack",
+        		"/messages/" + ProductCategory.LEVEL_PRODUCTS.name().toLowerCase() + "/publish",    		
+        		maxRetries,
                 tempoRetryMs);
     }
 

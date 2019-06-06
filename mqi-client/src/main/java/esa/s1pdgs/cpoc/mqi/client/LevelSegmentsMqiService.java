@@ -32,8 +32,10 @@ public class LevelSegmentsMqiService
     public LevelSegmentsMqiService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.LEVEL_SEGMENTS, hostUri, maxRetries,
-                tempoRetryMs);
+        super(restTemplate, ProductCategory.LEVEL_SEGMENTS, hostUri,
+        		"/messages/" + ProductCategory.LEVEL_SEGMENTS.name().toLowerCase() + "/ack",
+        		"/messages/" + ProductCategory.LEVEL_SEGMENTS.name().toLowerCase() + "/publish",
+        		maxRetries, tempoRetryMs);
     }
 
     /**

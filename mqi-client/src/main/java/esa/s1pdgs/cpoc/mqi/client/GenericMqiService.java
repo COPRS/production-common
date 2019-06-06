@@ -44,6 +44,16 @@ public abstract class GenericMqiService<T> {
      * Host URI. Example: http://localhost:8081
      */
     protected final String hostUri;
+    
+    /**
+     * Ack Path. Example: /messages/examplecategory/ack
+     */
+    protected final String ackPath;
+
+    /**
+     * Publish path. Example: /messages/examplecategory/publish
+     */
+    protected final String publishPath;
 
     /**
      * Maximal number of retries
@@ -66,10 +76,13 @@ public abstract class GenericMqiService<T> {
      */
     public GenericMqiService(final RestTemplate restTemplate,
             final ProductCategory category, final String hostUri,
+            final String ackPath, final String publishPath, 
             final int maxRetries, final int tempoRetryMs) {
         this.restTemplate = restTemplate;
         this.category = category;
         this.hostUri = hostUri;
+        this.ackPath = ackPath;
+        this.publishPath = publishPath;
         if (maxRetries < 0 || maxRetries > 20) {
             this.maxRetries = 0;
         } else {
@@ -122,8 +135,7 @@ public abstract class GenericMqiService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + "/messages/" + category.name().toLowerCase()
-                    + "/ack";
+            String uri = hostUri + ackPath;
             LogUtils.traceLog(LOGGER,
                     String.format("[uri %s] [body %s]", uri, ack));
             try {
@@ -167,8 +179,7 @@ public abstract class GenericMqiService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + "/messages/" + category.name().toLowerCase()
-                    + "/publish";
+            String uri = hostUri + publishPath;
             LogUtils.traceLog(LOGGER,
                     String.format("[uri %s] [body %s]", uri, message));
             try {

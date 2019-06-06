@@ -31,8 +31,10 @@ public class EdrsSessionMqiService extends GenericMqiService<EdrsSessionDto> {
     public EdrsSessionMqiService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.EDRS_SESSIONS, hostUri, maxRetries,
-                tempoRetryMs);
+        super(restTemplate, ProductCategory.EDRS_SESSIONS, hostUri,
+        		"/messages/" + ProductCategory.EDRS_SESSIONS.name().toLowerCase() + "/ack",
+        		"/messages/" + ProductCategory.EDRS_SESSIONS.name().toLowerCase() + "/publish",
+        		maxRetries, tempoRetryMs);
     }
 
     /**

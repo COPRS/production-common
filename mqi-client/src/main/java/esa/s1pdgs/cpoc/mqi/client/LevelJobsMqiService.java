@@ -31,8 +31,10 @@ public class LevelJobsMqiService extends GenericMqiService<LevelJobDto> {
     public LevelJobsMqiService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.LEVEL_JOBS, hostUri, maxRetries,
-                tempoRetryMs);
+        super(restTemplate, ProductCategory.LEVEL_JOBS, hostUri,
+        		"/messages/" + ProductCategory.LEVEL_JOBS.name().toLowerCase() + "/ack",
+        		"/messages/" + ProductCategory.LEVEL_JOBS.name().toLowerCase() + "/publish",
+        		maxRetries, tempoRetryMs);
     }
 
     /**
