@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
  * @author Viveris Technologie
  */
 public enum ProductCategory {
-    AUXILIARY_FILES, EDRS_SESSIONS, LEVEL_JOBS, LEVEL_PRODUCTS, LEVEL_REPORTS, LEVEL_SEGMENTS;
+    AUXILIARY_FILES, EDRS_SESSIONS, LEVEL_JOBS, LEVEL_PRODUCTS, LEVEL_REPORTS, LEVEL_SEGMENTS, ERRORS; /* FIXME: ERRORS has been temporarily included to allow consumption of this topic */
 
     /**
      * Get the category for a given product family
