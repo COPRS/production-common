@@ -86,9 +86,9 @@ public class SearchMetadataController {
 			else if ("ClosestStartValidity".equals(mode)) {
 				SearchMetadata f = esServices.closestStartValidity(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'")),
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'")),
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						satellite, insConfId, processMode);
 				
 				if (f != null) {
@@ -100,9 +100,9 @@ public class SearchMetadataController {
 			else if ("ClosestStopValidity".equals(mode)) {
 				SearchMetadata f = esServices.closestStopValidity(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'")),
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'")),
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						satellite, insConfId, processMode);
 				
 				if (f != null) {

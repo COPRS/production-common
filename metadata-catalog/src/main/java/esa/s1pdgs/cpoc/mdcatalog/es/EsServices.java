@@ -222,7 +222,7 @@ public class EsServices {
 	 * where startTime < centreTime and there exists no corresponding File_Type with
 	 * greater startTime where startTime < centreTime select from File_Type where
 	 * startTime >= centreTime and there exists no corresponding File_Type with
-	 * lesser startTime where startTime >= centreTime //TODO pseudo
+	 * lesser startTime where startTime >= centreTime 
 	 * implementation.Needs to be implemented properly
 	 */
 	public SearchMetadata closestStartValidity(String productType, ProductFamily productFamily, String beginDate,
@@ -355,7 +355,7 @@ public class EsServices {
 	 * ClosestStopValidity Similar to 'ClosestStartValidity', this policy uses a
 	 * centre time calculated as (t0-t1) / 2 to determine auxiliary data, which is
 	 * located closest to the centre time but using stopTime as the reference
-	 * instead of startTime //TODO pseudo implementation.
+	 * instead of startTime 
 	 */
 	public SearchMetadata closestStopValidity(String productType, ProductFamily productFamily, String beginDate,
 			String endDate, String satelliteId, int instrumentConfId, String processMode) throws Exception {
@@ -404,7 +404,6 @@ public class EsServices {
 			final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
 			
 			// only use millisecond precision here to avoid copying too much code from the old implementation
-			// TODO evaluate if this is sufficient			
 			final SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
 			final long centreTimeLong = formatter.parse(centreTime).getTime();
 			
@@ -536,12 +535,11 @@ public class EsServices {
 	}
 
 	private String calculateCentreTime(String startDate, String stopDate) throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
-		Date date1 = formatter.parse(startDate);
-		Date date2 = formatter.parse(stopDate);
+		Date date1 = parseDate(startDate);
+		Date date2 = parseDate(stopDate);
 		long millis = (date1.getTime() + date2.getTime());
 		Date averageDate = new Date(millis / 2);
-		String formattedDateStr = formatter.format(averageDate);
+		String formattedDateStr = toString(averageDate);
 		return formattedDateStr;
 	}
 
@@ -714,5 +712,35 @@ public class EsServices {
 		}
 		return r;
 	}
+	
+	//FIXME it's a workaround to handle multiple format of date coming from inventory
+	private String toString(Date date)	{
+		 final SimpleDateFormat dateFormat = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
+		 return dateFormat.format(date);
+	}
+	
+	   private Date parseDate(String date) {
+                 
+		   final SimpleDateFormat dateFormat =	     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+		   final SimpleDateFormat dateFormat_26 =	 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");  
+		   final SimpleDateFormat dateFormat_SHORT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		   
+		   SimpleDateFormat formatter;           
+	        if (date.length() > 26) {       	
+
+	        	formatter= dateFormat;
+	        } else if (date.length() == 26) {
+	        	formatter=  dateFormat_26;
+	        } else {
+	        	formatter=  dateFormat_SHORT;
+	        }	    
+	        
+	        try {
+				return formatter.parse(date);
+			} catch (ParseException e) {
+				throw new IllegalArgumentException(String.format("Error parsing date %s: %s", date, e.getMessage()), e);
+			}
+	    }
+
 
 }
