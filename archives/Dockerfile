@@ -5,6 +5,6 @@ WORKDIR /app
 FROM openjdk:8-jre-alpine
 WORKDIR /app
 RUN apk update && apk add wget
-COPY --from=build /app/archives/target/s1pro-core-archives-0.2.0-SNAPSHOT.jar /app/s1pdgs-archives.jar
+COPY --from=build /app/archives/target/s1pro-core-archives-*.jar /app/s1pdgs-archives.jar
 COPY /config/start.sh start.sh
 ENTRYPOINT "/app/start.sh"

@@ -4,7 +4,7 @@ WORKDIR /app
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
-COPY --from=build /app/applicative-catalog/target/s1pro-core-applicative-catalog-0.2.0-SNAPSHOT.jar s1pdgs-applicative-catalog.jar
+COPY --from=build /app/applicative-catalog/target/s1pro-core-applicative-catalog-*.jar s1pdgs-applicative-catalog.jar
 RUN apk update && apk add wget
 COPY /config/start.sh start.sh
 ENTRYPOINT "/app/start.sh"
