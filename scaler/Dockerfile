@@ -1,10 +1,10 @@
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:develop as build
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:latest as build
 
 WORKDIR /app
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
-COPY --from=build /app/scaler/target/s1pro-core-scaler-0.2.0-SNAPSHOT.jar s1pdgs-scaler.jar
+COPY --from=build /app/scaler/target/s1pro-core-scaler-*.jar s1pdgs-scaler.jar
 RUN apk update && apk add wget
 COPY /config/start.sh start.sh
 ENTRYPOINT "/app/start.sh"

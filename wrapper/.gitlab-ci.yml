@@ -10,7 +10,7 @@ wrapper-l0-build-master:
   stage: module
   script:
     - cd wrapper
-    - cat config/dockerfiles/Dockerfile_L0 | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0"
+    - cat config/dockerfiles/Dockerfile_L0 | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0" -
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0"
   only:
     - master
@@ -19,7 +19,7 @@ wrapper-l0-segment-build-master:
   stage: module
   script:
     - cd wrapper
-    - cat config/dockerfiles/Dockerfile_L0_segment | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment"
+    - cat config/dockerfiles/Dockerfile_L0_segment | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment" -
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment"
   only:
     - master
@@ -28,7 +28,7 @@ wrapper-l1-build-master:
   stage: module
   script:
     - cd wrapper
-    - cat config/dockerfiles/Dockerfile_L1 | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1"
+    - cat config/dockerfiles/Dockerfile_L1 | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1" -
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1"
   only:
     - master
@@ -37,7 +37,7 @@ wrapper-l2-build-master:
   stage: module
   script:
     - cd wrapper
-    - cat config/dockerfiles/Dockerfile_L2 | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2"
+    - cat config/dockerfiles/Dockerfile_L2 | docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2" -
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2"
   only:
     - master
