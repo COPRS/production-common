@@ -243,5 +243,6 @@
 		<module>obs-sdk</module>
 		<module>scaler</module>
 		<module>wrapper</module>
+		<module>error-repository</module>
 	</modules>
 </project>
