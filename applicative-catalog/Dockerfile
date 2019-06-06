@@ -1,4 +1,4 @@
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:develop as build
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:latest as build
 
 WORKDIR /app
 
