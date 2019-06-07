@@ -24,6 +24,7 @@ COPY mqi-server/ /app/mqi-server
 COPY obs-sdk/ /app/obs-sdk
 COPY scaler/ /app/scaler
 COPY wrapper/ /app/wrapper
+COPY error-repository/ /app/error-repository
 
 #RUN cat /usr/share/maven/ref/settings-docker.xml
 # RUN find /usr/share/maven/ref/repository
