@@ -8,4 +8,5 @@ COPY --from=build /app/compression/target/s1pro-core-compression-0.2.0-SNAPSHOT.
 RUN apk update && apk add wget
 RUN mkdir tmp
 COPY /config/start.sh start.sh
+COPY /config/compression.sh compression.sh
 ENTRYPOINT "/app/start.sh"
