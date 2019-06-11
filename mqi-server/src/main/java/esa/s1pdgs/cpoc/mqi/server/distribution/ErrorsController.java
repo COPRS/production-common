@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.MessageConsumptionController;
@@ -69,7 +70,7 @@ public class ErrorsController {
      */
     @SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/next")
-    public ResponseEntity<GenericMessageDto<String>> next() {
+    public ResponseEntity<GenericMessageDto<ErrorDto>> next() {
     	LOGGER.debug("[MONITOR] [errors] [api next] Starting");
 
         // We wait to be sure one message is read
@@ -80,18 +81,18 @@ public class ErrorsController {
                     "[MONITOR] [errors] [api next] Interrupted exception during waiting");
         }
 
-        ResponseEntity<GenericMessageDto<String>> result =
-                new ResponseEntity<GenericMessageDto<String>>(
+        ResponseEntity<GenericMessageDto<ErrorDto>> result =
+                new ResponseEntity<GenericMessageDto<ErrorDto>>(
                         HttpStatus.INTERNAL_SERVER_ERROR);
         try {
-            result = new ResponseEntity<GenericMessageDto<String>>(
-                    (GenericMessageDto<String>) messages.nextMessage(ProductCategory.ERRORS),
+            result = new ResponseEntity<GenericMessageDto<ErrorDto>>(
+                    (GenericMessageDto<ErrorDto>) messages.nextMessage(ProductCategory.ERRORS),
                     HttpStatus.OK);
         } catch (AbstractCodedException mcna) {
             LOGGER.error(
                     "[MONITOR] [errors] [api next] [code {}] [error {}]",
                     mcna.getCode().getCode(), mcna.getLogMessage());
-            result = new ResponseEntity<GenericMessageDto<String>>(
+            result = new ResponseEntity<GenericMessageDto<ErrorDto>>(
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
         LOGGER.debug("[MONITOR] [errors] [api next] [httpCode {}] End",

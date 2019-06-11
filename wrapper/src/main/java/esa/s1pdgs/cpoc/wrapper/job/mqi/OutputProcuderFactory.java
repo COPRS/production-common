@@ -11,6 +11,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -125,7 +126,9 @@ public class OutputProcuderFactory {
      */
     public void sendError(final String message) {
         try {
-            senderErrors.publish(message);
+        	ErrorDto errorDto = new ErrorDto();
+        	errorDto.setMessage(message);
+            senderErrors.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
         } catch (AbstractCodedException e) {
             LOGGER.error(e.getLogMessage());
         }

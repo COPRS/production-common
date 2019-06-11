@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -229,8 +230,13 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendError() throws AbstractCodedException {
         this.outputProcuderFactory.sendError("error message");
+
+        ErrorDto errorDto = new ErrorDto();
+    	errorDto.setMessage("error message");
+        GenericPublicationMessageDto<ErrorDto> expected = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
+        
         verify(this.errorService, times(1))
-                .publish(Mockito.eq("error message"));
+                .publish(Mockito.eq(expected));
         verify(this.senderReports, never()).publish(Mockito.any());
         verify(this.senderProducts, never()).publish(Mockito.any());
     }
@@ -241,10 +247,15 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendErrorWhenException() throws AbstractCodedException {
         doThrow(new InternalErrorException("execption raised"))
-                .when(errorService).publish(Mockito.anyString());
+                .when(errorService).publish(Mockito.any());
         this.outputProcuderFactory.sendError("error message");
+        
+        ErrorDto errorDto = new ErrorDto();
+    	errorDto.setMessage("error message");
+        GenericPublicationMessageDto<ErrorDto> expected = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
+        
         verify(this.errorService, times(1))
-                .publish(Mockito.eq("error message"));
+                .publish(Mockito.eq(expected));
         verify(this.senderReports, never()).publish(Mockito.any());
         verify(this.senderProducts, never()).publish(Mockito.any());
     }

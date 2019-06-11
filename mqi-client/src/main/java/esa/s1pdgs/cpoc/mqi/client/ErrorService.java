@@ -9,13 +9,14 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
+import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.ErrorsMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * @author Viveris Technologies
  */
-public class ErrorService extends GenericMqiService<String> {
+public class ErrorService extends GenericMqiService<ErrorDto> {
 
     /**
      * Constructor
@@ -41,7 +42,7 @@ public class ErrorService extends GenericMqiService<String> {
      * @return
      * @throws AbstractCodedException
      */
-    public GenericMessageDto<String> next() throws AbstractCodedException {
+    public GenericMessageDto<ErrorDto> next() throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;

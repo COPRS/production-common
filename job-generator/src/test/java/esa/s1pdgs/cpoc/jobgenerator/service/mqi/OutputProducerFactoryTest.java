@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -37,7 +38,7 @@ public class OutputProducerFactoryTest {
         MockitoAnnotations.initMocks(this);
 
         doNothing().when(sender).publish(Mockito.any());
-        doNothing().when(errorService).publish(Mockito.anyString());
+        doNothing().when(errorService).publish(Mockito.any());
 
         factory = new OutputProducerFactory(sender, errorService);
     }
@@ -65,16 +66,26 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendError() throws AbstractCodedException {
         factory.sendError("error message");
-        verify(errorService, times(1)).publish(Mockito.eq("error message"));
+        
+        ErrorDto errorDto = new ErrorDto();
+    	errorDto.setMessage("error message");
+        GenericPublicationMessageDto<ErrorDto> expected = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
+        
+        verify(errorService, times(1)).publish(Mockito.eq(expected));
         verifyZeroInteractions(sender);
     }
 
     @Test
     public void testSendErrorWhenException() throws AbstractCodedException {
         doThrow(new InternalErrorException("exception")).when(errorService)
-                .publish(Mockito.anyString());
+                .publish(Mockito.any());
         factory.sendError("error message");
-        verify(errorService, times(1)).publish(Mockito.eq("error message"));
+        
+        ErrorDto errorDto = new ErrorDto();
+    	errorDto.setMessage("error message");
+        GenericPublicationMessageDto<ErrorDto> expected = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
+        
+        verify(errorService, times(1)).publish(Mockito.eq(expected));
         verifyZeroInteractions(sender);
     }
 }
