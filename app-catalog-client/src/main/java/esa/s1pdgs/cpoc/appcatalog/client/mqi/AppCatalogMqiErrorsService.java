@@ -41,7 +41,7 @@ public class AppCatalogMqiErrorsService
     public AppCatalogMqiErrorsService(final RestTemplate restTemplate,
             final String hostUri, final int maxRetries,
             final int tempoRetryMs) {
-        super(restTemplate, ProductCategory.LEVEL_SEGMENTS, hostUri, maxRetries,
+        super(restTemplate, ProductCategory.ERRORS, hostUri, maxRetries,
                 tempoRetryMs);
     }
 
