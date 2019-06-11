@@ -10,6 +10,8 @@ public class FileUploader {
     private static final Logger LOGGER =
             LogManager.getLogger(FileUploader.class);
     
-    
+    public void processOutput() {
+    	
+    }
 
 }

@@ -7,12 +7,11 @@ import java.util.concurrent.Callable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
 import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -41,7 +40,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
     /**
      * List of processor (one per pool)
      */
-    protected final List<PoolProcessor> processors;
+//    protected final List<PoolProcessor> processors;
 
     /**
      * Prefix for monitor logs
@@ -61,19 +60,19 @@ public class PoolExecutorCallable implements Callable<Boolean> {
      * @param prefixMonitorLogs
      */
     public PoolExecutorCallable(final ApplicationProperties properties,
-            final LevelJobDto job, final String prefixLogs) {
+            final CompressionJobDto job, final String prefixLogs) {
         this.active = false;
         this.properties = properties;
         this.prefixMonitorLogs = prefixLogs;
         int counter = 0;
-        this.processors = new ArrayList<>(job.getPools().size());
-        for (LevelJobPoolDto pool : job.getPools()) {
-            counter++;
-            this.processors.add(new PoolProcessor(pool, job.getJobOrder(),
-                    job.getWorkDirectory(),
-                    String.format("%s [poolCounter %d] [s1pdgsTask %sProcessing] ", prefixMonitorLogs, counter),
-                    properties.getTmProcOneTaskS()));
-        }
+//        this.processors = new ArrayList<>(job.getPools().size());
+//        for (LevelJobPoolDto pool : job.getPools()) {
+//            counter++;
+//            this.processors.add(new PoolProcessor(pool, job.getJobOrder(),
+//                    job.getWorkDirectory(),
+//                    String.format("%s [poolCounter %d] [s1pdgsTask %sProcessing] ", prefixMonitorLogs, counter),
+//                    properties.getTmProcOneTaskS()));
+//        }
     }
 
     /**
@@ -113,18 +112,18 @@ public class PoolExecutorCallable implements Callable<Boolean> {
             final Reporting reporting = reportingFactory.newReporting(0);
             reporting.reportStart("Start compression");
                        
-            try {
-				for (PoolProcessor poolProcessor : processors) {
-				    if (isInterrupted()) {
-				        throw new InternalErrorException(
-				                "Current thread has been interrupted");
-				    }
-				    poolProcessor.process(reportingFactory);
-				}
-			} catch (AbstractCodedException e) {
-				reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
-				throw e;
-			}
+//            try {
+//				for (PoolProcessor poolProcessor : processors) {
+//				    if (isInterrupted()) {
+//				        throw new InternalErrorException(
+//				                "Current thread has been interrupted");
+//				    }
+//				    poolProcessor.process(reportingFactory);
+//				}
+//			} catch (AbstractCodedException e) {
+//				reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+//				throw e;
+//			}
             reporting.reportStop("End compression");
             return true;
         }
