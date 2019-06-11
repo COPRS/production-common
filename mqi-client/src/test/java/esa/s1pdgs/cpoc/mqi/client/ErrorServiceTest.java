@@ -25,8 +25,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishErrorException;
+import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 /**
  * Test the REST service ErrorService
@@ -86,7 +89,9 @@ public class ErrorServiceTest {
         thrown.expect(MqiPublishErrorException.class);
         thrown.expect(hasProperty("errorMessage", is("message to publish")));
 
-        service.publish("message to publish");
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage("message to publish");
+        service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
     }
 
     /**
@@ -109,7 +114,9 @@ public class ErrorServiceTest {
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.publish("message to publish");
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage("message to publish");
+        service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
     }
 
     /**
@@ -128,7 +135,9 @@ public class ErrorServiceTest {
                                 Mockito.any(Class.class));
 
         try {
-            service.publish("message to publish");
+        	ErrorDto errorDto = new ErrorDto();
+            errorDto.setMessage("message to publish");
+            service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
             fail("An exception shall be raised");
         } catch (MqiPublishErrorException mpee) {
             verify(restTemplate, times(2)).exchange(
@@ -154,7 +163,9 @@ public class ErrorServiceTest {
                                 Mockito.any(HttpEntity.class),
                                 Mockito.any(Class.class));
 
-        service.publish("message to publish");
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage("message to publish");
+        service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/errors/publish"), Mockito.eq(HttpMethod.POST),
                 Mockito.eq(new HttpEntity<String>("message to publish")),
@@ -174,7 +185,9 @@ public class ErrorServiceTest {
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        service.publish("message to publish");
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage("message to publish");
+        service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/errors/publish"), Mockito.eq(HttpMethod.POST),
                 Mockito.eq(new HttpEntity<String>("message to publish")),

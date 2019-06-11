@@ -1,11 +1,13 @@
 package esa.s1pdgs.cpoc.mqi.model.rest;
 
+import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
+
 /**
- * Extension of the GenericMessageDto for the category LevelJobs
+ * Extension of the GenericMessageDto for the error messages
  * 
  * @author Viveris Technologies
  */
-public class ErrorsMessageDto extends GenericMessageDto<String> {
+public class ErrorsMessageDto extends GenericMessageDto<ErrorDto> {
 
 	public final static String TOPIC_ERROR = "t-pdgs-errors";
 	
@@ -23,7 +25,7 @@ public class ErrorsMessageDto extends GenericMessageDto<String> {
      * @param body
      */
     public ErrorsMessageDto(final long identifier,
-            final String body) {
+            final ErrorDto body) {
         super(identifier, TOPIC_ERROR, body);
     }
 

@@ -13,6 +13,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
+import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
+import esa.s1pdgs.cpoc.mqi.server.consumption.MessageConsumptionController;
 import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 import esa.s1pdgs.cpoc.mqi.server.test.RestControllerTest;
 
@@ -23,11 +25,23 @@ import esa.s1pdgs.cpoc.mqi.server.test.RestControllerTest;
  */
 public class ErrorsControllerTest extends RestControllerTest {
 
+	/**
+     * Mock the controller of consumed messages
+     */
+    @Mock
+    private MessageConsumptionController messages;
+
     /**
      * Mock the controller of published messages
      */
     @Mock
     private MessagePublicationController publication;
+
+    /**
+     * Mock the application properties
+     */
+    @Mock
+    private ApplicationProperties properties;
 
     /**
      * The controller to test
@@ -43,7 +57,8 @@ public class ErrorsControllerTest extends RestControllerTest {
     public void init() throws MqiCategoryNotAvailable {
         MockitoAnnotations.initMocks(this);
 
-        controller = new ErrorsController(publication);
+        controller = new ErrorsController(messages,
+                publication, properties);
 
         this.initMockMvc(this.controller);
     }

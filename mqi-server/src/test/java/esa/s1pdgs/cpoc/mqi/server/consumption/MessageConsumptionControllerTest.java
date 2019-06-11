@@ -48,6 +48,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -119,6 +120,12 @@ public class MessageConsumptionControllerTest {
     private GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
 
     /**
+     * Service for Errors
+     */
+    @Mock
+    private GenericAppCatalogMqiService<ErrorDto> persistErrorsService;
+
+    /**
      * 
      */
     @Mock
@@ -143,7 +150,7 @@ public class MessageConsumptionControllerTest {
                 kafkaProperties, persistAuxiliaryFilesService,
                 persistEdrsSessionsService, persistLevelJobsService,
                 persistLevelProductsService, persistLevelReportsService,
-                persistLevelSegmentsService, otherService, appStatus);
+                persistLevelSegmentsService, persistErrorsService, otherService, appStatus);
 
         doReturn("pod-name").when(appProperties).getHostname();
 
@@ -169,6 +176,8 @@ public class MessageConsumptionControllerTest {
         lRepTopicsWithPriority.put("another-topic", 10);
         Map<String, Integer> lSegTopicsWithPriority = new HashMap<>();
         lSegTopicsWithPriority.put("topic", 100);
+        Map<String, Integer> lErrorsTopics = new HashMap<>();
+        lErrorsTopics.put("topic", 100);
         Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
         ProductCategoryConsumptionProperties prodCatAux =
                 new ProductCategoryConsumptionProperties(true);
@@ -200,6 +209,12 @@ public class MessageConsumptionControllerTest {
         prodCatSeg.setTopicsWithPriority(lSegTopicsWithPriority);
         map.put(ProductCategory.LEVEL_SEGMENTS,
                 new ProductCategoryProperties(prodCatSeg, null));
+        ProductCategoryConsumptionProperties prodCatErrors =
+                new ProductCategoryConsumptionProperties(true);
+        prodCatErrors.setTopicsWithPriority(lErrorsTopics);
+        map.put(ProductCategory.ERRORS,
+                new ProductCategoryProperties(prodCatErrors, null));
+        
         doReturn(map).when(appProperties).getProductCategories();
 
         manager.startConsumers();
@@ -279,6 +294,15 @@ public class MessageConsumptionControllerTest {
         assertEquals(LevelSegmentDto.class,
                 manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).get("topic")
                         .getConsumedMsgClass());
+        
+        assertEquals(1,
+                manager.consumers.get(ProductCategory.ERRORS).size());
+        assertEquals("topic", manager.consumers.get(ProductCategory.ERRORS)
+                .get("topic").getTopic());
+        assertEquals(ErrorDto.class,
+                manager.consumers.get(ProductCategory.ERRORS).get("topic")
+                        .getConsumedMsgClass());
+        
     }
 
     /**
@@ -318,6 +342,8 @@ public class MessageConsumptionControllerTest {
                 ProductCategory.LEVEL_REPORTS);
         testNextMessageWhenNoResponse(persistLevelSegmentsService,
                 ProductCategory.LEVEL_SEGMENTS);
+        testNextMessageWhenNoResponse(persistErrorsService,
+                ProductCategory.ERRORS);
     }
 
     /**
@@ -359,6 +385,8 @@ public class MessageConsumptionControllerTest {
                 ProductCategory.LEVEL_REPORTS, 5);
         testNextMessage(persistLevelSegmentsService,
                 ProductCategory.LEVEL_SEGMENTS, 6);
+        testNextMessage(persistErrorsService,
+                ProductCategory.LEVEL_SEGMENTS, 7);
     }
 
     /**
