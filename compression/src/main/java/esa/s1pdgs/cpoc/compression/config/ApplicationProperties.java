@@ -13,6 +13,8 @@ public class ApplicationProperties {
 	 */
 	private String command;
 	
+	private String workingDirectory;
+	
     /**
      * Timeout (in seconds) for waiting end of several tasks
      */
@@ -59,6 +61,14 @@ public class ApplicationProperties {
 
 	public void setCommand(String command) {
 		this.command = command;
+	}
+
+	public String getWorkingDirectory() {
+		return workingDirectory;
+	}
+
+	public void setWorkingDirectory(String workingDirectory) {
+		this.workingDirectory = workingDirectory;
 	}
 
 	public long getTmProcAllTasksS() {

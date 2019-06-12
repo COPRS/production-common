@@ -1,9 +1,14 @@
 package esa.s1pdgs.cpoc.compression.process;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -33,21 +38,21 @@ public class PoolExecutorCallable implements Callable<Boolean> {
      * launched
      */
     private boolean active;
+    
+    private final ExecutorService execSrv;
 
     /**
-     * List of processor (one per pool)
+     * Tasks completion service
      */
-//    protected final List<PoolProcessor> processors;
+    private final CompletionService<TaskResult> completionSrv;
 
-    /**
-     * Prefix for monitor logs
-     */
-//    private final String prefixMonitorLogs;
+    private CompressionJobDto job;
 
     /**
      * Application properties
      */
-    private final ApplicationProperties properties;
+    @Autowired
+    private ApplicationProperties properties;
 
     /**
      * Will create one PoolProcessor per pool
@@ -56,20 +61,12 @@ public class PoolExecutorCallable implements Callable<Boolean> {
      * @param job
      * @param prefixMonitorLogs
      */
-    public PoolExecutorCallable(final ApplicationProperties properties,
-            final CompressionJobDto job, final String prefixLogs) {
+    public PoolExecutorCallable(final CompressionJobDto job, final String prefixLogs) {
         this.active = false;
-        this.properties = properties;
-//        this.prefixMonitorLogs = prefixLogs;
-//        int counter = 0;
-//        this.processors = new ArrayList<>(job.getPools().size());
-//        for (LevelJobPoolDto pool : job.getPools()) {
-//            counter++;
-//            this.processors.add(new PoolProcessor(pool, job.getJobOrder(),
-//                    job.getWorkDirectory(),
-//                    String.format("%s [poolCounter %d] [s1pdgsTask %sProcessing] ", prefixMonitorLogs, counter),
-//                    properties.getTmProcOneTaskS()));
-//        }
+        this.job = job;
+
+        this.execSrv = Executors.newFixedThreadPool(1);
+        this.completionSrv = new ExecutorCompletionService<>(execSrv);        
     }
 
     /**
@@ -108,20 +105,10 @@ public class PoolExecutorCallable implements Callable<Boolean> {
             
             final Reporting reporting = reportingFactory.newReporting(0);
             reporting.reportStart("Start compression");
-                       
-//            try {
-//				for (PoolProcessor poolProcessor : processors) {
-//				    if (isInterrupted()) {
-//				        throw new InternalErrorException(
-//				                "Current thread has been interrupted");
-//				    }
-//				    poolProcessor.process(reportingFactory);
-//				}
-//			} catch (AbstractCodedException e) {
-//				reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
-//				throw e;
-//			}
+            
+            completionSrv.submit(new TaskCallable(properties.getCommand(),job.getInput().getLocalPath(), properties.getWorkingDirectory(), reporting));
             reporting.reportStop("End compression");
+            
             return true;
         }
         return false;

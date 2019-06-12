@@ -126,14 +126,14 @@ public class CompressProcessor {
 		CompressionJobDto job = message.getBody();
 
 		// Initialize the pool processor executor
-		PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
+		PoolExecutorCallable procExecutor = new PoolExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
 																						// job),
 				"CompressionProcessor - process");
 		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		ExecutorCompletionService<Boolean> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		FileDownloader fileDownloader = new FileDownloader(obsService, workDir, job.getInputs(),
+		FileDownloader fileDownloader = new FileDownloader(obsService, workDir, job.getInput(),
 				this.properties.getSizeBatchDownload(),
 				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				"CompressionProcessor", procExecutor);
@@ -175,6 +175,7 @@ public class CompressProcessor {
 			checkThreadInterrupted();
 			LOGGER.info("{} Processing l0 outputs", "LOG_OUTPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT
 					job);
+			
 			fileUploader.processOutput();
 
 			ackOk = true;

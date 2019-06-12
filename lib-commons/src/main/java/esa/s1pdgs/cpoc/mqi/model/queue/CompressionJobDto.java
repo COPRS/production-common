@@ -14,14 +14,14 @@ public class CompressionJobDto {
      * the file according the input family
      */
 	// TODO: Maybe LevelJobInputDto is not a good name or needs to have its own class
-    private LevelJobInputDto inputs;
+    private LevelJobInputDto input;
 
-	public LevelJobInputDto getInputs() {
-		return inputs;
+	public LevelJobInputDto getInput() {
+		return input;
 	}
 
-	public void setInputs(LevelJobInputDto inputs) {
-		this.inputs = inputs;
+	public void setInput(LevelJobInputDto input) {
+		this.input = input;
 	}
 
     

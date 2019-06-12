@@ -69,6 +69,7 @@
 		</dependency>
 
 		<dependency>
+			<scope>test</scope>
 			<groupId>org.springframework.ws</groupId>
 			<artifactId>spring-xml</artifactId>
 		</dependency>
