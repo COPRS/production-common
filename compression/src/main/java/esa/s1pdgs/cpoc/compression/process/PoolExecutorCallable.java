@@ -42,7 +42,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
     /**
      * Prefix for monitor logs
      */
-    private final String prefixMonitorLogs;
+//    private final String prefixMonitorLogs;
 
     /**
      * Application properties
@@ -60,8 +60,8 @@ public class PoolExecutorCallable implements Callable<Boolean> {
             final CompressionJobDto job, final String prefixLogs) {
         this.active = false;
         this.properties = properties;
-        this.prefixMonitorLogs = prefixLogs;
-        int counter = 0;
+//        this.prefixMonitorLogs = prefixLogs;
+//        int counter = 0;
 //        this.processors = new ArrayList<>(job.getPools().size());
 //        for (LevelJobPoolDto pool : job.getPools()) {
 //            counter++;
