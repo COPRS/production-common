@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.client;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -27,7 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishErrorException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -80,18 +80,20 @@ public class ErrorServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testPublishWhenNoResponse() throws AbstractCodedException {
+    	ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage("message to publish");
+        GenericPublicationMessageDto<ErrorDto> message = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
+
         doThrow(new RestClientException("rest client exception"))
                 .when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        thrown.expect(MqiPublishErrorException.class);
-        thrown.expect(hasProperty("errorMessage", is("message to publish")));
+        thrown.expect(MqiPublishApiError.class);
+        thrown.expect(hasProperty("output", is(message)));
 
-        ErrorDto errorDto = new ErrorDto();
-        errorDto.setMessage("message to publish");
-        service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
+        service.publish(message);
     }
 
     /**
@@ -101,6 +103,10 @@ public class ErrorServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testPublishWhenResponseKO() throws AbstractCodedException {
+    	ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage("message to publish");
+        GenericPublicationMessageDto<ErrorDto> message = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
+    	
         doReturn(new ResponseEntity<Void>(HttpStatus.BAD_GATEWAY),
                 new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR),
                 new ResponseEntity<Void>(HttpStatus.NOT_FOUND))
@@ -109,14 +115,12 @@ public class ErrorServiceTest {
                                 Mockito.any(HttpEntity.class),
                                 Mockito.any(Class.class));
 
-        thrown.expect(MqiPublishErrorException.class);
-        thrown.expect(hasProperty("errorMessage", is("message to publish")));
+        thrown.expect(MqiPublishApiError.class);
+        thrown.expect(hasProperty("output", is(message)));
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        ErrorDto errorDto = new ErrorDto();
-        errorDto.setMessage("message to publish");
-        service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
+        service.publish(message);
     }
 
     /**
@@ -134,16 +138,17 @@ public class ErrorServiceTest {
                                 Mockito.any(HttpEntity.class),
                                 Mockito.any(Class.class));
 
+    	ErrorDto errorDto = new ErrorDto();
+    	errorDto.setMessage("message to publish");
+    	GenericPublicationMessageDto<ErrorDto> message = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
         try {
-        	ErrorDto errorDto = new ErrorDto();
-            errorDto.setMessage("message to publish");
-            service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
+            service.publish(message);
             fail("An exception shall be raised");
-        } catch (MqiPublishErrorException mpee) {
+        } catch (MqiPublishApiError mpee) {
             verify(restTemplate, times(2)).exchange(
                     Mockito.eq("uri/errors/publish"),
                     Mockito.eq(HttpMethod.POST),
-                    Mockito.eq(new HttpEntity<String>("message to publish")),
+                    Mockito.eq(new HttpEntity<GenericPublicationMessageDto<ErrorDto>>(message)),
                     Mockito.eq(Void.class));
             verifyNoMoreInteractions(restTemplate);
         }
@@ -165,10 +170,11 @@ public class ErrorServiceTest {
 
         ErrorDto errorDto = new ErrorDto();
         errorDto.setMessage("message to publish");
-        service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
+        GenericPublicationMessageDto<ErrorDto> message = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
+        service.publish(message);
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/errors/publish"), Mockito.eq(HttpMethod.POST),
-                Mockito.eq(new HttpEntity<String>("message to publish")),
+                Mockito.eq(new HttpEntity<GenericPublicationMessageDto<ErrorDto>>(message)),
                 Mockito.eq(Void.class));
         verifyNoMoreInteractions(restTemplate);
     }
@@ -187,10 +193,11 @@ public class ErrorServiceTest {
 
         ErrorDto errorDto = new ErrorDto();
         errorDto.setMessage("message to publish");
-        service.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
+        GenericPublicationMessageDto<ErrorDto> message = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
+        service.publish(message);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/errors/publish"), Mockito.eq(HttpMethod.POST),
-                Mockito.eq(new HttpEntity<String>("message to publish")),
+                Mockito.eq(new HttpEntity<GenericPublicationMessageDto<ErrorDto>>(message)),
                 Mockito.eq(Void.class));
         verifyNoMoreInteractions(restTemplate);
     }
