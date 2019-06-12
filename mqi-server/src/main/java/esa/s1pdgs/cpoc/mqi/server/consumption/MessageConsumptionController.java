@@ -25,7 +25,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -105,11 +104,6 @@ public class MessageConsumptionController {
     private final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
 
     /**
-     * Service for ERRORS
-     */
-    private final GenericAppCatalogMqiService<ErrorDto> persistErrorsService;
-
-    /**
      * Service for checking if a message is processing or not by another
      */
     private final OtherApplicationService otherAppService;
@@ -135,7 +129,6 @@ public class MessageConsumptionController {
             @Qualifier("persistenceServiceForLevelProducts") final GenericAppCatalogMqiService<LevelProductDto> persistLevelProductsService,
             @Qualifier("persistenceServiceForLevelReports") final GenericAppCatalogMqiService<LevelReportDto> persistLevelReportsService,
             @Qualifier("persistenceServiceForLevelSegments") final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService,
-            @Qualifier("persistenceServiceForErrors") final GenericAppCatalogMqiService<ErrorDto> persistErrorsService,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus) {
         this.consumers = new HashMap<>();
@@ -149,7 +142,6 @@ public class MessageConsumptionController {
         this.persistLevelProductsService = persistLevelProductsService;
         this.persistLevelReportsService = persistLevelReportsService;
         this.persistLevelSegmentsService = persistLevelSegmentsService;
-        this.persistErrorsService = persistErrorsService;
         this.persistServices.put(ProductCategory.AUXILIARY_FILES,
                 this.persistAuxiliaryFilesService);
         this.persistServices.put(ProductCategory.EDRS_SESSIONS,
@@ -162,8 +154,6 @@ public class MessageConsumptionController {
                 this.persistLevelReportsService);
         this.persistServices.put(ProductCategory.LEVEL_SEGMENTS,
                 this.persistLevelSegmentsService);
-        this.persistServices.put(ProductCategory.ERRORS,
-                this.persistErrorsService);
         this.appStatus = appStatus;
     }
 
@@ -241,15 +231,6 @@ public class MessageConsumptionController {
                                             prop.getTopicsWithPriority().get(topic),
                                             LevelSegmentDto.class));
                             break;
-                        case ERRORS:
-                            catConsumers.put(topic,
-                                    new GenericConsumer<ErrorDto>(
-                                            kafkaProperties,
-                                            persistErrorsService,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            ErrorDto.class));
-                            break;
                     }
                 }
                 consumers.put(cat, catConsumers);
@@ -292,9 +273,6 @@ public class MessageConsumptionController {
                     break;
                 case LEVEL_SEGMENTS:
                     message = nextLevelSegmentsMessage();
-                    break;
-                case ERRORS:
-                    message = nextErrorsMessage();
                     break;
                 default:
                     message = nextAuxiliaryFilesMessage();
@@ -537,51 +515,6 @@ public class MessageConsumptionController {
         return (GenericMessageDto<LevelSegmentDto>) convertToRestDto(result);
     }
     
-    /**
-     * Get the next message for errors
-     * 
-     * @return
-     * @throws AbstractCodedException
-     */
-    @SuppressWarnings("unchecked")
-    protected GenericMessageDto<ErrorDto> nextErrorsMessage()
-            throws AbstractCodedException {
-        List<MqiGenericMessageDto<ErrorDto>> messages =
-                persistErrorsService.next(appProperties.getHostname());
-        MqiGenericMessageDto<ErrorDto> result = null;
-        if (!CollectionUtils.isEmpty(messages)) {
-            messages.sort(new Comparator<MqiGenericMessageDto<ErrorDto>>() {
-                @Override
-                public int compare(MqiGenericMessageDto<ErrorDto> o1,
-                        MqiGenericMessageDto<ErrorDto> o2) {
-                    if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() >
-                        consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
-                        return -1;
-                    } else if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() ==
-                            consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
-                        if(o1.getCreationDate()==null) {
-                            return 1;
-                        } else if(o2.getCreationDate()==null) {
-                            return -1;
-                        } else {
-                            return o1.getCreationDate().compareTo(o2.getCreationDate());
-                        }
-                    } else {
-                        return 1;
-                    }
-                }                
-            });
-            for (MqiGenericMessageDto<ErrorDto> tmpMessage : messages) {
-                if (send(persistErrorsService,
-                        (MqiLightMessageDto) tmpMessage)) {
-                    result = tmpMessage;
-                    break;
-                }
-            }
-        }
-        return (GenericMessageDto<ErrorDto>) convertToRestDto(result);
-    }
-
     /**
      * Get the next message for level reports
      * 
