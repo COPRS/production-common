@@ -33,11 +33,9 @@ public class TaskCallable implements Callable<TaskResult> {
      * Absolute path of the binary
      */
     private final String binaryPath;
-
-    /**
-     * Absolute path of the job order
-     */
-    private final String jobOrderPath;
+    
+    private final String inputPath;
+    private final String outputPath;
 
     /**
      * Work directory
@@ -54,21 +52,22 @@ public class TaskCallable implements Callable<TaskResult> {
      * @param jobOrderPath
      * @param workDirectory
      */
-    public TaskCallable(final String binaryPath, final String jobOrderPath,
+    public TaskCallable(final String binaryPath, final String inputPath,
             final String workDirectory, final Reporting reporting) {
-    	this(binaryPath, jobOrderPath, workDirectory, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER, reporting);
+    	this(binaryPath, inputPath, workDirectory, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER, reporting);
     }
     
     TaskCallable(
-    		String binaryPath, 
-    		String jobOrderPath, 
+    		String binaryPath,
+    		String inputPath,
     		String workDirectory, 
 			Consumer<String> stdOutConsumer, 
 			Consumer<String> stdErrConsumer,
 			Reporting reporting
 	) {
 		this.binaryPath = binaryPath;
-		this.jobOrderPath = jobOrderPath;
+		this.inputPath = inputPath;
+		this.outputPath = inputPath+".zip";
 		this.workDirectory = workDirectory;
 		this.stdOutConsumer = stdOutConsumer;
 		this.stdErrConsumer = stdErrConsumer;
@@ -87,7 +86,7 @@ public class TaskCallable implements Callable<TaskResult> {
         Process process = null;
         try {
             ProcessBuilder builder = new ProcessBuilder();
-            builder.command(binaryPath, jobOrderPath);
+            builder.command(binaryPath, inputPath, outputPath);
             builder.directory(new File(workDirectory));
             process = builder.start();
 

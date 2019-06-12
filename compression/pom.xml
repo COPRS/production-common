@@ -4,15 +4,15 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1pro-core</artifactId>
-	  <version>0.3.0-SNAPSHOT</version>
+		<groupId>de.werum.s1pdgs</groupId>
+		<artifactId>s1pro-core</artifactId>
+		<version>0.3.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1pro-core-compression</artifactId>
 	<packaging>jar</packaging>
 
 	<properties>
-		<!-- <docker.image.prefix>springio</docker.image.prefix>-->
+		<!-- <docker.image.prefix>springio</docker.image.prefix> -->
 		<project.build.finalName>s1pdgs-compression-app</project.build.finalName>
 		<project.artifactId>s1pdgs-compression-app</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.compression.Application</start-class>
@@ -20,7 +20,7 @@
 
 
 	<dependencies>
-	
+
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-mqi-client</artifactId>
@@ -31,7 +31,7 @@
 			<artifactId>s1pro-core-app-catalog-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -55,7 +55,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 		</dependency>
-				
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -66,6 +66,11 @@
 					<artifactId>android-json</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-xml</artifactId>
 		</dependency>
 
 		<dependency>
