@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
  * @author Viveris Technologies
  */
 @RestController
-@RequestMapping(path = "/errors")
+@RequestMapping(path = "/errorQueue")
 public class ErrorsController {
 
 	/**
