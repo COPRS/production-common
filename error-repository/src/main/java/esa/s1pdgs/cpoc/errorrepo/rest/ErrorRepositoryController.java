@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 
 @RestController
-@RequestMapping(path = "/errorrepo")
+@RequestMapping(path = "/errors")
 public class ErrorRepositoryController {
 
 	private final ErrorRepository errorRepository;
@@ -31,4 +31,10 @@ public class ErrorRepositoryController {
 	public ErrorDto getFailedProcessingsById(@PathVariable("id") String id) {
 		return errorRepository.getFailedProcessingsById(id);
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
+	public void restartFailedProcessing(@PathVariable("id") String id) {
+		errorRepository.restartAndDeleteFailedProcessing(id);
+	}
+	
 }

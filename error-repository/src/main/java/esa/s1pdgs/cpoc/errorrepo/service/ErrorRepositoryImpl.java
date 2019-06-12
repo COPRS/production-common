@@ -18,4 +18,9 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		return null;
 	}
 
+	@Override
+	public void restartAndDeleteFailedProcessing(String id) {
+		// TODO Auto-generated method stub
+	}
+
 }

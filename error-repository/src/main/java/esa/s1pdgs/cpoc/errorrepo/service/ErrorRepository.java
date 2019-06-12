@@ -7,4 +7,5 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 public interface ErrorRepository {
 	List<ErrorDto> getFailedProcessings();
 	ErrorDto getFailedProcessingsById(String id);
+	void restartAndDeleteFailedProcessing(String id);
 }
