@@ -7,8 +7,8 @@ public class FileUploader {
     /**
      * Logger
      */
-    private static final Logger LOGGER =
-            LogManager.getLogger(FileUploader.class);
+    /*private static final Logger LOGGER =
+            LogManager.getLogger(FileUploader.class);*/
     
     public void processOutput() {
     	

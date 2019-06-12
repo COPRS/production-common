@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.compression.process;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +10,6 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
 import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
