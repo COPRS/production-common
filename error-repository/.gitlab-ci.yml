@@ -5,7 +5,7 @@ image: docker:latest
 variables:
   MODULE_ERROR_REPO: s1pro-core-error-repository
 
-compression-build-master:
+error-repository-build-master:
   stage: module
   script:
     - cd error-repository
@@ -14,7 +14,7 @@ compression-build-master:
   only:
     - master
 
-compression-build:
+error-repository-build:
   stage: module
   script:
     - cd error-repository
