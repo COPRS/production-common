@@ -21,9 +21,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.file.FileDownloader;
+import esa.s1pdgs.cpoc.compression.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -67,6 +69,8 @@ public class CompressProcessor {
 	 * MQI service for stopping the MQI
 	 */
 	private final StatusService mqiStatusService;
+	
+	private final String workDir = "/tmp/compression";
 
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
@@ -81,7 +85,7 @@ public class CompressProcessor {
 		this.mqiStatusService = mqiStatusService;
 	}
 
-	public void processTask() {
+	public void process() {
 		LOGGER.trace("[MONITOR] [step 0] Waiting message");
 
 		// ----------------------------------------------------------
@@ -112,11 +116,14 @@ public class CompressProcessor {
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "CompressionProcessing");
-        
-        final Reporting report = reportingFactory.newReporting(0);
-        report.reportStart("Start compression processing");
-        
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "CompressionProcessing");
+
+		// TODO Static workdir currently
+		String workDir = "/tmp/workdir";
+
+		final Reporting report = reportingFactory.newReporting(0);
+		report.reportStart("Start compression processing");
+
 		CompressionJobDto job = message.getBody();
 
 		// Initialize the pool processor executor
@@ -127,18 +134,74 @@ public class CompressProcessor {
 		ExecutorCompletionService<Boolean> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-//		FileDownloader inputDownloader = new FileDownloader(obsService, job.getWorkDirectory(), job.getInputs(),
-//				this.properties.getSizeBatchDownload(),
-//				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
-//				"CompressionProcessor", procExecutor);
-		
-        // ----------------------------------------------------------
-        // Process message
-        // ----------------------------------------------------------
-//        processJob(message, inputDownloader, outputProcessor, procExecutorSrv,
-//                procCompletionSrv, procExecutor, report);
+		FileDownloader fileDownloader = new FileDownloader(obsService, workDir, job.getInputs(),
+				this.properties.getSizeBatchDownload(),
+				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
+				"CompressionProcessor", procExecutor);
+
+		FileUploader fileUploader = new FileUploader();
+
+		// ----------------------------------------------------------
+		// Process message
+		// ----------------------------------------------------------
+		processTask(message, fileDownloader, fileUploader, procExecutorSrv, procCompletionSrv, procExecutor, report);
 
 		report.reportStop("End compression processing");
+	}
+
+	protected void processTask(final GenericMessageDto<CompressionJobDto> message, final FileDownloader fileDownloader,
+			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
+			final ExecutorCompletionService<Boolean> procCompletionSrv, final PoolExecutorCallable procExecutor,
+			final Reporting report) {
+		CompressionJobDto job = message.getBody();
+		int step = 0;
+		boolean ackOk = false;
+		String errorMessage = "";
+
+		try {
+			step = 3;
+			LOGGER.info("{} Starting process executor", "LOG PROCESS"// getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS
+					, job);
+			procCompletionSrv.submit(procExecutor);
+
+			step = 2;
+			checkThreadInterrupted();
+			LOGGER.info("{} Preparing local working directory", "LOG_INPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT
+					job);
+			fileDownloader.processInputs();
+
+			step = 3;
+			this.waitForPoolProcessesEnding(procCompletionSrv);
+			step = 4;
+			checkThreadInterrupted();
+			LOGGER.info("{} Processing l0 outputs", "LOG_OUTPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT
+					job);
+			fileUploader.processOutput();
+
+			ackOk = true;
+		} catch (AbstractCodedException ace) {
+			ackOk = false;
+
+			errorMessage = String.format(
+					"[s1pdgsCompressionTask] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s", "LOG_DFT", // getPrefixMonitorLog(MonitorLogUtils.LOG_DFT,
+																														// job),
+					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
+					ace.getCode().getCode(), ace.getLogMessage());
+			report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+		} catch (InterruptedException e) {
+			ackOk = false;
+			errorMessage = String.format(
+					"%s [step %d] %s [code %d] [s1pdgsCompressionTask] [STOP KO] [subTask processing] [msg interrupted exception]",
+					"LOG_DFT", // getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job),
+					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
+					ErrorCode.INTERNAL_ERROR.getCode());
+			report.reportError("Interrupted job processing");
+		} finally {
+			cleanCompressionProcessing(job,procExecutorSrv);
+		}
+
+		// Ack and check if application shall stopped
+		ackProcessing(message, ackOk, errorMessage);
 	}
 
 	/**
@@ -179,26 +242,24 @@ public class CompressProcessor {
 	 * @param poolProcessing
 	 * @param procExecutorSrv
 	 */
-	protected void cleanJobProcessing(final LevelJobDto job, final boolean poolProcessing,
-			final ExecutorService procExecutorSrv) {
-		if (poolProcessing) {
-			procExecutorSrv.shutdownNow();
-			try {
-				procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
-				// TODO send kill if fails
-			} catch (InterruptedException e) {
-				// Conserves the interruption
-				Thread.currentThread().interrupt();
-			}
+	protected void cleanCompressionProcessing(final CompressionJobDto job, final ExecutorService procExecutorSrv) {
+		procExecutorSrv.shutdownNow();
+		try {
+			procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
+			// TODO send kill if fails
+		} catch (InterruptedException e) {
+			// Conserves the interruption
+			Thread.currentThread().interrupt();
 		}
+
 		this.eraseDirectory(job);
 	}
 
-	private void eraseDirectory(final LevelJobDto job) {
+	private void eraseDirectory(final CompressionJobDto job) {
 		try {
 //                LOGGER.info("{} Erasing local working directory",
 //                        getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));
-			Path p = Paths.get(job.getWorkDirectory());
+			Path p = Paths.get(workDir);
 			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
 					.peek(System.out::println).forEach(File::delete);
 		} catch (IOException e) {
@@ -217,7 +278,7 @@ public class CompressProcessor {
 	 * @param ackOk
 	 * @param errorMessage
 	 */
-	protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto, final boolean ackOk,
+	protected void ackProcessing(final GenericMessageDto<CompressionJobDto> dto, final boolean ackOk,
 			final String errorMessage) {
 		boolean stopping = appStatus.getStatus().isStopping();
 
@@ -253,7 +314,7 @@ public class CompressProcessor {
 	 * @param dto
 	 * @param errorMessage
 	 */
-	protected void ackNegatively(final boolean stop, final GenericMessageDto<LevelJobDto> dto,
+	protected void ackNegatively(final boolean stop, final GenericMessageDto<CompressionJobDto> dto,
 			final String errorMessage) {
 //        LOGGER.info("{} Acknowledging negatively",
 //                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
@@ -269,7 +330,7 @@ public class CompressProcessor {
 		appStatus.setError("PROCESSING");
 	}
 
-	protected void ackPositively(final boolean stop, final GenericMessageDto<LevelJobDto> dto) {
+	protected void ackPositively(final boolean stop, final GenericMessageDto<CompressionJobDto> dto) {
 //        LOGGER.info("{} Acknowledging positively",
 //                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
 		try {
