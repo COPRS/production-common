@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.compression.process;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +10,6 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
 import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -45,7 +42,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
     /**
      * Prefix for monitor logs
      */
-    private final String prefixMonitorLogs;
+//    private final String prefixMonitorLogs;
 
     /**
      * Application properties
@@ -63,8 +60,8 @@ public class PoolExecutorCallable implements Callable<Boolean> {
             final CompressionJobDto job, final String prefixLogs) {
         this.active = false;
         this.properties = properties;
-        this.prefixMonitorLogs = prefixLogs;
-        int counter = 0;
+//        this.prefixMonitorLogs = prefixLogs;
+//        int counter = 0;
 //        this.processors = new ArrayList<>(job.getPools().size());
 //        for (LevelJobPoolDto pool : job.getPools()) {
 //            counter++;

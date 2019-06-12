@@ -12,12 +12,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.compression.model.obs.S3DownloadFile;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.process.PoolExecutorCallable;
@@ -45,7 +43,7 @@ public class FileDownloader {
 	/**
 	 * List of all the inputs
 	 */
-	private final List<LevelJobInputDto> inputs;
+	private final LevelJobInputDto input;
 
 	/**
 	 * Batch size for downloading inputs from OBS
@@ -64,11 +62,11 @@ public class FileDownloader {
 	private final PoolExecutorCallable poolProcExecutor;
 
 	public FileDownloader(final ObsService obsService, final String localWorkingDir,
-			final List<LevelJobInputDto> inputs, final int sizeDownBatch, final String prefixMonitorLogs,
+			final LevelJobInputDto input, final int sizeDownBatch, final String prefixMonitorLogs,
 			final PoolExecutorCallable poolProcExecutor) {
 		this.obsService = obsService;
 		this.localWorkingDir = localWorkingDir;
-		this.inputs = inputs;
+		this.input = input;
 		this.sizeDownBatch = sizeDownBatch;
 		this.poolProcExecutor = poolProcExecutor;
 		this.prefixMonitorLogs = prefixMonitorLogs;
@@ -132,7 +130,13 @@ public class FileDownloader {
 		LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 
 		List<S3DownloadFile> downloadToBatch = new ArrayList<>();
-
+		
+		LOGGER.info("Input {}-{} will be stored in {}", input.getFamily(), input.getContentRef(),
+				input.getLocalPath());
+		downloadToBatch.add(new S3DownloadFile(ProductFamily.fromValue(input.getFamily()),
+				input.getContentRef(), (new File(input.getLocalPath()).getParent())));
+		
+		/*
 		for (LevelJobInputDto input : inputs) {
 			// Check if a directory shall be created
 			File parent = (new File(input.getLocalPath())).getParentFile();
@@ -167,7 +171,7 @@ public class FileDownloader {
 				throw new UnknownFamilyException("Family not managed in input downloader ", input.getFamily());
 			}
 
-		}
+		}*/
 		return downloadToBatch;
 	}
 
