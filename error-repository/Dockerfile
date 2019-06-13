@@ -8,5 +8,4 @@ COPY --from=build /app/error-repository/target/s1pro-core-error-repository-* s1p
 RUN apk update && apk add wget
 RUN mkdir tmp
 COPY /config/start.sh start.sh
-COPY /config/error-repository.sh error-repository.sh
 ENTRYPOINT "/app/start.sh"
