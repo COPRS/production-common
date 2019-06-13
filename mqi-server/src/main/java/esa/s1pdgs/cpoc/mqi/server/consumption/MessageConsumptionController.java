@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -102,6 +103,8 @@ public class MessageConsumptionController {
      * Service for LEVEL_SEGMENTS
      */
     private final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
+    
+    private final GenericAppCatalogMqiService<CompressionJobDto> persistCompressionJobService;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -129,6 +132,7 @@ public class MessageConsumptionController {
             @Qualifier("persistenceServiceForLevelProducts") final GenericAppCatalogMqiService<LevelProductDto> persistLevelProductsService,
             @Qualifier("persistenceServiceForLevelReports") final GenericAppCatalogMqiService<LevelReportDto> persistLevelReportsService,
             @Qualifier("persistenceServiceForLevelSegments") final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService,
+            @Qualifier("persistenceServiceForCompressionJob") final GenericAppCatalogMqiService<CompressionJobDto> persistCompressionJobService,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus) {
         this.consumers = new HashMap<>();
@@ -142,6 +146,8 @@ public class MessageConsumptionController {
         this.persistLevelProductsService = persistLevelProductsService;
         this.persistLevelReportsService = persistLevelReportsService;
         this.persistLevelSegmentsService = persistLevelSegmentsService;
+        this.persistCompressionJobService = persistCompressionJobService;
+        
         this.persistServices.put(ProductCategory.AUXILIARY_FILES,
                 this.persistAuxiliaryFilesService);
         this.persistServices.put(ProductCategory.EDRS_SESSIONS,
@@ -154,6 +160,9 @@ public class MessageConsumptionController {
                 this.persistLevelReportsService);
         this.persistServices.put(ProductCategory.LEVEL_SEGMENTS,
                 this.persistLevelSegmentsService);
+        this.persistServices.put(ProductCategory.COMPRESSED_PRODUCTS,
+                this.persistCompressionJobService);
+        
         this.appStatus = appStatus;
     }
 
@@ -231,6 +240,14 @@ public class MessageConsumptionController {
                                             prop.getTopicsWithPriority().get(topic),
                                             LevelSegmentDto.class));
                             break;
+                        case COMPRESSED_PRODUCTS:
+                        	catConsumers.put(topic,
+                                    new GenericConsumer<CompressionJobDto>(
+                                            kafkaProperties,
+                                            persistCompressionJobService,
+                                            otherAppService, appStatus, topic,
+                                            prop.getTopicsWithPriority().get(topic),
+                                            CompressionJobDto.class));
                     }
                 }
                 consumers.put(cat, catConsumers);
@@ -273,6 +290,9 @@ public class MessageConsumptionController {
                     break;
                 case LEVEL_SEGMENTS:
                     message = nextLevelSegmentsMessage();
+                    break;
+                case COMPRESSED_PRODUCTS:
+                	message = nextCompressedProductMessage();
                     break;
                 default:
                     message = nextAuxiliaryFilesMessage();
@@ -558,6 +578,45 @@ public class MessageConsumptionController {
             }
         }
         return (GenericMessageDto<LevelReportDto>) convertToRestDto(result);
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected GenericMessageDto<CompressionJobDto> nextCompressedProductMessage()
+            throws AbstractCodedException {
+        List<MqiGenericMessageDto<CompressionJobDto>> messages =
+                persistCompressionJobService.next(appProperties.getHostname());
+        MqiGenericMessageDto<CompressionJobDto> result = null;
+        if (!CollectionUtils.isEmpty(messages)) {
+            messages.sort(new Comparator<MqiGenericMessageDto<CompressionJobDto>>() {
+                @Override
+                public int compare(MqiGenericMessageDto<CompressionJobDto> o1,
+                        MqiGenericMessageDto<CompressionJobDto> o2) {
+                    if(consumers.get(ProductCategory.COMPRESSED_PRODUCTS).get(o1.getTopic()).getPriority() >
+                        consumers.get(ProductCategory.COMPRESSED_PRODUCTS).get(o2.getTopic()).getPriority()) {
+                        return -1;
+                    } else if(consumers.get(ProductCategory.COMPRESSED_PRODUCTS).get(o1.getTopic()).getPriority() ==
+                            consumers.get(ProductCategory.COMPRESSED_PRODUCTS).get(o2.getTopic()).getPriority()) {
+                        if(o1.getCreationDate()==null) {
+                            return 1;
+                        } else if(o2.getCreationDate()==null) {
+                            return -1;
+                        } else {
+                            return o1.getCreationDate().compareTo(o2.getCreationDate());
+                        }
+                    } else {
+                        return 1;
+                    }
+                }                
+            });
+            for (MqiGenericMessageDto<CompressionJobDto> tmpMessage : messages) {
+                if (send(persistCompressionJobService,
+                        (MqiLightMessageDto) tmpMessage)) {
+                    result = tmpMessage;
+                    break;
+                }
+            }
+        }
+        return (GenericMessageDto<CompressionJobDto>) convertToRestDto(result);
     }
 
     /**

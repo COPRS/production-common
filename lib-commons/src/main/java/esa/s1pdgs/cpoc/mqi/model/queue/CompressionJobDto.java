@@ -2,35 +2,24 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-/**
- * A DTO containing a request for a compression job. This class does
- * basically just contain the input of the products that should be processed.
- * 
- * @author florian_sievert
- *
- */
 public class CompressionJobDto {
-    /**
-     * List of inputs needed to execute the job.<br/>
-     * They contain the absolute name on the target host and where we can find
-     * the file according the input family
-     */
-	// TODO: Maybe LevelJobInputDto is not a good name or needs to have its own class
-    private LevelJobInputDto input;
-    
-    private ProductFamily family;
-    
-    public CompressionJobDto(final ProductFamily family, final LevelJobInputDto input) {
-    	this.family = family;
-    	this.input = input;    	
-    }
 
-	public LevelJobInputDto getInput() {
-		return input;
+	private String productName;
+	private ProductFamily family = ProductFamily.AUXILIARY_FILE;
+	private String keyObjectStorage;
+
+	public CompressionJobDto(final String productName, final ProductFamily family, final String keyObjectStorage) {
+		this.productName = productName;
+		this.family = family;
+		this.keyObjectStorage = keyObjectStorage;
 	}
 
-	public void setInput(LevelJobInputDto input) {
-		this.input = input;
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 
 	public ProductFamily getFamily() {
@@ -39,6 +28,16 @@ public class CompressionJobDto {
 
 	public void setFamily(ProductFamily family) {
 		this.family = family;
-	}	
-    
+	}
+
+	public String getKeyObjectStorage() {
+		return keyObjectStorage;
+	}
+
+	public void setKeyObjectStorage(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
+	}
+	
+	// TODO: Overwrite default object methods 
+
 }

@@ -107,10 +107,8 @@ public class FileDownloader {
 	protected S3DownloadFile buildInput() throws InternalErrorException, UnknownFamilyException {
 		LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 
-		LOGGER.info("Input {}-{} will be stored in {}", job.getFamily(), job.getInput().getContentRef(), job.getInput().getLocalPath());
-
-		return new S3DownloadFile(ProductFamily.fromValue(job.getInput().getFamily()), job.getInput().getContentRef(),
-				(new File(job.getInput().getLocalPath()).getParent()));
+//		LOGGER.info("Input {}-{} will be stored in {}", job.getFamily(), job.getInput().getContentRef(), job.getInput().getLocalPath());
+		return new S3DownloadFile(job.getFamily(), job.getProductName(),this.localWorkingDir+"/"+job.getProductName());
 
 	}
 
