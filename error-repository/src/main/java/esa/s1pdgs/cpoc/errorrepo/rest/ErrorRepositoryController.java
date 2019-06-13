@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
-import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 
 @RestController
-@RequestMapping(path = "/errorrepo")
+@RequestMapping(path = "/errors")
 public class ErrorRepositoryController {
 
 	private final ErrorRepository errorRepository;
@@ -23,12 +23,18 @@ public class ErrorRepositoryController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings")
-	public List<ErrorDto> getFailedProcessings() {
+	public List<FailedProcessing> getFailedProcessings() {
 		return errorRepository.getFailedProcessings();
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
-	public ErrorDto getFailedProcessingsById(@PathVariable("id") String id) {
+	public FailedProcessing getFailedProcessingsById(@PathVariable("id") String id) {
 		return errorRepository.getFailedProcessingsById(id);
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
+	public void restartFailedProcessing(@PathVariable("id") String id) {
+		errorRepository.restartAndDeleteFailedProcessing(id);
+	}
+	
 }

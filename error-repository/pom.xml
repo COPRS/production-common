@@ -17,12 +17,13 @@
 	</properties>
 
 	<dependencies>
-	
+
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-mqi-client</artifactId>
+			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-app-catalog-client</artifactId>
@@ -65,6 +66,36 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka_2.11</artifactId>
+			<version>1.0.1</version>
+			<classifier>test</classifier>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-log4j-appender</artifactId>
+			<version>1.0.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
 	</dependencies>
 
 </project>

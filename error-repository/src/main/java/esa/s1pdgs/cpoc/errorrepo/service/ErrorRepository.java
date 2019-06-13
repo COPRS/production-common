@@ -2,9 +2,10 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 
 import java.util.List;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 
 public interface ErrorRepository {
-	List<ErrorDto> getFailedProcessings();
-	ErrorDto getFailedProcessingsById(String id);
+	List<FailedProcessing> getFailedProcessings();
+	FailedProcessing getFailedProcessingsById(String id);
+	void restartAndDeleteFailedProcessing(String id);
 }

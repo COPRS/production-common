@@ -150,7 +150,7 @@ public class MessageConsumptionControllerTest {
                 kafkaProperties, persistAuxiliaryFilesService,
                 persistEdrsSessionsService, persistLevelJobsService,
                 persistLevelProductsService, persistLevelReportsService,
-                persistLevelSegmentsService, persistErrorsService, otherService, appStatus);
+                persistLevelSegmentsService, otherService, appStatus);
 
         doReturn("pod-name").when(appProperties).getHostname();
 
@@ -209,11 +209,6 @@ public class MessageConsumptionControllerTest {
         prodCatSeg.setTopicsWithPriority(lSegTopicsWithPriority);
         map.put(ProductCategory.LEVEL_SEGMENTS,
                 new ProductCategoryProperties(prodCatSeg, null));
-        ProductCategoryConsumptionProperties prodCatErrors =
-                new ProductCategoryConsumptionProperties(true);
-        prodCatErrors.setTopicsWithPriority(lErrorsTopics);
-        map.put(ProductCategory.ERRORS,
-                new ProductCategoryProperties(prodCatErrors, null));
         
         doReturn(map).when(appProperties).getProductCategories();
 
@@ -295,14 +290,6 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).get("topic")
                         .getConsumedMsgClass());
         
-        assertEquals(1,
-                manager.consumers.get(ProductCategory.ERRORS).size());
-        assertEquals("topic", manager.consumers.get(ProductCategory.ERRORS)
-                .get("topic").getTopic());
-        assertEquals(ErrorDto.class,
-                manager.consumers.get(ProductCategory.ERRORS).get("topic")
-                        .getConsumedMsgClass());
-        
     }
 
     /**
@@ -342,8 +329,6 @@ public class MessageConsumptionControllerTest {
                 ProductCategory.LEVEL_REPORTS);
         testNextMessageWhenNoResponse(persistLevelSegmentsService,
                 ProductCategory.LEVEL_SEGMENTS);
-        testNextMessageWhenNoResponse(persistErrorsService,
-                ProductCategory.ERRORS);
     }
 
     /**
