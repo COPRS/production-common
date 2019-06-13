@@ -122,6 +122,9 @@ public class S3Configuration {
      */
     public static final String BCK_L2_ACNS = "bucket.l2-acns";
     
+    public static final String BCK_AUX_FILE_ZIP = "bucket.auxiliary-files_zip";
+    public static final String BCK_L0_SEGMENT_ZIP = "bucket.l0-segments_zip";
+    
     public static final String BCK_L0_ACNS_ZIP = "bucket.l0_acns_zip";
     public static final String BCK_L1_ACNS_ZIP = "bucket.l1-acns_zip";
     public static final String BCK_L2_ACNS_ZIP = "bucket.l2-acns_zip";
@@ -266,6 +269,12 @@ public class S3Configuration {
             	break;
             case L2_SLICE_ZIP:
             	bucket = configuration.getString(BCK_L2_SLICES_ZIP);
+            	break;
+            case L0_SEGMENT_ZIP:
+            	bucket = configuration.getString(BCK_L0_SEGMENT_ZIP);
+            	break;
+            case AUXILIARY_FILE_ZIP:
+            	bucket = configuration.getString(BCK_AUX_FILE_ZIP);
             	break;
             default:
                 throw new ObsServiceException(
