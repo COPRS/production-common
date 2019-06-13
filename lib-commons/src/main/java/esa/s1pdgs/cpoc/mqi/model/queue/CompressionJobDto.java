@@ -19,6 +19,11 @@ public class CompressionJobDto {
     private LevelJobInputDto input;
     
     private ProductFamily family;
+    
+    public CompressionJobDto(final ProductFamily family, final LevelJobInputDto input) {
+    	this.family = family;
+    	this.input = input;    	
+    }
 
 	public LevelJobInputDto getInput() {
 		return input;

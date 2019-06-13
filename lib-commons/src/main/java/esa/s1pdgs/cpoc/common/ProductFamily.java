@@ -14,7 +14,9 @@ public enum ProductFamily {
     JOB_ORDER, BLANK,
     L2_ACN, L2_SLICE, L2_JOB, L2_REPORT,
     // ZIP Product families
-    L0_ACN_ZIP, L0_SLICE_ZIP, L0_BLANK_ZIP, L0_SEGMENT_ZIP, L1_ACN_ZIP, L1_SLICE_ZIP, L2_ACN_ZIP, L2_ACN_SLICE;
+    L0_SEGMENT_ZIP,AUXILIARY_FILE_ZIP,
+    L0_ACN_ZIP, L1_ACN_ZIP, L2_ACN_ZIP,
+    L0_SLICE_ZIP, L1_SLICE_ZIP,L2_SLICE_ZIP;
 
     /**
      * Get product family from value in string format
@@ -30,6 +32,7 @@ public enum ProductFamily {
             try {
                 ret = ProductFamily.valueOf(value);
             } catch (IllegalArgumentException ex) {
+            	ex.printStackTrace();
                 ret = ProductFamily.BLANK;
             }
         }
