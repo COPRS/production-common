@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 /**
  * A DTO containing a request for a compression job. This class does
  * basically just contain the input of the products that should be processed.
@@ -15,6 +17,8 @@ public class CompressionJobDto {
      */
 	// TODO: Maybe LevelJobInputDto is not a good name or needs to have its own class
     private LevelJobInputDto input;
+    
+    private ProductFamily family;
 
 	public LevelJobInputDto getInput() {
 		return input;
@@ -24,5 +28,12 @@ public class CompressionJobDto {
 		this.input = input;
 	}
 
+	public ProductFamily getFamily() {
+		return family;
+	}
+
+	public void setFamily(ProductFamily family) {
+		this.family = family;
+	}	
     
 }

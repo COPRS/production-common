@@ -12,7 +12,9 @@ public enum ProductFamily {
     L0_SEGMENT,
     L0_JOB, L1_JOB, L0_SEGMENT_JOB,
     JOB_ORDER, BLANK,
-    L2_ACN, L2_SLICE, L2_JOB, L2_REPORT;
+    L2_ACN, L2_SLICE, L2_JOB, L2_REPORT,
+    // ZIP Product families
+    L0_ACN_ZIP, L0_SLICE_ZIP, L0_BLANK_ZIP, L0_SEGMENT_ZIP, L1_ACN_ZIP, L1_SLICE_ZIP, L2_ACN_ZIP, L2_ACN_SLICE;
 
     /**
      * Get product family from value in string format
