@@ -15,24 +15,30 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@Autowired
 	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate) {
-		this.mongoTemplate = mongoTemplate;		
+		this.mongoTemplate = mongoTemplate;
 	}
 
 	@Override
-	public List<FailedProcessingDto> getFailedProcessings() {		
+	public List<FailedProcessingDto> getFailedProcessings() {
 		List<FailedProcessingDto> failedProcessings = mongoTemplate.findAll(FailedProcessingDto.class);
 		return failedProcessings;
 	}
 
 	@Override
 	public FailedProcessingDto getFailedProcessingsById(String id) {
-		FailedProcessingDto failedProcessing = mongoTemplate.findById(id,FailedProcessingDto.class);
+		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
 		return failedProcessing;
 	}
 
 	@Override
 	public void restartAndDeleteFailedProcessing(String id) {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void deleteFailedProcessing(String id) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
