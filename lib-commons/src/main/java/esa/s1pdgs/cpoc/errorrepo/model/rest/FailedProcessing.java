@@ -1,147 +1,144 @@
 package esa.s1pdgs.cpoc.errorrepo.model.rest;
 
 import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * @author birol_colak@net.werum
  *
  */
-public class FailedProcessing<T> {
+public class FailedProcessing<T> extends MqiGenericMessageDto<GenericMessageDto<T>> {
+	
+	private static final String TOPIC = "t-pdgs-errors";
+	
+	public FailedProcessing() {
+		super();
+	}
 
-	private UUID id = null;
+	public FailedProcessing(
+			ProductCategory category, 
+			long identifier, 
+			String topic, 
+			int partition, 
+			long offset,
+			GenericMessageDto<T> dto
+	) {
+		super(category, identifier, TOPIC, partition, offset, dto);
+	}
 
+	public FailedProcessing(
+			ProductCategory category, 
+			long identifier, 
+			String topic, 
+			int partition, 
+			long offset
+	) {
+		super(category, identifier, TOPIC, partition, offset);
+	}
+
+	public FailedProcessing(ProductCategory category) {
+		super(category);
+	}
+		
 	private String processingType = null;
-
-	private MqiStateMessageEnum processingStatus = null;
-
-	private ProductCategory productCategory = null;
-
-	private String partition = null;
-
-	private Long offset = null;
-
-	private String group = null;
-
-	private String failedPod = null;
-
-	private OffsetDateTime lastAssignmentDate = null;
-
-	private String sendingPod = null;
-
-	private OffsetDateTime lastSendDate = null;
-
-	private OffsetDateTime lastAckDate = null;
-
-	private String nbRetries = null;
-
-	private OffsetDateTime creationDate = null;
-
-	private OffsetDateTime failureDate = null;
-
 	private String failureMessage = null;
 
+	// maybe map to 'readingPod'
+	private String failedPod = null;
+
+	// maybe map to 'lastReadDate'
+	private Date lastAssignmentDate = null;
+	
+	// current time (at creation of this object)
+	private Date failureDate = null;
+
+	// original error
 	private GenericMessageDto<T> processingDetails = null;
-
-	public FailedProcessing<T> id(UUID id) {
-		this.id = id;
-		return this;
-	}
-
-	public UUID getId() {
-		return id;
-	}
-
-	public void setId(UUID id) {
-		this.id = id;
-	}
 
 	public FailedProcessing<T> processingType(String processingType) {
 		this.processingType = processingType;
 		return this;
 	}
+	
+	public FailedProcessing<T> processingStatus(MqiStateMessageEnum processingStatus) {
+		this.setState(processingStatus);
+		return this;
+	}
 
+	public FailedProcessing<T> productCategory(ProductCategory productCategory) {
+		this.setCategory(productCategory);
+		return this;
+	}
+	
+	public FailedProcessing<T> partition(int partition) {
+		this.setPartition(partition);
+		return this;
+	}
+
+	public FailedProcessing<T> offset(long offset) {
+		this.setOffset(offset);
+		return this;
+	}
+	
+	public FailedProcessing<T> group(String group) {
+		this.setGroup(group);
+		return this;
+	}
+	
+	public FailedProcessing<T> lastAssignmentDate(Date lastAssignmentDate) {
+		this.lastAssignmentDate = lastAssignmentDate;
+		return this;
+	}
+
+	public FailedProcessing<T> failedPod(String failedPod) {
+		this.failedPod = failedPod;
+		return this;
+	}
+	
+	public FailedProcessing<T> sendingPod(String sendingPod) {
+		this.setSendingPod(sendingPod);
+		return this;
+	}
+	
+	public FailedProcessing<T> lastSendDate(Date lastSendDate) {
+		this.setLastSendDate(lastSendDate);
+		return this;
+	}
+
+	public FailedProcessing<T> lastAckDate(Date lastAckDate) {
+		this.setLastAckDate(lastAckDate);
+		return this;
+	}
+	
+	public FailedProcessing<T> nbRetries(int nbRetries) {
+		this.setNbRetries(nbRetries);
+		return this;
+	}
+	
+	public FailedProcessing<T> creationDate(Date creationDate) {
+		this.setCreationDate(creationDate);
+		return this;
+	}
+	
+	public FailedProcessing<T> failureDate(Date failureDate) {
+		this.failureDate = failureDate;
+		return this;
+	}
+	
 	public String getProcessingType() {
 		return processingType;
 	}
 
 	public void setProcessingType(String processingType) {
 		this.processingType = processingType;
-	}
-
-	public FailedProcessing<T> processingStatus(MqiStateMessageEnum processingStatus) {
-		this.processingStatus = processingStatus;
-		return this;
-	}
-
-	public MqiStateMessageEnum getProcessingStatus() {
-		return processingStatus;
-	}
-
-	public void setProcessingStatus(MqiStateMessageEnum processingStatus) {
-		this.processingStatus = processingStatus;
-	}
-
-	public FailedProcessing<T> productCategory(ProductCategory productCategory) {
-		this.productCategory = productCategory;
-		return this;
-	}
-
-	public ProductCategory getProductCategory() {
-		return productCategory;
-	}
-
-	public void setProductCategory(ProductCategory productCategory) {
-		this.productCategory = productCategory;
-	}
-
-	public FailedProcessing<T> partition(String partition) {
-		this.partition = partition;
-		return this;
-	}
-
-	public String getPartition() {
-		return partition;
-	}
-
-	public void setPartition(String partition) {
-		this.partition = partition;
-	}
-
-	public FailedProcessing<T> offset(Long offset) {
-		this.offset = offset;
-		return this;
-	}
-
-	public Long getOffset() {
-		return offset;
-	}
-
-	public void setOffset(Long offset) {
-		this.offset = offset;
-	}
-
-	public FailedProcessing<T> group(String group) {
-		this.group = group;
-		return this;
-	}
-
-	public String getGroup() {
-		return group;
-	}
-
-	public void setGroup(String group) {
-		this.group = group;
-	}
-
-	public FailedProcessing<T> failedPod(String failedPod) {
-		this.failedPod = failedPod;
-		return this;
 	}
 
 	public String getFailedPod() {
@@ -152,94 +149,19 @@ public class FailedProcessing<T> {
 		this.failedPod = failedPod;
 	}
 
-	public FailedProcessing<T> lastAssignmentDate(OffsetDateTime lastAssignmentDate) {
-		this.lastAssignmentDate = lastAssignmentDate;
-		return this;
-	}
-
-	public OffsetDateTime getLastAssignmentDate() {
+	public Date getLastAssignmentDate() {
 		return lastAssignmentDate;
 	}
 
-	public void setLastAssignmentDate(OffsetDateTime lastAssignmentDate) {
+	public void setLastAssignmentDate(Date lastAssignmentDate) {
 		this.lastAssignmentDate = lastAssignmentDate;
 	}
 
-	public FailedProcessing<T> sendingPod(String sendingPod) {
-		this.sendingPod = sendingPod;
-		return this;
-	}
-
-	public String getSendingPod() {
-		return sendingPod;
-	}
-
-	public void setSendingPod(String sendingPod) {
-		this.sendingPod = sendingPod;
-	}
-
-	public FailedProcessing<T> lastSendDate(OffsetDateTime lastSendDate) {
-		this.lastSendDate = lastSendDate;
-		return this;
-	}
-
-	public OffsetDateTime getLastSendDate() {
-		return lastSendDate;
-	}
-
-	public void setLastSendDate(OffsetDateTime lastSendDate) {
-		this.lastSendDate = lastSendDate;
-	}
-
-	public FailedProcessing<T> lastAckDate(OffsetDateTime lastAckDate) {
-		this.lastAckDate = lastAckDate;
-		return this;
-	}
-
-	public OffsetDateTime getLastAckDate() {
-		return lastAckDate;
-	}
-
-	public void setLastAckDate(OffsetDateTime lastAckDate) {
-		this.lastAckDate = lastAckDate;
-	}
-
-	public FailedProcessing<T> nbRetries(String nbRetries) {
-		this.nbRetries = nbRetries;
-		return this;
-	}
-
-	public String getNbRetries() {
-		return nbRetries;
-	}
-
-	public void setNbRetries(String nbRetries) {
-		this.nbRetries = nbRetries;
-	}
-
-	public FailedProcessing<T> creationDate(OffsetDateTime creationDate) {
-		this.creationDate = creationDate;
-		return this;
-	}
-
-	public OffsetDateTime getCreationDate() {
-		return creationDate;
-	}
-
-	public void setCreationDate(OffsetDateTime creationDate) {
-		this.creationDate = creationDate;
-	}
-
-	public FailedProcessing<T> failureDate(OffsetDateTime failureDate) {
-		this.failureDate = failureDate;
-		return this;
-	}
-
-	public OffsetDateTime getFailureDate() {
+	public Date getFailureDate() {
 		return failureDate;
 	}
 
-	public void setFailureDate(OffsetDateTime failureDate) {
+	public void setFailureDate(Date failureDate) {
 		this.failureDate = failureDate;
 	}
 
@@ -277,11 +199,13 @@ public class FailedProcessing<T> {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		FailedProcessing<T> failedProcessing = (FailedProcessing) o;
-		return Objects.equals(this.id, failedProcessing.id)
+		@SuppressWarnings("unchecked")
+		FailedProcessing<T> failedProcessing = (FailedProcessing<T>) o;
+		
+		return Objects.equals(this.identifier, failedProcessing.identifier)
 				&& Objects.equals(this.processingType, failedProcessing.processingType)
-				&& Objects.equals(this.processingStatus, failedProcessing.processingStatus)
-				&& Objects.equals(this.productCategory, failedProcessing.productCategory)
+				&& Objects.equals(this.state, failedProcessing.state)
+				&& Objects.equals(this.category, failedProcessing.category)
 				&& Objects.equals(this.partition, failedProcessing.partition)
 				&& Objects.equals(this.offset, failedProcessing.offset)
 				&& Objects.equals(this.group, failedProcessing.group)
@@ -299,7 +223,7 @@ public class FailedProcessing<T> {
 
 	@Override
 	public int hashCode() {
-		return java.util.Objects.hash(id, processingType, processingStatus, productCategory, partition, offset, group,
+		return java.util.Objects.hash(identifier, processingType, state, category, partition, offset, group,
 				failedPod, lastAssignmentDate, sendingPod, lastSendDate, lastAckDate, nbRetries, creationDate,
 				failureDate, failureMessage, processingDetails);
 	}
@@ -309,10 +233,10 @@ public class FailedProcessing<T> {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class FailedProcessing {\n");
 
-		sb.append("    id: ").append(toIndentedString(id)).append("\n");
+		sb.append("    id: ").append(toIndentedString(identifier)).append("\n");
 		sb.append("    processingType: ").append(toIndentedString(processingType)).append("\n");
-		sb.append("    processingStatus: ").append(toIndentedString(processingStatus)).append("\n");
-		sb.append("    productCategory: ").append(toIndentedString(productCategory)).append("\n");
+		sb.append("    processingStatus: ").append(toIndentedString(state)).append("\n");
+		sb.append("    productCategory: ").append(toIndentedString(category)).append("\n");
 		sb.append("    partition: ").append(toIndentedString(partition)).append("\n");
 		sb.append("    offset: ").append(toIndentedString(offset)).append("\n");
 		sb.append("    group: ").append(toIndentedString(group)).append("\n");
