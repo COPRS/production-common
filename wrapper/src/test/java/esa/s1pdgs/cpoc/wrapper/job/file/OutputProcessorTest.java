@@ -170,7 +170,6 @@ public class OutputProcessorTest {
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         doNothing().when(procuderFactory)
                 .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
-        doNothing().when(procuderFactory).sendError(Mockito.anyString());
     }
 
     /**
@@ -626,7 +625,6 @@ public class OutputProcessorTest {
                 Mockito.eq(reportToPublish.get(1)), Mockito.eq(inputMessage));
         verify(procuderFactory, times(1)).sendOutput(
                 Mockito.eq(reportToPublish.get(2)), Mockito.eq(inputMessage));
-        verify(procuderFactory, times(1)).sendError(Mockito.anyString());
     }
 
     @Test
