@@ -80,7 +80,7 @@ public class CompressProcessor {
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
 			final ObsService obsService,
 			final OutputProducerFactory producerFactory,
-			@Qualifier("mqiServiceForLevelJobs") final GenericMqiService<CompressionJobDto> mqiService,
+			@Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> mqiService,
 			@Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
 		this.appStatus = appStatus;
 		this.properties = properties;
@@ -94,7 +94,7 @@ public class CompressProcessor {
     /**
      * Consume and execute jobs
      */
-    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.init-delay-poll-ms}")
+    @Scheduled(fixedDelayString = "${compress.fixed-delay-ms}", initialDelayString = "${compress.init-delay-poll-ms}")
 	public void process() {
 		LOGGER.trace("[MONITOR] [step 0] Waiting message");
 

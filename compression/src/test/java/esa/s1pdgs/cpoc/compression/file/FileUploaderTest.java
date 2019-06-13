@@ -12,7 +12,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class FileUploaderTest {
@@ -30,7 +29,7 @@ public class FileUploaderTest {
 		MockitoAnnotations.initMocks(this);
 
 		GenericMessageDto<CompressionJobDto> inputMessage = new GenericMessageDto<CompressionJobDto>(123, "",
-				new CompressionJobDto(ProductFamily.L0_ACN, new LevelJobInputDto("L0_ACN", "/", "key")));
+				new CompressionJobDto("product_name",ProductFamily.L0_ACN, "object_key"));
 
 		fileUploader = new FileUploader(obsService, producerFactory, "/tmp/compressed", inputMessage,
 				inputMessage.getBody());

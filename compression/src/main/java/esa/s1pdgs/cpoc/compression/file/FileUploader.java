@@ -71,9 +71,10 @@ public class FileUploader {
 		 List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 
 		try {
-    		 File workDir = new File(workingDir+"/"+job.getInput().getLocalPath());
+			String zipFileName = job.getProductName()+".zip";
+    		 File workDir = new File(workingDir+"/"+zipFileName);
     		 ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
-			S3UploadFile uploadFile = new S3UploadFile(productFamily, "xxx", workDir);
+			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, workDir);
 //// 			// Upload per batch the output
 			processProducts(reportingFactory, uploadFile, outputToPublish);
 
