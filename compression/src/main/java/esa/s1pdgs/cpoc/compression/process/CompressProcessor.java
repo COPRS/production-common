@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -84,6 +85,10 @@ public class CompressProcessor {
 		this.mqiStatusService = mqiStatusService;
 	}
 
+    /**
+     * Consume and execute jobs
+     */
+    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.init-delay-poll-ms}")
 	public void process() {
 		LOGGER.trace("[MONITOR] [step 0] Waiting message");
 
@@ -117,8 +122,7 @@ public class CompressProcessor {
 		// ------------------------------------------------------
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "CompressionProcessing");
 
-		// TODO Static workdir currently
-		String workDir = "/tmp/workdir";
+		String workDir = properties.getWorkingDirectory();
 
 		final Reporting report = reportingFactory.newReporting(0);
 		report.reportStart("Start compression processing");
@@ -130,7 +134,7 @@ public class CompressProcessor {
 																						// job),
 				"CompressionProcessor - process");
 		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
-		ExecutorCompletionService<Boolean> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
+		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
 		FileDownloader fileDownloader = new FileDownloader(obsService, workDir, job.getInput(),
@@ -138,7 +142,7 @@ public class CompressProcessor {
 				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				"CompressionProcessor", procExecutor);
 
-		FileUploader fileUploader = new FileUploader();
+		FileUploader fileUploader = new FileUploader(obsService, workDir);
 
 		// ----------------------------------------------------------
 		// Process message
@@ -150,7 +154,7 @@ public class CompressProcessor {
 
 	protected void processTask(final GenericMessageDto<CompressionJobDto> message, final FileDownloader fileDownloader,
 			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
-			final ExecutorCompletionService<Boolean> procCompletionSrv, final PoolExecutorCallable procExecutor,
+			final ExecutorCompletionService<Void> procCompletionSrv, final PoolExecutorCallable procExecutor,
 			final Reporting report) {
 		CompressionJobDto job = message.getBody();
 		int step = 0;
@@ -158,16 +162,17 @@ public class CompressProcessor {
 		String errorMessage = "";
 
 		try {
-			step = 3;
-			LOGGER.info("{} Starting process executor", "LOG PROCESS"// getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS
-					, job);
-			procCompletionSrv.submit(procExecutor);
-
 			step = 2;
+
 			checkThreadInterrupted();
 			LOGGER.info("{} Preparing local working directory", "LOG_INPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT
 					job);
 			fileDownloader.processInputs();
+			
+			step = 3;
+			LOGGER.info("{} Starting process executor", "LOG PROCESS"// getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS
+					, job);
+			procCompletionSrv.submit(procExecutor);
 
 			step = 3;
 			this.waitForPoolProcessesEnding(procCompletionSrv);
@@ -221,7 +226,7 @@ public class CompressProcessor {
 	 * @throws InterruptedException
 	 * @throws AbstractCodedException
 	 */
-	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<Boolean> procCompletionSrv)
+	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<?> procCompletionSrv)
 			throws InterruptedException, AbstractCodedException {
 		checkThreadInterrupted();
 		try {

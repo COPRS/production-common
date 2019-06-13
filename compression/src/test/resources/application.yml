@@ -9,3 +9,7 @@ logging:
 # Compression
 compression:
   command: /usr/bin/sh
+  mqi:
+    host-uri: http://localhost:8081       # the host and port for querying MQI server
+    max-retries: 3                        # the maximal number of consecutive retries following a MQI request error 
+    tempo-retry-ms: 1000                  #
