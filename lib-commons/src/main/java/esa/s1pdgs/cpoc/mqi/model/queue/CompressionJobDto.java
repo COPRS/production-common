@@ -6,12 +6,12 @@ public class CompressionJobDto {
 
 	private String productName;
 	private ProductFamily family = ProductFamily.AUXILIARY_FILE;
-	private String keyObjectStorage;
+	private String objectStorageKey;
 
-	public CompressionJobDto(final String productName, final ProductFamily family, final String keyObjectStorage) {
+	public CompressionJobDto(final String productName, final ProductFamily family, final String objectStorageKey) {
 		this.productName = productName;
 		this.family = family;
-		this.keyObjectStorage = keyObjectStorage;
+		this.objectStorageKey = objectStorageKey;
 	}
 
 	public String getProductName() {
@@ -30,13 +30,15 @@ public class CompressionJobDto {
 		this.family = family;
 	}
 
-	public String getKeyObjectStorage() {
-		return keyObjectStorage;
+	public String getObjectStorageKey() {
+		return objectStorageKey;
 	}
 
-	public void setKeyObjectStorage(String keyObjectStorage) {
-		this.keyObjectStorage = keyObjectStorage;
+	public void setObjectStorageKey(String objectStorageKey) {
+		this.objectStorageKey = objectStorageKey;
 	}
+
+
 	
 	// TODO: Overwrite default object methods 
 
