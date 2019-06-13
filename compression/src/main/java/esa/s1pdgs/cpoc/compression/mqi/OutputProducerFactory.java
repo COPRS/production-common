@@ -6,12 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.model.mqi.FileQueueMessage;
+import esa.s1pdgs.cpoc.compression.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 @Service
 public class OutputProducerFactory {
@@ -30,7 +34,7 @@ public class OutputProducerFactory {
     /**
      * MQI client for LEVEL_PRODUCTS
      */
-//    private final GenericMqiService<LevelProductDto> senderProducts;
+    private final GenericMqiService<LevelProductDto> senderProducts;
 
     /**
      * MQI client for LEVEL_REPORTS
@@ -50,13 +54,13 @@ public class OutputProducerFactory {
      */
     @Autowired
     public OutputProducerFactory(
-            @Qualifier("mqiServiceForCompression") final GenericMqiService<LevelSegmentDto> senderSegments
-            //@Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> senderProducts,
+            @Qualifier("mqiServiceForCompression") final GenericMqiService<LevelSegmentDto> senderSegments,
+            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> senderProducts
             //@Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports,
             //@Qualifier("mqiServiceForErrors") final ErrorService senderErrors
             ) {
         this.senderSegments = senderSegments;
-//        this.senderProducts = senderProducts;
+        this.senderProducts = senderProducts;
 //        this.senderReports = senderReports;
 //        this.senderErrors = senderErrors;
     }
@@ -68,7 +72,7 @@ public class OutputProducerFactory {
      * @throws AbstractCodedException
      */
     public void sendOutput(final FileQueueMessage msg,
-            GenericMessageDto<LevelJobDto> inputMessage)
+            GenericMessageDto<CompressionJobDto> inputMessage)
             throws AbstractCodedException {
 //        LevelReportDto dtoReport = new LevelReportDto(msg.getProductName(),
 //                FileUtils.readFile(msg.getFile()), msg.getFamily());
@@ -82,30 +86,30 @@ public class OutputProducerFactory {
 //     * @param msg
 //     * @throws AbstractCodedException
 //     */
-//    public void sendOutput(final ObsQueueMessage msg,
-//            GenericMessageDto<LevelJobDto> inputMessage)
-//            throws AbstractCodedException {
-//        if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
-//            LevelSegmentDto dtoProduct =
-//                    new LevelSegmentDto(msg.getProductName(), msg.getKeyObs(),
-//                            msg.getFamily(), msg.getProcessMode());
-//            senderSegments
-//                    .publish(new GenericPublicationMessageDto<LevelSegmentDto>(
-//                            inputMessage.getIdentifier(), msg.getFamily(),
-//                            dtoProduct));
-//        } else {
-//            LevelProductDto dtoProduct =
-//                    new LevelProductDto(msg.getProductName(), msg.getKeyObs(),
-//                            msg.getFamily(), msg.getProcessMode());
-//            GenericPublicationMessageDto<LevelProductDto> messageToPublish =
-//                    new GenericPublicationMessageDto<LevelProductDto>(
-//                            inputMessage.getIdentifier(), msg.getFamily(),
-//                            dtoProduct);
-//            messageToPublish.setInputKey(inputMessage.getInputKey());
-//            messageToPublish.setOutputKey(msg.getFamily().name());
-//            senderProducts.publish(messageToPublish);
-//        }
-//    }
+    public void sendOutput(final ObsQueueMessage msg,
+            GenericMessageDto<CompressionJobDto> inputMessage)
+            throws AbstractCodedException {
+        if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
+            LevelSegmentDto dtoProduct =
+                    new LevelSegmentDto(msg.getProductName(), msg.getKeyObs(),
+                            msg.getFamily(), msg.getProcessMode());
+            senderSegments
+                    .publish(new GenericPublicationMessageDto<LevelSegmentDto>(
+                            inputMessage.getIdentifier(), msg.getFamily(),
+                            dtoProduct));
+        } else {
+            LevelProductDto dtoProduct =
+                    new LevelProductDto(msg.getProductName(), msg.getKeyObs(),
+                            msg.getFamily(), msg.getProcessMode());
+            GenericPublicationMessageDto<LevelProductDto> messageToPublish =
+                    new GenericPublicationMessageDto<LevelProductDto>(
+                            inputMessage.getIdentifier(), msg.getFamily(),
+                            dtoProduct);
+            messageToPublish.setInputKey(inputMessage.getInputKey());
+            messageToPublish.setOutputKey(msg.getFamily().name());
+            senderProducts.publish(messageToPublish);
+        }
+    }
 //
 //    /**
 //     * Publish a error

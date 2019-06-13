@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.file.FileDownloader;
 import esa.s1pdgs.cpoc.compression.file.FileUploader;
+import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -59,6 +60,11 @@ public class CompressProcessor {
 	 * Output processsor
 	 */
 	private final ObsService obsService;
+	
+    /**
+     * Output processsor
+     */
+    private final OutputProducerFactory producerFactory;
 
 	/**
 	 * MQI service for reading message
@@ -70,16 +76,16 @@ public class CompressProcessor {
 	 */
 	private final StatusService mqiStatusService;
 	
-	private final String workDir = "/tmp/compression";
-
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
 			final ObsService obsService,
+			final OutputProducerFactory producerFactory,
 			@Qualifier("mqiServiceForLevelJobs") final GenericMqiService<CompressionJobDto> mqiService,
 			@Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
 		this.appStatus = appStatus;
 		this.properties = properties;
 		this.obsService = obsService;
+		this.producerFactory = producerFactory;
 
 		this.mqiService = mqiService;
 		this.mqiStatusService = mqiStatusService;
@@ -137,12 +143,12 @@ public class CompressProcessor {
 		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		FileDownloader fileDownloader = new FileDownloader(obsService, workDir, job.getInput(),
+		FileDownloader fileDownloader = new FileDownloader(obsService, workDir, job,
 				this.properties.getSizeBatchDownload(),
 				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
-				"CompressionProcessor", procExecutor);
+				"CompressionProcessor");
 
-		FileUploader fileUploader = new FileUploader(obsService, workDir);
+		FileUploader fileUploader = new FileUploader(obsService, producerFactory, workDir, message, job);
 
 		// ----------------------------------------------------------
 		// Process message
@@ -264,7 +270,7 @@ public class CompressProcessor {
 		try {
 //                LOGGER.info("{} Erasing local working directory",
 //                        getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));
-			Path p = Paths.get(workDir);
+			Path p = Paths.get(properties.getWorkingDirectory());
 			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
 					.peek(System.out::println).forEach(File::delete);
 		} catch (IOException e) {

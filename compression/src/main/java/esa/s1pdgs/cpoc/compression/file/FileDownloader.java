@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,8 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.compression.model.obs.S3DownloadFile;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
-import esa.s1pdgs.cpoc.compression.process.PoolExecutorCallable;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -44,31 +41,18 @@ public class FileDownloader {
 	/**
 	 * List of all the inputs
 	 */
-	private final LevelJobInputDto input;
-
-	/**
-	 * Batch size for downloading inputs from OBS
-	 */
-	private final int sizeDownBatch;
+	private final CompressionJobDto job;
 
 	/**
 	 * Prefix to concatene to monitor logs
 	 */
 	private final String prefixMonitorLogs;
 
-	/**
-	 * Executor which executes processes. Shall be informed when all inputs are
-	 * download
-	 */
-	private final PoolExecutorCallable poolProcExecutor;
-
-	public FileDownloader(final ObsService obsService, final String localWorkingDir, final LevelJobInputDto input,
-			final int sizeDownBatch, final String prefixMonitorLogs, final PoolExecutorCallable poolProcExecutor) {
+	public FileDownloader(final ObsService obsService, final String localWorkingDir, final CompressionJobDto job,
+			final int sizeDownBatch, final String prefixMonitorLogs) {
 		this.obsService = obsService;
 		this.localWorkingDir = localWorkingDir;
-		this.input = input;
-		this.sizeDownBatch = sizeDownBatch;
-		this.poolProcExecutor = poolProcExecutor;
+		this.job = job;
 		this.prefixMonitorLogs = prefixMonitorLogs;
 	}
 
@@ -123,10 +107,10 @@ public class FileDownloader {
 	protected S3DownloadFile buildInput() throws InternalErrorException, UnknownFamilyException {
 		LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 
-		LOGGER.info("Input {}-{} will be stored in {}", input.getFamily(), input.getContentRef(), input.getLocalPath());
+		LOGGER.info("Input {}-{} will be stored in {}", job.getFamily(), job.getInput().getContentRef(), job.getInput().getLocalPath());
 
-		return new S3DownloadFile(ProductFamily.fromValue(input.getFamily()), input.getContentRef(),
-				(new File(input.getLocalPath()).getParent()));
+		return new S3DownloadFile(ProductFamily.fromValue(job.getInput().getFamily()), job.getInput().getContentRef(),
+				(new File(job.getInput().getLocalPath()).getParent()));
 
 	}
 
