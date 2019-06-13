@@ -4,76 +4,23 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+
 /**
  * @author birol_colak@net.werum
  *
  */
-public class FailedProcessing {
+public class FailedProcessing<T> {
 
 	private UUID id = null;
 
 	private String processingType = null;
 
-	public enum ProcessingStatusEnum {
-		READ("READ"), SEND("SEND"), ACK_OK("ACK_OK"), ACK_KO("ACK_KO"), ACK_WARN("ACK_WARN");
+	private MqiStateMessageEnum processingStatus = null;
 
-		private String value;
-
-		ProcessingStatusEnum(String value) {
-			this.value = value;
-		}
-
-		public String getValue() {
-			return value;
-		}
-
-		@Override
-		public String toString() {
-			return String.valueOf(value);
-		}
-
-		public static ProcessingStatusEnum fromValue(String text) {
-			for (ProcessingStatusEnum b : ProcessingStatusEnum.values()) {
-				if (String.valueOf(b.value).equals(text)) {
-					return b;
-				}
-			}
-			return null;
-		}
-	}
-
-	private ProcessingStatusEnum processingStatus = null;
-
-	public enum ProductCategoryEnum {
-		AUXILIARY_FILES("AUXILIARY_FILES"), EDRS_SESSIONS("EDRS_SESSIONS"), LEVEL_JOBS("LEVEL_JOBS"),
-		LEVEL_PRODUCTS("LEVEL_PRODUCTS"), LEVEL_REPORTS("LEVEL_REPORTS"), LEVEL_SEGMENTS("LEVEL_SEGMENTS");
-
-		private String value;
-
-		ProductCategoryEnum(String value) {
-			this.value = value;
-		}
-
-		public String getValue() {
-			return value;
-		}
-
-		@Override
-		public String toString() {
-			return String.valueOf(value);
-		}
-
-		public static ProductCategoryEnum fromValue(String text) {
-			for (ProductCategoryEnum b : ProductCategoryEnum.values()) {
-				if (String.valueOf(b.value).equals(text)) {
-					return b;
-				}
-			}
-			return null;
-		}
-	}
-
-	private ProductCategoryEnum productCategory = null;
+	private ProductCategory productCategory = null;
 
 	private String partition = null;
 
@@ -99,9 +46,9 @@ public class FailedProcessing {
 
 	private String failureMessage = null;
 
-	private Object processingDetails = null;
+	private GenericMessageDto<T> processingDetails = null;
 
-	public FailedProcessing id(UUID id) {
+	public FailedProcessing<T> id(UUID id) {
 		this.id = id;
 		return this;
 	}
@@ -114,7 +61,7 @@ public class FailedProcessing {
 		this.id = id;
 	}
 
-	public FailedProcessing processingType(String processingType) {
+	public FailedProcessing<T> processingType(String processingType) {
 		this.processingType = processingType;
 		return this;
 	}
@@ -127,33 +74,33 @@ public class FailedProcessing {
 		this.processingType = processingType;
 	}
 
-	public FailedProcessing processingStatus(ProcessingStatusEnum processingStatus) {
+	public FailedProcessing<T> processingStatus(MqiStateMessageEnum processingStatus) {
 		this.processingStatus = processingStatus;
 		return this;
 	}
 
-	public ProcessingStatusEnum getProcessingStatus() {
+	public MqiStateMessageEnum getProcessingStatus() {
 		return processingStatus;
 	}
 
-	public void setProcessingStatus(ProcessingStatusEnum processingStatus) {
+	public void setProcessingStatus(MqiStateMessageEnum processingStatus) {
 		this.processingStatus = processingStatus;
 	}
 
-	public FailedProcessing productCategory(ProductCategoryEnum productCategory) {
+	public FailedProcessing<T> productCategory(ProductCategory productCategory) {
 		this.productCategory = productCategory;
 		return this;
 	}
 
-	public ProductCategoryEnum getProductCategory() {
+	public ProductCategory getProductCategory() {
 		return productCategory;
 	}
 
-	public void setProductCategory(ProductCategoryEnum productCategory) {
+	public void setProductCategory(ProductCategory productCategory) {
 		this.productCategory = productCategory;
 	}
 
-	public FailedProcessing partition(String partition) {
+	public FailedProcessing<T> partition(String partition) {
 		this.partition = partition;
 		return this;
 	}
@@ -166,7 +113,7 @@ public class FailedProcessing {
 		this.partition = partition;
 	}
 
-	public FailedProcessing offset(Long offset) {
+	public FailedProcessing<T> offset(Long offset) {
 		this.offset = offset;
 		return this;
 	}
@@ -179,7 +126,7 @@ public class FailedProcessing {
 		this.offset = offset;
 	}
 
-	public FailedProcessing group(String group) {
+	public FailedProcessing<T> group(String group) {
 		this.group = group;
 		return this;
 	}
@@ -192,7 +139,7 @@ public class FailedProcessing {
 		this.group = group;
 	}
 
-	public FailedProcessing failedPod(String failedPod) {
+	public FailedProcessing<T> failedPod(String failedPod) {
 		this.failedPod = failedPod;
 		return this;
 	}
@@ -205,7 +152,7 @@ public class FailedProcessing {
 		this.failedPod = failedPod;
 	}
 
-	public FailedProcessing lastAssignmentDate(OffsetDateTime lastAssignmentDate) {
+	public FailedProcessing<T> lastAssignmentDate(OffsetDateTime lastAssignmentDate) {
 		this.lastAssignmentDate = lastAssignmentDate;
 		return this;
 	}
@@ -218,7 +165,7 @@ public class FailedProcessing {
 		this.lastAssignmentDate = lastAssignmentDate;
 	}
 
-	public FailedProcessing sendingPod(String sendingPod) {
+	public FailedProcessing<T> sendingPod(String sendingPod) {
 		this.sendingPod = sendingPod;
 		return this;
 	}
@@ -231,7 +178,7 @@ public class FailedProcessing {
 		this.sendingPod = sendingPod;
 	}
 
-	public FailedProcessing lastSendDate(OffsetDateTime lastSendDate) {
+	public FailedProcessing<T> lastSendDate(OffsetDateTime lastSendDate) {
 		this.lastSendDate = lastSendDate;
 		return this;
 	}
@@ -244,7 +191,7 @@ public class FailedProcessing {
 		this.lastSendDate = lastSendDate;
 	}
 
-	public FailedProcessing lastAckDate(OffsetDateTime lastAckDate) {
+	public FailedProcessing<T> lastAckDate(OffsetDateTime lastAckDate) {
 		this.lastAckDate = lastAckDate;
 		return this;
 	}
@@ -257,7 +204,7 @@ public class FailedProcessing {
 		this.lastAckDate = lastAckDate;
 	}
 
-	public FailedProcessing nbRetries(String nbRetries) {
+	public FailedProcessing<T> nbRetries(String nbRetries) {
 		this.nbRetries = nbRetries;
 		return this;
 	}
@@ -270,7 +217,7 @@ public class FailedProcessing {
 		this.nbRetries = nbRetries;
 	}
 
-	public FailedProcessing creationDate(OffsetDateTime creationDate) {
+	public FailedProcessing<T> creationDate(OffsetDateTime creationDate) {
 		this.creationDate = creationDate;
 		return this;
 	}
@@ -283,7 +230,7 @@ public class FailedProcessing {
 		this.creationDate = creationDate;
 	}
 
-	public FailedProcessing failureDate(OffsetDateTime failureDate) {
+	public FailedProcessing<T> failureDate(OffsetDateTime failureDate) {
 		this.failureDate = failureDate;
 		return this;
 	}
@@ -296,7 +243,7 @@ public class FailedProcessing {
 		this.failureDate = failureDate;
 	}
 
-	public FailedProcessing failureMessage(String failureMessage) {
+	public FailedProcessing<T> failureMessage(String failureMessage) {
 		this.failureMessage = failureMessage;
 		return this;
 	}
@@ -309,16 +256,16 @@ public class FailedProcessing {
 		this.failureMessage = failureMessage;
 	}
 
-	public FailedProcessing processingDetails(Object processingDetails) {
+	public FailedProcessing<T> processingDetails(GenericMessageDto<T> processingDetails) {
 		this.processingDetails = processingDetails;
 		return this;
 	}
 
-	public Object getProcessingDetails() {
+	public GenericMessageDto<T> getProcessingDetails() {
 		return processingDetails;
 	}
 
-	public void setProcessingDetails(Object processingDetails) {
+	public void setProcessingDetails(GenericMessageDto<T> processingDetails) {
 		this.processingDetails = processingDetails;
 	}
 
@@ -330,7 +277,7 @@ public class FailedProcessing {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		FailedProcessing failedProcessing = (FailedProcessing) o;
+		FailedProcessing<T> failedProcessing = (FailedProcessing) o;
 		return Objects.equals(this.id, failedProcessing.id)
 				&& Objects.equals(this.processingType, failedProcessing.processingType)
 				&& Objects.equals(this.processingStatus, failedProcessing.processingStatus)
