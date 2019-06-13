@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 
+@Component
 public class ErrorRepositoryImpl implements ErrorRepository {
 
 	private final MongoTemplate mongoTemplate;

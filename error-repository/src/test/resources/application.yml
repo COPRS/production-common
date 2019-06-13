@@ -3,7 +3,7 @@ spring:
     name: s1pdgs-error-repo
     
 logging:
-  config: log4j2.yml
+  config: classpath:log4j2-test.yml
 
 application:
   hostname: ${HOSTNAME}                                                                 # Hostname
