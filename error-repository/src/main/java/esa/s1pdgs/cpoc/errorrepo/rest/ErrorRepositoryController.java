@@ -32,7 +32,7 @@ public class ErrorRepositoryController {
 		return errorRepository.getFailedProcessingsById(id);
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
+	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
 	public void restartFailedProcessing(@PathVariable("id") String id) {
 		errorRepository.restartAndDeleteFailedProcessing(id);
 	}
