@@ -12,15 +12,15 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * @author birol_colak@net.werum
  *
  */
-public class FailedProcessing<T extends GenericMessageDto<?>> extends MqiGenericMessageDto<T> {
+public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGenericMessageDto<T> {
 	
 	private static final String TOPIC = "t-pdgs-errors";
 	
-	public FailedProcessing() {
+	public FailedProcessingDto() {
 		super();
 	}
 
-	public FailedProcessing(
+	public FailedProcessingDto(
 			ProductCategory category, 
 			long identifier, 
 			String topic, 
@@ -31,7 +31,7 @@ public class FailedProcessing<T extends GenericMessageDto<?>> extends MqiGeneric
 		super(category, identifier, TOPIC, partition, offset, dto);
 	}
 
-	public FailedProcessing(
+	public FailedProcessingDto(
 			ProductCategory category, 
 			long identifier, 
 			String topic, 
@@ -41,7 +41,7 @@ public class FailedProcessing<T extends GenericMessageDto<?>> extends MqiGeneric
 		super(category, identifier, TOPIC, partition, offset);
 	}
 
-	public FailedProcessing(ProductCategory category) {
+	public FailedProcessingDto(ProductCategory category) {
 		super(category);
 	}
 		
@@ -60,72 +60,72 @@ public class FailedProcessing<T extends GenericMessageDto<?>> extends MqiGeneric
 	// original error
 	private GenericMessageDto<T> processingDetails = null;
 
-	public FailedProcessing<T> processingType(String processingType) {
+	public FailedProcessingDto<T> processingType(String processingType) {
 		this.processingType = processingType;
 		return this;
 	}
 	
-	public FailedProcessing<T> processingStatus(MqiStateMessageEnum processingStatus) {
+	public FailedProcessingDto<T> processingStatus(MqiStateMessageEnum processingStatus) {
 		this.setState(processingStatus);
 		return this;
 	}
 
-	public FailedProcessing<T> productCategory(ProductCategory productCategory) {
+	public FailedProcessingDto<T> productCategory(ProductCategory productCategory) {
 		this.setCategory(productCategory);
 		return this;
 	}
 	
-	public FailedProcessing<T> partition(int partition) {
+	public FailedProcessingDto<T> partition(int partition) {
 		this.setPartition(partition);
 		return this;
 	}
 
-	public FailedProcessing<T> offset(long offset) {
+	public FailedProcessingDto<T> offset(long offset) {
 		this.setOffset(offset);
 		return this;
 	}
 	
-	public FailedProcessing<T> group(String group) {
+	public FailedProcessingDto<T> group(String group) {
 		this.setGroup(group);
 		return this;
 	}
 	
-	public FailedProcessing<T> lastAssignmentDate(Date lastAssignmentDate) {
+	public FailedProcessingDto<T> lastAssignmentDate(Date lastAssignmentDate) {
 		this.lastAssignmentDate = lastAssignmentDate;
 		return this;
 	}
 
-	public FailedProcessing<T> failedPod(String failedPod) {
+	public FailedProcessingDto<T> failedPod(String failedPod) {
 		this.failedPod = failedPod;
 		return this;
 	}
 	
-	public FailedProcessing<T> sendingPod(String sendingPod) {
+	public FailedProcessingDto<T> sendingPod(String sendingPod) {
 		this.setSendingPod(sendingPod);
 		return this;
 	}
 	
-	public FailedProcessing<T> lastSendDate(Date lastSendDate) {
+	public FailedProcessingDto<T> lastSendDate(Date lastSendDate) {
 		this.setLastSendDate(lastSendDate);
 		return this;
 	}
 
-	public FailedProcessing<T> lastAckDate(Date lastAckDate) {
+	public FailedProcessingDto<T> lastAckDate(Date lastAckDate) {
 		this.setLastAckDate(lastAckDate);
 		return this;
 	}
 	
-	public FailedProcessing<T> nbRetries(int nbRetries) {
+	public FailedProcessingDto<T> nbRetries(int nbRetries) {
 		this.setNbRetries(nbRetries);
 		return this;
 	}
 	
-	public FailedProcessing<T> creationDate(Date creationDate) {
+	public FailedProcessingDto<T> creationDate(Date creationDate) {
 		this.setCreationDate(creationDate);
 		return this;
 	}
 	
-	public FailedProcessing<T> failureDate(Date failureDate) {
+	public FailedProcessingDto<T> failureDate(Date failureDate) {
 		this.failureDate = failureDate;
 		return this;
 	}
@@ -162,7 +162,7 @@ public class FailedProcessing<T extends GenericMessageDto<?>> extends MqiGeneric
 		this.failureDate = failureDate;
 	}
 
-	public FailedProcessing<T> failureMessage(String failureMessage) {
+	public FailedProcessingDto<T> failureMessage(String failureMessage) {
 		this.failureMessage = failureMessage;
 		return this;
 	}
@@ -175,7 +175,7 @@ public class FailedProcessing<T extends GenericMessageDto<?>> extends MqiGeneric
 		this.failureMessage = failureMessage;
 	}
 
-	public FailedProcessing<T> processingDetails(GenericMessageDto<T> processingDetails) {
+	public FailedProcessingDto<T> processingDetails(GenericMessageDto<T> processingDetails) {
 		this.processingDetails = processingDetails;
 		return this;
 	}
@@ -197,7 +197,7 @@ public class FailedProcessing<T extends GenericMessageDto<?>> extends MqiGeneric
 			return false;
 		}
 		@SuppressWarnings("unchecked")
-		FailedProcessing<T> failedProcessing = (FailedProcessing<T>) o;
+		FailedProcessingDto<T> failedProcessing = (FailedProcessingDto<T>) o;
 		
 		return Objects.equals(this.identifier, failedProcessing.identifier)
 				&& Objects.equals(this.processingType, failedProcessing.processingType)
