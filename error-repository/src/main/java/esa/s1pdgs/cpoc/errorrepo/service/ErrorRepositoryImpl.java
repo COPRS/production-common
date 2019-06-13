@@ -12,12 +12,17 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 public class ErrorRepositoryImpl implements ErrorRepository {
 
 	private final MongoTemplate mongoTemplate;
-
+	
 	@Autowired
 	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate) {
 		this.mongoTemplate = mongoTemplate;
 	}
 
+	@Override
+	public void saveFailedProcessing(FailedProcessingDto failedProcessing) {
+		mongoTemplate.save(failedProcessing);
+	}
+	
 	@Override
 	public List<FailedProcessingDto> getFailedProcessings() {
 		List<FailedProcessingDto> failedProcessings = mongoTemplate.findAll(FailedProcessingDto.class);
