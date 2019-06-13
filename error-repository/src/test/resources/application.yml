@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: s1pdgs-error-repo
+    
+logging:
+  config: log4j2.yml
+
+application:
+  hostname: ${HOSTNAME}                                                                 # Hostname
+  
+# REST controller
+server:
+  port: 8081                                                                            #
+  
+# App catlog
+persistence:
+  host-uri-catalog: http://app-catalog-svc:8080                                         #
+  port-uri-other-app: 8080                                                              #
+  max-retries: 3                                                                        #
+  tempo-retry-ms: 500                                                                   #
+  other-app:
+    suffix-uri: ${mqi_persistence_other-app_suffix-uri:.l0-wrapper-svc}                 #
