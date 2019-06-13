@@ -46,6 +46,8 @@ public class FileUploader {
 	 * Cannot be a key in obs
 	 */
 	protected static final String NOT_KEY_OBS = "IT_IS_NOT_A_KEY";
+	
+	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 
 	/**
 	 * OBS service
@@ -83,7 +85,7 @@ public class FileUploader {
 	}
 	
 	ProductFamily getCompressedProductFamily(ProductFamily inputFamily) {
-        return ProductFamily.fromValue(job.getFamily().toString()+"_zip");
+        return ProductFamily.fromValue(inputFamily.toString()+SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
 	final void processProducts(final Reporting.Factory reportingFactory, final S3UploadFile uploadFile,
