@@ -472,7 +472,6 @@ public class OutputProcessor {
                                 prefixMonitorLogs, ace.getCode().getCode(),
                                 ace.getLogMessage());
                         LOGGER.error(message);
-                        procuderFactory.sendError(message);
                     }
                 }
             }

@@ -49,10 +49,6 @@ public class OutputProcuderFactory {
      */
     private final GenericMqiService<LevelReportDto> senderReports;
 
-    /**
-     * MQI client for errors
-     */
-    private final ErrorService senderErrors;
 
     /**
      * Constructor
@@ -64,12 +60,10 @@ public class OutputProcuderFactory {
     public OutputProcuderFactory(
             @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> senderSegments,
             @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> senderProducts,
-            @Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports,
-            @Qualifier("mqiServiceForErrors") final ErrorService senderErrors) {
+            @Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports) {
         this.senderSegments = senderSegments;
         this.senderProducts = senderProducts;
         this.senderReports = senderReports;
-        this.senderErrors = senderErrors;
     }
 
     /**
@@ -115,19 +109,6 @@ public class OutputProcuderFactory {
             messageToPublish.setInputKey(inputMessage.getInputKey());
             messageToPublish.setOutputKey(msg.getFamily().name());
             senderProducts.publish(messageToPublish);
-        }
-    }
-
-    /**
-     * Publish a error
-     * 
-     * @param message
-     */
-    public void sendError(final String message) {
-        try {
-            senderErrors.publish(message);
-        } catch (AbstractCodedException e) {
-            LOGGER.error(e.getLogMessage());
         }
     }
 }
