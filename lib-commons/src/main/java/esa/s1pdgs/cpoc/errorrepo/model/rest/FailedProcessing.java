@@ -1,21 +1,18 @@
 package esa.s1pdgs.cpoc.errorrepo.model.rest;
 
-import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.Objects;
-import java.util.UUID;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * @author birol_colak@net.werum
  *
  */
-public class FailedProcessing<T> extends MqiGenericMessageDto<GenericMessageDto<T>> {
+public class FailedProcessing<T extends GenericMessageDto<?>> extends MqiGenericMessageDto<T> {
 	
 	private static final String TOPIC = "t-pdgs-errors";
 	
@@ -29,7 +26,7 @@ public class FailedProcessing<T> extends MqiGenericMessageDto<GenericMessageDto<
 			String topic, 
 			int partition, 
 			long offset,
-			GenericMessageDto<T> dto
+			T dto
 	) {
 		super(category, identifier, TOPIC, partition, offset, dto);
 	}

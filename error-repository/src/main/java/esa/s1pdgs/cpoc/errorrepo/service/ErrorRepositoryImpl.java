@@ -3,34 +3,29 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
-import esa.s1pdgs.cpoc.errorrepo.ApplicationProperties;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
-import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 
 public class ErrorRepositoryImpl implements ErrorRepository {
-	
-	private final GenericAppCatalogMqiService<ErrorDto> persistErrorsService;
-	private final ApplicationProperties appProperties;
+
+	private final MongoTemplate mongoTemplate;
 
 	@Autowired
-	public ErrorRepositoryImpl(final ApplicationProperties appProperties, final GenericAppCatalogMqiService<ErrorDto> persistErrorsService) {
-		this.appProperties = appProperties;
-		this.persistErrorsService = persistErrorsService;
+	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;		
 	}
 
 	@Override
-	public List<FailedProcessing> getFailedProcessings() {
-		// TODO
-		return null;
-		
+	public List<FailedProcessing> getFailedProcessings() {		
+		List<FailedProcessing> failedProcessings = mongoTemplate.findAll(FailedProcessing.class);
+		return failedProcessings;
 	}
 
 	@Override
 	public FailedProcessing getFailedProcessingsById(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		FailedProcessing failedProcessing = mongoTemplate.findById(id,FailedProcessing.class);
+		return failedProcessing;
 	}
 
 	@Override
