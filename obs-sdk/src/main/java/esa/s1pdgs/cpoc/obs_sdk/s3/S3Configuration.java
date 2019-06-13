@@ -121,6 +121,17 @@ public class S3Configuration {
      * Name of the bucket dedicated to the family {@link ObsFamily#L2_ACN}
      */
     public static final String BCK_L2_ACNS = "bucket.l2-acns";
+    
+    public static final String BCK_AUX_FILE_ZIP = "bucket.auxiliary-files_zip";
+    public static final String BCK_L0_SEGMENT_ZIP = "bucket.l0-segments_zip";
+    
+    public static final String BCK_L0_ACNS_ZIP = "bucket.l0_acns_zip";
+    public static final String BCK_L1_ACNS_ZIP = "bucket.l1-acns_zip";
+    public static final String BCK_L2_ACNS_ZIP = "bucket.l2-acns_zip";
+    
+    public static final String BCK_L0_SLICES_ZIP = "bucket.l0-slices_zip";
+    public static final String BCK_L1_SLICES_ZIP = "bucket.l1-slices_zip";
+    public static final String BCK_L2_SLICES_ZIP = "bucket.l2-slices_zip";
     /**
      * Timeout in second for shutdown a thread
      */
@@ -239,6 +250,31 @@ public class S3Configuration {
             	break;
             case L2_ACN:
             	bucket = configuration.getString(BCK_L2_ACNS);
+            	break;
+            // ZIP Buckets
+            case L0_ACN_ZIP:
+            	bucket = configuration.getString(BCK_L0_ACNS_ZIP);
+            	break;
+            case L1_ACN_ZIP:
+            	bucket = configuration.getString(BCK_L1_ACNS_ZIP);
+            	break;
+            case L2_ACN_ZIP:
+            	bucket = configuration.getString(BCK_L2_ACNS_ZIP);
+            	break;
+            case L0_SLICE_ZIP:
+            	bucket = configuration.getString(BCK_L0_SLICES_ZIP);
+            	break;
+            case L1_SLICE_ZIP:
+            	bucket = configuration.getString(BCK_L1_SLICES_ZIP);
+            	break;
+            case L2_SLICE_ZIP:
+            	bucket = configuration.getString(BCK_L2_SLICES_ZIP);
+            	break;
+            case L0_SEGMENT_ZIP:
+            	bucket = configuration.getString(BCK_L0_SEGMENT_ZIP);
+            	break;
+            case AUXILIARY_FILE_ZIP:
+            	bucket = configuration.getString(BCK_AUX_FILE_ZIP);
             	break;
             default:
                 throw new ObsServiceException(
