@@ -12,6 +12,12 @@ metadata:
   rest-api_nb-retry: 3
   rest-api_tempo-retry-ms: 1000
 
+# KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors
     
 level0:
   maxnumberofsessions: 20

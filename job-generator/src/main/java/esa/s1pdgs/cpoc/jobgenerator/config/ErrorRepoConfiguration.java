@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.errorrepo;
+package esa.s1pdgs.cpoc.jobgenerator.config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,19 +12,26 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.KafkaErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 @Configuration
 public class ErrorRepoConfiguration {
 	
-    @Value("${kafka.bootstrapServers}")
+    @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
     
-    @Value("${kafka.maxRetries}")
+    @Value("${kafka.max-retries}")
     private int maxRetries;
-	
-	@Bean
-	public KafkaTemplate<String, FailedProcessingDto<?>> kafkaTemplate()
+    
+    @Value("${kafka.group-id}")
+    private String groupId;
+    
+    @Value("${kafka.error-topic}")
+    private String topic;
+
+	private KafkaTemplate<String, FailedProcessingDto<?>> kafkaTemplate()
 	{
         final Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -33,5 +40,11 @@ public class ErrorRepoConfiguration {
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         props.put(ProducerConfig.RETRIES_CONFIG, maxRetries);        
         return new KafkaTemplate<String, FailedProcessingDto<?>>(new DefaultKafkaProducerFactory<>(props));
+	}
+	
+	@Bean 
+	public ErrorRepoAppender kafkaErrorRepoAppender()
+	{
+		return new KafkaErrorRepoAppender(kafkaTemplate(), groupId, topic);
 	}
 }
