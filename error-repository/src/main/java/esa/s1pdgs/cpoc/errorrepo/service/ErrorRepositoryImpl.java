@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 @Component
 public class ErrorRepositoryImpl implements ErrorRepository {
@@ -19,14 +19,14 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	}
 
 	@Override
-	public List<FailedProcessing> getFailedProcessings() {		
-		List<FailedProcessing> failedProcessings = mongoTemplate.findAll(FailedProcessing.class);
+	public List<FailedProcessingDto> getFailedProcessings() {		
+		List<FailedProcessingDto> failedProcessings = mongoTemplate.findAll(FailedProcessingDto.class);
 		return failedProcessings;
 	}
 
 	@Override
-	public FailedProcessing getFailedProcessingsById(String id) {
-		FailedProcessing failedProcessing = mongoTemplate.findById(id,FailedProcessing.class);
+	public FailedProcessingDto getFailedProcessingsById(String id) {
+		FailedProcessingDto failedProcessing = mongoTemplate.findById(id,FailedProcessingDto.class);
 		return failedProcessing;
 	}
 

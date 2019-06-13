@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiAuxiliaryFilesService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiCompressionJobService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiEdrsSessionsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelJobsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelProductsService;
@@ -15,6 +16,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelReportsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelSegmentsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -157,6 +159,14 @@ public class PersistenceConfiguration {
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new AppCatalogMqiEdrsSessionsService(template, hostUriCatalog,
+                maxRetries, tempoRetryMs);
+    }
+    
+    @Bean(name = "persistenceServiceForCompressionJob")
+    public GenericAppCatalogMqiService<CompressionJobDto> persistenceServiceForCompressionJob(
+            final RestTemplateBuilder builder) {
+        RestTemplate template = builder.build();
+        return new AppCatalogMqiCompressionJobService(template, hostUriCatalog,
                 maxRetries, tempoRetryMs);
     }
     

@@ -222,32 +222,4 @@ public class OutputProducerFactoryTest {
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
     }
-
-    /**
-     * Test send error
-     */
-    @Test
-    public void testSendError() throws AbstractCodedException {
-        this.outputProcuderFactory.sendError("error message");
-
-        verify(this.errorService, times(1))
-                .publish(Mockito.eq("error message"));
-        verify(this.senderReports, never()).publish(Mockito.any());
-        verify(this.senderProducts, never()).publish(Mockito.any());
-    }
-
-    /**
-     * Test send error
-     */
-    @Test
-    public void testSendErrorWhenException() throws AbstractCodedException {
-        doThrow(new InternalErrorException("execption raised"))
-                .when(errorService).publish(Mockito.anyString());
-        this.outputProcuderFactory.sendError("error message");
-        
-        verify(this.errorService, times(1))
-                .publish(Mockito.eq("error message"));
-        verify(this.senderReports, never()).publish(Mockito.any());
-        verify(this.senderProducts, never()).publish(Mockito.any());
-    }
 }
