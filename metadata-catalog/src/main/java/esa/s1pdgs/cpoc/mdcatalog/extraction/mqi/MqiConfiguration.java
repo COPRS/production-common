@@ -113,16 +113,4 @@ public class MqiConfiguration {
         return new EdrsSessionMqiService(template, hostUri, maxRetries,
                 tempoRetryMs);
     }
-
-    /**
-     * Service for publishing errors
-     * 
-     * @param builder
-     * @return
-     */
-    @Bean(name = "mqiServiceForErrors")
-    public ErrorService mqiServiceForErrors(final RestTemplateBuilder builder) {
-        RestTemplate template = builder.build();
-        return new ErrorService(template, hostUri, maxRetries, tempoRetryMs);
-    }
 }
