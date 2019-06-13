@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  */
 public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGenericMessageDto<T> {
 	
-	private static final String TOPIC = "t-pdgs-errors";
+	public static final String TOPIC = "t-pdgs-errors";
 	
 	public FailedProcessingDto() {
 		super();
