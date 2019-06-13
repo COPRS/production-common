@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.jobgenerator.service.mqi;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +12,6 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -24,9 +22,6 @@ public class OutputProducerFactoryTest {
 
     @Mock
     private GenericMqiService<LevelJobDto> sender;
-
-    @Mock
-    private ErrorService errorService;
 
     private OutputProducerFactory factory;
 
@@ -56,7 +51,6 @@ public class OutputProducerFactoryTest {
 
         factory.sendJob(message, dto);
         verify(sender, times(1)).publish(Mockito.eq(expected));
-        verifyZeroInteractions(errorService);
     }
 //
 //    @Test

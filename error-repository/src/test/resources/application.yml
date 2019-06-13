@@ -12,6 +12,11 @@ application:
 server:
   port: 8081      
   
+# KAFKA
+kafka:
+  bootstrapServers: ${kafka_bootstrap-servers:kafka-svc:9093}   # the bootstrap servers for KAFKA
+  maxRetries: 10                                                # the group identifier to use for KAFKA publishers  
+  
 # MongoDB
 mongodb:
   host: ${mongo_db_host:localhost}
