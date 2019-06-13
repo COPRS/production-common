@@ -16,23 +16,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
-/**
- * Executor of all process: - pool one after the other - all tasks of the same
- * pool in parallel
- * 
- * @author Viveris Technologies
- */
 public class PoolExecutorCallable implements Callable<Void> {
 
 	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(PoolExecutorCallable.class);
-
-	/**
-	 * Indicate if the working directory is ready and the processes can be launched
-	 */
-	private boolean active;
 
 	private final ExecutorService execSrv;
 
@@ -57,7 +46,6 @@ public class PoolExecutorCallable implements Callable<Void> {
 	 * @param prefixMonitorLogs
 	 */
 	public PoolExecutorCallable(final CompressionJobDto job, final String prefixLogs) {
-		this.active = false;
 		this.job = job;
 
 		this.execSrv = Executors.newFixedThreadPool(1);
