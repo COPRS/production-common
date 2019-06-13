@@ -5,7 +5,13 @@ import java.util.List;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 public interface ErrorRepository {
+	void saveFailedProcessing(FailedProcessingDto failedProcessing);
+	
 	List<FailedProcessingDto> getFailedProcessings();
+
 	FailedProcessingDto getFailedProcessingsById(String id);
+
 	void restartAndDeleteFailedProcessing(String id);
+
+	void deleteFailedProcessing(String id);
 }

@@ -17,11 +17,11 @@ import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 public class ErrorRepositoryController {
 
 	private final ErrorRepository errorRepository;
-	
+
 	public ErrorRepositoryController(@Autowired ErrorRepository errorRepository) {
 		this.errorRepository = errorRepository;
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings")
 	public List<FailedProcessingDto> getFailedProcessings() {
 		return errorRepository.getFailedProcessings();
@@ -31,10 +31,15 @@ public class ErrorRepositoryController {
 	public FailedProcessingDto getFailedProcessingsById(@PathVariable("id") String id) {
 		return errorRepository.getFailedProcessingsById(id);
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
+
+	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
 	public void restartFailedProcessing(@PathVariable("id") String id) {
 		errorRepository.restartAndDeleteFailedProcessing(id);
 	}
-	
+
+	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
+	public void deleteFailedProcessing(@PathVariable("id") String id) {
+		errorRepository.deleteFailedProcessing(id);
+	}
+
 }

@@ -16,7 +16,8 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+
 
 @EnableKafka
 @Configuration
@@ -29,7 +30,7 @@ public class ErrorQueueConsumerConfig {
     private String bootstrapServers;
     
     /**
-     * Ingestor group identifier for KAFKA
+     * Group identifier for KAFKA
      */
     @Value("${kafka.group-id}")
     private String kafkaGroupId;
@@ -39,9 +40,6 @@ public class ErrorQueueConsumerConfig {
      */
     @Value("${kafka.poll-timeout}")
     private long kafkaPooltimeout;
-
-    @Value("${kafka.producer-retries}")
-    protected int kafkaRetriesConfig;
 
     /**
      * Consumer configuration
@@ -66,10 +64,8 @@ public class ErrorQueueConsumerConfig {
      * @return
      */
     @Bean
-    public ConsumerFactory<String, ErrorDto> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(),
-                new StringDeserializer(),
-                new JsonDeserializer<>(ErrorDto.class));
+    public ConsumerFactory<String, FailedProcessingDto<?>> consumerFactory() {
+    	return new DefaultKafkaConsumerFactory<String,FailedProcessingDto<?>>(consumerConfigs());
     }
 
     /**
@@ -78,8 +74,8 @@ public class ErrorQueueConsumerConfig {
      * @return
      */
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ErrorDto>> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ErrorDto> factory =
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, FailedProcessingDto<?>>> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, FailedProcessingDto<?>> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
