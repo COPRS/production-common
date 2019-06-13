@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.mqi.client.EdrsSessionMqiService;
-import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelJobsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
@@ -115,19 +114,7 @@ public class MqiConfiguration {
         return new LevelJobsMqiService(template, hostUri, maxRetries,
                 tempoRetryMs);
     }
-
-    /**
-     * Service for publishing errors
-     * 
-     * @param builder
-     * @return
-     */
-    @Bean(name = "mqiServiceForErrors")
-    public ErrorService mqiServiceForErrors(final RestTemplateBuilder builder) {
-        RestTemplate template = builder.build();
-        return new ErrorService(template, hostUri, maxRetries, tempoRetryMs);
-    }
-
+    
     /**
      * Service for stopping MQI server
      * 
