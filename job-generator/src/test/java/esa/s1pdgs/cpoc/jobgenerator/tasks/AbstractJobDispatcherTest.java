@@ -219,17 +219,16 @@ public class AbstractJobDispatcherTest {
         AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
         try {
             dispatcher.initTaskTables();
-            verify(jobGenerationTaskScheduler, times(2))
+            verify(jobGenerationTaskScheduler, times(3))
                     .scheduleWithFixedDelay(any(), anyLong());
-            verify(jobGenerationTaskScheduler, times(2))
+            verify(jobGenerationTaskScheduler, times(3))
                     .scheduleWithFixedDelay(any(), eq(2000L));
 
-            assertTrue(dispatcher.generators.size() == 2);
+            assertTrue(dispatcher.generators.size() == 3);
             assertTrue(dispatcher.generators.containsKey("TaskTable.AIOP.xml"));
-            assertTrue(
-                    dispatcher.generators.containsKey("IW_RAW__0_GRDH_1.xml"));
+            assertTrue(dispatcher.generators.containsKey("IW_RAW__0_GRDH_1.xml"));
 
-            assertTrue(dispatcher.getCounter() == 2);
+            assertTrue(dispatcher.getCounter() == 3);
         } catch (AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
@@ -256,17 +255,17 @@ public class AbstractJobDispatcherTest {
         AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
         try {
             dispatcher.initTaskTables();
-            verify(jobGenerationTaskScheduler, times(2))
+            verify(jobGenerationTaskScheduler, times(3))
                     .scheduleWithFixedDelay(any(), anyLong());
-            verify(jobGenerationTaskScheduler, times(2))
+            verify(jobGenerationTaskScheduler, times(3))
                     .scheduleWithFixedDelay(any(), eq(2000L));
 
-            assertTrue(dispatcher.generators.size() == 2);
+            assertTrue(dispatcher.generators.size() == 3);
             assertTrue(dispatcher.generators.containsKey("TaskTable.AIOP.xml"));
             assertTrue(
                     dispatcher.generators.containsKey("IW_RAW__0_GRDH_1.xml"));
 
-            assertTrue(dispatcher.getCounter() == 2);
+            assertTrue(dispatcher.getCounter() == 3);
 
             verify(appDataService, times(1)).findByPodAndState(
                     Mockito.eq("hostname"),
