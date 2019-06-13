@@ -38,7 +38,7 @@ public class OutputProducerFactoryTest {
         MockitoAnnotations.initMocks(this);
 
         doNothing().when(sender).publish(Mockito.any());
-        doNothing().when(errorService).publish(Mockito.any());
+        doNothing().when(errorService).publish(Mockito.anyString());
 
         factory = new OutputProducerFactory(sender, errorService);
     }
@@ -67,25 +67,17 @@ public class OutputProducerFactoryTest {
     public void testSendError() throws AbstractCodedException {
         factory.sendError("error message");
         
-        ErrorDto errorDto = new ErrorDto();
-    	errorDto.setMessage("error message");
-        GenericPublicationMessageDto<ErrorDto> expected = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
-        
-        verify(errorService, times(1)).publish(Mockito.eq(expected));
+        verify(errorService, times(1)).publish(Mockito.eq("error message"));
         verifyZeroInteractions(sender);
     }
 
     @Test
     public void testSendErrorWhenException() throws AbstractCodedException {
         doThrow(new InternalErrorException("exception")).when(errorService)
-                .publish(Mockito.any());
+                .publish(Mockito.anyString());
         factory.sendError("error message");
-        
-        ErrorDto errorDto = new ErrorDto();
-    	errorDto.setMessage("error message");
-        GenericPublicationMessageDto<ErrorDto> expected = new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto);
-        
-        verify(errorService, times(1)).publish(Mockito.eq(expected));
+
+        verify(errorService, times(1)).publish(Mockito.eq("error message"));
         verifyZeroInteractions(sender);
     }
 }
