@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -52,6 +54,8 @@ public abstract class AbstractGenericConsumer<T> {
      * Application status
      */
     protected final AppStatus appStatus;
+    
+    private final ErrorRepoAppender errorRepoAppender;
 
     public AbstractGenericConsumer(
             final AbstractJobsDispatcher<T> jobsDispatcher,
@@ -59,13 +63,16 @@ public abstract class AbstractGenericConsumer<T> {
             final GenericMqiService<T> mqiService,
             final StatusService mqiStatusService,
             final AbstractAppCatalogJobService<T> appDataService,
-            final AppStatus appStatus) {
+            final AppStatus appStatus,
+            final ErrorRepoAppender errorRepoAppender
+    		) {
         this.jobsDispatcher = jobsDispatcher;
         this.processSettings = processSettings;
         this.mqiService = mqiService;
         this.mqiStatusService = mqiStatusService;
         this.appDataService = appDataService;
         this.appStatus = appStatus;
+        this.errorRepoAppender = errorRepoAppender;
     }
 
     protected GenericMessageDto<T> readMessage() {
@@ -90,6 +97,7 @@ public abstract class AbstractGenericConsumer<T> {
      * @param errorMessage
      */
     protected void ackProcessing(final GenericMessageDto<T> dto,
+    		final FailedProcessingDto<GenericMessageDto<T>> failed,
             final boolean ackOk, final String productName,
             final String errorMessage) {
         boolean stopping = appStatus.getStatus().isStopping();
@@ -99,6 +107,7 @@ public abstract class AbstractGenericConsumer<T> {
             ackPositively(stopping, dto, productName);
         } else {
             ackNegatively(stopping, dto, productName, errorMessage);
+            errorRepoAppender.send(failed);
         }
 
         // Check status
@@ -134,7 +143,7 @@ public abstract class AbstractGenericConsumer<T> {
         appStatus.setError("NEXT_MESSAGE");
         try {
             mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
-                    errorMessage, stop));
+                    errorMessage, stop));            
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step 3] [productName {}] [code {}] {}",
                     productName, ace.getCode().getCode(), ace.getLogMessage());

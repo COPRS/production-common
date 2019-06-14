@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.jobgenerator.config.L0SegmentAppProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
@@ -68,6 +69,8 @@ public class L0SegmentAppConsumerTest {
     private List<GenericMessageDto<LevelSegmentDto>> messages;
 
     private L0SegmentAppConsumer consumer;
+    
+    private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
     @Before
     public void init() throws AbstractCodedException {
@@ -81,7 +84,7 @@ public class L0SegmentAppConsumerTest {
         mockAppStatus();
 
         consumer = new L0SegmentAppConsumer(jobsDispatcher, appProperties,
-                processSettings, mqiService, mqiStatusService, appDataService,
+                processSettings, mqiService, mqiStatusService, appDataService, errorAppender,
                 appStatus);
     }
 

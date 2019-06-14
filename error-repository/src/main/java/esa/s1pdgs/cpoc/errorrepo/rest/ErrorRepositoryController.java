@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 
 @RestController
@@ -17,24 +17,29 @@ import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 public class ErrorRepositoryController {
 
 	private final ErrorRepository errorRepository;
-	
+
 	public ErrorRepositoryController(@Autowired ErrorRepository errorRepository) {
 		this.errorRepository = errorRepository;
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings")
-	public List<FailedProcessing> getFailedProcessings() {
+	public List<FailedProcessingDto> getFailedProcessings() {
 		return errorRepository.getFailedProcessings();
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
-	public FailedProcessing getFailedProcessingsById(@PathVariable("id") String id) {
+	public FailedProcessingDto getFailedProcessingsById(@PathVariable("id") String id) {
 		return errorRepository.getFailedProcessingsById(id);
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
+
+	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
 	public void restartFailedProcessing(@PathVariable("id") String id) {
 		errorRepository.restartAndDeleteFailedProcessing(id);
 	}
-	
+
+	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
+	public void deleteFailedProcessing(@PathVariable("id") String id) {
+		errorRepository.deleteFailedProcessing(id);
+	}
+
 }

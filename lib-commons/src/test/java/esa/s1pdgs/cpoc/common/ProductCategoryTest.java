@@ -20,7 +20,7 @@ public class ProductCategoryTest {
      */
     @Test
     public void testNominalEnumFunctions() {
-        assertEquals(6, ProductCategory.values().length);
+        assertEquals(7, ProductCategory.values().length);
         assertEquals(ProductCategory.AUXILIARY_FILES,
                 ProductCategory.valueOf("AUXILIARY_FILES"));
         assertEquals(ProductCategory.EDRS_SESSIONS,
@@ -33,6 +33,9 @@ public class ProductCategoryTest {
                 ProductCategory.valueOf("LEVEL_JOBS"));
         assertEquals(ProductCategory.LEVEL_SEGMENTS,
                 ProductCategory.valueOf("LEVEL_SEGMENTS"));
+        assertEquals(ProductCategory.COMPRESSED_PRODUCTS,
+                ProductCategory.valueOf("COMPRESSED_PRODUCTS"));
+        
     }
 
     /**

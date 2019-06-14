@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -16,8 +17,12 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.L0SegmentAppProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
@@ -60,9 +65,10 @@ public class L0SegmentAppConsumer
             @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> mqiService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
             @Qualifier("appCatalogServiceForLevelSegments") final AbstractAppCatalogJobService<LevelSegmentDto> appDataService,
+            final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
-                appDataService, appStatus);
+                appDataService, appStatus, errorRepoAppender);
         this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(),
                 Pattern.CASE_INSENSITIVE);
         this.patternGroups = appProperties.getNameRegexpGroups();
@@ -89,6 +95,11 @@ public class L0SegmentAppConsumer
         boolean ackOk = false;
         String errorMessage = "";
         String productName = mqiMessage.getBody().getName();
+        
+        final FailedProcessingDto<GenericMessageDto<LevelSegmentDto>> failedProc =  
+        		new FailedProcessingDto<GenericMessageDto<LevelSegmentDto>>();
+        
+        
         // Note: the report log of consume and global log is raised during
         // building job to get the datatake identifier which is the real
         // product name
@@ -132,10 +143,18 @@ public class L0SegmentAppConsumer
                     productName, ace.getCode().getCode(),
                     ace.getLogMessage());
             reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+
+            failedProc.processingType(LevelSegmentDto.class.getName())
+	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.productCategory(ProductCategory.LEVEL_SEGMENTS)
+	    		.failedPod(processSettings.getHostname())
+	            .failureDate(new Date())
+	    		.failureMessage(errorMessage)
+	    		.processingDetails(mqiMessage);
         }
 
         // Ack and check if application shall stopped
-        ackProcessing(mqiMessage, ackOk, productName, errorMessage);
+        ackProcessing(mqiMessage, failedProc, ackOk, productName, errorMessage);
 
         LOGGER.info("[MONITOR] [step 0] [productName {}] End",
                 productName);

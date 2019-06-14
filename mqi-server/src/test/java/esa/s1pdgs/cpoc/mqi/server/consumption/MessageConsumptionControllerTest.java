@@ -47,6 +47,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -118,6 +119,9 @@ public class MessageConsumptionControllerTest {
      */
     @Mock
     private GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
+    
+    @Mock
+    private GenericAppCatalogMqiService<CompressionJobDto> persistCompressedJobService;
 
     /**
      * Service for Errors
@@ -150,7 +154,7 @@ public class MessageConsumptionControllerTest {
                 kafkaProperties, persistAuxiliaryFilesService,
                 persistEdrsSessionsService, persistLevelJobsService,
                 persistLevelProductsService, persistLevelReportsService,
-                persistLevelSegmentsService, otherService, appStatus);
+                persistLevelSegmentsService,persistCompressedJobService, otherService, appStatus);
 
         doReturn("pod-name").when(appProperties).getHostname();
 

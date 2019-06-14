@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -32,11 +31,6 @@ public class OutputProducerFactory {
     private final GenericMqiService<LevelJobDto> senderJobs;
 
     /**
-     * MQI client for errors
-     */
-    private final ErrorService senderErrors;
-
-    /**
      * Constructor
      * 
      * @param senderProducts
@@ -44,10 +38,8 @@ public class OutputProducerFactory {
      */
     @Autowired
     public OutputProducerFactory(
-            @Qualifier("mqiServiceForLevelJobs") final GenericMqiService<LevelJobDto> senderJobs,
-            @Qualifier("mqiServiceForErrors") final ErrorService senderErrors) {
+            @Qualifier("mqiServiceForLevelJobs") final GenericMqiService<LevelJobDto> senderJobs) {
         this.senderJobs = senderJobs;
-        this.senderErrors = senderErrors;
     }
 
     /**
@@ -64,17 +56,5 @@ public class OutputProducerFactory {
         messageToPublish.setInputKey(genericMessageDto.getInputKey());
         messageToPublish.setOutputKey(dto.getFamily().name());
         senderJobs.publish(messageToPublish);
-    }
-    
-    /**
-     * Publish a error
-     * @param message
-     */
-    public void sendError(final String message) {
-        try {
-            senderErrors.publish(message);
-        } catch (AbstractCodedException e) {
-            LOGGER.error(e.getLogMessage());
-        }
-    }
+    }    
 }

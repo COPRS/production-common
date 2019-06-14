@@ -9,7 +9,6 @@ import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.mqi.client.AuxiliaryFilesMqiService;
 import esa.s1pdgs.cpoc.mqi.client.EdrsSessionMqiService;
-import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelSegmentsMqiService;
@@ -112,17 +111,5 @@ public class MqiConfiguration {
         RestTemplate template = builder.build();
         return new EdrsSessionMqiService(template, hostUri, maxRetries,
                 tempoRetryMs);
-    }
-
-    /**
-     * Service for publishing errors
-     * 
-     * @param builder
-     * @return
-     */
-    @Bean(name = "mqiServiceForErrors")
-    public ErrorService mqiServiceForErrors(final RestTemplateBuilder builder) {
-        RestTemplate template = builder.build();
-        return new ErrorService(template, hostUri, maxRetries, tempoRetryMs);
     }
 }

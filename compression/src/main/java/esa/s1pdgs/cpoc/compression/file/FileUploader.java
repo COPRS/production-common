@@ -46,6 +46,8 @@ public class FileUploader {
 	 * Cannot be a key in obs
 	 */
 	protected static final String NOT_KEY_OBS = "IT_IS_NOT_A_KEY";
+	
+	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 
 	/**
 	 * OBS service
@@ -69,9 +71,10 @@ public class FileUploader {
 		 List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 
 		try {
-    		 File workDir = new File(workingDir+"/"+job.getInput().getLocalPath());
+			String zipFileName = job.getProductName()+".zip";
+    		 File workDir = new File(workingDir+"/"+zipFileName);
     		 ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
-			S3UploadFile uploadFile = new S3UploadFile(productFamily, "xxx", workDir);
+			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, workDir);
 //// 			// Upload per batch the output
 			processProducts(reportingFactory, uploadFile, outputToPublish);
 
@@ -83,7 +86,7 @@ public class FileUploader {
 	}
 	
 	ProductFamily getCompressedProductFamily(ProductFamily inputFamily) {
-        return ProductFamily.fromValue(job.getFamily().toString()+"_zip");
+        return ProductFamily.fromValue(inputFamily.toString()+SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
 	final void processProducts(final Reporting.Factory reportingFactory, final S3UploadFile uploadFile,

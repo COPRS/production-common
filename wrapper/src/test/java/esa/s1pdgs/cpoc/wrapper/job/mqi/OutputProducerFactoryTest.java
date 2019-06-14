@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.wrapper.job.mqi;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,8 +15,6 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.mqi.client.ErrorService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -54,12 +51,6 @@ public class OutputProducerFactoryTest {
     private GenericMqiService<LevelReportDto> senderReports;
 
     /**
-     * Kafka producer for errors
-     */
-    @Mock
-    private ErrorService errorService;
-
-    /**
      * Factory to test
      */
     private OutputProcuderFactory outputProcuderFactory;
@@ -79,9 +70,8 @@ public class OutputProducerFactoryTest {
         MockitoAnnotations.initMocks(this);
         doNothing().when(senderProducts).publish(Mockito.any());
         doNothing().when(senderReports).publish(Mockito.any());
-        doNothing().when(errorService).publish(Mockito.any());
         this.outputProcuderFactory = new OutputProcuderFactory(senderSegments,
-                senderProducts, senderReports, errorService);
+                senderProducts, senderReports);
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
                 new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST",
                         "work-dir", "job-order"));
@@ -221,33 +211,5 @@ public class OutputProducerFactoryTest {
         message.setOutputKey("L1_ACN");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
         verify(this.senderReports, never()).publish(Mockito.any());
-    }
-
-    /**
-     * Test send error
-     */
-    @Test
-    public void testSendError() throws AbstractCodedException {
-        this.outputProcuderFactory.sendError("error message");
-
-        verify(this.errorService, times(1))
-                .publish(Mockito.eq("error message"));
-        verify(this.senderReports, never()).publish(Mockito.any());
-        verify(this.senderProducts, never()).publish(Mockito.any());
-    }
-
-    /**
-     * Test send error
-     */
-    @Test
-    public void testSendErrorWhenException() throws AbstractCodedException {
-        doThrow(new InternalErrorException("execption raised"))
-                .when(errorService).publish(Mockito.anyString());
-        this.outputProcuderFactory.sendError("error message");
-        
-        verify(this.errorService, times(1))
-                .publish(Mockito.eq("error message"));
-        verify(this.senderReports, never()).publish(Mockito.any());
-        verify(this.senderProducts, never()).publish(Mockito.any());
     }
 }

@@ -65,7 +65,6 @@ public class MetadataServiceTest {
                 tempoRetry);
     }
     
-    @Test
     public void test() {
     	String uri = "http://localhost/test.json";
     	
