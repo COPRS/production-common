@@ -122,16 +122,17 @@ public class S3Configuration {
      */
     public static final String BCK_L2_ACNS = "bucket.l2-acns";
     
-    public static final String BCK_AUX_FILE_ZIP = "bucket.auxiliary-files_zip";
-    public static final String BCK_L0_SEGMENT_ZIP = "bucket.l0-segments_zip";
+    public static final String BCK_AUX_FILE_ZIP = "bucket.auxiliary-files-zip";
+    public static final String BCK_L0_SEGMENT_ZIP = "bucket.l0-segments-zip";
     
-    public static final String BCK_L0_ACNS_ZIP = "bucket.l0_acns_zip";
-    public static final String BCK_L1_ACNS_ZIP = "bucket.l1-acns_zip";
-    public static final String BCK_L2_ACNS_ZIP = "bucket.l2-acns_zip";
+    public static final String BCK_L0_ACNS_ZIP = "bucket.l0-acns-zip";
+    public static final String BCK_L1_ACNS_ZIP = "bucket.l1-acns-zip";
+    public static final String BCK_L2_ACNS_ZIP = "bucket.l2-acns-zip";
     
-    public static final String BCK_L0_SLICES_ZIP = "bucket.l0-slices_zip";
-    public static final String BCK_L1_SLICES_ZIP = "bucket.l1-slices_zip";
-    public static final String BCK_L2_SLICES_ZIP = "bucket.l2-slices_zip";
+    public static final String BCK_L0_SLICES_ZIP = "bucket.l0-slices-zip";
+    public static final String BCK_L1_SLICES_ZIP = "bucket.l1-slices-zip";
+    public static final String BCK_L2_SLICES_ZIP = "bucket.l2-slices-zip";
+    public static final String BCK_L0_BLANK_ZIP = "bucket.l0-blanks-zip";
     /**
      * Timeout in second for shutdown a thread
      */
@@ -276,6 +277,9 @@ public class S3Configuration {
             case AUXILIARY_FILE_ZIP:
             	bucket = configuration.getString(BCK_AUX_FILE_ZIP);
             	break;
+            case L0_BLANK_ZIP:
+                bucket = configuration.getString(BCK_L0_BLANK_ZIP);
+                break;            	
             default:
                 throw new ObsServiceException(
                         "Invalid object storage family " + family);

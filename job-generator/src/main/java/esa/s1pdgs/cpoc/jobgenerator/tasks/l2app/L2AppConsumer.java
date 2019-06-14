@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l2app;
 
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,9 +16,13 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
@@ -62,9 +67,10 @@ public class L2AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
             @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<LevelProductDto> appDataService,
+            final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
-                appDataService, appStatus);
+                appDataService, appStatus, errorRepoAppender);
         this.patternSettings = patternSettings;
         this.l2SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
                 Pattern.CASE_INSENSITIVE);
@@ -90,7 +96,10 @@ public class L2AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
         boolean ackOk = false;
         String errorMessage = "";
         String productName = mqiMessage.getBody().getProductName();
-
+        
+        final FailedProcessingDto<GenericMessageDto<LevelProductDto>> failedProc =  
+        		new FailedProcessingDto<GenericMessageDto<LevelProductDto>>();
+        
         try {
 
             // Check if a job is already created for message identifier
@@ -122,10 +131,18 @@ public class L2AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(), ace.getLogMessage());
             reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            
+            failedProc.processingType(LevelProductDto.class.getName())
+	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.productCategory(ProductCategory.LEVEL_PRODUCTS)
+	    		.failedPod(processSettings.getHostname())
+	            .failureDate(new Date())
+	    		.failureMessage(errorMessage)
+	    		.processingDetails(mqiMessage);   
         }
 
         // Ack and check if application shall stopped
-        ackProcessing(mqiMessage, ackOk, productName, errorMessage);
+        ackProcessing(mqiMessage, failedProc, ackOk, productName, errorMessage);
 
         LOGGER.info("[MONITOR] [step 0] [productName {}] End", productName);
         reporting.reportStart("End job generation using " + mqiMessage.getBody().getProductName());

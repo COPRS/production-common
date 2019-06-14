@@ -20,7 +20,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@Override
 	public void saveFailedProcessing(FailedProcessingDto failedProcessing) {
-		mongoTemplate.save(failedProcessing);
+		mongoTemplate.insert(failedProcessing);
 	}
 	
 	@Override

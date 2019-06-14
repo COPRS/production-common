@@ -14,9 +14,9 @@ server:
   
 # KAFKA
 kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}   # the bootstrap servers for KAFKA
-  group-id: error                                                # the group identifier to use for KAFKA publishers  
-  max-retries: 10                                                # number of retries if kafka is not available
+  bootstrapServers: ${kafka_bootstrap-servers:kafka-svc:9093}   # the bootstrap servers for KAFKA
+  maxRetries: 10                                                # the group identifier to use for KAFKA publishers  
+  group-id: error
   poll-timeout: 3000
   producer-retries: 10
   topic:

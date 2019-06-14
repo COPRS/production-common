@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,10 +16,14 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
@@ -48,9 +53,10 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             final EdrsSessionFileService edrsService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
             @Qualifier("appCatalogServiceForEdrsSessions") final AbstractAppCatalogJobService<EdrsSessionDto> appDataService,
+            final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobDispatcher, processSettings, mqiService, mqiStatusService,
-                appDataService, appStatus);
+                appDataService, appStatus, errorRepoAppender);
         this.edrsService = edrsService;
     }
 
@@ -80,7 +86,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             appStatus.setProcessing(mqiMessage.getIdentifier());            
     	 	
             final Reporting reporting = reportingFactory.newReporting(0);
-
+            final FailedProcessingDto<GenericMessageDto<EdrsSessionDto>> failedProc =  
+            		new FailedProcessingDto<GenericMessageDto<EdrsSessionDto>>();
+            
             try {
 
                 // Create the EdrsSessionFile object from the consumed message
@@ -111,12 +119,11 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                                 false, false);
                     }
                     jobsDispatcher.dispatch(appDataJob);
-                }
 
+                }
                 // Ack
                 step++;
                 ackOk = true;
-
             } catch (AbstractCodedException ace) {
                 ackOk = false;
                 errorMessage = String.format(
@@ -125,9 +132,18 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                         ace.getLogMessage());
                 
                 reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+
+                failedProc.processingType(EdrsSessionDto.class.getName())
+                		.processingStatus(MqiStateMessageEnum.READ)
+                		.productCategory(ProductCategory.EDRS_SESSIONS)
+                		.failedPod(processSettings.getHostname())
+                        .failureDate(new Date())
+                		.failureMessage(errorMessage)
+                		.processingDetails(mqiMessage);
             }  
+            
             // Ack and check if application shall stopped
-            ackProcessing(mqiMessage, ackOk, productName, errorMessage);
+            ackProcessing(mqiMessage, failedProc, ackOk, productName, errorMessage);
 
             step = 0;
             LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,

@@ -135,14 +135,15 @@ public class GenericMessageDistribution<T> {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        // If error, log in KAFKA topic the message
+        // If an error, simply dump the message into the log. Appending to kafka error queue
+        // will be done where the error occurs
         if (ack == Ack.ERROR) {
             String logMessage = message;
             if (resumeDetails != null) {
                 logMessage = message
                         + String.format(" [resumeDetails %s]", resumeDetails);
             }
-            publication.publishError(logMessage);
+            LOGGER.error(logMessage);
         }
 
         LOGGER.info(
