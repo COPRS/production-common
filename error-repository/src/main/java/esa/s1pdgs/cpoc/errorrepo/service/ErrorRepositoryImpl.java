@@ -6,13 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.mongodb.client.result.DeleteResult;
+
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 @Component
 public class ErrorRepositoryImpl implements ErrorRepository {
 
 	private final MongoTemplate mongoTemplate;
-	
+
 	@Autowired
 	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate) {
 		this.mongoTemplate = mongoTemplate;
@@ -22,7 +24,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	public void saveFailedProcessing(FailedProcessingDto failedProcessing) {
 		mongoTemplate.insert(failedProcessing);
 	}
-	
+
 	@Override
 	public List<FailedProcessingDto> getFailedProcessings() {
 		List<FailedProcessingDto> failedProcessings = mongoTemplate.findAll(FailedProcessingDto.class);
@@ -41,9 +43,18 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	}
 
 	@Override
-	public void deleteFailedProcessing(String id) {
-		// TODO Auto-generated method stub
-
+	public boolean deleteFailedProcessing(String id) {
+		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
+		if (failedProcessing == null) {
+			return false;
+		}
+		if (failedProcessing != null) {
+			DeleteResult result = mongoTemplate.remove(failedProcessing);
+			if (result.getDeletedCount() == 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
