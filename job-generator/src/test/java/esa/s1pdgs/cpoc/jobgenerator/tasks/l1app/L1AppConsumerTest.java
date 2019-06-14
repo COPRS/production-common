@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
@@ -63,6 +64,8 @@ public class L1AppConsumerTest {
 
     @Mock
     private JobStatus jobStatus;
+    
+    private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
     private LevelProductDto dtoMatch = new LevelProductDto(
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
@@ -160,7 +163,7 @@ public class L1AppConsumerTest {
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus);
         consumer.consumeMessages();
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -174,7 +177,7 @@ public class L1AppConsumerTest {
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
 
         verify(appDataService, times(1)).newJob(Mockito.any());
@@ -192,7 +195,7 @@ public class L1AppConsumerTest {
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -219,7 +222,7 @@ public class L1AppConsumerTest {
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
 
         job1.setPod("");
@@ -251,7 +254,7 @@ public class L1AppConsumerTest {
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
 
         job1.setPod("");
@@ -284,7 +287,7 @@ public class L1AppConsumerTest {
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
 
         job1.setPod("");

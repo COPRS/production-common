@@ -14,40 +14,15 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  */
 public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGenericMessageDto<T> {
 	
-	public static final String TOPIC = "t-pdgs-errors";
+	//public static final String TOPIC = "t-pdgs-errors";
 	
 	public FailedProcessingDto() {
 		super();
 	}
-
-	public FailedProcessingDto(
-			ProductCategory category, 
-			long identifier, 
-			String topic, 
-			int partition, 
-			long offset,
-			T dto
-	) {
-		super(category, identifier, TOPIC, partition, offset, dto);
-	}
-
-	public FailedProcessingDto(
-			ProductCategory category, 
-			long identifier, 
-			String topic, 
-			int partition, 
-			long offset
-	) {
-		super(category, identifier, TOPIC, partition, offset);
-	}
-
-	public FailedProcessingDto(ProductCategory category) {
-		super(category);
-	}
 		
 	private String processingType = null;
 	private String failureMessage = null;
-
+	
 	// maybe map to 'readingPod'
 	private String failedPod = null;
 
@@ -57,11 +32,13 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 	// current time (at creation of this object)
 	private Date failureDate = null;
 
-	// original error
-	private GenericMessageDto<T> processingDetails = null;
-
 	public FailedProcessingDto<T> processingType(String processingType) {
 		this.processingType = processingType;
+		return this;
+	}
+	
+	public FailedProcessingDto<T> topic(String topic) {
+		this.setTopic(topic);
 		return this;
 	}
 	
@@ -175,17 +152,9 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		this.failureMessage = failureMessage;
 	}
 
-	public FailedProcessingDto<T> processingDetails(GenericMessageDto<T> processingDetails) {
-		this.processingDetails = processingDetails;
+	public FailedProcessingDto<T> processingDetails(T processingDetails) {
+		this.setDto(processingDetails);
 		return this;
-	}
-
-	public GenericMessageDto<T> getProcessingDetails() {
-		return processingDetails;
-	}
-
-	public void setProcessingDetails(GenericMessageDto<T> processingDetails) {
-		this.processingDetails = processingDetails;
 	}
 
 	@Override
@@ -214,15 +183,14 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 				&& Objects.equals(this.nbRetries, failedProcessing.nbRetries)
 				&& Objects.equals(this.creationDate, failedProcessing.creationDate)
 				&& Objects.equals(this.failureDate, failedProcessing.failureDate)
-				&& Objects.equals(this.failureMessage, failedProcessing.failureMessage)
-				&& Objects.equals(this.processingDetails, failedProcessing.processingDetails);
+				&& Objects.equals(this.failureMessage, failedProcessing.failureMessage);
 	}
 
 	@Override
 	public int hashCode() {
 		return java.util.Objects.hash(identifier, processingType, state, category, partition, offset, group,
 				failedPod, lastAssignmentDate, sendingPod, lastSendDate, lastAckDate, nbRetries, creationDate,
-				failureDate, failureMessage, processingDetails);
+				failureDate, failureMessage);
 	}
 
 	@Override
@@ -246,7 +214,6 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
 		sb.append("    failureDate: ").append(toIndentedString(failureDate)).append("\n");
 		sb.append("    failureMessage: ").append(toIndentedString(failureMessage)).append("\n");
-		sb.append("    processingDetails: ").append(toIndentedString(processingDetails)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}

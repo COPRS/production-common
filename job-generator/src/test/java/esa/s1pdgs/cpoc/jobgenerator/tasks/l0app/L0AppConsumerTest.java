@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFileRaw;
@@ -67,6 +68,8 @@ public class L0AppConsumerTest {
 
     @Mock
     private JobStatus jobStatus;
+
+    private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
     private EdrsSessionDto dto1 = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1,
             EdrsSessionFileType.SESSION, "S1", "A");
@@ -204,7 +207,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus);
 
         // Job<EdrsSession> job = new Job<EdrsSession>(session.getSessionId(),
         // session.getStartTime(), session.getStartTime(), session);
@@ -240,7 +243,7 @@ public class L0AppConsumerTest {
     public void testReceiveRaw() throws Exception {
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService,errorAppender, appStatus);
         doReturn(new GenericMessageDto<EdrsSessionDto>(1, "",
                 new EdrsSessionDto("KEY_OBS_SESSION_2_2", 2,
                         EdrsSessionFileType.RAW, "S1", "A"))).when(mqiService)
@@ -255,7 +258,7 @@ public class L0AppConsumerTest {
     public void testReceivedSameMessageTwice() throws Exception {
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus);
         doReturn(message1, message1).when(mqiService).next();
 
         edrsSessionsConsumer.consumeMessages();
@@ -273,7 +276,7 @@ public class L0AppConsumerTest {
     public void testReceivedInvalidProductChannel() throws Exception {
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus);
         dto1.setChannelId(3);
         doReturn(message1).when(mqiService).next();
 
@@ -300,7 +303,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus);
 
         AppDataJobDto<EdrsSessionDto> result =
                 edrsSessionsConsumer.buildJob(message);
@@ -330,7 +333,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus);
 
         AppDataJobDto<EdrsSessionDto> result =
                 edrsSessionsConsumer.buildJob(message);
@@ -365,7 +368,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus);
 
         AppDataJobDto<EdrsSessionDto> result =
                 edrsSessionsConsumer.buildJob(message);
@@ -406,7 +409,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
-                mqiStatusService, appDataService, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus);
 
         AppDataJobDto<EdrsSessionDto> result =
                 edrsSessionsConsumer.buildJob(message);
