@@ -60,6 +60,8 @@ public class ApplicationProperties {
      * Tempo between two loops when waiting for inputs downloading
      */
     private long wapTempoS;
+    
+    private String hostname;
 
     /**
      * Default constructor
@@ -203,4 +205,11 @@ public class ApplicationProperties {
         this.wapTempoS = waitActiveProcessTempoS;
     }
 
+	public String getHostname() {
+		return hostname;
+	}
+
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
+	}
 }

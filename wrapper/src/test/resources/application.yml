@@ -8,8 +8,16 @@ logging:
 server:
   port: ${wrapper_rest_server_port:8080}
   
+  # KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors
+  
 process:
   level: L0
+  hostname: "hostname"
   fixed-delay-ms: 500
   init-delay-poll-ms: 1000
   tm-proc-one-task-s: 600
