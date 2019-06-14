@@ -8,6 +8,13 @@ public class CompressionJobDto {
 	private ProductFamily family = ProductFamily.AUXILIARY_FILE;
 	private String objectStorageKey;
 
+    /**
+     * Default constructor
+     */
+    public CompressionJobDto() {
+        super();
+    }
+    
 	public CompressionJobDto(final String productName, final ProductFamily family, final String objectStorageKey) {
 		this.productName = productName;
 		this.family = family;
