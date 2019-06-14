@@ -15,10 +15,10 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  *
  */
 public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGenericMessageDto<T> {
-	
-	//public static final String TOPIC = "t-pdgs-errors";
-	
-	private static class FailedProcessingDtoComparator implements Comparator<FailedProcessingDto>, Serializable{
+
+	// public static final String TOPIC = "t-pdgs-errors";
+
+	private static class FailedProcessingDtoComparator implements Comparator<FailedProcessingDto>, Serializable {
 
 		private static final long serialVersionUID = 1191382370884793376L;
 
@@ -27,26 +27,26 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		 */
 		@Override
 		public int compare(FailedProcessingDto o1, FailedProcessingDto o2) {
-			
+
 			return o1.getCreationDate().compareTo(o2.getCreationDate());
 		}
 	}
-	
+
 	public static final Comparator<FailedProcessingDto> ASCENDING_CREATION_TIME_COMPERATOR = new FailedProcessingDtoComparator();
-	
+
 	public FailedProcessingDto() {
 		super();
 	}
-		
+
 	private String processingType = null;
 	private String failureMessage = null;
-	
+
 	// maybe map to 'readingPod'
 	private String failedPod = null;
 
 	// maybe map to 'lastReadDate'
 	private Date lastAssignmentDate = null;
-	
+
 	// current time (at creation of this object)
 	private Date failureDate = null;
 
@@ -54,12 +54,12 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		this.processingType = processingType;
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> topic(String topic) {
 		this.setTopic(topic);
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> processingStatus(MqiStateMessageEnum processingStatus) {
 		this.setState(processingStatus);
 		return this;
@@ -69,7 +69,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		this.setCategory(productCategory);
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> partition(int partition) {
 		this.setPartition(partition);
 		return this;
@@ -79,12 +79,12 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		this.setOffset(offset);
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> group(String group) {
 		this.setGroup(group);
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> lastAssignmentDate(Date lastAssignmentDate) {
 		this.lastAssignmentDate = lastAssignmentDate;
 		return this;
@@ -94,12 +94,12 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		this.failedPod = failedPod;
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> sendingPod(String sendingPod) {
 		this.setSendingPod(sendingPod);
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> lastSendDate(Date lastSendDate) {
 		this.setLastSendDate(lastSendDate);
 		return this;
@@ -109,22 +109,22 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		this.setLastAckDate(lastAckDate);
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> nbRetries(int nbRetries) {
 		this.setNbRetries(nbRetries);
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> creationDate(Date creationDate) {
 		this.setCreationDate(creationDate);
 		return this;
 	}
-	
+
 	public FailedProcessingDto<T> failureDate(Date failureDate) {
 		this.failureDate = failureDate;
 		return this;
 	}
-	
+
 	public String getProcessingType() {
 		return processingType;
 	}
@@ -185,7 +185,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		}
 		@SuppressWarnings("unchecked")
 		FailedProcessingDto<T> failedProcessing = (FailedProcessingDto<T>) o;
-		
+
 		return Objects.equals(this.identifier, failedProcessing.identifier)
 				&& Objects.equals(this.processingType, failedProcessing.processingType)
 				&& Objects.equals(this.state, failedProcessing.state)
@@ -206,9 +206,9 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 
 	@Override
 	public int hashCode() {
-		return java.util.Objects.hash(identifier, processingType, state, category, partition, offset, group,
-				failedPod, lastAssignmentDate, sendingPod, lastSendDate, lastAckDate, nbRetries, creationDate,
-				failureDate, failureMessage);
+		return java.util.Objects.hash(identifier, processingType, state, category, partition, offset, group, failedPod,
+				lastAssignmentDate, sendingPod, lastSendDate, lastAckDate, nbRetries, creationDate, failureDate,
+				failureMessage);
 	}
 
 	@Override
