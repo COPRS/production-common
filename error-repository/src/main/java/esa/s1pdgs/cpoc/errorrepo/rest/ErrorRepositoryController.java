@@ -100,11 +100,15 @@ public class ErrorRepositoryController {
 		}
 
 		try {
-			errorRepository.deleteFailedProcessing(id);
+			boolean deleted = errorRepository.deleteFailedProcessing(id);
+			if (!deleted) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+
 		} catch (RuntimeException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
