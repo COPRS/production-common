@@ -5,6 +5,6 @@ WORKDIR /app
 FROM openjdk:8-jre-alpine
 COPY --from=build /app/error-repository/target/s1pro-core-error-repository-*.jar s1pdgs-error-repository.jar
 RUN apk update && apk add wget
-RUN mkdir tmp
+RUN mkdir -p tmp
 COPY /config/start.sh start.sh
 ENTRYPOINT "/app/start.sh"
