@@ -18,7 +18,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 
 	// public static final String TOPIC = "t-pdgs-errors";
 
-	private static class FailedProcessingDtoComparator implements Comparator<FailedProcessingDto>, Serializable {
+	private static class AscendingCreationTimeComparator implements Comparator<FailedProcessingDto>, Serializable {
 
 		private static final long serialVersionUID = 1191382370884793376L;
 
@@ -32,7 +32,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		}
 	}
 
-	public static final Comparator<FailedProcessingDto> ASCENDING_CREATION_TIME_COMPERATOR = new FailedProcessingDtoComparator();
+	public static final Comparator<FailedProcessingDto> ASCENDING_CREATION_TIME_COMPERATOR = new AscendingCreationTimeComparator();
 
 	public FailedProcessingDto() {
 		super();
