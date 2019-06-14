@@ -192,6 +192,7 @@ public abstract class GenericExtractor<T> {
                     e1.getLogMessage());
             
             failedProc.processingType(messageClass.getName())
+      			.topic(message.getInputKey())
 	    		.processingStatus(MqiStateMessageEnum.READ)
 	    		.productCategory(category)
 	    		.failedPod(processConfiguration.getHostname())
