@@ -3,7 +3,7 @@ spring:
     name: s1pdgs-error-repo
     
 logging:
-  config: classpath:log4j2-test.yml
+  config: log4j2.yml
 
 # REST controller
 server:
