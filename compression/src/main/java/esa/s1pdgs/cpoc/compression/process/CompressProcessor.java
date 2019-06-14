@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -30,6 +33,8 @@ import esa.s1pdgs.cpoc.compression.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.status.AppStatus;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
@@ -76,11 +81,14 @@ public class CompressProcessor {
 	 */
 	private final StatusService mqiStatusService;
 	
+	private final ErrorRepoAppender errorAppender;
+	
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
 			final ObsService obsService,
 			final OutputProducerFactory producerFactory,
 			@Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> mqiService,
+			final ErrorRepoAppender errorAppender,
 			@Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
 		this.appStatus = appStatus;
 		this.properties = properties;
@@ -89,6 +97,7 @@ public class CompressProcessor {
 
 		this.mqiService = mqiService;
 		this.mqiStatusService = mqiStatusService;
+		this.errorAppender = errorAppender;
 	}
 
     /**
@@ -166,6 +175,9 @@ public class CompressProcessor {
 		int step = 0;
 		boolean ackOk = false;
 		String errorMessage = "";
+		
+        final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failedProc =  
+        		new FailedProcessingDto<GenericMessageDto<CompressionJobDto>>();
 
 		try {
 			step = 2;
@@ -199,6 +211,16 @@ public class CompressProcessor {
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ace.getCode().getCode(), ace.getLogMessage());
 			report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+			
+            failedProc.processingType(CompressionJobDto.class.getName())
+      			.topic(message.getInputKey())
+	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.productCategory(ProductCategory.COMPRESSED_PRODUCTS)
+	    		.failedPod(properties.getHostname())
+	            .failureDate(new Date())
+	    		.failureMessage(errorMessage)
+	    		.processingDetails(message);   
+			
 		} catch (InterruptedException e) {
 			ackOk = false;
 			errorMessage = String.format(
@@ -207,12 +229,21 @@ public class CompressProcessor {
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ErrorCode.INTERNAL_ERROR.getCode());
 			report.reportError("Interrupted job processing");
-		} finally {
+			
+		     failedProc.processingType(CompressionJobDto.class.getName())
+	   			.topic(message.getInputKey())
+	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.productCategory(ProductCategory.COMPRESSED_PRODUCTS)
+	    		.failedPod(properties.getHostname())
+	            .failureDate(new Date())
+	    		.failureMessage(errorMessage)
+	    		.processingDetails(message);
+			
 			cleanCompressionProcessing(job,procExecutorSrv);
 		}
 
 		// Ack and check if application shall stopped
-		ackProcessing(message, ackOk, errorMessage);
+		ackProcessing(message, failedProc, ackOk, errorMessage);
 	}
 
 	/**
@@ -289,7 +320,7 @@ public class CompressProcessor {
 	 * @param ackOk
 	 * @param errorMessage
 	 */
-	protected void ackProcessing(final GenericMessageDto<CompressionJobDto> dto, final boolean ackOk,
+	protected void ackProcessing(final GenericMessageDto<CompressionJobDto> dto, final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failed, final boolean ackOk,
 			final String errorMessage) {
 		boolean stopping = appStatus.getStatus().isStopping();
 
@@ -298,6 +329,7 @@ public class CompressProcessor {
 			ackPositively(stopping, dto);
 		} else {
 			ackNegatively(stopping, dto, errorMessage);
+			errorAppender.send(failed);
 		}
 
 		// Check status
