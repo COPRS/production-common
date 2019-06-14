@@ -9,10 +9,8 @@ import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.mqi.client.CompressedProductsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 
 @Configuration
 public class MqiConfiguration {
