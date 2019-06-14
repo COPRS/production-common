@@ -18,6 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 
+/**
+ * Provides information about failed processings and the ability to restart and delete failed processings.
+ * 
+ * @author birol_colak@net.werum
+ *
+ */
 @RestController
 @RequestMapping(path = "/errors")
 public class ErrorRepositoryController {
@@ -33,6 +39,12 @@ public class ErrorRepositoryController {
 		this.errorRepository = errorRepository;
 	}
 
+	/**
+	 * Gets the list of failed processings ordered by creation time (ascending).
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings")
 	public ResponseEntity<List<FailedProcessingDto>> getFailedProcessings(@RequestHeader("ApiKey") String apiKey) {
 
@@ -59,6 +71,13 @@ public class ErrorRepositoryController {
 		return new ResponseEntity<List<FailedProcessingDto>>(failedProcessings, HttpStatus.OK);
 	}
 
+	/**
+	 * Gets the failed processing by Id
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @param id failed processing Id
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
 	public ResponseEntity<FailedProcessingDto> getFailedProcessingsById(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
@@ -89,6 +108,13 @@ public class ErrorRepositoryController {
 		return new ResponseEntity<FailedProcessingDto>(failedProcessing, HttpStatus.OK);
 	}
 
+	/**
+	 * Restarts the failed processing with Id
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @param id failed processing Id
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
 	public ResponseEntity restartFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
@@ -111,6 +137,13 @@ public class ErrorRepositoryController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	/**
+	 * Deletes the failed processing with Id
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @param id failed processing Id
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
 	public ResponseEntity deleteFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
