@@ -42,8 +42,10 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@Override
 	public void deleteFailedProcessing(String id) {
-		// TODO Auto-generated method stub
-
+		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
+		if (failedProcessing != null) {
+			mongoTemplate.remove(failedProcessing);
+		}
 	}
 
 }
