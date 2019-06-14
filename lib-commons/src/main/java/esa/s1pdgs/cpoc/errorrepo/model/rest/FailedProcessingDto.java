@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.errorrepo.model.rest;
 
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
 
@@ -15,6 +17,22 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGenericMessageDto<T> {
 	
 	//public static final String TOPIC = "t-pdgs-errors";
+	
+	private static class FailedProcessingDtoComparator implements Comparator<FailedProcessingDto>, Serializable{
+
+		private static final long serialVersionUID = 1191382370884793376L;
+
+		/**
+		 * order by ascending creation time
+		 */
+		@Override
+		public int compare(FailedProcessingDto o1, FailedProcessingDto o2) {
+			
+			return o1.getCreationDate().compareTo(o2.getCreationDate());
+		}
+	}
+	
+	public static final Comparator<FailedProcessingDto> ASCENDING_CREATION_TIME_COMPERATOR = new FailedProcessingDtoComparator();
 	
 	public FailedProcessingDto() {
 		super();
