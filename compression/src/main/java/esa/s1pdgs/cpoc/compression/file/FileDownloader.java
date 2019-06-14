@@ -20,7 +20,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
-@Service
 public class FileDownloader {
 	/**
 	 * Logger
