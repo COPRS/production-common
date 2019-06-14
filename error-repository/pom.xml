@@ -23,12 +23,6 @@
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-app-catalog-client</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
