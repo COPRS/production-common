@@ -103,7 +103,7 @@ public class CompressProcessor {
     /**
      * Consume and execute jobs
      */
-    @Scheduled(fixedDelayString = "${compress.fixed-delay-ms}", initialDelayString = "${compress.init-delay-poll-ms}")
+    @Scheduled(fixedDelayString = "${compression.fixed-delay-ms}", initialDelayString = "${compression.init-delay-poll-ms}")
 	public void process() {
 		LOGGER.trace("[MONITOR] [step 0] Waiting message");
 
