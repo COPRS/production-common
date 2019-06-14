@@ -18,6 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 
+/**
+ * Provides information about failed processings and the ability to restart and delete failed processings.
+ * 
+ * @author birol_colak@net.werum
+ *
+ */
 @RestController
 @RequestMapping(path = "/errors")
 public class ErrorRepositoryController {
@@ -33,6 +39,12 @@ public class ErrorRepositoryController {
 		this.errorRepository = errorRepository;
 	}
 
+	/**
+	 * Gets the list of failed processings ordered by creation time (ascending).
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings")
 	public ResponseEntity<List<FailedProcessingDto>> getFailedProcessings(@RequestHeader("ApiKey") String apiKey) {
 
@@ -59,11 +71,18 @@ public class ErrorRepositoryController {
 		return new ResponseEntity<List<FailedProcessingDto>>(failedProcessings, HttpStatus.OK);
 	}
 
+	/**
+	 * Gets the failed processing by Id
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @param id failed processing Id
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
 	public ResponseEntity<FailedProcessingDto> getFailedProcessingsById(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
 
-		LOGGER.info("get the failed processing with id " + id);
+		LOGGER.info("get the failed processing with id {} ", id);
 
 		if (!API_KEY.equals(apiKey)) {
 			LOGGER.warn("invalid API key supplied");
@@ -77,23 +96,30 @@ public class ErrorRepositoryController {
 			failedProcessing = errorRepository.getFailedProcessingsById(id);
 
 			if (failedProcessing == null) {
-				LOGGER.warn("failed processing not found, id " + id);
+				LOGGER.warn("failed processing not found, id {}", id);
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 
 		} catch (RuntimeException e) {
-			LOGGER.error("error while getting the failed processings with id " + id, e);
+			LOGGER.error("error while getting the failed processings with id {}:{} ",id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		return new ResponseEntity<FailedProcessingDto>(failedProcessing, HttpStatus.OK);
 	}
 
+	/**
+	 * Restarts the failed processing with Id
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @param id failed processing Id
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
 	public ResponseEntity restartFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
 
-		LOGGER.info("restart the failed processing with id " + id);
+		LOGGER.info("restart the failed processing with id {}", id);
 
 		if (!API_KEY.equals(apiKey)) {
 			LOGGER.warn("invalid API key supplied");
@@ -104,18 +130,25 @@ public class ErrorRepositoryController {
 			// TODO return 404 in case processing is not found
 			errorRepository.restartAndDeleteFailedProcessing(id);
 		} catch (RuntimeException e) {
-			LOGGER.error("error while restarting the failed processings with id " + id, e);
+			LOGGER.error("error while restarting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	/**
+	 * Deletes the failed processing with Id
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @param id failed processing Id
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
 	public ResponseEntity deleteFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
 
-		LOGGER.info("delete the failed processing with id " + id);
+		LOGGER.info("delete the failed processing with id {}", id);
 
 		if (!API_KEY.equals(apiKey)) {
 			LOGGER.warn("invalid API key supplied");
@@ -125,12 +158,12 @@ public class ErrorRepositoryController {
 		try {
 			boolean deleted = errorRepository.deleteFailedProcessing(id);
 			if (!deleted) {
-				LOGGER.warn("failed processing not found, id " + id);
+				LOGGER.warn("failed processing not found, id {}", id);
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 
 		} catch (RuntimeException e) {
-			LOGGER.error("error while deleting the failed processings with id " + id, e);
+			LOGGER.error("error while deleting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
