@@ -26,6 +26,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
@@ -86,6 +88,9 @@ public class AuxiliaryFilesExtractorTest {
      * Job to process
      */
     private GenericMessageDto<AuxiliaryFileDto> inputMessageAux;
+    
+    private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
+    
 
     /**
      * Initialization
@@ -132,7 +137,7 @@ public class AuxiliaryFilesExtractorTest {
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath()
                         + File.separator,
-                "manifest.safe", ".safe");
+                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe");
     }
 
     @Test
@@ -166,7 +171,7 @@ public class AuxiliaryFilesExtractorTest {
 
         extractor = new AuxiliaryFilesExtractor(esServices, obsService,
                 mqiService, appStatus, extractorConfig, "./test/workDir2/",
-                "manifest.safe", ".safe");
+                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe");
         assertTrue((new File(
                 "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
                         .exists());

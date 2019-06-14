@@ -1,16 +1,21 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
@@ -79,6 +84,12 @@ public abstract class GenericExtractor<T> {
      * Product category
      */
     protected final ProductCategory category;
+    
+    private final ErrorRepoAppender errorAppender;
+    
+    private final Class<T> messageClass;
+    
+    private final ProcessConfiguration processConfiguration;
 
     /**
      * @param esServices
@@ -92,7 +103,10 @@ public abstract class GenericExtractor<T> {
             final GenericMqiService<T> mqiService, final AppStatus appStatus,
             final String localDirectory,
             final MetadataExtractorConfig extractorConfig, final String pattern,
-            final ProductCategory category) {
+            final ErrorRepoAppender errorAppender,
+            final ProductCategory category,
+            final ProcessConfiguration processConfiguration,
+            final Class<T> messageClass) {
         this.localDirectory = localDirectory;
         this.fileDescriptorBuilder =
                 new FileDescriptorBuilder(this.localDirectory,
@@ -103,6 +117,9 @@ public abstract class GenericExtractor<T> {
         this.mqiService = mqiService;
         this.appStatus = appStatus;
         this.category = category;
+        this.errorAppender = errorAppender;
+        this.messageClass = messageClass;
+        this.processConfiguration = processConfiguration;
     }
 
     /**
@@ -144,6 +161,9 @@ public abstract class GenericExtractor<T> {
         final Reporting report = reportingFactory.newReporting(0);        
         report.reportStart("Starting metadata extraction");        
         appStatus.setProcessing(category, message.getIdentifier());
+        
+        final FailedProcessingDto<GenericMessageDto<T>> failedProc =  
+        		new FailedProcessingDto<GenericMessageDto<T>>();
 
         try { 	
         	
@@ -170,14 +190,35 @@ public abstract class GenericExtractor<T> {
                     "[MONITOR] [%s] [productName %s] [code %s] %s", category,
                     extractProductNameFromDto(dto), e1.getCode().getCode(),
                     e1.getLogMessage());
-            ackNegatively(reportingFactory, message, errorMessage);
+            
+            failedProc.processingType(messageClass.getName())
+	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.productCategory(category)
+	    		.failedPod(processConfiguration.getHostname())
+	            .failureDate(new Date())
+	    		.failureMessage(errorMessage)
+	    		.processingDetails(message);
+            
+            ackNegatively(reportingFactory, failedProc, message, errorMessage);
+            
+            
         } catch (Exception e) {
             String errorMessage = String.format(
                     "[MONITOR] [%s] [productName %s] [code %s] [msg %s]",
                     category, extractProductNameFromDto(dto),
                     ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
-            ackNegatively(reportingFactory, message, errorMessage);
-        } finally {
+            
+            failedProc.processingType(messageClass.getName())
+	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.productCategory(category)
+	    		.failedPod(processConfiguration.getHostname())
+	            .failureDate(new Date())
+	    		.failureMessage(errorMessage)
+	    		.processingDetails(message);
+            
+            ackNegatively(reportingFactory,failedProc, message, errorMessage);
+            
+        } finally {        	
             this.cleanProcessing(message);
         }
 
@@ -198,6 +239,7 @@ public abstract class GenericExtractor<T> {
      */
     final void ackNegatively(
     		final Reporting.Factory reportingFactory, 
+            final FailedProcessingDto<GenericMessageDto<T>> failedProc,
     		final GenericMessageDto<T> message,
             final String errorMessage) {
     	
@@ -205,6 +247,7 @@ public abstract class GenericExtractor<T> {
         reportAck.reportStart("Start acknowledging negatively");
         try {
             mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false));
+            errorAppender.send(failedProc);            
             reportAck.reportStop("End acknowledging negatively");
         } catch (AbstractCodedException ace) {
         	reportAck.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());     

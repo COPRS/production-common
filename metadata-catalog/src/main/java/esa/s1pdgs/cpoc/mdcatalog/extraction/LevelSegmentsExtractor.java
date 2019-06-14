@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
@@ -57,10 +59,13 @@ public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
             final MetadataExtractorConfig extractorConfig,
             @Value("${file.product-categories.level-segments.local-directory}") final String localDirectory,
             @Value("${file.manifest-filename}") final String manifestFilename,
+            final ErrorRepoAppender errorAppender,
+            final ProcessConfiguration processConfiguration,
             @Value("${file.file-with-manifest-ext}") final String fileManifestExt) {
         super(esServices, mqiService, appStatus, localDirectory,
                 extractorConfig, PATTERN_CONFIG,
-                ProductCategory.LEVEL_SEGMENTS);
+                errorAppender,
+                ProductCategory.LEVEL_SEGMENTS, processConfiguration, LevelSegmentDto.class);
         this.obsService = obsService;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;

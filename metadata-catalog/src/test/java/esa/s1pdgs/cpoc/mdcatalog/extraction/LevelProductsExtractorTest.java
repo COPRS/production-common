@@ -26,6 +26,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
@@ -88,6 +90,10 @@ public class LevelProductsExtractorTest {
 	 * Job to process
 	 */
 	private GenericMessageDto<LevelProductDto> inputMessageAux;
+	
+    private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
+    
+    private final ProcessConfiguration config = new ProcessConfiguration();
 
 	/**
 	 * Initialization
@@ -129,7 +135,7 @@ public class LevelProductsExtractorTest {
 						"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.L0_ACN, "NRT"));
 
 		extractor = new LevelProductsExtractor(esServices, obsService, mqiService, appStatus, extractorConfig,
-				(new File("./test/workDir/")).getAbsolutePath() + File.separator, "manifest.safe", ".safe");
+				(new File("./test/workDir/")).getAbsolutePath() + File.separator, "manifest.safe", errorAppender, config, ".safe");
 	}
 
 	@Test
@@ -154,7 +160,7 @@ public class LevelProductsExtractorTest {
 		(new File("./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).createNewFile();
 
 		extractor = new LevelProductsExtractor(esServices, obsService, mqiService, appStatus, extractorConfig,
-				"./test/workDir2/", "manifest.safe", ".safe");
+				"./test/workDir2/", "manifest.safe", errorAppender, config,".safe");
 		assertTrue((new File("./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).exists());
 		assertTrue((new File("./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).exists());
 
