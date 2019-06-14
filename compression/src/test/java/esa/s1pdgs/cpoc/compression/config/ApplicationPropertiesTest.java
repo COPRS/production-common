@@ -25,5 +25,5 @@ public class ApplicationPropertiesTest {
     @Test
     public void testLoadProperties() {
         assertEquals("/usr/bin/sh", properties.getCommand());
-    }
+    } 
 }
