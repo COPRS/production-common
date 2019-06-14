@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.errorrepo.rest;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +20,8 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 
 /**
- * Provides information about failed processings and the ability to restart and delete failed processings.
+ * Provides information about failed processings and the ability to restart and
+ * delete failed processings.
  * 
  * @author birol_colak@net.werum
  *
@@ -66,7 +68,9 @@ public class ErrorRepositoryController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		// TODO: order by creation time (ascending)
+		if (failedProcessings.size() > 1) {
+			Collections.sort(failedProcessings, FailedProcessingDto.ASCENDING_CREATION_TIME_COMPERATOR);
+		}
 
 		return new ResponseEntity<List<FailedProcessingDto>>(failedProcessings, HttpStatus.OK);
 	}
@@ -75,7 +79,7 @@ public class ErrorRepositoryController {
 	 * Gets the failed processing by Id
 	 * 
 	 * @param apiKey token agreed by server and client for authentication
-	 * @param id failed processing Id
+	 * @param id     failed processing Id
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
@@ -101,7 +105,7 @@ public class ErrorRepositoryController {
 			}
 
 		} catch (RuntimeException e) {
-			LOGGER.error("error while getting the failed processings with id {}:{} ",id, e);
+			LOGGER.error("error while getting the failed processings with id {}:{} ", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -112,7 +116,7 @@ public class ErrorRepositoryController {
 	 * Restarts the failed processing with Id
 	 * 
 	 * @param apiKey token agreed by server and client for authentication
-	 * @param id failed processing Id
+	 * @param id     failed processing Id
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
@@ -141,7 +145,7 @@ public class ErrorRepositoryController {
 	 * Deletes the failed processing with Id
 	 * 
 	 * @param apiKey token agreed by server and client for authentication
-	 * @param id failed processing Id
+	 * @param id     failed processing Id
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
