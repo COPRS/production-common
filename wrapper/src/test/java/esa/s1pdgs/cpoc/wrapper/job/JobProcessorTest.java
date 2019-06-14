@@ -32,6 +32,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -110,6 +111,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     
     private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(JobProcessorTest.class), "TestOutputHandling");
 	
+    private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 
     /**
      * Initialization
@@ -131,7 +133,7 @@ public class JobProcessorTest extends MockPropertiesTest {
             workingDir.mkdir();
         }
         processor = new JobProcessor(appStatus, properties, devProperties,
-                obsService, procuderFactory, mqiService, mqiStatusService);
+                obsService, procuderFactory, mqiService, errorAppender, mqiStatusService);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }

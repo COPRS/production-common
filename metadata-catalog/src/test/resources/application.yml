@@ -15,6 +15,16 @@ elasticsearch:
   connect-timeout-ms: 2000
   socket-timeout-ms: 10000
   max-retry-timeout-ms: 30000
+  
+process:
+  hostname: "hostname"
+  
+# KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors
     
 # File
 file:

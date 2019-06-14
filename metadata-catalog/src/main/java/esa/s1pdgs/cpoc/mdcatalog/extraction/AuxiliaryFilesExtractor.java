@@ -15,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
@@ -62,9 +64,11 @@ public class AuxiliaryFilesExtractor
             final MetadataExtractorConfig extractorConfig,
             @Value("${file.product-categories.auxiliary-files.local-directory}") final String localDirectory,
             @Value("${file.manifest-filename}") final String manifestFilename,
+            final ErrorRepoAppender errorAppender,
+            final ProcessConfiguration processConfiguration,
             @Value("${file.file-with-manifest-ext}") final String fileManifestExt) {
         super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_CONFIG, ProductCategory.AUXILIARY_FILES);
+                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.AUXILIARY_FILES, processConfiguration, AuxiliaryFileDto.class) ;
         this.obsService = obsService;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;

@@ -19,6 +19,8 @@ import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
@@ -75,6 +77,10 @@ public class EdrsSessionsExtractorTest {
      */
     private GenericMessageDto<EdrsSessionDto> inputMessageXml;
 
+    private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
+    
+    private final ProcessConfiguration config = new ProcessConfiguration();
+    
     /**
      * Initialization
      * 
@@ -96,7 +102,7 @@ public class EdrsSessionsExtractorTest {
                         EdrsSessionFileType.SESSION, "S1", "B"));
 
         extractor = new EdrsSessionsExtractor(esServices, mqiService, appStatus,
-                (new File("./test/workDir/")).getAbsolutePath(),
+                (new File("./test/workDir/")).getAbsolutePath(),errorAppender, config,
                 extractorConfig);
     }
 

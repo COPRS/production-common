@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -21,10 +22,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -96,6 +101,8 @@ public class JobProcessor {
      * MQI service for stopping the MQI
      */
     private final StatusService mqiStatusService;
+    
+    private final ErrorRepoAppender errorAppender;
 
     /**
      * @param job
@@ -114,6 +121,7 @@ public class JobProcessor {
             final DevProperties devProperties, final ObsService obsService,
             final OutputProcuderFactory procuderFactory,
             @Qualifier("mqiServiceForLevelJobs") final GenericMqiService<LevelJobDto> mqiService,
+            final ErrorRepoAppender errorAppender,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
         this.appStatus = appStatus;
         this.devProperties = devProperties;
@@ -122,6 +130,7 @@ public class JobProcessor {
         this.procuderFactory = procuderFactory;
         this.mqiService = mqiService;
         this.mqiStatusService = mqiStatusService;
+        this.errorAppender = errorAppender;
     }
 
     /**
@@ -237,6 +246,10 @@ public class JobProcessor {
         int step = 0;
         boolean ackOk = false;
         String errorMessage = "";
+        
+        final FailedProcessingDto<GenericMessageDto<LevelJobDto>> failedProc =  
+        		new FailedProcessingDto<GenericMessageDto<LevelJobDto>>();
+        
         try {
             step = 3;
             LOGGER.info("{} Starting process executor",
@@ -280,6 +293,15 @@ public class JobProcessor {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
             report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+
+            failedProc.processingType(LevelJobDto.class.getName())
+	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.productCategory(ProductCategory.LEVEL_JOBS)
+	    		.failedPod(properties.getHostname())
+	            .failureDate(new Date())
+	    		.failureMessage(errorMessage)
+	    		.processingDetails(message);
+            
         } catch (InterruptedException e) {
             ackOk = false;
             errorMessage = String.format(
@@ -294,7 +316,7 @@ public class JobProcessor {
         }
 
         // Ack and check if application shall stopped
-        ackProcessing(message, ackOk, errorMessage);
+        ackProcessing(message, failedProc, ackOk, errorMessage);
     }
 
     /**
@@ -382,7 +404,7 @@ public class JobProcessor {
      * @param ackOk
      * @param errorMessage
      */
-    protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto,
+    protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto, 	final FailedProcessingDto<GenericMessageDto<LevelJobDto>> failed,
             final boolean ackOk, final String errorMessage) {
         boolean stopping = appStatus.getStatus().isStopping();
 
@@ -391,6 +413,7 @@ public class JobProcessor {
             ackPositively(stopping, dto);
         } else {
             ackNegatively(stopping, dto, errorMessage);
+            errorAppender.send(failed);
         }
 
         // Check status

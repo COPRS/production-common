@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
@@ -42,9 +44,11 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
             @Qualifier("mqiServiceForEdrsSessions") final GenericMqiService<EdrsSessionDto> mqiService,
             final AppStatus appStatus,
             @Value("${file.product-categories.edrs-sessions.local-directory}") final String localDirectory,
+            final ErrorRepoAppender errorAppender,
+            final ProcessConfiguration processConfiguration,
             final MetadataExtractorConfig extractorConfig) {
         super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_SESSION, ProductCategory.EDRS_SESSIONS);
+                extractorConfig, PATTERN_SESSION, errorAppender, ProductCategory.EDRS_SESSIONS, processConfiguration, EdrsSessionDto.class);
     }
 
     /**

@@ -22,6 +22,9 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
@@ -68,6 +71,10 @@ public class GenericExtractorTest {
      * Extractor
      */
     protected GenericExtractor<LevelProductDto> extractor;
+    
+    private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
+    
+    private final ProcessConfiguration config = new ProcessConfiguration();
 
     /**
      * Job to process
@@ -100,7 +107,7 @@ public class GenericExtractorTest {
         extractor = new LevelProductsExtractor(esServices, obsService,
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath(),
-                "manifest.safe", ".safe");
+                "manifest.safe", errorAppender, config, ".safe");
     }
 
     /**
@@ -114,7 +121,7 @@ public class GenericExtractorTest {
                 "ack-msg", "error-ùmessage")).when(mqiService)
                         .ack(Mockito.any());
         
-        extractor.ackNegatively(reportingFactory, inputMessage, "error message");
+        extractor.ackNegatively(reportingFactory, new FailedProcessingDto<>(), inputMessage, "error message");
 
         verify(mqiService, times(1)).ack(Mockito
                 .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
@@ -132,7 +139,7 @@ public class GenericExtractorTest {
     public void testAckNegatively() throws AbstractCodedException {
         doReturn(true).when(mqiService).ack(Mockito.any());
 
-        extractor.ackNegatively(reportingFactory,inputMessage, "error message");
+        extractor.ackNegatively(reportingFactory, new FailedProcessingDto<>(), inputMessage, "error message");
 
         verify(mqiService, times(1)).ack(Mockito
                 .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
