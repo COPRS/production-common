@@ -25,7 +25,7 @@ public class OutputProducerFactory {
     /**
      * MQI client for LEVEL_SEGMENTS
      */
-    private final GenericMqiService<CompressionJobDto> senderCompression;
+//    private final GenericMqiService<CompressionJobDto> senderCompression;
 
     /**
      * MQI client for LEVEL_PRODUCTS
@@ -55,7 +55,7 @@ public class OutputProducerFactory {
             //@Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports,
             //@Qualifier("mqiServiceForErrors") final ErrorService senderErrors
             ) {
-    	this.senderCompression = senderCompressed;
+//    	this.senderCompression = senderCompressed;
 //        this.senderSegments = senderSegments;
 //        this.senderProducts = senderProducts;
 //        this.senderReports = senderReports;
