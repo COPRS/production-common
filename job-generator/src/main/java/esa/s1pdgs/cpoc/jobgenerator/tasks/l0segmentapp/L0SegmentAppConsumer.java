@@ -145,6 +145,7 @@ public class L0SegmentAppConsumer
             reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 
             failedProc.processingType(LevelSegmentDto.class.getName())
+      			.topic(mqiMessage.getInputKey())
 	    		.processingStatus(MqiStateMessageEnum.READ)
 	    		.productCategory(ProductCategory.LEVEL_SEGMENTS)
 	    		.failedPod(processSettings.getHostname())
