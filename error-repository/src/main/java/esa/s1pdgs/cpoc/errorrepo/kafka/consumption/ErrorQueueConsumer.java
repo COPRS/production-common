@@ -27,7 +27,7 @@ public class ErrorQueueConsumer {
 	}
     
 	@KafkaListener(topics = "${kafka.topic.errors}", groupId = "${kafka.group-id}")
-	public void receive(FailedProcessingDto<?> failedProcessing, final Acknowledgment acknowledgment) {
+	public void receive(FailedProcessingDto failedProcessing, final Acknowledgment acknowledgment) {
 		try {			
 			errorRepository.saveFailedProcessing(failedProcessing);		
 	    	acknowledgment.acknowledge();
