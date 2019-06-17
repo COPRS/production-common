@@ -64,8 +64,7 @@ public class GenericMessageDistribution<T> {
             final MessagePublicationController publication,
             final ApplicationProperties properties,
             final ProductCategory category) {
-    	String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
-        LOGGER.info("Starting REST API for {} exposed at {}", category, controllerMapping);
+        LOGGER.info("Starting REST API for {}", category);
         this.messages = messages;
         this.publication = publication;
         this.properties = properties;
