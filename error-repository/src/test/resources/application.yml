@@ -16,6 +16,8 @@ kafka:
   max-retries: 10                                                # number of retries if kafka is not available
   poll-timeout: 3000
   producer-retries: 10
+  max-pool-records: 1                                             # the maximal number of messages to get per poll
+  session-timeout-ms: 120000                                      # the timeout to acknowledge a message
   topic:
     errors: t-pdgs-errors
 
