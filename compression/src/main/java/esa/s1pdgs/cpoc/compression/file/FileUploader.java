@@ -47,7 +47,7 @@ public class FileUploader {
 	 */
 	protected static final String NOT_KEY_OBS = "IT_IS_NOT_A_KEY";
 
-	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
+	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "ZIP";
 
 	/**
 	 * OBS service
@@ -77,8 +77,10 @@ public class FileUploader {
 				throw new InternalErrorException(
 						"The compressed product " + productPath + " does not exist, stopping upload");
 			}
-			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getClass());
+			
 			ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
+			
+			LOGGER.info("Uploading compressed product {} [{}]",productPath, productFamily);			
 			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, productPath);
 //// 			// Upload per batch the output
 			processProducts(reportingFactory, uploadFile, outputToPublish);
