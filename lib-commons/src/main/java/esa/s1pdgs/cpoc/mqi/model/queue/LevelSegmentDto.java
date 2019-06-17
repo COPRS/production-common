@@ -16,11 +16,13 @@ public class LevelSegmentDto {
      * Product name of the metadata to index
      */
     private String name;
+    private String productName; // FIXME: Decide if name or productName should be used. This is a workarround for compression
 
     /**
      * ObjectkeyStorage of the metatdata to index
-     */
+     */    
     private String keyObs;
+    private String keyObjectStorage; // FIXME: Decide if keyObs or keyObjectStorage should be used. This is a workarround for compression
 
     /**
      * Family name for L0 Slices
@@ -48,7 +50,9 @@ public class LevelSegmentDto {
             final String keyObjectStorage, final ProductFamily family, final String mode) {
         this();
         this.name = productName;
+        this.productName = productName;
         this.keyObs = keyObjectStorage;
+        this.keyObjectStorage = keyObjectStorage;
         this.family = family;
         if (mode != null) {
             this.mode = mode.toUpperCase(Locale.FRANCE);
@@ -69,6 +73,7 @@ public class LevelSegmentDto {
      */
     public void setName(final String name) {
         this.name = name;
+        this.productName = name; // FIXME: Workarround, see above!
     }
 
     /**
@@ -85,6 +90,7 @@ public class LevelSegmentDto {
      */
     public void setKeyObs(final String keyObs) {
         this.keyObs = keyObs;
+        this.keyObjectStorage = keyObs; // FIXME: Workarround, see above!
     }
 
     /**
@@ -102,7 +108,23 @@ public class LevelSegmentDto {
         this.family = family;
     }
 
-    /**
+    public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+	public String getKeyObjectStorage() {
+		return keyObjectStorage;
+	}
+
+	public void setKeyObjectStorage(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
+	}
+
+	/**
      * @return
      */
     public String getMode() {

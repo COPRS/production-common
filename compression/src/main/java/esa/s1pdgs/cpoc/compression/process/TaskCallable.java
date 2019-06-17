@@ -78,7 +78,8 @@ public class TaskCallable implements Callable<TaskResult> {
      * Execution of the binary
      */
     @Override
-    public TaskResult call() throws InternalErrorException {        
+    public TaskResult call() throws InternalErrorException {
+    	LOGGER.info("Starting compression task using '{}' with input {} and output {} in {}", binaryPath, inputPath, outputPath, workDirectory);
         reporting.reportStart("Start Task " + binaryPath);
 
         int r = -1;
