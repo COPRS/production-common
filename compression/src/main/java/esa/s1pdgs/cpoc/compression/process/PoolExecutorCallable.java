@@ -65,25 +65,20 @@ public class PoolExecutorCallable implements Callable<Void> {
 	 * - For each pool, launch in parallel the tasks executions
 	 */
 	public Void call() throws AbstractCodedException {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Compression");
-
-		final Reporting reporting = reportingFactory.newReporting(0);
-		reporting.reportStart("Start compression");
 		
 		LOGGER.debug("command={}, productName={}, workingDirectory={}",properties.getCommand(), job.getProductName(), properties.getWorkingDirectory());
 		/*completionSrv.submit(new TaskCallable(properties.getCommand(), job.getProductName(),
 				properties.getWorkingDirectory(), reporting));*/
-		execute(properties.getCommand(), job.getProductName(), properties.getWorkingDirectory(), reporting);
-		
-		
-		reporting.reportStop("End compression");
+		execute(properties.getCommand(), job.getProductName(), properties.getWorkingDirectory());
 
 		return null;
 	}
 	
 	public TaskResult execute(final String binaryPath, final String inputPath,
-            final String workDirectory, final Reporting reporting) throws InternalErrorException {
+            final String workDirectory) throws InternalErrorException {
 		
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Compression");
+		final Reporting reporting = reportingFactory.newReporting(0);
 		
 		String outputPath = inputPath+".zip";
 		LOGGER.info("Starting compression task using '{}' with input {} and output {} in {}", binaryPath, inputPath, outputPath, workDirectory);
