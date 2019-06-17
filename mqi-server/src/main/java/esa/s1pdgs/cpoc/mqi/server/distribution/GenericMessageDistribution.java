@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
@@ -63,7 +64,8 @@ public class GenericMessageDistribution<T> {
             final MessagePublicationController publication,
             final ApplicationProperties properties,
             final ProductCategory category) {
-        LOGGER.info("Starting REST API for {}", category);
+    	String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
+        LOGGER.info("Starting REST API for {} exposed at {}", category, controllerMapping);
         this.messages = messages;
         this.publication = publication;
         this.properties = properties;
