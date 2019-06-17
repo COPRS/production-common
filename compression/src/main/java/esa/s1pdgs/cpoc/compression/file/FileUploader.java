@@ -78,7 +78,7 @@ public class FileUploader {
 				throw new InternalErrorException(
 						"The compressed product " + productPath + " does not exist, stopping upload");
 			}
-			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getClass());
+			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getFamily());
 			ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
 			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, productPath);
 //// 			// Upload per batch the output
