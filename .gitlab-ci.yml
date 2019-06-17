@@ -44,4 +44,4 @@ include:
   - local: metadata-catalog/.gitlab-ci.yml
   - local: mqi-server/.gitlab-ci.yml
   - local: scaler/.gitlab-ci.yml
-  - local: wrapper/.gitlab-ci.yml
+  #- local: wrapper/.gitlab-ci.yml
