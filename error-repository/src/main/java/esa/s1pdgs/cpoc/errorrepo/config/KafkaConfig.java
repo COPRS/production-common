@@ -22,7 +22,6 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.KafkaSubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
@@ -117,7 +116,7 @@ public class KafkaConfig {
         props.put(ProducerConfig.RETRIES_CONFIG, maxRetries);        
                 
         return new KafkaSubmissionClient(
-        		new KafkaTemplate<String, MqiGenericMessageDto<?>>(new DefaultKafkaProducerFactory<>(props))
+        		new KafkaTemplate<String, Object>(new DefaultKafkaProducerFactory<>(props))
         );
     }
 

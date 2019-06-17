@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 
 @Component
@@ -39,7 +40,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	public synchronized void saveFailedProcessing(FailedProcessingDto failedProcessing) {		
 		LOGGER.error("DEBUG INFO: getDto");
-		final MqiGenericMessageDto<?> dto = (MqiGenericMessageDto<?>) failedProcessing.getDto();
+		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
 		
 		LOGGER.error("DEBUG INFO: findOriginalMessage");
 		final MqiMessage message = findOriginalMessage(dto.getIdentifier());
@@ -132,5 +133,4 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	{
 		return mongoTemplate.findOne(query(where("identifier").is(id)), MqiMessage.class);	
 	}
-
 }
