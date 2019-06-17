@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.errorrepo.kafka.consumption;
+package esa.s1pdgs.cpoc.errorrepo.config;
 
 import java.util.HashMap;
 import java.util.Map;

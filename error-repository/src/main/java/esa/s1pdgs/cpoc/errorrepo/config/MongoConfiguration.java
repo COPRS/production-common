@@ -1,7 +1,7 @@
 /**
  * 
  */
-package esa.s1pdgs.cpoc.errorrepo;
+package esa.s1pdgs.cpoc.errorrepo.config;
 
 
 import java.util.ArrayList;
