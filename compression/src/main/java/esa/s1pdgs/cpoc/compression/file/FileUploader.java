@@ -71,8 +71,11 @@ public class FileUploader {
 		 List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 
 		try {
-			String zipFileName = job.getProductName()+".zip";
+			String zipFileName = job.getProductName()+".zip";			
     		 File workDir = new File(workingDir+"/"+zipFileName);
+    		 if (!workDir.exists()) {
+    			 throw new InternalErrorException("The compressed product "+workDir+" does not exist, stopping upload");
+    		 }
     		 ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
 			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, workDir);
 //// 			// Upload per batch the output
