@@ -30,11 +30,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.appcatalog.server.RestControllerTest;
-import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.rest.MqiLevelReportController;
 import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;

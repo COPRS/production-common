@@ -11,8 +11,8 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
-import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessage;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;

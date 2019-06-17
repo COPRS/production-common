@@ -10,7 +10,9 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 

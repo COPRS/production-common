@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.server.mqi.db;
+package esa.s1pdgs.cpoc.appcatalog.common;
 
 import java.util.Date;
 
