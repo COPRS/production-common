@@ -41,6 +41,12 @@ public class ErrorQueueConsumerConfig {
      */
     @Value("${kafka.poll-timeout}")
     private long kafkaPooltimeout;
+    
+    @Value("${kafka.max-pool-records}")
+    protected int kafkaMaxPoolRecords;
+
+    @Value("${kafka.session-timeout-ms}")
+    protected int kafkaSessionTimeoutMs;
 
     /**
      * Consumer configuration
@@ -55,6 +61,10 @@ public class ErrorQueueConsumerConfig {
                 StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 JsonDeserializer.class);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, kafkaMaxPoolRecords);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,
+                kafkaSessionTimeoutMs);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
         return props;
     }

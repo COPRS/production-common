@@ -22,8 +22,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
-import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
