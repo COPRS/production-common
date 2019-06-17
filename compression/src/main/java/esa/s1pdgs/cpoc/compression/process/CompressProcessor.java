@@ -153,7 +153,7 @@ public class CompressProcessor {
 		// Initialize the pool processor executor
 		PoolExecutorCallable procExecutor = new PoolExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
 																						// job),
-				"CompressionProcessor - process");
+				"CompressionProcessor - process", properties);
 		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 

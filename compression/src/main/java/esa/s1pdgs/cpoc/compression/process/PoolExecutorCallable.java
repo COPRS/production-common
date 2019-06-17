@@ -35,8 +35,7 @@ public class PoolExecutorCallable implements Callable<Void> {
 	/**
 	 * Application properties
 	 */
-	@Autowired
-	private ApplicationProperties properties;
+	private final ApplicationProperties properties;
 
 	/**
 	 * Will create one PoolProcessor per pool
@@ -45,8 +44,9 @@ public class PoolExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public PoolExecutorCallable(final CompressionJobDto job, final String prefixLogs) {
+	public PoolExecutorCallable(final CompressionJobDto job, final String prefixLogs, ApplicationProperties properties) {
 		this.job = job;
+		this.properties = properties;
 
 		this.execSrv = Executors.newFixedThreadPool(1);
 		this.completionSrv = new ExecutorCompletionService<>(execSrv);
