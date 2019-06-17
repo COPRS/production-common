@@ -47,7 +47,7 @@ public class FileUploader {
 	 */
 	protected static final String NOT_KEY_OBS = "IT_IS_NOT_A_KEY";
 
-	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
+	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "ZIP";
 
 	/**
 	 * OBS service
