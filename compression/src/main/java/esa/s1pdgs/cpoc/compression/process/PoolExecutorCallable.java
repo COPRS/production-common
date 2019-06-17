@@ -62,7 +62,8 @@ public class PoolExecutorCallable implements Callable<Void> {
 
 		final Reporting reporting = reportingFactory.newReporting(0);
 		reporting.reportStart("Start compression");
-
+		
+		LOGGER.debug("command={}, productName={}, workingDirectory={}",properties.getCommand(), job.getProductName(), properties.getWorkingDirectory());
 		completionSrv.submit(new TaskCallable(properties.getCommand(), job.getProductName(),
 				properties.getWorkingDirectory(), reporting));
 		reporting.reportStop("End compression");

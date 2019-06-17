@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -127,6 +128,11 @@ public class CompressProcessor {
 		}
 		if (message == null || message.getBody() == null) {
 			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
+			return;
+		}
+		if (message.getBody().getFamily().equals(ProductFamily.L0_SEGMENT)) {
+			//FIXME: Segment does contain productName and key null and this not working
+			LOGGER.info("Compression job is L0 segment. Deactivated due to incompatible data structure");
 			return;
 		}
 		appStatus.setProcessing(message.getIdentifier());
