@@ -17,7 +17,7 @@ COPY --from=build /app/compression/target/s1pro-core-compression-0.3.0-SNAPSHOT.
 RUN mkdir -p tmp
 
 RUN apt-get update && \
-		apt-get install -y openjdk-8-jre p7zip
+		apt-get install -y openjdk-8-jre p7zip wget
 
 COPY /config/start.sh start.sh
 COPY /config/compression.sh compression.sh
