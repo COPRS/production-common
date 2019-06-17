@@ -46,7 +46,7 @@ public class FileUploader {
 	 * Cannot be a key in obs
 	 */
 	protected static final String NOT_KEY_OBS = "IT_IS_NOT_A_KEY";
-	
+
 	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 
 	/**
@@ -68,16 +68,18 @@ public class FileUploader {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "FileUploader");
 		final Reporting reporting = reportingFactory.newReporting(0);
 
-		 List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+		List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 
 		try {
-			String zipFileName = job.getProductName()+".zip";			
-    		 File workDir = new File(workingDir+"/"+zipFileName);
-    		 if (!workDir.exists()) {
-    			 throw new InternalErrorException("The compressed product "+workDir+" does not exist, stopping upload");
-    		 }
-    		 ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
-			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, workDir);
+			String zipFileName = job.getProductName() + ".zip";
+			File productPath = new File(workingDir + "/" + zipFileName);
+			if (!productPath.exists()) {
+				throw new InternalErrorException(
+						"The compressed product " + productPath + " does not exist, stopping upload");
+			}
+			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getClass());
+			ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
+			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, productPath);
 //// 			// Upload per batch the output
 			processProducts(reportingFactory, uploadFile, outputToPublish);
 
@@ -87,9 +89,9 @@ public class FileUploader {
 			throw e;
 		}
 	}
-	
+
 	ProductFamily getCompressedProductFamily(ProductFamily inputFamily) {
-        return ProductFamily.fromValue(inputFamily.toString()+SUFFIX_ZIPPRODUCTFAMILY);
+		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
 	final void processProducts(final Reporting.Factory reportingFactory, final S3UploadFile uploadFile,
