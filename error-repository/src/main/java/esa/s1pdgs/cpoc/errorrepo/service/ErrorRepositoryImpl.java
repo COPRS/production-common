@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,12 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 
 @Component
 public class ErrorRepositoryImpl implements ErrorRepository {
+	
+	/**
+     * Logger
+     */
+    private static final Logger LOGGER =
+            LogManager.getLogger(ErrorRepositoryImpl.class);
 
 	private final MongoTemplate mongoTemplate;
 
@@ -36,13 +44,15 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		
 		if (message == null)
 		{
-			throw new IllegalArgumentException(
-					String.format(
-							"Could not find orginal request by id %s. Message was %s", 
-							dto.getIdentifier(),
-							failedProcessing
-					)
-			);			
+			String errmsg = String.format(
+					"Could not find orginal request by id %s. Message was %s", 
+					dto.getIdentifier(),
+					failedProcessing
+			);
+			
+			LOGGER.error(errmsg);
+			
+			throw new IllegalArgumentException(errmsg);			
 		}
 		failedProcessing
 			.lastAssignmentDate(message.getLastReadDate())
@@ -52,7 +62,10 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			.nbRetries(message.getNbRetries())
 			.creationDate(message.getCreationDate());
 		
+		LOGGER.error("DEBUG INFO: inserting failed processsing message into DB");
+		
 		mongoTemplate.insert(failedProcessing);
+		LOGGER.error("DEBUG INFO: inserted failed processsing message into DB");
 	}
 
 	@Override
