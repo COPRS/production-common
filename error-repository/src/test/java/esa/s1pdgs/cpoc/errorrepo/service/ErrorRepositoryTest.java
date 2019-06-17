@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.LevelProductsMessageDto;
 
@@ -26,7 +27,7 @@ public class ErrorRepositoryTest {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate);
+		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, SubmissionClient.NULL);
 	}
 
 	@Test

@@ -90,7 +90,8 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 					)
 			);			
 		}
-		kafkaSubmissionClient.resubmit(message);
+		kafkaSubmissionClient.resubmit(failedProcessing, dto);
+		
 		// no error? remove from error queue
 		mongoTemplate.remove(Long.parseLong(id));	
 	}
