@@ -6,13 +6,17 @@
    <description>Viveris POP Java PMD Ruleset</description>
    
    <!--  Overriding priorities for specific rules -->
-   <rule ref="rulesets/java/imports.xml/UnusedImports"><priority>2</priority></rule>
-   <rule ref="rulesets/java/unusedcode.xml/UnusedPrivateField"><priority>2</priority></rule>
-   <rule ref="rulesets/java/unusedcode.xml/UnusedPrivateMethod"><priority>2</priority></rule>
-   <rule ref="rulesets/java/unusedcode.xml/UnusedLocalVariable"><priority>2</priority></rule>
-   <rule ref="rulesets/java/naming.xml/BooleanGetMethodName"><priority>2</priority></rule>
-   <rule ref="rulesets/java/naming.xml/PackageCase"><priority>2</priority></rule>
    <rule ref="rulesets/java/coupling.xml/LawOfDemeter"><priority>4</priority></rule>
+   <rule ref="rulesets/java/imports.xml/UnusedImports"><priority>5</priority></rule>
+   <rule ref="rulesets/java/naming.xml/BooleanGetMethodName"><priority>5</priority></rule>
+   <rule ref="rulesets/java/naming.xml/ClassNamingConventions"><priority>5</priority></rule>
+   <rule ref="rulesets/java/naming.xml/MethodNamingConventions"><priority>5</priority></rule> 
+   <rule ref="rulesets/java/naming.xml/PackageCase"><priority>5</priority></rule>
+   <rule ref="rulesets/java/naming.xml/VariableNamingConventions"><priority>5</priority></rule>
+   <rule ref="rulesets/java/strictexception.xml/AvoidThrowingRawExceptionTypes"><priority>5</priority></rule>
+   <rule ref="rulesets/java/unusedcode.xml/UnusedLocalVariable"><priority>5</priority></rule>
+   <rule ref="rulesets/java/unusedcode.xml/UnusedPrivateField"><priority>5</priority></rule>
+   <rule ref="rulesets/java/unusedcode.xml/UnusedPrivateMethod"><priority>5</priority></rule>
    
    <!-- Default rulesets -->
    <rule ref="rulesets/java/design.xml/AbstractClassWithoutAbstractMethod"/>
@@ -58,7 +62,6 @@
    <rule ref="rulesets/java/basic.xml/AvoidThreadGroup"/>
    <rule ref="rulesets/java/strictexception.xml/AvoidThrowingNewInstanceOfSameException"/>
    <rule ref="rulesets/java/strictexception.xml/AvoidThrowingNullPointerException"/>
-   <rule ref="rulesets/java/strictexception.xml/AvoidThrowingRawExceptionTypes"/>
    <rule ref="rulesets/java/basic.xml/AvoidUsingHardCodedIP"/>
    <rule ref="rulesets/java/controversial.xml/AvoidUsingNativeCode"/>
    <rule ref="rulesets/java/basic.xml/AvoidUsingOctalValues"/>
@@ -76,7 +79,6 @@
    <rule ref="rulesets/java/basic.xml/CheckResultSet"/>
    <rule ref="rulesets/java/basic.xml/CheckSkipResult"/>
    <rule ref="rulesets/java/basic.xml/ClassCastExceptionWithToArray"/>
-   <rule ref="rulesets/java/naming.xml/ClassNamingConventions"/>
    <rule ref="rulesets/java/design.xml/ClassWithOnlyPrivateConstructorsShouldBeFinal"/>
    <rule ref="rulesets/java/clone.xml/CloneMethodMustBePublic"/>
    <rule ref="rulesets/java/clone.xml/CloneMethodMustImplementCloneable"/>
@@ -177,7 +179,6 @@
    <rule ref="rulesets/java/coupling.xml/LooseCoupling"/>
    <rule ref="rulesets/java/j2ee.xml/MDBAndSessionBeanNamingConvention"/>
    <rule ref="rulesets/java/optimizations.xml/MethodArgumentCouldBeFinal"/>
-   <rule ref="rulesets/java/naming.xml/MethodNamingConventions"/>
    <rule ref="rulesets/java/sunsecure.xml/MethodReturnsInternalArray"/>
    <rule ref="rulesets/java/naming.xml/MethodWithSameNameAsEnclosingClass"/>
    <rule ref="rulesets/java/naming.xml/MisleadingVariableName"/>
@@ -287,6 +288,5 @@
    <rule ref="rulesets/java/unnecessary.xml/UselessParentheses"/>
    <rule ref="rulesets/java/unnecessary.xml/UselessQualifiedThis"/>
    <rule ref="rulesets/java/strings.xml/UselessStringValueOf"/>
-   <rule ref="rulesets/java/naming.xml/VariableNamingConventions"/>
    <rule ref="rulesets/java/braces.xml/WhileLoopsMustUseBraces"/>
 </ruleset>
