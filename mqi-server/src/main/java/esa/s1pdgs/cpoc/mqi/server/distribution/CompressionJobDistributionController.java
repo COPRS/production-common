@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.mqi.server.consumption.MessageConsumptionController;
 import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 
 @RestController
-@RequestMapping(path = "/messages/compression_jobs")
+@RequestMapping(path = "/messages/compressed_products")
 public class CompressionJobDistributionController extends GenericMessageDistribution<CompressionJobDto> {
 
     /**
