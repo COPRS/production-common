@@ -37,10 +37,13 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	}
 
 	@Override
-	public void saveFailedProcessing(FailedProcessingDto failedProcessing) {		
+	public void saveFailedProcessing(FailedProcessingDto failedProcessing) {
+		LOGGER.error("DEBUG INFO: getDto");
 		final MqiGenericMessageDto<?> dto = (MqiGenericMessageDto<?>) failedProcessing.getDto();
 		
+		LOGGER.error("DEBUG INFO: findOriginalMessage");
 		final MqiMessage message = findOriginalMessage(dto.getIdentifier());
+		LOGGER.error("DEBUG INFO: foundOriginalMessage");
 		
 		if (message == null)
 		{
@@ -54,6 +57,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			
 			throw new IllegalArgumentException(errmsg);			
 		}
+		LOGGER.error("DEBUG INFO: appending addtional information");
 		failedProcessing
 			.lastAssignmentDate(message.getLastReadDate())
 			.sendingPod(message.getReadingPod())
