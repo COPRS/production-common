@@ -64,8 +64,10 @@ public class ErrorQueueConsumerConfig {
      * @return
      */
     @Bean
-    public ConsumerFactory<String, FailedProcessingDto<?>> consumerFactory() {
-    	return new DefaultKafkaConsumerFactory<String,FailedProcessingDto<?>>(consumerConfigs());
+    public ConsumerFactory<String, FailedProcessingDto> consumerFactory() {
+    	return new DefaultKafkaConsumerFactory<String,FailedProcessingDto>(consumerConfigs(), 
+    			new StringDeserializer(),
+                new JsonDeserializer<>(FailedProcessingDto.class));
     }
 
     /**
@@ -74,8 +76,8 @@ public class ErrorQueueConsumerConfig {
      * @return
      */
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, FailedProcessingDto<?>>> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, FailedProcessingDto<?>> factory =
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, FailedProcessingDto>> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, FailedProcessingDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
