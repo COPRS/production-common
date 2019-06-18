@@ -16,7 +16,6 @@ import com.mongodb.client.result.DeleteResult;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.errorrepo.seq.SequenceDao;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 @Component
@@ -29,13 +28,11 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	private final MongoTemplate mongoTemplate;
 	private final SubmissionClient kafkaSubmissionClient;
-	private final SequenceDao seq;
 
 	@Autowired
-	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate, final SubmissionClient kafkaSubmissionClient, final SequenceDao seq) {
+	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate, final SubmissionClient kafkaSubmissionClient) {
 		this.mongoTemplate = mongoTemplate;
 		this.kafkaSubmissionClient = kafkaSubmissionClient;
-		this.seq = seq;
 	}
 
 	public synchronized void saveFailedProcessing(FailedProcessingDto failedProcessing) {
@@ -51,7 +48,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			throw new IllegalArgumentException(errmsg);
 		}
 		// TODO fix ide provision
-		failedProcessing.setIdentifier(seq.getNextSequenceId("mqiMessage"));
+		failedProcessing.setIdentifier(message.getIdentifier());
 		failedProcessing
 				.partition(message.getPartition())
 				.offset(message.getOffset())
@@ -93,7 +90,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
 
-		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
+		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();	
 		kafkaSubmissionClient.resubmit(failedProcessing, dto.getBody());
 		deleteFailedProcessing(id);
 	}
