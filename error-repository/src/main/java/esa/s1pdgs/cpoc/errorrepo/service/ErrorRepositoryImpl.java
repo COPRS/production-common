@@ -76,6 +76,11 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	@Override
 	public FailedProcessingDto getFailedProcessingById(long id) {
 		FailedProcessingDto failedProcessing = mongoTemplate.findOne(query(where("identifier").is(id)), FailedProcessingDto.class);
+		
+		if (failedProcessing == null) {
+			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
+		}
+
 		return failedProcessing;
 	}
 
