@@ -10,5 +10,5 @@ public interface ProcessingsRepository {
 
 	List<ProcessingDto> getProcessings();
 
-	ProcessingDto getProcessing(String id);
+	ProcessingDto getProcessing(long id);
 }

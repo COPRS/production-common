@@ -13,7 +13,7 @@ public interface ErrorRepository {
 	List<FailedProcessingDto> getFailedProcessings();
 
 	@SuppressWarnings("rawtypes")
-	FailedProcessingDto getFailedProcessingsById(long id);
+	FailedProcessingDto getFailedProcessingById(long id);
 
 	void restartAndDeleteFailedProcessing(long id);
 
