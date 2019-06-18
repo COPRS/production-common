@@ -51,7 +51,8 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 			throw new IllegalArgumentException(errmsg);
 		}
-		failedProcessing.setIdentifier(seq.getNextSequenceId("errorMessage"));
+		// TODO fix ide provision
+		failedProcessing.setIdentifier(seq.getNextSequenceId("mqiMessage"));
 		failedProcessing
 				.partition(message.getPartition())
 				.offset(message.getOffset())
