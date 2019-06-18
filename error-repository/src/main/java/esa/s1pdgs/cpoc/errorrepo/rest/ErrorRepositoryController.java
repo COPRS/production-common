@@ -99,7 +99,7 @@ public class ErrorRepositoryController {
 
 		try {
 
-			failedProcessing = errorRepository.getFailedProcessingsById(id);
+			failedProcessing = errorRepository.getFailedProcessingsById(Long.parseLong(id));
 
 			if (failedProcessing == null) {
 				LOGGER.warn("failed processing not found, id {}", id);
@@ -134,7 +134,7 @@ public class ErrorRepositoryController {
 		}
 
 		try {
-			errorRepository.restartAndDeleteFailedProcessing(id);
+			errorRepository.restartAndDeleteFailedProcessing(Long.parseLong(id));
 		} catch (IllegalArgumentException e) {
 			LOGGER.warn("failed processing not found, id {}", id);
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -167,7 +167,7 @@ public class ErrorRepositoryController {
 		}
 
 		try {
-			errorRepository.deleteFailedProcessing(id);
+			errorRepository.deleteFailedProcessing(Long.parseLong(id));
 
 		} catch (IllegalArgumentException e) {
 			LOGGER.warn("failed processing not found, id {}", id);

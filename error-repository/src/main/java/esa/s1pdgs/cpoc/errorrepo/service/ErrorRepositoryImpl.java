@@ -65,14 +65,14 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public FailedProcessingDto getFailedProcessingsById(String id) {
-		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
+	public FailedProcessingDto getFailedProcessingsById(long id) {
+		FailedProcessingDto failedProcessing = mongoTemplate.findOne(query(where("identifier").is(id)), FailedProcessingDto.class);
 		return failedProcessing;
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public synchronized void restartAndDeleteFailedProcessing(String id) {
+	public synchronized void restartAndDeleteFailedProcessing(long id) {
 		final FailedProcessingDto failedProcessing = getFailedProcessingsById(id);
 
 		if (failedProcessing == null) {
@@ -89,13 +89,14 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		kafkaSubmissionClient.resubmit(failedProcessing, dto);
 
 		// no error? remove from error queue
-		mongoTemplate.remove(Long.parseLong(id));
+		mongoTemplate.remove(id);	
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public void deleteFailedProcessing(String id) {
-		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
+	public synchronized void deleteFailedProcessing(String id) {
+
+		final FailedProcessingDto failedProcessing = getFailedProcessingsById(id);
 		if (failedProcessing == null) {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
