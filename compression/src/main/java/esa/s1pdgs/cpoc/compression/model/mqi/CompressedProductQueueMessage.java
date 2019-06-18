@@ -8,8 +8,9 @@ public class CompressedProductQueueMessage extends QueueMessage {
     
 	private String objectStorageKey;;
     
-	public CompressedProductQueueMessage(ProductFamily family, String productName) {
+	public CompressedProductQueueMessage(ProductFamily family, String productName, String objectStorageKey) {
 		super(family, productName);
+		setObjectStorageKey(objectStorageKey);
 	}
 
 	public String getObjectStorageKey() {

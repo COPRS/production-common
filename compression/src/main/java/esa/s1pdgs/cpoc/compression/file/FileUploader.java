@@ -78,9 +78,14 @@ public class FileUploader {
 				throw new InternalErrorException(
 						"The compressed product " + productPath + " does not exist, stopping upload");
 			}
+						
 			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getFamily());
-			ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
-			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, productPath);
+			ProductFamily zipProductFamily = getCompressedProductFamily(job.getFamily());
+			S3UploadFile uploadFile = new S3UploadFile(zipProductFamily, zipFileName, productPath);
+			
+			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName,zipFileName);
+			outputToPublish.add(cpqm);
+			
 //// 			// Upload per batch the output
 			processProducts(reportingFactory, uploadFile, outputToPublish);
 
@@ -102,6 +107,7 @@ public class FileUploader {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
 		this.obsService.uploadFilesPerBatch(Collections.singletonList(uploadFile));
+
 
 		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
 	}

@@ -305,16 +305,14 @@ public class CompressProcessor {
 
 	private void eraseDirectory(final CompressionJobDto job) {
 		try {
-//                LOGGER.info("{} Erasing local working directory",
-//                        getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));
+                LOGGER.info("Erasing local working directory for job {}",job);
 			Path p = Paths.get(properties.getWorkingDirectory());
 			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
 					.peek(System.out::println).forEach(File::delete);
 		} catch (IOException e) {
-//                LOGGER.error(
-//                        "{} [code {}] Failed to erase local working directory",
-//                        getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job),
-//                        ErrorCode.INTERNAL_ERROR.getCode());
+                LOGGER.error(
+                        "{} [code {}] Failed to erase local working directory", job,
+                        ErrorCode.INTERNAL_ERROR.getCode());
 			this.appStatus.setError("PROCESSING");
 		}
 	}
