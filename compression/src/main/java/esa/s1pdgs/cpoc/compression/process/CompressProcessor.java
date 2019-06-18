@@ -216,7 +216,7 @@ public class CompressProcessor {
 					ace.getCode().getCode(), ace.getLogMessage());
 			report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 
-			failedProc.processingType(CompressionJobDto.class.getName()).topic(message.getInputKey())
+			failedProc.processingType(message.getInputKey()).topic(message.getInputKey())
 					.processingStatus(MqiStateMessageEnum.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
 					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
 					.processingDetails(message);
@@ -230,7 +230,7 @@ public class CompressProcessor {
 					ErrorCode.INTERNAL_ERROR.getCode());
 			report.reportError("Interrupted job processing");
 
-			failedProc.processingType(CompressionJobDto.class.getName()).topic(message.getInputKey())
+			failedProc.processingType(message.getInputKey()).topic(message.getInputKey())
 					.processingStatus(MqiStateMessageEnum.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
 					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
 					.processingDetails(message);

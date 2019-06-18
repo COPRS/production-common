@@ -294,7 +294,7 @@ public class JobProcessor {
                     ace.getCode().getCode(), ace.getLogMessage());
             report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 
-            failedProc.processingType(LevelJobDto.class.getName())
+            failedProc.processingType(message.getInputKey())
             	.topic(message.getInputKey())
 	    		.processingStatus(MqiStateMessageEnum.READ)
 	    		.productCategory(ProductCategory.LEVEL_JOBS)
