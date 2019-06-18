@@ -69,7 +69,7 @@ public class FileDownloader {
 
 		final Reporting reporting = new LoggerReporting.Factory(LOGGER, "FileDownloader").newReporting(0);
 
-		reporting.reportStart("Start download of product to compress {} " + inputProduct);
+		reporting.reportStart("Start download of product to compress " + inputProduct);
 
 		// Download input from object storage in batch
 		try {
@@ -103,9 +103,14 @@ public class FileDownloader {
 	 */
 	protected S3DownloadFile buildInput() throws InternalErrorException, UnknownFamilyException {
 		LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
+		
+		if (job.getProductName() == null) {
+			throw new InternalErrorException("productName to download cannot be null");
+		}
 
-//		LOGGER.info("Input {}-{} will be stored in {}", job.getFamily(), job.getInput().getContentRef(), job.getInput().getLocalPath());
-		return new S3DownloadFile(job.getFamily(), job.getProductName(),this.localWorkingDir+"/"+job.getProductName());
+		String targetFile = this.localWorkingDir+"/"+job.getProductName();
+		LOGGER.info("Input {} will be stored in {}", job.getProductName(), targetFile);
+		return new S3DownloadFile(job.getFamily(), job.getProductName(),targetFile);
 
 	}
 
