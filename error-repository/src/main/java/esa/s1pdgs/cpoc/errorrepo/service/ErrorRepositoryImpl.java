@@ -93,16 +93,9 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		deleteFailedProcessing(id);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public synchronized void deleteFailedProcessing(long id) {
-
-		final FailedProcessingDto failedProcessing = getFailedProcessingsById(id);
-		if (failedProcessing == null) {
-			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
-		}
-
-		DeleteResult result = mongoTemplate.remove(failedProcessing);
+		DeleteResult result = mongoTemplate.remove(query(where("identifier").is(id)), FailedProcessingDto.class);
 		if (result.getDeletedCount() == 0) {
 			throw new RuntimeException(String.format("Could not delete failed request with id %s", id));
 		}
