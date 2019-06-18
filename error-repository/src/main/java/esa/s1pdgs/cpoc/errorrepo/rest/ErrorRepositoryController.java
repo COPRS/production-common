@@ -47,6 +47,7 @@ public class ErrorRepositoryController {
 	 * @param apiKey token agreed by server and client for authentication
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings")
 	public ResponseEntity<List<FailedProcessingDto>> getFailedProcessings(@RequestHeader("ApiKey") String apiKey) {
 
@@ -82,6 +83,7 @@ public class ErrorRepositoryController {
 	 * @param id     failed processing Id
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
 	public ResponseEntity<FailedProcessingDto> getFailedProcessingsById(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
@@ -119,6 +121,7 @@ public class ErrorRepositoryController {
 	 * @param id     failed processing Id
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
 	public ResponseEntity restartFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
@@ -148,6 +151,7 @@ public class ErrorRepositoryController {
 	 * @param id     failed processing Id
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
 	public ResponseEntity deleteFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
