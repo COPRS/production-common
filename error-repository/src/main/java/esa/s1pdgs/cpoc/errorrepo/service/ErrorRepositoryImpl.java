@@ -89,7 +89,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		}
 
 		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
-		kafkaSubmissionClient.resubmit(failedProcessing, dto);
+		kafkaSubmissionClient.resubmit(failedProcessing, dto.getBody());
 		deleteFailedProcessing(id);
 	}
 
