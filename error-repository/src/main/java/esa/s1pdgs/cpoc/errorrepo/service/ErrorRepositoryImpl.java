@@ -74,7 +74,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public FailedProcessingDto getFailedProcessingsById(long id) {
+	public FailedProcessingDto getFailedProcessingById(long id) {
 		FailedProcessingDto failedProcessing = mongoTemplate.findOne(query(where("identifier").is(id)), FailedProcessingDto.class);
 		return failedProcessing;
 	}
@@ -82,7 +82,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public synchronized void restartAndDeleteFailedProcessing(long id) {
-		final FailedProcessingDto failedProcessing = getFailedProcessingsById(id);
+		final FailedProcessingDto failedProcessing = getFailedProcessingById(id);
 
 		if (failedProcessing == null) {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
