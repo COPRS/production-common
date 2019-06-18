@@ -94,7 +94,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public synchronized void deleteFailedProcessing(String id) {
+	public synchronized void deleteFailedProcessing(long id) {
 
 		final FailedProcessingDto failedProcessing = getFailedProcessingsById(id);
 		if (failedProcessing == null) {
