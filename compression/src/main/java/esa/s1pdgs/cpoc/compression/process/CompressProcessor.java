@@ -66,11 +66,11 @@ public class CompressProcessor {
 	 * Output processsor
 	 */
 	private final ObsService obsService;
-	
-    /**
-     * Output processsor
-     */
-    private final OutputProducerFactory producerFactory;
+
+	/**
+	 * Output processsor
+	 */
+	private final OutputProducerFactory producerFactory;
 
 	/**
 	 * MQI service for reading message
@@ -81,13 +81,12 @@ public class CompressProcessor {
 	 * MQI service for stopping the MQI
 	 */
 	private final StatusService mqiStatusService;
-	
+
 	private final ErrorRepoAppender errorAppender;
-	
+
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
-			final ObsService obsService,
-			final OutputProducerFactory producerFactory,
+			final ObsService obsService, final OutputProducerFactory producerFactory,
 			@Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> mqiService,
 			final ErrorRepoAppender errorAppender,
 			@Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
@@ -101,10 +100,10 @@ public class CompressProcessor {
 		this.errorAppender = errorAppender;
 	}
 
-    /**
-     * Consume and execute jobs
-     */
-    @Scheduled(fixedDelayString = "${compression.fixed-delay-ms}", initialDelayString = "${compression.init-delay-poll-ms}")
+	/**
+	 * Consume and execute jobs
+	 */
+	@Scheduled(fixedDelayString = "${compression.fixed-delay-ms}", initialDelayString = "${compression.init-delay-poll-ms}")
 	public void process() {
 		LOGGER.trace("[MONITOR] [step 0] Waiting message");
 
@@ -131,7 +130,7 @@ public class CompressProcessor {
 			return;
 		}
 		if (message.getBody().getFamily().equals(ProductFamily.L0_SEGMENT)) {
-			//FIXME: Segment does contain productName and key null and this not working
+			// FIXME: Segment does contain productName and key null and this not working
 			LOGGER.info("Compression job is L0 segment. Deactivated due to incompatible data structure");
 			return;
 		}
@@ -152,7 +151,7 @@ public class CompressProcessor {
 
 		// Initialize the pool processor executor
 		CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
-																						// job),
+																					// job),
 				"CompressionProcessor - process", properties);
 		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
@@ -181,9 +180,8 @@ public class CompressProcessor {
 		int step = 0;
 		boolean ackOk = false;
 		String errorMessage = "";
-		
-        final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failedProc =  
-        		new FailedProcessingDto<GenericMessageDto<CompressionJobDto>>();
+
+		final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failedProc = new FailedProcessingDto<GenericMessageDto<CompressionJobDto>>();
 
 		try {
 			step = 2;
@@ -192,7 +190,7 @@ public class CompressProcessor {
 			LOGGER.info("{} Preparing local working directory", "LOG_INPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT
 					job);
 			fileDownloader.processInputs();
-			
+
 			step = 3;
 			LOGGER.info("{} Starting process executor", "LOG PROCESS"// getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS
 					, job);
@@ -204,7 +202,7 @@ public class CompressProcessor {
 			checkThreadInterrupted();
 			LOGGER.info("{} Processing l0 outputs", "LOG_OUTPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT
 					job);
-			
+
 			fileUploader.processOutput();
 
 			ackOk = true;
@@ -217,16 +215,12 @@ public class CompressProcessor {
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ace.getCode().getCode(), ace.getLogMessage());
 			report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
-			
-            failedProc.processingType(CompressionJobDto.class.getName())
-      			.topic(message.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
-	    		.productCategory(ProductCategory.COMPRESSED_PRODUCTS)
-	    		.failedPod(properties.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(message);   
-			
+
+			failedProc.processingType(CompressionJobDto.class.getName()).topic(message.getInputKey())
+					.processingStatus(MqiStateMessageEnum.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
+					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
+					.processingDetails(message);
+
 		} catch (InterruptedException e) {
 			ackOk = false;
 			errorMessage = String.format(
@@ -235,17 +229,13 @@ public class CompressProcessor {
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ErrorCode.INTERNAL_ERROR.getCode());
 			report.reportError("Interrupted job processing");
-			
-		     failedProc.processingType(CompressionJobDto.class.getName())
-	   			.topic(message.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
-	    		.productCategory(ProductCategory.COMPRESSED_PRODUCTS)
-	    		.failedPod(properties.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(message);
-			
-			cleanCompressionProcessing(job,procExecutorSrv);
+
+			failedProc.processingType(CompressionJobDto.class.getName()).topic(message.getInputKey())
+					.processingStatus(MqiStateMessageEnum.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
+					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
+					.processingDetails(message);
+
+			cleanCompressionProcessing(job, procExecutorSrv);
 		}
 
 		// Ack and check if application shall stopped
@@ -305,14 +295,13 @@ public class CompressProcessor {
 
 	private void eraseDirectory(final CompressionJobDto job) {
 		try {
-                LOGGER.info("Erasing local working directory for job {}",job);
+			LOGGER.info("Erasing local working directory for job {}", job);
 			Path p = Paths.get(properties.getWorkingDirectory());
 			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
 					.peek(System.out::println).forEach(File::delete);
 		} catch (IOException e) {
-                LOGGER.error(
-                        "{} [code {}] Failed to erase local working directory", job,
-                        ErrorCode.INTERNAL_ERROR.getCode());
+			LOGGER.error("{} [code {}] Failed to erase local working directory", job,
+					ErrorCode.INTERNAL_ERROR.getCode());
 			this.appStatus.setError("PROCESSING");
 		}
 	}
@@ -324,7 +313,8 @@ public class CompressProcessor {
 	 * @param ackOk
 	 * @param errorMessage
 	 */
-	protected void ackProcessing(final GenericMessageDto<CompressionJobDto> dto, final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failed, final boolean ackOk,
+	protected void ackProcessing(final GenericMessageDto<CompressionJobDto> dto,
+			final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failed, final boolean ackOk,
 			final String errorMessage) {
 		boolean stopping = appStatus.getStatus().isStopping();
 
@@ -337,13 +327,13 @@ public class CompressProcessor {
 		}
 
 		// Check status
-//        LOGGER.info("{} Checking status consumer",
-//                getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, dto.getBody()));
+        LOGGER.info("Checking status consumer {}", dto.getBody());
 		if (appStatus.getStatus().isStopping()) {
 			// TODO send stop to the MQI
 			try {
 				mqiStatusService.stop();
 			} catch (AbstractCodedException ace) {
+				LOGGER.error("MQI service couldn't be stopped {}",ace);
 //                LOGGER.error("{} {} Checking status consumer",
 //                        getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS,
 //                                dto.getBody()),
@@ -363,11 +353,11 @@ public class CompressProcessor {
 	 */
 	protected void ackNegatively(final boolean stop, final GenericMessageDto<CompressionJobDto> dto,
 			final String errorMessage) {
-//        LOGGER.info("{} Acknowledging negatively",
-//                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
+        LOGGER.info("Acknowledging negatively {} ",dto.getBody());
 		try {
 			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop));
 		} catch (AbstractCodedException ace) {
+			LOGGER.error("Unable to confirm negatively request:{}",ace);
 //            LOGGER.error("{} [step 5] {} [code {}] {}",
 //                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
 //                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
@@ -378,11 +368,11 @@ public class CompressProcessor {
 	}
 
 	protected void ackPositively(final boolean stop, final GenericMessageDto<CompressionJobDto> dto) {
-//        LOGGER.info("{} Acknowledging positively",
-//                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
+		LOGGER.info("Acknowledging positively {}", dto.getBody());
 		try {
 			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));
 		} catch (AbstractCodedException ace) {
+			LOGGER.error("Unable to confirm positively request:{}",ace);
 //            LOGGER.error("{} [step 5] {} [code {}] {}",
 //                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
 //                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
