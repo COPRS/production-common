@@ -134,8 +134,11 @@ public class ErrorRepositoryController {
 		}
 
 		try {
-			// TODO return 404 in case processing is not found
 			errorRepository.restartAndDeleteFailedProcessing(id);
+		} catch (IllegalArgumentException e) {
+			LOGGER.warn("failed processing not found, id {}", id);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 		} catch (RuntimeException e) {
 			LOGGER.error("error while restarting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -164,11 +167,11 @@ public class ErrorRepositoryController {
 		}
 
 		try {
-			boolean deleted = errorRepository.deleteFailedProcessing(id);
-			if (!deleted) {
-				LOGGER.warn("failed processing not found, id {}", id);
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
+			errorRepository.deleteFailedProcessing(id);
+
+		} catch (IllegalArgumentException e) {
+			LOGGER.warn("failed processing not found, id {}", id);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 		} catch (RuntimeException e) {
 			LOGGER.error("error while deleting the failed processings with id {}:{}", id, e);

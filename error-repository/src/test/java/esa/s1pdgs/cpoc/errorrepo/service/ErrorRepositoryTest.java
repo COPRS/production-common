@@ -2,7 +2,9 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -74,6 +76,13 @@ public class ErrorRepositoryTest {
 	}
 
 	@Test
+	public void getFailedProcessingByIdWhenNotFound() {
+
+		FailedProcessingDto failedProcessing = errorRepository.getFailedProcessingsById("123");
+		assertNull(failedProcessing);
+	}
+
+	@Test
 	public void deleteFailedProcessing() {
 
 		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
@@ -98,8 +107,46 @@ public class ErrorRepositoryTest {
 
 		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
 
-		assertTrue(errorRepository.deleteFailedProcessing("123"));
-		assertFalse(errorRepository.deleteFailedProcessing("4"));
+		errorRepository.deleteFailedProcessing("123");
+		try {
+			errorRepository.deleteFailedProcessing("4");
+			fail("IllegalArgumentException expected");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+	}
+
+	@Test
+	public void deleteFailedProcessingWhenNotSucceeded() {
+
+		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
+		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		fpDto.setIdentifier(123);
+		fpDto.setDto(levelProductsMsgDto);
+
+		doReturn(fpDto).when(mongoTemplate).findById("123", FailedProcessingDto.class);
+		DeleteResult deleteResult = new DeleteResult() {
+
+			@Override
+			public boolean wasAcknowledged() {
+				return true;
+			}
+
+			@Override
+			public long getDeletedCount() {
+
+				return 0;
+			}
+		};
+
+		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
+
+		try {
+			errorRepository.deleteFailedProcessing("123");
+			fail("IllegalArgumentException expected");
+		} catch (RuntimeException e) {
+			// expected
+		}
 	}
 
 	@Test
@@ -116,7 +163,26 @@ public class ErrorRepositoryTest {
 
 		errorRepository.saveFailedProcessing(fpDto);
 		verify(mongoTemplate, times(1)).insert(fpDto);
+	}
 
+	@Test
+	public void saveFailedProcessingWhenMessageNotFound() {
+
+		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
+		levelProductsMsgDto.setIdentifier(1);
+		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		fpDto.setIdentifier(123);
+		fpDto.setDto(levelProductsMsgDto);
+
+		doReturn(null).when(mongoTemplate).findOne(any(), eq(MqiMessage.class));
+
+		try {
+			errorRepository.saveFailedProcessing(fpDto);
+			fail("IllegalArgumentException expected");
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+		verify(mongoTemplate, times(0)).insert(fpDto);
 	}
 
 	@Test

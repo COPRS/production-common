@@ -17,5 +17,5 @@ public interface ErrorRepository {
 
 	void restartAndDeleteFailedProcessing(String id);
 
-	boolean deleteFailedProcessing(String id);
+	void deleteFailedProcessing(String id);
 }
