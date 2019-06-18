@@ -77,7 +77,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public FailedProcessingDto getFailedProcessingsById(String id) {
-		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
+		FailedProcessingDto failedProcessing = mongoTemplate.findOne(query(where("identifier").is(id)), FailedProcessingDto.class);
 		return failedProcessing;
 	}
 
