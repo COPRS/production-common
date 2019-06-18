@@ -5,7 +5,9 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +31,14 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 
 	@Override
 	public List<String> getProcessingTypes() {
-		final List<String> result = new ArrayList<>();
+		final Set<String> result = new HashSet<>();
 		
 		final MongoCursor<String> cursor = mongoTemplate.getCollection("mqiMessage")
 			    .distinct("topic", String.class).iterator();
 		while (cursor.hasNext()) {
 			result.add(cursor.next());
 		}
-		return result;
+		return new ArrayList<>(result);
 	}
 
 	@Override
