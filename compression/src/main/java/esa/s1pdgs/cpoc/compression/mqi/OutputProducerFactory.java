@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.compression.model.mqi.FileQueueMessage;
-import esa.s1pdgs.cpoc.compression.model.mqi.ObsQueueMessage;
+import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 @Service
 public class OutputProducerFactory {
@@ -25,22 +25,7 @@ public class OutputProducerFactory {
     /**
      * MQI client for LEVEL_SEGMENTS
      */
-//    private final GenericMqiService<CompressionJobDto> senderCompression;
-
-    /**
-     * MQI client for LEVEL_PRODUCTS
-     */
-//    private final GenericMqiService<LevelProductDto> senderProducts;
-
-    /**
-     * MQI client for LEVEL_REPORTS
-     */
-//    private final GenericMqiService<LevelReportDto> senderReports;
-
-    /**
-     * MQI client for errors
-     */
-//    private final ErrorService senderErrors;
+    private final GenericMqiService<CompressionJobDto> senderCompression;
 
     /**
      * Constructor
@@ -51,15 +36,8 @@ public class OutputProducerFactory {
     @Autowired
     public OutputProducerFactory(
             @Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> senderCompressed
-            //@Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> senderProducts
-            //@Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports,
-            //@Qualifier("mqiServiceForErrors") final ErrorService senderErrors
             ) {
-//    	this.senderCompression = senderCompressed;
-//        this.senderSegments = senderSegments;
-//        this.senderProducts = senderProducts;
-//        this.senderReports = senderReports;
-//        this.senderErrors = senderErrors;
+    	this.senderCompression = senderCompressed;
     }
 
     /**
@@ -68,59 +46,11 @@ public class OutputProducerFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final FileQueueMessage msg,
+    public void sendOutput(final CompressedProductQueueMessage msg,
             GenericMessageDto<CompressionJobDto> inputMessage)
             throws AbstractCodedException {
-//        LevelReportDto dtoReport = new LevelReportDto(msg.getProductName(),
-//                FileUtils.readFile(msg.getFile()), msg.getFamily());
-//        senderReports.publish(new GenericPublicationMessageDto<LevelReportDto>(
-//                inputMessage.getIdentifier(), msg.getFamily(), dtoReport));
+    	CompressionJobDto dto = new CompressionJobDto(msg.getProductName(),  msg.getFamily(), msg.getObjectStorageKey());
+    	senderCompression.publish(new GenericPublicationMessageDto<CompressionJobDto>(inputMessage.getIdentifier(), msg.getFamily(), dto));
     }
 
-//    /**
-//     * Send an output in right topic according its family
-//     * 
-//     * @param msg
-//     * @throws AbstractCodedException
-//     */
-    public void sendOutput(final ObsQueueMessage msg,
-            GenericMessageDto<CompressionJobDto> inputMessage)
-            throws AbstractCodedException {
-    	//TODO
-//        if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
-//            LevelSegmentDto dtoProduct =
-//                    new LevelSegmentDto(msg.getProductName(), msg.getKeyObs(),
-//                            msg.getFamily(), msg.getProcessMode());
-//            senderSegments
-//                    .publish(new GenericPublicationMessageDto<LevelSegmentDto>(
-//                            inputMessage.getIdentifier(), msg.getFamily(),
-//                            dtoProduct));
-//        } else {
-//            LevelProductDto dtoProduct =
-//                    new LevelProductDto(msg.getProductName(), msg.getKeyObs(),
-//                            msg.getFamily(), msg.getProcessMode());
-//            GenericPublicationMessageDto<LevelProductDto> messageToPublish =
-//                    new GenericPublicationMessageDto<LevelProductDto>(
-//                            inputMessage.getIdentifier(), msg.getFamily(),
-//                            dtoProduct);
-//            messageToPublish.setInputKey(inputMessage.getInputKey());
-//            messageToPublish.setOutputKey(msg.getFamily().name());
-//            senderProducts.publish(messageToPublish);
-//        }
-    }
-//
-//    /**
-//     * Publish a error
-//     * 
-//     * @param message
-//     */
-//    public void sendError(final String message) {
-//        try {
-//        	ErrorDto errorDto = new ErrorDto();
-//        	errorDto.setMessage(message);
-//            senderErrors.publish(new GenericPublicationMessageDto<ErrorDto>(ProductFamily.BLANK, errorDto));
-//        } catch (AbstractCodedException e) {
-//            LOGGER.error(e.getLogMessage());
-//        }
-//    }
 }
