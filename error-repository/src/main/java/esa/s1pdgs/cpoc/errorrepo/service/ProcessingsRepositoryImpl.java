@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +11,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+
+import com.mongodb.client.MongoCursor;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.ProcessingDto;
@@ -24,11 +27,16 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 		this.mongoTemplate = mongoTemplate;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getProcessingTypes() {
-		return (List<String>) mongoTemplate.getCollection("mqiMessage")
-		    .distinct("topic", String.class);
+		final List<String> result = new ArrayList<>();
+		
+		final MongoCursor<String> cursor = mongoTemplate.getCollection("mqiMessage")
+			    .distinct("topic", String.class).iterator();
+		while (cursor.hasNext()) {
+			result.add(cursor.next());
+		}
+		return result;
 	}
 
 	@Override
