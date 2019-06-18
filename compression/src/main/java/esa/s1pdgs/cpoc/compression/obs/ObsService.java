@@ -201,6 +201,35 @@ public class ObsService {
             case L2_ACN:
             	ret = ObsFamily.L2_ACN;
             	break;
+            	
+            // COMPRESSED PRODUCTS
+            case AUXILIARY_FILE_ZIP:
+                ret = ObsFamily.AUXILIARY_FILE_ZIP;
+                break;
+            case L0_SLICE_ZIP:
+                ret = ObsFamily.L0_SLICE_ZIP;
+                break;
+            case L0_SEGMENT_ZIP:
+                ret = ObsFamily.L0_SEGMENT_ZIP;
+                break;
+            case L0_BLANK_ZIP:
+                ret = ObsFamily.L0_BLANK_ZIP;
+                break;
+            case L0_ACN_ZIP:
+                ret = ObsFamily.L0_ACN_ZIP;
+                break;
+            case L1_SLICE_ZIP:
+                ret = ObsFamily.L1_SLICE_ZIP;
+                break;
+            case L1_ACN_ZIP:
+                ret = ObsFamily.L1_ACN_ZIP;
+                break;
+            case L2_SLICE_ZIP:
+            	ret = ObsFamily.L2_SLICE_ZIP;
+            	break;
+            case L2_ACN_ZIP:
+            	ret = ObsFamily.L2_ACN_ZIP;
+            	break;
             default:
                 ret = ObsFamily.UNKNOWN;
                 break;

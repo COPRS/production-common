@@ -14,6 +14,7 @@ public enum ProductFamily {
     JOB_ORDER, BLANK,
     L2_ACN, L2_SLICE, L2_JOB, L2_REPORT,
     // ZIP Product families
+    L0_BLANK_ZIP,
     L0_SEGMENT_ZIP,AUXILIARY_FILE_ZIP,
     L0_ACN_ZIP, L1_ACN_ZIP, L2_ACN_ZIP,
     L0_SLICE_ZIP, L1_SLICE_ZIP,L2_SLICE_ZIP;
