@@ -50,7 +50,11 @@ public class OutputProducerFactory {
             GenericMessageDto<CompressionJobDto> inputMessage)
             throws AbstractCodedException {
     	CompressionJobDto dto = new CompressionJobDto(msg.getProductName(),  msg.getFamily(), msg.getObjectStorageKey());
-    	senderCompression.publish(new GenericPublicationMessageDto<CompressionJobDto>(inputMessage.getIdentifier(), msg.getFamily(), dto));
+    	GenericPublicationMessageDto messageDto = new GenericPublicationMessageDto<CompressionJobDto>(inputMessage.getIdentifier(), msg.getFamily(), dto);
+    	messageDto.setInputKey(inputMessage.getInputKey());
+    	messageDto.setOutputKey(dto.getFamily().name());
+    	
+    	senderCompression.publish(messageDto);
     }
 
 }
