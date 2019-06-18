@@ -8,7 +8,7 @@ public class CompressionJobDto {
 
 	private String productName;
 	private ProductFamily family = ProductFamily.AUXILIARY_FILE;
-	private String objectStorageKey;
+	private String objectStorageKey ="NOT_APPLICABLE"; // FIXME TAI: We might need to split this in two DTO
 
     /**
      * Default constructor
