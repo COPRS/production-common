@@ -67,7 +67,7 @@ public class ErrorRepositoryTest {
 		fpDtoToReturn.setIdentifier(123);
 		fpDtoToReturn.setDto(levelProductsMsgDto);
 
-		doReturn(fpDtoToReturn).when(mongoTemplate).findById("123", FailedProcessingDto.class);
+		doReturn(fpDtoToReturn).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
 
 		FailedProcessingDto<LevelProductsMessageDto> failedProcessing = errorRepository.getFailedProcessingsById(123);
 
@@ -90,7 +90,7 @@ public class ErrorRepositoryTest {
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(mongoTemplate).findById("123", FailedProcessingDto.class);
+		doReturn(fpDto).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
 		DeleteResult deleteResult = new DeleteResult() {
 
 			@Override
@@ -108,6 +108,9 @@ public class ErrorRepositoryTest {
 		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
 
 		errorRepository.deleteFailedProcessing(123);
+		
+		doReturn(null).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+		
 		try {
 			errorRepository.deleteFailedProcessing(4);
 			fail("IllegalArgumentException expected");
@@ -124,7 +127,7 @@ public class ErrorRepositoryTest {
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(mongoTemplate).findById("123", FailedProcessingDto.class);
+		doReturn(fpDto).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
 		DeleteResult deleteResult = new DeleteResult() {
 
 			@Override

@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Objects;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class CompressionJobDto {
@@ -45,8 +47,42 @@ public class CompressionJobDto {
 		this.objectStorageKey = objectStorageKey;
 	}
 
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return String.format(
+                "{objectStorageKey: %s, productName: %s, family: %s}",
+                objectStorageKey, productName, family);
+    }
 
-	
-	// TODO: Overwrite default object methods 
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(objectStorageKey, productName, family);
+    }
+
+    /**
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        boolean ret;
+        if (this == obj) {
+            ret = true;
+        } else if (obj == null || getClass() != obj.getClass()) {
+            ret = false;
+        } else {
+        	CompressionJobDto other = (CompressionJobDto) obj;
+            // field comparison
+            ret = Objects.equals(objectStorageKey, other.objectStorageKey)
+                    && productName == other.productName
+                    && Objects.equals(family, other.family);
+        }
+        return ret;
+    }
 
 }

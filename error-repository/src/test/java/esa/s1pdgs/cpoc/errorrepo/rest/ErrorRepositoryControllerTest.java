@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.errorrepo.rest;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,7 +33,7 @@ public class ErrorRepositoryControllerTest {
 	
 	@Autowired
 	private MockMvc uut;
-
+	
 	@Test
 	public void test_getFailedProcessings_200() throws Exception {
 		@SuppressWarnings("rawtypes")
@@ -62,10 +63,68 @@ public class ErrorRepositoryControllerTest {
 
 	@Test
 	public void test_deleteFailedProcessing_200() throws Exception {
-		uut.perform(delete("/errors/failedProcessings/1")
-			      .contentType(MediaType.APPLICATION_JSON)
-			      .header("ApiKey", API_KEY)
-        ).andExpect(status().isOk());
+
+		uut.perform(
+				delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
+				.andExpect(status().isOk());
 	}
+
+	@Test
+	public void test_deleteFailedProcessing_403() throws Exception {
+
+		uut.perform(delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				"wrong Key")).andExpect(status().isForbidden());
+	}
+
+	@Test
+	public void test_deleteFailedProcessing_404() throws Exception {
+
+		doThrow(new IllegalArgumentException()).when(errorRepository).deleteFailedProcessing(1);
+
+		uut.perform(
+				delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void test_deleteFailedProcessing_500() throws Exception {
+
+		doThrow(new RuntimeException()).when(errorRepository).deleteFailedProcessing(1);
+
+		uut.perform(
+				delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
+				.andExpect(status().isInternalServerError());
+	}
+
+	@Test
+	public void test_restartAndDeleteFailedProcessing_200() throws Exception {
+
+		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isOk());
+	}
+
+	@Test
+	public void test_restartAndDeleteFailedProcessing_403() throws Exception {
+
+		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				"wrong key")).andExpect(status().isForbidden());
+	}
+
+	@Test
+	public void test_restartAndDeleteFailedProcessing_404() throws Exception {
+
+		doThrow(new IllegalArgumentException()).when(errorRepository).restartAndDeleteFailedProcessing(1);
+		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void test_restartAndDeleteFailedProcessing_500() throws Exception {
+
+		doThrow(new RuntimeException()).when(errorRepository).restartAndDeleteFailedProcessing(1);
+		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isInternalServerError());
+	}
+	
 
 }
