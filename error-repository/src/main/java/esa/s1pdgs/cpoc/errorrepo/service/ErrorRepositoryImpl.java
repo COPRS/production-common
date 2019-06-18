@@ -89,16 +89,8 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		}
 
 		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
-		final MqiMessage message = findOriginalMessage(dto.getIdentifier());
-
-		if (message == null) {
-			throw new IllegalArgumentException(String.format("Could not find original request by id %s. Message was %s",
-					dto.getIdentifier(), failedProcessing));
-		}
 		kafkaSubmissionClient.resubmit(failedProcessing, dto);
-
-		// no error? remove from error queue
-		mongoTemplate.remove(id);	
+		deleteFailedProcessing(id);
 	}
 
 	@SuppressWarnings("rawtypes")

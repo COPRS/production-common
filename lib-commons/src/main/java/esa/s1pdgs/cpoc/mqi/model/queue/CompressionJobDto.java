@@ -79,7 +79,7 @@ public class CompressionJobDto {
         	CompressionJobDto other = (CompressionJobDto) obj;
             // field comparison
             ret = Objects.equals(objectStorageKey, other.objectStorageKey)
-                    && productName == other.productName
+                    && productName.equals(other.productName)
                     && Objects.equals(family, other.family);
         }
         return ret;

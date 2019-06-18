@@ -136,7 +136,7 @@ public class ErrorRepositoryController {
 		try {
 			errorRepository.restartAndDeleteFailedProcessing(Long.parseLong(id));
 		} catch (IllegalArgumentException e) {
-			LOGGER.warn("failed processing not found, id {}", id);
+			LOGGER.warn("failed processing not found, id {}: {}", id, e);
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 		} catch (RuntimeException e) {
