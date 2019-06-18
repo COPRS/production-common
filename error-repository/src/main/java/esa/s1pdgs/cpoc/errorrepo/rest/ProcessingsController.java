@@ -79,7 +79,7 @@ public class ProcessingsController {
 		}
 
 		try {
-			final ProcessingDto result = processingRepository.getProcessing(id);
+			final ProcessingDto result = processingRepository.getProcessing(Long.parseLong(id));
 			if (result == null) {
 				LOGGER.warn("processing not found, id {}", id);
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
