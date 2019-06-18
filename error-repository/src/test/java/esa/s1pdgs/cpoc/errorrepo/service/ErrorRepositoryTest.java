@@ -105,11 +105,11 @@ public class ErrorRepositoryTest {
 			}
 		};
 
-		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
+		doReturn(deleteResult).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
 
 		errorRepository.deleteFailedProcessing(123);
 		
-		doReturn(null).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+		doReturn(null).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
 		
 		try {
 			errorRepository.deleteFailedProcessing(4);

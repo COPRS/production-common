@@ -96,6 +96,11 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	@Override
 	public synchronized void deleteFailedProcessing(long id) {
 		DeleteResult result = mongoTemplate.remove(query(where("identifier").is(id)), FailedProcessingDto.class);
+		
+		if (result == null) {
+			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
+		}
+		
 		if (result.getDeletedCount() == 0) {
 			throw new RuntimeException(String.format("Could not delete failed request with id %s", id));
 		}
