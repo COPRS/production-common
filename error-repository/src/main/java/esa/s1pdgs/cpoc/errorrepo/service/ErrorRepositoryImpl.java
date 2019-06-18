@@ -39,12 +39,8 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	}
 
 	public synchronized void saveFailedProcessing(FailedProcessingDto failedProcessing) {		
-		LOGGER.error("DEBUG INFO: getDto");
 		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
-		
-		LOGGER.error("DEBUG INFO: findOriginalMessage");
 		final MqiMessage message = findOriginalMessage(dto.getIdentifier());
-		LOGGER.error("DEBUG INFO: foundOriginalMessage");
 
 		if (message == null)
 		{
@@ -58,7 +54,6 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			
 			throw new IllegalArgumentException(errmsg);			
 		}
-		LOGGER.error("DEBUG INFO: appending addtional information");
 		failedProcessing
 			.partition(message.getPartition())
 			.offset(message.getOffset())
@@ -69,24 +64,24 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			.nbRetries(message.getNbRetries())
 			.creationDate(message.getCreationDate());
 		
-		LOGGER.error("DEBUG INFO: inserting failed processsing message into DB");
-		
 		mongoTemplate.insert(failedProcessing);
-		LOGGER.error("DEBUG INFO: inserted failed processsing message into DB");
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public List<FailedProcessingDto> getFailedProcessings() {
 		List<FailedProcessingDto> failedProcessings = mongoTemplate.findAll(FailedProcessingDto.class);
 		return failedProcessings;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public FailedProcessingDto getFailedProcessingsById(String id) {
 		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
 		return failedProcessing;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public synchronized void restartAndDeleteFailedProcessing(String id) {
 		final FailedProcessingDto failedProcessing =  getFailedProcessingsById(id);
@@ -114,6 +109,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		mongoTemplate.remove(Long.parseLong(id));	
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean deleteFailedProcessing(String id) {
 		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
