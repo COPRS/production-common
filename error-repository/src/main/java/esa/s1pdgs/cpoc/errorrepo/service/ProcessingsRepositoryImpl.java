@@ -24,9 +24,11 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 		this.mongoTemplate = mongoTemplate;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getProcessingTypes() {
-		return Collections.emptyList();
+		return (List<String>) mongoTemplate.getCollection("mqiMessage")
+		    .distinct("topic", String.class);
 	}
 
 	@Override
@@ -35,7 +37,7 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 	}
 	
 	@Override
-	public ProcessingDto getProcessing(String id) {		
+	public ProcessingDto getProcessing(long id) {		
 		final MqiMessage mess = mongoTemplate.findOne(query(where("identifier").is(id)), MqiMessage.class);
 		
 		if (mess == null)
