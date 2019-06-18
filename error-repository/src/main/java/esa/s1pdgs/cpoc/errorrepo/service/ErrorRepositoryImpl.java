@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.mongodb.client.result.DeleteResult;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.errorrepo.seq.SequenceDao;
@@ -51,7 +50,8 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 			throw new IllegalArgumentException(errmsg);
 		}
-		failedProcessing.setIdentifier(seq.getNextSequenceId("errorMessage"));
+		// TODO fix ide provision
+		failedProcessing.setIdentifier(seq.getNextSequenceId("mqiMessage"));
 		failedProcessing
 				.partition(message.getPartition())
 				.offset(message.getOffset())
@@ -88,7 +88,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
 
-		final MqiGenericMessageDto<?> dto = (MqiGenericMessageDto<?>) failedProcessing.getDto();
+		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
 		final MqiMessage message = findOriginalMessage(dto.getIdentifier());
 
 		if (message == null) {
