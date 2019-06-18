@@ -83,7 +83,7 @@ public class FileUploader {
 			ProductFamily zipProductFamily = getCompressedProductFamily(job.getFamily());
 			S3UploadFile uploadFile = new S3UploadFile(zipProductFamily, zipFileName, productPath);
 			
-			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, job.getProductName(),zipFileName);
+			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName,zipFileName);
 			outputToPublish.add(cpqm);
 			
 //// 			// Upload per batch the output
