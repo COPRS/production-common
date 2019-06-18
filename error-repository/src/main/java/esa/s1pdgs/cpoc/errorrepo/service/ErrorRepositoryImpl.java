@@ -76,14 +76,14 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public FailedProcessingDto getFailedProcessingsById(String id) {
+	public FailedProcessingDto getFailedProcessingsById(long id) {
 		FailedProcessingDto failedProcessing = mongoTemplate.findOne(query(where("identifier").is(id)), FailedProcessingDto.class);
 		return failedProcessing;
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public synchronized void restartAndDeleteFailedProcessing(String id) {
+	public synchronized void restartAndDeleteFailedProcessing(long id) {
 		final FailedProcessingDto failedProcessing =  getFailedProcessingsById(id);
 		
 		if (failedProcessing == null)
@@ -106,12 +106,12 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		kafkaSubmissionClient.resubmit(failedProcessing, dto);
 		
 		// no error? remove from error queue
-		mongoTemplate.remove(Long.parseLong(id));	
+		mongoTemplate.remove(id);	
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public boolean deleteFailedProcessing(String id) {
+	public boolean deleteFailedProcessing(long id) {
 		FailedProcessingDto failedProcessing = mongoTemplate.findById(id, FailedProcessingDto.class);
 		if (failedProcessing == null) {
 			return false;

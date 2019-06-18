@@ -13,9 +13,9 @@ public interface ErrorRepository {
 	List<FailedProcessingDto> getFailedProcessings();
 
 	@SuppressWarnings("rawtypes")
-	FailedProcessingDto getFailedProcessingsById(String id);
+	FailedProcessingDto getFailedProcessingsById(long id);
 
-	void restartAndDeleteFailedProcessing(String id);
+	void restartAndDeleteFailedProcessing(long id);
 
-	boolean deleteFailedProcessing(String id);
+	boolean deleteFailedProcessing(long id);
 }

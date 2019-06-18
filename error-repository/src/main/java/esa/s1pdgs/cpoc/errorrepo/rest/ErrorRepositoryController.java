@@ -99,7 +99,7 @@ public class ErrorRepositoryController {
 
 		try {
 
-			failedProcessing = errorRepository.getFailedProcessingsById(id);
+			failedProcessing = errorRepository.getFailedProcessingsById(Long.parseLong(id));
 
 			if (failedProcessing == null) {
 				LOGGER.warn("failed processing not found, id {}", id);
@@ -135,7 +135,7 @@ public class ErrorRepositoryController {
 
 		try {
 			// TODO return 404 in case processing is not found
-			errorRepository.restartAndDeleteFailedProcessing(id);
+			errorRepository.restartAndDeleteFailedProcessing(Long.parseLong(id));
 		} catch (RuntimeException e) {
 			LOGGER.error("error while restarting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -164,7 +164,7 @@ public class ErrorRepositoryController {
 		}
 
 		try {
-			boolean deleted = errorRepository.deleteFailedProcessing(id);
+			boolean deleted = errorRepository.deleteFailedProcessing(Long.parseLong(id));
 			if (!deleted) {
 				LOGGER.warn("failed processing not found, id {}", id);
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
