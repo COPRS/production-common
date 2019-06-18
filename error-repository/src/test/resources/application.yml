@@ -11,7 +11,7 @@ server:
   
 # KAFKA
 kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}   # the bootstrap servers for KAFKA
+  bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
   group-id: error                                                # the group identifier to use for KAFKA publishers  
   max-retries: 10                                                # number of retries if kafka is not available
   poll-timeout: 3000
@@ -23,6 +23,6 @@ kafka:
 
 # MongoDB
 mongodb:
-  host: ${mongo_db_host:localhost}
-  port: ${mongo_db_port:27017}
-  database: ${mongo_db_database:s1pdgs}                                                                    #
+  host: localhost
+  port: 27017
+  database: s1pdgs                                                             #

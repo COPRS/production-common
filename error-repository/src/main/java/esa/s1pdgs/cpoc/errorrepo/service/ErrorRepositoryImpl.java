@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.errorrepo.service;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
+
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,11 +15,9 @@ import com.mongodb.client.result.DeleteResult;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
+import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-
-
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 
 @Component
@@ -30,21 +30,22 @@ public class ErrorRepositoryImpl implements ErrorRepository {
             LogManager.getLogger(ErrorRepositoryImpl.class);
 
 	private final MongoTemplate mongoTemplate;
+	private final SubmissionClient kafkaSubmissionClient;
 
 	@Autowired
-	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate) {
+	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate, final SubmissionClient kafkaSubmissionClient) {
 		this.mongoTemplate = mongoTemplate;
+		this.kafkaSubmissionClient = kafkaSubmissionClient;
 	}
 
-	@Override
-	public void saveFailedProcessing(FailedProcessingDto failedProcessing) {
+	public synchronized void saveFailedProcessing(FailedProcessingDto failedProcessing) {		
 		LOGGER.error("DEBUG INFO: getDto");
-		final MqiGenericMessageDto<?> dto = (MqiGenericMessageDto<?>) failedProcessing.getDto();
+		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
 		
 		LOGGER.error("DEBUG INFO: findOriginalMessage");
 		final MqiMessage message = findOriginalMessage(dto.getIdentifier());
 		LOGGER.error("DEBUG INFO: foundOriginalMessage");
-		
+
 		if (message == null)
 		{
 			String errmsg = String.format(
@@ -59,6 +60,8 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		}
 		LOGGER.error("DEBUG INFO: appending addtional information");
 		failedProcessing
+			.partition(message.getPartition())
+			.offset(message.getOffset())
 			.lastAssignmentDate(message.getLastReadDate())
 			.sendingPod(message.getReadingPod())
 			.lastSendDate(message.getLastSendDate())
@@ -85,8 +88,30 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	}
 
 	@Override
-	public void restartAndDeleteFailedProcessing(String id) {
-		// TODO Auto-generated method stub
+	public synchronized void restartAndDeleteFailedProcessing(String id) {
+		final FailedProcessingDto failedProcessing =  getFailedProcessingsById(id);
+		
+		if (failedProcessing == null)
+		{
+			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
+		}
+		
+		final MqiGenericMessageDto<?> dto = (MqiGenericMessageDto<?>) failedProcessing.getDto();		
+		final MqiMessage message = findOriginalMessage(dto.getIdentifier());
+		
+		if (message == null) {
+			throw new IllegalArgumentException(
+					String.format(
+							"Could not find original request by id %s. Message was %s", 
+							dto.getIdentifier(),
+							failedProcessing
+					)
+			);			
+		}
+		kafkaSubmissionClient.resubmit(failedProcessing, dto);
+		
+		// no error? remove from error queue
+		mongoTemplate.remove(Long.parseLong(id));	
 	}
 
 	@Override
@@ -106,10 +131,6 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	
 	private final MqiMessage findOriginalMessage(final long id)
 	{
-		return mongoTemplate.findOne(
-				query(where("identifier").is(id)),
-				MqiMessage.class
-		);	
+		return mongoTemplate.findOne(query(where("identifier").is(id)), MqiMessage.class);	
 	}
-
 }

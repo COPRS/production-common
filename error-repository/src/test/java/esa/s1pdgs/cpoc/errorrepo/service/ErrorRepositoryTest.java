@@ -3,7 +3,11 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +21,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.client.result.DeleteResult;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
+import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.LevelProductsMessageDto;
 
@@ -30,7 +35,7 @@ public class ErrorRepositoryTest {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate);
+		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, SubmissionClient.NULL);
 	}
 
 	@Test
@@ -67,56 +72,56 @@ public class ErrorRepositoryTest {
 		assertEquals(123, failedProcessing.getIdentifier());
 		assertTrue(failedProcessing.getDto() instanceof LevelProductsMessageDto);
 	}
-	
+
 	@Test
-	public void deleteFailedProcessing( ) {
-		
+	public void deleteFailedProcessing() {
+
 		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
 		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
-		
+
 		doReturn(fpDto).when(mongoTemplate).findById("123", FailedProcessingDto.class);
 		DeleteResult deleteResult = new DeleteResult() {
-			
+
 			@Override
 			public boolean wasAcknowledged() {
 				return true;
 			}
-			
+
 			@Override
 			public long getDeletedCount() {
-				
+
 				return 1;
 			}
 		};
-		
+
 		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
-		
+
 		assertTrue(errorRepository.deleteFailedProcessing("123"));
 		assertFalse(errorRepository.deleteFailedProcessing("4"));
 	}
-	
+
 	@Test
 	public void saveFailedProcessing() {
-		
+
 		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
 		levelProductsMsgDto.setIdentifier(1);
 		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
-		
-		MqiMessage mqiMsg = new MqiMessage();		
-				doReturn(mqiMsg).when(mongoTemplate).findOne(any(), eq(MqiMessage.class));
+
+		MqiMessage mqiMsg = new MqiMessage();
+		doReturn(mqiMsg).when(mongoTemplate).findOne(any(), eq(MqiMessage.class));
 
 		errorRepository.saveFailedProcessing(fpDto);
 		verify(mongoTemplate, times(1)).insert(fpDto);
-		
+
 	}
-	
+
 	@Test
 	public void restartAndDeleteFailedProcessing() {
-		//TODO
+		// TODO
 	}
 
 }

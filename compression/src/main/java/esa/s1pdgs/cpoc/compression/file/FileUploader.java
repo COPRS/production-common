@@ -47,7 +47,7 @@ public class FileUploader {
 	 */
 	protected static final String NOT_KEY_OBS = "IT_IS_NOT_A_KEY";
 
-	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "ZIP";
+	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 
 	/**
 	 * OBS service
@@ -73,19 +73,18 @@ public class FileUploader {
 		try {
 			String zipFileName = job.getProductName() + ".zip";
 			File productPath = new File(workingDir + "/" + zipFileName);
+			reporting.reportStart("Start uploading " + zipFileName);
 			if (!productPath.exists()) {
 				throw new InternalErrorException(
 						"The compressed product " + productPath + " does not exist, stopping upload");
 			}
-			
+			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getFamily());
 			ProductFamily productFamily = getCompressedProductFamily(job.getFamily());
-			
-			LOGGER.info("Uploading compressed product {} [{}]",productPath, productFamily);			
 			S3UploadFile uploadFile = new S3UploadFile(productFamily, zipFileName, productPath);
 //// 			// Upload per batch the output
 			processProducts(reportingFactory, uploadFile, outputToPublish);
 
-// 	        reporting.reportStopWithTransfer("End handling of output {} " + listoutputs, size);
+ 	        reporting.reportStopWithTransfer("End uploading " + zipFileName, productPath.length());
 		} catch (AbstractCodedException e) {
 			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
@@ -99,20 +98,11 @@ public class FileUploader {
 	final void processProducts(final Reporting.Factory reportingFactory, final S3UploadFile uploadFile,
 			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
 
-		final Reporting report = reportingFactory.product(null, null).newReporting(2);
-		try {
-			report.reportStart("Start uploading compressed product" + uploadFile);
-
-			if (Thread.currentThread().isInterrupted()) {
-				throw new InternalErrorException("The current thread as been interrupted");
-			}
-			this.obsService.uploadFilesPerBatch(Collections.singletonList(uploadFile));
-			report.reportStop("End uploading compressed product " + uploadFile);
-
-		} catch (AbstractCodedException e) {
-			report.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
-			throw e;
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InternalErrorException("The current thread as been interrupted");
 		}
+		this.obsService.uploadFilesPerBatch(Collections.singletonList(uploadFile));
+
 		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
 	}
 
