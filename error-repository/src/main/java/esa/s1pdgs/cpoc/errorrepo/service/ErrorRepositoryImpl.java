@@ -90,7 +90,17 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
 
-		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();	
+		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
+		
+		if (failedProcessing.getTopic() == null)
+		{
+			throw new IllegalArgumentException(
+					String.format(
+							"Failed to restart request id %s as it has no topic specified (not restartable)", 
+							id
+					)
+			);
+		}	
 		kafkaSubmissionClient.resubmit(failedProcessing, dto.getBody());
 		deleteFailedProcessing(id);
 	}
