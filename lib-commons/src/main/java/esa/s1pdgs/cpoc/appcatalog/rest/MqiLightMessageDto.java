@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.appcatalog.rest;
 import java.util.Date;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
@@ -55,6 +57,7 @@ public class MqiLightMessageDto {
     /**
      * Date of the last read
      */
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
     protected Date lastReadDate;
 
     /**
@@ -65,11 +68,13 @@ public class MqiLightMessageDto {
     /**
      * Date of the last send
      */
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
     protected Date lastSendDate;
 
     /**
      * Date of the last ack
      */
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
     protected Date lastAckDate;
 
     /**
@@ -80,6 +85,7 @@ public class MqiLightMessageDto {
     /**
      * Date of creation
      */
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
     protected Date creationDate;
 
     /**
