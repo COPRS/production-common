@@ -16,7 +16,7 @@ WORKDIR /app
 COPY --from=build /app/compression/target/s1pro-core-compression-0.3.0-SNAPSHOT.jar s1pdgs-compression.jar
 RUN mkdir -p tmp
 
-RUN yum install p7zip wget java-1.8.0-openjdk
+RUN yum -y install p7zip wget java-1.8.0-openjdk
 
 COPY /config/start.sh start.sh
 COPY /config/compression.sh compression.sh
