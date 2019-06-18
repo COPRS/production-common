@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.seq.SequenceDao;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 @Component
@@ -29,11 +30,13 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	private final MongoTemplate mongoTemplate;
 	private final SubmissionClient kafkaSubmissionClient;
+	private final SequenceDao seq;
 
 	@Autowired
-	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate, final SubmissionClient kafkaSubmissionClient) {
+	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate, final SubmissionClient kafkaSubmissionClient, final SequenceDao seq) {
 		this.mongoTemplate = mongoTemplate;
 		this.kafkaSubmissionClient = kafkaSubmissionClient;
+		this.seq = seq;
 	}
 
 	public synchronized void saveFailedProcessing(FailedProcessingDto failedProcessing) {
@@ -48,10 +51,16 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 			throw new IllegalArgumentException(errmsg);
 		}
-		failedProcessing.partition(message.getPartition()).offset(message.getOffset())
-				.lastAssignmentDate(message.getLastReadDate()).sendingPod(message.getReadingPod())
-				.lastSendDate(message.getLastSendDate()).lastAckDate(message.getLastAckDate())
-				.nbRetries(message.getNbRetries()).creationDate(message.getCreationDate());
+		failedProcessing.setIdentifier(seq.getNextSequenceId("errorMessage"));
+		failedProcessing
+				.partition(message.getPartition())
+				.offset(message.getOffset())
+				.lastAssignmentDate(message.getLastReadDate())
+				.sendingPod(message.getReadingPod())
+				.lastSendDate(message.getLastSendDate())
+				.lastAckDate(message.getLastAckDate())
+				.nbRetries(message.getNbRetries())
+				.creationDate(message.getCreationDate());
 
 		mongoTemplate.insert(failedProcessing);
 	}

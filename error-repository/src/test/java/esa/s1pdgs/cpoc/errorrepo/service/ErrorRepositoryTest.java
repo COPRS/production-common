@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.errorrepo.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -25,6 +24,7 @@ import com.mongodb.client.result.DeleteResult;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.seq.SequenceDao;
 import esa.s1pdgs.cpoc.mqi.model.rest.LevelProductsMessageDto;
 
 public class ErrorRepositoryTest {
@@ -37,7 +37,7 @@ public class ErrorRepositoryTest {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, SubmissionClient.NULL);
+		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, SubmissionClient.NULL, SequenceDao.NULL);
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class ErrorRepositoryTest {
 
 		doReturn(fpDtoToReturn).when(mongoTemplate).findById("123", FailedProcessingDto.class);
 
-		FailedProcessingDto<LevelProductsMessageDto> failedProcessing = errorRepository.getFailedProcessingsById("123");
+		FailedProcessingDto<LevelProductsMessageDto> failedProcessing = errorRepository.getFailedProcessingsById(123);
 
 		assertEquals(123, failedProcessing.getIdentifier());
 		assertTrue(failedProcessing.getDto() instanceof LevelProductsMessageDto);
@@ -78,7 +78,7 @@ public class ErrorRepositoryTest {
 	@Test
 	public void getFailedProcessingByIdWhenNotFound() {
 
-		FailedProcessingDto failedProcessing = errorRepository.getFailedProcessingsById("123");
+		FailedProcessingDto failedProcessing = errorRepository.getFailedProcessingsById(123);
 		assertNull(failedProcessing);
 	}
 
@@ -107,9 +107,9 @@ public class ErrorRepositoryTest {
 
 		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
 
-		errorRepository.deleteFailedProcessing("123");
+		errorRepository.deleteFailedProcessing(123);
 		try {
-			errorRepository.deleteFailedProcessing("4");
+			errorRepository.deleteFailedProcessing(4);
 			fail("IllegalArgumentException expected");
 		} catch (IllegalArgumentException e) {
 			// expected
@@ -142,7 +142,7 @@ public class ErrorRepositoryTest {
 		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
 
 		try {
-			errorRepository.deleteFailedProcessing("123");
+			errorRepository.deleteFailedProcessing(123);
 			fail("IllegalArgumentException expected");
 		} catch (RuntimeException e) {
 			// expected
