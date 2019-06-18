@@ -21,12 +21,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
-public class PoolExecutorCallable implements Callable<Void> {
+public class CompressExecutorCallable implements Callable<Void> {
 
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LogManager.getLogger(PoolExecutorCallable.class);
+	private static final Logger LOGGER = LogManager.getLogger(CompressExecutorCallable.class);
 	
 	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
 
@@ -51,7 +51,7 @@ public class PoolExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public PoolExecutorCallable(final CompressionJobDto job, final String prefixLogs, ApplicationProperties properties) {
+	public CompressExecutorCallable(final CompressionJobDto job, final String prefixLogs, ApplicationProperties properties) {
 		this.job = job;
 		this.properties = properties;
 

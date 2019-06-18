@@ -151,7 +151,7 @@ public class CompressProcessor {
 		CompressionJobDto job = message.getBody();
 
 		// Initialize the pool processor executor
-		PoolExecutorCallable procExecutor = new PoolExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
+		CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
 																						// job),
 				"CompressionProcessor - process", properties);
 		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
@@ -175,7 +175,7 @@ public class CompressProcessor {
 
 	protected void processTask(final GenericMessageDto<CompressionJobDto> message, final FileDownloader fileDownloader,
 			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
-			final ExecutorCompletionService<Void> procCompletionSrv, final PoolExecutorCallable procExecutor,
+			final ExecutorCompletionService<Void> procCompletionSrv, final CompressExecutorCallable procExecutor,
 			final Reporting report) {
 		CompressionJobDto job = message.getBody();
 		int step = 0;
