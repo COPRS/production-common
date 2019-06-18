@@ -99,7 +99,7 @@ public class ErrorRepositoryController {
 
 		try {
 
-			failedProcessing = errorRepository.getFailedProcessingsById(Long.parseLong(id));
+			failedProcessing = errorRepository.getFailedProcessingById(Long.parseLong(id));
 
 			if (failedProcessing == null) {
 				LOGGER.warn("failed processing not found, id {}", id);
