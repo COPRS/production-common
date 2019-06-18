@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
-import esa.s1pdgs.cpoc.compression.model.mqi.ObsQueueMessage;
+import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.model.obs.S3UploadFile;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
@@ -68,7 +68,7 @@ public class FileUploader {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "FileUploader");
 		final Reporting reporting = reportingFactory.newReporting(0);
 
-		List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+		List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
 
 		try {
 			String zipFileName = job.getProductName() + ".zip";
@@ -96,7 +96,7 @@ public class FileUploader {
 	}
 
 	final void processProducts(final Reporting.Factory reportingFactory, final S3UploadFile uploadFile,
-			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
+			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
@@ -115,18 +115,17 @@ public class FileUploader {
 	 * @throws AbstractCodedException
 	 */
 	private void publishAccordingUploadFiles(final Reporting.Factory reportingFactory, final String nextKeyUpload,
-			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
+			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
-//        LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}",
-//                prefixMonitorLogs, nbBatch);
-		Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
+        LOGGER.info("{} 3 - Publishing KAFKA messages for batch ");
+		Iterator<CompressedProductQueueMessage> iter = outputToPublish.iterator();
 		boolean stop = false;
 		while (!stop && iter.hasNext()) {
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InternalErrorException("The current thread as been interrupted");
 			}
-			ObsQueueMessage msg = iter.next();
-			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
+			CompressedProductQueueMessage msg = iter.next();
+			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
 				final Reporting report = reportingFactory.product(null, msg.getProductName()).newReporting(1);
