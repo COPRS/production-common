@@ -93,11 +93,11 @@ public class ErrorRepositoryControllerTest {
 		.creationDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
 		.failureDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
 		.failureMessage("dummyMessage")
-		.processingDetails(new GenericMessageDto()); // TODO create more detailed dummy object
+		.processingDetails(new GenericMessageDto<Object>()); // TODO create more detailed dummy object
 		doReturn(failedProcessingToReturn).when(errorRepository).getFailedProcessingById(Mockito.anyLong());
 		
 		String jsonContent = "{\n" + 
-				"    \"identifier\": 1001,\n" + // TODO: attribute name has to change to id
+				"    \"id\": 1001,\n" +
 				"    \"processingType\": \"dummyProcessingType\",\n" + 
 				"    \"processingStatus\": \"READ\",\n" + 
 				"    \"productCategory\": \"AUXILIARY_FILES\",\n" + 

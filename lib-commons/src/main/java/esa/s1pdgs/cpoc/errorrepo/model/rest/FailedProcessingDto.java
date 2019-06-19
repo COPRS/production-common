@@ -50,11 +50,9 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 	private String failedPod = null;
 
 	// maybe map to 'lastReadDate'
-	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date lastAssignmentDate = null;
 
 	// current time (at creation of this object)
-	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date failureDate = null;
 
 	public FailedProcessingDto<T> processingType(String processingType) {
@@ -127,6 +125,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		return this;
 	}
 
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	public FailedProcessingDto<T> failureDate(Date failureDate) {
 		this.failureDate = failureDate;
 		return this;
@@ -148,6 +147,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		this.failedPod = failedPod;
 	}
 
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	public Date getLastAssignmentDate() {
 		return lastAssignmentDate;
 	}
@@ -156,6 +156,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		this.lastAssignmentDate = lastAssignmentDate;
 	}
 
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	public Date getFailureDate() {
 		return failureDate;
 	}
@@ -271,5 +272,34 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		}
 		return o.toString().replace("\n", "\n    ");
 	}
-
+	
+	@JsonProperty("id")
+	@Override
+	public long getIdentifier() {
+		// TODO Auto-generated method stub
+		return super.getIdentifier();
+	}
+	
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
+	@Override
+	public Date getCreationDate() {
+		return super.getCreationDate();
+	}
+	
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
+	@Override
+	public Date getLastReadDate() {
+		return super.getLastReadDate();
+	}
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
+	@Override
+	public Date getLastSendDate() {
+		return super.getLastSendDate();
+	}
+	
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
+	@Override
+	public Date getLastAckDate() {
+		return super.getLastAckDate();
+	}
 }

@@ -129,11 +129,11 @@ public class CompressProcessor {
 			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
 			return;
 		}
-		if (message.getBody().getFamily().equals(ProductFamily.L0_SEGMENT)) {
-			// FIXME: Segment does contain productName and key null and this not working
-			LOGGER.info("Compression job is L0 segment. Deactivated due to incompatible data structure");
-			return;
-		}
+//		if (message.getBody().getFamily().equals(ProductFamily.L0_SEGMENT)) {
+//			// FIXME: Segment does contain productName and key null and this not working
+//			LOGGER.info("Compression job is L0 segment. Deactivated due to incompatible data structure");
+//			return;
+//		}
 		appStatus.setProcessing(message.getIdentifier());
 		LOGGER.info("Initializing job processing {}", message);
 
