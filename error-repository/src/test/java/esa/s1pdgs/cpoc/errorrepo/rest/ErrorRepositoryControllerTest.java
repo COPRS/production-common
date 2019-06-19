@@ -124,9 +124,8 @@ public class ErrorRepositoryControllerTest {
 
 	@Test
 	public void test_getFailedProcessingById_400() throws Exception {
-	    doThrow(new RuntimeException()).when(errorRepository).getFailedProcessingById(Mockito.anyInt());
 	    uut.perform(get("/errors/failedProcessings/wrongParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
-	        API_KEY)).andExpect(status().isInternalServerError());
+	        API_KEY)).andExpect(status().isBadRequest());
 	}
 	
 	@Test
@@ -147,10 +146,6 @@ public class ErrorRepositoryControllerTest {
 	    doThrow(new RuntimeException()).when(errorRepository).getFailedProcessingById(1);
 	    uut.perform(get("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isInternalServerError());
-	    
-//	    doThrow(new RuntimeException()).when(errorRepository).restartAndDeleteFailedProcessing(1);
-//		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
-//				API_KEY)).andExpect(status().isInternalServerError());
 	}
 
 	@Test

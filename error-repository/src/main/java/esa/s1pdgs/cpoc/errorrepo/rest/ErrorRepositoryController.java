@@ -105,7 +105,9 @@ public class ErrorRepositoryController {
 				LOGGER.warn("failed processing not found, id {}", id);
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-
+		} catch (NumberFormatException e) {
+			LOGGER.error("invalid id error while getting the failed processings with id {}:{} ", id, e);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (RuntimeException e) {
 			LOGGER.error("error while getting the failed processings with id {}:{} ", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
