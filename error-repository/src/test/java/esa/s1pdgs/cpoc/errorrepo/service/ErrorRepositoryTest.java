@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.errorrepo.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +23,6 @@ import com.mongodb.client.result.DeleteResult;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.errorrepo.seq.SequenceDao;
 import esa.s1pdgs.cpoc.mqi.model.rest.LevelProductsMessageDto;
 
 public class ErrorRepositoryTest {
@@ -37,7 +35,7 @@ public class ErrorRepositoryTest {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, SubmissionClient.NULL, SequenceDao.NULL);
+		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, SubmissionClient.NULL);
 	}
 
 	@Test
@@ -78,8 +76,13 @@ public class ErrorRepositoryTest {
 	@Test
 	public void getFailedProcessingByIdWhenNotFound() {
 
-		FailedProcessingDto failedProcessing = errorRepository.getFailedProcessingById(123);
-		assertNull(failedProcessing);
+		try {
+			errorRepository.getFailedProcessingById(123);
+			fail("IllegalArguementException expected");
+		} catch (IllegalArgumentException e) {
+			// Expected
+		}
+
 	}
 
 	@Test
@@ -108,9 +111,9 @@ public class ErrorRepositoryTest {
 		doReturn(deleteResult).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
 
 		errorRepository.deleteFailedProcessing(123);
-		
+
 		doReturn(null).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
-		
+
 		try {
 			errorRepository.deleteFailedProcessing(4);
 			fail("IllegalArgumentException expected");
