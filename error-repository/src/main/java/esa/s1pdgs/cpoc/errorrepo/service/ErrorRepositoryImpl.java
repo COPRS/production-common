@@ -16,7 +16,6 @@ import com.mongodb.client.result.DeleteResult;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.errorrepo.seq.SequenceDao;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 @Component
@@ -29,13 +28,11 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	private final MongoTemplate mongoTemplate;
 	private final SubmissionClient kafkaSubmissionClient;
-	private final SequenceDao seq;
 
 	@Autowired
-	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate, final SubmissionClient kafkaSubmissionClient, final SequenceDao seq) {
+	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate, final SubmissionClient kafkaSubmissionClient) {
 		this.mongoTemplate = mongoTemplate;
 		this.kafkaSubmissionClient = kafkaSubmissionClient;
-		this.seq = seq;
 	}
 
 	public synchronized void saveFailedProcessing(FailedProcessingDto failedProcessing) {
@@ -51,7 +48,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			throw new IllegalArgumentException(errmsg);
 		}
 		// TODO fix ide provision
-		failedProcessing.setIdentifier(seq.getNextSequenceId("mqiMessage"));
+		failedProcessing.setIdentifier(message.getIdentifier());
 		failedProcessing
 				.partition(message.getPartition())
 				.offset(message.getOffset())
@@ -74,35 +71,48 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public FailedProcessingDto getFailedProcessingsById(long id) {
+	public FailedProcessingDto getFailedProcessingById(long id) {
 		FailedProcessingDto failedProcessing = mongoTemplate.findOne(query(where("identifier").is(id)), FailedProcessingDto.class);
+		
+		if (failedProcessing == null) {
+			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
+		}
+
 		return failedProcessing;
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public synchronized void restartAndDeleteFailedProcessing(long id) {
-		final FailedProcessingDto failedProcessing = getFailedProcessingsById(id);
+		final FailedProcessingDto failedProcessing = getFailedProcessingById(id);
 
 		if (failedProcessing == null) {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
 
 		final GenericMessageDto<?> dto = (GenericMessageDto<?>) failedProcessing.getDto();
-		kafkaSubmissionClient.resubmit(failedProcessing, dto);
+		
+		if (failedProcessing.getTopic() == null)
+		{
+			throw new IllegalArgumentException(
+					String.format(
+							"Failed to restart request id %s as it has no topic specified (not restartable)", 
+							id
+					)
+			);
+		}	
+		kafkaSubmissionClient.resubmit(failedProcessing, dto.getBody());
 		deleteFailedProcessing(id);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public synchronized void deleteFailedProcessing(long id) {
-
-		final FailedProcessingDto failedProcessing = getFailedProcessingsById(id);
-		if (failedProcessing == null) {
+		DeleteResult result = mongoTemplate.remove(query(where("identifier").is(id)), FailedProcessingDto.class);
+		
+		if (result == null) {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
-
-		DeleteResult result = mongoTemplate.remove(failedProcessing);
+		
 		if (result.getDeletedCount() == 0) {
 			throw new RuntimeException(String.format("Could not delete failed request with id %s", id));
 		}

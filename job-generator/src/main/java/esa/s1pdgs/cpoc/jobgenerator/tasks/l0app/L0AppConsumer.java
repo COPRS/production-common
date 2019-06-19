@@ -133,7 +133,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 
                 reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
                 
-                failedProc.processingType(EdrsSessionDto.class.getName())
+                failedProc.processingType(mqiMessage.getInputKey())
                 		.topic(mqiMessage.getInputKey())
                 		.processingStatus(MqiStateMessageEnum.READ)
                 		.productCategory(ProductCategory.EDRS_SESSIONS)

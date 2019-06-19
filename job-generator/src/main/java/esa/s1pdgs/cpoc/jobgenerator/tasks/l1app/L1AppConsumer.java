@@ -133,7 +133,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
                     productName, ace.getCode().getCode(), ace.getLogMessage());
             reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
             
-            failedProc.processingType(LevelProductDto.class.getName())
+            failedProc.processingType(mqiMessage.getInputKey())
       			.topic(mqiMessage.getInputKey())
 	    		.processingStatus(MqiStateMessageEnum.READ)
 	    		.productCategory(ProductCategory.LEVEL_PRODUCTS)

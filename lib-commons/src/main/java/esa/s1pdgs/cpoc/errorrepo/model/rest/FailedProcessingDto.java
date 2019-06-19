@@ -5,6 +5,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -18,6 +21,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 
 	// public static final String TOPIC = "t-pdgs-errors";
 
+	@SuppressWarnings("rawtypes")
 	private static class AscendingCreationTimeComparator implements Comparator<FailedProcessingDto>, Serializable {
 
 		private static final long serialVersionUID = 1191382370884793376L;
@@ -32,6 +36,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static final Comparator<FailedProcessingDto> ASCENDING_CREATION_TIME_COMPERATOR = new AscendingCreationTimeComparator();
 
 	public FailedProcessingDto() {
@@ -45,9 +50,11 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 	private String failedPod = null;
 
 	// maybe map to 'lastReadDate'
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date lastAssignmentDate = null;
 
 	// current time (at creation of this object)
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date failureDate = null;
 
 	public FailedProcessingDto<T> processingType(String processingType) {
@@ -173,6 +180,24 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 	public FailedProcessingDto<T> processingDetails(T processingDetails) {
 		this.setDto(processingDetails);
 		return this;
+	}
+	
+	@Override
+	@JsonProperty("processingStatus")
+	public MqiStateMessageEnum getState() {
+		return super.getState();
+	}
+	
+	@Override
+	@JsonProperty("productCategory")
+	public ProductCategory getCategory() {
+		return super.getCategory();
+	}
+	
+	@Override
+	@JsonProperty("processingDetails")
+	public T getDto() {
+		return super.getDto();
 	}
 
 	@Override

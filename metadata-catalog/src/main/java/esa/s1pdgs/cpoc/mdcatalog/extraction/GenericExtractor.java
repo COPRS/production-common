@@ -191,7 +191,7 @@ public abstract class GenericExtractor<T> {
                     extractProductNameFromDto(dto), e1.getCode().getCode(),
                     e1.getLogMessage());
             
-            failedProc.processingType(messageClass.getName())
+            failedProc.processingType(message.getInputKey())
       			.topic(message.getInputKey())
 	    		.processingStatus(MqiStateMessageEnum.READ)
 	    		.productCategory(category)
@@ -209,7 +209,8 @@ public abstract class GenericExtractor<T> {
                     category, extractProductNameFromDto(dto),
                     ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
             
-            failedProc.processingType(messageClass.getName())
+            failedProc.processingType(message.getInputKey())
+        		.topic(message.getInputKey())
 	    		.processingStatus(MqiStateMessageEnum.READ)
 	    		.productCategory(category)
 	    		.failedPod(processConfiguration.getHostname())

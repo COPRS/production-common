@@ -69,7 +69,7 @@ public class ErrorRepositoryTest {
 
 		doReturn(fpDtoToReturn).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
 
-		FailedProcessingDto<LevelProductsMessageDto> failedProcessing = errorRepository.getFailedProcessingsById(123);
+		FailedProcessingDto<LevelProductsMessageDto> failedProcessing = errorRepository.getFailedProcessingById(123);
 
 		assertEquals(123, failedProcessing.getIdentifier());
 		assertTrue(failedProcessing.getDto() instanceof LevelProductsMessageDto);
@@ -78,7 +78,7 @@ public class ErrorRepositoryTest {
 	@Test
 	public void getFailedProcessingByIdWhenNotFound() {
 
-		FailedProcessingDto failedProcessing = errorRepository.getFailedProcessingsById(123);
+		FailedProcessingDto failedProcessing = errorRepository.getFailedProcessingById(123);
 		assertNull(failedProcessing);
 	}
 
@@ -105,11 +105,11 @@ public class ErrorRepositoryTest {
 			}
 		};
 
-		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
+		doReturn(deleteResult).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
 
 		errorRepository.deleteFailedProcessing(123);
 		
-		doReturn(null).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+		doReturn(null).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
 		
 		try {
 			errorRepository.deleteFailedProcessing(4);
