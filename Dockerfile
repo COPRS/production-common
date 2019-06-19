@@ -25,6 +25,7 @@ COPY obs-sdk/ /app/obs-sdk
 COPY scaler/ /app/scaler
 COPY wrapper/ /app/wrapper
 COPY error-repository/ /app/error-repository
+COPY queue-watcher/ /app/queue-watcher
 
 #RUN cat /usr/share/maven/ref/settings-docker.xml
 # RUN find /usr/share/maven/ref/repository
