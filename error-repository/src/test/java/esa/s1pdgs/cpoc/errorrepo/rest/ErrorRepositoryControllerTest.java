@@ -124,7 +124,7 @@ public class ErrorRepositoryControllerTest {
 
 	@Test
 	public void test_getFailedProcessingById_400() throws Exception {
-	    uut.perform(get("/errors/failedProcessings/wrongParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+	    uut.perform(get("/errors/failedProcessings/invalidParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isBadRequest());
 	}
 	
@@ -165,8 +165,13 @@ public class ErrorRepositoryControllerTest {
 	}
 
 	@Test
+	public void test_deleteFailedProcessing_400() throws Exception {
+		uut.perform(delete("/errors/failedProcessings/invalidParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isBadRequest());
+	}
+	
+	@Test
 	public void test_deleteFailedProcessing_403() throws Exception {
-
 		uut.perform(delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				"wrong Key")).andExpect(status().isForbidden());
 	}
@@ -196,6 +201,12 @@ public class ErrorRepositoryControllerTest {
 
 		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isOk());
+	}
+
+	@Test
+	public void test_restartAndDeleteFailedProcessing_400() throws Exception {
+		uut.perform(post("/errors/failedProcessings/invalidParameter/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isBadRequest());
 	}
 
 	@Test
