@@ -3,13 +3,13 @@
 image: docker:latest
 
 variables:
-  MODULE_METADATA_CATALOG: s1pro-core-queue-watcher
+  MODULE_QUEUE_WATCHER: s1pro-core-queue-watcher
 
 queue-watcher-build-master:
   stage: module
   script:
     - cd queue-watcher
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG" .
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG"
   only:
     - master
@@ -18,7 +18,7 @@ queue-watcher-build:
   stage: module
   script:
     - cd queue-watcher
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG:$CI_COMMIT_REF_SLUG" .
+    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG:$CI_COMMIT_REF_SLUG"
   except:
     - master
