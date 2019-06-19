@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 @RequestMapping(path = "/errors")
 public class ErrorRepositoryController {
 
-	// TODO: get api_key from configuration
+	// TODO: put api_key in a crypted place
 	private static final String API_KEY = "errorRepositorySecretKey";
 
 	private static final Logger LOGGER = LogManager.getLogger(ErrorRepositoryController.class);
