@@ -10,8 +10,6 @@ logging:
 
 # File
 file:
-  file-with-manifest-ext: .safe                                   # Extension of the SAFE files
-  manifest-filename: manifest.safe                                # Name of the manifest (with extension)
   mqi:
     host-uri: http://localhost:8081                               # the host and port for querying MQI server
     max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
@@ -33,11 +31,3 @@ file:
       fixed-delay-ms: 500                                         # 
       init-delay-poll-ms: 2000                                    # 
         
-# REST controller
-server:
-  port: 8080                                                      # port used for publishing REST API
-  
-status:
-  max-error-counter-processing: 3                                 # the number of consecutive processing errors leading to the state FATALERROR
-  max-error-counter-mqi: 30                                       # the number of consecutive MQI errors leading to the state FATALERROR
-  

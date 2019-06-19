@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.queuewatcher.mqi;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,9 +25,18 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
  * @author Faisal Rafi
  */
 @Configuration
+@EnableConfigurationProperties
 public class MqiConfiguration {
 
-    /**
+    public String getHostUri() {
+		return hostUri;
+	}
+
+	public int getMaxRetries() {
+		return maxRetries;
+	}
+
+	/**
      * Host URI for the MQI server
      */
     private final String hostUri;
