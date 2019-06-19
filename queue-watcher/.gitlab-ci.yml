@@ -10,7 +10,7 @@ queue-watcher-build-master:
   script:
     - cd queue-watcher
     - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG"
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER"
   only:
     - master
 
@@ -19,6 +19,6 @@ queue-watcher-build:
   script:
     - cd queue-watcher
     - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG:$CI_COMMIT_REF_SLUG"
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER:$CI_COMMIT_REF_SLUG"
   except:
     - master
