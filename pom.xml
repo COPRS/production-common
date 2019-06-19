@@ -230,6 +230,7 @@
 	</dependencyManagement>
 
 	<modules>
+	    <module>queue-watcher</module>
 		<module>applicative-catalog</module>
 		<module>app-catalog-client</module>
 		<module>archives</module>
