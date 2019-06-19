@@ -119,7 +119,7 @@ public class ErrorRepositoryControllerTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void test_getFailedProcessingsById_200() throws Exception {
+	public void test_getFailedProcessingById_200() throws Exception {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
 		@SuppressWarnings("rawtypes")
 		FailedProcessingDto failedProcessingToReturn = new FailedProcessingDto();
