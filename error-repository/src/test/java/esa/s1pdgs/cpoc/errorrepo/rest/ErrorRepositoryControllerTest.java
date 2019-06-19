@@ -195,14 +195,6 @@ public class ErrorRepositoryControllerTest {
 	}
 
 	@Test
-	public void test_restartFailedProcessing_200() throws Exception {
-		uut.perform(post("/errors/failedProcessings/1/restart")
-			      .contentType(MediaType.APPLICATION_JSON)
-			      .header("ApiKey", API_KEY)
-        ).andExpect(status().isOk());
-	}
-
-	@Test
 	public void test_deleteFailedProcessing_200() throws Exception {
 
 		uut.perform(
@@ -241,7 +233,7 @@ public class ErrorRepositoryControllerTest {
 				delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
 				.andExpect(status().isInternalServerError());
 	}
-
+	
 	@Test
 	public void test_restartAndDeleteFailedProcessing_200() throws Exception {
 
