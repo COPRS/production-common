@@ -6,6 +6,6 @@ FROM openjdk:8-jre-alpine
 WORKDIR /app
 COPY --from=build /app/queue-watcher/target/s1pro-core-queue-watcher-*.jar s1pdgs-queue-watcher.jar
 RUN apk update && apk add wget
-RUN mkdir tmp
+RUN mkdir -p tmp
 COPY /config/start.sh start.sh
 ENTRYPOINT "/app/start.sh"

@@ -15,9 +15,9 @@
 		<version>2.0.0.RELEASE</version> <relativePath /> </parent> -->
 
 	<properties>
-<!-- 		<docker.image.prefix>springio</docker.image.prefix> -->
-		<project.build.finalName>s1pdgs-queue-watcher-app</project.build.finalName>
-		<project.artifactId>s1pdgs-queue-watcher-app</project.artifactId>
+		<docker.image.prefix>springio</docker.image.prefix>
+		<project.build.finalName>s1pdgs-queue-watcher</project.build.finalName>
+		<project.artifactId>s1pdgs-queue-watcher</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.queuewatcher.Application</start-class>
 	</properties>
 
