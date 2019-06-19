@@ -7,8 +7,10 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 public class CompressionJobDto {
 
 	private String productName;
+	private String name;
 	private ProductFamily family = ProductFamily.AUXILIARY_FILE;
 	private String objectStorageKey ="NOT_APPLICABLE"; // FIXME TAI: We might need to split this in two DTO
+	private String keyObs;
 
     /**
      * Default constructor
@@ -24,10 +26,14 @@ public class CompressionJobDto {
 	}
 
 	public String getProductName() {
+		// TODO: Workarround because segments using a different naming
+		if (this.family.equals(ProductFamily.L0_SEGMENT)) {
+			return name;
+		}
 		return productName;
 	}
 
-	public void setProductName(String productName) {
+	public void setProductName(String productName) {		
 		this.productName = productName;
 	}
 
@@ -40,6 +46,10 @@ public class CompressionJobDto {
 	}
 
 	public String getObjectStorageKey() {
+		// TODO: Workarround because segments using a different naming
+		if (this.family.equals(ProductFamily.L0_SEGMENT)) {
+			return keyObs;
+		}
 		return objectStorageKey;
 	}
 
@@ -47,7 +57,23 @@ public class CompressionJobDto {
 		this.objectStorageKey = objectStorageKey;
 	}
 
-    /**
+    public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getKeyObs() {
+		return keyObs;
+	}
+
+	public void setKeyObs(String keyObs) {
+		this.keyObs = keyObs;
+	}
+
+	/**
      * @see java.lang.Object#toString()
      */
     @Override
