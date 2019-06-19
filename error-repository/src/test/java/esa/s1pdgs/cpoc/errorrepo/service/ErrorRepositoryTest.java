@@ -30,12 +30,15 @@ public class ErrorRepositoryTest {
 	@Mock
 	private MongoTemplate mongoTemplate;
 
+	@Mock
+	private SubmissionClient submissionClient;
+
 	private ErrorRepository errorRepository;
 
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, SubmissionClient.NULL);
+		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, submissionClient);
 	}
 
 	@Test
@@ -193,7 +196,71 @@ public class ErrorRepositoryTest {
 
 	@Test
 	public void restartAndDeleteFailedProcessing() {
-		// TODO
+		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
+		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		fpDto.setIdentifier(123);
+		fpDto.setTopic("topic");
+		fpDto.setDto(levelProductsMsgDto);
+
+		doReturn(fpDto).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+
+		DeleteResult deleteResult = new DeleteResult() {
+
+			@Override
+			public boolean wasAcknowledged() {
+				return true;
+			}
+
+			@Override
+			public long getDeletedCount() {
+
+				return 1;
+			}
+		};
+
+		doReturn(deleteResult).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
+
+		errorRepository.restartAndDeleteFailedProcessing(123);
+		verify(mongoTemplate, times(1)).findOne(any(), eq(FailedProcessingDto.class));
+		verify(mongoTemplate, times(1)).remove(any(), eq(FailedProcessingDto.class));
+		verify(submissionClient, times(1)).resubmit(fpDto, levelProductsMsgDto.getBody());
+	}
+
+	@Test
+	public void restartAndDeleteFailedProcessingNoTopic() {
+		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
+		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		fpDto.setIdentifier(123);
+		fpDto.setDto(levelProductsMsgDto);
+
+		doReturn(fpDto).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+
+		DeleteResult deleteResult = new DeleteResult() {
+
+			@Override
+			public boolean wasAcknowledged() {
+				return true;
+			}
+
+			@Override
+			public long getDeletedCount() {
+
+				return 1;
+			}
+		};
+
+		doReturn(deleteResult).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
+
+		try {
+			errorRepository.restartAndDeleteFailedProcessing(123);
+			fail("IllegalArguemtException expected");
+		} catch (IllegalArgumentException e) {
+			// Expected
+		}
+		verify(mongoTemplate, times(1)).findOne(any(), eq(FailedProcessingDto.class));
+		verify(mongoTemplate, times(0)).remove(any(), eq(FailedProcessingDto.class));
+		verify(submissionClient, times(0)).resubmit(fpDto, levelProductsMsgDto.getBody());
+
 	}
 
 }
