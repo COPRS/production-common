@@ -230,7 +230,6 @@
 	</dependencyManagement>
 
 	<modules>
-	    <module>queue-watcher</module>
 		<module>applicative-catalog</module>
 		<module>app-catalog-client</module>
 		<module>archives</module>
@@ -245,5 +244,6 @@
 		<module>scaler</module>
 		<module>wrapper</module>
 		<module>error-repository</module>
+		<module>queue-watcher</module>
 	</modules>
 </project>
