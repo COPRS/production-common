@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.errorrepo.rest;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -46,12 +47,57 @@ public class ErrorRepositoryControllerTest {
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void test_getFailedProcessings_200() throws Exception {
 		@SuppressWarnings("rawtypes")
 		List<FailedProcessingDto> failedProcessingsToReturn = new ArrayList<>();
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+		@SuppressWarnings("rawtypes")
+		FailedProcessingDto failedProcessing1 = new FailedProcessingDto();
+		failedProcessing1.setIdentifier(1001);
+		failedProcessing1.processingType("dummyProcessingType")
+		.processingStatus(MqiStateMessageEnum.READ)
+		.productCategory(ProductCategory.AUXILIARY_FILES)
+		.partition(9)
+		.offset(1234)
+		.group("dummyGroup")
+		.failedPod("pod1234")
+		.lastAssignmentDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
+		.sendingPod("pod5678")
+		.lastSendDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
+		.lastAckDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
+		.nbRetries(3)
+		.creationDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
+		.failureDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
+		.failureMessage("dummyMessage")
+		.processingDetails(new GenericMessageDto<Object>()); // TODO create more detailed dummy object
+		
+		failedProcessingsToReturn.add(failedProcessing1);
+
 		doReturn(failedProcessingsToReturn).when(errorRepository).getFailedProcessings();
-		String jsonContent = "[]";
+
+		String jsonContent = "[{\n" + 
+				"    \"id\": 1001,\n" +
+				"    \"processingType\": \"dummyProcessingType\",\n" + 
+				"    \"processingStatus\": \"READ\",\n" + 
+				"    \"productCategory\": \"AUXILIARY_FILES\",\n" + 
+				"    \"partition\": 9,\n" + 
+				"    \"offset\": 1234,\n" + 
+				"    \"group\": \"dummyGroup\",\n" + 
+				"    \"failedPod\": \"pod1234\",\n" + 
+				"    \"lastAssignmentDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
+				"    \"sendingPod\": \"pod5678\",\n" + 
+				"    \"lastSendDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
+				"    \"lastAckDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
+				"    \"nbRetries\": 3,\n" + 
+				"    \"creationDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
+				"    \"failureDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
+				"    \"failureMessage\": \"dummyMessage\",\n" + 
+				"    \"processingDetails\": {}\n" + 
+				"  }]";
+		
 		uut.perform(get("/errors/failedProcessings")
 			      .contentType(MediaType.APPLICATION_JSON)
 			      .header("ApiKey", API_KEY)
