@@ -47,7 +47,6 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 			throw new IllegalArgumentException(errmsg);
 		}
-		// TODO fix ide provision
 		failedProcessing.setIdentifier(message.getIdentifier());
 		failedProcessing
 				.partition(message.getPartition())
