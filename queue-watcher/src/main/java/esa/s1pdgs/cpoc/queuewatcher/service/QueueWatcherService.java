@@ -191,18 +191,37 @@ public class QueueWatcherService {
 		return;
 	}	
 
-	synchronized protected void  writeCSV(String dateTimeStamp,String productName) throws IOException {
-	        try (
-	        	FileWriter writer = new FileWriter(new File(CSV_FILE_PATH),true);
+	synchronized protected void writeCSV(String dateTimeStamp,
+			String productName) throws IOException {
 
-	            CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
-	            		.withHeader("timestamp", "fileName")
-	            		.withDelimiter(','));
-	        ) {
-	            csvPrinter.printRecord(dateTimeStamp,productName);
-	            csvPrinter.flush();            
-	        }
-	    }
+		CSVPrinter csvPrinter = null;
+		FileWriter writer = null;
+		try {
+
+			File csvFile = new File(CSV_FILE_PATH);
+			writer = new FileWriter(csvFile, true);
+
+			if (csvFile.exists()) {
+				csvPrinter = new CSVPrinter(writer,
+						CSVFormat.DEFAULT.withDelimiter(','));
+			} else {
+				csvPrinter = new CSVPrinter(writer,
+						CSVFormat.DEFAULT.withHeader("timestamp", "fileName")
+								.withDelimiter(','));
+			}
+
+			csvPrinter.printRecord(dateTimeStamp, productName);
+			csvPrinter.flush();
+		} finally {
+			if (writer != null) {
+				writer.close();
+			}
+			if (csvPrinter != null) {
+				csvPrinter.close();
+			}
+
+		}
+	}
 
 }
 
