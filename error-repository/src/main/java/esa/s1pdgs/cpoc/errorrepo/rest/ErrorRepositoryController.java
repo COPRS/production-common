@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.errorrepo.rest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,11 +28,10 @@ import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
  *
  */
 @RestController
-@RequestMapping(path = "/errors")
 public class ErrorRepositoryController {
 
 	// TODO: put api_key in a crypted place
-	private static final String API_KEY = "errorRepositorySecretKey";
+	private static final String API_KEY = "LdbEo2020tffcEGS";
 
 	private static final Logger LOGGER = LogManager.getLogger(ErrorRepositoryController.class);
 
@@ -48,7 +48,7 @@ public class ErrorRepositoryController {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/failedProcessings")
 	public ResponseEntity<List<FailedProcessingDto>> getFailedProcessings(@RequestHeader("ApiKey") String apiKey) {
 
 		LOGGER.info("get the list of failed processings");
@@ -84,7 +84,7 @@ public class ErrorRepositoryController {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/failedProcessings/{id}")
 	public ResponseEntity<FailedProcessingDto> getFailedProcessingsById(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
 
@@ -124,8 +124,8 @@ public class ErrorRepositoryController {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}/restart")
-	public ResponseEntity restartFailedProcessing(@RequestHeader("ApiKey") String apiKey,
+	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/failedProcessings/{id}/restart")
+	public ResponseEntity<ModelApiResponse> restartFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
 
 		LOGGER.info("restart the failed processing with id {}", id);
@@ -148,8 +148,13 @@ public class ErrorRepositoryController {
 			LOGGER.error("error while restarting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		
+		final ModelApiResponse response = new ModelApiResponse();
+		response.setCode(UUID.randomUUID());
+		response.setType("restart");
+		response.setMessage("restart success");
 
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	/**
@@ -160,8 +165,8 @@ public class ErrorRepositoryController {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/failedProcessings/{id}")
-	public ResponseEntity deleteFailedProcessing(@RequestHeader("ApiKey") String apiKey,
+	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/failedProcessings/{id}")
+	public ResponseEntity<ModelApiResponse> deleteFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
 
 		LOGGER.info("delete the failed processing with id {}", id);
@@ -183,8 +188,13 @@ public class ErrorRepositoryController {
 			LOGGER.error("error while deleting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		
+		final ModelApiResponse response = new ModelApiResponse();
+		response.setCode(UUID.randomUUID());
+		response.setType("delete");
+		response.setMessage("delete success");
 
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 }

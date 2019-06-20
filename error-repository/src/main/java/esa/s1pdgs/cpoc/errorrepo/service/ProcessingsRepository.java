@@ -2,12 +2,15 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import esa.s1pdgs.cpoc.errorrepo.model.rest.ProcessingDto;
 
 public interface ProcessingsRepository {
 
 	List<String> getProcessingTypes();
-
+	
 	List<ProcessingDto> getProcessings();
 
 	ProcessingDto getProcessing(long id);

@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.errorrepo.rest;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.errorrepo.model.rest.ProcessingDto;
@@ -23,7 +26,7 @@ public class ProcessingsController {
 	private static final Logger LOGGER = LogManager.getLogger(ProcessingsRepository.class);
 
 	// TODO: get api_key from configuration
-	private static final String API_KEY = "processingRepositorySecretKey";
+	private static final String API_KEY = "LdbEo2020tffcEGS";
 	
 	private final ProcessingsRepository processingRepository;
 	
@@ -32,7 +35,7 @@ public class ProcessingsController {
 		this.processingRepository = processingRepository;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/processingTypes")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/processingTypes")
 	public ResponseEntity<List<String>> getProcessingTypes(@RequestHeader("ApiKey") String apiKey) {
 		LOGGER.info("get the list of processing types");
 
@@ -49,24 +52,7 @@ public class ProcessingsController {
 		}	
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/processings")
-	public ResponseEntity<List<ProcessingDto>> getProcessings(@RequestHeader("ApiKey") String apiKey) {
-		LOGGER.info("get the list of processings");
-
-		if (!API_KEY.equals(apiKey)) {
-			LOGGER.warn("invalid API key supplied");
-			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		}
-
-		try {
-			return new ResponseEntity<List<ProcessingDto>>(processingRepository.getProcessings(), HttpStatus.OK);
-		} catch (RuntimeException e) {
-			LOGGER.error("error while getting the list of processings", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}	
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/processings/{id}")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/processings/{id}")
 	public ResponseEntity<ProcessingDto> getProcessing(
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
@@ -90,4 +76,50 @@ public class ProcessingsController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}	
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/processings")
+	public ResponseEntity<List<ProcessingDto>> getProcessings(
+			@RequestHeader(value="ApiKey") String apiKey,
+			@RequestParam(value = "processingType", required = false) List<String> processingType,
+			@RequestParam(value = "processingStatus", required = false) List<String> processingStatus,
+			@RequestParam(value = "pageSize", required = false) Integer pageSize,
+			@RequestParam(value = "pageNumber", required = false) Integer pageNumber) {
+		
+		LOGGER.info("get the list of processings");
+
+		if (!API_KEY.equals(apiKey)) {
+			LOGGER.warn("invalid API key supplied");
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+
+		try {
+			final List<ProcessingDto> result = processingRepository.getProcessings().stream()
+					.filter(p -> (processingType==null || processingType.isEmpty() || processingType.contains(p.getProcessingType())))
+					.filter(p -> (processingStatus==null || processingStatus.isEmpty() || processingStatus.contains(p.getState().toString())))
+					.collect(Collectors.toList());
+			
+			if (pageSize == null || pageNumber==null)
+			{
+				return new ResponseEntity<List<ProcessingDto>>(result, HttpStatus.OK);				
+			}	
+			
+			final int startIndex = pageNumber*pageSize;
+			final int endIndex = (pageNumber+1)*pageSize;
+			
+			if (startIndex < 0 || endIndex < 0)
+			{
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}			
+			if (startIndex >= result.size() || endIndex > result.size())
+			{
+				return new ResponseEntity<List<ProcessingDto>>(Collections.emptyList(), HttpStatus.OK);				
+			}			
+			return new ResponseEntity<List<ProcessingDto>>(result.subList(startIndex, endIndex), HttpStatus.OK);
+			
+		} catch (RuntimeException e) {
+			LOGGER.error("error while getting the list of processings", e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}	
+
+    }
 }

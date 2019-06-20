@@ -38,7 +38,7 @@ public class ErrorRepositoryTest {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		this.errorRepository = new ErrorRepositoryImpl(mongoTemplate, submissionClient);
+		this.errorRepository = new ErrorRepositoryImpl(null, null, submissionClient);
 	}
 
 	@Test

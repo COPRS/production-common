@@ -4,6 +4,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,37 +21,32 @@ import com.mongodb.client.MongoCursor;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.ProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.repo.MqiMessageRepo;
 
 @Component
 public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 
-	private final MongoTemplate mongoTemplate;
+	private final MqiMessageRepo processingRepo;
 	
 	@Autowired
-	public ProcessingsRepositoryImpl(MongoTemplate mongoTemplate) {
-		this.mongoTemplate = mongoTemplate;
+	public ProcessingsRepositoryImpl(final MqiMessageRepo processingRepo) {
+		this.processingRepo = processingRepo;
 	}
 
 	@Override
 	public List<String> getProcessingTypes() {
-		final Set<String> result = new HashSet<>();
-		
-		final MongoCursor<String> cursor = mongoTemplate.getCollection("mqiMessage")
-			    .distinct("topic", String.class).iterator();
-		while (cursor.hasNext()) {
-			result.add(cursor.next());
-		}
-		return new ArrayList<>(result);
-	}
-
-	@Override
-	public final List<ProcessingDto> getProcessings() {
-		return toExternal(mongoTemplate.findAll(MqiMessage.class));
+		return Arrays.asList("t-pdgs-edrs-sessions", "t-pdgs-auxiliary-files", "t-pdgs-l0-jobs",
+				"t-pdgs-l0-segment-jobs", "t-pdgs-l0-segments", "t-pdgs-l0-slices-nrt", "t-pdgs-l0-acns-nrt",
+				"t-pdgs-l0-slices-fast", "t-pdgs-l0-acns-fast", "t-pdgs-l0-reports", "t-pdgs-l0-segment-reports",
+				"t-pdgs-l0-blanks", "t-pdgs-l1-slices-nrt", "t-pdgs-l1-acns-nrt", "t-pdgs-l1-slices-fast",
+				"t-pdgs-l1-acns-fast", "t-pdgs-l1-reports", "t-pdgs-l1-jobs-nrt", "t-pdgs-l1-jobs-fast",
+				"t-pdgs-l2-acns-fast", "t-pdgs-l2-slices-fast", "t-pdgs-l2-jobs-fast", "t-pdgs-l2-reports",
+				"t-pdgs-compressed-products");
 	}
 	
 	@Override
 	public ProcessingDto getProcessing(long id) {		
-		final MqiMessage mess = mongoTemplate.findOne(query(where("identifier").is(id)), MqiMessage.class);
+		final MqiMessage mess = processingRepo.findByIdentifier(id);
 		
 		if (mess == null)
 		{
@@ -57,6 +55,11 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 		return toProcessingDto(mess);
 	}
 	
+	@Override
+	public List<ProcessingDto> getProcessings() {
+		return toExternal(processingRepo.findAllOrderByCreationDateAsc());
+	}
+
 	private final List<ProcessingDto> toExternal(final List<MqiMessage> messages)	{
 		if (messages == null || messages.size() == 0)
 		{

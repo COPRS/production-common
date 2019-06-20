@@ -1,21 +1,17 @@
 package esa.s1pdgs.cpoc.errorrepo.service;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
-
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
-
-import com.mongodb.client.result.DeleteResult;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.repo.FailedProcessingRepo;
+import esa.s1pdgs.cpoc.errorrepo.repo.MqiMessageRepo;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 @Component
@@ -26,12 +22,14 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(ErrorRepositoryImpl.class);
 
-	private final MongoTemplate mongoTemplate;
+	private final FailedProcessingRepo failedProcessingRepo;
+	private final MqiMessageRepo mqiMessageRepository;
 	private final SubmissionClient kafkaSubmissionClient;
 
 	@Autowired
-	public ErrorRepositoryImpl(final MongoTemplate mongoTemplate, final SubmissionClient kafkaSubmissionClient) {
-		this.mongoTemplate = mongoTemplate;
+	public ErrorRepositoryImpl(final MqiMessageRepo mqiMessageRepository, final FailedProcessingRepo failedProcessingRepo, final SubmissionClient kafkaSubmissionClient) {
+		this.mqiMessageRepository = mqiMessageRepository;
+		this.failedProcessingRepo = failedProcessingRepo;
 		this.kafkaSubmissionClient = kafkaSubmissionClient;
 	}
 
@@ -49,6 +47,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		}
 		failedProcessing.setIdentifier(message.getIdentifier());
 		failedProcessing
+				.group(message.getGroup())
 				.partition(message.getPartition())
 				.offset(message.getOffset())
 				.lastAssignmentDate(message.getLastReadDate())
@@ -57,22 +56,21 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 				.lastAckDate(message.getLastAckDate())
 				.nbRetries(message.getNbRetries())
 				.creationDate(message.getCreationDate());
-
-		mongoTemplate.insert(failedProcessing);
+		
+		failedProcessingRepo.save(failedProcessing);
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<FailedProcessingDto> getFailedProcessings() {
-		List<FailedProcessingDto> failedProcessings = mongoTemplate.findAll(FailedProcessingDto.class);
+		List<FailedProcessingDto> failedProcessings = failedProcessingRepo.findAllOrderByCreationDateAsc();
 		return failedProcessings;
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public FailedProcessingDto getFailedProcessingById(long id) {
-		FailedProcessingDto failedProcessing = mongoTemplate.findOne(query(where("identifier").is(id)), FailedProcessingDto.class);
-		
+		FailedProcessingDto failedProcessing = failedProcessingRepo.findByIdentifier(id);
 		if (failedProcessing == null) {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
@@ -105,19 +103,17 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	}
 
 	@Override
-	public synchronized void deleteFailedProcessing(long id) {
-		DeleteResult result = mongoTemplate.remove(query(where("identifier").is(id)), FailedProcessingDto.class);
+	public synchronized void deleteFailedProcessing(long id) {		
+		final FailedProcessingDto failed = failedProcessingRepo.findByIdentifier(id);
 		
-		if (result == null) {
+		if (failed == null)
+		{
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
-		
-		if (result.getDeletedCount() == 0) {
-			throw new RuntimeException(String.format("Could not delete failed request with id %s", id));
-		}
+		failedProcessingRepo.deleteByIdentfier(id);
 	}
 
-	private final MqiMessage findOriginalMessage(final long id) {
-		return mongoTemplate.findOne(query(where("identifier").is(id)), MqiMessage.class);
+	private final MqiMessage findOriginalMessage(final long id) {		
+		return mqiMessageRepository.findByIdentifier(id);
 	}
 }
