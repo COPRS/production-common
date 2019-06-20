@@ -206,7 +206,7 @@ public class QueueWatcherService {
 			} else {
 				writer = new FileWriter(csvFile, false);
 				csvPrinter = new CSVPrinter(writer,
-						CSVFormat.DEFAULT.withHeader("timestamp", "fileName")
+						CSVFormat.DEFAULT.withHeader("timestamp", "file name")
 								.withDelimiter(','));
 			}
 
