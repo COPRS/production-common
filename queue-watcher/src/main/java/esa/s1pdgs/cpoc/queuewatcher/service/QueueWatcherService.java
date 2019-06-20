@@ -199,12 +199,12 @@ public class QueueWatcherService {
 		try {
 
 			File csvFile = new File(CSV_FILE_PATH);
-			writer = new FileWriter(csvFile, true);
-
 			if (csvFile.exists()) {
+				writer = new FileWriter(csvFile, true);
 				csvPrinter = new CSVPrinter(writer,
 						CSVFormat.DEFAULT.withDelimiter(','));
 			} else {
+				writer = new FileWriter(csvFile, false);
 				csvPrinter = new CSVPrinter(writer,
 						CSVFormat.DEFAULT.withHeader("timestamp", "fileName")
 								.withDelimiter(','));
