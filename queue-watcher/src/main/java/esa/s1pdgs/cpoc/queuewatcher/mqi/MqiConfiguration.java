@@ -36,6 +36,7 @@ public class MqiConfiguration {
 		return maxRetries;
 	}
 
+	
 	/**
      * Host URI for the MQI server
      */

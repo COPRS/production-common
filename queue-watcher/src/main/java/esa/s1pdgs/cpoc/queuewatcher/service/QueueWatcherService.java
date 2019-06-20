@@ -1,5 +1,13 @@
 package esa.s1pdgs.cpoc.queuewatcher.service;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +54,11 @@ public class QueueWatcherService {
 	private final GenericMqiService<LevelSegmentDto> mqiServiceForLevelSegments;
 
 
+	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
+	
+	//TODO
+	private static final String CSV_FILE_PATH = "./s1pdgs.csv";
+   
 	@Autowired
 	public QueueWatcherService(
 			@Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> mqiServiceForCompressedProducts,
@@ -71,14 +84,19 @@ public class QueueWatcherService {
 		try {
 			message = this.mqiServiceForCompressedProducts.next();
 			 if (message == null || message.getBody() == null) {
-		            LOGGER.debug(" No message received: continue");
+		            LOGGER.trace(" No message received: continue");
 		            return;
 		        }
-			LOGGER.info("{}", message.getBody().getProductName());
+			LOGGER.info("reveived compressed file {}", message.getBody().getProductName());
+			String timeStamp = new SimpleDateFormat(DATE_FORMAT).format(new Date());
+			writeCSV(timeStamp,  message.getBody().getProductName());
 			this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true));
 
 		} catch (AbstractCodedException ace) {
-			 LOGGER.error("[ [step 0] [{}] [code {}] {}",               ace.getCode().getCode(), ace.getLogMessage());
+			LOGGER.error("Error Code: {}, Message: {}", ace.getCode().getCode(),
+					ace.getLogMessage());
+		} catch (Exception e) {
+			LOGGER.error("Error occured while writing to CSV {}",e.getMessage());
 			 //this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, null, false));
 		}
 		return;
@@ -99,15 +117,20 @@ public class QueueWatcherService {
 		            return;
 		        }
 			 
-			LOGGER.info("{}", message.getBody().getProductName());
-			this.mqiServiceForAUXProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true));
+				LOGGER.info("reveived aux file{}", message.getBody().getProductName());
+				String timeStamp = new SimpleDateFormat(DATE_FORMAT).format(new Date());
+				writeCSV(timeStamp,  message.getBody().getProductName());
+				this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true));
+
 		} catch (AbstractCodedException ace) {
-			 LOGGER.error("[ [step 0] [{}] [code {}] {}",               ace.getCode().getCode(), ace.getLogMessage());
+			LOGGER.error("Error Code: {}, Message: {}", ace.getCode().getCode(),
+					ace.getLogMessage());
+		} catch (Exception e) {
+			LOGGER.error("Error occured while writing to CSV {}",e.getMessage());
 			 //this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, null, false));
 		}
-
 		return;
-	}
+	}	
 	
 	
 
@@ -124,18 +147,20 @@ public class QueueWatcherService {
 		            LOGGER.trace(" No message received: continue");
 		            return;
 		        }
-			 
-			LOGGER.info("{}", message.getBody().getProductName());
-			this.mqiServiceForLevelProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true));
+			LOGGER.info("reveived level product {}", message.getBody().getProductName());
+			String timeStamp = new SimpleDateFormat(DATE_FORMAT).format(new Date());
+			writeCSV(timeStamp,  message.getBody().getProductName());
+			this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true));
+
 		} catch (AbstractCodedException ace) {
-			 LOGGER.error("[ [step 0] [{}] [code {}] {}",               ace.getCode().getCode(), ace.getLogMessage());
+			LOGGER.error("Error Code: {}, Message: {}", ace.getCode().getCode(),
+					ace.getLogMessage());
+		} catch (Exception e) {
+			LOGGER.error("Error occured while writing to CSV {}",e.getMessage());
 			 //this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, null, false));
 		}
-
 		return;
-	}
-	
-	
+	}	
 
 	/**
 	 * Consume message and log
@@ -146,19 +171,38 @@ public class QueueWatcherService {
 		GenericMessageDto<LevelSegmentDto> message = null;
 		try {
 			message = this.mqiServiceForLevelSegments.next();
-			
   		    if (message == null || message.getBody() == null) {
 		            LOGGER.trace(" No message received: continue");
 		            return;
 		        }
-			LOGGER.info("{}", message.getBody().getName());
-			this.mqiServiceForLevelSegments.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true));
+
+  		    LOGGER.info("reveived segment file {}", message.getBody().getName());
+			String timeStamp = new SimpleDateFormat(DATE_FORMAT).format(new Date());
+			writeCSV(timeStamp,  message.getBody().getName());
+			this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true));
+
 		} catch (AbstractCodedException ace) {
-			 LOGGER.error("[ [step 0] [{}] [code {}] {}",               ace.getCode().getCode(), ace.getLogMessage());
+			LOGGER.error("Error Code: {}, Message: {}", ace.getCode().getCode(),
+					ace.getLogMessage());
+		} catch (Exception e) {
+			LOGGER.error("Error occured while writing to CSV {}",e.getMessage());
 			 //this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, null, false));
 		}
 		return;
-	}
-	
-	
+	}	
+
+	synchronized protected void  writeCSV(String dateTimeStamp,String productName) throws IOException {
+	        try (
+	        	FileWriter writer = new FileWriter(new File(CSV_FILE_PATH),true);
+
+	            CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
+	            		.withHeader("timestamp", "fileName")
+	            		.withDelimiter(','));
+	        ) {
+	            csvPrinter.printRecord(dateTimeStamp,productName);
+	            csvPrinter.flush();            
+	        }
+	    }
+
 }
+
