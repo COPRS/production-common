@@ -12,7 +12,7 @@ public interface FailedProcessingRepo extends MongoRepository<FailedProcessingDt
 
 	public FailedProcessingDto findByIdentifier(long identifier);
 
-	List<FailedProcessingDto> findAllOrderByCreationDateAsc();
+	List<FailedProcessingDto> findAllOrderByCreationDate();
 	
-	public void deleteByIdentfier(long identifier);
+	public void deleteByIdentifier(long identifier);
 }

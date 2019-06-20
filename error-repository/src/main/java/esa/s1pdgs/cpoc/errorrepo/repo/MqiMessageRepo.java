@@ -14,7 +14,7 @@ public interface MqiMessageRepo extends MongoRepository<MqiMessage, Long> {
 	
 	MqiMessage findByIdentifier(long identifier);
 	
-	List<MqiMessage> findAllOrderByCreationDateAsc();
+	List<MqiMessage> findAllOrderByCreationDate();
 	
 	Page<MqiMessage> findAll(Pageable p);
 }

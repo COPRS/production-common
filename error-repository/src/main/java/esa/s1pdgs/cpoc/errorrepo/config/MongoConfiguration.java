@@ -24,7 +24,6 @@ import com.mongodb.ServerAddress;
  * @author Viveris Technologies
  */
 @Configuration
-@EnableMongoRepositories
 public class MongoConfiguration {
 
     /**

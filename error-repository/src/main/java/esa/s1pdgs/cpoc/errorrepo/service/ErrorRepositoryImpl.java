@@ -63,7 +63,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<FailedProcessingDto> getFailedProcessings() {
-		List<FailedProcessingDto> failedProcessings = failedProcessingRepo.findAllOrderByCreationDateAsc();
+		List<FailedProcessingDto> failedProcessings = failedProcessingRepo.findAllOrderByCreationDate();
 		return failedProcessings;
 	}
 
@@ -110,7 +110,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 		{
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
 		}
-		failedProcessingRepo.deleteByIdentfier(id);
+		failedProcessingRepo.deleteByIdentifier(id);
 	}
 
 	private final MqiMessage findOriginalMessage(final long id) {		

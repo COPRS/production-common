@@ -1,23 +1,12 @@
 package esa.s1pdgs.cpoc.errorrepo.service;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
-
-import com.mongodb.client.MongoCursor;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.ProcessingDto;
@@ -57,7 +46,7 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 	
 	@Override
 	public List<ProcessingDto> getProcessings() {
-		return toExternal(processingRepo.findAllOrderByCreationDateAsc());
+		return toExternal(processingRepo.findAllOrderByCreationDate	());
 	}
 
 	private final List<ProcessingDto> toExternal(final List<MqiMessage> messages)	{

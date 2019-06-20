@@ -39,7 +39,7 @@ Configuration:
           - ref: STDOUT
           - ref: FILE
       - name: org.springframework
-        level: error
+        level: debug
         additivity: false
         AppenderRef:
           - ref: STDOUT
@@ -63,6 +63,6 @@ Configuration:
           - ref: STDOUT
           - ref: FILE
     Root:
-      level: info
+      level: debug
       AppenderRef:
         ref: STDOUT
