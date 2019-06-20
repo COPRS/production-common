@@ -57,7 +57,7 @@ public class QueueWatcherService {
 	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
 	
 	//TODO
-	private static final String CSV_FILE_PATH = "./s1pdgs.csv";
+	private static final String CSV_FILE_PATH = "/data/notificationSimulatorService.csv";
    
 	@Autowired
 	public QueueWatcherService(
