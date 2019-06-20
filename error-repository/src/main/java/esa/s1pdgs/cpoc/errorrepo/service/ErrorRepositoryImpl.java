@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.errorrepo.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -63,7 +64,9 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<FailedProcessingDto> getFailedProcessings() {
-		List<FailedProcessingDto> failedProcessings = failedProcessingRepo.findAllOrderByCreationDate();
+		List<FailedProcessingDto> failedProcessings = failedProcessingRepo.findAll();
+		Collections.sort(failedProcessings, FailedProcessingDto.ASCENDING_CREATION_TIME_COMPERATOR);
+				
 		return failedProcessings;
 	}
 

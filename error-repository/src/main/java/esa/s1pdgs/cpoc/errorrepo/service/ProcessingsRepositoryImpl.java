@@ -46,7 +46,7 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 	
 	@Override
 	public List<ProcessingDto> getProcessings() {
-		return toExternal(processingRepo.findAllOrderByCreationDate	());
+		return toExternal(processingRepo.findAll());
 	}
 
 	private final List<ProcessingDto> toExternal(final List<MqiMessage> messages)	{
