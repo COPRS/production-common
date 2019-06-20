@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.queuewatcher.config.ApplicationProperties;
 
 @Service
 public class QueueWatcherService {
@@ -56,8 +57,8 @@ public class QueueWatcherService {
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
 	
-	//TODO
-	private static final String CSV_FILE_PATH = "/data/notificationSimulatorService.csv";
+	@Autowired
+	private ApplicationProperties properties;
    
 	@Autowired
 	public QueueWatcherService(
@@ -196,9 +197,8 @@ public class QueueWatcherService {
 
 		CSVPrinter csvPrinter = null;
 		FileWriter writer = null;
-		try {
-
-			File csvFile = new File(CSV_FILE_PATH);
+		try {			
+			File csvFile = new File(properties.getCsvFile());
 			if (csvFile.exists()) {
 				writer = new FileWriter(csvFile, true);
 				csvPrinter = new CSVPrinter(writer,
