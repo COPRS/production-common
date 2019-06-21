@@ -21,3 +21,10 @@ compression:
     host-uri: http://localhost:8081       # the host and port for querying MQI server
     max-retries: 3                        # the maximal number of consecutive retries following a MQI request error 
     tempo-retry-ms: 1000                  #
+    fixed-delay-ms: 200                   # (Fixed delay) Dealy in milliseconds between 2 next messages
+    initial-delay-ms: 5000    
+    init-delay-poll-ms: 5000    
+    tm-proc-one-task-s: 600                 # Timeout in second for stopping task of pool's task execution
+    tm-proc-all-tasks-s: 1800               # Timeout in second for stopping task of pool execution
+    tm-proc-stop-s: 300                     # Timeout in second for stopping task of pool execution
+    tm-proc-check-stop-s: 60                # Timeout in second for stopping the task of waiting for required inputs before starting processing
