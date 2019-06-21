@@ -3,12 +3,12 @@ package esa.s1pdgs.cpoc.scaler.kafka.services;
 import java.util.Properties;
 
 import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.clients.admin.AdminClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoringProperties;
+import kafka.admin.AdminClient;
 
 /**
  * KAFKA administration configuration
