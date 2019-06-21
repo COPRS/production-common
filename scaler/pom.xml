@@ -67,20 +67,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka_2.11</artifactId>
-			<version>1.0.1</version>
+			<artifactId>kafka_2.12</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka_2.11</artifactId>
-			<version>1.0.1</version>
+			<artifactId>kafka_2.12</artifactId>
 			<classifier>test</classifier>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
-			<version>1.0.1</version>
 		</dependency>
 
 		<!-- Internal libraries -->

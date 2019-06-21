@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.RoundRobinAssignor;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -14,8 +15,6 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.listener.config.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-
-import com.github.grantneale.kafka.LagBasedPartitionAssignor;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
@@ -209,8 +208,10 @@ public class GenericConsumer<T> {
                 properties.getConsumer().getSessionTimeoutMs());
         props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG,
                 properties.getConsumer().getHeartbeatIntvMs());
+        
+        
         props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-                Collections.singletonList(LagBasedPartitionAssignor.class));
+                Collections.singletonList(RoundRobinAssignor.class));
         props.put(ConsumerConfig.CLIENT_ID_CONFIG, properties.getClientId());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
                 properties.getConsumer().getAutoOffsetReset());

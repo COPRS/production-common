@@ -98,10 +98,10 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>com.github.grantneale</groupId>
-			<artifactId>kafka-lag-based-assignor</artifactId>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.github.grantneale</groupId> -->
+<!-- 			<artifactId>kafka-lag-based-assignor</artifactId> -->
+<!-- 		</dependency> -->
 
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
