@@ -1,11 +1,12 @@
-FROM maven:3.5.3-jdk-8
-
-# Just used in Werum network
-#ENV https_proxy=http://proxy.net.werum:8080/
+####
+#The image that is used to deploy the build environment and compile all source code.
+#### 
+FROM maven:3.5.3-jdk-8 as buildenv
 
 WORKDIR /app
 
 # Just used in Werum network
+#ENV https_proxy=http://proxy.net.werum:8080/
 #COPY test.xml /usr/share/maven/ref/settings-docker.xml
 
 COPY pom.xml /app
@@ -27,9 +28,22 @@ COPY wrapper/ /app/wrapper
 COPY error-repository/ /app/error-repository
 COPY queue-watcher/ /app/queue-watcher
 
-#RUN cat /usr/share/maven/ref/settings-docker.xml
-# RUN find /usr/share/maven/ref/repository
 RUN mvn -Dmaven.test.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
-#ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
-#CMD ["mvn && sleep 1h"]
+####
+# An empty image that will be just used to gather all build artifacts into a small image
+####
+FROM scatch
+
+WORKDIR /app
+COPY --from=buildenv /app/applicative-catalog/target /
+COPY --from=buildenv /app/archives/target /
+COPY --from=buildenv /app/compression/target /
+COPY --from=buildenv /app/ingestoringestor/ /
+COPY --from=buildenv /app/job-generator/target /
+COPY --from=buildenv /app/metadata-catalog /
+COPY --from=buildenv /app/mqi-server/target /
+COPY --from=buildenv /app/scaler/target /
+COPY --from=buildenv /app/wrapper/target /
+COPY --from=buildenv /app/error-repository/target /
+COPY --from=buildenv /app/queue-watcher/target /
