@@ -1,12 +1,20 @@
 package esa.s1pdgs.cpoc.scaler.kafka.services;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.ConsumerGroupDescription;
+import org.apache.kafka.clients.admin.DescribeConsumerGroupsResult;
+import org.apache.kafka.clients.admin.MemberAssignment;
+import org.apache.kafka.clients.admin.MemberDescription;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.logging.log4j.LogManager;
@@ -18,8 +26,7 @@ import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoringProperties;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerGroupsDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.PartitionDescription;
-import kafka.admin.AdminClient;
-import kafka.admin.AdminClient.ConsumerSummary;
+
 
 /**
  * Class to access to KAFKA cluster
@@ -78,41 +85,39 @@ public class KafkaService {
         try {
         	LOGGER.debug("describeConsumerGroup is using groupid {}",groupId);
             consumer = createKafkaConsumer(groupId);
-
-            List<ConsumerSummary> groupSummaries =
-                    scala.collection.JavaConversions
-                            .seqAsJavaList(kafkaAdminClient
-                                    .describeConsumerGroup(groupId,
-                                            properties.getRequestTimeoutMs())
-                                    .consumers().get());
-            for (ConsumerSummary summary : groupSummaries) {
-                List<TopicPartition> topicPartitions =
-                        scala.collection.JavaConversions
-                                .seqAsJavaList(summary.assignment());
-                addConsumerDescription(r, summary, topicPartitions, limitTopic,
-                        consumer);
+            
+            final DescribeConsumerGroupsResult res = kafkaAdminClient
+            		.describeConsumerGroups(Collections.singleton(groupId));
+            
+            for (final KafkaFuture<ConsumerGroupDescription> groupDescFuture : res.describedGroups().values())
+            {
+            	final ConsumerGroupDescription groupDesc = groupDescFuture.get();
+            	for (final MemberDescription desc : groupDesc.members())
+            	{
+            		final MemberAssignment f = desc.assignment();
+            		final String clientId = desc.clientId();
+            		final String consumerId = desc.consumerId();  
+            		
+            	    final ConsumerDescription cd = new ConsumerDescription(clientId,consumerId);            		
+            		addConsumerDescription(r, cd, new ArrayList<>(f.topicPartitions()), limitTopic, consumer);
+            	}
             }
-        } finally {
+		} catch (Exception e) {
+			LOGGER.error(e);
+		} finally {
             closeKafkaConsumer(consumer);
         }
-
         return r;
     }
-
-    /**
-     * Build wanted object according kafka information
-     * 
-     * @param result
-     * @param summary
-     * @param topicPartitions
-     * @param limitTopic
-     * @param consumer
-     */
-    protected void addConsumerDescription(ConsumerGroupsDescription result,
-            ConsumerSummary summary, List<TopicPartition> topicPartitions,
-            String limitTopic, KafkaConsumer<String, String> consumer) {
-        ConsumerDescription cd = new ConsumerDescription(summary.clientId(),
-                summary.consumerId());
+    
+    final void addConsumerDescription(
+    		ConsumerGroupsDescription result,
+    		ConsumerDescription cd, 
+            List<TopicPartition> topicPartitions,
+            String limitTopic, 
+            KafkaConsumer<String, String> consumer
+            ) {
+ 
         for (TopicPartition tp : topicPartitions) {        	
             if (limitTopic.equalsIgnoreCase(tp.topic())) {
             	// Calculate offset and lag
@@ -131,7 +136,7 @@ public class KafkaService {
                 long lag = logEndOffset - currentOffset;
                 // Create partition description
                 PartitionDescription pd = new PartitionDescription(
-                        tp.partition(), tp.topic(), summary.consumerId(),
+                        tp.partition(), tp.topic(), cd.getConsumerId(),
                         currentOffset, logEndOffset, lag);
                 cd.addPartition(pd);
                 result.getDescPerPartition().put("" + pd.getId(), pd);
@@ -145,6 +150,8 @@ public class KafkaService {
         }
         result.getDescPerConsumer().put(cd.getConsumerId(), cd);
     }
+
+
 
     /**
      * Build and get usefull Kafka client properties

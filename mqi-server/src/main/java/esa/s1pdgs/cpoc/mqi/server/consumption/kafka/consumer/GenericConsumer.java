@@ -9,11 +9,11 @@ import org.apache.kafka.clients.consumer.RoundRobinAssignor;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.listener.MessageListener;
-import org.springframework.kafka.listener.config.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
@@ -175,8 +175,7 @@ public class GenericConsumer<T> {
         containerProp.setMessageListener(messageListener);
         containerProp
                 .setPollTimeout(properties.getListener().getPollTimeoutMs());
-        containerProp.setAckMode(
-                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+        containerProp.setAckMode(AckMode.MANUAL_IMMEDIATE);
         containerProp.setConsumerRebalanceListener(
                 new MemoryConsumerAwareRebalanceListener(service,
                         properties.getConsumer().getGroupId(),
