@@ -39,14 +39,14 @@ RUN mvn -Dmaven.test.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settin
 FROM alpine
 
 WORKDIR /app
-COPY -v --from=buildenv /app/applicative-catalog/target /
-COPY -v --from=buildenv /app/archives/target /
-COPY -v --from=buildenv /app/compression/target /
-COPY -v --from=buildenv /app/ingestor/target /
-COPY -v --from=buildenv /app/job-generator/target /
-COPY -v --from=buildenv /app/metadata-catalog /
-COPY -v --from=buildenv /app/mqi-server/target /
-COPY -v --from=buildenv /app/scaler/target /
-COPY -v --from=buildenv /app/wrapper/target /
-COPY -v --from=buildenv /app/error-repository/target /
-COPY -v --from=buildenv /app/queue-watcher/target /
+COPY --from=buildenv /app/applicative-catalog/target /app/applicative-catalog/target
+COPY --from=buildenv /app/archives/target /app/archives/target
+COPY --from=buildenv /app/compression/target /app/compression/target
+COPY --from=buildenv /app/ingestor/target /app/ingestor/target
+COPY --from=buildenv /app/job-generator/target /app/job-generator/target
+COPY --from=buildenv /app/metadata-catalog /app/metadata-catalog
+COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
+COPY --from=buildenv /app/scaler/target /app/scaler/target
+COPY --from=buildenv /app/wrapper/target /app/wrapper/target
+COPY --from=buildenv /app/error-repository/target /app/error-repository/target
+COPY --from=buildenv /app/queue-watcher/target /app/queue-watcher/target
