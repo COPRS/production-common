@@ -70,6 +70,7 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 				.partition(message.getPartition())
 				.offset(message.getOffset())
 				.group(message.getGroup())
+				.topic(message.getTopic())
 				.assignedPod(message.getReadingPod())
 				.lastAssignmentDate(message.getLastReadDate())
 				.sendingPod(message.getSendingPod())
