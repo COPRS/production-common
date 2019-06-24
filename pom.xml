@@ -241,7 +241,7 @@
 		<module>mqi-server</module>
 		<module>obs-sdk</module>
 		<module>scaler</module>
-		<!-- <module>wrapper</module> -->
+		<module>wrapper</module>
 		<module>error-repository</module>
 		<module>queue-watcher</module>
 	</modules>

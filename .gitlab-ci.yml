@@ -45,4 +45,4 @@ include:
   - local: mqi-server/.gitlab-ci.yml
   - local: scaler/.gitlab-ci.yml
   - local: queue-watcher/.gitlab-ci.yml
-  - local: wrapper/.gitlab-ci.yml
+  #- local: wrapper/.gitlab-ci.yml
