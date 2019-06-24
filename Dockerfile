@@ -33,7 +33,10 @@ RUN mvn -Dmaven.test.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settin
 ####
 # An empty image that will be just used to gather all build artifacts into a small image
 ####
-FROM scatch
+
+# scratch seems not to work for some reason, we go for alpine...
+#FROM scatch
+FROM alpine
 
 WORKDIR /app
 COPY --from=buildenv /app/applicative-catalog/target /
