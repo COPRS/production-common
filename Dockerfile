@@ -42,7 +42,7 @@ WORKDIR /app
 COPY --from=buildenv /app/applicative-catalog/target /
 COPY --from=buildenv /app/archives/target /
 COPY --from=buildenv /app/compression/target /
-COPY --from=buildenv /app/ingestoringestor/ /
+COPY --from=buildenv /app/ingestor/target /
 COPY --from=buildenv /app/job-generator/target /
 COPY --from=buildenv /app/metadata-catalog /
 COPY --from=buildenv /app/mqi-server/target /
