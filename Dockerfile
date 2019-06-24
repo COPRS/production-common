@@ -48,5 +48,6 @@ COPY --from=buildenv /app/metadata-catalog /app/metadata-catalog
 COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
 COPY --from=buildenv /app/scaler/target /app/scaler/target
 COPY --from=buildenv /app/wrapper/target /app/wrapper/target
+COPY --from=buildenv /app/wrapper/config /app/wrapper/config
 COPY --from=buildenv /app/error-repository/target /app/error-repository/target
 COPY --from=buildenv /app/queue-watcher/target /app/queue-watcher/target
