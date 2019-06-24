@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.errorrepo.rest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,10 +66,6 @@ public class ErrorRepositoryController {
 		} catch (RuntimeException e) {
 			LOGGER.error("error while getting the list of failed processings", e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-
-		if (failedProcessings.size() > 1) {
-			Collections.sort(failedProcessings, FailedProcessingDto.ASCENDING_CREATION_TIME_COMPERATOR);
 		}
 
 		return new ResponseEntity<List<FailedProcessingDto>>(failedProcessings, HttpStatus.OK);
