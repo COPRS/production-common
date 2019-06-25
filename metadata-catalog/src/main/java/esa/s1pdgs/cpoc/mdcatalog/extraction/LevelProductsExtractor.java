@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  * @author Olivier Bex-Chauvet
  */
 @Service
-public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
+public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
 
     /**
      * Pattern for configuration files to extract data
@@ -58,7 +58,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
     @Autowired
     public LevelProductsExtractor(final EsServices esServices,
             final ObsService obsService,
-            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiService,
+            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> mqiService,
             final AppStatus appStatus,
             final MetadataExtractorConfig extractorConfig,
             @Value("${file.product-categories.level-products.local-directory}") final String localDirectory,
@@ -67,7 +67,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
             final ProcessConfiguration processConfiguration,
             @Value("${file.file-with-manifest-ext}") final String fileManifestExt) {
         super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.LEVEL_PRODUCTS, processConfiguration, LevelProductDto.class);
+                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.LEVEL_PRODUCTS, processConfiguration, ProductDto.class);
         this.obsService = obsService;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;
@@ -90,9 +90,9 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
     @Override
     protected JSONObject extractMetadata(
     		final Reporting.Factory reportingFactory, 
-            final GenericMessageDto<LevelProductDto> message)
+            final GenericMessageDto<ProductDto> message)
             throws AbstractCodedException {
-        LevelProductDto dto = message.getBody();
+        ProductDto dto = message.getBody();
         // Upload file
         String keyObs = getKeyObs(message);
         
@@ -107,7 +107,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
     
     private final JSONObject extract(	
     		final Reporting.Factory reportingFactory, 
-    		final LevelProductDto dto,
+    		final ProductDto dto,
     		final File metadataFile,
             final String productName,
             final ProductFamily family
@@ -182,7 +182,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
      * @param message
      * @return
      */
-    protected String getKeyObs(final GenericMessageDto<LevelProductDto> message) {
+    protected String getKeyObs(final GenericMessageDto<ProductDto> message) {
         String keyObs = message.getBody().getKeyObjectStorage();
         if (keyObs.toLowerCase().endsWith(fileManifestExt.toLowerCase())) {
             keyObs += "/" + manifestFilename;
@@ -194,7 +194,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
      * @see GenericExtractor#extractProductNameFromDto(Object)
      */
     @Override
-    protected String extractProductNameFromDto(final LevelProductDto dto) {
+    protected String extractProductNameFromDto(final ProductDto dto) {
         return dto.getProductName();
     }
 
@@ -203,7 +203,7 @@ public class LevelProductsExtractor extends GenericExtractor<LevelProductDto> {
      */
     @Override
     protected void cleanProcessing(
-            final GenericMessageDto<LevelProductDto> message) {
+            final GenericMessageDto<ProductDto> message) {
         // TODO Auto-generated method stub
         File metadataFile = new File(localDirectory + getKeyObs(message));
         if (metadataFile.exists()) {

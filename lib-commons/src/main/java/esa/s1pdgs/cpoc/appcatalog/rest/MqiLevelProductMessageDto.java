@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.appcatalog.rest;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Message object used by the REST applicative catalog for the category
@@ -10,7 +10,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
  * @author Viveris Technologies
  */
 public class MqiLevelProductMessageDto
-        extends MqiGenericMessageDto<LevelProductDto> {
+        extends MqiGenericMessageDto<ProductDto> {
 
     /**
      * Default constructor
@@ -41,7 +41,7 @@ public class MqiLevelProductMessageDto
      * @param dto
      */
     public MqiLevelProductMessageDto(final long identifier, final String topic,
-            final int partition, final long offset, final LevelProductDto dto) {
+            final int partition, final long offset, final ProductDto dto) {
         super(ProductCategory.LEVEL_PRODUCTS, identifier, topic, partition,
                 offset, dto);
     }

@@ -43,7 +43,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetNbReadingApiErro
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
@@ -74,10 +74,10 @@ public class GenericAppCatalogMqiServiceTest {
      * DTO
      */
     private MqiLightMessageDto lightMessage;
-    private MqiGenericReadMessageDto<LevelProductDto> readMessage;
+    private MqiGenericReadMessageDto<ProductDto> readMessage;
     private MqiSendMessageDto sendMessage;
-    private LevelProductDto dto =
-            new LevelProductDto("name", "keyobs", ProductFamily.L0_SLICE, "FAST");
+    private ProductDto dto =
+            new ProductDto("name", "keyobs", ProductFamily.L0_SLICE, "FAST");
 
     /**
      * Initialization
@@ -92,7 +92,7 @@ public class GenericAppCatalogMqiServiceTest {
         lightMessage = new MqiLightMessageDto(ProductCategory.LEVEL_PRODUCTS,
                 1234, "topic", 2, 9876);
 
-        readMessage = new MqiGenericReadMessageDto<LevelProductDto>("group",
+        readMessage = new MqiGenericReadMessageDto<ProductDto>("group",
                 "pod", false, dto);
 
         sendMessage = new MqiSendMessageDto("pod", true);
@@ -363,7 +363,7 @@ public class GenericAppCatalogMqiServiceTest {
                 Mockito.eq("uri/mqi/level_products/topic/2/9876/read"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<MqiGenericReadMessageDto<LevelProductDto>>(
+                        new HttpEntity<MqiGenericReadMessageDto<ProductDto>>(
                                 readMessage)),
                 Mockito.eq(MqiLightMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
@@ -389,7 +389,7 @@ public class GenericAppCatalogMqiServiceTest {
                 Mockito.eq("uri/mqi/level_products/topic/2/9876/read"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<MqiGenericReadMessageDto<LevelProductDto>>(
+                        new HttpEntity<MqiGenericReadMessageDto<ProductDto>>(
                                 readMessage)),
                 Mockito.eq(MqiLightMessageDto.class));
         verifyNoMoreInteractions(restTemplate);

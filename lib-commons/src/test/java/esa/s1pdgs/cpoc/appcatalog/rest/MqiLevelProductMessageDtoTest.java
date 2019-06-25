@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -22,8 +22,7 @@ public class MqiLevelProductMessageDtoTest {
     /**
      * DTO
      */
-    private LevelProductDto dto = new LevelProductDto("prodcut-name", "key-obs",
-            ProductFamily.L0_SLICE, null);
+    private ProductDto dto = new ProductDto("prodcut-name", "key-obs", ProductFamily.L0_SLICE);
 
     /**
      * Test constructors

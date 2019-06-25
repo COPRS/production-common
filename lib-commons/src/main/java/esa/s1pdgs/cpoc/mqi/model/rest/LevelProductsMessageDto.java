@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.model.rest;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Extension of the GenericMessageDto for the category LevelProducts
@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
  * @author Viveris Technologies
  */
 public class LevelProductsMessageDto
-        extends GenericMessageDto<LevelProductDto> {
+        extends GenericMessageDto<ProductDto> {
 
     /**
      * Default constructor
@@ -24,7 +24,7 @@ public class LevelProductsMessageDto
      * @param body
      */
     public LevelProductsMessageDto(final long identifier, final String inputKey,
-            final LevelProductDto body) {
+            final ProductDto body) {
         super(identifier, inputKey, body);
     }
 

@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
@@ -57,7 +57,7 @@ public class LevelProductsExtractorTest {
 	 * MQI service
 	 */
 	@Mock
-	private GenericMqiService<LevelProductDto> mqiService;
+	private GenericMqiService<ProductDto> mqiService;
 
 	/**
 	 * 
@@ -79,17 +79,17 @@ public class LevelProductsExtractorTest {
 	/**
 	 * Job to process
 	 */
-	private GenericMessageDto<LevelProductDto> inputMessage;
+	private GenericMessageDto<ProductDto> inputMessage;
 
 	/**
 	 * Job to process
 	 */
-	private GenericMessageDto<LevelProductDto> inputMessageSafe;
+	private GenericMessageDto<ProductDto> inputMessageSafe;
 
 	/**
 	 * Job to process
 	 */
-	private GenericMessageDto<LevelProductDto> inputMessageAux;
+	private GenericMessageDto<ProductDto> inputMessageAux;
 	
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
@@ -123,15 +123,15 @@ public class LevelProductsExtractorTest {
 		doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
 		doReturn(true).when(mqiService).ack(Mockito.any());
 
-		inputMessage = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto("product-name", "key-obs", ProductFamily.L0_ACN, "NRT"));
+		inputMessage = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto("product-name", "key-obs", ProductFamily.L0_ACN, "NRT"));
 
-		inputMessageSafe = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto("S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
+		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto("S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
 						"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", ProductFamily.L0_ACN, "NRT"));
 
-		inputMessageAux = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
+		inputMessageAux = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
 						"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.L0_ACN, "NRT"));
 
 		extractor = new LevelProductsExtractor(esServices, obsService, mqiService, appStatus, extractorConfig,
@@ -186,8 +186,8 @@ public class LevelProductsExtractorTest {
 				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe");
 
-		inputMessageSafe = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_SLICE, "NRT"));
 
@@ -236,8 +236,8 @@ public class LevelProductsExtractorTest {
 				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe");
 
-		inputMessageSafe = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_ACN, "NRT"));
 
@@ -285,8 +285,8 @@ public class LevelProductsExtractorTest {
 				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe");
 
-		inputMessageSafe = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L1_SLICE, "NRT"));
 
@@ -335,8 +335,8 @@ public class LevelProductsExtractorTest {
 		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l1acnName
 				+ File.separator + "manifest.safe");
 
-		inputMessageSafe = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto(l1acnName, l1acnName, ProductFamily.L1_ACN, "NRT"));
+		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto(l1acnName, l1acnName, ProductFamily.L1_ACN, "NRT"));
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
@@ -382,8 +382,8 @@ public class LevelProductsExtractorTest {
 		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l2SliceName
 				+ File.separator + "manifest.safe");
 
-		inputMessageSafe = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto(l2SliceName, l2SliceName, ProductFamily.L2_SLICE, "NRT"));
+		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto(l2SliceName, l2SliceName, ProductFamily.L2_SLICE, "NRT"));
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
@@ -428,8 +428,8 @@ public class LevelProductsExtractorTest {
 		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l2acnName
 				+ File.separator + "manifest.safe");
 
-		inputMessageSafe = new GenericMessageDto<LevelProductDto>(123, "",
-				new LevelProductDto(l2acnName, l2acnName, ProductFamily.L2_ACN, "NRT"));
+		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto(l2acnName, l2acnName, ProductFamily.L2_ACN, "NRT"));
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 

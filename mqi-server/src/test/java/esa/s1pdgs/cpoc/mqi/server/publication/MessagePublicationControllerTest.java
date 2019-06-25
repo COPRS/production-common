@@ -43,7 +43,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -98,7 +98,7 @@ public class MessagePublicationControllerTest {
 
     private MessagePublicationController customController;
 
-    private GenericKafkaUtils<LevelProductDto> kafkaUtilsProducts;
+    private GenericKafkaUtils<ProductDto> kafkaUtilsProducts;
 
     private GenericKafkaUtils<LevelReportDto> kafkaUtilsReports;
 
@@ -115,7 +115,7 @@ public class MessagePublicationControllerTest {
         MockitoAnnotations.initMocks(this);
 
         kafkaUtilsProducts =
-                new GenericKafkaUtils<LevelProductDto>(embeddedKafka);
+                new GenericKafkaUtils<ProductDto>(embeddedKafka);
 
         kafkaUtilsReports =
                 new GenericKafkaUtils<LevelReportDto>(embeddedKafka);
@@ -317,13 +317,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelProducts() throws Exception {
-        LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
+        ProductDto dto = new ProductDto("product-name", "key-obs",
                 ProductFamily.L0_SLICE, "NRT");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, LevelProductDto> record = kafkaUtilsProducts
+        ConsumerRecord<String, ProductDto> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L0_PRODUCTS);
 
         assertEquals(dto, record.value());
@@ -331,13 +331,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelProducts1() throws Exception {
-        LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
+        ProductDto dto = new ProductDto("product-name", "key-obs",
                 ProductFamily.L1_ACN, "NRT");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto, "t-pdgs-l1-jobs-nrt", "L1_ACN");
 
-        ConsumerRecord<String, LevelProductDto> record = kafkaUtilsProducts
+        ConsumerRecord<String, ProductDto> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L1_ACNS);
 
         assertEquals(dto, record.value());
@@ -346,7 +346,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelProductsNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
-        LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
+        ProductDto dto = new ProductDto("product-name", "key-obs",
                 ProductFamily.L0_SLICE, "NRT");
         initCustomControllerForNoPublication();
 

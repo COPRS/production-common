@@ -41,7 +41,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class JobsGeneratorFactoryTest {
 
@@ -67,7 +67,7 @@ public class JobsGeneratorFactoryTest {
     private AbstractAppCatalogJobService<EdrsSessionDto> appDataEService;
 
     @Mock
-    private AbstractAppCatalogJobService<LevelProductDto> appDataPService;
+    private AbstractAppCatalogJobService<ProductDto> appDataPService;
 
     /**
      * Test set up
@@ -396,7 +396,7 @@ public class JobsGeneratorFactoryTest {
                     l0ProcessSettings, jobGeneratorSettings, xmlConverter,
                     metadataService, JobsSender);
 
-            AbstractJobsGenerator<LevelProductDto> generator =
+            AbstractJobsGenerator<ProductDto> generator =
                     factory.createJobGeneratorForL0Slice(new File(
                             "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
                     		 ApplicationLevel.L2,appDataPService);

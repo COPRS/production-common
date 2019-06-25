@@ -22,7 +22,7 @@ public class ProductDtoTest {
 	 * Test getters, setters and constructors
 	 */
 	@Test
-	public void testGettersSettersConstructors() {
+	public void testAux() {
 		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
 		assertEquals("product-name", dto.getProductName());
 		assertEquals("key-obs", dto.getKeyObjectStorage());
@@ -33,6 +33,16 @@ public class ProductDtoTest {
 		assertEquals("other-product", dto.getProductName());
 		assertEquals("other-key", dto.getKeyObjectStorage());
 	}
+	
+    @Test
+    public void testLevelProduct() {
+        ProductDto dto = new ProductDto("product-name", "key-obs",
+                ProductFamily.L0_SLICE, "NRT");
+        assertEquals("product-name", dto.getProductName());
+        assertEquals("key-obs", dto.getKeyObjectStorage());
+        assertEquals(ProductFamily.L0_SLICE, dto.getFamily());
+        assertEquals("NRT", dto.getMode());
+    }
 
 	/**
 	 * Test the toString function
@@ -52,5 +62,42 @@ public class ProductDtoTest {
 	public void checkEquals() {
 		EqualsVerifier.forClass(ProductDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
+	
+
+
+    /**
+     * Test toString methods and setters
+     */
+    @Test
+    public void testToStringAndSetters() {
+        ProductDto dto = new ProductDto();
+        dto.setProductName("product-name");
+        dto.setKeyObjectStorage("key-obs");
+        dto.setFamily(ProductFamily.L1_SLICE);
+        dto.setMode("fast");
+        String str = dto.toString();
+        assertTrue(str.contains("productName: product-name"));
+        assertTrue(str.contains("keyObjectStorage: key-obs"));
+        assertTrue(str.contains("family: L1_SLICE"));
+        assertTrue(str.contains("mode: FAST"));
+    }
+
+    /**
+     * Test toString methods and setters
+     */
+    @Test
+    public void testToStringAndSettersL2() {
+        ProductDto dto = new ProductDto();
+        dto.setProductName("product-name");
+        dto.setKeyObjectStorage("key-obs");
+        dto.setFamily(ProductFamily.L2_SLICE);
+        dto.setMode("FAST");
+        String str = dto.toString();
+        assertTrue(str.contains("productName: product-name"));
+        assertTrue(str.contains("keyObjectStorage: key-obs"));
+        assertTrue(str.contains("family: L2_SLICE"));
+        assertTrue(str.contains("mode: FAST"));
+    }
+
 
 }

@@ -34,13 +34,13 @@ import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class L1AppConsumerTest {
 
     @Mock
-    private AbstractJobsDispatcher<LevelProductDto> l0SliceJobsDispatcher;
+    private AbstractJobsDispatcher<ProductDto> l0SliceJobsDispatcher;
 
     @Mock
     protected ProcessSettings processSettings;
@@ -49,12 +49,12 @@ public class L1AppConsumerTest {
     private L0SlicePatternSettings l0SlicePatternSettings;
 
     @Mock
-    private GenericMqiService<LevelProductDto> mqiService;
+    private GenericMqiService<ProductDto> mqiService;
     @Mock
     protected StatusService mqiStatusService;
 
     @Mock
-    protected AbstractAppCatalogJobService<LevelProductDto> appDataService;
+    protected AbstractAppCatalogJobService<ProductDto> appDataService;
 
     /**
      * Application status
@@ -67,18 +67,18 @@ public class L1AppConsumerTest {
     
     private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
-    private LevelProductDto dtoMatch = new LevelProductDto(
+    private ProductDto dtoMatch = new ProductDto(
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             ProductFamily.L0_SLICE, "NRT");
-    private LevelProductDto dtoNotMatch = new LevelProductDto(
+    private ProductDto dtoNotMatch = new ProductDto(
             "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             ProductFamily.L0_SLICE, "NRT");
-    private GenericMessageDto<LevelProductDto> message1 =
-            new GenericMessageDto<LevelProductDto>(1, "", dtoMatch);
-    private GenericMessageDto<LevelProductDto> message2 =
-            new GenericMessageDto<LevelProductDto>(2, "", dtoNotMatch);
+    private GenericMessageDto<ProductDto> message1 =
+            new GenericMessageDto<ProductDto>(1, "", dtoMatch);
+    private GenericMessageDto<ProductDto> message2 =
+            new GenericMessageDto<ProductDto>(2, "", dtoNotMatch);
 
     @Before
     public void setUp() throws Exception {
@@ -206,12 +206,12 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistOtherPod()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
         job1.setIdentifier(12L);
         job1.setPod("i-hostname");
         job1.setProduct(new AppDataJobProductDto());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());
@@ -238,12 +238,12 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistSamePodWaiting()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
         job1.setIdentifier(12L);
         job1.setPod("hostname");
         job1.setProduct(new AppDataJobProductDto());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());
@@ -270,13 +270,13 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistSamePodGenerating()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
         job1.setIdentifier(12L);
         job1.setPod("hostname");
         job1.setState(AppDataJobDtoState.DISPATCHING);
         job1.setProduct(new AppDataJobProductDto());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());

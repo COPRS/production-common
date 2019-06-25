@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -62,7 +62,7 @@ public class LevelProductDistributionControllerTest extends RestControllerTest {
     /**
      * The consumed messsage
      */
-    private GenericMessageDto<LevelProductDto> consumedMessage;
+    private GenericMessageDto<ProductDto> consumedMessage;
 
     /**
      * The controller to test
@@ -77,10 +77,10 @@ public class LevelProductDistributionControllerTest extends RestControllerTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        LevelProductDto dto = new LevelProductDto("product-name", "key-obs",
+        ProductDto dto = new ProductDto("product-name", "key-obs",
                 ProductFamily.L1_ACN, "NRT");
         consumedMessage =
-                new GenericMessageDto<LevelProductDto>(123, "input-key", dto);
+                new GenericMessageDto<ProductDto>(123, "input-key", dto);
 
         doReturn(consumedMessage).when(messages).nextMessage(Mockito.any());
 
@@ -159,9 +159,9 @@ public class LevelProductDistributionControllerTest extends RestControllerTest {
     @Test
     public void testPublishMessageUri() throws Exception {
         doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-        GenericPublicationMessageDto<LevelProductDto> dto =
+        GenericPublicationMessageDto<ProductDto> dto =
                 new GenericPublicationMessageDto<>(ProductFamily.L0_SLICE,
-                        new LevelProductDto("product-name", "key-test",
+                        new ProductDto("product-name", "key-test",
                                 ProductFamily.L0_SLICE, "NRT"));
         dto.setInputKey("key");
         dto.setOutputKey("L0_SLICE");

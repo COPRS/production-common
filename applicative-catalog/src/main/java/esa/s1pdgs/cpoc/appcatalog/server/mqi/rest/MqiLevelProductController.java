@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * REST server for managing MQI messages in DB for the product category
@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 @RestController
 @RequestMapping(path = "/mqi/level_products")
 public class MqiLevelProductController
-        extends GenericMqiController<LevelProductDto> {
+        extends GenericMqiController<ProductDto> {
 
     /**
      * @param mongoDBServices

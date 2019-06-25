@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -53,7 +53,7 @@ public class GenericExtractorTest {
      * MQI service
      */
     @Mock
-    private GenericMqiService<LevelProductDto> mqiService;
+    private GenericMqiService<ProductDto> mqiService;
 
     /**
      * 
@@ -70,7 +70,7 @@ public class GenericExtractorTest {
     /**
      * Extractor
      */
-    protected GenericExtractor<LevelProductDto> extractor;
+    protected GenericExtractor<ProductDto> extractor;
     
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
@@ -79,7 +79,7 @@ public class GenericExtractorTest {
     /**
      * Job to process
      */
-    private GenericMessageDto<LevelProductDto> inputMessage;
+    private GenericMessageDto<ProductDto> inputMessage;
     
     private final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
     		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
@@ -98,8 +98,8 @@ public class GenericExtractorTest {
                 Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any());
 
-        inputMessage = new GenericMessageDto<LevelProductDto>(123, "",
-                new LevelProductDto(
+        inputMessage = new GenericMessageDto<ProductDto>(123, "",
+                new ProductDto(
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         ProductFamily.L0_ACN, "NRT"));

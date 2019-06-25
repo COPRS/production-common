@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 public class SegmentsConsumerTest {
@@ -110,7 +110,7 @@ public class SegmentsConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsService, times(1)).downloadFile(
@@ -126,7 +126,7 @@ public class SegmentsConsumerTest {
                         appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -139,7 +139,7 @@ public class SegmentsConsumerTest {
                         appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -156,7 +156,7 @@ public class SegmentsConsumerTest {
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }

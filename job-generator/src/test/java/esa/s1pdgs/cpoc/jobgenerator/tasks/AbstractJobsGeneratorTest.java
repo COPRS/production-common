@@ -57,7 +57,7 @@ import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class AbstractJobsGeneratorTest {
 
@@ -84,10 +84,10 @@ public class AbstractJobsGeneratorTest {
 
     private int nbLoopMetadata;
 
-    private AbstractJobsGenerator<LevelProductDto> generator;
+    private AbstractJobsGenerator<ProductDto> generator;
 
     @Mock
-    private AbstractAppCatalogJobService<LevelProductDto> appDataPService;
+    private AbstractAppCatalogJobService<ProductDto> appDataPService;
 
     private TaskTable expectedTaskTable;
 
@@ -293,15 +293,15 @@ public class AbstractJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<LevelProductDto> primaryCheckAppJob =
+        AppDataJobDto<ProductDto> primaryCheckAppJob =
                 TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<LevelProductDto> readyAppJob =
+        AppDataJobDto<ProductDto> readyAppJob =
                 TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<LevelProductDto> sentAppJob =
+        AppDataJobDto<ProductDto> sentAppJob =
                 TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
@@ -328,7 +328,7 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, JobGenBuildTaskTableException {
         doThrow(new IOException("IO exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        AbstractJobsGenerator<LevelProductDto> gen = new L1AppJobsGenerator(
+        AbstractJobsGenerator<ProductDto> gen = new L1AppJobsGenerator(
                 xmlConverter, metadataService, processSettings,
                 jobGeneratorSettings, JobsSender, appDataPService);
         generator.setMode(ProductMode.SLICING);
@@ -346,7 +346,7 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, JobGenBuildTaskTableException {
         doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        AbstractJobsGenerator<LevelProductDto> gen = new L1AppJobsGenerator(
+        AbstractJobsGenerator<ProductDto> gen = new L1AppJobsGenerator(
                 xmlConverter, metadataService, processSettings,
                 jobGeneratorSettings, JobsSender, appDataPService);
         generator.setMode(ProductMode.SLICING);
@@ -423,7 +423,7 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(jobGeneratorSettings).getWaitmetadatainput();
         
-        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
         job1.setIdentifier(12L);
         job1.getGenerations().add(new AppDataJobGenerationDto());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
@@ -453,14 +453,14 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(jobGeneratorSettings).getWaitmetadatainput();
         
-        AppDataJobDto<LevelProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
         job1.setIdentifier(12L);
         job1.getGenerations().add(new AppDataJobGenerationDto());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
         job1.getGenerations().get(0).setState(AppDataJobGenerationDtoState.INITIAL);
         job1.getGenerations().get(0).setLastUpdateDate(new Date());
         
-        AppDataJobDto<LevelProductDto> job2 = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
         job2.setIdentifier(12L);
         job2.getGenerations().add(new AppDataJobGenerationDto());
         job2.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");

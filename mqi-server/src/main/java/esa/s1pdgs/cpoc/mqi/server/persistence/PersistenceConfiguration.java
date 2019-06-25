@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
@@ -85,7 +85,7 @@ public class PersistenceConfiguration {
      * @return
      */
     @Bean(name = "persistenceServiceForLevelProducts")
-    public GenericAppCatalogMqiService<LevelProductDto> persistenceServiceForLevelProducts(
+    public GenericAppCatalogMqiService<ProductDto> persistenceServiceForLevelProducts(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new AppCatalogMqiLevelProductsService(template, hostUriCatalog,

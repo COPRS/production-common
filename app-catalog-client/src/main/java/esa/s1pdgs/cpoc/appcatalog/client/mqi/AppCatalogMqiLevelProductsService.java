@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Service for managing MQI level products messages in applicative catalog (REST
@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
  * @author Viveris Technologies
  */
 public class AppCatalogMqiLevelProductsService
-        extends GenericAppCatalogMqiService<LevelProductDto> {
+        extends GenericAppCatalogMqiService<ProductDto> {
 
     /**
      * Constructor
@@ -49,7 +49,7 @@ public class AppCatalogMqiLevelProductsService
      * @see GenericAppCatalogMqiService#next()
      */
     @Override
-    public List<MqiGenericMessageDto<LevelProductDto>> next(String podName)
+    public List<MqiGenericMessageDto<ProductDto>> next(String podName)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -69,8 +69,8 @@ public class AppCatalogMqiLevelProductsService
                     if (body == null) {
                         return new ArrayList<>();
                     } else {
-                        List<MqiGenericMessageDto<LevelProductDto>> ret =
-                                new ArrayList<MqiGenericMessageDto<LevelProductDto>>();
+                        List<MqiGenericMessageDto<ProductDto>> ret =
+                                new ArrayList<MqiGenericMessageDto<ProductDto>>();
                         ret.addAll(body);
                         return ret;
                     }
@@ -93,7 +93,7 @@ public class AppCatalogMqiLevelProductsService
      * @see GenericAppCatalogMqiService#get(long)
      */
     @Override
-    public MqiGenericMessageDto<LevelProductDto> get(final long messageId)
+    public MqiGenericMessageDto<ProductDto> get(final long messageId)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {

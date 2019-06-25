@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -38,9 +38,9 @@ public class OutputProducerFactoryTest {
     public void testSendJob() throws AbstractCodedException {
         LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
-        GenericMessageDto<LevelProductDto> message =
-                new GenericMessageDto<LevelProductDto>(123, "key",
-                        new LevelProductDto("level-name", "key-obs",
+        GenericMessageDto<ProductDto> message =
+                new GenericMessageDto<ProductDto>(123, "key",
+                        new ProductDto("level-name", "key-obs",
                                 ProductFamily.L0_SLICE, "NRT"));
 
         GenericPublicationMessageDto<LevelJobDto> expected =

@@ -21,14 +21,14 @@ import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Customization of the job generator for L2 slice products
  * 
  * @author Cyrielle Gailliard
  */
-public class L2AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
+public class L2AppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
 
     /**
      * @param xmlConverter
@@ -42,7 +42,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
             final ProcessSettings processSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<LevelProductDto> appDataService) {
+            final AbstractAppCatalogJobService<ProductDto> appDataService) {
         super(xmlConverter, metadataService, processSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
@@ -52,7 +52,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
      * inputs
      */
     @Override
-    protected void preSearch(final JobGeneration<LevelProductDto> job)
+    protected void preSearch(final JobGeneration<ProductDto> job)
             throws JobGenInputsMissingException {
         Map<String, String> missingMetadata = new HashMap<>();
         // Retrieve instrument configuration id and slice number
@@ -96,7 +96,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
      * Custom job order before building the job DTO
      */
     @Override
-    protected void customJobOrder(final JobGeneration<LevelProductDto> job) {
+    protected void customJobOrder(final JobGeneration<ProductDto> job) {
         // Rewrite job order sensing time
         String jobOrderStart = DateUtils.convertToAnotherFormat(
                 job.getAppDataJob().getProduct().getSegmentStartDate(),
@@ -151,7 +151,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<LevelProductDto> {
      * Customisation of the job DTO before sending it
      */
     @Override
-    protected void customJobDto(final JobGeneration<LevelProductDto> job,
+    protected void customJobDto(final JobGeneration<ProductDto> job,
             final LevelJobDto dto) {
         // NOTHING TO DO
 

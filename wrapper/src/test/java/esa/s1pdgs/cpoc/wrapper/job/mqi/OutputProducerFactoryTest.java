@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -42,7 +42,7 @@ public class OutputProducerFactoryTest {
      * Kafka producer for L0 slices
      */
     @Mock
-    private GenericMqiService<LevelProductDto> senderProducts;
+    private GenericMqiService<ProductDto> senderProducts;
 
     /**
      * Kafka producer for report
@@ -108,9 +108,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L0_SLICE,
                         "test.txt", "test.txt", "NRT"), inputMessage);
-        GenericPublicationMessageDto<LevelProductDto> message =
-                new GenericPublicationMessageDto<LevelProductDto>(123,
-                        ProductFamily.L0_SLICE, new LevelProductDto("test.txt",
+        GenericPublicationMessageDto<ProductDto> message =
+                new GenericPublicationMessageDto<ProductDto>(123,
+                        ProductFamily.L0_SLICE, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L0_SLICE, "NRT"));
         message.setOutputKey("L0_SLICE");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
@@ -147,9 +147,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L0_ACN,
                         "test.txt", "test.txt", "FAST"), inputMessage);
-        GenericPublicationMessageDto<LevelProductDto> message =
-                new GenericPublicationMessageDto<LevelProductDto>(123,
-                        ProductFamily.L0_ACN, new LevelProductDto("test.txt",
+        GenericPublicationMessageDto<ProductDto> message =
+                new GenericPublicationMessageDto<ProductDto>(123,
+                        ProductFamily.L0_ACN, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L0_ACN, "FAST"));
         message.setOutputKey("L0_ACN");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
@@ -185,9 +185,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L1_SLICE,
                         "test.txt", "test.txt", "FAST"), inputMessage);
-        GenericPublicationMessageDto<LevelProductDto> message =
-                new GenericPublicationMessageDto<LevelProductDto>(123,
-                        ProductFamily.L1_SLICE, new LevelProductDto("test.txt",
+        GenericPublicationMessageDto<ProductDto> message =
+                new GenericPublicationMessageDto<ProductDto>(123,
+                        ProductFamily.L1_SLICE, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L1_SLICE, "FAST"));
         message.setOutputKey("L1_SLICE");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
@@ -204,9 +204,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L1_ACN,
                         "test.txt", "test.txt", "NRT"), inputMessage);
-        GenericPublicationMessageDto<LevelProductDto> message =
-                new GenericPublicationMessageDto<LevelProductDto>(123,
-                        ProductFamily.L1_ACN, new LevelProductDto("test.txt",
+        GenericPublicationMessageDto<ProductDto> message =
+                new GenericPublicationMessageDto<ProductDto>(123,
+                        ProductFamily.L1_ACN, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L1_ACN, "NRT"));
         message.setOutputKey("L1_ACN");
         verify(this.senderProducts, times(1)).publish(Mockito.eq(message));

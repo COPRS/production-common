@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -45,9 +45,9 @@ public class QueueWatcherService {
 	private final GenericMqiService<ProductDto> mqiServiceForAUXProducts;
 
 	/**
-	 * MQI service for reading message LevelProductDto
+	 * MQI service for reading message ProductDto
 	 */
-	private final GenericMqiService<LevelProductDto> mqiServiceForLevelProducts;
+	private final GenericMqiService<ProductDto> mqiServiceForLevelProducts;
 
 		/**
 	 * MQI service for reading message LevelSegmentDto
@@ -64,7 +64,7 @@ public class QueueWatcherService {
 	public QueueWatcherService(
 			@Qualifier("mqiServiceForCompression") final GenericMqiService<ProductDto> mqiServiceForCompressedProducts,
 			@Qualifier("mqiServiceForAuxiliaryFiles") final GenericMqiService<ProductDto> mqiServiceForAUXProducts,
-			@Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiServiceForLevelProducts,
+			@Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> mqiServiceForLevelProducts,
 			@Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> mqiServiceForLevelSegments) {
 
 		this.mqiServiceForCompressedProducts = mqiServiceForCompressedProducts;
@@ -141,7 +141,7 @@ public class QueueWatcherService {
 	@Scheduled(fixedDelayString = "${file.product-categories.level-products.fixed-delay-ms}", initialDelayString = "${file.product-categories.level-products.init-delay-poll-ms}")
 	public void watchLevelProductQueue() {
 		
-		GenericMessageDto<LevelProductDto> message = null;
+		GenericMessageDto<ProductDto> message = null;
 		try {
 			message = this.mqiServiceForLevelProducts.next();
 			if (message == null || message.getBody() == null) {

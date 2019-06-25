@@ -49,12 +49,25 @@ public class OutputProducerFactory {
     public void sendOutput(final CompressedProductQueueMessage msg,
             GenericMessageDto<ProductDto> inputMessage)
             throws AbstractCodedException {
-    	ProductDto dto = new ProductDto(msg.getProductName(), msg.getObjectStorageKey(), msg.getFamily());
-    	GenericPublicationMessageDto messageDto = new GenericPublicationMessageDto<ProductDto>(inputMessage.getIdentifier(), msg.getFamily(), dto);
+    	GenericPublicationMessageDto<ProductDto> messageDto = new GenericPublicationMessageDto<ProductDto>(
+    			inputMessage.getIdentifier(), 
+    			msg.getFamily(), 
+    			toProductDto(msg)
+    	);
     	messageDto.setInputKey(inputMessage.getInputKey());
-    	messageDto.setOutputKey(dto.getFamily().name());
+    	messageDto.setOutputKey(msg.getFamily().name());
     	
     	senderCompression.publish(messageDto);
+    }
+    
+    private final ProductDto toProductDto(final CompressedProductQueueMessage msg)
+    {
+    	return new ProductDto(
+        		msg.getProductName(), 
+        		msg.getObjectStorageKey(),
+        		msg.getFamily(), 
+        		null
+        );
     }
 
 }

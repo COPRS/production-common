@@ -25,7 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class LevelProductsAppCatalogJobServiceTest {
 
@@ -38,7 +38,7 @@ public class LevelProductsAppCatalogJobServiceTest {
     /**
      * Client to test
      */
-    protected AbstractAppCatalogJobService<LevelProductDto> client;
+    protected AbstractAppCatalogJobService<ProductDto> client;
 
     /**
      * Initialization
@@ -77,7 +77,7 @@ public class LevelProductsAppCatalogJobServiceTest {
         builder = builder.queryParam("key1", "value1");
         URI uri = builder.build().toUri();
 
-        ResponseEntity<List<AppDataJobDto<LevelProductDto>>> result =
+        ResponseEntity<List<AppDataJobDto<ProductDto>>> result =
                 client.internalExchangeSearch(uri);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(list, result.getBody());
@@ -105,7 +105,7 @@ public class LevelProductsAppCatalogJobServiceTest {
         builder = builder.queryParam("key1", "value1");
         URI uri = builder.build().toUri();
 
-        ResponseEntity<List<AppDataJobDto<LevelProductDto>>> result =
+        ResponseEntity<List<AppDataJobDto<ProductDto>>> result =
                 client.internalExchangeSearch(uri);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(0, result.getBody().size());
@@ -127,14 +127,14 @@ public class LevelProductsAppCatalogJobServiceTest {
 
         String uri = "http://localhost:8080/lvel_products/jobs/search";
 
-        ResponseEntity<AppDataJobDto<LevelProductDto>> result =
+        ResponseEntity<AppDataJobDto<ProductDto>> result =
                 client.internalExchangeNewJob(uri, body);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(expected, result.getBody());
         verify(restTemplate, only()).exchange(Mockito.eq(uri),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<AppDataJobDto<LevelProductDto>>(body)),
+                        new HttpEntity<AppDataJobDto<ProductDto>>(body)),
                 Mockito.eq(LevelProductAppDataJobDto.class));
     }
 
@@ -151,14 +151,14 @@ public class LevelProductsAppCatalogJobServiceTest {
 
         String uri = "http://localhost:8080/lvel_products/jobs/search";
 
-        ResponseEntity<AppDataJobDto<LevelProductDto>> result =
+        ResponseEntity<AppDataJobDto<ProductDto>> result =
                 client.internalExchangePatchJob(uri, body);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(expected, result.getBody());
         verify(restTemplate, only()).exchange(Mockito.eq(uri),
                 Mockito.eq(HttpMethod.PATCH),
                 Mockito.eq(
-                        new HttpEntity<AppDataJobDto<LevelProductDto>>(body)),
+                        new HttpEntity<AppDataJobDto<ProductDto>>(body)),
                 Mockito.eq(LevelProductAppDataJobDto.class));
     }
 
@@ -175,7 +175,7 @@ public class LevelProductsAppCatalogJobServiceTest {
 
         String uri = "http://localhost:8080/lvel_products/jobs/search";
 
-        ResponseEntity<AppDataJobDto<LevelProductDto>> result =
+        ResponseEntity<AppDataJobDto<ProductDto>> result =
                 client.internalExchangePatchTaskTableOfJob(uri, body);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(expected, result.getBody());

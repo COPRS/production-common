@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 @Component
 @ConditionalOnProperty(name = "process.level", havingValue = "L1")
 
-public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
+public class L1AppConsumer extends AbstractGenericConsumer<ProductDto> {
 
     /**
      * Settings used to extract information from L0 product name
@@ -62,12 +62,12 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
      */
     @Autowired
     public L1AppConsumer(
-            final AbstractJobsDispatcher<LevelProductDto> jobsDispatcher,
+            final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
             final L0SlicePatternSettings patternSettings,
             final ProcessSettings processSettings,
-            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiService,
+            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> mqiService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
-            @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<LevelProductDto> appDataService,
+            @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<ProductDto> appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
@@ -86,7 +86,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
     	final Reporting reporting = reportingFactory.newReporting(0);
     	
         // First, consume message
-        GenericMessageDto<LevelProductDto> mqiMessage = readMessage();
+        GenericMessageDto<ProductDto> mqiMessage = readMessage();
         if (mqiMessage == null || mqiMessage.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;
@@ -98,8 +98,8 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
         String errorMessage = "";
         String productName = mqiMessage.getBody().getProductName();
 
-        final FailedProcessingDto<GenericMessageDto<LevelProductDto>> failedProc =  
-        		new FailedProcessingDto<GenericMessageDto<LevelProductDto>>();
+        final FailedProcessingDto<GenericMessageDto<ProductDto>> failedProc =  
+        		new FailedProcessingDto<GenericMessageDto<ProductDto>>();
         
         try {
 
@@ -107,7 +107,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job",
                     productName);
             reporting.reportStart("Start job generation using " + mqiMessage.getBody().getProductName());
-            AppDataJobDto<LevelProductDto> appDataJob = buildJob(mqiMessage);
+            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -150,13 +150,13 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
         reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
     }
 
-    protected AppDataJobDto<LevelProductDto> buildJob(
-            GenericMessageDto<LevelProductDto> mqiMessage)
+    protected AppDataJobDto<ProductDto> buildJob(
+            GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
-        LevelProductDto leveldto = mqiMessage.getBody();
+        ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJobDto<LevelProductDto>> existingJobs = appDataService
+        List<AppDataJobDto<ProductDto>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -177,7 +177,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
             String stopTime = m.group(this.patternSettings.getMGroupStopTime());
 
             // Create the JOB
-            AppDataJobDto<LevelProductDto> jobDto = new AppDataJobDto<>();
+            AppDataJobDto<ProductDto> jobDto = new AppDataJobDto<>();
             // General details
             jobDto.setLevel(processSettings.getLevel());
             jobDto.setPod(processSettings.getHostname());
@@ -202,7 +202,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
 
         } else {
             // Update pod if needed
-            AppDataJobDto<LevelProductDto> jobDto = existingJobs.get(0);
+            AppDataJobDto<ProductDto> jobDto = existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());

@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Test the REST service ErrorService
@@ -69,10 +69,10 @@ public class AppCatalogMqiLevelProductsServiceTest {
      */
     private MqiLevelProductMessageDto message1;
     private MqiLevelProductMessageDto message2;
-    private List<MqiGenericMessageDto<LevelProductDto>> messages;
+    private List<MqiGenericMessageDto<ProductDto>> messages;
     private List<MqiLevelProductMessageDto> messages2;
-    private LevelProductDto dto =
-            new LevelProductDto("name", "keyobs", ProductFamily.L0_SLICE, "FAST");
+    private ProductDto dto =
+            new ProductDto("name", "keyobs", ProductFamily.L0_SLICE, "FAST");
 
     /**
      * Initialization
@@ -195,7 +195,7 @@ public class AppCatalogMqiLevelProductsServiceTest {
                 .fromUriString(uriStr).queryParam("pod", "pod-name");
         URI expectedUri = builder.build().toUri();
 
-        List<MqiGenericMessageDto<LevelProductDto>> result =
+        List<MqiGenericMessageDto<ProductDto>> result =
                 service.next("pod-name");
         assertEquals(messages, result);
         verify(restTemplate, times(2)).exchange(Mockito.eq(expectedUri),
@@ -224,7 +224,7 @@ public class AppCatalogMqiLevelProductsServiceTest {
                 .fromUriString(uriStr).queryParam("pod", "pod-name");
         URI expectedUri = builder.build().toUri();
 
-        List<MqiGenericMessageDto<LevelProductDto>> result =
+        List<MqiGenericMessageDto<ProductDto>> result =
                 service.next("pod-name");
         assertEquals(messages, result);
         verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
@@ -253,7 +253,7 @@ public class AppCatalogMqiLevelProductsServiceTest {
                 .fromUriString(uriStr).queryParam("pod", "pod-name");
         URI expectedUri = builder.build().toUri();
 
-        List<MqiGenericMessageDto<LevelProductDto>> result =
+        List<MqiGenericMessageDto<ProductDto>> result =
                 service.next("pod-name");
         assertEquals(0, result.size());
         verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
@@ -352,7 +352,7 @@ public class AppCatalogMqiLevelProductsServiceTest {
                                 Mockito.any(HttpMethod.class), Mockito.any(),
                                 Mockito.any(Class.class));
 
-        MqiGenericMessageDto<LevelProductDto> ret = service.get(1234);
+        MqiGenericMessageDto<ProductDto> ret = service.get(1234);
         assertEquals(ret, message1);
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234"),
@@ -374,7 +374,7 @@ public class AppCatalogMqiLevelProductsServiceTest {
                         Mockito.any(HttpMethod.class), Mockito.any(),
                         Mockito.any(Class.class));
 
-        MqiGenericMessageDto<LevelProductDto> ret = service.get(1234);
+        MqiGenericMessageDto<ProductDto> ret = service.get(1234);
         assertEquals(ret, message1);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234"),

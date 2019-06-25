@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelSegmentsMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
@@ -89,7 +89,7 @@ public class MqiConfiguration {
      * @return
      */
     @Bean(name = "mqiServiceForLevelProducts")
-    public GenericMqiService<LevelProductDto> mqiServiceForLevelProducts(
+    public GenericMqiService<ProductDto> mqiServiceForLevelProducts(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new LevelProductsMqiService(template, hostUri, maxRetries,

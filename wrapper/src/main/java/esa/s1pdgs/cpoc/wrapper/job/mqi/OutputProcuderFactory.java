@@ -11,9 +11,9 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
@@ -41,7 +41,7 @@ public class OutputProcuderFactory {
     /**
      * MQI client for LEVEL_PRODUCTS
      */
-    private final GenericMqiService<LevelProductDto> senderProducts;
+    private final GenericMqiService<ProductDto> senderProducts;
 
     /**
      * MQI client for LEVEL_REPORTS
@@ -58,7 +58,7 @@ public class OutputProcuderFactory {
     @Autowired
     public OutputProcuderFactory(
             @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> senderSegments,
-            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> senderProducts,
+            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> senderProducts,
             @Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports) {
         this.senderSegments = senderSegments;
         this.senderProducts = senderProducts;
@@ -98,16 +98,33 @@ public class OutputProcuderFactory {
                             inputMessage.getIdentifier(), msg.getFamily(),
                             dtoProduct));
         } else {
-            LevelProductDto dtoProduct =
-                    new LevelProductDto(msg.getProductName(), msg.getKeyObs(),
-                            msg.getFamily(), msg.getProcessMode());
-            GenericPublicationMessageDto<LevelProductDto> messageToPublish =
-                    new GenericPublicationMessageDto<LevelProductDto>(
-                            inputMessage.getIdentifier(), msg.getFamily(),
-                            dtoProduct);
+            GenericPublicationMessageDto<ProductDto> messageToPublish = new GenericPublicationMessageDto<ProductDto>(
+                            inputMessage.getIdentifier(), 
+                            msg.getFamily(),
+                            toProductDto(msg)
+            );
             messageToPublish.setInputKey(inputMessage.getInputKey());
             messageToPublish.setOutputKey(msg.getFamily().name());
             senderProducts.publish(messageToPublish);
         }
+    }
+    
+    private final ProductDto toProductDto(final ObsQueueMessage msg)
+    {
+    	return new ProductDto(
+        		msg.getProductName(), 
+        		msg.getKeyObs(),
+        		msg.getFamily(), 
+        		toUppercaseOrNull(msg.getProcessMode())
+        );
+    }
+    
+    private final String toUppercaseOrNull(final String string)
+    {
+    	if (string == null)
+    	{
+    		return null;
+    	}
+    	return string.toUpperCase();
     }
 }

@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Route;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1RouteFrom;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1RouteTo;
 import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Routing;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestL1Utils {
@@ -62,17 +62,17 @@ public class TestL1Utils {
         return r;
     }
 
-    public static AppDataJobDto<LevelProductDto> buildJobGeneration(
+    public static AppDataJobDto<ProductDto> buildJobGeneration(
             boolean preSearchInfo) throws InternalErrorException {
-        AppDataJobDto<LevelProductDto> ret = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> ret = new AppDataJobDto<>();
         ret.setIdentifier(123);
         ret.setState(AppDataJobDtoState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);
 
-        GenericMessageDto<LevelProductDto> message1 =
-                new GenericMessageDto<LevelProductDto>(1, "input-key",
-                        new LevelProductDto(
+        GenericMessageDto<ProductDto> message1 =
+                new GenericMessageDto<ProductDto>(1, "input-key",
+                        new ProductDto(
                                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
                                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
                                 ProductFamily.L0_ACN, "NRT"));

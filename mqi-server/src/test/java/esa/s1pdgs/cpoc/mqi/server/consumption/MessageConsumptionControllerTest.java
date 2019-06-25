@@ -49,7 +49,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -104,7 +104,7 @@ public class MessageConsumptionControllerTest {
      * Service for AUXILIARY_FILES
      */
     @Mock
-    private GenericAppCatalogMqiService<LevelProductDto> persistLevelProductsService;
+    private GenericAppCatalogMqiService<ProductDto> persistLevelProductsService;
 
     /**
      * Service for AUXILIARY_FILES
@@ -252,7 +252,7 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.LEVEL_PRODUCTS).size());
         assertEquals("topic", manager.consumers
                 .get(ProductCategory.LEVEL_PRODUCTS).get("topic").getTopic());
-        assertEquals(LevelProductDto.class,
+        assertEquals(ProductDto.class,
                 manager.consumers.get(ProductCategory.LEVEL_PRODUCTS)
                         .get("topic").getConsumedMsgClass());
 

@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -62,7 +62,7 @@ public class GenericMqiServiceTest {
      * DTO
      */
     private AckMessageDto ackMessage;
-    private GenericPublicationMessageDto<LevelProductDto> pubMessage;
+    private GenericPublicationMessageDto<ProductDto> pubMessage;
 
     /**
      * Initialization
@@ -75,8 +75,8 @@ public class GenericMqiServiceTest {
 
         ackMessage = new AckMessageDto(1, Ack.OK, "message", true);
 
-        pubMessage = new GenericPublicationMessageDto<LevelProductDto>(
-                ProductFamily.L0_SLICE, new LevelProductDto("name", "keyobs",
+        pubMessage = new GenericPublicationMessageDto<ProductDto>(
+                ProductFamily.L0_SLICE, new ProductDto("name", "keyobs",
                         ProductFamily.L0_SLICE, "NRT"));
     }
     
@@ -154,7 +154,7 @@ public class GenericMqiServiceTest {
                     Mockito.eq("uri/messages/level_products/publish"),
                     Mockito.eq(HttpMethod.POST),
                     Mockito.eq(
-                            new HttpEntity<GenericPublicationMessageDto<LevelProductDto>>(
+                            new HttpEntity<GenericPublicationMessageDto<ProductDto>>(
                                     pubMessage)),
                     Mockito.eq(Void.class));
             verifyNoMoreInteractions(restTemplate);
@@ -181,7 +181,7 @@ public class GenericMqiServiceTest {
                 Mockito.eq("uri/messages/level_products/publish"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<GenericPublicationMessageDto<LevelProductDto>>(
+                        new HttpEntity<GenericPublicationMessageDto<ProductDto>>(
                                 pubMessage)),
                 Mockito.eq(Void.class));
         verifyNoMoreInteractions(restTemplate);
@@ -205,7 +205,7 @@ public class GenericMqiServiceTest {
                 Mockito.eq("uri/messages/level_products/publish"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<GenericPublicationMessageDto<LevelProductDto>>(
+                        new HttpEntity<GenericPublicationMessageDto<ProductDto>>(
                                 pubMessage)),
                 Mockito.eq(Void.class));
         verifyNoMoreInteractions(restTemplate);

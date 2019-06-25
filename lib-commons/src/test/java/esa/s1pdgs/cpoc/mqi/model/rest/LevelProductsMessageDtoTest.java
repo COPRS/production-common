@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -22,7 +22,7 @@ public class LevelProductsMessageDtoTest {
      */
     @Test
     public void testGettersSettersConstructors() {
-        LevelProductDto body = new LevelProductDto("product-name", "key-obs",
+        ProductDto body = new ProductDto("product-name", "key-obs",
                 ProductFamily.L0_SLICE, "NRT");
         LevelProductsMessageDto dto =
                 new LevelProductsMessageDto(123, "input-key", body);
@@ -44,7 +44,7 @@ public class LevelProductsMessageDtoTest {
      */
     @Test
     public void testToString() {
-        LevelProductDto body = new LevelProductDto("product-name", "key-obs",
+        ProductDto body = new ProductDto("product-name", "key-obs",
                 ProductFamily.L0_SLICE, "NRT");
         LevelProductsMessageDto dto =
                 new LevelProductsMessageDto(123, "input-key", body);

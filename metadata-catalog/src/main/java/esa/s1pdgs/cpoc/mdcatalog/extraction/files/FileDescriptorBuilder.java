@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 
 /**
@@ -161,7 +161,7 @@ public class FileDescriptorBuilder {
 		}
 	}
 
-	public L0OutputFileDescriptor buildL0OutputFileDescriptor(File file, LevelProductDto product)
+	public L0OutputFileDescriptor buildL0OutputFileDescriptor(File file, ProductDto product)
 			throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
@@ -273,7 +273,7 @@ public class FileDescriptorBuilder {
         return l0Descriptor;
     }
 
-	public L1OutputFileDescriptor buildL1OutputFileDescriptor(File file, LevelProductDto product)
+	public L1OutputFileDescriptor buildL1OutputFileDescriptor(File file, ProductDto product)
 			throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
@@ -330,7 +330,7 @@ public class FileDescriptorBuilder {
 		return l1Descriptor;
 	}
 	
-	public L2OutputFileDescriptor buildL2OutputFileDescriptor(File file, LevelProductDto product)
+	public L2OutputFileDescriptor buildL2OutputFileDescriptor(File file, ProductDto product)
 			throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();

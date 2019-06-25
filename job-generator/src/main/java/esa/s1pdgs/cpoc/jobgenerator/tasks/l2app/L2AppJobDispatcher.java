@@ -33,12 +33,12 @@ import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 @Service
 @ConditionalOnProperty(name = "process.level", havingValue = "L2")
 public class L2AppJobDispatcher
-        extends AbstractJobsDispatcher<LevelProductDto> {
+        extends AbstractJobsDispatcher<ProductDto> {
 
     /**
      * Logger
@@ -77,7 +77,7 @@ public class L2AppJobDispatcher
             final ThreadPoolTaskScheduler taskScheduler,
             final XmlConverter xmlConverter,
             @Value("${level2.pathroutingxmlfile}") String pathRoutingXmlFile,
-            @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<LevelProductDto> appDataService) {
+            @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<ProductDto> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
         this.xmlConverter = xmlConverter;
@@ -118,7 +118,7 @@ public class L2AppJobDispatcher
      * 
      */
     @Override
-    protected AbstractJobsGenerator<LevelProductDto> createJobGenerator(
+    protected AbstractJobsGenerator<ProductDto> createJobGenerator(
 			final File xmlFile) throws AbstractCodedException {
 		return this.factory.createJobGeneratorForL0Slice(xmlFile, ApplicationLevel.L2, appDataService);
 	}
@@ -130,7 +130,7 @@ public class L2AppJobDispatcher
      */
     @Override
     protected List<String> getTaskTables(
-            final AppDataJobDto<LevelProductDto> job)
+            final AppDataJobDto<ProductDto> job)
             throws JobGenMissingRoutingEntryException {
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"
