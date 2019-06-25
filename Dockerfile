@@ -36,7 +36,7 @@ RUN mvn -Dmaven.test.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/p
 
 # scratch seems not to work for some reason, we go for alpine...
 #FROM scatch
-FROM alpine
+FROM alpine as final
 
 WORKDIR /app
 COPY --from=buildenv /app/applicative-catalog/target /app/applicative-catalog/target
