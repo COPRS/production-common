@@ -7,13 +7,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
  * 
  * @author Viveris Technologies
  */
-public class AuxiliaryFilesMessageDto
-        extends GenericMessageDto<ProductDto> {
+public class ProductMessageDto extends GenericMessageDto<ProductDto> {
 
     /**
      * Default constructor
      */
-    public AuxiliaryFilesMessageDto() {
+    public ProductMessageDto() {
         super();
     }
 
@@ -23,7 +22,7 @@ public class AuxiliaryFilesMessageDto
      * @param identifier
      * @param body
      */
-    public AuxiliaryFilesMessageDto(final long identifier,
+    public ProductMessageDto(final long identifier,
             final String inputKey, final ProductDto body) {
         super(identifier, inputKey, body);
     }

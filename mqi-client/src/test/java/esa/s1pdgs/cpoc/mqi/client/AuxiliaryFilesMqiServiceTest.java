@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.AuxiliaryFilesMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -54,12 +54,12 @@ public class AuxiliaryFilesMqiServiceTest {
     /**
      * Service to test
      */
-    private AuxiliaryFilesMqiService service;
+    private GenericMqiService<ProductDto> service;
 
     /**
      * DTO
      */
-    private AuxiliaryFilesMessageDto message;
+    private ProductMessageDto message;
 
     /**
      * Initialization
@@ -67,10 +67,13 @@ public class AuxiliaryFilesMqiServiceTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
+        
+        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
+        		.restTemplateSupplier(() -> restTemplate);
+        
+        service = factory.newProductServiceFor(ProductCategory.AUXILIARY_FILES);
 
-        service = new AuxiliaryFilesMqiService(restTemplate, "uri", 2, 500);
-
-        message = new AuxiliaryFilesMessageDto(123, "input-key",
+        message = new ProductMessageDto(123, "input-key",
                 new ProductDto("name", "keyobs", ProductFamily.AUXILIARY_FILE));
     }
 
@@ -104,11 +107,11 @@ public class AuxiliaryFilesMqiServiceTest {
     @Test
     public void testNextWhenResponseKO() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<AuxiliaryFilesMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<AuxiliaryFilesMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<AuxiliaryFilesMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
@@ -133,11 +136,11 @@ public class AuxiliaryFilesMqiServiceTest {
     @Test
     public void testMaxRetries() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<AuxiliaryFilesMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<AuxiliaryFilesMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<AuxiliaryFilesMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
@@ -151,7 +154,7 @@ public class AuxiliaryFilesMqiServiceTest {
             verify(restTemplate, times(2)).exchange(
                     Mockito.eq("uri/messages/auxiliary_files/next"),
                     Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                    Mockito.eq(AuxiliaryFilesMessageDto.class));
+                    Mockito.eq(ProductMessageDto.class));
             verifyNoMoreInteractions(restTemplate);
         }
     }
@@ -165,9 +168,9 @@ public class AuxiliaryFilesMqiServiceTest {
     @Test
     public void testNext1() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<AuxiliaryFilesMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<AuxiliaryFilesMessageDto>(message,
+                new ResponseEntity<ProductMessageDto>(message,
                         HttpStatus.OK)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
@@ -179,7 +182,7 @@ public class AuxiliaryFilesMqiServiceTest {
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/messages/auxiliary_files/next"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                Mockito.eq(AuxiliaryFilesMessageDto.class));
+                Mockito.eq(ProductMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
 
@@ -191,7 +194,7 @@ public class AuxiliaryFilesMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testNext2() throws AbstractCodedException {
-        doReturn(new ResponseEntity<AuxiliaryFilesMessageDto>(message, HttpStatus.OK))
+        doReturn(new ResponseEntity<ProductMessageDto>(message, HttpStatus.OK))
                 .when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.isNull(),
@@ -202,7 +205,7 @@ public class AuxiliaryFilesMqiServiceTest {
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/messages/auxiliary_files/next"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                Mockito.eq(AuxiliaryFilesMessageDto.class));
+                Mockito.eq(ProductMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
 }

@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterOperator;
-import esa.s1pdgs.cpoc.mqi.model.rest.AuxiliaryFilesMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
 
 /**
  *
@@ -115,8 +115,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("tast-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("tast-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -137,8 +137,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("tast-table-22");
         AppDataJobGeneration gen32 = new AppDataJobGeneration();
         gen3.setTaskTable("tast-table-32");
-        AuxiliaryFilesMessageDto message12 = new AuxiliaryFilesMessageDto(12, "topic12", null);
-        AuxiliaryFilesMessageDto message22 = new AuxiliaryFilesMessageDto(22, "topic12", null);
+        ProductMessageDto message12 = new ProductMessageDto(12, "topic12", null);
+        ProductMessageDto message22 = new ProductMessageDto(22, "topic12", null);
         obj2.setIdentifier(123);
         obj2.setLevel(ApplicationLevel.L1);
         obj2.setPod("pod-name-2");
@@ -168,8 +168,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -208,8 +208,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -250,8 +250,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -285,8 +285,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -327,8 +327,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -362,8 +362,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -406,8 +406,8 @@ public class AppDataJobServiceTest {
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
         gen3.setState(AppDataJobGenerationState.SENT);
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -449,8 +449,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -483,8 +483,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -513,8 +513,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");

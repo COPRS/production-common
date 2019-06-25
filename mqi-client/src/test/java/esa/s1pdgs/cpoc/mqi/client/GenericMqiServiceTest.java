@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.client;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -25,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
@@ -56,7 +56,7 @@ public class GenericMqiServiceTest {
     /**
      * Service to test
      */
-    private LevelProductsMqiService service;
+    private GenericMqiService<ProductDto> service;
 
     /**
      * DTO
@@ -70,22 +70,17 @@ public class GenericMqiServiceTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
+        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
+        		.restTemplateSupplier(() -> restTemplate);
+        
+        service = factory.newProductServiceFor(ProductCategory.LEVEL_PRODUCTS);
 
-        service = new LevelProductsMqiService(restTemplate, "uri", 2, 500);
 
         ackMessage = new AckMessageDto(1, Ack.OK, "message", true);
 
         pubMessage = new GenericPublicationMessageDto<ProductDto>(
                 ProductFamily.L0_SLICE, new ProductDto("name", "keyobs",
                         ProductFamily.L0_SLICE, "NRT"));
-    }
-    
-    @Test
-    public void tesConstructor() {
-        service = new LevelProductsMqiService(restTemplate, "uri", -1, 500);
-        assertEquals(0, service.maxRetries);
-        service = new LevelProductsMqiService(restTemplate, "uri", 21, 500);
-        assertEquals(0, service.maxRetries);
     }
 
     /**

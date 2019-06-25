@@ -63,9 +63,11 @@ public class StatusServiceTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-
-        service = new StatusService(restTemplate, "uri", 2, 500);
-
+        
+        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
+        		.restTemplateSupplier(() -> restTemplate);
+        
+        service = factory.newStatusService();
         message = new StatusDto(AppState.ERROR, 123, 1);
     }
     

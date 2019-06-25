@@ -54,7 +54,7 @@ public class LevelReportsMqiServiceTest {
     /**
      * Service to test
      */
-    private LevelReportsMqiService service;
+    private GenericMqiService<LevelReportDto> service;
 
     /**
      * DTO
@@ -68,7 +68,10 @@ public class LevelReportsMqiServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new LevelReportsMqiService(restTemplate, "uri", 2, 500);
+        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
+        		.restTemplateSupplier(() -> restTemplate);
+        
+        service = factory.newReportsService();
 
         message = new LevelReportsMessageDto(123, "input-key",
                 new LevelReportDto("name", "keyobs", ProductFamily.L0_REPORT));

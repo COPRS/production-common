@@ -11,7 +11,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
- * Test the AuxiliaryFilesMessageDto
+ * Test the ProductMessageDto
  * 
  * @author Viveris Technologies
  */
@@ -23,13 +23,13 @@ public class ProductMessageDtoTest {
     @Test
     public void testGettersSettersConstructors() {
         ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
-        AuxiliaryFilesMessageDto dto =
-                new AuxiliaryFilesMessageDto(123, "input-key", body);
+        ProductMessageDto dto =
+                new ProductMessageDto(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new AuxiliaryFilesMessageDto();
+        dto = new ProductMessageDto();
         dto.setIdentifier(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -44,8 +44,8 @@ public class ProductMessageDtoTest {
     @Test
     public void testToString() {
         ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
-        AuxiliaryFilesMessageDto dto =
-                new AuxiliaryFilesMessageDto(123, "input-key", body);
+        ProductMessageDto dto =
+                new ProductMessageDto(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("identifier: 123"));
@@ -60,7 +60,7 @@ public class ProductMessageDtoTest {
      */
     @Test
     public void checkEquals() {
-        EqualsVerifier.forClass(AuxiliaryFilesMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(ProductMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

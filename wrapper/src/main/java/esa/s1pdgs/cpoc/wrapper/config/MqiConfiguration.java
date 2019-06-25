@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdcatalog.extraction.mqi;
+package esa.s1pdgs.cpoc.wrapper.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.MqiClientFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
@@ -30,11 +32,11 @@ public class MqiConfiguration {
      * @param tempoRetryMs
      */
     @Autowired
-    public MqiConfiguration(@Value("${file.mqi.host-uri}") final String hostUri,
-            @Value("${file.mqi.max-retries}") final int maxRetries,
-            @Value("${file.mqi.tempo-retry-ms}") final int tempoRetryMs,
-            final RestTemplateBuilder builder
-    ) {
+    public MqiConfiguration(
+            @Value("${process.mqi.host-uri}") final String hostUri,
+            @Value("${process.mqi.max-retries}") final int maxRetries,
+            @Value("${process.mqi.tempo-retry-ms}") final int tempoRetryMs,
+            final RestTemplateBuilder builder) {
     	mqiClientFactory = new MqiClientFactory(hostUri, maxRetries, tempoRetryMs)
     			.restTemplateSupplier(builder::build);
     }
@@ -46,7 +48,7 @@ public class MqiConfiguration {
      * @return
      */
     @Bean(name = "mqiServiceForLevelSegments")
-    public GenericMqiService<ProductDto> mqiServiceForLevelSegments() {    	    	
+    public GenericMqiService<ProductDto> mqiServiceForLevelSegments() {
     	return mqiClientFactory.newProductServiceFor(ProductCategory.LEVEL_SEGMENTS);
     }
 
@@ -67,9 +69,9 @@ public class MqiConfiguration {
      * @param builder
      * @return
      */
-    @Bean(name = "mqiServiceForAuxiliaryFiles")
-    public GenericMqiService<ProductDto> mqiServiceForAuxiliaryFiles() {    
-    	return mqiClientFactory.newProductServiceFor(ProductCategory.AUXILIARY_FILES);
+    @Bean(name = "mqiServiceForLevelReports")
+    public GenericMqiService<LevelReportDto> mqiServiceForLevelReports() {
+    	return mqiClientFactory.newReportsService();
     }
 
     /**
@@ -78,8 +80,19 @@ public class MqiConfiguration {
      * @param builder
      * @return
      */
-    @Bean(name = "mqiServiceForEdrsSessions")
-    public GenericMqiService<EdrsSessionDto> mqiServiceForEdrsSessions() {
-     	return mqiClientFactory.newErdsSessionService();
+    @Bean(name = "mqiServiceForLevelJobs")
+    public GenericMqiService<LevelJobDto> mqiServiceForLevelJobs() {
+    	return mqiClientFactory.newLevelJobsServiceFor();
+    }
+
+    /**
+     * Service for stopping application
+     * 
+     * @param builder
+     * @return
+     */
+    @Bean(name = "mqiServiceForStatus")
+    public StatusService mqiServiceForStatus() {
+    	return mqiClientFactory.newStatusService();
     }
 }

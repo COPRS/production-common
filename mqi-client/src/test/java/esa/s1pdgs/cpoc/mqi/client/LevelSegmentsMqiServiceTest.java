@@ -54,7 +54,7 @@ public class LevelSegmentsMqiServiceTest {
     /**
      * Service to test
      */
-    private LevelSegmentsMqiService service;
+    private GenericMqiService<ProductDto> service;
 
     /**
      * DTO
@@ -67,8 +67,10 @@ public class LevelSegmentsMqiServiceTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-
-        service = new LevelSegmentsMqiService(restTemplate, "uri", 2, 500);
+        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
+        		.restTemplateSupplier(() -> restTemplate);
+        
+        service = factory.newProductServiceFor(ProductCategory.LEVEL_SEGMENTS);
 
         message = new LevelSegmentsMessageDto(123, "input-key",
                 new ProductDto("name", "keyobs", ProductFamily.L0_SEGMENT, "NRT"));

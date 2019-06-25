@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -22,48 +23,39 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
  * @author Viveris Technologies
  * @param <T>
  */
-public abstract class GenericMqiService<T> {
+public class GenericMqiService<T> {
 
     /**
      * Logger
      */
-    protected static final Log LOGGER =
-            LogFactory.getLog(GenericMqiService.class);
+    protected static final Log LOGGER = LogFactory.getLog(GenericMqiService.class);
 
     /**
      * Rest template
      */
-    protected final RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     /**
      * Product category
      */
-    protected final ProductCategory category;
+    private final ProductCategory category;
+    
+    private final Class<? extends GenericMessageDto<T>> className;
 
     /**
      * Host URI. Example: http://localhost:8081
      */
-    protected final String hostUri;
-    
-    /**
-     * Ack Path. Example: /messages/examplecategory/ack
-     */
-    protected final String ackPath;
-
-    /**
-     * Publish path. Example: /messages/examplecategory/publish
-     */
-    protected final String publishPath;
+    private final String hostUri;
 
     /**
      * Maximal number of retries
      */
-    protected final int maxRetries;
+    private final int maxRetries;
 
     /**
      * Temporisation in ms betwenn 2 retries
      */
-    protected final int tempoRetryMs;
+    private final int tempoRetryMs;
 
     /**
      * Constructor
@@ -74,21 +66,35 @@ public abstract class GenericMqiService<T> {
      * @param maxRetries
      * @param tempoRetryMs
      */
-    public GenericMqiService(final RestTemplate restTemplate,
-            final ProductCategory category, final String hostUri,
-            final String ackPath, final String publishPath, 
-            final int maxRetries, final int tempoRetryMs) {
+    public GenericMqiService(
+    		final RestTemplate restTemplate,
+            final ProductCategory category, 
+            final String hostUri,
+            final int maxRetries, 
+            final int tempoRetryMs,
+            final Class<? extends GenericMessageDto<T>> className
+    ) {
         this.restTemplate = restTemplate;
         this.category = category;
         this.hostUri = hostUri;
-        this.ackPath = ackPath;
-        this.publishPath = publishPath;
-        if (maxRetries < 0 || maxRetries > 20) {
-            this.maxRetries = 0;
-        } else {
-            this.maxRetries = maxRetries;
-        }
+        this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
+        this.className = className;
+    }
+    
+    private final String publishUri()
+    {
+    	return hostUri + "/messages/" + category.name().toLowerCase() + "/publish";
+    }
+    
+    private final String ackUri()
+    {
+    	return hostUri  + "/messages/" + category.name().toLowerCase() + "/ack";
+    }
+    
+    private final String nextUri()
+    {
+    	return hostUri  + "/messages/" + category.name().toLowerCase() + "/next";
     }
 
     /**
@@ -98,11 +104,13 @@ public abstract class GenericMqiService<T> {
      * @param cause
      * @throws AbstractCodedException
      */
-    protected void waitOrThrow(final int retries,
-            final AbstractCodedException cause, final String api)
-            throws AbstractCodedException {
-        LOGGER.debug(String.format("[api %s] %s Retry %d/%d", api,
-                cause.getLogMessage(), retries, maxRetries));
+    protected void waitOrThrow(
+    		final int retries,
+            final AbstractCodedException cause, 
+            final String api
+    )
+    	throws AbstractCodedException {
+        LOGGER.debug(String.format("[api %s] %s Retry %d/%d", api, cause.getLogMessage(), retries, maxRetries));
         if (retries < maxRetries) {
             try {
                 Thread.sleep(tempoRetryMs);
@@ -120,7 +128,37 @@ public abstract class GenericMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public abstract GenericMessageDto<T> next() throws AbstractCodedException;
+    public GenericMessageDto<T> next() throws AbstractCodedException {
+        int retries = 0;
+        while (true) {
+            retries++;
+            final String uri = nextUri();
+            try {
+                @SuppressWarnings("unchecked")
+				final ResponseEntity<GenericMessageDto<T>> response = (ResponseEntity<GenericMessageDto<T>>) restTemplate.exchange(
+                		uri, 
+                		HttpMethod.GET, 
+                		null, 
+                		className
+                );
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    return response.getBody();
+                } 
+                else {
+                    waitOrThrow(retries,
+                            new MqiNextApiError(category,
+                                    "HTTP status code "
+                                            + response.getStatusCode()),
+                            "next");
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new MqiNextApiError(category,
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce), "next");
+            }
+        }
+    }
+
 
     /**
      * Ack a message
@@ -135,7 +173,7 @@ public abstract class GenericMqiService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + ackPath;
+            final String uri = ackUri();
             LogUtils.traceLog(LOGGER,
                     String.format("[uri %s] [body %s]", uri, ack));
             try {
@@ -179,7 +217,7 @@ public abstract class GenericMqiService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uri = hostUri + publishPath;
+            final String uri = publishUri();
             LogUtils.traceLog(LOGGER,
                     String.format("[uri %s] [body %s]", uri, message));
             try {

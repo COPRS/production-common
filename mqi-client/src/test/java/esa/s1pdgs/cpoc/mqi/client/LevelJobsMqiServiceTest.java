@@ -54,7 +54,7 @@ public class LevelJobsMqiServiceTest {
     /**
      * Service to test
      */
-    private LevelJobsMqiService service;
+    private GenericMqiService<LevelJobDto> service;
 
     /**
      * DTO
@@ -68,7 +68,10 @@ public class LevelJobsMqiServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new LevelJobsMqiService(restTemplate, "uri", 2, 500);
+        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
+        		.restTemplateSupplier(() -> restTemplate);
+        
+        service = factory.newLevelJobsServiceFor();
 
         message = new LevelJobsMessageDto(123, "input-key", new LevelJobDto(
                 ProductFamily.L0_JOB, "name", "FAST", "workdir", "joborder"));

@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.rest.AuxiliaryFilesMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -33,8 +33,8 @@ public class AppDataJobTest {
         gen2.setTaskTable("tast-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("tast-table-3");
-        AuxiliaryFilesMessageDto message1 = new AuxiliaryFilesMessageDto(1, "topic1", null);
-        AuxiliaryFilesMessageDto message2 = new AuxiliaryFilesMessageDto(2, "topic1", null);
+        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
+        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
         
         // check default constructor
         assertEquals(0, obj.getMessages().size());

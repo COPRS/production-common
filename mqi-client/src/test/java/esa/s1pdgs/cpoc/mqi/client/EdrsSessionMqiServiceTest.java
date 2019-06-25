@@ -54,7 +54,7 @@ public class EdrsSessionMqiServiceTest {
     /**
      * Service to test
      */
-    private EdrsSessionMqiService service;
+    private GenericMqiService<EdrsSessionDto> service;
 
     /**
      * DTO
@@ -68,7 +68,10 @@ public class EdrsSessionMqiServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new EdrsSessionMqiService(restTemplate, "uri", 2, 500);
+        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
+        		.restTemplateSupplier(() -> restTemplate);
+        
+        service = factory.newErdsSessionService();
 
         message =
                 new EdrsSessionsMessageDto(123, "input-key", new EdrsSessionDto(
