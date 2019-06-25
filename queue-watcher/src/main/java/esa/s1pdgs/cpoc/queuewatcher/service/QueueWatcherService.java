@@ -18,9 +18,6 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -50,9 +47,9 @@ public class QueueWatcherService {
 	private final GenericMqiService<ProductDto> mqiServiceForLevelProducts;
 
 		/**
-	 * MQI service for reading message LevelSegmentDto
+	 * MQI service for reading message ProductDto
 	 */
-	private final GenericMqiService<LevelSegmentDto> mqiServiceForLevelSegments;
+	private final GenericMqiService<ProductDto> mqiServiceForLevelSegments;
 
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
@@ -65,7 +62,7 @@ public class QueueWatcherService {
 			@Qualifier("mqiServiceForCompression") final GenericMqiService<ProductDto> mqiServiceForCompressedProducts,
 			@Qualifier("mqiServiceForAuxiliaryFiles") final GenericMqiService<ProductDto> mqiServiceForAUXProducts,
 			@Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> mqiServiceForLevelProducts,
-			@Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> mqiServiceForLevelSegments) {
+			@Qualifier("mqiServiceForLevelSegments") final GenericMqiService<ProductDto> mqiServiceForLevelSegments) {
 
 		this.mqiServiceForCompressedProducts = mqiServiceForCompressedProducts;
 		this.mqiServiceForAUXProducts = mqiServiceForAUXProducts;
@@ -169,7 +166,7 @@ public class QueueWatcherService {
 	@Scheduled(fixedDelayString = "${file.product-categories.level-segments.fixed-delay-ms}", initialDelayString = "${file.product-categories.level-segments.init-delay-poll-ms}")
 	public void watchLevelSegmentsQueue() {
 		
-		GenericMessageDto<LevelSegmentDto> message = null;
+		GenericMessageDto<ProductDto> message = null;
 		try {
 			message = this.mqiServiceForLevelSegments.next();
   		    if (message == null || message.getBody() == null) {
@@ -177,9 +174,9 @@ public class QueueWatcherService {
 		            return;
 		        }
 
-  		    LOGGER.info("reveived segment file {}", message.getBody().getName());
+  		    LOGGER.info("reveived segment file {}", message.getBody().getProductName());
 			String timeStamp = new SimpleDateFormat(DATE_FORMAT).format(new Date());
-			writeCSV(timeStamp,  message.getBody().getName());
+			writeCSV(timeStamp,  message.getBody().getProductName());
 			this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true));
 
 		} catch (AbstractCodedException ace) {

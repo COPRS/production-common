@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryPublicationProperties;
@@ -191,7 +191,7 @@ public class MessagePublicationController {
 				publishLevelReports((LevelReportDto) dto, inputKey, outputKey);
 				break;
 			case LEVEL_SEGMENTS:
-				publishLevelSegments((LevelSegmentDto) dto, inputKey, outputKey);
+				publishLevelSegments((ProductDto) dto, inputKey, outputKey);
 				break;
 			case COMPRESSED_PRODUCTS:
 				publishCompressedProducts((ProductDto)dto, inputKey, outputKey);
@@ -317,7 +317,7 @@ public class MessagePublicationController {
 	 * @throws MqiCategoryNotAvailable
 	 * @throws MqiRouteNotAvailable
 	 */
-	protected void publishLevelSegments(final LevelSegmentDto dto, String inputKey, String outputKey)
+	protected void publishLevelSegments(final ProductDto dto, String inputKey, String outputKey)
 			throws MqiPublicationError, MqiCategoryNotAvailable, MqiRouteNotAvailable {
 		ProductCategory category = ProductCategory.LEVEL_SEGMENTS;
 		if (producers.containsKey(category)) {

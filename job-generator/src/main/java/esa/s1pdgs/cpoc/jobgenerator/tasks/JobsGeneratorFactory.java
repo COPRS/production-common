@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l2app.L2AppJobsGenerator;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 @Service
 public class JobsGeneratorFactory {
@@ -129,11 +129,11 @@ public class JobsGeneratorFactory {
      * @return
      * @throws JobGenBuildTaskTableException
      */
-    public AbstractJobsGenerator<LevelSegmentDto> createJobGeneratorForL0Segment(
+    public AbstractJobsGenerator<ProductDto> createJobGeneratorForL0Segment(
             final File xmlFile,
-            final AbstractAppCatalogJobService<LevelSegmentDto> appDataService)
+            final AbstractAppCatalogJobService<ProductDto> appDataService)
             throws JobGenBuildTaskTableException {
-        AbstractJobsGenerator<LevelSegmentDto> processor =
+        AbstractJobsGenerator<ProductDto> processor =
                 new L0SegmentAppJobsGenerator(this.xmlConverter,
                         this.metadataService, this.l0ProcessSettings,
                         this.jobGeneratorSettings, this.outputFactory,

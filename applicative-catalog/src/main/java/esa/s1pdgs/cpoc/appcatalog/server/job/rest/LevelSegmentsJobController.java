@@ -9,7 +9,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoS
 import esa.s1pdgs.cpoc.appcatalog.server.job.converter.JobConverter;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Controller for managing jobs of product levels
@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
  */
 @RestController
 @RequestMapping(path = "/level_segments/jobs")
-public class LevelSegmentsJobController extends JobController<LevelSegmentDto> {
+public class LevelSegmentsJobController extends JobController<ProductDto> {
 
     /**
      * Constructor
@@ -48,7 +48,7 @@ public class LevelSegmentsJobController extends JobController<LevelSegmentDto> {
  * 
  * @author Viveris Technologies
  */
-class LevelSegmentJobConverter extends JobConverter<LevelSegmentDto> {
+class LevelSegmentJobConverter extends JobConverter<ProductDto> {
 
     /**
      * Constructor

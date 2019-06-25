@@ -23,7 +23,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
 /**
@@ -49,10 +49,10 @@ public class LevelSegmentProducerTest {
      * Kafka template
      */
     @Mock
-    private KafkaTemplate<String, LevelSegmentDto> template;
+    private KafkaTemplate<String, ProductDto> template;
 
     @Mock
-    private ListenableFuture<SendResult<String, LevelSegmentDto>> future;
+    private ListenableFuture<SendResult<String, ProductDto>> future;
 
     /**
      * Publisher to test
@@ -62,7 +62,7 @@ public class LevelSegmentProducerTest {
     /**
      * DTO to send
      */
-    private LevelSegmentDto dto;
+    private ProductDto dto;
 
     /**
      * Initialization
@@ -71,7 +71,7 @@ public class LevelSegmentProducerTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        dto = new LevelSegmentDto("product-name-1", "key-obs",
+        dto = new ProductDto("product-name-1", "key-obs",
                 ProductFamily.L0_SLICE, "FAST");
 
         producer = new LevelSegmentProducer(properties, template);

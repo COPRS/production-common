@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.LevelProductsAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.client.job.LevelSegmentsAppCatalogJobService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Configuration of applicative data catalog client Creation of 3 services:
@@ -95,7 +95,7 @@ public class AppCatalogConfiguration {
      * @return
      */
     @Bean(name = "appCatalogServiceForLevelSegments")
-    public AbstractAppCatalogJobService<LevelSegmentDto> appCatalogServiceForLevelSegments(
+    public AbstractAppCatalogJobService<ProductDto> appCatalogServiceForLevelSegments(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
         return new LevelSegmentsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);

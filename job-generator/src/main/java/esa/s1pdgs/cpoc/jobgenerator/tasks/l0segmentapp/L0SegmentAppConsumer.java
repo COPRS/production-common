@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -39,7 +39,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 @ConditionalOnProperty(name = "process.level", havingValue = "L0_SEGMENT")
 
 public class L0SegmentAppConsumer
-        extends AbstractGenericConsumer<LevelSegmentDto> {
+        extends AbstractGenericConsumer<ProductDto> {
 
     /**
      * Pattern built from the regular expression given in configuration
@@ -59,12 +59,12 @@ public class L0SegmentAppConsumer
      */
     @Autowired
     public L0SegmentAppConsumer(
-            final AbstractJobsDispatcher<LevelSegmentDto> jobsDispatcher,
+            final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
             final L0SegmentAppProperties appProperties,
             final ProcessSettings processSettings,
-            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> mqiService,
+            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<ProductDto> mqiService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
-            @Qualifier("appCatalogServiceForLevelSegments") final AbstractAppCatalogJobService<LevelSegmentDto> appDataService,
+            @Qualifier("appCatalogServiceForLevelSegments") final AbstractAppCatalogJobService<ProductDto> appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
@@ -82,7 +82,7 @@ public class L0SegmentAppConsumer
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L0_SEGMENTJobGeneration"); 
     	
         // First, consume message
-        GenericMessageDto<LevelSegmentDto> mqiMessage = readMessage();
+        GenericMessageDto<ProductDto> mqiMessage = readMessage();
         if (mqiMessage == null || mqiMessage.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;
@@ -94,10 +94,10 @@ public class L0SegmentAppConsumer
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
-        String productName = mqiMessage.getBody().getName();
+        String productName = mqiMessage.getBody().getProductName();
         
-        final FailedProcessingDto<GenericMessageDto<LevelSegmentDto>> failedProc =  
-        		new FailedProcessingDto<GenericMessageDto<LevelSegmentDto>>();
+        final FailedProcessingDto<GenericMessageDto<ProductDto>> failedProc =  
+        		new FailedProcessingDto<GenericMessageDto<ProductDto>>();
         
         
         // Note: the report log of consume and global log is raised during
@@ -110,8 +110,8 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
-            reporting.reportStart("Start job generation using " + mqiMessage.getBody().getName());
-            AppDataJobDto<LevelSegmentDto> appDataJob = buildJob(mqiMessage);
+            reporting.reportStart("Start job generation using " + mqiMessage.getBody().getProductName());
+            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -160,22 +160,22 @@ public class L0SegmentAppConsumer
         LOGGER.info("[MONITOR] [step 0] [productName {}] End",
                 productName);
         
-        reporting.reportStop("End job generation using " + mqiMessage.getBody().getName());
+        reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
     }
 
-    protected AppDataJobDto<LevelSegmentDto> buildJob(
-            GenericMessageDto<LevelSegmentDto> mqiMessage)
+    protected AppDataJobDto<ProductDto> buildJob(
+            GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
-        LevelSegmentDto leveldto = mqiMessage.getBody();
+        ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJobDto<LevelSegmentDto>> existingJobs = appDataService
+        List<AppDataJobDto<ProductDto>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
 
             // Extract information from name
-            Matcher m = pattern.matcher(leveldto.getName());
+            Matcher m = pattern.matcher(leveldto.getProductName());
             if (!m.matches()) {
                 throw new InvalidFormatProduct(
                         "Don't match with regular expression "
@@ -187,13 +187,13 @@ public class L0SegmentAppConsumer
             String datatakeID = m.group(this.patternGroups.get("datatakeId"));
 
             // Search job for given datatake id
-            List<AppDataJobDto<LevelSegmentDto>> existingJobsForDatatake =
+            List<AppDataJobDto<ProductDto>> existingJobsForDatatake =
                     appDataService.findByProductDataTakeId(datatakeID);
 
             if (CollectionUtils.isEmpty(existingJobsForDatatake)) {
 
                 // Create the JOB
-                AppDataJobDto<LevelSegmentDto> jobDto = new AppDataJobDto<>();
+                AppDataJobDto<ProductDto> jobDto = new AppDataJobDto<>();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
@@ -211,7 +211,7 @@ public class L0SegmentAppConsumer
 
                 return appDataService.newJob(jobDto);
             } else {
-                AppDataJobDto<LevelSegmentDto> jobDto =
+                AppDataJobDto<ProductDto> jobDto =
                         existingJobsForDatatake.get(0);
 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
@@ -225,7 +225,7 @@ public class L0SegmentAppConsumer
 
         } else {
             // Update pod if needed
-            AppDataJobDto<LevelSegmentDto> jobDto = existingJobs.get(0);
+            AppDataJobDto<ProductDto> jobDto = existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());

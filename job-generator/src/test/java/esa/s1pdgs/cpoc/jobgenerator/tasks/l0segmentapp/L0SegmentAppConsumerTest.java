@@ -37,7 +37,7 @@ import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class L0SegmentAppConsumerTest {
@@ -49,16 +49,16 @@ public class L0SegmentAppConsumerTest {
     private ProcessSettings processSettings;
 
     @Mock
-    private AbstractJobsDispatcher<LevelSegmentDto> jobsDispatcher;
+    private AbstractJobsDispatcher<ProductDto> jobsDispatcher;
 
     @Mock
-    private GenericMqiService<LevelSegmentDto> mqiService;
+    private GenericMqiService<ProductDto> mqiService;
 
     @Mock
     private StatusService mqiStatusService;
 
     @Mock
-    private AbstractAppCatalogJobService<LevelSegmentDto> appDataService;
+    private AbstractAppCatalogJobService<ProductDto> appDataService;
 
     @Mock
     private AppStatus appStatus;
@@ -66,7 +66,7 @@ public class L0SegmentAppConsumerTest {
     @Mock
     private JobStatus jobStatus;
 
-    private List<GenericMessageDto<LevelSegmentDto>> messages;
+    private List<GenericMessageDto<ProductDto>> messages;
 
     private L0SegmentAppConsumer consumer;
     
@@ -108,23 +108,23 @@ public class L0SegmentAppConsumerTest {
 
     public void initMessages() {
         messages = new ArrayList<>();
-        GenericMessageDto<LevelSegmentDto> message1 =
-                new GenericMessageDto<LevelSegmentDto>(1, "topic1",
-                        new LevelSegmentDto(
+        GenericMessageDto<ProductDto> message1 =
+                new GenericMessageDto<ProductDto>(1, "topic1",
+                        new ProductDto(
                                 "S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
                                 "S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
                                 ProductFamily.L0_SEGMENT, "FAST"));
         messages.add(message1);
-        GenericMessageDto<LevelSegmentDto> message2 =
-                new GenericMessageDto<LevelSegmentDto>(2, "topic1",
-                        new LevelSegmentDto(
+        GenericMessageDto<ProductDto> message2 =
+                new GenericMessageDto<ProductDto>(2, "topic1",
+                        new ProductDto(
                                 "S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
                                 "S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
                                 ProductFamily.L0_SEGMENT, "FAST"));
         messages.add(message2);
-        GenericMessageDto<LevelSegmentDto> message3 =
-                new GenericMessageDto<LevelSegmentDto>(1, "topic1",
-                        new LevelSegmentDto(
+        GenericMessageDto<ProductDto> message3 =
+                new GenericMessageDto<ProductDto>(1, "topic1",
+                        new ProductDto(
                                 "S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
                                 "S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
                                 ProductFamily.L0_SEGMENT, "FAST"));
@@ -172,7 +172,7 @@ public class L0SegmentAppConsumerTest {
 
     @Test
     public void testBuildJobNew() throws AbstractCodedException {
-        AppDataJobDto<LevelSegmentDto> expectedData = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> expectedData = new AppDataJobDto<>();
         expectedData.setLevel(processSettings.getLevel());
         expectedData.setPod(processSettings.getHostname());
         expectedData.getMessages().add(messages.get(0));
@@ -185,7 +185,7 @@ public class L0SegmentAppConsumerTest {
         productDto.setSatelliteId("B");
         expectedData.setProduct(productDto);
         
-        AppDataJobDto<LevelSegmentDto> result = consumer.buildJob(messages.get(0));
+        AppDataJobDto<ProductDto> result = consumer.buildJob(messages.get(0));
         assertEquals(expectedData, result);
         verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
         verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
@@ -205,7 +205,7 @@ public class L0SegmentAppConsumerTest {
     
     @Test
     public void testConsumeWhenNewJob() throws AbstractCodedException {
-        AppDataJobDto<LevelSegmentDto> expectedData = new AppDataJobDto<>();
+        AppDataJobDto<ProductDto> expectedData = new AppDataJobDto<>();
         expectedData.setLevel(processSettings.getLevel());
         expectedData.setPod(processSettings.getHostname());
         expectedData.setState(AppDataJobDtoState.DISPATCHING);

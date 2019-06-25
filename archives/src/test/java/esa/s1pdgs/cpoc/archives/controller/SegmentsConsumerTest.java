@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class SegmentsConsumerTest {
 
@@ -91,7 +91,7 @@ public class SegmentsConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new LevelSegmentDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsService, times(1)).downloadFile(

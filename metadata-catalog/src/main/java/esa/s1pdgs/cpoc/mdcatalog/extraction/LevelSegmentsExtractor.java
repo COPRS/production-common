@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  * @author Olivier Bex-Chauvet
  */
 @Service
-public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
+public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> {
     /**
      * Pattern for configuration files to extract data
      */
@@ -54,7 +54,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
     @Autowired
     public LevelSegmentsExtractor(final EsServices esServices,
             final ObsService obsService,
-            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> mqiService,
+            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<ProductDto> mqiService,
             final AppStatus appStatus,
             final MetadataExtractorConfig extractorConfig,
             @Value("${file.product-categories.level-segments.local-directory}") final String localDirectory,
@@ -65,7 +65,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
         super(esServices, mqiService, appStatus, localDirectory,
                 extractorConfig, PATTERN_CONFIG,
                 errorAppender,
-                ProductCategory.LEVEL_SEGMENTS, processConfiguration, LevelSegmentDto.class);
+                ProductCategory.LEVEL_SEGMENTS, processConfiguration, ProductDto.class);
         this.obsService = obsService;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;
@@ -88,10 +88,10 @@ public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
     @Override
     protected JSONObject extractMetadata(
     		final Reporting.Factory reportingFactory, 
-            final GenericMessageDto<LevelSegmentDto> message)
+            final GenericMessageDto<ProductDto> message)
             throws AbstractCodedException {
     	
-        final LevelSegmentDto dto = message.getBody();
+        final ProductDto dto = message.getBody();
         final String keyObs = getKeyObs(message);        
         final String productName = extractProductNameFromDto(dto);
         final ProductFamily family = message.getBody().getFamily();
@@ -117,8 +117,8 @@ public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
      * @return
      */
     protected String getKeyObs(
-            final GenericMessageDto<LevelSegmentDto> message) {
-        String keyObs = message.getBody().getKeyObs();
+            final GenericMessageDto<ProductDto> message) {
+        String keyObs = message.getBody().getKeyObjectStorage();
         if (keyObs.toLowerCase().endsWith(fileManifestExt.toLowerCase())) {
             keyObs += "/" + manifestFilename;
         }
@@ -129,8 +129,8 @@ public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
      * @see GenericExtractor#extractProductNameFromDto(Object)
      */
     @Override
-    protected String extractProductNameFromDto(final LevelSegmentDto dto) {
-        return dto.getName();
+    protected String extractProductNameFromDto(final ProductDto dto) {
+        return dto.getProductName();
     }
 
     /**
@@ -138,7 +138,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<LevelSegmentDto> {
      */
     @Override
     protected void cleanProcessing(
-            final GenericMessageDto<LevelSegmentDto> message) {
+            final GenericMessageDto<ProductDto> message) {
         // TODO Auto-generated method stub
         File metadataFile = new File(localDirectory + getKeyObs(message));
         if (metadataFile.exists()) {

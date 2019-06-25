@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -22,7 +22,7 @@ public class LevelSegmentsMessageDtoTest {
      */
     @Test
     public void testGettersSettersConstructors() {
-        LevelSegmentDto body = new LevelSegmentDto("product-name", "key-obs",
+        ProductDto body = new ProductDto("product-name", "key-obs",
                 ProductFamily.L0_SEGMENT, "NRT");
         LevelSegmentsMessageDto dto =
                 new LevelSegmentsMessageDto(123, "input-key", body);
@@ -44,7 +44,7 @@ public class LevelSegmentsMessageDtoTest {
      */
     @Test
     public void testToString() {
-        LevelSegmentDto body = new LevelSegmentDto("product-name", "key-obs",
+        ProductDto body = new ProductDto("product-name", "key-obs",
                 ProductFamily.L0_SEGMENT, "NRT");
         LevelSegmentsMessageDto dto =
                 new LevelSegmentsMessageDto(123, "input-key", body);

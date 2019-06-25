@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Configuration of applicative catalog client for data persistence.<br/>
@@ -127,7 +127,7 @@ public class PersistenceConfiguration {
      * @return
      */
     @Bean(name = "persistenceServiceForLevelSegments")
-    public GenericAppCatalogMqiService<LevelSegmentDto> persistenceServiceForLevelSegments(
+    public GenericAppCatalogMqiService<ProductDto> persistenceServiceForLevelSegments(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new AppCatalogMqiLevelSegmentsService(template, hostUriCatalog,

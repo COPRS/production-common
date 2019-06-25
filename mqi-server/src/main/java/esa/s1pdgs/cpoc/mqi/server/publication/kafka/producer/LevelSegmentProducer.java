@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer;
 
 import org.springframework.kafka.core.KafkaTemplate;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
 /**
@@ -11,7 +11,7 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
  * @author Viveris Technologies
  */
 public class LevelSegmentProducer
-        extends AbstractGenericProducer<LevelSegmentDto> {
+        extends AbstractGenericProducer<ProductDto> {
 
     /**
      * Constructor
@@ -30,7 +30,7 @@ public class LevelSegmentProducer
      * @param topic
      */
     protected LevelSegmentProducer(final KafkaProperties properties,
-            final KafkaTemplate<String, LevelSegmentDto> template) {
+            final KafkaTemplate<String, ProductDto> template) {
         super(properties, template);
     }
 
@@ -38,8 +38,8 @@ public class LevelSegmentProducer
      * Extract the product name from the DTO objects
      */
     @Override
-    protected String extractProductName(final LevelSegmentDto obj) {
-        return obj.getName();
+    protected String extractProductName(final ProductDto obj) {
+        return obj.getProductName();
     }
 
 }

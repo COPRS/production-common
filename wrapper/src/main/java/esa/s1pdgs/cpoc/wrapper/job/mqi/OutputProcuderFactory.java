@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -36,7 +36,7 @@ public class OutputProcuderFactory {
     /**
      * MQI client for LEVEL_SEGMENTS
      */
-    private final GenericMqiService<LevelSegmentDto> senderSegments;
+    private final GenericMqiService<ProductDto> senderSegments;
 
     /**
      * MQI client for LEVEL_PRODUCTS
@@ -57,7 +57,7 @@ public class OutputProcuderFactory {
      */
     @Autowired
     public OutputProcuderFactory(
-            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> senderSegments,
+            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<ProductDto> senderSegments,
             @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> senderProducts,
             @Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports) {
         this.senderSegments = senderSegments;
@@ -90,11 +90,11 @@ public class OutputProcuderFactory {
             GenericMessageDto<LevelJobDto> inputMessage)
             throws AbstractCodedException {
         if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
-            LevelSegmentDto dtoProduct =
-                    new LevelSegmentDto(msg.getProductName(), msg.getKeyObs(),
+            ProductDto dtoProduct =
+                    new ProductDto(msg.getProductName(), msg.getKeyObs(),
                             msg.getFamily(), msg.getProcessMode());
             senderSegments
-                    .publish(new GenericPublicationMessageDto<LevelSegmentDto>(
+                    .publish(new GenericPublicationMessageDto<ProductDto>(
                             inputMessage.getIdentifier(), msg.getFamily(),
                             dtoProduct));
         } else {

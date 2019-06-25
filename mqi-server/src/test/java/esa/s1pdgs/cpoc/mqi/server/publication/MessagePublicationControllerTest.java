@@ -45,7 +45,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryPublicationProperties;
@@ -108,7 +108,7 @@ public class MessagePublicationControllerTest {
 
     private GenericKafkaUtils<ProductDto> kafkaUtilsAux;
 
-    private GenericKafkaUtils<LevelSegmentDto> kafkaUtilsSegments;
+    private GenericKafkaUtils<ProductDto> kafkaUtilsSegments;
 
     @Before
     public void init() {
@@ -127,7 +127,7 @@ public class MessagePublicationControllerTest {
 
         kafkaUtilsAux = new GenericKafkaUtils<ProductDto>(embeddedKafka);
 
-        kafkaUtilsSegments = new GenericKafkaUtils<LevelSegmentDto>(embeddedKafka);
+        kafkaUtilsSegments = new GenericKafkaUtils<ProductDto>(embeddedKafka);
 
     }
 
@@ -360,13 +360,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelSegments() throws Exception {
-        LevelSegmentDto dto = new LevelSegmentDto("product-name", "key-obs",
+        ProductDto dto = new ProductDto("product-name", "key-obs",
                 ProductFamily.L0_SEGMENT, "FAST");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_SEGMENTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, LevelSegmentDto> record = kafkaUtilsSegments
+        ConsumerRecord<String, ProductDto> record = kafkaUtilsSegments
                 .getReceivedRecordSegments(GenericKafkaUtils.TOPIC_L0_SEGMENTS);
 
         assertEquals(dto, record.value());
@@ -375,7 +375,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelSegmentsNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
-        LevelSegmentDto dto = new LevelSegmentDto("product-name", "key-obs",
+        ProductDto dto = new ProductDto("product-name", "key-obs",
                 ProductFamily.L0_SEGMENT, "FAST");
         initCustomControllerForNoPublication();
 

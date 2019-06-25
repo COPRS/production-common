@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -66,12 +66,12 @@ public class SegmentsConsumer {
     }
 
     @KafkaListener(topics = "#{'${kafka.topics.segments}'.split(',')}", groupId = "${kafka.group-id}", containerFactory = "segmentKafkaListenerContainerFactory")
-    public void receive(final LevelSegmentDto dto,
+    public void receive(final ProductDto dto,
             final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
     	
     	final Reporting reporting = new LoggerReporting.Factory(LOGGER, "Archiver")
-    			.product(dto.getFamily().toString(), dto.getName())
+    			.product(dto.getFamily().toString(), dto.getProductName())
     			.newReporting(0);
     	
     	reporting.reportStart("Start Distribution");    	
@@ -79,12 +79,12 @@ public class SegmentsConsumer {
         try {
             if (!devProperties.getActivations().get("download-all")) {
                 this.obsService.downloadFile(dto.getFamily(),
-                        dto.getKeyObs() + "/manifest.safe",
+                        dto.getKeyObjectStorage() + "/manifest.safe",
                         this.sharedVolume + "/"
                                 + dto.getFamily().name().toLowerCase());
             } else {
                 this.obsService.downloadFile(dto.getFamily(),
-                        dto.getKeyObs(), this.sharedVolume + "/"
+                        dto.getKeyObjectStorage(), this.sharedVolume + "/"
                                 + dto.getFamily().name().toLowerCase());
             }
             acknowledgment.acknowledge();

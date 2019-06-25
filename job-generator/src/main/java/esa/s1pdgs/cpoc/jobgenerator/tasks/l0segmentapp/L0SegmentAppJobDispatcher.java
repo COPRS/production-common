@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Dispatcher of L0 slice product<br/>
@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 @Service
 @ConditionalOnProperty(name = "process.level", havingValue = "L0_SEGMENT")
 public class L0SegmentAppJobDispatcher
-        extends AbstractJobsDispatcher<LevelSegmentDto> {
+        extends AbstractJobsDispatcher<ProductDto> {
 
     /**
      * Task table
@@ -54,7 +54,7 @@ public class L0SegmentAppJobDispatcher
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            @Qualifier("appCatalogServiceForLevelSegments") final AbstractAppCatalogJobService<LevelSegmentDto> appDataService) {
+            @Qualifier("appCatalogServiceForLevelSegments") final AbstractAppCatalogJobService<ProductDto> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -72,7 +72,7 @@ public class L0SegmentAppJobDispatcher
      * 
      */
     @Override
-    protected AbstractJobsGenerator<LevelSegmentDto> createJobGenerator(
+    protected AbstractJobsGenerator<ProductDto> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
         return this.factory.createJobGeneratorForL0Segment(xmlFile,
                 appDataService);
@@ -85,7 +85,7 @@ public class L0SegmentAppJobDispatcher
      */
     @Override
     protected List<String> getTaskTables(
-            final AppDataJobDto<LevelSegmentDto> job)
+            final AppDataJobDto<ProductDto> job)
             throws JobGenMissingRoutingEntryException {
         return Arrays.asList(TASK_TABLE_NAME);
     }

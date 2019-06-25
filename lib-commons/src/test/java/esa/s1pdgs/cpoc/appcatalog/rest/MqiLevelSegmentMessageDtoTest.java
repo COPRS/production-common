@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -22,7 +22,7 @@ public class MqiLevelSegmentMessageDtoTest {
     /**
      * DTO
      */
-    private LevelSegmentDto dto = new LevelSegmentDto("prodcut-name", "key-obs",
+    private ProductDto dto = new ProductDto("prodcut-name", "key-obs",
             ProductFamily.L0_SEGMENT, null);
 
     /**

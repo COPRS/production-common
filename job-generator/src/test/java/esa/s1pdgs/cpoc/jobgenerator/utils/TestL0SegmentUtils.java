@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestL0SegmentUtils {
@@ -76,17 +76,17 @@ public class TestL0SegmentUtils {
         return template;
     }
 
-    public static AppDataJobDto<LevelSegmentDto> buildAppData() {
-        AppDataJobDto<LevelSegmentDto> ret = new AppDataJobDto<>();
+    public static AppDataJobDto<ProductDto> buildAppData() {
+        AppDataJobDto<ProductDto> ret = new AppDataJobDto<>();
         ret.setIdentifier(123);
         ret.setState(AppDataJobDtoState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0_SEGMENT);
 
-        List<GenericMessageDto<LevelSegmentDto>> messages = new ArrayList<>();
-        GenericMessageDto<LevelSegmentDto> message1 =
-                new GenericMessageDto<LevelSegmentDto>(1, "input-key",
-                        new LevelSegmentDto(
+        List<GenericMessageDto<ProductDto>> messages = new ArrayList<>();
+        GenericMessageDto<ProductDto> message1 =
+                new GenericMessageDto<ProductDto>(1, "input-key",
+                        new ProductDto(
                                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE",
                                 "kobs", ProductFamily.L0_SEGMENT, "FAST"));
         messages.add(message1);
@@ -111,14 +111,14 @@ public class TestL0SegmentUtils {
         return ret;
     }
 
-    public static void setMessageToBuildData(AppDataJobDto<LevelSegmentDto> job,
+    public static void setMessageToBuildData(AppDataJobDto<ProductDto> job,
             List<String> segmentNames) {
         job.setMessages(new ArrayList<>());
         int id = 1;
         for (String name : segmentNames) {
             job.getMessages()
-                    .add(new GenericMessageDto<LevelSegmentDto>(id, "input-key",
-                            new LevelSegmentDto(name, "kobs",
+                    .add(new GenericMessageDto<ProductDto>(id, "input-key",
+                            new ProductDto(name, "kobs",
                                     ProductFamily.L0_SEGMENT, "FAST")));
             id++;
         }

@@ -57,7 +57,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0SegmentUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class L0SegmentAppJobsGeneratorTest {
 
@@ -77,13 +77,13 @@ public class L0SegmentAppJobsGeneratorTest {
     private OutputProducerFactory JobsSender;
 
     @Mock
-    private AbstractAppCatalogJobService<LevelSegmentDto> appDataService;
+    private AbstractAppCatalogJobService<ProductDto> appDataService;
 
     private TaskTable expectedTaskTable;
 
     private L0SegmentAppJobsGenerator generator;
 
-    private JobGeneration<LevelSegmentDto> job;
+    private JobGeneration<ProductDto> job;
 
     @Mock
     private LevelJobDto mockJobDto;
@@ -98,7 +98,7 @@ public class L0SegmentAppJobsGeneratorTest {
     @Before
     public void init() throws Exception {
 
-        AppDataJobDto<LevelSegmentDto> appDataJob =
+        AppDataJobDto<ProductDto> appDataJob =
                 TestL0SegmentUtils.buildAppData();
         job = new JobGeneration<>(appDataJob, "TaskTable.L0ASP.xml");
 
@@ -574,9 +574,9 @@ public class L0SegmentAppJobsGeneratorTest {
 
     @Test
     public void testCustomJobDto() {
-        AppDataJobDto<LevelSegmentDto> appDataJob =
+        AppDataJobDto<ProductDto> appDataJob =
                 TestL0SegmentUtils.buildAppData();
-        JobGeneration<LevelSegmentDto> job =
+        JobGeneration<ProductDto> job =
                 new JobGeneration<>(appDataJob, "TaskTable.L0ASP.xml");
 
         generator.customJobDto(job, mockJobDto);
@@ -587,11 +587,11 @@ public class L0SegmentAppJobsGeneratorTest {
     @Test
     public void testCustomJobOrder() {
         JobOrder jobOrder = TestL0Utils.buildJobOrderL20171109175634707000125();
-        AppDataJobDto<LevelSegmentDto> appDataJob =
+        AppDataJobDto<ProductDto> appDataJob =
                 TestL0SegmentUtils.buildAppData();
         appDataJob.getProduct().setSatelliteId("B");
         appDataJob.getProduct().setMissionId("S1");
-        JobGeneration<LevelSegmentDto> job =
+        JobGeneration<ProductDto> job =
                 new JobGeneration<>(appDataJob, "TaskTable.L0ASP.xml");
         job.setJobOrder(jobOrder);
 

@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Implementation of job applicative data client for LEVEL_PRODUCTS product
@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
  * @author Viveris Technologies
  */
 public class LevelSegmentsAppCatalogJobService
-        extends AbstractAppCatalogJobService<LevelSegmentDto> {
+        extends AbstractAppCatalogJobService<ProductDto> {
 
     /**
      * @param restTemplate
@@ -42,20 +42,20 @@ public class LevelSegmentsAppCatalogJobService
      * @see super{@link #internalExchangeSearch(URI)}
      */
     @Override
-    protected ResponseEntity<List<AppDataJobDto<LevelSegmentDto>>> internalExchangeSearch(
+    protected ResponseEntity<List<AppDataJobDto<ProductDto>>> internalExchangeSearch(
             final URI uri) {
         ResponseEntity<List<LevelSegmentAppDataJobDto>> response =
                 restTemplate.exchange(uri, HttpMethod.GET, null,
                         new ParameterizedTypeReference<List<LevelSegmentAppDataJobDto>>() {
                         });
-        List<AppDataJobDto<LevelSegmentDto>> body = new ArrayList<>();
+        List<AppDataJobDto<ProductDto>> body = new ArrayList<>();
         List<LevelSegmentAppDataJobDto> responseBody = response.getBody();
         if (!CollectionUtils.isEmpty(responseBody)) {
             for (LevelSegmentAppDataJobDto elt : responseBody) {
                 body.add(elt);
             }
         }
-        return new ResponseEntity<List<AppDataJobDto<LevelSegmentDto>>>(body,
+        return new ResponseEntity<List<AppDataJobDto<ProductDto>>>(body,
                 response.getStatusCode());
     }
 
@@ -63,14 +63,14 @@ public class LevelSegmentsAppCatalogJobService
      * @see super{@link #internalExchangeNewJob(String, AppDataJobDto)}
      */
     @Override
-    protected ResponseEntity<AppDataJobDto<LevelSegmentDto>> internalExchangeNewJob(
-            final String uri, final AppDataJobDto<LevelSegmentDto> body) {
+    protected ResponseEntity<AppDataJobDto<ProductDto>> internalExchangeNewJob(
+            final String uri, final AppDataJobDto<ProductDto> body) {
         ResponseEntity<LevelSegmentAppDataJobDto> response =
                 restTemplate.exchange(uri, HttpMethod.POST,
-                        new HttpEntity<AppDataJobDto<LevelSegmentDto>>(body),
+                        new HttpEntity<AppDataJobDto<ProductDto>>(body),
                         LevelSegmentAppDataJobDto.class);
 
-        return new ResponseEntity<AppDataJobDto<LevelSegmentDto>>(
+        return new ResponseEntity<AppDataJobDto<ProductDto>>(
                 response.getBody(), response.getStatusCode());
     }
 
@@ -78,14 +78,14 @@ public class LevelSegmentsAppCatalogJobService
      * @see super{@link #internalExchangePatchJob(String, AppDataJobDto)}
      */
     @Override
-    protected ResponseEntity<AppDataJobDto<LevelSegmentDto>> internalExchangePatchJob(
-            final String uri, final AppDataJobDto<LevelSegmentDto> body) {
+    protected ResponseEntity<AppDataJobDto<ProductDto>> internalExchangePatchJob(
+            final String uri, final AppDataJobDto<ProductDto> body) {
         ResponseEntity<LevelSegmentAppDataJobDto> response =
                 restTemplate.exchange(uri, HttpMethod.PATCH,
-                        new HttpEntity<AppDataJobDto<LevelSegmentDto>>(body),
+                        new HttpEntity<AppDataJobDto<ProductDto>>(body),
                         LevelSegmentAppDataJobDto.class);
 
-        return new ResponseEntity<AppDataJobDto<LevelSegmentDto>>(
+        return new ResponseEntity<AppDataJobDto<ProductDto>>(
                 response.getBody(), response.getStatusCode());
     }
 
@@ -93,14 +93,14 @@ public class LevelSegmentsAppCatalogJobService
      * @see super{@link #internalExchangePatchTaskTableOfJob(String, AppDataJobGenerationDto)}
      */
     @Override
-    protected ResponseEntity<AppDataJobDto<LevelSegmentDto>> internalExchangePatchTaskTableOfJob(
+    protected ResponseEntity<AppDataJobDto<ProductDto>> internalExchangePatchTaskTableOfJob(
             final String uri, final AppDataJobGenerationDto body) {
         ResponseEntity<LevelSegmentAppDataJobDto> response =
                 restTemplate.exchange(uri, HttpMethod.PATCH,
                         new HttpEntity<AppDataJobGenerationDto>(body),
                         LevelSegmentAppDataJobDto.class);
 
-        return new ResponseEntity<AppDataJobDto<LevelSegmentDto>>(
+        return new ResponseEntity<AppDataJobDto<ProductDto>>(
                 response.getBody(), response.getStatusCode());
     }
 
@@ -109,6 +109,6 @@ public class LevelSegmentsAppCatalogJobService
 /**
  * @author Viveris Technologies
  */
-class LevelSegmentAppDataJobDto extends AppDataJobDto<LevelSegmentDto> {
+class LevelSegmentAppDataJobDto extends AppDataJobDto<ProductDto> {
 
 }

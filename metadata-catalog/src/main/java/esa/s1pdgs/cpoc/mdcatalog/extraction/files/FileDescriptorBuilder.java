@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Service to build file descriptor
@@ -219,7 +219,7 @@ public class FileDescriptorBuilder {
 		return l0Descriptor;
 	}
 	
-	public L0OutputFileDescriptor buildL0SegmentFileDescriptor(File file, LevelSegmentDto product)
+	public L0OutputFileDescriptor buildL0SegmentFileDescriptor(File file, ProductDto product)
             throws MetadataFilePathException, MetadataIgnoredFileException {
         // Extract relative path
         String absolutePath = file.getAbsolutePath();

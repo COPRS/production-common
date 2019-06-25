@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class FileDescriptorBuilderTest {
 
@@ -220,7 +220,7 @@ public class FileDescriptorBuilderTest {
 
     @Test
     public void testBuildL0SegmentFileDescriptor() {
-        LevelSegmentDto dto = new LevelSegmentDto(
+        ProductDto dto = new ProductDto(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");

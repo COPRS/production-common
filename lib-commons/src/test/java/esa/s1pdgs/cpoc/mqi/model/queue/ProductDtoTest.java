@@ -36,14 +36,23 @@ public class ProductDtoTest {
 	
     @Test
     public void testLevelProduct() {
-        ProductDto dto = new ProductDto("product-name", "key-obs",
-                ProductFamily.L0_SLICE, "NRT");
+        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.L0_SLICE, "NRT");
         assertEquals("product-name", dto.getProductName());
         assertEquals("key-obs", dto.getKeyObjectStorage());
         assertEquals(ProductFamily.L0_SLICE, dto.getFamily());
         assertEquals("NRT", dto.getMode());
     }
 
+    
+    @Test
+    public void testLevelSegment() {
+        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.L0_SLICE, "NRT");
+        assertEquals("product-name", dto.getProductName());
+        assertEquals("key-obs", dto.getKeyObjectStorage());
+        assertEquals(ProductFamily.L0_SLICE, dto.getFamily());
+        assertEquals("NRT", dto.getMode());
+    }
+    
 	/**
 	 * Test the toString function
 	 */
@@ -63,8 +72,6 @@ public class ProductDtoTest {
 		EqualsVerifier.forClass(ProductDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 	
-
-
     /**
      * Test toString methods and setters
      */
@@ -74,7 +81,7 @@ public class ProductDtoTest {
         dto.setProductName("product-name");
         dto.setKeyObjectStorage("key-obs");
         dto.setFamily(ProductFamily.L1_SLICE);
-        dto.setMode("fast");
+        dto.setMode("FAST");
         String str = dto.toString();
         assertTrue(str.contains("productName: product-name"));
         assertTrue(str.contains("keyObjectStorage: key-obs"));

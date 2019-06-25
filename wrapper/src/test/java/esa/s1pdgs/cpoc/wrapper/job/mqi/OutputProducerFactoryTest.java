@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
@@ -36,7 +36,7 @@ public class OutputProducerFactoryTest {
      * Kafka producer for segments
      */
     @Mock
-    private GenericMqiService<LevelSegmentDto> senderSegments;
+    private GenericMqiService<ProductDto> senderSegments;
 
     /**
      * Kafka producer for L0 slices
@@ -128,9 +128,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L0_SEGMENT,
                         "test.txt", "test.txt", "NRT"), inputMessage);
-        GenericPublicationMessageDto<LevelSegmentDto> message =
-                new GenericPublicationMessageDto<LevelSegmentDto>(123,
-                        ProductFamily.L0_SEGMENT, new LevelSegmentDto("test.txt",
+        GenericPublicationMessageDto<ProductDto> message =
+                new GenericPublicationMessageDto<ProductDto>(123,
+                        ProductFamily.L0_SEGMENT, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L0_SEGMENT, "NRT"));
         verify(this.senderSegments, times(1)).publish(Mockito.eq(message));
         verify(this.senderProducts, never()).publish(Mockito.any());

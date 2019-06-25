@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -102,7 +102,7 @@ public class MessageConsumptionController {
     /**
      * Service for LEVEL_SEGMENTS
      */
-    private final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
+    private final GenericAppCatalogMqiService<ProductDto> persistLevelSegmentsService;
     
     private final GenericAppCatalogMqiService<ProductDto> persistCompressionJobService;
 
@@ -131,7 +131,7 @@ public class MessageConsumptionController {
             @Qualifier("persistenceServiceForLevelJobs") final GenericAppCatalogMqiService<LevelJobDto> persistLevelJobsService,
             @Qualifier("persistenceServiceForLevelProducts") final GenericAppCatalogMqiService<ProductDto> persistLevelProductsService,
             @Qualifier("persistenceServiceForLevelReports") final GenericAppCatalogMqiService<LevelReportDto> persistLevelReportsService,
-            @Qualifier("persistenceServiceForLevelSegments") final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService,
+            @Qualifier("persistenceServiceForLevelSegments") final GenericAppCatalogMqiService<ProductDto> persistLevelSegmentsService,
             @Qualifier("persistenceServiceForCompressionJob") final GenericAppCatalogMqiService<ProductDto> persistCompressionJobService,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus) {
@@ -233,12 +233,12 @@ public class MessageConsumptionController {
                             break;
                         case LEVEL_SEGMENTS:
                             catConsumers.put(topic,
-                                    new GenericConsumer<LevelSegmentDto>(
+                                    new GenericConsumer<ProductDto>(
                                             kafkaProperties,
                                             persistLevelSegmentsService,
                                             otherAppService, appStatus, topic,
                                             prop.getTopicsWithPriority().get(topic),
-                                            LevelSegmentDto.class));
+                                            ProductDto.class));
                             break;
                         case COMPRESSED_PRODUCTS:
                         	catConsumers.put(topic,
@@ -497,16 +497,16 @@ public class MessageConsumptionController {
      * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
-    protected GenericMessageDto<LevelSegmentDto> nextLevelSegmentsMessage()
+    protected GenericMessageDto<ProductDto> nextLevelSegmentsMessage()
             throws AbstractCodedException {
-        List<MqiGenericMessageDto<LevelSegmentDto>> messages =
+        List<MqiGenericMessageDto<ProductDto>> messages =
                 persistLevelSegmentsService.next(appProperties.getHostname());
-        MqiGenericMessageDto<LevelSegmentDto> result = null;
+        MqiGenericMessageDto<ProductDto> result = null;
         if (!CollectionUtils.isEmpty(messages)) {
-            messages.sort(new Comparator<MqiGenericMessageDto<LevelSegmentDto>>() {
+            messages.sort(new Comparator<MqiGenericMessageDto<ProductDto>>() {
                 @Override
-                public int compare(MqiGenericMessageDto<LevelSegmentDto> o1,
-                        MqiGenericMessageDto<LevelSegmentDto> o2) {
+                public int compare(MqiGenericMessageDto<ProductDto> o1,
+                        MqiGenericMessageDto<ProductDto> o2) {
                     if(consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o1.getTopic()).getPriority() >
                         consumers.get(ProductCategory.LEVEL_PRODUCTS).get(o2.getTopic()).getPriority()) {
                         return -1;
@@ -524,7 +524,7 @@ public class MessageConsumptionController {
                     }
                 }                
             });
-            for (MqiGenericMessageDto<LevelSegmentDto> tmpMessage : messages) {
+            for (MqiGenericMessageDto<ProductDto> tmpMessage : messages) {
                 if (send(persistLevelSegmentsService,
                         (MqiLightMessageDto) tmpMessage)) {
                     result = tmpMessage;
@@ -532,7 +532,7 @@ public class MessageConsumptionController {
                 }
             }
         }
-        return (GenericMessageDto<LevelSegmentDto>) convertToRestDto(result);
+        return (GenericMessageDto<ProductDto>) convertToRestDto(result);
     }
     
     /**

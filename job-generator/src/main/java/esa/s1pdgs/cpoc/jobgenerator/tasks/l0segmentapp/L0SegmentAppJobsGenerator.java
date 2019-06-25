@@ -26,7 +26,7 @@ import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * @author Cyrielle Gailliard
  */
 public class L0SegmentAppJobsGenerator
-        extends AbstractJobsGenerator<LevelSegmentDto> {
+        extends AbstractJobsGenerator<ProductDto> {
 
     /**
      * @param xmlConverter
@@ -49,7 +49,7 @@ public class L0SegmentAppJobsGenerator
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<LevelSegmentDto> appDataService) {
+            final AbstractAppCatalogJobService<ProductDto> appDataService) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
@@ -59,7 +59,7 @@ public class L0SegmentAppJobsGenerator
      * inputs
      */
     @Override
-    protected void preSearch(final JobGeneration<LevelSegmentDto> job)
+    protected void preSearch(final JobGeneration<ProductDto> job)
             throws JobGenInputsMissingException {
         boolean fullCoverage = false;
 
@@ -70,14 +70,14 @@ public class L0SegmentAppJobsGenerator
                 new HashMap<>();
         String lastName = "";
         try {
-            for (GenericMessageDto<LevelSegmentDto> message : job
+            for (GenericMessageDto<ProductDto> message : job
                     .getAppDataJob().getMessages()) {
-                LevelSegmentDto dto = message.getBody();
-                lastName = dto.getName();
+                ProductDto dto = message.getBody();
+                lastName = dto.getProductName();
                 LevelSegmentMetadata metadata = metadataService
-                        .getLevelSegment(dto.getFamily(), dto.getName());
+                        .getLevelSegment(dto.getFamily(), dto.getProductName());
                 if (metadata == null) {
-                    missingMetadata.put(dto.getName(), "Missing segment");
+                    missingMetadata.put(dto.getProductName(), "Missing segment");
                 } else {
                     if (!segmentsGroupByPol
                             .containsKey(metadata.getPolarisation())) {
@@ -205,7 +205,7 @@ public class L0SegmentAppJobsGenerator
      * Custom job order before building the job DTO
      */
     @Override
-    protected void customJobOrder(final JobGeneration<LevelSegmentDto> job) {
+    protected void customJobOrder(final JobGeneration<ProductDto> job) {
         this.updateProcParam(job.getJobOrder(), "Mission_Id",
                 job.getAppDataJob().getProduct().getMissionId()
                         + job.getAppDataJob().getProduct().getSatelliteId());
@@ -237,7 +237,7 @@ public class L0SegmentAppJobsGenerator
      * Customisation of the job DTO before sending it
      */
     @Override
-    protected void customJobDto(final JobGeneration<LevelSegmentDto> job,
+    protected void customJobDto(final JobGeneration<ProductDto> job,
             final LevelJobDto dto) {
         // NOTHING TO DO
 

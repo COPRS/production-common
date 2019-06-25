@@ -51,7 +51,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -116,7 +116,7 @@ public class MessageConsumptionControllerTest {
      * Service for AUXILIARY_FILES
      */
     @Mock
-    private GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
+    private GenericAppCatalogMqiService<ProductDto> persistLevelSegmentsService;
     
     @Mock
     private GenericAppCatalogMqiService<ProductDto> persistCompressedJobService;
@@ -282,7 +282,7 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).size());
         assertEquals("topic", manager.consumers.get(ProductCategory.LEVEL_SEGMENTS)
                 .get("topic").getTopic());
-        assertEquals(LevelSegmentDto.class,
+        assertEquals(ProductDto.class,
                 manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).get("topic")
                         .getConsumedMsgClass());
         
