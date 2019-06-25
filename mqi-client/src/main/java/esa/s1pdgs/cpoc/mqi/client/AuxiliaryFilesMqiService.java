@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.AuxiliaryFilesMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * @author Viveris Technologies
  */
 public class AuxiliaryFilesMqiService
-        extends GenericMqiService<AuxiliaryFileDto> {
+        extends GenericMqiService<ProductDto> {
 
     /**
      * Constructor
@@ -41,7 +41,7 @@ public class AuxiliaryFilesMqiService
     /**
      * @see GenericMqiService#next()
      */
-    public GenericMessageDto<AuxiliaryFileDto> next()
+    public GenericMessageDto<ProductDto> next()
             throws AbstractCodedException {
         int retries = 0;
         while (true) {

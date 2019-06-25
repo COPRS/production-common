@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.model.obs.S3UploadFile;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -30,7 +30,7 @@ public class FileUploader {
 
 	private final String workingDir;
 
-	private final CompressionJobDto job;
+	private final ProductDto job;
 
 	/**
 	 * Output producer factory for message queue system
@@ -40,7 +40,7 @@ public class FileUploader {
 	/**
 	 * Input message
 	 */
-	private final GenericMessageDto<CompressionJobDto> inputMessage;
+	private final GenericMessageDto<ProductDto> inputMessage;
 
 	/**
 	 * Cannot be a key in obs
@@ -55,8 +55,8 @@ public class FileUploader {
 	private final ObsService obsService;
 
 	public FileUploader(final ObsService obsService, final OutputProducerFactory producerFactory,
-			final String workingDir, final GenericMessageDto<CompressionJobDto> inputMessage,
-			final CompressionJobDto job) {
+			final String workingDir, final GenericMessageDto<ProductDto> inputMessage,
+			final ProductDto job) {
 		this.obsService = obsService;
 		this.producerFactory = producerFactory;
 		this.workingDir = workingDir;

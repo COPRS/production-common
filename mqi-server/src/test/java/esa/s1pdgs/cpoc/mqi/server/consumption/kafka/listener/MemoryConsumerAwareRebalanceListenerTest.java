@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Test the MemoryConsumerAwareRebalanceListener
@@ -43,7 +43,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
      * Service of applicative data
      */
     @Mock
-    private GenericAppCatalogMqiService<AuxiliaryFileDto> service;
+    private GenericAppCatalogMqiService<ProductDto> service;
 
     /**
      * Listener to test

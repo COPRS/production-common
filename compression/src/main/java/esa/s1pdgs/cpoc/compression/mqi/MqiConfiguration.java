@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.mqi.client.CompressedProductsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 @Configuration
 public class MqiConfiguration {
@@ -48,7 +48,7 @@ public class MqiConfiguration {
     }
 
     @Bean(name = "mqiServiceForCompression")
-    public GenericMqiService<CompressionJobDto> mqiServiceForCompression(
+    public GenericMqiService<ProductDto> mqiServiceForCompression(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new CompressedProductsMqiService(template, hostUri, maxRetries,

@@ -9,11 +9,11 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.CompressionJobsMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-public class CompressedProductsMqiService extends GenericMqiService<CompressionJobDto> {
+public class CompressedProductsMqiService extends GenericMqiService<ProductDto> {
 
     /**
      * Constructor
@@ -36,7 +36,7 @@ public class CompressedProductsMqiService extends GenericMqiService<CompressionJ
     /**
      * @see GenericMqiService#next()
      */
-    public GenericMessageDto<CompressionJobDto> next()
+    public GenericMessageDto<ProductDto> next()
             throws AbstractCodedException {
         int retries = 0;
         while (true) {

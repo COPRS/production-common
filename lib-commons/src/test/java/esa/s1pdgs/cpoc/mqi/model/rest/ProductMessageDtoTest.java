@@ -5,7 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -14,14 +15,14 @@ import nl.jqno.equalsverifier.Warning;
  * 
  * @author Viveris Technologies
  */
-public class AuxiliaryFilesMessageDtoTest {
+public class ProductMessageDtoTest {
 
     /**
      * Test getters, setters and constructors
      */
     @Test
     public void testGettersSettersConstructors() {
-        AuxiliaryFileDto body = new AuxiliaryFileDto("product-name", "key-obs");
+        ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
         AuxiliaryFilesMessageDto dto =
                 new AuxiliaryFilesMessageDto(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
@@ -42,7 +43,7 @@ public class AuxiliaryFilesMessageDtoTest {
      */
     @Test
     public void testToString() {
-        AuxiliaryFileDto body = new AuxiliaryFileDto("product-name", "key-obs");
+        ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
         AuxiliaryFilesMessageDto dto =
                 new AuxiliaryFilesMessageDto(123, "input-key", body);
         String str = dto.toString();

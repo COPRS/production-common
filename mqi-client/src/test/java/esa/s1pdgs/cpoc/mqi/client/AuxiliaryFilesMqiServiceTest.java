@@ -25,9 +25,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.AuxiliaryFilesMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -70,7 +71,7 @@ public class AuxiliaryFilesMqiServiceTest {
         service = new AuxiliaryFilesMqiService(restTemplate, "uri", 2, 500);
 
         message = new AuxiliaryFilesMessageDto(123, "input-key",
-                new AuxiliaryFileDto("name", "keyobs"));
+                new ProductDto("name", "keyobs", ProductFamily.AUXILIARY_FILE));
     }
 
     /**
@@ -173,7 +174,7 @@ public class AuxiliaryFilesMqiServiceTest {
                                 Mockito.isNull(),
                                 Mockito.any(Class.class));
 
-        GenericMessageDto<AuxiliaryFileDto> ret = service.next();
+        GenericMessageDto<ProductDto> ret = service.next();
         assertEquals(message, ret);
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/messages/auxiliary_files/next"),
@@ -196,7 +197,7 @@ public class AuxiliaryFilesMqiServiceTest {
                         Mockito.isNull(),
                         Mockito.any(Class.class));
 
-        GenericMessageDto<AuxiliaryFileDto> ret = service.next();
+        GenericMessageDto<ProductDto> ret = service.next();
         assertEquals(message, ret);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/messages/auxiliary_files/next"),

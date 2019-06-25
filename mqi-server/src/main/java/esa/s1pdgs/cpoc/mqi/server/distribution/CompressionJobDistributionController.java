@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 
 @RestController
 @RequestMapping(path = "/messages/compressed_products")
-public class CompressionJobDistributionController extends GenericMessageDistribution<CompressionJobDto> {
+public class CompressionJobDistributionController extends GenericMessageDistribution<ProductDto> {
 
     /**
      * Constructor
@@ -40,7 +40,7 @@ public class CompressionJobDistributionController extends GenericMessageDistribu
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/next")
-    public ResponseEntity<GenericMessageDto<CompressionJobDto>> next() {
+    public ResponseEntity<GenericMessageDto<ProductDto>> next() {
         return super.next();
     }
 
@@ -62,9 +62,9 @@ public class CompressionJobDistributionController extends GenericMessageDistribu
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/publish")
     public ResponseEntity<Void> publish(
-            @RequestBody() final GenericPublicationMessageDto<CompressionJobDto> message) {
+            @RequestBody() final GenericPublicationMessageDto<ProductDto> message) {
         String log = String.format("[productName: %s]",
-                message.getMessageToPublish().getObjectStorageKey());
+                message.getMessageToPublish().getKeyObjectStorage());
         return super.publish(log, message);
     }
 }

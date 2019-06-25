@@ -23,8 +23,8 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -77,7 +77,7 @@ public class MessageConsumptionController {
     /**
      * Service for AUXILIARY_FILES
      */
-    private final GenericAppCatalogMqiService<AuxiliaryFileDto> persistAuxiliaryFilesService;
+    private final GenericAppCatalogMqiService<ProductDto> persistAuxiliaryFilesService;
 
     /**
      * Service for EDRS_SESSIONS
@@ -104,7 +104,7 @@ public class MessageConsumptionController {
      */
     private final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
     
-    private final GenericAppCatalogMqiService<CompressionJobDto> persistCompressionJobService;
+    private final GenericAppCatalogMqiService<ProductDto> persistCompressionJobService;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -126,13 +126,13 @@ public class MessageConsumptionController {
     public MessageConsumptionController(
             final ApplicationProperties appProperties,
             final KafkaProperties kafkaProperties,
-            @Qualifier("persistenceServiceForAuxiliaryFiles") final GenericAppCatalogMqiService<AuxiliaryFileDto> persistAuxiliaryFilesService,
+            @Qualifier("persistenceServiceForAuxiliaryFiles") final GenericAppCatalogMqiService<ProductDto> persistAuxiliaryFilesService,
             @Qualifier("persistenceServiceForEdrsSessions") final GenericAppCatalogMqiService<EdrsSessionDto> persistEdrsSessionsService,
             @Qualifier("persistenceServiceForLevelJobs") final GenericAppCatalogMqiService<LevelJobDto> persistLevelJobsService,
             @Qualifier("persistenceServiceForLevelProducts") final GenericAppCatalogMqiService<LevelProductDto> persistLevelProductsService,
             @Qualifier("persistenceServiceForLevelReports") final GenericAppCatalogMqiService<LevelReportDto> persistLevelReportsService,
             @Qualifier("persistenceServiceForLevelSegments") final GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService,
-            @Qualifier("persistenceServiceForCompressionJob") final GenericAppCatalogMqiService<CompressionJobDto> persistCompressionJobService,
+            @Qualifier("persistenceServiceForCompressionJob") final GenericAppCatalogMqiService<ProductDto> persistCompressionJobService,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus) {
         this.consumers = new HashMap<>();
@@ -188,12 +188,12 @@ public class MessageConsumptionController {
                     switch (cat) {
                         case AUXILIARY_FILES:
                             catConsumers.put(topic,
-                                    new GenericConsumer<AuxiliaryFileDto>(
+                                    new GenericConsumer<ProductDto>(
                                             kafkaProperties,
                                             persistAuxiliaryFilesService,
                                             otherAppService, appStatus, topic,
                                             prop.getTopicsWithPriority().get(topic),
-                                            AuxiliaryFileDto.class));
+                                            ProductDto.class));
                             break;
                         case EDRS_SESSIONS:
                             catConsumers.put(topic,
@@ -242,12 +242,12 @@ public class MessageConsumptionController {
                             break;
                         case COMPRESSED_PRODUCTS:
                         	catConsumers.put(topic,
-                                    new GenericConsumer<CompressionJobDto>(
+                                    new GenericConsumer<ProductDto>(
                                             kafkaProperties,
                                             persistCompressionJobService,
                                             otherAppService, appStatus, topic,
                                             prop.getTopicsWithPriority().get(topic),
-                                            CompressionJobDto.class));
+                                            ProductDto.class));
                     }
                 }
                 consumers.put(cat, catConsumers);
@@ -317,16 +317,16 @@ public class MessageConsumptionController {
      * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
-    protected GenericMessageDto<AuxiliaryFileDto> nextAuxiliaryFilesMessage()
+    protected GenericMessageDto<ProductDto> nextAuxiliaryFilesMessage()
             throws AbstractCodedException {
-        List<MqiGenericMessageDto<AuxiliaryFileDto>> messages =
+        List<MqiGenericMessageDto<ProductDto>> messages =
                 persistAuxiliaryFilesService.next(appProperties.getHostname());
-        MqiGenericMessageDto<AuxiliaryFileDto> result = null;
+        MqiGenericMessageDto<ProductDto> result = null;
         if (!CollectionUtils.isEmpty(messages)) {
-            messages.sort(new Comparator<MqiGenericMessageDto<AuxiliaryFileDto>>() {
+            messages.sort(new Comparator<MqiGenericMessageDto<ProductDto>>() {
                 @Override
-                public int compare(MqiGenericMessageDto<AuxiliaryFileDto> o1,
-                        MqiGenericMessageDto<AuxiliaryFileDto> o2) {
+                public int compare(MqiGenericMessageDto<ProductDto> o1,
+                        MqiGenericMessageDto<ProductDto> o2) {
                     if(consumers.get(ProductCategory.AUXILIARY_FILES).get(o1.getTopic()).getPriority() >
                         consumers.get(ProductCategory.AUXILIARY_FILES).get(o2.getTopic()).getPriority()) {
                         return -1;
@@ -344,7 +344,7 @@ public class MessageConsumptionController {
                     }
                 }                
             });
-            for (MqiGenericMessageDto<AuxiliaryFileDto> tmpMessage : messages) {
+            for (MqiGenericMessageDto<ProductDto> tmpMessage : messages) {
                 if (send(persistAuxiliaryFilesService,
                         (MqiLightMessageDto) tmpMessage)) {
                     result = tmpMessage;
@@ -352,7 +352,7 @@ public class MessageConsumptionController {
                 }
             }
         }
-        return (GenericMessageDto<AuxiliaryFileDto>) convertToRestDto(result);
+        return (GenericMessageDto<ProductDto>) convertToRestDto(result);
     }
 
     /**
@@ -581,16 +581,16 @@ public class MessageConsumptionController {
     }
     
     @SuppressWarnings("unchecked")
-    protected GenericMessageDto<CompressionJobDto> nextCompressedProductMessage()
+    protected GenericMessageDto<ProductDto> nextCompressedProductMessage()
             throws AbstractCodedException {
-        List<MqiGenericMessageDto<CompressionJobDto>> messages =
+        List<MqiGenericMessageDto<ProductDto>> messages =
                 persistCompressionJobService.next(appProperties.getHostname());
-        MqiGenericMessageDto<CompressionJobDto> result = null;
+        MqiGenericMessageDto<ProductDto> result = null;
         if (!CollectionUtils.isEmpty(messages)) {
-            messages.sort(new Comparator<MqiGenericMessageDto<CompressionJobDto>>() {
+            messages.sort(new Comparator<MqiGenericMessageDto<ProductDto>>() {
                 @Override
-                public int compare(MqiGenericMessageDto<CompressionJobDto> o1,
-                        MqiGenericMessageDto<CompressionJobDto> o2) {
+                public int compare(MqiGenericMessageDto<ProductDto> o1,
+                        MqiGenericMessageDto<ProductDto> o2) {
                     if(consumers.get(ProductCategory.COMPRESSED_PRODUCTS).get(o1.getTopic()).getPriority() >
                         consumers.get(ProductCategory.COMPRESSED_PRODUCTS).get(o2.getTopic()).getPriority()) {
                         return -1;
@@ -608,7 +608,7 @@ public class MessageConsumptionController {
                     }
                 }                
             });
-            for (MqiGenericMessageDto<CompressionJobDto> tmpMessage : messages) {
+            for (MqiGenericMessageDto<ProductDto> tmpMessage : messages) {
                 if (send(persistCompressionJobService,
                         (MqiLightMessageDto) tmpMessage)) {
                     result = tmpMessage;
@@ -616,7 +616,7 @@ public class MessageConsumptionController {
                 }
             }
         }
-        return (GenericMessageDto<CompressionJobDto>) convertToRestDto(result);
+        return (GenericMessageDto<ProductDto>) convertToRestDto(result);
     }
 
     /**

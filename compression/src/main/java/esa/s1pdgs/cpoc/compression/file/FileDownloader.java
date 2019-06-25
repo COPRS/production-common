@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.compression.model.obs.S3DownloadFile;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -38,14 +38,14 @@ public class FileDownloader {
 	/**
 	 * List of all the inputs
 	 */
-	private final CompressionJobDto job;
+	private final ProductDto job;
 
 	/**
 	 * Prefix to concatene to monitor logs
 	 */
 	private final String prefixMonitorLogs;
 
-	public FileDownloader(final ObsService obsService, final String localWorkingDir, final CompressionJobDto job,
+	public FileDownloader(final ObsService obsService, final String localWorkingDir, final ProductDto job,
 			final int sizeDownBatch, final String prefixMonitorLogs) {
 		this.obsService = obsService;
 		this.localWorkingDir = localWorkingDir;

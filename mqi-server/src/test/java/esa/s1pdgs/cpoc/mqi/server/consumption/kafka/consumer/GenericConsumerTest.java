@@ -26,8 +26,9 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
@@ -55,7 +56,7 @@ public class GenericConsumerTest {
     private AppStatus appStatus;
 
     @Mock
-    private GenericAppCatalogMqiService<AuxiliaryFileDto> service;
+    private GenericAppCatalogMqiService<ProductDto> service;
 
     @Mock
     private OtherApplicationService otherService;
@@ -88,28 +89,28 @@ public class GenericConsumerTest {
 
     @Test
     public void testConstructor() {
-        GenericConsumer<AuxiliaryFileDto> consumer =
+        GenericConsumer<ProductDto> consumer =
                 new GenericConsumer<>(properties, service, otherService,
                         appStatus, GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-                        100, AuxiliaryFileDto.class);
+                        100, ProductDto.class);
         assertEquals(GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
                 consumer.getTopic());
-        assertEquals(AuxiliaryFileDto.class, consumer.getConsumedMsgClass());
+        assertEquals(ProductDto.class, consumer.getConsumedMsgClass());
     }
 
     @Test
     public void testAuxiliaryFilesConsumer() throws InterruptedException,
             ExecutionException, AbstractCodedException {
-        AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
-        AuxiliaryFileDto dto2 =
-                new AuxiliaryFileDto("product-name-2", "key-obs-2");
-        GenericKafkaUtils<AuxiliaryFileDto> kafkaUtils =
+        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+        ProductDto dto2 =
+                new ProductDto("product-name-2", "key-obs-2", ProductFamily.AUXILIARY_FILE);
+        GenericKafkaUtils<ProductDto> kafkaUtils =
                 new GenericKafkaUtils<>(embeddedKafka);
 
-        GenericConsumer<AuxiliaryFileDto> consumer =
+        GenericConsumer<ProductDto> consumer =
                 new GenericConsumer<>(properties, service, otherService,
                         appStatus, GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-                        100, AuxiliaryFileDto.class);
+                        100, ProductDto.class);
         consumer.start();
         Thread.sleep(5000);
         verify(service, never()).read(Mockito.anyString(), Mockito.anyInt(),
@@ -119,8 +120,8 @@ public class GenericConsumerTest {
         kafkaUtils.sendMessageToKafka(dto,
                 GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
         Thread.sleep(1500);
-        MqiGenericReadMessageDto<AuxiliaryFileDto> expected =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("wrappers",
+        MqiGenericReadMessageDto<ProductDto> expected =
+                new MqiGenericReadMessageDto<ProductDto>("wrappers",
                         "test-host", false, dto);
         verify(service, times(1)).read(
                 Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
@@ -137,8 +138,8 @@ public class GenericConsumerTest {
         // REsume consumer
         consumer.resume();
         Thread.sleep(1000);
-        MqiGenericReadMessageDto<AuxiliaryFileDto> expected2 =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("wrappers",
+        MqiGenericReadMessageDto<ProductDto> expected2 =
+                new MqiGenericReadMessageDto<ProductDto>("wrappers",
                         "test-host", false, dto2);
         verify(service, times(2)).read(
                 Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),

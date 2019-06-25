@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -75,7 +75,7 @@ public class CompressProcessor {
 	/**
 	 * MQI service for reading message
 	 */
-	private final GenericMqiService<CompressionJobDto> mqiService;
+	private final GenericMqiService<ProductDto> mqiService;
 
 	/**
 	 * MQI service for stopping the MQI
@@ -87,7 +87,7 @@ public class CompressProcessor {
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
 			final ObsService obsService, final OutputProducerFactory producerFactory,
-			@Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> mqiService,
+			@Qualifier("mqiServiceForCompression") final GenericMqiService<ProductDto> mqiService,
 			final ErrorRepoAppender errorAppender,
 			@Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
 		this.appStatus = appStatus;
@@ -116,7 +116,7 @@ public class CompressProcessor {
 			this.appStatus.forceStopping();
 			return;
 		}
-		GenericMessageDto<CompressionJobDto> message = null;
+		GenericMessageDto<ProductDto> message = null;
 		try {
 			message = mqiService.next();
 			this.appStatus.setWaiting();
@@ -147,7 +147,7 @@ public class CompressProcessor {
 		final Reporting report = reportingFactory.newReporting(0);
 		report.reportStart("Start compression processing");
 
-		CompressionJobDto job = message.getBody();
+		ProductDto job = message.getBody();
 
 		// Initialize the pool processor executor
 		CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
@@ -172,16 +172,16 @@ public class CompressProcessor {
 		report.reportStop("End compression processing");
 	}
 
-	protected void processTask(final GenericMessageDto<CompressionJobDto> message, final FileDownloader fileDownloader,
+	protected void processTask(final GenericMessageDto<ProductDto> message, final FileDownloader fileDownloader,
 			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
 			final ExecutorCompletionService<Void> procCompletionSrv, final CompressExecutorCallable procExecutor,
 			final Reporting report) {
-		CompressionJobDto job = message.getBody();
+		ProductDto job = message.getBody();
 		int step = 0;
 		boolean ackOk = false;
 		String errorMessage = "";
 
-		final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failedProc = new FailedProcessingDto<GenericMessageDto<CompressionJobDto>>();
+		final FailedProcessingDto<GenericMessageDto<ProductDto>> failedProc = new FailedProcessingDto<GenericMessageDto<ProductDto>>();
 
 		try {
 			step = 2;
@@ -280,7 +280,7 @@ public class CompressProcessor {
 	 * @param poolProcessing
 	 * @param procExecutorSrv
 	 */
-	protected void cleanCompressionProcessing(final CompressionJobDto job, final ExecutorService procExecutorSrv) {
+	protected void cleanCompressionProcessing(final ProductDto job, final ExecutorService procExecutorSrv) {
 		procExecutorSrv.shutdownNow();
 		try {
 			procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
@@ -293,7 +293,7 @@ public class CompressProcessor {
 		this.eraseDirectory(job);
 	}
 
-	private void eraseDirectory(final CompressionJobDto job) {
+	private void eraseDirectory(final ProductDto job) {
 		try {
 			LOGGER.info("Erasing local working directory for job {}", job);
 			Path p = Paths.get(properties.getWorkingDirectory());
@@ -313,8 +313,8 @@ public class CompressProcessor {
 	 * @param ackOk
 	 * @param errorMessage
 	 */
-	protected void ackProcessing(final GenericMessageDto<CompressionJobDto> dto,
-			final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failed, final boolean ackOk,
+	protected void ackProcessing(final GenericMessageDto<ProductDto> dto,
+			final FailedProcessingDto<GenericMessageDto<ProductDto>> failed, final boolean ackOk,
 			final String errorMessage) {
 		boolean stopping = appStatus.getStatus().isStopping();
 
@@ -351,7 +351,7 @@ public class CompressProcessor {
 	 * @param dto
 	 * @param errorMessage
 	 */
-	protected void ackNegatively(final boolean stop, final GenericMessageDto<CompressionJobDto> dto,
+	protected void ackNegatively(final boolean stop, final GenericMessageDto<ProductDto> dto,
 			final String errorMessage) {
         LOGGER.info("Acknowledging negatively {} ",dto.getBody());
 		try {
@@ -367,7 +367,7 @@ public class CompressProcessor {
 		appStatus.setError("PROCESSING");
 	}
 
-	protected void ackPositively(final boolean stop, final GenericMessageDto<CompressionJobDto> dto) {
+	protected void ackPositively(final boolean stop, final GenericMessageDto<ProductDto> dto) {
 		LOGGER.info("Acknowledging positively {}", dto.getBody());
 		try {
 			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));

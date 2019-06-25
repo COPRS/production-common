@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.appcatalog.rest;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Message object used by the REST applicative catalog for the category
@@ -10,7 +10,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
  * @author Viveris Technologies
  */
 public class MqiAuxiliaryFileMessageDto
-        extends MqiGenericMessageDto<AuxiliaryFileDto> {
+        extends MqiGenericMessageDto<ProductDto> {
 
     /**
      * Default constructor
@@ -42,7 +42,7 @@ public class MqiAuxiliaryFileMessageDto
      */
     public MqiAuxiliaryFileMessageDto(final long identifier, final String topic,
             final int partition, final long offset,
-            final AuxiliaryFileDto dto) {
+            final ProductDto dto) {
         super(ProductCategory.AUXILIARY_FILES, identifier, topic, partition,
                 offset, dto);
     }

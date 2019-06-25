@@ -5,7 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -15,18 +16,18 @@ import nl.jqno.equalsverifier.Warning;
  * @author Viveris Technologies
  *
  */
-public class AuxiliaryFileDtoTest {
+public class ProductDtoTest {
 
 	/**
 	 * Test getters, setters and constructors
 	 */
 	@Test
 	public void testGettersSettersConstructors() {
-		AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
+		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
 		assertEquals("product-name", dto.getProductName());
 		assertEquals("key-obs", dto.getKeyObjectStorage());
 
-		dto = new AuxiliaryFileDto();
+		dto = new ProductDto();
 		dto.setProductName("other-product");
 		dto.setKeyObjectStorage("other-key");
 		assertEquals("other-product", dto.getProductName());
@@ -38,7 +39,7 @@ public class AuxiliaryFileDtoTest {
 	 */
 	@Test
 	public void testToString() {
-		AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
+		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
 		String str = dto.toString();
 		assertTrue("toString should contain the product name", str.contains("productName: product-name"));
 		assertTrue("toString should contain the key OBS", str.contains("keyObjectStorage: key-obs"));
@@ -49,7 +50,7 @@ public class AuxiliaryFileDtoTest {
 	 */
 	@Test
 	public void checkEquals() {
-		EqualsVerifier.forClass(AuxiliaryFileDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(ProductDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

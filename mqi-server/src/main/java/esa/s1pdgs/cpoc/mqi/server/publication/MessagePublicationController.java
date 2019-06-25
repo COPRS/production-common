@@ -17,8 +17,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -176,7 +176,7 @@ public class MessagePublicationController {
 		if (producers.containsKey(category)) {
 			switch (category) {
 			case AUXILIARY_FILES:
-				publishAuxiliaryFiles((AuxiliaryFileDto) dto, inputKey, outputKey);
+				publishAuxiliaryFiles((ProductDto) dto, inputKey, outputKey);
 				break;
 			case EDRS_SESSIONS:
 				publishEdrsSessions((EdrsSessionDto) dto, inputKey, outputKey);
@@ -194,7 +194,7 @@ public class MessagePublicationController {
 				publishLevelSegments((LevelSegmentDto) dto, inputKey, outputKey);
 				break;
 			case COMPRESSED_PRODUCTS:
-				publishCompressedProducts((CompressionJobDto)dto, inputKey, outputKey);
+				publishCompressedProducts((ProductDto)dto, inputKey, outputKey);
 				break;
 			}
 		} else {
@@ -240,7 +240,7 @@ public class MessagePublicationController {
 	 * @throws MqiCategoryNotAvailable
 	 * @throws MqiRouteNotAvailable
 	 */
-	protected void publishAuxiliaryFiles(final AuxiliaryFileDto dto, String inputKey, String outputKey)
+	protected void publishAuxiliaryFiles(final ProductDto dto, String inputKey, String outputKey)
 			throws MqiPublicationError, MqiCategoryNotAvailable, MqiRouteNotAvailable {
 		ProductCategory category = ProductCategory.AUXILIARY_FILES;
 		if (producers.containsKey(category)) {
@@ -259,7 +259,7 @@ public class MessagePublicationController {
 	 * @throws MqiCategoryNotAvailable
 	 * @throws MqiRouteNotAvailable
 	 */
-	protected void publishCompressedProducts(final CompressionJobDto dto, String inputKey, String outputKey)
+	protected void publishCompressedProducts(final ProductDto dto, String inputKey, String outputKey)
 			throws MqiPublicationError, MqiCategoryNotAvailable, MqiRouteNotAvailable {
 		ProductCategory category = ProductCategory.COMPRESSED_PRODUCTS;
 		if (producers.containsKey(category)) {

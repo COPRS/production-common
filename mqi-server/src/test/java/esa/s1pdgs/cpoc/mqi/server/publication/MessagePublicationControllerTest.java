@@ -40,7 +40,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -106,7 +106,7 @@ public class MessagePublicationControllerTest {
 
     private GenericKafkaUtils<LevelJobDto> kafkaUtilsJobs;
 
-    private GenericKafkaUtils<AuxiliaryFileDto> kafkaUtilsAux;
+    private GenericKafkaUtils<ProductDto> kafkaUtilsAux;
 
     private GenericKafkaUtils<LevelSegmentDto> kafkaUtilsSegments;
 
@@ -125,7 +125,7 @@ public class MessagePublicationControllerTest {
 
         kafkaUtilsJobs = new GenericKafkaUtils<LevelJobDto>(embeddedKafka);
 
-        kafkaUtilsAux = new GenericKafkaUtils<AuxiliaryFileDto>(embeddedKafka);
+        kafkaUtilsAux = new GenericKafkaUtils<ProductDto>(embeddedKafka);
 
         kafkaUtilsSegments = new GenericKafkaUtils<LevelSegmentDto>(embeddedKafka);
 
@@ -290,12 +290,12 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishAuxiliaryFiles() throws Exception {
-        AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
+        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.AUXILIARY_FILES, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, AuxiliaryFileDto> record = kafkaUtilsAux
+        ConsumerRecord<String, ProductDto> record = kafkaUtilsAux
                 .getReceivedRecordAux(GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
 
         assertEquals(dto, record.value());
@@ -304,7 +304,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishAuxiliaryFilesNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
-        AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
+        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
         initCustomControllerForNoPublication();
 
         thrown.expect(MqiCategoryNotAvailable.class);

@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.model.rest;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Extension of the GenericMessageDto for the category AuxiliaryFiles
@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
  * @author Viveris Technologies
  */
 public class AuxiliaryFilesMessageDto
-        extends GenericMessageDto<AuxiliaryFileDto> {
+        extends GenericMessageDto<ProductDto> {
 
     /**
      * Default constructor
@@ -24,7 +24,7 @@ public class AuxiliaryFilesMessageDto
      * @param body
      */
     public AuxiliaryFilesMessageDto(final long identifier,
-            final String inputKey, final AuxiliaryFileDto body) {
+            final String inputKey, final ProductDto body) {
         super(identifier, inputKey, body);
     }
 

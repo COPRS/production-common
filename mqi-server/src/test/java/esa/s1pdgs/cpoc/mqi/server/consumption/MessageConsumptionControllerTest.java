@@ -46,10 +46,8 @@ import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ErrorDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -88,7 +86,7 @@ public class MessageConsumptionControllerTest {
      * Service for AUXILIARY_FILES
      */
     @Mock
-    private GenericAppCatalogMqiService<AuxiliaryFileDto> persistAuxiliaryFilesService;
+    private GenericAppCatalogMqiService<ProductDto> persistAuxiliaryFilesService;
 
     /**
      * Service for AUXILIARY_FILES
@@ -121,13 +119,7 @@ public class MessageConsumptionControllerTest {
     private GenericAppCatalogMqiService<LevelSegmentDto> persistLevelSegmentsService;
     
     @Mock
-    private GenericAppCatalogMqiService<CompressionJobDto> persistCompressedJobService;
-
-    /**
-     * Service for Errors
-     */
-    @Mock
-    private GenericAppCatalogMqiService<ErrorDto> persistErrorsService;
+    private GenericAppCatalogMqiService<ProductDto> persistCompressedJobService;
 
     /**
      * 
@@ -238,13 +230,13 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES).size());
         assertEquals("topic", manager.consumers
                 .get(ProductCategory.AUXILIARY_FILES).get("topic").getTopic());
-        assertEquals(AuxiliaryFileDto.class,
+        assertEquals(ProductDto.class,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic").getConsumedMsgClass());
         assertEquals("topic-other",
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic-other").getTopic());
-        assertEquals(AuxiliaryFileDto.class,
+        assertEquals(ProductDto.class,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic-other").getConsumedMsgClass());
 
@@ -374,8 +366,6 @@ public class MessageConsumptionControllerTest {
                 ProductCategory.LEVEL_REPORTS, 5);
         testNextMessage(persistLevelSegmentsService,
                 ProductCategory.LEVEL_SEGMENTS, 6);
-        testNextMessage(persistErrorsService,
-                ProductCategory.LEVEL_SEGMENTS, 7);
     }
 
     /**

@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.mqi.client.EdrsSessionMqiService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelProductsMqiService;
 import esa.s1pdgs.cpoc.mqi.client.LevelSegmentsMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
@@ -92,7 +92,7 @@ public class MqiConfiguration {
      * @return
      */
     @Bean(name = "mqiServiceForAuxiliaryFiles")
-    public GenericMqiService<AuxiliaryFileDto> mqiServiceForAuxiliaryFiles(
+    public GenericMqiService<ProductDto> mqiServiceForAuxiliaryFiles(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new AuxiliaryFilesMqiService(template, hostUri, maxRetries,

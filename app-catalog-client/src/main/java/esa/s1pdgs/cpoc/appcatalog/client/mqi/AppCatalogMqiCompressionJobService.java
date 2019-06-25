@@ -19,9 +19,9 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
-public class AppCatalogMqiCompressionJobService extends GenericAppCatalogMqiService<CompressionJobDto> {
+public class AppCatalogMqiCompressionJobService extends GenericAppCatalogMqiService<ProductDto> {
 
 	/**
 	 * Constructor
@@ -40,7 +40,7 @@ public class AppCatalogMqiCompressionJobService extends GenericAppCatalogMqiServ
 	 * @see GenericAppCatalogMqiService#next()
 	 */
 	@Override
-	public List<MqiGenericMessageDto<CompressionJobDto>> next(String podName) throws AbstractCodedException {
+	public List<MqiGenericMessageDto<ProductDto>> next(String podName) throws AbstractCodedException {
 		int retries = 0;
 		while (true) {
 			retries++;
@@ -56,7 +56,7 @@ public class AppCatalogMqiCompressionJobService extends GenericAppCatalogMqiServ
 					if (body == null) {
 						return new ArrayList<>();
 					} else {
-						List<MqiGenericMessageDto<CompressionJobDto>> ret = new ArrayList<MqiGenericMessageDto<CompressionJobDto>>();
+						List<MqiGenericMessageDto<ProductDto>> ret = new ArrayList<MqiGenericMessageDto<ProductDto>>();
 						ret.addAll(body);
 						return ret;
 					}
@@ -76,7 +76,7 @@ public class AppCatalogMqiCompressionJobService extends GenericAppCatalogMqiServ
 	 * @see GenericAppCatalogMqiService#get(long)
 	 */
 	@Override
-	public MqiGenericMessageDto<CompressionJobDto> get(final long messageId) throws AbstractCodedException {
+	public MqiGenericMessageDto<ProductDto> get(final long messageId) throws AbstractCodedException {
 		int retries = 0;
 		while (true) {
 			retries++;

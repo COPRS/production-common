@@ -34,10 +34,11 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiAuxiliaryFilesService;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiAuxiliaryFileMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Test the REST service ErrorService
@@ -68,9 +69,9 @@ public class AppCatalogMqiAuxiliaryFilesServiceTest {
      */
     private MqiAuxiliaryFileMessageDto message1;
     private MqiAuxiliaryFileMessageDto message2;
-    private List<MqiGenericMessageDto<AuxiliaryFileDto>> messages;
+    private List<MqiGenericMessageDto<ProductDto>> messages;
     private List<MqiAuxiliaryFileMessageDto> messages2;
-    private AuxiliaryFileDto dto = new AuxiliaryFileDto("name", "keyobs");
+    private ProductDto dto = new ProductDto("name", "keyobs", ProductFamily.AUXILIARY_FILE);
 
     /**
      * Initialization
@@ -193,7 +194,7 @@ public class AppCatalogMqiAuxiliaryFilesServiceTest {
                 .fromUriString(uriStr).queryParam("pod", "pod-name");
         URI expectedUri = builder.build().toUri();
 
-        List<MqiGenericMessageDto<AuxiliaryFileDto>> result =
+        List<MqiGenericMessageDto<ProductDto>> result =
                 service.next("pod-name");
         assertEquals(messages, result);
         verify(restTemplate, times(2)).exchange(Mockito.eq(expectedUri),
@@ -222,7 +223,7 @@ public class AppCatalogMqiAuxiliaryFilesServiceTest {
                 .fromUriString(uriStr).queryParam("pod", "pod-name");
         URI expectedUri = builder.build().toUri();
 
-        List<MqiGenericMessageDto<AuxiliaryFileDto>> result =
+        List<MqiGenericMessageDto<ProductDto>> result =
                 service.next("pod-name");
         assertEquals(messages, result);
         verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
@@ -251,7 +252,7 @@ public class AppCatalogMqiAuxiliaryFilesServiceTest {
                 .fromUriString(uriStr).queryParam("pod", "pod-name");
         URI expectedUri = builder.build().toUri();
 
-        List<MqiGenericMessageDto<AuxiliaryFileDto>> result =
+        List<MqiGenericMessageDto<ProductDto>> result =
                 service.next("pod-name");
         assertEquals(0, result.size());
         verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
@@ -359,7 +360,7 @@ public class AppCatalogMqiAuxiliaryFilesServiceTest {
                                 Mockito.any(HttpMethod.class), Mockito.any(),
                                 Mockito.any(Class.class));
 
-        MqiGenericMessageDto<AuxiliaryFileDto> ret =
+        MqiGenericMessageDto<ProductDto> ret =
                 service.get(1234);
         assertEquals(ret, message1);
         verify(restTemplate, times(2)).exchange(
@@ -383,7 +384,7 @@ public class AppCatalogMqiAuxiliaryFilesServiceTest {
                         Mockito.any(HttpMethod.class), Mockito.any(),
                         Mockito.any(Class.class));
 
-        MqiGenericMessageDto<AuxiliaryFileDto> ret = service.get(1234);
+        MqiGenericMessageDto<ProductDto> ret = service.get(1234);
         assertEquals(ret, message1);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/auxiliary_files/1234"),

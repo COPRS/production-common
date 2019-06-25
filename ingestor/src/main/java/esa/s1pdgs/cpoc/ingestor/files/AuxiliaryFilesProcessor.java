@@ -9,14 +9,14 @@ import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * 
  */
 @Component
 public class AuxiliaryFilesProcessor
-        extends AbstractFileProcessor<AuxiliaryFileDto> {
+        extends AbstractFileProcessor<ProductDto> {
 
     /**
      * @param obsService
@@ -35,9 +35,8 @@ public class AuxiliaryFilesProcessor
      * 
      */
     @Override
-    protected AuxiliaryFileDto buildDto(final FileDescriptor descriptor) {
-        return new AuxiliaryFileDto(descriptor.getProductName(),
-                descriptor.getProductName());
+    protected ProductDto buildDto(final FileDescriptor descriptor) {
+        return new ProductDto(descriptor.getProductName(), descriptor.getProductName(), ProductFamily.AUXILIARY_FILE);
     }
 
 }

@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.compression.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.test.MockPropertiesTest;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -63,7 +63,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 //    /**
 //     * Job to process
 //     */
-//    private GenericMessageDto<CompressionJobDto> inputMessage;
+//    private GenericMessageDto<ProductDto> inputMessage;
 //
 //    /**
 //     * Processor to test

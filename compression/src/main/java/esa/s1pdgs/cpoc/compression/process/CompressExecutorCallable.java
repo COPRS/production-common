@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -37,7 +37,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 */
 	private final CompletionService<TaskResult> completionSrv;
 
-	private CompressionJobDto job;
+	private ProductDto job;
 
 	/**
 	 * Application properties
@@ -51,7 +51,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final CompressionJobDto job, final String prefixLogs, ApplicationProperties properties) {
+	public CompressExecutorCallable(final ProductDto job, final String prefixLogs, ApplicationProperties properties) {
 		this.job = job;
 		this.properties = properties;
 

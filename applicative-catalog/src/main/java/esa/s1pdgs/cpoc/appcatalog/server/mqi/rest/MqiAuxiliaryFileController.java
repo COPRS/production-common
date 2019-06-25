@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * REST server for managing MQI messages in DB for the product category
@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
 @RestController
 @RequestMapping(path = "/mqi/auxiliary_files")
 public class MqiAuxiliaryFileController
-        extends GenericMqiController<AuxiliaryFileDto> {
+        extends GenericMqiController<ProductDto> {
 
     /**
      * @param mongoDBServices

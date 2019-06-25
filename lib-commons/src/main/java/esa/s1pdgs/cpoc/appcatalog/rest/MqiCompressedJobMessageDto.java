@@ -1,9 +1,9 @@
 package esa.s1pdgs.cpoc.appcatalog.rest;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
-public class MqiCompressedJobMessageDto extends MqiGenericMessageDto<CompressionJobDto> {
+public class MqiCompressedJobMessageDto extends MqiGenericMessageDto<ProductDto> {
 
     /**
      * Default constructor
@@ -34,7 +34,7 @@ public class MqiCompressedJobMessageDto extends MqiGenericMessageDto<Compression
      * @param dto
      */
     public MqiCompressedJobMessageDto(final long identifier, final String topic,
-            final int partition, final long offset, final CompressionJobDto dto) {
+            final int partition, final long offset, final ProductDto dto) {
         super(ProductCategory.COMPRESSED_PRODUCTS, identifier, topic, partition,
                 offset, dto);
     }

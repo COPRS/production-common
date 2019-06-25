@@ -46,7 +46,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.rest.MqiAuxiliaryFileController;
 import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
@@ -116,8 +116,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         doNothing().when(mongoDBServices)
                 .insertMqiMessage(Mockito.any(MqiMessage.class));
         this.mockSearchByTopicPartitionOffsetGroup(new ArrayList<MqiMessage>());
-        MqiGenericReadMessageDto<AuxiliaryFileDto> body =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("group",
+        MqiGenericReadMessageDto<ProductDto> body =
+                new MqiGenericReadMessageDto<ProductDto>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -140,8 +140,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<AuxiliaryFileDto> body =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("group",
+        MqiGenericReadMessageDto<ProductDto> body =
+                new MqiGenericReadMessageDto<ProductDto>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -168,8 +168,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(),
                 Mockito.any());
 
-        MqiGenericReadMessageDto<AuxiliaryFileDto> body =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("group",
+        MqiGenericReadMessageDto<ProductDto> body =
+                new MqiGenericReadMessageDto<ProductDto>("group",
                         "readingPod2", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -199,8 +199,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<AuxiliaryFileDto> body =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("group",
+        MqiGenericReadMessageDto<ProductDto> body =
+                new MqiGenericReadMessageDto<ProductDto>("group",
                         "readingPod2", true, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -229,8 +229,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<AuxiliaryFileDto> body =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("group",
+        MqiGenericReadMessageDto<ProductDto> body =
+                new MqiGenericReadMessageDto<ProductDto>("group",
                         "readingPod", true, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -258,8 +258,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<AuxiliaryFileDto> body =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("group",
+        MqiGenericReadMessageDto<ProductDto> body =
+                new MqiGenericReadMessageDto<ProductDto>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -286,8 +286,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        MqiGenericReadMessageDto<AuxiliaryFileDto> body =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("group",
+        MqiGenericReadMessageDto<ProductDto> body =
+                new MqiGenericReadMessageDto<ProductDto>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -310,8 +310,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .searchByTopicPartitionOffsetGroup(Mockito.anyString(),
                         Mockito.anyInt(), Mockito.anyLong(),
                         Mockito.anyString());
-        MqiGenericReadMessageDto<AuxiliaryFileDto> body =
-                new MqiGenericReadMessageDto<AuxiliaryFileDto>("group",
+        MqiGenericReadMessageDto<ProductDto> body =
+                new MqiGenericReadMessageDto<ProductDto>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

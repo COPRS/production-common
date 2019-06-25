@@ -7,7 +7,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -21,8 +22,8 @@ public class MqiAuxiliaryFileMessageDtoTest {
     /**
      * DTO
      */
-    private AuxiliaryFileDto dto =
-            new AuxiliaryFileDto("prodcut-name", "key-obs");
+    private ProductDto dto =
+            new ProductDto("prodcut-name", "key-obs", ProductFamily.AUXILIARY_FILE);
 
     /**
      * Test constructors

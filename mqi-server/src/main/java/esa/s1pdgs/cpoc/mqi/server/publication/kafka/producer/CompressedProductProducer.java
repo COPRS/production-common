@@ -1,9 +1,9 @@
 package esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
-public class CompressedProductProducer extends AbstractGenericProducer<CompressionJobDto> {
+public class CompressedProductProducer extends AbstractGenericProducer<ProductDto> {
     /**
      * Constructor
      * 
@@ -18,7 +18,7 @@ public class CompressedProductProducer extends AbstractGenericProducer<Compressi
      * Extract the product name from the DTO objects
      */
     @Override
-    protected String extractProductName(final CompressionJobDto obj) {
+    protected String extractProductName(final ProductDto obj) {
         return obj.getProductName();
     }
 }

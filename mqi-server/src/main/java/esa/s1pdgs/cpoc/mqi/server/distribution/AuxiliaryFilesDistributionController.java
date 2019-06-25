@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 @RestController
 @RequestMapping(path = "/messages/auxiliary_files")
 public class AuxiliaryFilesDistributionController
-        extends GenericMessageDistribution<AuxiliaryFileDto> {
+        extends GenericMessageDistribution<ProductDto> {
 
     /**
      * Constructor
@@ -47,7 +47,7 @@ public class AuxiliaryFilesDistributionController
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/next")
-    public ResponseEntity<GenericMessageDto<AuxiliaryFileDto>> next() {
+    public ResponseEntity<GenericMessageDto<ProductDto>> next() {
         return super.next();
     }
 
@@ -69,7 +69,7 @@ public class AuxiliaryFilesDistributionController
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/publish")
     public ResponseEntity<Void> publish(
-            @RequestBody() final GenericPublicationMessageDto<AuxiliaryFileDto> message) {
+            @RequestBody() final GenericPublicationMessageDto<ProductDto> message) {
         String log = String.format("[productName: %s]",
                 message.getMessageToPublish().getProductName());
         return super.publish(log, message);

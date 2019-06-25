@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -25,7 +25,7 @@ public class OutputProducerFactory {
     /**
      * MQI client for LEVEL_SEGMENTS
      */
-    private final GenericMqiService<CompressionJobDto> senderCompression;
+    private final GenericMqiService<ProductDto> senderCompression;
 
     /**
      * Constructor
@@ -35,7 +35,7 @@ public class OutputProducerFactory {
      */
     @Autowired
     public OutputProducerFactory(
-            @Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> senderCompressed
+            @Qualifier("mqiServiceForCompression") final GenericMqiService<ProductDto> senderCompressed
             ) {
     	this.senderCompression = senderCompressed;
     }
@@ -47,10 +47,10 @@ public class OutputProducerFactory {
      * @throws AbstractCodedException
      */
     public void sendOutput(final CompressedProductQueueMessage msg,
-            GenericMessageDto<CompressionJobDto> inputMessage)
+            GenericMessageDto<ProductDto> inputMessage)
             throws AbstractCodedException {
-    	CompressionJobDto dto = new CompressionJobDto(msg.getProductName(),  msg.getFamily(), msg.getObjectStorageKey());
-    	GenericPublicationMessageDto messageDto = new GenericPublicationMessageDto<CompressionJobDto>(inputMessage.getIdentifier(), msg.getFamily(), dto);
+    	ProductDto dto = new ProductDto(msg.getProductName(), msg.getObjectStorageKey(), msg.getFamily());
+    	GenericPublicationMessageDto messageDto = new GenericPublicationMessageDto<ProductDto>(inputMessage.getIdentifier(), msg.getFamily(), dto);
     	messageDto.setInputKey(inputMessage.getInputKey());
     	messageDto.setOutputKey(dto.getFamily().name());
     	

@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 @RestController
 @RequestMapping(path = "/mqi/compressed_products")
-public class MqiCompressedJobController extends GenericMqiController<CompressionJobDto> {
+public class MqiCompressedJobController extends GenericMqiController<ProductDto> {
 
 	/**
 	 * @param mongoDBServices

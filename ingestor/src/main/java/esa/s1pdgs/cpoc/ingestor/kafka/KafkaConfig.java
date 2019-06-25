@@ -22,7 +22,7 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 
 /**
@@ -76,10 +76,10 @@ public class KafkaConfig {
      * @return
      */
     @Bean
-    public ConsumerFactory<String, AuxiliaryFileDto> consumerFactory() {
+    public ConsumerFactory<String, ProductDto> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs(),
                 new StringDeserializer(),
-                new JsonDeserializer<>(AuxiliaryFileDto.class));
+                new JsonDeserializer<>(ProductDto.class));
     }
 
     /**
@@ -88,9 +88,9 @@ public class KafkaConfig {
      * @return
      */
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, AuxiliaryFileDto>> kafkaListenerContainerFactory() {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ProductDto>> kafkaListenerContainerFactory() {
 
-        ConcurrentKafkaListenerContainerFactory<String, AuxiliaryFileDto> factory =
+        ConcurrentKafkaListenerContainerFactory<String, ProductDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties();
@@ -143,7 +143,7 @@ public class KafkaConfig {
      * @return
      */
     @Bean(name = "producerConfigFileFactory")
-    public ProducerFactory<String, AuxiliaryFileDto> producerConfigFileFactory() {
+    public ProducerFactory<String, ProductDto> producerConfigFileFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfig());
     }
 
@@ -154,7 +154,7 @@ public class KafkaConfig {
      * @return
      */
     @Bean(name = "kafkaConfigFileTemplate")
-    public KafkaTemplate<String, AuxiliaryFileDto> kafkaConfigFileTemplate() {
+    public KafkaTemplate<String, ProductDto> kafkaConfigFileTemplate() {
         return new KafkaTemplate<>(producerConfigFileFactory());
     }
 

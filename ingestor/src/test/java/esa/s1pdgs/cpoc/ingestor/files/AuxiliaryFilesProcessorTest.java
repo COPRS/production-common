@@ -8,12 +8,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
 import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class AuxiliaryFilesProcessorTest {
 
@@ -67,8 +68,7 @@ public class AuxiliaryFilesProcessorTest {
         desc.setProductType(EdrsSessionFileType.RAW);
         desc.setMissionId("mission");
         desc.setSatelliteId("sat");
-        AuxiliaryFileDto expected =
-                new AuxiliaryFileDto("product-name", "product-name");
+        ProductDto expected = new ProductDto("product-name", "product-name", ProductFamily.AUXILIARY_FILE);
 
         assertEquals(expected, service.buildDto(desc));
     }

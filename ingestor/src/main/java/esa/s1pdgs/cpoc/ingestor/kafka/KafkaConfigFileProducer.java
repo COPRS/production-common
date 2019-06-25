@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * KAFKA producer for publishing metadata. </br>
@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
  */
 @Service
 public class KafkaConfigFileProducer
-        extends AbstractKafkaService<AuxiliaryFileDto> {
+        extends AbstractKafkaService<ProductDto> {
 
     /**
      * Constructor
@@ -26,7 +26,7 @@ public class KafkaConfigFileProducer
      */
     @Autowired
     public KafkaConfigFileProducer(
-            @Qualifier("kafkaConfigFileTemplate") final KafkaTemplate<String, AuxiliaryFileDto> kafkaTemplate,
+            @Qualifier("kafkaConfigFileTemplate") final KafkaTemplate<String, ProductDto> kafkaTemplate,
             @Value("${kafka.topic.auxiliary-files}") final String kafkaTopic) {
         super(kafkaTemplate, kafkaTopic);
     }
@@ -35,7 +35,7 @@ public class KafkaConfigFileProducer
      * 
      */
     @Override
-    protected String extractProductName(AuxiliaryFileDto obj) {
+    protected String extractProductName(ProductDto obj) {
         return obj.getProductName();
     }
 

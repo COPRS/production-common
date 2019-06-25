@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  */
 @Controller
 public class AuxiliaryFilesExtractor
-        extends GenericExtractor<AuxiliaryFileDto> {
+        extends GenericExtractor<ProductDto> {
 
     /**
      * Pattern for configuration files to extract data
@@ -59,7 +59,7 @@ public class AuxiliaryFilesExtractor
     @Autowired
     public AuxiliaryFilesExtractor(final EsServices esServices,
             final ObsService obsService,
-            @Qualifier("mqiServiceForAuxiliaryFiles") final GenericMqiService<AuxiliaryFileDto> mqiService,
+            @Qualifier("mqiServiceForAuxiliaryFiles") final GenericMqiService<ProductDto> mqiService,
             final AppStatus appStatus,
             final MetadataExtractorConfig extractorConfig,
             @Value("${file.product-categories.auxiliary-files.local-directory}") final String localDirectory,
@@ -68,7 +68,7 @@ public class AuxiliaryFilesExtractor
             final ProcessConfiguration processConfiguration,
             @Value("${file.file-with-manifest-ext}") final String fileManifestExt) {
         super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.AUXILIARY_FILES, processConfiguration, AuxiliaryFileDto.class) ;
+                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.AUXILIARY_FILES, processConfiguration, ProductDto.class) ;
         this.obsService = obsService;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;
@@ -94,7 +94,7 @@ public class AuxiliaryFilesExtractor
     @Override
     protected JSONObject extractMetadata(
     		final Reporting.Factory reportingFactory, 
-            final GenericMessageDto<AuxiliaryFileDto> message)
+            final GenericMessageDto<ProductDto> message)
             throws AbstractCodedException {
         // Upload file
         final String keyObs = getKeyObs(message);
@@ -127,7 +127,7 @@ public class AuxiliaryFilesExtractor
      * @param message
      * @return
      */
-    protected String getKeyObs(final GenericMessageDto<AuxiliaryFileDto> message) {
+    protected String getKeyObs(final GenericMessageDto<ProductDto> message) {
         String keyObs = message.getBody().getKeyObjectStorage();
         if (keyObs.toLowerCase().endsWith(fileManifestExt.toLowerCase())) {
             keyObs += "/" + manifestFilename;
@@ -139,7 +139,7 @@ public class AuxiliaryFilesExtractor
      * @see GenericExtractor#extractProductNameFromDto(Object)
      */
     @Override
-    protected String extractProductNameFromDto(final AuxiliaryFileDto dto) {
+    protected String extractProductNameFromDto(final ProductDto dto) {
         return dto.getProductName();
     }
 
@@ -148,7 +148,7 @@ public class AuxiliaryFilesExtractor
      */
     @Override
     protected void cleanProcessing(
-            final GenericMessageDto<AuxiliaryFileDto> message) {
+            final GenericMessageDto<ProductDto> message) {
         // TODO Auto-generated method stub
         File metadataFile = new File(localDirectory + getKeyObs(message));
         if (metadataFile.exists()) {

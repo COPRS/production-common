@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -64,7 +64,7 @@ public class AuxiliaryFilesDistributionControllerTest
     /**
      * The consumed messsage
      */
-    private GenericMessageDto<AuxiliaryFileDto> consumedMessage;
+    private GenericMessageDto<ProductDto> consumedMessage;
 
     /**
      * The controller to test
@@ -79,9 +79,9 @@ public class AuxiliaryFilesDistributionControllerTest
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        AuxiliaryFileDto dto = new AuxiliaryFileDto("product-name", "key-obs");
+        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
         consumedMessage =
-                new GenericMessageDto<AuxiliaryFileDto>(123, "input-key", dto);
+                new GenericMessageDto<ProductDto>(123, "input-key", dto);
 
         doReturn(consumedMessage).when(messages).nextMessage(Mockito.any());
 
@@ -175,9 +175,9 @@ public class AuxiliaryFilesDistributionControllerTest
     @Test
     public void testPublishMessageUri() throws Exception {
         doNothing().when(publication).publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-        GenericPublicationMessageDto<AuxiliaryFileDto> dto =
+        GenericPublicationMessageDto<ProductDto> dto =
                 new GenericPublicationMessageDto<>(ProductFamily.AUXILIARY_FILE,
-                        new AuxiliaryFileDto("product-name", "key-test"));
+                        new ProductDto("product-name", "key-test", ProductFamily.AUXILIARY_FILE));
         String convertedObj = GenericKafkaUtils.convertObjectToJsonString(dto);
         request(post("/messages/auxiliary_files/publish")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

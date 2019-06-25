@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -35,14 +35,14 @@ public class QueueWatcherService {
 	private static final Logger LOGGER = LogManager.getLogger(QueueWatcherService.class);
 	
 	/**
-	 * MQI service for reading message CompressionJobDto
+	 * MQI service for reading message ProductDto
 	 */
-	private final GenericMqiService<CompressionJobDto> mqiServiceForCompressedProducts;
+	private final GenericMqiService<ProductDto> mqiServiceForCompressedProducts;
 
 	/**
-	 * MQI service for reading message AuxiliaryFileDto
+	 * MQI service for reading message ProductDto
 	 */
-	private final GenericMqiService<AuxiliaryFileDto> mqiServiceForAUXProducts;
+	private final GenericMqiService<ProductDto> mqiServiceForAUXProducts;
 
 	/**
 	 * MQI service for reading message LevelProductDto
@@ -62,8 +62,8 @@ public class QueueWatcherService {
    
 	@Autowired
 	public QueueWatcherService(
-			@Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> mqiServiceForCompressedProducts,
-			@Qualifier("mqiServiceForAuxiliaryFiles") final GenericMqiService<AuxiliaryFileDto> mqiServiceForAUXProducts,
+			@Qualifier("mqiServiceForCompression") final GenericMqiService<ProductDto> mqiServiceForCompressedProducts,
+			@Qualifier("mqiServiceForAuxiliaryFiles") final GenericMqiService<ProductDto> mqiServiceForAUXProducts,
 			@Qualifier("mqiServiceForLevelProducts") final GenericMqiService<LevelProductDto> mqiServiceForLevelProducts,
 			@Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> mqiServiceForLevelSegments) {
 
@@ -81,7 +81,7 @@ public class QueueWatcherService {
 	@Scheduled(fixedDelayString = "${file.product-categories.compressed-products.fixed-delay-ms}", initialDelayString = "${file.product-categories.compressed-products.init-delay-poll-ms}")
 	public void watchCompressionQueue() {
 		
-		GenericMessageDto<CompressionJobDto> message = null;
+		GenericMessageDto<ProductDto> message = null;
 		try {
 			message = this.mqiServiceForCompressedProducts.next();
 			 if (message == null || message.getBody() == null) {
@@ -110,7 +110,7 @@ public class QueueWatcherService {
 	@Scheduled(fixedDelayString = "${file.product-categories.auxiliary-files.fixed-delay-ms}", initialDelayString = "${file.product-categories.auxiliary-files.init-delay-poll-ms}")
 	public void watchAuxIngestionQueue() {
 		
-		GenericMessageDto<AuxiliaryFileDto> message = null;
+		GenericMessageDto<ProductDto> message = null;
 		try {
 			message = this.mqiServiceForAUXProducts.next();
 			 if (message == null || message.getBody() == null) {

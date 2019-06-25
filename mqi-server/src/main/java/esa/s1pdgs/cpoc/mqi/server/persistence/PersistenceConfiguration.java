@@ -15,8 +15,8 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelProductsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelReportsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelSegmentsService;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
@@ -141,7 +141,7 @@ public class PersistenceConfiguration {
      * @return
      */
     @Bean(name = "persistenceServiceForAuxiliaryFiles")
-    public GenericAppCatalogMqiService<AuxiliaryFileDto> persistenceServiceForAuxiliaryFiles(
+    public GenericAppCatalogMqiService<ProductDto> persistenceServiceForAuxiliaryFiles(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new AppCatalogMqiAuxiliaryFilesService(template, hostUriCatalog,
@@ -163,7 +163,7 @@ public class PersistenceConfiguration {
     }
     
     @Bean(name = "persistenceServiceForCompressionJob")
-    public GenericAppCatalogMqiService<CompressionJobDto> persistenceServiceForCompressionJob(
+    public GenericAppCatalogMqiService<ProductDto> persistenceServiceForCompressionJob(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
         return new AppCatalogMqiCompressionJobService(template, hostUriCatalog,
