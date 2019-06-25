@@ -18,7 +18,7 @@ scaler-build:
   stage: module
   script:
     - cd scaler
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_SCALER:$CI_COMMIT_REF_SLUG" .
+    - docker build --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_SCALER:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_SCALER:$CI_COMMIT_REF_SLUG"
   except:
     - master
