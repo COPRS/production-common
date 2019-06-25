@@ -3,8 +3,7 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,20 +15,24 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.mongodb.client.result.DeleteResult;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.repo.FailedProcessingRepo;
+import esa.s1pdgs.cpoc.errorrepo.repo.MqiMessageRepo;
 import esa.s1pdgs.cpoc.mqi.model.rest.LevelProductsMessageDto;
 
 public class ErrorRepositoryTest {
 
 	@Mock
-	private MongoTemplate mongoTemplate;
+	private FailedProcessingRepo failedProcessingRepo;
 
+	@Mock
+	private MqiMessageRepo mqiMessageRepository;
+	
 	@Mock
 	private SubmissionClient submissionClient;
 
@@ -38,7 +41,7 @@ public class ErrorRepositoryTest {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		this.errorRepository = new ErrorRepositoryImpl(null, null, submissionClient);
+		this.errorRepository = new ErrorRepositoryImpl(mqiMessageRepository, failedProcessingRepo, submissionClient);
 	}
 
 	@Test
@@ -52,8 +55,9 @@ public class ErrorRepositoryTest {
 		fpDto.setDto(levelProductsMsgDto);
 		failedProcessingsToReturn.add(fpDto);
 
-		doReturn(failedProcessingsToReturn).when(mongoTemplate).findAll(FailedProcessingDto.class);
+		doReturn(failedProcessingsToReturn).when(failedProcessingRepo).findAll();
 
+		@SuppressWarnings("rawtypes")
 		List<FailedProcessingDto> failedProcessings = errorRepository.getFailedProcessings();
 
 		assertEquals(123, failedProcessings.get(0).getIdentifier());
@@ -68,8 +72,9 @@ public class ErrorRepositoryTest {
 		fpDtoToReturn.setIdentifier(123);
 		fpDtoToReturn.setDto(levelProductsMsgDto);
 
-		doReturn(fpDtoToReturn).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+		doReturn(fpDtoToReturn).when(failedProcessingRepo).findByIdentifier(anyLong());
 
+		@SuppressWarnings("unchecked")
 		FailedProcessingDto<LevelProductsMessageDto> failedProcessing = errorRepository.getFailedProcessingById(123);
 
 		assertEquals(123, failedProcessing.getIdentifier());
@@ -96,7 +101,7 @@ public class ErrorRepositoryTest {
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(anyLong());
 		DeleteResult deleteResult = new DeleteResult() {
 
 			@Override
@@ -111,11 +116,11 @@ public class ErrorRepositoryTest {
 			}
 		};
 
-		doReturn(deleteResult).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
+		doReturn(deleteResult).when(failedProcessingRepo).deleteByIdentifier(anyLong());
 
 		errorRepository.deleteFailedProcessing(123);
 
-		doReturn(null).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
+		doReturn(null).when(failedProcessingRepo).deleteByIdentifier(anyLong());
 
 		try {
 			errorRepository.deleteFailedProcessing(4);
@@ -133,7 +138,7 @@ public class ErrorRepositoryTest {
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(anyLong());
 		DeleteResult deleteResult = new DeleteResult() {
 
 			@Override
@@ -148,7 +153,7 @@ public class ErrorRepositoryTest {
 			}
 		};
 
-		doReturn(deleteResult).when(mongoTemplate).remove(fpDto);
+		doReturn(deleteResult).when(failedProcessingRepo).deleteByIdentifier(fpDto.getIdentifier());
 
 		try {
 			errorRepository.deleteFailedProcessing(123);
@@ -168,10 +173,10 @@ public class ErrorRepositoryTest {
 		fpDto.setDto(levelProductsMsgDto);
 
 		MqiMessage mqiMsg = new MqiMessage();
-		doReturn(mqiMsg).when(mongoTemplate).findOne(any(), eq(MqiMessage.class));
+		doReturn(mqiMsg).when(failedProcessingRepo).findByIdentifier(anyLong());
 
 		errorRepository.saveFailedProcessing(fpDto);
-		verify(mongoTemplate, times(1)).insert(fpDto);
+		verify(failedProcessingRepo, times(1)).insert(fpDto);
 	}
 
 	@Test
@@ -183,7 +188,7 @@ public class ErrorRepositoryTest {
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(null).when(mongoTemplate).findOne(any(), eq(MqiMessage.class));
+		doReturn(null).when(failedProcessingRepo).findByIdentifier(anyLong());
 
 		try {
 			errorRepository.saveFailedProcessing(fpDto);
@@ -191,7 +196,7 @@ public class ErrorRepositoryTest {
 		} catch (IllegalArgumentException e) {
 			// expected
 		}
-		verify(mongoTemplate, times(0)).insert(fpDto);
+		verify(failedProcessingRepo, times(0)).insert(fpDto);
 	}
 
 	@Test
@@ -202,7 +207,7 @@ public class ErrorRepositoryTest {
 		fpDto.setTopic("topic");
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(anyLong());
 
 		DeleteResult deleteResult = new DeleteResult() {
 
@@ -218,11 +223,11 @@ public class ErrorRepositoryTest {
 			}
 		};
 
-		doReturn(deleteResult).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
+		doReturn(deleteResult).when(failedProcessingRepo).deleteByIdentifier(anyLong());
 
 		errorRepository.restartAndDeleteFailedProcessing(123);
-		verify(mongoTemplate, times(1)).findOne(any(), eq(FailedProcessingDto.class));
-		verify(mongoTemplate, times(1)).remove(any(), eq(FailedProcessingDto.class));
+		verify(failedProcessingRepo, times(1)).findByIdentifier(anyLong());
+		verify(failedProcessingRepo, times(1)).deleteByIdentifier(anyLong());
 		verify(submissionClient, times(1)).resubmit(fpDto, levelProductsMsgDto.getBody());
 	}
 
@@ -233,7 +238,7 @@ public class ErrorRepositoryTest {
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(mongoTemplate).findOne(any(), eq(FailedProcessingDto.class));
+		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(anyLong());
 
 		DeleteResult deleteResult = new DeleteResult() {
 
@@ -249,7 +254,7 @@ public class ErrorRepositoryTest {
 			}
 		};
 
-		doReturn(deleteResult).when(mongoTemplate).remove(any(), eq(FailedProcessingDto.class));
+		doReturn(deleteResult).when(failedProcessingRepo).deleteByIdentifier(anyLong());
 
 		try {
 			errorRepository.restartAndDeleteFailedProcessing(123);
@@ -257,8 +262,8 @@ public class ErrorRepositoryTest {
 		} catch (IllegalArgumentException e) {
 			// Expected
 		}
-		verify(mongoTemplate, times(1)).findOne(any(), eq(FailedProcessingDto.class));
-		verify(mongoTemplate, times(0)).remove(any(), eq(FailedProcessingDto.class));
+		verify(failedProcessingRepo, times(1)).findByIdentifier(anyLong());
+		verify(failedProcessingRepo, times(0)).deleteByIdentifier(anyLong());
 		verify(submissionClient, times(0)).resubmit(fpDto, levelProductsMsgDto.getBody());
 
 	}
