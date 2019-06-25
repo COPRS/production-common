@@ -13,7 +13,6 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
@@ -71,13 +70,14 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final FileQueueMessage msg,
-            GenericMessageDto<LevelJobDto> inputMessage)
+    public void sendOutput(final FileQueueMessage msg, GenericMessageDto<LevelJobDto> inputMessage)
             throws AbstractCodedException {
-        LevelReportDto dtoReport = new LevelReportDto(msg.getProductName(),
-                FileUtils.readFile(msg.getFile()), msg.getFamily());
-        senderReports.publish(new GenericPublicationMessageDto<LevelReportDto>(
-                inputMessage.getIdentifier(), msg.getFamily(), dtoReport));
+        LevelReportDto dtoReport = new LevelReportDto(
+        		msg.getProductName(),
+                FileUtils.readFile(msg.getFile()), 
+                msg.getFamily()
+        );
+        senderReports.publish(new GenericPublicationMessageDto<LevelReportDto>(inputMessage.getIdentifier(), msg.getFamily(), dtoReport));
     }
 
     /**
@@ -86,25 +86,20 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final ObsQueueMessage msg,
-            GenericMessageDto<LevelJobDto> inputMessage)
+    public void sendOutput(final ObsQueueMessage msg, GenericMessageDto<LevelJobDto> inputMessage)
             throws AbstractCodedException {
+    	
+        final GenericPublicationMessageDto<ProductDto> messageToPublish = new GenericPublicationMessageDto<ProductDto>(
+                inputMessage.getIdentifier(), 
+                msg.getFamily(),
+                toProductDto(msg)
+		);
+    	    	
         if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
-            ProductDto dtoProduct =
-                    new ProductDto(msg.getProductName(), msg.getKeyObs(),
-                            msg.getFamily(), msg.getProcessMode());
-            senderSegments
-                    .publish(new GenericPublicationMessageDto<ProductDto>(
-                            inputMessage.getIdentifier(), msg.getFamily(),
-                            dtoProduct));
+            senderSegments.publish(messageToPublish);
         } else {
-            GenericPublicationMessageDto<ProductDto> messageToPublish = new GenericPublicationMessageDto<ProductDto>(
-                            inputMessage.getIdentifier(), 
-                            msg.getFamily(),
-                            toProductDto(msg)
-            );
-            messageToPublish.setInputKey(inputMessage.getInputKey());
-            messageToPublish.setOutputKey(msg.getFamily().name());
+    		messageToPublish.setInputKey(inputMessage.getInputKey());
+    		messageToPublish.setOutputKey(msg.getFamily().name());
             senderProducts.publish(messageToPublish);
         }
     }
