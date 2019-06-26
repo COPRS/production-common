@@ -31,7 +31,7 @@ import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 public class ErrorRepositoryController {
 
 	// TODO: put api_key in a crypted place
-	private static final String API_KEY = "LdbEo2020tffcEGS";
+	public static final String API_KEY = "LdbEo2020tffcEGS";
 
 	private static final Logger LOGGER = LogManager.getLogger(ErrorRepositoryController.class);
 
@@ -123,7 +123,6 @@ public class ErrorRepositoryController {
 	 * @param id     failed processing Id
 	 * @return
 	 */
-	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/failedProcessings/{id}/restart")
 	public ResponseEntity<ModelApiResponse> restartFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
@@ -164,7 +163,6 @@ public class ErrorRepositoryController {
 	 * @param id     failed processing Id
 	 * @return
 	 */
-	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/failedProcessings/{id}")
 	public ResponseEntity<ModelApiResponse> deleteFailedProcessing(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
