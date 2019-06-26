@@ -52,7 +52,7 @@ Parameter                                        | Description
 ------------------------------------------------ | ------------- 
 kafka.bootstrap-servers                          | the bootstrap servers for KAFKA
 kafka.group-id                                   | the group identifier to use for KAFKA publishers
-kafka.poll-timeout                               | the bootstrap servers for KAFKA (example: kafka-svc:9092)
+kafka.poll-timeout                               | the bootstrap servers for KAFKA (example: s1kafka-headless:9092)
 kafka.producer-retries                           | the maximal number of retries when publishing a message = parameter "retries" of KAFKA producer configuration
 kafka.topic.auxiliary-files                      | the name of the topic used for the auxiliary files
 kafka.topic.edrs-sessions                        | the name of the topic used for EDRS sessions

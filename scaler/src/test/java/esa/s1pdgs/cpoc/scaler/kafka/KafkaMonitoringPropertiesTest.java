@@ -36,7 +36,7 @@ public class KafkaMonitoringPropertiesTest {
     @Test
     public void testInit() {
         assertEquals("spdgs-scaler", properties.getClientId());
-        assertEquals("10.2.3.1:9093", properties.getBootstrapServers());
+        assertEquals("10.2.3.1:9092", properties.getBootstrapServers());
         assertEquals(5000, properties.getSessionTimeoutMs());
         assertEquals(5000, properties.getRequestTimeoutMs());
         assertEquals(660000, properties.getCnxMaxIdlMs());

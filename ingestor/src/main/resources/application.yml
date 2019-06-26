@@ -8,7 +8,7 @@ logging:
 
 # KAFKA
 kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}
+  bootstrap-servers: ${kafka_bootstrap-servers:s1kafka-headless:9092}
   group-id: ingestors
   poll-timeout: 500
   producer-retries: 10
