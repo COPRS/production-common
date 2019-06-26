@@ -73,13 +73,17 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public FailedProcessingDto getFailedProcessingById(long id) {
-		return failedProcessingRepo.findByIdentifier(id);
+		final FailedProcessingDto failedProcessing = failedProcessingRepo.findByIdentifier(id);
+		if (failedProcessing == null) {
+			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
+		}
+		return failedProcessing;
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public synchronized void restartAndDeleteFailedProcessing(long id) {
-		final FailedProcessingDto failedProcessing = getFailedProcessingById(id);
+		final FailedProcessingDto failedProcessing = failedProcessingRepo.findByIdentifier(id);
 
 		if (failedProcessing == null) {
 			throw new IllegalArgumentException(String.format("Could not find failed request by id %s", id));
