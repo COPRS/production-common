@@ -97,7 +97,7 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 			);
 		}	
 		kafkaSubmissionClient.resubmit(failedProcessing, dto.getBody());
-		deleteFailedProcessing(id);
+		failedProcessingRepo.deleteByIdentifier(id);
 	}
 
 	@Override
