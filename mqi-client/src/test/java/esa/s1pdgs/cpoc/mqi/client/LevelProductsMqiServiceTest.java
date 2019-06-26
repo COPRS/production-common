@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.LevelProductsMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
 
 /**
  * Test the REST service ErrorService
@@ -59,7 +59,7 @@ public class LevelProductsMqiServiceTest {
     /**
      * DTO
      */
-    private LevelProductsMessageDto message;
+    private ProductMessageDto message;
 
     /**
      * Initialization
@@ -73,7 +73,7 @@ public class LevelProductsMqiServiceTest {
         
         service = factory.newProductServiceFor(ProductCategory.LEVEL_PRODUCTS);
 
-        message = new LevelProductsMessageDto(123, "input-key",
+        message = new ProductMessageDto(123, "input-key",
                 new ProductDto("name", "keyobs", ProductFamily.L0_ACN, "NRT"));
     }
 
@@ -106,11 +106,11 @@ public class LevelProductsMqiServiceTest {
     @Test
     public void testNextWhenResponseKO() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<LevelProductsMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<LevelProductsMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<LevelProductsMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
@@ -134,11 +134,11 @@ public class LevelProductsMqiServiceTest {
     @Test
     public void testMaxRetries() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<LevelProductsMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<LevelProductsMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<LevelProductsMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
@@ -151,7 +151,7 @@ public class LevelProductsMqiServiceTest {
             verify(restTemplate, times(2)).exchange(
                     Mockito.eq("uri/messages/level_products/next"),
                     Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                    Mockito.eq(LevelProductsMessageDto.class));
+                    Mockito.eq(ProductMessageDto.class));
             verifyNoMoreInteractions(restTemplate);
         }
     }
@@ -165,9 +165,9 @@ public class LevelProductsMqiServiceTest {
     @Test
     public void testNext1() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<LevelProductsMessageDto>(
+                new ResponseEntity<ProductMessageDto>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<LevelProductsMessageDto>(message,
+                new ResponseEntity<ProductMessageDto>(message,
                         HttpStatus.OK)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
@@ -178,7 +178,7 @@ public class LevelProductsMqiServiceTest {
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/messages/level_products/next"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                Mockito.eq(LevelProductsMessageDto.class));
+                Mockito.eq(ProductMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
 
@@ -190,7 +190,7 @@ public class LevelProductsMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testNext2() throws AbstractCodedException {
-        doReturn(new ResponseEntity<LevelProductsMessageDto>(message,
+        doReturn(new ResponseEntity<ProductMessageDto>(message,
                 HttpStatus.OK)).when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class), Mockito.isNull(),
                         Mockito.any(Class.class));
@@ -200,7 +200,7 @@ public class LevelProductsMqiServiceTest {
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/messages/level_products/next"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                Mockito.eq(LevelProductsMessageDto.class));
+                Mockito.eq(ProductMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
 }

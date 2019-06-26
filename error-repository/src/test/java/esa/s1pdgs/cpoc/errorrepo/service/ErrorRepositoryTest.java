@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.errorrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.errorrepo.repo.MqiMessageRepo;
-import esa.s1pdgs.cpoc.mqi.model.rest.LevelProductsMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
 
 public class ErrorRepositoryTest {
 
@@ -46,10 +46,10 @@ public class ErrorRepositoryTest {
 	@Test
 	public void getFailedProcessings() {
 
-		List<FailedProcessingDto<LevelProductsMessageDto>> failedProcessingsToReturn = new ArrayList<>();
+		List<FailedProcessingDto<ProductMessageDto>> failedProcessingsToReturn = new ArrayList<>();
 
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
-		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		ProductMessageDto levelProductsMsgDto = new ProductMessageDto();
+		FailedProcessingDto<ProductMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 		failedProcessingsToReturn.add(fpDto);
@@ -60,24 +60,24 @@ public class ErrorRepositoryTest {
 		List<FailedProcessingDto> failedProcessings = errorRepository.getFailedProcessings();
 
 		assertEquals(123, failedProcessings.get(0).getIdentifier());
-		assertTrue(failedProcessings.get(0).getDto() instanceof LevelProductsMessageDto);
+		assertTrue(failedProcessings.get(0).getDto() instanceof ProductMessageDto);
 	}
 
 	@Test
 	public void getFailedProcessingById_Existing() {
 
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
-		FailedProcessingDto<LevelProductsMessageDto> fpDtoToReturn = new FailedProcessingDto<>();
+		ProductMessageDto levelProductsMsgDto = new ProductMessageDto();
+		FailedProcessingDto<ProductMessageDto> fpDtoToReturn = new FailedProcessingDto<>();
 		fpDtoToReturn.setIdentifier(123);
 		fpDtoToReturn.setDto(levelProductsMsgDto);
 
 		doReturn(fpDtoToReturn).when(failedProcessingRepo).findByIdentifier(123);
 
 		@SuppressWarnings("unchecked")
-		FailedProcessingDto<LevelProductsMessageDto> failedProcessing = errorRepository.getFailedProcessingById(123);
+		FailedProcessingDto<ProductMessageDto> failedProcessing = errorRepository.getFailedProcessingById(123);
 
 		assertEquals(123, failedProcessing.getIdentifier());
-		assertTrue(failedProcessing.getDto() instanceof LevelProductsMessageDto);
+		assertTrue(failedProcessing.getDto() instanceof ProductMessageDto);
 	}
 
 	@Test
@@ -94,8 +94,8 @@ public class ErrorRepositoryTest {
 
 	@Test
 	public void deleteFailedProcessing_Existing() {
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
-		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		ProductMessageDto levelProductsMsgDto = new ProductMessageDto();
+		FailedProcessingDto<ProductMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
@@ -124,10 +124,10 @@ public class ErrorRepositoryTest {
 		MqiMessage mqiMsg = new MqiMessage();
 		mqiMsg.setIdentifier(456);
 		
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
+		ProductMessageDto levelProductsMsgDto = new ProductMessageDto();
 		levelProductsMsgDto.setIdentifier(mqiMsg.getIdentifier());
 
-		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		FailedProcessingDto<ProductMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
@@ -141,9 +141,9 @@ public class ErrorRepositoryTest {
 	@Test
 	public void saveFailedProcessing_MessageNotExisting() {
 
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
+		ProductMessageDto levelProductsMsgDto = new ProductMessageDto();
 		levelProductsMsgDto.setIdentifier(789);
-		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		FailedProcessingDto<ProductMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
@@ -160,8 +160,8 @@ public class ErrorRepositoryTest {
 
 	@Test
 	public void restartAndDeleteFailedProcessing_ExistingWithTopic() {
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
-		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		ProductMessageDto levelProductsMsgDto = new ProductMessageDto();
+		FailedProcessingDto<ProductMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setTopic("topic");
 		fpDto.setDto(levelProductsMsgDto);
@@ -176,8 +176,8 @@ public class ErrorRepositoryTest {
 
 	@Test
 	public void restartAndDeleteFailedProcessing_ExistingWithoutTopic() {
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
-		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		ProductMessageDto levelProductsMsgDto = new ProductMessageDto();
+		FailedProcessingDto<ProductMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(456);
 		fpDto.setDto(levelProductsMsgDto);
 
