@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.errorrepo.rest;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -27,17 +26,29 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.repo.FailedProcessingRepo;
+import esa.s1pdgs.cpoc.errorrepo.repo.MqiMessageRepo;
 import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 @RunWith(SpringRunner.class)
 @WebMvcTest(ErrorRepositoryController.class)
 public class ErrorRepositoryControllerTest {
 	
-	private static final String API_KEY = "errorRepositorySecretKey";
+	private static final String API_KEY = ErrorRepositoryController.API_KEY;
 
 	@MockBean
-	ErrorRepository errorRepository;
+	private MqiMessageRepo mqiMessageRepository;
+	
+	@MockBean
+	private FailedProcessingRepo failedProcessingRepo;
+
+	@MockBean
+	private SubmissionClient submissionClient;
+	
+	@MockBean
+	private ErrorRepository errorRepository;
 	
 	@Autowired
 	private MockMvc uut;
@@ -98,7 +109,7 @@ public class ErrorRepositoryControllerTest {
 				"    \"processingDetails\": {}\n" + 
 				"  }]";
 		
-		uut.perform(get("/errors/failedProcessings")
+		uut.perform(get("/api/v1/failedProcessings")
 			      .contentType(MediaType.APPLICATION_JSON)
 			      .header("ApiKey", API_KEY)
         ).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andExpect(content().json(jsonContent));
@@ -106,14 +117,14 @@ public class ErrorRepositoryControllerTest {
 	
 	@Test
 	public void test_getFailedProcessings_403() throws Exception {
-	    uut.perform(get("/errors/failedProcessings").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+	    uut.perform(get("/api/v1/failedProcessings").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        "wrong key")).andExpect(status().isForbidden());
 	}
 
 	@Test
 	public void test_getFailedProcessings_500() throws Exception {
 	    doThrow(new RuntimeException()).when(errorRepository).getFailedProcessings();
-	    uut.perform(get("/errors/failedProcessings").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+	    uut.perform(get("/api/v1/failedProcessings").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isInternalServerError());
 	}
 	
@@ -161,7 +172,7 @@ public class ErrorRepositoryControllerTest {
 				"    \"failureMessage\": \"dummyMessage\",\n" + 
 				"    \"processingDetails\": {}\n" + 
 				"  }";
-		uut.perform(get("/errors/failedProcessings/1")
+		uut.perform(get("/api/v1/failedProcessings/1")
 			      .contentType(MediaType.APPLICATION_JSON)
 			      .header("ApiKey", API_KEY)
         ).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -170,27 +181,27 @@ public class ErrorRepositoryControllerTest {
 
 	@Test
 	public void test_getFailedProcessingById_400() throws Exception {
-	    uut.perform(get("/errors/failedProcessings/invalidParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+	    uut.perform(get("/api/v1/failedProcessings/invalidParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isBadRequest());
 	}
 	
 	@Test
 	public void test_getFailedProcessingById_403() throws Exception {
-	    uut.perform(get("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+	    uut.perform(get("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        "wrong key")).andExpect(status().isForbidden());
 	}
 
 	@Test
 	public void test_getFailedProcessingById_404() throws Exception {
 		doReturn(null).when(errorRepository).getFailedProcessingById(Mockito.anyLong());
-	    uut.perform(get("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+	    uut.perform(get("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void test_getFailedProcessingById_500() throws Exception {
 	    doThrow(new RuntimeException()).when(errorRepository).getFailedProcessingById(1);
-	    uut.perform(get("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+	    uut.perform(get("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isInternalServerError());
 	}
 
@@ -198,19 +209,19 @@ public class ErrorRepositoryControllerTest {
 	public void test_deleteFailedProcessing_200() throws Exception {
 
 		uut.perform(
-				delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
+				delete("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void test_deleteFailedProcessing_400() throws Exception {
-		uut.perform(delete("/errors/failedProcessings/invalidParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+		uut.perform(delete("/api/v1/failedProcessings/invalidParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isBadRequest());
 	}
 	
 	@Test
 	public void test_deleteFailedProcessing_403() throws Exception {
-		uut.perform(delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+		uut.perform(delete("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				"wrong Key")).andExpect(status().isForbidden());
 	}
 
@@ -220,7 +231,7 @@ public class ErrorRepositoryControllerTest {
 		doThrow(new IllegalArgumentException()).when(errorRepository).deleteFailedProcessing(1);
 
 		uut.perform(
-				delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
+				delete("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
 				.andExpect(status().isNotFound());
 	}
 
@@ -230,27 +241,27 @@ public class ErrorRepositoryControllerTest {
 		doThrow(new RuntimeException()).when(errorRepository).deleteFailedProcessing(1);
 
 		uut.perform(
-				delete("/errors/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
+				delete("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
 				.andExpect(status().isInternalServerError());
 	}
 	
 	@Test
 	public void test_restartAndDeleteFailedProcessing_200() throws Exception {
 
-		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+		uut.perform(post("/api/v1/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isOk());
 	}
 
 	@Test
 	public void test_restartAndDeleteFailedProcessing_400() throws Exception {
-		uut.perform(post("/errors/failedProcessings/invalidParameter/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+		uut.perform(post("/api/v1/failedProcessings/invalidParameter/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isBadRequest());
 	}
 
 	@Test
 	public void test_restartAndDeleteFailedProcessing_403() throws Exception {
 
-		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+		uut.perform(post("/api/v1/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				"wrong key")).andExpect(status().isForbidden());
 	}
 
@@ -258,7 +269,7 @@ public class ErrorRepositoryControllerTest {
 	public void test_restartAndDeleteFailedProcessing_404() throws Exception {
 
 		doThrow(new IllegalArgumentException()).when(errorRepository).restartAndDeleteFailedProcessing(1);
-		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+		uut.perform(post("/api/v1/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isNotFound());
 	}
 
@@ -266,7 +277,7 @@ public class ErrorRepositoryControllerTest {
 	public void test_restartAndDeleteFailedProcessing_500() throws Exception {
 
 		doThrow(new RuntimeException()).when(errorRepository).restartAndDeleteFailedProcessing(1);
-		uut.perform(post("/errors/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+		uut.perform(post("/api/v1/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isInternalServerError());
 	}
 	

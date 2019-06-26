@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.errorrepo;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @DirtiesContext
 @EmbeddedKafka(partitions = 1, controlledShutdown = false, brokerProperties = {"listeners=PLAINTEXT://localhost:9093", "port=9093"})
+@Ignore
 public class TestApplication {	
 	@Test
 	public void applicationContextTest() throws InterruptedException {
