@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.server.distribution;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -12,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -20,15 +20,24 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
+import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.MessageConsumptionController;
-import esa.s1pdgs.cpoc.mqi.server.distribution.GenericMessageDistribution;
+import esa.s1pdgs.cpoc.mqi.server.distribution.ProductDistributionController.ProductDistributionException;
 import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 
-public class GenericMessageDistributionTest {
+public class TestProductDistributionController {
+	
+	static final class StringDto extends AbstractDto {
+		public StringDto(String productName) {
+			super(productName);
+		}		
+	}
 
     /**
      * Mock the controller of consumed messages
@@ -51,12 +60,12 @@ public class GenericMessageDistributionTest {
     /**
      * The consumed messsage
      */
-    private GenericMessageDto<String> consumedMessage;
+    private GenericMessageDto<StringDto> consumedMessage;
 
     /**
      * The controller to test
      */
-    private GenericMessageDistribution<String> controller;
+    private ProductDistributionController controller;
 
     /**
      * Initialization
@@ -66,15 +75,13 @@ public class GenericMessageDistributionTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        consumedMessage =
-                new GenericMessageDto<String>(123, "input-key", "message-test");
+        consumedMessage = new GenericMessageDto<StringDto>(123, "input-key", new StringDto("message-test"));
 
         doReturn(consumedMessage).when(messages).nextMessage(Mockito.any());
 
         doReturn(1000).when(properties).getWaitNextMs();
 
-        controller = new GenericMessageDistribution<String>(messages,
-                publication, properties, ProductCategory.AUXILIARY_FILES);
+        controller = new ProductDistributionController(messages, publication, properties);
     }
 
     /**
@@ -86,11 +93,12 @@ public class GenericMessageDistributionTest {
             throws AbstractCodedException {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "consumer")).when(messages).nextMessage(Mockito.any());
-        ResponseEntity<GenericMessageDto<String>> message = controller.next();
-
-        assertEquals(message.getBody(), null);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, message.getStatusCode());
-
+        try {
+			controller.next(ProductCategory.AUXILIARY_FILES.name().toString());
+			fail();
+		} catch (ProductDistributionException e) {
+			// expected
+		}
         verify(messages, times(1))
                 .nextMessage(Mockito.eq(ProductCategory.AUXILIARY_FILES));
     }
@@ -105,12 +113,13 @@ public class GenericMessageDistributionTest {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "consumer")).when(messages).ackMessage(Mockito.any(),
                         Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean());
-        ResponseEntity<Boolean> message =
-                controller.ack(123L, Ack.OK, "message", false);
-
-        assertEquals(message.getBody(), null);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, message.getStatusCode());
-
+        
+        try {
+		    controller.ack(new AckMessageDto(123L, Ack.OK, "message", false), ProductCategory.AUXILIARY_FILES.name().toString());
+			fail();
+		} catch (ProductDistributionException e) {
+			// expected
+		}
         verify(messages, times(1)).ackMessage(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(123L),
                 Mockito.eq(Ack.OK), Mockito.eq(false));
@@ -129,15 +138,23 @@ public class GenericMessageDistributionTest {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "publisher")).when(publication).publish(Mockito.any(),
                         Mockito.any(), Mockito.any(), Mockito.any());
-        ResponseEntity<Void> message = controller.publish("log message",
-                new GenericPublicationMessageDto<String>(ProductFamily.BLANK,
-                        "message"));
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, message.getStatusCode());
-
+        
+        final ProductDto dto = new ProductDto("test321", "bar", ProductFamily.AUXILIARY_FILE);
+        
+        try {
+		    final GenericPublicationMessageDto<? extends AbstractDto> mess = new GenericPublicationMessageDto<ProductDto>(
+		    		ProductFamily.AUXILIARY_FILE,
+		    		dto
+		    );
+		    
+		    controller.publish(mess, ProductCategory.AUXILIARY_FILES.name().toString());
+			fail();
+		} catch (ProductDistributionException e) {
+			// expected
+		}
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq("message"),
+                Mockito.eq(dto),
                 Mockito.eq(null), 
                 Mockito.eq(null));
     }
@@ -154,15 +171,24 @@ public class GenericMessageDistributionTest {
             throws MqiCategoryNotAvailable, MqiPublicationError, MqiRouteNotAvailable {
         doThrow(MqiPublicationError.class).when(publication)
                 .publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-        ResponseEntity<Void> message = controller.publish("log message",
-                new GenericPublicationMessageDto<String>(ProductFamily.BLANK,
-                        "message"));
-
-        assertEquals(HttpStatus.GATEWAY_TIMEOUT, message.getStatusCode());
-
+        
+        final ProductDto dto = new ProductDto("test321", "bar", ProductFamily.AUXILIARY_FILE);
+        
+        try {
+		    final GenericPublicationMessageDto<? extends AbstractDto> mess = new GenericPublicationMessageDto<ProductDto>(
+		    		ProductFamily.AUXILIARY_FILE,
+		    		new ProductDto("test321", "bar", ProductFamily.AUXILIARY_FILE)
+		    );
+		    
+		    controller.publish(mess, ProductCategory.AUXILIARY_FILES.name().toString());
+			fail();
+		} catch (ProductDistributionException e) {
+			// expected
+	        assertEquals(HttpStatus.GATEWAY_TIMEOUT, e.getStatus());
+		}   
         verify(publication, times(1)).publish(
                 Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq("message"), 
+                Mockito.eq(dto), 
                 Mockito.eq(null), 
                 Mockito.eq(null));
     }

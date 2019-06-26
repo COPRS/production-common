@@ -9,12 +9,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
-public class LevelReportDto {
-
-    /**
-     * Product name of the reports
-     */
-    private String productName;
+public class LevelReportDto extends AbstractDto {
 
     /**
      * ObjectkeyStorage of the reports
@@ -39,26 +34,11 @@ public class LevelReportDto {
      */
     public LevelReportDto(final String productName, final String content,
             final ProductFamily family) {
-        this();
-        this.productName = productName;
+        super(productName);
         this.content = content;
         this.family = family;
     }
 
-    /**
-     * @return the productName
-     */
-    public String getProductName() {
-        return productName;
-    }
-
-    /**
-     * @param productName
-     *            the productName to set
-     */
-    public void setProductName(final String productName) {
-        this.productName = productName;
-    }
 
     /**
      * @return the content
@@ -96,7 +76,7 @@ public class LevelReportDto {
     @Override
     public String toString() {
         return String.format("{productName: %s, content: %s, family: %s}",
-                productName, content, family);
+                getProductName(), content, family);
     }
 
     /**
@@ -104,7 +84,7 @@ public class LevelReportDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(productName, content, family);
+        return Objects.hash(getProductName(), content, family);
     }
 
     /**
@@ -120,7 +100,7 @@ public class LevelReportDto {
         } else {
             LevelReportDto other = (LevelReportDto) obj;
             // field comparison
-            ret = Objects.equals(productName, other.productName)
+            ret = Objects.equals(getProductName(), other.getProductName())
                     && Objects.equals(content, other.content)
                     && Objects.equals(family, other.family);
         }

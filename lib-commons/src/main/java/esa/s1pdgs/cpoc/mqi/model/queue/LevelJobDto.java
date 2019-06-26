@@ -11,17 +11,12 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
-public class LevelJobDto {
+public class LevelJobDto extends AbstractDto {
 
     /**
      * Family name
      */
     private ProductFamily family;
-
-    /**
-     * Session identifier
-     */
-    private String productIdentifier;
     
     /**
      * Process mode
@@ -72,9 +67,8 @@ public class LevelJobDto {
     public LevelJobDto(final ProductFamily family,
             final String productIdentifier, final String productProcessMode, final String workDirectory,
             final String jobOrder) {
-        this();
+        super(productIdentifier);
         this.family = family;
-        this.productIdentifier = productIdentifier;
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
@@ -99,7 +93,7 @@ public class LevelJobDto {
      * @return the productIdentifier
      */
     public String getProductIdentifier() {
-        return productIdentifier;
+        return getProductName();
     }
 
     /**
@@ -107,7 +101,7 @@ public class LevelJobDto {
      *            the productIdentifier to set
      */
     public void setProductIdentifier(final String productIdentifier) {
-        this.productIdentifier = productIdentifier;
+        this.setProductName(productIdentifier);;
     }
 
     /**
@@ -248,7 +242,7 @@ public class LevelJobDto {
     public String toString() {
         return String.format(
                 "{family: %s, productIdentifier: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s}",
-                family, productIdentifier, productProcessMode, workDirectory, jobOrder, inputs,
+                family, getProductIdentifier(), productProcessMode, workDirectory, jobOrder, inputs,
                 outputs, pools);
     }
 
@@ -257,7 +251,7 @@ public class LevelJobDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(family, productIdentifier, productProcessMode, workDirectory, jobOrder, 
+        return Objects.hash(family, getProductIdentifier(), productProcessMode, workDirectory, jobOrder, 
                 inputs, outputs, pools);
     }
 
@@ -274,8 +268,7 @@ public class LevelJobDto {
         } else {
             LevelJobDto other = (LevelJobDto) obj;
             ret = Objects.equals(family, other.family)
-                    && Objects.equals(productIdentifier,
-                            other.productIdentifier)
+                    && Objects.equals(getProductIdentifier(), other.getProductIdentifier())
                     && Objects.equals(productProcessMode,
                             other.productProcessMode)
                     && Objects.equals(workDirectory, other.workDirectory)
