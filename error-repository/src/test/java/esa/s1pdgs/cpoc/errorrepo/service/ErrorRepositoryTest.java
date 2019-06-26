@@ -3,8 +3,9 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -15,8 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import com.mongodb.client.result.DeleteResult;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
@@ -65,14 +64,14 @@ public class ErrorRepositoryTest {
 	}
 
 	@Test
-	public void getFailedProcessingById() {
+	public void getFailedProcessingById_Existing() {
 
 		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
 		FailedProcessingDto<LevelProductsMessageDto> fpDtoToReturn = new FailedProcessingDto<>();
 		fpDtoToReturn.setIdentifier(123);
 		fpDtoToReturn.setDto(levelProductsMsgDto);
 
-		doReturn(fpDtoToReturn).when(failedProcessingRepo).findByIdentifier(anyLong());
+		doReturn(fpDtoToReturn).when(failedProcessingRepo).findByIdentifier(123);
 
 		@SuppressWarnings("unchecked")
 		FailedProcessingDto<LevelProductsMessageDto> failedProcessing = errorRepository.getFailedProcessingById(123);
@@ -82,10 +81,10 @@ public class ErrorRepositoryTest {
 	}
 
 	@Test
-	public void getFailedProcessingByIdWhenNotFound() {
-
+	public void getFailedProcessingById_NotExisting() {
+		doReturn(null).when(failedProcessingRepo).findByIdentifier(456);
 		try {
-			errorRepository.getFailedProcessingById(123);
+			errorRepository.getFailedProcessingById(456);
 			fail("IllegalArguementException expected");
 		} catch (IllegalArgumentException e) {
 			// Expected
@@ -94,101 +93,61 @@ public class ErrorRepositoryTest {
 	}
 
 	@Test
-	public void deleteFailedProcessing() {
-
+	public void deleteFailedProcessing_Existing() {
 		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
 		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(anyLong());
-		DeleteResult deleteResult = new DeleteResult() {
-
-			@Override
-			public boolean wasAcknowledged() {
-				return true;
-			}
-
-			@Override
-			public long getDeletedCount() {
-
-				return 1;
-			}
-		};
-
-		doReturn(deleteResult).when(failedProcessingRepo).deleteByIdentifier(anyLong());
+		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(123);
 
 		errorRepository.deleteFailedProcessing(123);
 
-		doReturn(null).when(failedProcessingRepo).deleteByIdentifier(anyLong());
+		verify(failedProcessingRepo).deleteByIdentifier(123L);
+	}
 
+	@Test
+	public void deleteFailedProcessing_NotExisting() {
+		doReturn(null).when(failedProcessingRepo).findByIdentifier(456);
+		
 		try {
-			errorRepository.deleteFailedProcessing(4);
+			errorRepository.deleteFailedProcessing(456);
 			fail("IllegalArgumentException expected");
 		} catch (IllegalArgumentException e) {
 			// expected
+			verify(failedProcessingRepo, never()).deleteByIdentifier(123L);
 		}
 	}
 
 	@Test
-	public void deleteFailedProcessingWhenNotSucceeded() {
-
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
-		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
-		fpDto.setIdentifier(123);
-		fpDto.setDto(levelProductsMsgDto);
-
-		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(anyLong());
-		DeleteResult deleteResult = new DeleteResult() {
-
-			@Override
-			public boolean wasAcknowledged() {
-				return true;
-			}
-
-			@Override
-			public long getDeletedCount() {
-
-				return 0;
-			}
-		};
-
-		doReturn(deleteResult).when(failedProcessingRepo).deleteByIdentifier(fpDto.getIdentifier());
-
-		try {
-			errorRepository.deleteFailedProcessing(123);
-			fail("IllegalArgumentException expected");
-		} catch (RuntimeException e) {
-			// expected
-		}
-	}
-
-	@Test
-	public void saveFailedProcessing() {
-
-		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
-		levelProductsMsgDto.setIdentifier(1);
-		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
-		fpDto.setIdentifier(123);
-		fpDto.setDto(levelProductsMsgDto);
-
+	public void saveFailedProcessing_MessageExisting() {
 		MqiMessage mqiMsg = new MqiMessage();
-		doReturn(mqiMsg).when(failedProcessingRepo).findByIdentifier(anyLong());
+		mqiMsg.setIdentifier(456);
+		
+		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
+		levelProductsMsgDto.setIdentifier(mqiMsg.getIdentifier());
+
+		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
+		fpDto.setIdentifier(123);
+		fpDto.setDto(levelProductsMsgDto);
+
+		doReturn(mqiMsg).when(mqiMessageRepository).findByIdentifier(456);
 
 		errorRepository.saveFailedProcessing(fpDto);
-		verify(failedProcessingRepo, times(1)).insert(fpDto);
+		verify(mqiMessageRepository, times(1)).findByIdentifier(456);
+		verify(failedProcessingRepo, times(1)).save(fpDto);
 	}
 
 	@Test
-	public void saveFailedProcessingWhenMessageNotFound() {
+	public void saveFailedProcessing_MessageNotExisting() {
 
 		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
-		levelProductsMsgDto.setIdentifier(1);
+		levelProductsMsgDto.setIdentifier(789);
 		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(null).when(failedProcessingRepo).findByIdentifier(anyLong());
+		doReturn(null).when(failedProcessingRepo).findByIdentifier(123);
 
 		try {
 			errorRepository.saveFailedProcessing(fpDto);
@@ -196,76 +155,57 @@ public class ErrorRepositoryTest {
 		} catch (IllegalArgumentException e) {
 			// expected
 		}
-		verify(failedProcessingRepo, times(0)).insert(fpDto);
+		verify(failedProcessingRepo, never()).save(fpDto);
 	}
 
 	@Test
-	public void restartAndDeleteFailedProcessing() {
+	public void restartAndDeleteFailedProcessing_ExistingWithTopic() {
 		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
 		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
 		fpDto.setIdentifier(123);
 		fpDto.setTopic("topic");
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(anyLong());
-
-		DeleteResult deleteResult = new DeleteResult() {
-
-			@Override
-			public boolean wasAcknowledged() {
-				return true;
-			}
-
-			@Override
-			public long getDeletedCount() {
-
-				return 1;
-			}
-		};
-
-		doReturn(deleteResult).when(failedProcessingRepo).deleteByIdentifier(anyLong());
+		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(123);
 
 		errorRepository.restartAndDeleteFailedProcessing(123);
-		verify(failedProcessingRepo, times(1)).findByIdentifier(anyLong());
-		verify(failedProcessingRepo, times(1)).deleteByIdentifier(anyLong());
+		verify(failedProcessingRepo, times(1)).findByIdentifier(123);
+		verify(failedProcessingRepo, times(1)).deleteByIdentifier(123);
 		verify(submissionClient, times(1)).resubmit(fpDto, levelProductsMsgDto.getBody());
 	}
 
 	@Test
-	public void restartAndDeleteFailedProcessingNoTopic() {
+	public void restartAndDeleteFailedProcessing_ExistingWithoutTopic() {
 		LevelProductsMessageDto levelProductsMsgDto = new LevelProductsMessageDto();
 		FailedProcessingDto<LevelProductsMessageDto> fpDto = new FailedProcessingDto<>();
-		fpDto.setIdentifier(123);
+		fpDto.setIdentifier(456);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(anyLong());
-
-		DeleteResult deleteResult = new DeleteResult() {
-
-			@Override
-			public boolean wasAcknowledged() {
-				return true;
-			}
-
-			@Override
-			public long getDeletedCount() {
-
-				return 1;
-			}
-		};
-
-		doReturn(deleteResult).when(failedProcessingRepo).deleteByIdentifier(anyLong());
+		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(456);
 
 		try {
-			errorRepository.restartAndDeleteFailedProcessing(123);
+			errorRepository.restartAndDeleteFailedProcessing(456);
 			fail("IllegalArguemtException expected");
 		} catch (IllegalArgumentException e) {
 			// Expected
 		}
-		verify(failedProcessingRepo, times(1)).findByIdentifier(anyLong());
-		verify(failedProcessingRepo, times(0)).deleteByIdentifier(anyLong());
-		verify(submissionClient, times(0)).resubmit(fpDto, levelProductsMsgDto.getBody());
-
+		verify(failedProcessingRepo, times(1)).findByIdentifier(456);
+		verify(failedProcessingRepo, never()).deleteByIdentifier(456);
+		verify(submissionClient, never()).resubmit(fpDto, levelProductsMsgDto.getBody());
 	}
 
+	@Test
+	public void restartAndDeleteFailedProcessing_NotExisting() {
+		doReturn(null).when(failedProcessingRepo).findByIdentifier(789);
+
+		try {
+			errorRepository.restartAndDeleteFailedProcessing(789);
+			fail("IllegalArguemtException expected");
+		} catch (IllegalArgumentException e) {
+			// Expected
+		}
+		verify(failedProcessingRepo, times(1)).findByIdentifier(789);
+		verify(failedProcessingRepo, never()).deleteByIdentifier(789);
+		verify(submissionClient, never()).resubmit(any(), any());
+	}
 }
