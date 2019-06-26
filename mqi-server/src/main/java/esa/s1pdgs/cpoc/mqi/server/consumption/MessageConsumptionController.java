@@ -23,11 +23,9 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -271,9 +269,9 @@ public class MessageConsumptionController {
      * @return
      * @throws AbstractCodedException
      */
-    public GenericMessageDto<?> nextMessage(final ProductCategory category)
+    public GenericMessageDto<? extends AbstractDto> nextMessage(final ProductCategory category)
             throws AbstractCodedException {
-        GenericMessageDto<?> message = null;
+        GenericMessageDto<? extends AbstractDto> message = null;
         if (consumers.containsKey(category)) {
             switch (category) {
                 case EDRS_SESSIONS:
@@ -683,8 +681,7 @@ public class MessageConsumptionController {
         if (object == null) {
             return null;
         }
-        return new GenericMessageDto<>(object.getIdentifier(),
-                object.getTopic(), object.getDto());
+        return new GenericMessageDto<>(object.getIdentifier(), object.getTopic(), object.getDto());
     }
 
     /**

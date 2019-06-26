@@ -9,12 +9,7 @@ import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
  * 
  * @author Viveris technologies
  */
-public class EdrsSessionDto {
-
-    /**
-     * Key in OBS
-     */
-    private String objectStorageKey;
+public class EdrsSessionDto extends AbstractDto {
 
     /**
      * Channel identifier
@@ -49,7 +44,7 @@ public class EdrsSessionDto {
     public EdrsSessionDto(final String objectStorageKey, final int channelId,
             final EdrsSessionFileType productType, final String missionId,
             final String satelliteId) {
-        this.objectStorageKey = objectStorageKey;
+        super(objectStorageKey);
         this.channelId = channelId;
         this.productType = productType;
         this.missionId = missionId;
@@ -60,7 +55,7 @@ public class EdrsSessionDto {
      * @return the objectStorageKey
      */
     public String getObjectStorageKey() {
-        return objectStorageKey;
+        return getProductName();
     }
 
     /**
@@ -68,7 +63,7 @@ public class EdrsSessionDto {
      *            the objectStorageKey to set
      */
     public void setObjectStorageKey(final String objectStorageKey) {
-        this.objectStorageKey = objectStorageKey;
+        this.setProductName(objectStorageKey);
     }
 
     /**
@@ -138,7 +133,7 @@ public class EdrsSessionDto {
     public String toString() {
         return String.format(
                 "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s}",
-                objectStorageKey, channelId, productType, satelliteId,
+                getObjectStorageKey(), channelId, productType, satelliteId,
                 missionId);
     }
 
@@ -147,7 +142,7 @@ public class EdrsSessionDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(objectStorageKey, channelId, productType,
+        return Objects.hash(getObjectStorageKey(), channelId, productType,
                 satelliteId, missionId);
     }
 
@@ -164,7 +159,7 @@ public class EdrsSessionDto {
         } else {
             EdrsSessionDto other = (EdrsSessionDto) obj;
             // field comparison
-            ret = Objects.equals(objectStorageKey, other.objectStorageKey)
+            ret = Objects.equals(getObjectStorageKey(), other.getObjectStorageKey())
                     && channelId == other.channelId
                     && Objects.equals(productType, other.productType)
                     && Objects.equals(satelliteId, other.satelliteId)

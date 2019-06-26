@@ -4,9 +4,8 @@ import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class ProductDto {
+public class ProductDto extends AbstractDto {
 
-    private String productName;
     private String keyObjectStorage;    
     private ProductFamily family;
     private String mode = null;
@@ -20,18 +19,10 @@ public class ProductDto {
 	}
 	
 	public ProductDto(String productName, String keyObjectStorage, ProductFamily family, String mode) {
-		this.productName = productName;
+		super(productName);
 		this.keyObjectStorage = keyObjectStorage;
 		this.family = family;
 		this.mode = mode;
-	}
-
-	public String getProductName() {
-		return productName;
-	}
-	
-	public void setProductName(String productName) {
-		this.productName = productName;
 	}
 	
 	public String getKeyObjectStorage() {
@@ -63,7 +54,7 @@ public class ProductDto {
      */
     @Override
     public String toString() {
-        return String.format("{productName: %s, keyObjectStorage: %s, family: %s, mode: %s}",productName, keyObjectStorage, family, mode);
+        return String.format("{productName: %s, keyObjectStorage: %s, family: %s, mode: %s}", getProductName(), keyObjectStorage, family, mode);
     }
 
     /**
@@ -71,7 +62,7 @@ public class ProductDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(productName, keyObjectStorage, family, mode);
+        return Objects.hash(getProductName(), keyObjectStorage, family, mode);
     }
     
 
@@ -88,7 +79,7 @@ public class ProductDto {
         } else {
         	ProductDto other = (ProductDto) obj;
             // field comparison
-            ret = Objects.equals(productName, other.productName)
+            ret = Objects.equals(getProductName(), other.getProductName())
                     && Objects.equals(keyObjectStorage, other.keyObjectStorage)
                     && Objects.equals(family, other.family)
                     && Objects.equals(mode, other.mode);
