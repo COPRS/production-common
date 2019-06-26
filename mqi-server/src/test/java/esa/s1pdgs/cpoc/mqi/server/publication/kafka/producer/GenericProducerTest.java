@@ -31,7 +31,7 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
  * 
  * @author Viveris Technologies
  */
-public class LevelProductProducerTest {
+public class GenericProducerTest {
 
     /**
      * Exception
@@ -49,7 +49,7 @@ public class LevelProductProducerTest {
      * Kafka template
      */
     @Mock
-    private KafkaTemplate<String, ProductDto> template;
+    private KafkaTemplate<String, Object> template;
 
     @Mock
     private ListenableFuture<SendResult<String, ProductDto>> future;
@@ -57,7 +57,7 @@ public class LevelProductProducerTest {
     /**
      * Publisher to test
      */
-    private LevelProductProducer producer;
+    private GenericProducer producer;
 
     /**
      * DTO to send
@@ -71,10 +71,9 @@ public class LevelProductProducerTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        dto = new ProductDto("product-name-1", "key-obs",
-                ProductFamily.L0_SLICE, "FAST");
+        dto = new ProductDto("product-name-1", "key-obs", ProductFamily.AUXILIARY_FILE);
 
-        producer = new LevelProductProducer(properties, template);
+        producer = new GenericProducer(properties, template);
     }
 
     /**

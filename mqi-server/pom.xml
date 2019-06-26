@@ -84,12 +84,11 @@
 			</exclusions>
 		</dependency>
 		
-		<!-- old versions required for unit tests -->
+		<!-- old versions required for unit tests -->	
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
 			<version>1.1.0</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>

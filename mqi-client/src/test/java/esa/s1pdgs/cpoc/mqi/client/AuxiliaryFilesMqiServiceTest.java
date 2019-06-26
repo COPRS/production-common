@@ -74,7 +74,7 @@ public class AuxiliaryFilesMqiServiceTest {
         service = factory.newProductServiceFor(ProductCategory.AUXILIARY_FILES);
 
         message = new ProductMessageDto(123, "input-key",
-                new ProductDto("name", "keyobs", ProductFamily.AUXILIARY_FILE));
+                new ProductDto("name", "keyobs", ProductFamily.AUXILIARY_FILE, null));
     }
 
     /**

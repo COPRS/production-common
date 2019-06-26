@@ -35,7 +35,7 @@ public class TestProductDistributionController {
 	
 	static final class StringDto extends AbstractDto {
 		public StringDto(String productName) {
-			super(productName);
+			super(productName, ProductFamily.BLANK);
 		}		
 	}
 
@@ -136,7 +136,7 @@ public class TestProductDistributionController {
     public void testPublishApiCategoryNotAvailable()
             throws MqiCategoryNotAvailable, MqiPublicationError, MqiRouteNotAvailable {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
-                "publisher")).when(publication).publish(Mockito.any(),
+                "publisher")).when(publication).publish(Mockito.any(), 
                         Mockito.any(), Mockito.any(), Mockito.any());
         
         final ProductDto dto = new ProductDto("test321", "bar", ProductFamily.AUXILIARY_FILE);

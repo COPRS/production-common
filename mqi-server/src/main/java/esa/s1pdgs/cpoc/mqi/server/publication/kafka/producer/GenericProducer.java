@@ -9,12 +9,15 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
 /**
@@ -24,31 +27,16 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
  * @param <T>
  *            the type of the published message
  */
-public abstract class AbstractGenericProducer<T> {
+@Component
+public class GenericProducer {
 
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(AbstractGenericProducer.class);
+    private static final Logger LOGGER = LogManager.getLogger(GenericProducer.class);
 
-    /**
-     * Kafka properties
-     */
     private final KafkaProperties properties;
+    private final KafkaTemplate<String, Object> template;
 
-    /**
-     * Kafka template
-     */
-    private final KafkaTemplate<String, T> template;
-
-    /**
-     * Constructor
-     * 
-     * @param properties
-     * @param topic
-     */
-    public AbstractGenericProducer(final KafkaProperties properties) {
+    @Autowired
+    public GenericProducer(final KafkaProperties properties) {
         this.properties = properties;
         this.template = new KafkaTemplate<>(producerFactory());
     }
@@ -58,8 +46,7 @@ public abstract class AbstractGenericProducer<T> {
      * @param properties
      * @param template
      */
-    protected AbstractGenericProducer(final KafkaProperties properties,
-            final KafkaTemplate<String, T> template) {
+    protected GenericProducer(final KafkaProperties properties, final KafkaTemplate<String, Object> template) {
         this.properties = properties;
         this.template = template;
     }
@@ -69,27 +56,17 @@ public abstract class AbstractGenericProducer<T> {
      * 
      * @param descriptor
      */
-    public void send(final String topic, final T dto)
+    public void send(final String topic, final AbstractDto dto)
             throws MqiPublicationError {
         try {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("[send] Send object {}", dto);
             }
             template.send(topic, dto).get();
-        } catch (CancellationException | InterruptedException
-                | ExecutionException e) {
-            throw new MqiPublicationError(topic, dto, extractProductName(dto),
-                    e.getMessage(), e);
+        } catch (CancellationException | InterruptedException | ExecutionException e) {
+            throw new MqiPublicationError(topic, dto, dto.getProductName(), e.getMessage(), e);
         }
     }
-
-    /**
-     * Extract the product name of the DTO
-     * 
-     * @param obj
-     * @return
-     */
-    protected abstract String extractProductName(T obj);
 
     /**
      * Producer configuration
@@ -110,7 +87,7 @@ public abstract class AbstractGenericProducer<T> {
         return props;
     }
 
-    private ProducerFactory<String, T> producerFactory() {
+    private ProducerFactory<String, Object> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 

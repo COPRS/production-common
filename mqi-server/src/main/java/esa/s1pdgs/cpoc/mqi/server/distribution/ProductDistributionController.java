@@ -125,19 +125,15 @@ public class ProductDistributionController {
             final ResumeDetails resumeDetails = messages.ackMessage(category, ackDto.getMessageId(), ackDto.getAck(), ackDto.isStop());
             // If an error, simply dump the message into the log. Appending to kafka error queue
             // will be done where the error occurs
-            if (ackDto.getAck() == Ack.ERROR) {
-                if (resumeDetails != null)
-                {
-                	if (LOGGER.isErrorEnabled())
-                	{
-                		LOGGER.error(ackDto.getMessage() + " [resumeDetails {}]", resumeDetails);
-                	}                  
-                }
-                else
-                {
-                    LOGGER.error(ackDto.getMessage());
-                }
-            }
+			if (ackDto.getAck() == Ack.ERROR) {
+				if (resumeDetails != null) {
+					if (LOGGER.isErrorEnabled()) {
+						LOGGER.error(ackDto.getMessage() + " [resumeDetails {}]", resumeDetails);
+					}
+				} else {
+					LOGGER.error(ackDto.getMessage());
+				}
+			}
 
         } catch (AbstractCodedException mcna) {
             LOGGER.error(
