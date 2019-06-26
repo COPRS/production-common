@@ -17,11 +17,6 @@ public class LevelReportDto extends AbstractDto {
     private String content;
 
     /**
-     * Family name for reports
-     */
-    private ProductFamily family;
-
-    /**
      * Default constructor
      */
     public LevelReportDto() {
@@ -34,9 +29,8 @@ public class LevelReportDto extends AbstractDto {
      */
     public LevelReportDto(final String productName, final String content,
             final ProductFamily family) {
-        super(productName);
+        super(productName, family);
         this.content = content;
-        this.family = family;
     }
 
 
@@ -56,27 +50,12 @@ public class LevelReportDto extends AbstractDto {
     }
 
     /**
-     * @return the family
-     */
-    public ProductFamily getFamily() {
-        return family;
-    }
-
-    /**
-     * @param family
-     *            the family to set
-     */
-    public void setFamily(final ProductFamily family) {
-        this.family = family;
-    }
-
-    /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return String.format("{productName: %s, content: %s, family: %s}",
-                getProductName(), content, family);
+                getProductName(), content, getFamily());
     }
 
     /**
@@ -84,7 +63,7 @@ public class LevelReportDto extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getProductName(), content, family);
+        return Objects.hash(getProductName(), content, getFamily());
     }
 
     /**
@@ -102,7 +81,7 @@ public class LevelReportDto extends AbstractDto {
             // field comparison
             ret = Objects.equals(getProductName(), other.getProductName())
                     && Objects.equals(content, other.content)
-                    && Objects.equals(family, other.family);
+                    && Objects.equals(getFamily(), other.getFamily());
         }
         return ret;
     }

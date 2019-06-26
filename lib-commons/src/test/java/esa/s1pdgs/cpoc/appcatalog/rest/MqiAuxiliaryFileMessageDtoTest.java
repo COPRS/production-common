@@ -23,7 +23,7 @@ public class MqiAuxiliaryFileMessageDtoTest {
      * DTO
      */
     private ProductDto dto =
-            new ProductDto("prodcut-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+            new ProductDto("prodcut-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
 
     /**
      * Test constructors

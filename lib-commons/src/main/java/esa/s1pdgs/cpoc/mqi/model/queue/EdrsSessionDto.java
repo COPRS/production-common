@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * DTO object used to transfer EDRS session files between MQI and application
@@ -44,7 +45,7 @@ public class EdrsSessionDto extends AbstractDto {
     public EdrsSessionDto(final String objectStorageKey, final int channelId,
             final EdrsSessionFileType productType, final String missionId,
             final String satelliteId) {
-        super(objectStorageKey);
+        super(objectStorageKey, ProductFamily.EDRS_SESSION);
         this.channelId = channelId;
         this.productType = productType;
         this.missionId = missionId;
@@ -142,7 +143,7 @@ public class EdrsSessionDto extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getObjectStorageKey(), channelId, productType,
+        return Objects.hash(getObjectStorageKey(), getFamily(), channelId, productType,
                 satelliteId, missionId);
     }
 
@@ -160,6 +161,7 @@ public class EdrsSessionDto extends AbstractDto {
             EdrsSessionDto other = (EdrsSessionDto) obj;
             // field comparison
             ret = Objects.equals(getObjectStorageKey(), other.getObjectStorageKey())
+            		&&  Objects.equals(getFamily(), other.getFamily())
                     && channelId == other.channelId
                     && Objects.equals(productType, other.productType)
                     && Objects.equals(satelliteId, other.satelliteId)

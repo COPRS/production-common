@@ -23,7 +23,7 @@ public class ProductDtoTest {
 	 */
 	@Test
 	public void testAux() {
-		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
 		assertEquals("product-name", dto.getProductName());
 		assertEquals("key-obs", dto.getKeyObjectStorage());
 
@@ -58,7 +58,7 @@ public class ProductDtoTest {
 	 */
 	@Test
 	public void testToString() {
-		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
 		String str = dto.toString();
 		assertTrue("toString should contain the product name", str.contains("productName: product-name"));
 		assertTrue("toString should contain the key OBS", str.contains("keyObjectStorage: key-obs"));

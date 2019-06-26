@@ -22,7 +22,7 @@ public class ProductMessageDtoTest {
      */
     @Test
     public void testGettersSettersConstructors() {
-        ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+        ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
         ProductMessageDto dto =
                 new ProductMessageDto(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
@@ -43,7 +43,7 @@ public class ProductMessageDtoTest {
      */
     @Test
     public void testToString() {
-        ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+        ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
         ProductMessageDto dto =
                 new ProductMessageDto(123, "input-key", body);
         String str = dto.toString();

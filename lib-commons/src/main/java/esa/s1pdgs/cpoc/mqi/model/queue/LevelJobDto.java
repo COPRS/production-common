@@ -11,13 +11,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
-public class LevelJobDto extends AbstractDto {
-
-    /**
-     * Family name
-     */
-    private ProductFamily family;
-    
+public class LevelJobDto extends AbstractDto {    
     /**
      * Process mode
      */
@@ -38,27 +32,24 @@ public class LevelJobDto extends AbstractDto {
      * They contain the absolute name on the target host and where we can find
      * the file according the input family
      */
-    private List<LevelJobInputDto> inputs;
+    private List<LevelJobInputDto> inputs= new ArrayList<>();
 
     /**
      * List information needed to validate the outputs of the job and share them
      */
-    private List<LevelJobOutputDto> outputs;
+    private List<LevelJobOutputDto> outputs= new ArrayList<>();
 
     /**
      * List the tasks to be executed for processing the job grouped by
      * pools.<br/>
      * The pools shall be executed one after one if the previous execution is ok
      */
-    private List<LevelJobPoolDto> pools;
+    private List<LevelJobPoolDto> pools= new ArrayList<>();
 
     /**
      * Default constructor
      */
     public LevelJobDto() {
-        this.inputs = new ArrayList<>();
-        this.outputs = new ArrayList<>();
-        this.pools = new ArrayList<>();
     }
 
     /**
@@ -67,26 +58,10 @@ public class LevelJobDto extends AbstractDto {
     public LevelJobDto(final ProductFamily family,
             final String productIdentifier, final String productProcessMode, final String workDirectory,
             final String jobOrder) {
-        super(productIdentifier);
-        this.family = family;
+        super(productIdentifier, family);
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
-    }
-
-    /**
-     * @return the family
-     */
-    public ProductFamily getFamily() {
-        return family;
-    }
-
-    /**
-     * @param family
-     *            the family to set
-     */
-    public void setFamily(final ProductFamily family) {
-        this.family = family;
     }
 
     /**
@@ -242,7 +217,7 @@ public class LevelJobDto extends AbstractDto {
     public String toString() {
         return String.format(
                 "{family: %s, productIdentifier: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s}",
-                family, getProductIdentifier(), productProcessMode, workDirectory, jobOrder, inputs,
+                getFamily(), getProductIdentifier(), productProcessMode, workDirectory, jobOrder, inputs,
                 outputs, pools);
     }
 
@@ -251,7 +226,7 @@ public class LevelJobDto extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(family, getProductIdentifier(), productProcessMode, workDirectory, jobOrder, 
+        return Objects.hash(getFamily(), getProductIdentifier(), productProcessMode, workDirectory, jobOrder, 
                 inputs, outputs, pools);
     }
 
@@ -267,7 +242,7 @@ public class LevelJobDto extends AbstractDto {
             ret = false;
         } else {
             LevelJobDto other = (LevelJobDto) obj;
-            ret = Objects.equals(family, other.family)
+            ret = Objects.equals(getFamily(), other.getFamily())
                     && Objects.equals(getProductIdentifier(), other.getProductIdentifier())
                     && Objects.equals(productProcessMode,
                             other.productProcessMode)

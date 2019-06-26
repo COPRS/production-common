@@ -7,11 +7,10 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 public class ProductDto extends AbstractDto {
 
     private String keyObjectStorage;    
-    private ProductFamily family;
     private String mode = null;
     
     public ProductDto() {
-		
+		super();
 	}
     
 	public ProductDto(String productName, String keyObjectStorage, ProductFamily family) {
@@ -19,9 +18,8 @@ public class ProductDto extends AbstractDto {
 	}
 	
 	public ProductDto(String productName, String keyObjectStorage, ProductFamily family, String mode) {
-		super(productName);
+		super(productName, family);
 		this.keyObjectStorage = keyObjectStorage;
-		this.family = family;
 		this.mode = mode;
 	}
 	
@@ -32,15 +30,7 @@ public class ProductDto extends AbstractDto {
 	public void setKeyObjectStorage(String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;
 	}
-	
-	public ProductFamily getFamily() {
-		return family;
-	}
-	
-	public void setFamily(ProductFamily family) {
-		this.family = family;
-	}
-	
+
 	public String getMode() {
 		return mode;
 	}
@@ -54,7 +44,7 @@ public class ProductDto extends AbstractDto {
      */
     @Override
     public String toString() {
-        return String.format("{productName: %s, keyObjectStorage: %s, family: %s, mode: %s}", getProductName(), keyObjectStorage, family, mode);
+        return String.format("{productName: %s, keyObjectStorage: %s, family: %s, mode: %s}", getProductName(), keyObjectStorage, getFamily(), mode);
     }
 
     /**
@@ -62,7 +52,7 @@ public class ProductDto extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getProductName(), keyObjectStorage, family, mode);
+        return Objects.hash(getProductName(), keyObjectStorage, getFamily(), mode);
     }
     
 
@@ -81,7 +71,7 @@ public class ProductDto extends AbstractDto {
             // field comparison
             ret = Objects.equals(getProductName(), other.getProductName())
                     && Objects.equals(keyObjectStorage, other.keyObjectStorage)
-                    && Objects.equals(family, other.family)
+                    && Objects.equals(getFamily(), other.getFamily())
                     && Objects.equals(mode, other.mode);
         }
         return ret;
