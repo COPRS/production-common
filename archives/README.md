@@ -61,7 +61,7 @@ Parameter                                        | Description
 ------------------------------------------------ | ------------- 
 kafka.bootstrap-servers                          | the bootstrap servers for KAFKA
 kafka.group-id                                   | the group identifier to use for KAFKA consumers
-kafka.poll-timeout                               | the bootstrap servers for KAFKA (example: s1kafka-headless:9092)
+kafka.poll-timeout                               | the bootstrap servers for KAFKA (example: kafka-svc:9092)
 kafka.max-pool-records                           | the maximal number of messages to get per poll
 kafka.session-timeout-ms                         | the timeout to acknowledge a message
 kafka.topics.slices                              | the list of topics of level products (separated by comma)

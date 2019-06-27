@@ -11,7 +11,7 @@ server:
   
 # KAFKA
 kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:s1kafka-headless:9092}   # the bootstrap servers for KAFKA
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-svc:9093}   # the bootstrap servers for KAFKA
   group-id: error
   maxRetries: 10                                                # the group identifier to use for KAFKA publishers  
   poll-timeout: 3000

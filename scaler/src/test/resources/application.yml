@@ -8,7 +8,7 @@ logging:
   
 # Kafka
 kafka:
-  bootstrap-servers: 10.2.3.1:9092
+  bootstrap-servers: 10.2.3.1:9093
   client-id: spdgs-scaler
   request-timeout-ms: 5000
   session-timeout-ms: 5000

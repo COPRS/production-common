@@ -72,7 +72,7 @@ public class KafkaServiceTest {
         groups.put(SpdgsTopic.L1_JOBS, "group");
         doReturn(topics).when(properties).getTopics();
         doReturn(groups).when(properties).getGroupIdPerTopic();
-        doReturn("172.20.35.2:9092").when(properties).getBootstrapServers();
+        doReturn("172.20.35.2:9093").when(properties).getBootstrapServers();
         doReturn("client").when(properties).getClientId();
         doReturn(15000).when(properties).getSessionTimeoutMs();
 
@@ -83,7 +83,7 @@ public class KafkaServiceTest {
     public void testKafkaConsumerProperties() {
         Properties prop = service.kafkaConsumerProperties("group");
         assertEquals(7, prop.size());
-        assertEquals("172.20.35.2:9092",
+        assertEquals("172.20.35.2:9093",
                 prop.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
         assertEquals("client",
                 prop.getProperty(ConsumerConfig.CLIENT_ID_CONFIG));
