@@ -8,7 +8,7 @@ logging:
     
 # KAFKA
 kafka:
-  bootstrap-servers: kafka-svc:9093
+  bootstrap-servers: kafka-headless:9092
   group-id: archives
   client-id: archives
   poll-timeout: 500
