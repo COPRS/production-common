@@ -23,9 +23,9 @@ import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
@@ -130,7 +130,7 @@ public class GenericMqiController<T> {
                 Date now = new Date();
                 MqiMessage messageToInsert = new MqiMessage(category, topic,
                         partition, offset, body.getGroup(),
-                        MqiStateMessageEnum.READ, body.getPod(), now,
+                        MessageState.READ, body.getPod(), now,
                         null, null, null, 0, body.getDto(), now);
                 mongoDBServices.insertMqiMessage(messageToInsert);
 
@@ -181,7 +181,7 @@ public class GenericMqiController<T> {
                                         body.getGroup());
                                 // on met status = ACK_KO
                                 messageFromDB
-                                        .setState(MqiStateMessageEnum.ACK_KO);
+                                        .setState(MessageState.ACK_KO);
                                 updateMap.put("state",
                                         messageFromDB.getState());
                                 // on met à jour les éventuelles dates
@@ -205,7 +205,7 @@ public class GenericMqiController<T> {
                                         body.getGroup()));
                                 // on met status = READ
                                 messageFromDB
-                                        .setState(MqiStateMessageEnum.READ);
+                                        .setState(MessageState.READ);
                                 updateMap.put("state",
                                         messageFromDB.getState());
                                 // on met le reading_pod au pod recu
@@ -260,7 +260,7 @@ public class GenericMqiController<T> {
                     default:
                         HashMap<String, Object> updateMap = new HashMap<>();
                         if (messageFromDB.getState()
-                                .equals(MqiStateMessageEnum.READ)) {
+                                .equals(MessageState.READ)) {
                             log(String.format(
                                     "[Read Message] [Topic %s] [Partition %d] [Offset %d] [Body %s] MqiMessage is at State READ",
                                     topic, partition, offset, body.getGroup()));
@@ -300,10 +300,10 @@ public class GenericMqiController<T> {
     public ResponseEntity<List<MqiGenericMessageDto<T>>> next(
             @RequestParam("pod") final String pod) {
         try {
-            Set<MqiStateMessageEnum> ackStates = new HashSet<>();
-            ackStates.add(MqiStateMessageEnum.ACK_KO);
-            ackStates.add(MqiStateMessageEnum.ACK_OK);
-            ackStates.add(MqiStateMessageEnum.ACK_WARN);
+            Set<MessageState> ackStates = new HashSet<>();
+            ackStates.add(MessageState.ACK_KO);
+            ackStates.add(MessageState.ACK_OK);
+            ackStates.add(MessageState.ACK_WARN);
             List<MqiMessage> mqiMessages = mongoDBServices
                     .searchByPodStateCategory(pod, category, ackStates);
             if (mqiMessages.isEmpty()) {
@@ -363,7 +363,7 @@ public class GenericMqiController<T> {
                     case READ:
                         HashMap<String, Object> updateMap1 = new HashMap<>();
                         // on met status à SEND et son processing_pod
-                        messageFromDB.setState(MqiStateMessageEnum.SEND);
+                        messageFromDB.setState(MessageState.SEND);
                         messageFromDB.setSendingPod(body.getPod());
                         updateMap1.put("state", messageFromDB.getState());
                         updateMap1.put("sendingPod",
@@ -394,7 +394,7 @@ public class GenericMqiController<T> {
                                     "[Send Message] [MessageID {}] Number of retries is not reached",
                                     messageID);
                             // on met status = ACK_KO
-                            messageFromDB.setState(MqiStateMessageEnum.ACK_KO);
+                            messageFromDB.setState(MessageState.ACK_KO);
                             updateMap2.put("state", messageFromDB.getState());
                             // on met à jour les éventuelles dates
                             messageFromDB.setLastAckDate(now);
@@ -405,7 +405,7 @@ public class GenericMqiController<T> {
                                     HttpStatus.OK);
                         } else {
                             // on met status = à SEND et son processing_pod
-                            messageFromDB.setState(MqiStateMessageEnum.SEND);
+                            messageFromDB.setState(MessageState.SEND);
                             messageFromDB.setSendingPod(body.getPod());
                             updateMap2.put("state", messageFromDB.getState());
                             updateMap2.put("sendingPod",
@@ -438,11 +438,11 @@ public class GenericMqiController<T> {
         try {
             HashMap<String, Object> updateMap = new HashMap<>();
             if (ack.equals(Ack.OK)) {
-                updateMap.put("state", MqiStateMessageEnum.ACK_OK);
+                updateMap.put("state", MessageState.ACK_OK);
             } else if (ack.equals(Ack.ERROR)) {
-                updateMap.put("state", MqiStateMessageEnum.ACK_KO);
+                updateMap.put("state", MessageState.ACK_KO);
             } else if (ack.equals(Ack.WARN)) {
-                updateMap.put("state", MqiStateMessageEnum.ACK_WARN);
+                updateMap.put("state", MessageState.ACK_WARN);
             } else {
                 LOGGER.error(
                         "[Ack Message] [MessageID {}] [Ack {}] Ack is not valid",
@@ -512,10 +512,10 @@ public class GenericMqiController<T> {
             // message avec status != ACK et la plus petite date de lecture (à
             // voir
             // si on prend le plus petit offset)
-            Set<MqiStateMessageEnum> ackStates = new HashSet<>();
-            ackStates.add(MqiStateMessageEnum.ACK_KO);
-            ackStates.add(MqiStateMessageEnum.ACK_OK);
-            ackStates.add(MqiStateMessageEnum.ACK_WARN);
+            Set<MessageState> ackStates = new HashSet<>();
+            ackStates.add(MessageState.ACK_KO);
+            ackStates.add(MessageState.ACK_OK);
+            ackStates.add(MessageState.ACK_WARN);
             List<MqiMessage> responseFromDB =
                     mongoDBServices.searchByTopicPartitionGroup(topic,
                             partition, group, ackStates);

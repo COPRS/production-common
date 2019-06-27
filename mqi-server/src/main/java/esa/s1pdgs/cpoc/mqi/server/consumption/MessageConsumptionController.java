@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -627,7 +627,7 @@ public class MessageConsumptionController {
     protected boolean send(final GenericAppCatalogMqiService<?> service,
             final MqiLightMessageDto message) throws AbstractCodedException {
         boolean ret = false;
-        if (message.getState() == MqiStateMessageEnum.SEND) {
+        if (message.getState() == MessageState.SEND) {
             if (isSameSendingPod(message.getSendingPod())) {
 
                 ret = service.send(message.getIdentifier(),

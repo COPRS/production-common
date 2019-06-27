@@ -22,8 +22,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
@@ -296,7 +296,7 @@ public class JobProcessor {
 
             failedProc.processingType(message.getInputKey())
             	.topic(message.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.processingStatus(MessageState.READ)
 	    		.productCategory(ProductCategory.LEVEL_JOBS)
 	    		.failedPod(properties.getHostname())
 	            .failureDate(new Date())

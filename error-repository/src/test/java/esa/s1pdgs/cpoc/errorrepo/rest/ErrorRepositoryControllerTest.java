@@ -24,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -69,7 +69,7 @@ public class ErrorRepositoryControllerTest {
 		FailedProcessingDto failedProcessing1 = new FailedProcessingDto();
 		failedProcessing1.setIdentifier(1001);
 		failedProcessing1.processingType("dummyProcessingType")
-		.processingStatus(MqiStateMessageEnum.READ)
+		.processingStatus(MessageState.READ)
 		.productCategory(ProductCategory.AUXILIARY_FILES)
 		.partition(9)
 		.offset(1234)
@@ -136,7 +136,7 @@ public class ErrorRepositoryControllerTest {
 		FailedProcessingDto failedProcessingToReturn = new FailedProcessingDto();
 		failedProcessingToReturn.setIdentifier(1001);
 		failedProcessingToReturn.processingType("dummyProcessingType")
-		.processingStatus(MqiStateMessageEnum.READ)
+		.processingStatus(MessageState.READ)
 		.productCategory(ProductCategory.AUXILIARY_FILES)
 		.partition(9)
 		.offset(1234)

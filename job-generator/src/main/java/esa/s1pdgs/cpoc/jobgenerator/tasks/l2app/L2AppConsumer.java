@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
@@ -134,7 +134,7 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
             
             failedProc.processingType(mqiMessage.getInputKey())
       			.topic(mqiMessage.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.processingStatus(MessageState.READ)
 	    		.productCategory(ProductCategory.LEVEL_PRODUCTS)
 	    		.failedPod(processSettings.getHostname())
 	            .failureDate(new Date())

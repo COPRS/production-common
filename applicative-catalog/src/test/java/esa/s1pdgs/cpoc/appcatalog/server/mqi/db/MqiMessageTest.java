@@ -12,7 +12,7 @@ import java.util.Date;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -28,14 +28,14 @@ public class MqiMessageTest {
     public void testGetter() {
         Date now = new Date();
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic",
-                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", now, 
+                1, 5, "group", MessageState.READ, "readingPod", now, 
                 "sendingPod", now, now, 0, null, now);
         assertEquals(ProductCategory.AUXILIARY_FILES, message.getCategory());
         assertEquals("topic", message.getTopic());
         assertEquals(1, message.getPartition());
         assertEquals(5, message.getOffset());
         assertEquals("group", message.getGroup());
-        assertEquals(MqiStateMessageEnum.READ, message.getState());
+        assertEquals(MessageState.READ, message.getState());
         assertEquals("readingPod", message.getReadingPod());
         assertEquals(now, message.getLastAckDate());
         assertEquals(now, message.getLastReadDate());
@@ -50,7 +50,7 @@ public class MqiMessageTest {
     public void testToString() {
         Date now = new Date();
         MqiMessage message = new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic",
-                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", now, 
+                1, 5, "group", MessageState.READ, "readingPod", now, 
                 "sendingPod", now, now, 0, null, now);
         message = new MqiMessage();
         message.setCategory(ProductCategory.AUXILIARY_FILES);
@@ -58,7 +58,7 @@ public class MqiMessageTest {
         message.setPartition(1);
         message.setOffset(5);
         message.setGroup("group");
-        message.setState(MqiStateMessageEnum.READ);
+        message.setState(MessageState.READ);
         message.setReadingPod("readingPod");
         message.setLastAckDate(now);
         message.setLastReadDate(now);

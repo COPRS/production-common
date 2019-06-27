@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.rest;
+package esa.s1pdgs.cpoc.common;
 
 /**
  * Available states of a MQI message:
@@ -7,6 +7,6 @@ package esa.s1pdgs.cpoc.appcatalog.rest;
  * <li>ACK_OK: message successfully processing by an application</li>
  * <li>ACK_KO: message processing by an application but error occurred</li>
  */
-public enum MqiStateMessageEnum {
+public enum MessageState {
     READ, SEND, ACK_OK, ACK_KO, ACK_WARN;
 }

@@ -39,7 +39,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
@@ -386,7 +386,7 @@ public class MessageConsumptionControllerTest {
         // Processing by another pod
         MqiGenericMessageDto<?> msg1 =
                 new MqiGenericMessageDto<>(category, 1, "topic", 1, 10);
-        msg1.setState(MqiStateMessageEnum.SEND);
+        msg1.setState(MessageState.SEND);
         msg1.setCreationDate(new Date());
         msg1.setSendingPod("other-pod");
         doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
@@ -395,14 +395,14 @@ public class MessageConsumptionControllerTest {
         // Status read
         MqiGenericMessageDto<?> msg2 =
                 new MqiGenericMessageDto<>(category, 2, "topic", 1, 11);
-        msg2.setState(MqiStateMessageEnum.READ);
+        msg2.setState(MessageState.READ);
         msg2.setCreationDate(new Date());
         doReturn(true).when(mockedService).send(Mockito.eq(2L), Mockito.any());
 
         // Status read
         MqiGenericMessageDto<?> msg3 =
                 new MqiGenericMessageDto<>(category, 3, "topic", 2, 11);
-        msg3.setState(MqiStateMessageEnum.READ);
+        msg3.setState(MessageState.READ);
         msg3.setCreationDate(new Date());
         doReturn(true).when(mockedService).send(Mockito.eq(3L), Mockito.any());
 
@@ -584,7 +584,7 @@ public class MessageConsumptionControllerTest {
      */
     @Test
     public void testSendWhenMessageRead() throws AbstractCodedException {
-        testSendMessageWhenAskOtherAppNotNeeded(MqiStateMessageEnum.READ);
+        testSendMessageWhenAskOtherAppNotNeeded(MessageState.READ);
     }
 
     /**
@@ -595,7 +595,7 @@ public class MessageConsumptionControllerTest {
     @Test
     public void testSendWhenMessageProcessingBySamePod()
             throws AbstractCodedException {
-        testSendMessageWhenAskOtherAppNotNeeded(MqiStateMessageEnum.SEND);
+        testSendMessageWhenAskOtherAppNotNeeded(MessageState.SEND);
     }
 
     /**
@@ -605,7 +605,7 @@ public class MessageConsumptionControllerTest {
      * @throws AbstractCodedException
      */
     private void testSendMessageWhenAskOtherAppNotNeeded(
-            MqiStateMessageEnum state) throws AbstractCodedException {
+            MessageState state) throws AbstractCodedException {
 
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
@@ -649,7 +649,7 @@ public class MessageConsumptionControllerTest {
 
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("other-name");
 
@@ -698,13 +698,13 @@ public class MessageConsumptionControllerTest {
 
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234L, "topic", 1, 111);
-        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("other-name");
 
         MqiLightMessageDto msgLight2 = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1235L, "topic", 1, 111);
-        msgLight2.setState(MqiStateMessageEnum.SEND);
+        msgLight2.setState(MessageState.SEND);
         msgLight2.setReadingPod("pod-name");
         msgLight2.setSendingPod("other-name");
 

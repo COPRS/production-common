@@ -26,8 +26,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
@@ -55,7 +55,7 @@ public class MqiMessageDaoTest {
     public void testSearchByTopicPartitionOffsetGroup() {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                5, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
@@ -65,7 +65,7 @@ public class MqiMessageDaoTest {
 
         MqiMessage expectedResult =
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
-                        "group", MqiStateMessageEnum.READ, "readingPod", null,
+                        "group", MessageState.READ, "readingPod", null,
                         "sendingPod", null, null, 0, null, null);
 
         assertEquals(expectedResult, result.get(0));
@@ -78,33 +78,33 @@ public class MqiMessageDaoTest {
     public void testSearchByTopicPartitionGroup() {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                5, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                8, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                8, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                18, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                18, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
 
-        Set<MqiStateMessageEnum> ackStates = new HashSet<>();
-        ackStates.add(MqiStateMessageEnum.ACK_KO);
-        ackStates.add(MqiStateMessageEnum.ACK_OK);
-        ackStates.add(MqiStateMessageEnum.ACK_WARN);
+        Set<MessageState> ackStates = new HashSet<>();
+        ackStates.add(MessageState.ACK_KO);
+        ackStates.add(MessageState.ACK_OK);
+        ackStates.add(MessageState.ACK_WARN);
         List<MqiMessage> result = mongoDBDAO
                 .searchByTopicPartitionGroup("topic", 1, "group", ackStates);
 
         List<MqiMessage> expectedResult = new ArrayList<>();
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
-                "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
+                "topic", 1, 5, "group", MessageState.READ, "readingPod",
                 null, "sendingPod", null, null, 0, null, null));
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
-                "topic", 1, 8, "group", MqiStateMessageEnum.READ, "readingPod",
+                "topic", 1, 8, "group", MessageState.READ, "readingPod",
                 null, "sendingPod", null, null, 0, null, null));
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
-                "topic", 1, 18, "group", MqiStateMessageEnum.READ, "readingPod",
+                "topic", 1, 18, "group", MessageState.READ, "readingPod",
                 null, "sendingPod", null, null, 0, null, null));
 
         assertEquals(expectedResult, result);
@@ -118,33 +118,33 @@ public class MqiMessageDaoTest {
     public void testSearchByPodStateCategory() {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                5, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                8, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                8, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                18, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                18, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
 
-        Set<MqiStateMessageEnum> ackStates = new HashSet<>();
-        ackStates.add(MqiStateMessageEnum.ACK_KO);
-        ackStates.add(MqiStateMessageEnum.ACK_OK);
-        ackStates.add(MqiStateMessageEnum.ACK_WARN);
+        Set<MessageState> ackStates = new HashSet<>();
+        ackStates.add(MessageState.ACK_KO);
+        ackStates.add(MessageState.ACK_OK);
+        ackStates.add(MessageState.ACK_WARN);
         List<MqiMessage> result = mongoDBDAO.searchByPodStateCategory(
                 "readingPod", ProductCategory.AUXILIARY_FILES, ackStates);
 
         List<MqiMessage> expectedResult = new ArrayList<>();
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
-                "topic", 1, 5, "group", MqiStateMessageEnum.READ, "readingPod",
+                "topic", 1, 5, "group", MessageState.READ, "readingPod",
                 null, "sendingPod", null, null, 0, null, null));
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
-                "topic", 1, 8, "group", MqiStateMessageEnum.READ, "readingPod",
+                "topic", 1, 8, "group", MessageState.READ, "readingPod",
                 null, "sendingPod", null, null, 0, null, null));
         expectedResult.add(new MqiMessage(ProductCategory.AUXILIARY_FILES,
-                "topic", 1, 18, "group", MqiStateMessageEnum.READ, "readingPod",
+                "topic", 1, 18, "group", MessageState.READ, "readingPod",
                 null, "sendingPod", null, null, 0, null, null));
 
         assertEquals(expectedResult, result);
@@ -158,7 +158,7 @@ public class MqiMessageDaoTest {
     public void testSearchByID() {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                5, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
@@ -167,7 +167,7 @@ public class MqiMessageDaoTest {
 
         MqiMessage expectedResult =
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
-                        "group", MqiStateMessageEnum.READ, "readingPod", null,
+                        "group", MessageState.READ, "readingPod", null,
                         "sendingPod", null, null, 0, null, null);
 
         assertEquals(expectedResult, result.get(0));
@@ -181,10 +181,10 @@ public class MqiMessageDaoTest {
     public void testCountReadingMsg() {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                5, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic2",
-                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                1, 5, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).find(Mockito.any(Query.class),
                 Mockito.any());
@@ -202,7 +202,7 @@ public class MqiMessageDaoTest {
     public void testInsertMqiMessage() {
         MqiMessage messageToInsert =
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
-                        "group", MqiStateMessageEnum.READ, "readingPod", null,
+                        "group", MessageState.READ, "readingPod", null,
                         "sendingPod", null, null, 0, null, null);
         doNothing().when(mongoClient).insert(Mockito.any(MqiMessage.class));
 
@@ -229,10 +229,10 @@ public class MqiMessageDaoTest {
     public void testFindAllAndRemove() {
         List<MqiMessage> response = new ArrayList<>();
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1,
-                5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                5, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         response.add(new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic2",
-                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null,
+                1, 5, "group", MessageState.READ, "readingPod", null,
                 "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoClient).findAllAndRemove(Mockito.any(Query.class),
                 Mockito.any(Class.class));

@@ -24,7 +24,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
@@ -195,7 +195,7 @@ public class GenericMessageListenerTest {
 
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("other-name");
 
@@ -244,24 +244,24 @@ public class GenericMessageListenerTest {
 
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("other-name");
 
         MqiLightMessageDto msgLightForceRead = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLightForceRead.setState(MqiStateMessageEnum.READ);
+        msgLightForceRead.setState(MessageState.READ);
         msgLightForceRead.setReadingPod("pod-name");
 
         MqiLightMessageDto msgLightForceAck = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLightForceAck.setState(MqiStateMessageEnum.ACK_KO);
+        msgLightForceAck.setState(MessageState.ACK_KO);
         msgLightForceAck.setReadingPod("pod-name");
         msgLightForceAck.setSendingPod("other-name");
 
         MqiLightMessageDto msgLightForceSend = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLightForceSend.setState(MqiStateMessageEnum.SEND);
+        msgLightForceSend.setState(MessageState.SEND);
         msgLightForceSend.setReadingPod("pod-name");
         msgLightForceSend.setSendingPod("other-name");
 
@@ -305,7 +305,7 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessageWhenAlreadyAckKo() throws AbstractCodedException {
-        checkOnMEssageWhenAckRead(MqiStateMessageEnum.ACK_KO, false);
+        checkOnMEssageWhenAckRead(MessageState.ACK_KO, false);
     }
 
     /**
@@ -315,7 +315,7 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessageWhenAlreadyAckOk() throws AbstractCodedException {
-        checkOnMEssageWhenAckRead(MqiStateMessageEnum.ACK_OK, false);
+        checkOnMEssageWhenAckRead(MessageState.ACK_OK, false);
     }
 
     /**
@@ -326,7 +326,7 @@ public class GenericMessageListenerTest {
     @Test
     public void testOnMessageWhenAlreadyAckWarn()
             throws AbstractCodedException {
-        checkOnMEssageWhenAckRead(MqiStateMessageEnum.ACK_WARN, false);
+        checkOnMEssageWhenAckRead(MessageState.ACK_WARN, false);
     }
 
     /**
@@ -336,7 +336,7 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessageWhenRead() throws AbstractCodedException {
-        checkOnMEssageWhenAckRead(MqiStateMessageEnum.READ, true);
+        checkOnMEssageWhenAckRead(MessageState.READ, true);
     }
 
     /**
@@ -346,7 +346,7 @@ public class GenericMessageListenerTest {
      * @param pause
      * @throws AbstractCodedException
      */
-    private void checkOnMEssageWhenAckRead(MqiStateMessageEnum state,
+    private void checkOnMEssageWhenAckRead(MessageState state,
             boolean pause) throws AbstractCodedException {
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
@@ -414,7 +414,7 @@ public class GenericMessageListenerTest {
             throws AbstractCodedException {
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setState(MessageState.SEND);
         msgLight.setSendingPod("pod-name");
 
         MqiGenericReadMessageDto<String> expectedReadBody =
@@ -447,7 +447,7 @@ public class GenericMessageListenerTest {
             throws AbstractCodedException {
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setState(MessageState.SEND);
         msgLight.setSendingPod("other-name");
 
         MqiGenericReadMessageDto<String> expectedReadBody =
@@ -483,12 +483,12 @@ public class GenericMessageListenerTest {
             throws AbstractCodedException {
         MqiLightMessageDto msgLight = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLight.setState(MqiStateMessageEnum.SEND);
+        msgLight.setState(MessageState.SEND);
         msgLight.setSendingPod("other-name");
 
         MqiLightMessageDto msgLightForceRead = new MqiLightMessageDto(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLightForceRead.setState(MqiStateMessageEnum.READ);
+        msgLightForceRead.setState(MessageState.READ);
         msgLightForceRead.setReadingPod("pod-name");
 
         MqiGenericReadMessageDto<String> expectedReadBody =

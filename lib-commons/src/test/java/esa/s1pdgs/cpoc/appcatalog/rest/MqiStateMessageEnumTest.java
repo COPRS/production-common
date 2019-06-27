@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.common.MessageState;
+
 /**
- * Test the enumeration MqiStateMessageEnum
+ * Test the enumeration MessageState
  * 
  * @author Viveris Technologies
  */
@@ -16,12 +18,12 @@ public class MqiStateMessageEnumTest {
      */
     @Test
     public void basic() {
-        assertEquals(5, MqiStateMessageEnum.values().length);
+        assertEquals(5, MessageState.values().length);
         
-        assertEquals(MqiStateMessageEnum.ACK_KO, MqiStateMessageEnum.valueOf("ACK_KO"));
-        assertEquals(MqiStateMessageEnum.ACK_OK, MqiStateMessageEnum.valueOf("ACK_OK"));
-        assertEquals(MqiStateMessageEnum.ACK_WARN, MqiStateMessageEnum.valueOf("ACK_WARN"));
-        assertEquals(MqiStateMessageEnum.READ, MqiStateMessageEnum.valueOf("READ"));
-        assertEquals(MqiStateMessageEnum.SEND, MqiStateMessageEnum.valueOf("SEND"));
+        assertEquals(MessageState.ACK_KO, MessageState.valueOf("ACK_KO"));
+        assertEquals(MessageState.ACK_OK, MessageState.valueOf("ACK_OK"));
+        assertEquals(MessageState.ACK_WARN, MessageState.valueOf("ACK_WARN"));
+        assertEquals(MessageState.READ, MessageState.valueOf("READ"));
+        assertEquals(MessageState.SEND, MessageState.valueOf("SEND"));
     }
 }

@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -193,7 +193,7 @@ public abstract class GenericExtractor<T> {
             
             failedProc.processingType(message.getInputKey())
       			.topic(message.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.processingStatus(MessageState.READ)
 	    		.productCategory(category)
 	    		.failedPod(processConfiguration.getHostname())
 	            .failureDate(new Date())
@@ -211,7 +211,7 @@ public abstract class GenericExtractor<T> {
             
             failedProc.processingType(message.getInputKey())
         		.topic(message.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.processingStatus(MessageState.READ)
 	    		.productCategory(category)
 	    		.failedPod(processConfiguration.getHostname())
 	            .failureDate(new Date())

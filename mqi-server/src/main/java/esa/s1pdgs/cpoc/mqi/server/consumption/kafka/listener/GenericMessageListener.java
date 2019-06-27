@@ -10,7 +10,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
@@ -203,7 +203,7 @@ public class GenericMessageListener<T>
                     new MqiGenericReadMessageDto<T>(
                             properties.getConsumer().getGroupId(),
                             properties.getHostname(), true, data.value()));
-            if (resultForce.getState() != MqiStateMessageEnum.READ) {
+            if (resultForce.getState() != MessageState.READ) {
                 ret = true;
             }
             LOGGER.warn(

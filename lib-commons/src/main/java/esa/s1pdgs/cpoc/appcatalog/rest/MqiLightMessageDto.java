@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
@@ -47,7 +48,7 @@ public class MqiLightMessageDto {
     /**
      * State of the message
      */
-    protected MqiStateMessageEnum state;
+    protected MessageState state;
 
     /**
      * Pod name who is reading the message
@@ -90,7 +91,7 @@ public class MqiLightMessageDto {
     public MqiLightMessageDto() {
         super();
         this.nbRetries = 0;
-        this.state = MqiStateMessageEnum.READ;
+        this.state = MessageState.READ;
     }
 
     /**
@@ -211,7 +212,7 @@ public class MqiLightMessageDto {
     /**
      * @return the state
      */
-    public MqiStateMessageEnum getState() {
+    public MessageState getState() {
         return state;
     }
 
@@ -219,7 +220,7 @@ public class MqiLightMessageDto {
      * @param state
      *            the state to set
      */
-    public void setState(final MqiStateMessageEnum state) {
+    public void setState(final MessageState state) {
         this.state = state;
     }
 

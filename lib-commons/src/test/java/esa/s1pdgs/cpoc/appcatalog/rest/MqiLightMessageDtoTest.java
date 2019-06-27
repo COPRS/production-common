@@ -7,6 +7,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -24,7 +25,7 @@ public class MqiLightMessageDtoTest {
     @Test
     public void testConstructors() {
         MqiLightMessageDto obj = new MqiLightMessageDto();
-        assertEquals(MqiStateMessageEnum.READ, obj.getState());
+        assertEquals(MessageState.READ, obj.getState());
 
         MqiLightMessageDto obj1 =
                 new MqiLightMessageDto(ProductCategory.AUXILIARY_FILES);
@@ -53,7 +54,7 @@ public class MqiLightMessageDtoTest {
         obj3.setNbRetries(3);
         obj3.setReadingPod("reading-pod");
         obj3.setSendingPod("sending-pod");
-        obj3.setState(MqiStateMessageEnum.ACK_WARN);
+        obj3.setState(MessageState.ACK_WARN);
         assertEquals("group-name", obj3.getGroup());
         assertEquals(new Date(888888888), obj3.getLastAckDate());
         assertEquals(new Date(999999999), obj3.getLastReadDate());
@@ -61,7 +62,7 @@ public class MqiLightMessageDtoTest {
         assertEquals(3, obj3.getNbRetries());
         assertEquals("reading-pod", obj3.getReadingPod());
         assertEquals("sending-pod", obj3.getSendingPod());
-        assertEquals(MqiStateMessageEnum.ACK_WARN, obj3.getState());
+        assertEquals(MessageState.ACK_WARN, obj3.getState());
 
     }
 
@@ -83,7 +84,7 @@ public class MqiLightMessageDtoTest {
         obj.setNbRetries(3);
         obj.setReadingPod("reading-pod");
         obj.setSendingPod("sending-pod");
-        obj.setState(MqiStateMessageEnum.ACK_WARN);
+        obj.setState(MessageState.ACK_WARN);
 
         String str = obj.toString();
         assertTrue(str.contains("category: EDRS_SESSIONS"));

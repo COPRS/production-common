@@ -33,11 +33,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.appcatalog.server.RestControllerTest;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.rest.MqiLevelReportController;
 import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -80,7 +80,7 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
     public void testReadMessageMqiMessageNoForceSend() throws Exception {
         doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(), Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.LEVEL_REPORTS, "topic",
-                1, 5, "group", MqiStateMessageEnum.SEND, "readingPod", null, 
+                1, 5, "group", MessageState.SEND, "readingPod", null, 
                 "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
@@ -104,13 +104,13 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
     public void testNextMessageMqiMessage() throws Exception {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.LEVEL_REPORTS, "topic",
-                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null, 
+                1, 5, "group", MessageState.READ, "readingPod", null, 
                 "sendingPod", null, null, 2, null, null));
         response.add(new MqiMessage(ProductCategory.LEVEL_REPORTS, "topic",
-                1, 8, "group", MqiStateMessageEnum.READ, "readingPod", null, 
+                1, 8, "group", MessageState.READ, "readingPod", null, 
                 "sendingPod", null, null, 2, null, null));
         response.add(new MqiMessage(ProductCategory.LEVEL_REPORTS, "topic",
-                1, 18, "group", MqiStateMessageEnum.READ, "readingPod", null, 
+                1, 18, "group", MessageState.READ, "readingPod", null, 
                 "sendingPod", null, null, 2, null, null));
         doReturn(response).when(mongoDBServices).searchByPodStateCategory(
                 Mockito.anyString(), Mockito.any(ProductCategory.class),
@@ -127,7 +127,7 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
     public void testSendMessageMqiMessageREAD() throws Exception {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.LEVEL_REPORTS, "topic",
-            1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null, 
+            1, 5, "group", MessageState.READ, "readingPod", null, 
                 "sendingPod", null, null, 0, null, null));
         doReturn(response).when(mongoDBServices).searchByID(Mockito.anyLong());
         MqiSendMessageDto body = new MqiSendMessageDto("pod", false);
@@ -144,7 +144,7 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
     public void testAckMessageMqiMessageOK() throws Exception {
         doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(), Mockito.any());
         MqiMessage message = new MqiMessage(ProductCategory.LEVEL_REPORTS, "topic",
-                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null, 
+                1, 5, "group", MessageState.READ, "readingPod", null, 
                 "sendingPod", null, null, 2, null, null);
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
@@ -163,7 +163,7 @@ public class MqiLevelReportControllerTest  extends RestControllerTest {
     public void testEarliestOffsetMessageMqiMessage() throws Exception {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(new MqiMessage(ProductCategory.LEVEL_REPORTS, "topic",
-                1, 5, "group", MqiStateMessageEnum.READ, "readingPod", null, 
+                1, 5, "group", MessageState.READ, "readingPod", null, 
                 "sendingPod", null, null, 2, null, null));
         doReturn(response).when(mongoDBServices).searchByTopicPartitionGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),

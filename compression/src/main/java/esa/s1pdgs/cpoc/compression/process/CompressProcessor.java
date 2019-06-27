@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -217,7 +217,7 @@ public class CompressProcessor {
 			report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 
 			failedProc.processingType(message.getInputKey()).topic(message.getInputKey())
-					.processingStatus(MqiStateMessageEnum.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
+					.processingStatus(MessageState.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
 					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
 					.processingDetails(message);
 
@@ -231,7 +231,7 @@ public class CompressProcessor {
 			report.reportError("Interrupted job processing");
 
 			failedProc.processingType(message.getInputKey()).topic(message.getInputKey())
-					.processingStatus(MqiStateMessageEnum.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
+					.processingStatus(MessageState.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
 					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
 					.processingDetails(message);
 

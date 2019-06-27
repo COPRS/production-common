@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 public class ProcessingDto extends MqiGenericMessageDto<Object> {
@@ -59,7 +59,7 @@ public class ProcessingDto extends MqiGenericMessageDto<Object> {
 		return this;
 	}
 
-	public ProcessingDto processingStatus(MqiStateMessageEnum processingStatus) {
+	public ProcessingDto processingStatus(MessageState processingStatus) {
 		this.setState(processingStatus);
 		return this;
 	}

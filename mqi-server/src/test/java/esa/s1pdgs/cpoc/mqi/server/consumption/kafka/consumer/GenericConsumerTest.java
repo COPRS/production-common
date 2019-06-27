@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -77,9 +77,9 @@ public class GenericConsumerTest {
 
         properties.setHostname("test-host");
 
-        messageLight2.setState(MqiStateMessageEnum.SEND);
+        messageLight2.setState(MessageState.SEND);
         messageLight2.setSendingPod("test-host");
-        messageLight3.setState(MqiStateMessageEnum.SEND);
+        messageLight3.setState(MessageState.SEND);
         messageLight3.setSendingPod("other-host");
 
         doReturn(messageLight1, messageLight2, messageLight3).when(service)

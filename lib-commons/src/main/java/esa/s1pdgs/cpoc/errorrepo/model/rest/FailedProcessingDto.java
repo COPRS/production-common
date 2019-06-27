@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -65,7 +65,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 		return this;
 	}
 
-	public FailedProcessingDto<T> processingStatus(MqiStateMessageEnum processingStatus) {
+	public FailedProcessingDto<T> processingStatus(MessageState processingStatus) {
 		this.setState(processingStatus);
 		return this;
 	}
@@ -185,7 +185,7 @@ public class FailedProcessingDto<T extends GenericMessageDto<?>> extends MqiGene
 	
 	@Override
 	@JsonProperty("processingStatus")
-	public MqiStateMessageEnum getState() {
+	public MessageState getState() {
 		return super.getState();
 	}
 	
