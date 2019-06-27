@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>de.werum.s1pdgs</groupId>
 		<artifactId>s1pro-core</artifactId>
-		<version>0.3.0</version>
+		<version>0.4.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1pro-core-error-repository</artifactId>
 	<packaging>jar</packaging>
@@ -88,7 +88,6 @@
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.11</artifactId>
-			<version>1.0.1</version>
 			<classifier>test</classifier>
 			<scope>test</scope>
 		</dependency>
@@ -96,7 +95,6 @@
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-log4j-appender</artifactId>
-			<version>1.0.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>

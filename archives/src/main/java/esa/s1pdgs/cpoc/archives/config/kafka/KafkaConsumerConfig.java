@@ -18,7 +18,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.AbstractMessageListenerContainer;
+import org.springframework.kafka.listener.AbstractMessageListenerContainer.AckMode;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
@@ -120,8 +120,7 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
-        factory.getContainerProperties().setAckMode(
-                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 
@@ -154,8 +153,7 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(reportConsumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
-        factory.getContainerProperties().setAckMode(
-                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 
@@ -188,8 +186,7 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(segmentConsumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
-        factory.getContainerProperties().setAckMode(
-                AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 

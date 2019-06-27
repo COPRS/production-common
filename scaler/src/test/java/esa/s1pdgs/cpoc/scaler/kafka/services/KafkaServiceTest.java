@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -29,7 +30,6 @@ import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerGroupsDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.PartitionDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.SpdgsTopic;
 import esa.s1pdgs.cpoc.scaler.kafka.services.KafkaService;
-import kafka.admin.AdminClient;
 import kafka.admin.AdminClient.ConsumerSummary;
 
 public class KafkaServiceTest {
@@ -143,9 +143,20 @@ public class KafkaServiceTest {
         list1.add(tp4);
         List<TopicPartition> list2 = new ArrayList<>();
         list2.add(tp2);
-        service.addConsumerDescription(result, kConsumer1, list1, "topic",
+        
+        final ConsumerDescription cd1 = new ConsumerDescription(
+        		kConsumer1.clientId(),
+        		kConsumer1.consumerId()
+        );
+        
+        final ConsumerDescription cd2 = new ConsumerDescription(
+        		kConsumer2.clientId(),
+        		kConsumer2.consumerId()
+        );
+        
+        service.addConsumerDescription(result, cd1, list1, "topic",
                 consumer);
-        service.addConsumerDescription(result, kConsumer2, list2, "topic",
+        service.addConsumerDescription(result, cd2, list2, "topic",
                 consumer);
 
         PartitionDescription pDesc1 =

@@ -18,7 +18,7 @@ public class ProductFamilyTest {
      */
     @Test
     public void testBasic() {
-        assertEquals(28, ProductFamily.values().length);
+        assertEquals(29, ProductFamily.values().length);
         assertEquals(ProductFamily.L0_SLICE, ProductFamily.valueOf("L0_SLICE"));
     }
 
