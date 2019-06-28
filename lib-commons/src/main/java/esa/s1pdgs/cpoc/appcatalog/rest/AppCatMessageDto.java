@@ -3,8 +3,6 @@ package esa.s1pdgs.cpoc.appcatalog.rest;
 import java.util.Date;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
@@ -13,82 +11,86 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * 
  * @author Viveris Technologies
  */
-public class MqiLightMessageDto {
+public class AppCatMessageDto<T> {
 
     /**
      * Category
      */
-    protected ProductCategory category;
+    private ProductCategory category;
 
     /**
      * Identifier
      */
-    protected long identifier;
+    private long identifier;
 
     /**
      * Topic name
      */
-    protected String topic;
+    private String topic;
 
     /**
      * Partition identifier
      */
-    protected int partition;
+    private int partition;
 
     /**
      * Offset in Kafka
      */
-    protected long offset;
+    private long offset;
 
     /**
      * Group name
      */
-    protected String group;
+    private String group;
 
     /**
      * State of the message
      */
-    protected MessageState state;
+    private MessageState state;
 
     /**
      * Pod name who is reading the message
      */
-    protected String readingPod;
+    private String readingPod;
 
     /**
      * Date of the last read
      */
-    protected Date lastReadDate;
+    private Date lastReadDate;
 
     /**
      * Pod name who is sending the message
      */
-    protected String sendingPod;
+    private String sendingPod;
 
     /**
      * Date of the last send
      */
-    protected Date lastSendDate;
+    private Date lastSendDate;
 
     /**
      * Date of the last ack
      */
-    protected Date lastAckDate;
+    private Date lastAckDate;
 
     /**
      * Number of retries
      */
-    protected int nbRetries;
+    private int nbRetries;
     
     /**
      * Date of creation
      */
-    protected Date creationDate;
+    private Date creationDate;
+    
+    
+    private T dto;
+        
 
     /**
      * Default constructor
      */
-    public MqiLightMessageDto() {
+    public AppCatMessageDto() {
         super();
         this.nbRetries = 0;
         this.state = MessageState.READ;
@@ -97,7 +99,7 @@ public class MqiLightMessageDto {
     /**
      * @param category
      */
-    public MqiLightMessageDto(final ProductCategory category) {
+    public AppCatMessageDto(final ProductCategory category) {
         this();
         this.category = category;
     }
@@ -109,7 +111,7 @@ public class MqiLightMessageDto {
      * @param partition
      * @param offset
      */
-    public MqiLightMessageDto(final ProductCategory category,
+    public AppCatMessageDto(final ProductCategory category,
             final long identifier, final String topic, final int partition,
             final long offset) {
         this(category);
@@ -119,7 +121,16 @@ public class MqiLightMessageDto {
         this.offset = offset;
     }
 
-    /**
+    public AppCatMessageDto(ProductCategory category, int identifier, String topic, int partition, int offset, T dto) {
+        this(category);
+        this.identifier = identifier;
+        this.topic = topic;
+        this.partition = partition;
+        this.offset = offset;
+        this.dto = dto;
+	}
+
+	/**
      * @return the category
      */
     public ProductCategory getCategory() {
@@ -327,6 +338,22 @@ public class MqiLightMessageDto {
     public void setCreationDate(final Date creationDate) {
         this.creationDate = creationDate;
     }
+    
+
+    /**
+     * @return the dto
+     */
+    public T getDto() {
+        return dto;
+    }
+
+    /**
+     * @param dto
+     *            the dto to set
+     */
+    public void setDto(final T dto) {
+        this.dto = dto;
+    }
 
     /**
      * @see java.lang.Object#toString()
@@ -341,10 +368,12 @@ public class MqiLightMessageDto {
      */
     public String toStringForExtend() {
         return String.format(
-                "category: %s, identifier: %s, topic: %s, partition: %s, offset: %s, group: %s, state: %s, readingPod: %s, lastReadDate: %s, sendingPod: %s, lastSendDate: %s, lastAckDate: %s, nbRetries: %s, creationDate: %s",
+                "category: %s, identifier: %s, topic: %s, partition: %s, offset: %s, "
+                + "group: %s, state: %s, readingPod: %s, lastReadDate: %s, sendingPod: %s, "
+                + "lastSendDate: %s, lastAckDate: %s, nbRetries: %s, creationDate: %s, dto: %s",
                 category, identifier, topic, partition, offset, group, state,
                 readingPod, lastReadDate, sendingPod, lastSendDate, lastAckDate,
-                nbRetries, creationDate);
+                nbRetries, creationDate, dto);
     }
 
     /**
@@ -354,7 +383,7 @@ public class MqiLightMessageDto {
     public int hashCode() {
         return Objects.hash(category, identifier, topic, partition, offset,
                 group, state, readingPod, lastReadDate, sendingPod,
-                lastSendDate, lastAckDate, nbRetries, creationDate);
+                lastSendDate, lastAckDate, nbRetries, creationDate, dto);
     }
 
     /**
@@ -368,7 +397,7 @@ public class MqiLightMessageDto {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            MqiLightMessageDto other = (MqiLightMessageDto) obj;
+            AppCatMessageDto<?> other = (AppCatMessageDto<?>) obj;
             ret = Objects.equals(category, other.category)
                     && identifier == other.identifier
                     && Objects.equals(topic, other.topic)
@@ -381,6 +410,7 @@ public class MqiLightMessageDto {
                     && Objects.equals(lastSendDate, other.lastSendDate)
                     && Objects.equals(lastAckDate, other.lastAckDate)
                     && Objects.equals(creationDate, other.creationDate)
+                    && Objects.equals(dto, other.dto)
                     && nbRetries == other.nbRetries;
         }
         return ret;

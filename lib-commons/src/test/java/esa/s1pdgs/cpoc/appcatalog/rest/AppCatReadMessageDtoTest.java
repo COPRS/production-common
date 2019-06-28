@@ -14,14 +14,14 @@ import nl.jqno.equalsverifier.Warning;
  * 
  * @author Viveris Technologies
  */
-public class MqiGenericReadMessageDtoTest {
+public class AppCatReadMessageDtoTest {
 
     /**
      * Test constructors
      */
     @Test
     public void testConstructors() {
-        MqiGenericReadMessageDto<String> obj = new MqiGenericReadMessageDto<>();
+        AppCatReadMessageDto<String> obj = new AppCatReadMessageDto<>();
         assertFalse(obj.isForce());
         obj.setGroup("group");
         obj.setPod("pod-name");
@@ -32,8 +32,8 @@ public class MqiGenericReadMessageDtoTest {
         assertEquals("dto-obj", obj.getDto());
         assertTrue(obj.isForce());
 
-        MqiGenericReadMessageDto<String> obj1 =
-                new MqiGenericReadMessageDto<String>("group", "pod-name", true,
+        AppCatReadMessageDto<String> obj1 =
+                new AppCatReadMessageDto<String>("group", "pod-name", true,
                         "dto-obj");
         assertEquals("group", obj1.getGroup());
         assertEquals("pod-name", obj1.getPod());
@@ -46,8 +46,8 @@ public class MqiGenericReadMessageDtoTest {
      */
     @Test
     public void testToString() {
-        MqiGenericReadMessageDto<String> obj =
-                new MqiGenericReadMessageDto<String>("group", "pod-name", true,
+        AppCatReadMessageDto<String> obj =
+                new AppCatReadMessageDto<String>("group", "pod-name", true,
                         "dto-obj");
         String str = obj.toString();
         assertTrue(str.contains("group: group"));
@@ -61,7 +61,7 @@ public class MqiGenericReadMessageDtoTest {
      */
     @Test
     public void testEquals() {
-        EqualsVerifier.forClass(MqiGenericReadMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(AppCatReadMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

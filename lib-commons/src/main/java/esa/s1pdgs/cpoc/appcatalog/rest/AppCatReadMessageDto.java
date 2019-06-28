@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Viveris Technologies
  */
-public class MqiGenericReadMessageDto<T> {
+public class AppCatReadMessageDto<T> {
 
     /**
      * Group
@@ -33,7 +33,7 @@ public class MqiGenericReadMessageDto<T> {
     /**
      * Default constructor
      */
-    public MqiGenericReadMessageDto() {
+    public AppCatReadMessageDto() {
         super();
     }
 
@@ -43,7 +43,7 @@ public class MqiGenericReadMessageDto<T> {
      * @param force
      * @param dto
      */
-    public MqiGenericReadMessageDto(final String group, final String pod,
+    public AppCatReadMessageDto(final String group, final String pod,
             final boolean force, final T dto) {
         super();
         this.group = group;
@@ -140,7 +140,7 @@ public class MqiGenericReadMessageDto<T> {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            MqiGenericReadMessageDto<?> other = (MqiGenericReadMessageDto<?>) obj;
+            AppCatReadMessageDto<?> other = (AppCatReadMessageDto<?>) obj;
             ret = Objects.equals(group, other.group)
                     && Objects.equals(pod, other.pod) && force == other.force
                     && Objects.equals(dto, other.dto);

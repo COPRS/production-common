@@ -21,10 +21,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Test the MemoryConsumerAwareRebalanceListener
@@ -43,7 +41,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
      * Service of applicative data
      */
     @Mock
-    private GenericAppCatalogMqiService<ProductDto> service;
+    private GenericAppCatalogMqiService service;
 
     /**
      * Listener to test
@@ -82,8 +80,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
                 Mockito.eq(3), Mockito.anyString());
         doReturn(128L).when(service).getEarliestOffset(Mockito.anyString(),
                 Mockito.eq(4), Mockito.anyString());
-        doThrow(new AppCatalogMqiGetOffsetApiError(
-                ProductCategory.AUXILIARY_FILES, "uri", "message"))
+        doThrow(new AppCatalogMqiGetOffsetApiError("uri", "message"))
                         .when(service).getEarliestOffset(Mockito.anyString(),
                                 Mockito.eq(5), Mockito.anyString());
 

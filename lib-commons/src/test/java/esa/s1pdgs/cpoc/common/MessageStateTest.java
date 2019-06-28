@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.rest;
+package esa.s1pdgs.cpoc.common;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,7 +11,7 @@ import esa.s1pdgs.cpoc.common.MessageState;
  * 
  * @author Viveris Technologies
  */
-public class MqiStateMessageEnumTest {
+public class MessageStateTest {
 
     /**
      * Test values and valueOf

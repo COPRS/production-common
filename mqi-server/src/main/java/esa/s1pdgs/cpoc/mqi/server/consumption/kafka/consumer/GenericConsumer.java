@@ -17,6 +17,7 @@ import org.springframework.kafka.listener.config.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
@@ -39,7 +40,7 @@ public class GenericConsumer<T> {
     /**
      * Service for persisting data
      */
-    private final GenericAppCatalogMqiService<T> service;
+    private final GenericAppCatalogMqiService service;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -70,6 +71,8 @@ public class GenericConsumer<T> {
      * 
      */
     private final Class<T> consumedMsgClass;
+    
+    private final ProductCategory category;
 
     /**
      * 
@@ -80,12 +83,14 @@ public class GenericConsumer<T> {
      * @param topic
      * @param consumedMsgClass
      */
-    public GenericConsumer(final KafkaProperties properties,
-            final GenericAppCatalogMqiService<T> service,
+    public GenericConsumer(final ProductCategory category,
+    		final KafkaProperties properties,
+            final GenericAppCatalogMqiService service,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus, final String topic,
-            final int priority,
+            final int priority,            
             final Class<T> consumedMsgClass) {
+    	this.category = category;
         this.properties = properties;
         this.service = service;
         this.otherAppService = otherAppService;
@@ -120,9 +125,14 @@ public class GenericConsumer<T> {
      * Start the consumer
      */
     public void start() {
-        AcknowledgingConsumerAwareMessageListener<String, T> messageListener =
-                new GenericMessageListener<>(properties, service,
-                        otherAppService, this, appStatus);
+        AcknowledgingConsumerAwareMessageListener<String, T> messageListener = new GenericMessageListener<>(
+        		category,
+        		properties, 
+        		service,
+        		otherAppService, 
+        		this, 
+        		appStatus
+        );
 
         container = new ConcurrentMessageListenerContainer<>(consumerFactory(),
                 containerProperties(topic, messageListener));

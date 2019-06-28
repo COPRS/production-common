@@ -30,7 +30,7 @@ public class MemoryConsumerAwareRebalanceListener
     /**
      * Service for checking if a message is processing or not by another
      */
-    private final GenericAppCatalogMqiService<?> service;
+    private final GenericAppCatalogMqiService service;
 
     /**
      * Group name
@@ -46,7 +46,7 @@ public class MemoryConsumerAwareRebalanceListener
      * Default constructor
      */
     public MemoryConsumerAwareRebalanceListener(
-            final GenericAppCatalogMqiService<?> service, final String group,
+            final GenericAppCatalogMqiService service, final String group,
             final int defaultMode) {
         super();
         this.service = service;
@@ -105,8 +105,7 @@ public class MemoryConsumerAwareRebalanceListener
             long startingOffset = defaultMode;
             try {
                 startingOffset =
-                        service.getEarliestOffset(topicPartition.topic(),
-                                topicPartition.partition(), group);
+                        service.getEarliestOffset(topicPartition.topic(), topicPartition.partition(), group);
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",

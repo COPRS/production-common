@@ -1,10 +1,12 @@
 package esa.s1pdgs.cpoc.appcatalog.client.mqi;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -13,56 +15,51 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiAckApiError;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetNbReadingApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
+import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
  * @author Viveris Technologies
  * @param <T>
  */
-public abstract class GenericAppCatalogMqiService<T> {
-
+public class GenericAppCatalogMqiService {
     /**
      * Logger
      */
-    protected static final Log LOGGER =
-            LogFactory.getLog(GenericAppCatalogMqiService.class);
+    static final Log LOGGER = LogFactory.getLog(GenericAppCatalogMqiService.class);
 
     /**
      * Rest template
      */
-    protected final RestTemplate restTemplate;
-
-    /**
-     * Product category
-     */
-    protected final ProductCategory category;
+    private final RestTemplate restTemplate;
 
     /**
      * Host URI. Example: http://localhost:8081
      */
-    protected final String hostUri;
+    private final String hostUri;
 
     /**
      * Maximal number of retries
      */
-    protected final int maxRetries;
+    private final int maxRetries;
 
     /**
      * Temporisation in ms betwenn 2 retries
      */
-    protected final int tempoRetryMs;
+    private final int tempoRetryMs;
 
     /**
      * Constructor
@@ -74,24 +71,12 @@ public abstract class GenericAppCatalogMqiService<T> {
      * @param tempoRetryMs
      */
     public GenericAppCatalogMqiService(final RestTemplate restTemplate,
-            final ProductCategory category, final String hostUri,
+            final String hostUri,
             final int maxRetries, final int tempoRetryMs) {
         this.restTemplate = restTemplate;
-        this.category = category;
         this.hostUri = hostUri;
-        if (maxRetries < 0 || maxRetries > 20) {
-            this.maxRetries = 0;
-        } else {
-            this.maxRetries = maxRetries;
-        }
+        this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
-    }
-
-    /**
-     * @return the category
-     */
-    public ProductCategory getCategory() {
-        return category;
     }
 
     /**
@@ -101,7 +86,7 @@ public abstract class GenericAppCatalogMqiService<T> {
         return hostUri;
     }
 
-    /**
+	/**
      * @return the maxRetries
      */
     public int getMaxRetries() {
@@ -122,7 +107,7 @@ public abstract class GenericAppCatalogMqiService<T> {
      * @param cause
      * @throws AbstractCodedException
      */
-    protected void waitOrThrow(final int retries,
+    private final void waitOrThrow(final int retries,
             final AbstractCodedException cause, final String api)
             throws AbstractCodedException {
         LOGGER.debug(String.format("[api %s] %s Retry %d/%d", api,
@@ -149,8 +134,13 @@ public abstract class GenericAppCatalogMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public MqiLightMessageDto read(final String topic, final int partition,
-            final long offset, final MqiGenericReadMessageDto<T> body)
+    public AppCatMessageDto<? extends AbstractDto> read(
+    		final ProductCategory category,
+    		final String topic, 
+    		final int partition,
+            final long offset, 
+            final AppCatReadMessageDto<?> body
+    )
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -160,11 +150,10 @@ public abstract class GenericAppCatalogMqiService<T> {
             LogUtils.traceLog(LOGGER,
                     String.format("[uri %s] [body %s]", uri, body));
             try {
-                ResponseEntity<MqiLightMessageDto> response =
+                ResponseEntity<AppCatMessageDto> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
-                                new HttpEntity<MqiGenericReadMessageDto<T>>(
-                                        body),
-                                MqiLightMessageDto.class);
+                                new HttpEntity<AppCatReadMessageDto<?>>(body),
+                                AppCatMessageDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     if (response.getBody() == null) {
                         waitOrThrow(
@@ -194,21 +183,12 @@ public abstract class GenericAppCatalogMqiService<T> {
     }
 
     /**
-     * Get the next message to proceed
-     * 
-     * @return
-     * @throws AbstractCodedException
-     */
-    public abstract List<MqiGenericMessageDto<T>> next(String podName)
-            throws AbstractCodedException;
-
-    /**
      * Publish a message
      * 
      * @param message
      * @throws AbstractCodedException
      */
-    public boolean send(final long messageId, final MqiSendMessageDto body)
+    public boolean send(final ProductCategory category, final long messageId, final AppCatSendMessageDto body)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -218,7 +198,7 @@ public abstract class GenericAppCatalogMqiService<T> {
             try {
                 ResponseEntity<Boolean> response = restTemplate.exchange(uri,
                         HttpMethod.POST,
-                        new HttpEntity<MqiSendMessageDto>(body), Boolean.class);
+                        new HttpEntity<AppCatSendMessageDto>(body), Boolean.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     Boolean ret = response.getBody();
                     LogUtils.traceLog(LOGGER,
@@ -254,7 +234,7 @@ public abstract class GenericAppCatalogMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public boolean ack(final long messageId, final Ack ack)
+    public boolean ack(final ProductCategory category, final long messageId, final Ack ack)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -293,18 +273,6 @@ public abstract class GenericAppCatalogMqiService<T> {
     }
 
     /**
-     * Ack a message
-     * 
-     * @param identifier
-     * @param ack
-     * @param message
-     * @return
-     * @throws AbstractCodedException
-     */
-    public abstract MqiGenericMessageDto<T> get(final long messageId)
-            throws AbstractCodedException;
-
-    /**
      * Publish a message
      * 
      * @param message
@@ -316,8 +284,7 @@ public abstract class GenericAppCatalogMqiService<T> {
         while (true) {
             retries++;
             // TODO use URI builder
-            String uriStr = hostUri + "/mqi/" + category.name().toLowerCase()
-                    + "/" + topic + "/" + partition + "/earliestOffset";
+            String uriStr = hostUri + "/mqi/" + topic + "/" + partition + "/earliestOffset";
             UriComponentsBuilder builder = UriComponentsBuilder
                     .fromUriString(uriStr).queryParam("group", group);
             URI uri = builder.build().toUri();
@@ -339,7 +306,7 @@ public abstract class GenericAppCatalogMqiService<T> {
                     }
                 } else {
                     waitOrThrow(retries,
-                            new AppCatalogMqiGetOffsetApiError(category,
+                            new AppCatalogMqiGetOffsetApiError(
                                     uri.toString(),
                                     "HTTP status code "
                                             + response.getStatusCode()),
@@ -347,7 +314,7 @@ public abstract class GenericAppCatalogMqiService<T> {
                 }
             } catch (RestClientException rce) {
                 waitOrThrow(retries, new AppCatalogMqiGetOffsetApiError(
-                        category, uri.toString(),
+                     uri.toString(),
                         "RestClientException occurred: " + rce.getMessage(),
                         rce), "send");
             }
@@ -362,8 +329,7 @@ public abstract class GenericAppCatalogMqiService<T> {
         int retries = 0;
         while (true) {
             retries++;
-            String uriStr = hostUri + "/mqi/" + category.name().toLowerCase()
-                    + "/" + topic + "/nbReading";
+            String uriStr = hostUri + "/mqi/" + topic + "/nbReading";
             UriComponentsBuilder builder = UriComponentsBuilder
                     .fromUriString(uriStr).queryParam("pod", podName);
             URI uri = builder.build().toUri();
@@ -384,7 +350,7 @@ public abstract class GenericAppCatalogMqiService<T> {
                     }
                 } else {
                     waitOrThrow(retries,
-                            new AppCatalogMqiGetNbReadingApiError(category,
+                            new AppCatalogMqiGetNbReadingApiError(
                                     uri.toString(),
                                     "HTTP status code "
                                             + response.getStatusCode()),
@@ -392,13 +358,90 @@ public abstract class GenericAppCatalogMqiService<T> {
                 }
             } catch (RestClientException rce) {
                 waitOrThrow(retries,
-                        new AppCatalogMqiGetNbReadingApiError(category,
+                        new AppCatalogMqiGetNbReadingApiError(
                                 uri.toString(),
 
                                 "RestClientException occurred: "
                                         + rce.getMessage(),
                                 rce),
                         "getNbReadingMessages");
+            }
+        }
+    }
+    
+
+    public List<AppCatMessageDto<? extends AbstractDto>> next(final ProductCategory category, String podName)
+            throws AbstractCodedException {
+        int retries = 0;
+        while (true) {
+            retries++;
+            String uriStr =
+                    hostUri + "/mqi/" + category.name().toLowerCase() + "/next";
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromUriString(uriStr).queryParam("pod", podName);
+            URI uri = builder.build().toUri();
+            try {
+                ResponseEntity<List<AppCatMessageDto<? extends AbstractDto>>> response =
+                        restTemplate.exchange(uri, HttpMethod.GET, null,
+                                new ParameterizedTypeReference<List<AppCatMessageDto<? extends AbstractDto>>>() {
+                                });
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    List<AppCatMessageDto<? extends AbstractDto>> body = response.getBody();
+                    if (body == null) {
+                        return new ArrayList<>();
+                    } else {
+                        List<AppCatMessageDto<? extends AbstractDto>> ret =
+                                new ArrayList<AppCatMessageDto<? extends AbstractDto>>();
+                        ret.addAll(body);
+                        return ret;
+                    }
+                } else {
+                    waitOrThrow(retries,
+                            new AppCatalogMqiNextApiError(category,
+                                    "HTTP status code "
+                                            + response.getStatusCode()),
+                            "next");
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new AppCatalogMqiNextApiError(category,
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce), "next");
+            }
+        }
+    }
+
+    public AppCatMessageDto<?> get(final ProductCategory category, final long messageId)
+            throws AbstractCodedException {
+        int retries = 0;
+        while (true) {
+            retries++;
+            String uri = hostUri + "/mqi/" + category.name().toLowerCase() + "/"
+                    + messageId;
+            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
+            try {
+                ResponseEntity<AppCatMessageDto> response =
+                        restTemplate.exchange(uri, HttpMethod.GET, null,
+                        		AppCatMessageDto.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
+                            uri, response.getBody()));
+                    return response.getBody();
+                } else if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    LogUtils.traceLog(LOGGER,
+                            String.format("[uri %s] [ret NOT_FOUND]", uri));
+                    throw new AppCatalogMqiGetApiError(category, uri,
+                            "Message not found");
+                } else {
+                    waitOrThrow(retries, new AppCatalogMqiGetApiError(category,
+                            uri,
+                            "HTTP status code " + response.getStatusCode()),
+                            "ack");
+                }
+            } catch (RestClientException rce) {
+                waitOrThrow(retries, new AppCatalogMqiGetApiError(category, uri,
+
+                        "RestClientException occurred: " + rce.getMessage(),
+                        rce), "ack");
             }
         }
     }

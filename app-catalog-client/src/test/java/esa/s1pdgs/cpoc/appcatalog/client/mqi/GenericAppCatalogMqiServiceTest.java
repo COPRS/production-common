@@ -31,10 +31,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiLevelProductsService;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiSendMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -68,14 +67,14 @@ public class GenericAppCatalogMqiServiceTest {
     /**
      * Service to test
      */
-    private AppCatalogMqiLevelProductsService service;
+    private GenericAppCatalogMqiService service;
 
     /**
      * DTO
      */
-    private MqiLightMessageDto lightMessage;
-    private MqiGenericReadMessageDto<ProductDto> readMessage;
-    private MqiSendMessageDto sendMessage;
+    private AppCatMessageDto<ProductDto> message;
+    private AppCatReadMessageDto<ProductDto> readMessage;
+    private AppCatSendMessageDto sendMessage;
     private ProductDto dto =
             new ProductDto("name", "keyobs", ProductFamily.L0_SLICE, "FAST");
 
@@ -86,32 +85,27 @@ public class GenericAppCatalogMqiServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new AppCatalogMqiLevelProductsService(restTemplate, "uri", 2,
-                500);
+        service = new GenericAppCatalogMqiService(restTemplate, "uri", 2, 500);
 
-        lightMessage = new MqiLightMessageDto(ProductCategory.LEVEL_PRODUCTS,
-                1234, "topic", 2, 9876);
+        message = new AppCatMessageDto<>(ProductCategory.LEVEL_PRODUCTS, 1234, "topic", 2, 9876);
 
-        readMessage = new MqiGenericReadMessageDto<ProductDto>("group",
+        readMessage = new AppCatReadMessageDto<ProductDto>("group",
                 "pod", false, dto);
 
-        sendMessage = new MqiSendMessageDto("pod", true);
+        sendMessage = new AppCatSendMessageDto("pod", true);
     }
 
     @Test
-    public void tesConstructor() {
+    public void testConstructor() {
         assertEquals(2, service.getMaxRetries());
         assertEquals(500, service.getTempoRetryMs());
         assertEquals("uri", service.getHostUri());
-        assertEquals(ProductCategory.LEVEL_PRODUCTS, service.getCategory());
 
-        service = new AppCatalogMqiLevelProductsService(restTemplate, "uri", -1,
-                500);
+        service = new GenericAppCatalogMqiService(restTemplate, "uri", 0, 500);
         assertEquals(0, service.getMaxRetries());
 
-        service = new AppCatalogMqiLevelProductsService(restTemplate, "uri", 21,
-                500);
-        assertEquals(0, service.getMaxRetries());
+        service = new GenericAppCatalogMqiService(restTemplate, "uri", 15, 500);
+        assertEquals(15, service.getMaxRetries());
     }
 
     /**
@@ -135,7 +129,7 @@ public class GenericAppCatalogMqiServiceTest {
                 hasProperty("uri", is("uri/mqi/level_products/1234/send")));
         thrown.expect(hasProperty("dto", is(sendMessage)));
 
-        service.send(1234, sendMessage);
+        service.send(ProductCategory.LEVEL_PRODUCTS, 1234, sendMessage);
     }
 
     /**
@@ -163,7 +157,7 @@ public class GenericAppCatalogMqiServiceTest {
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.send(1234, sendMessage);
+        service.send(ProductCategory.LEVEL_PRODUCTS, 1234, sendMessage);
     }
 
     /**
@@ -183,13 +177,13 @@ public class GenericAppCatalogMqiServiceTest {
                                 Mockito.any(Class.class));
 
         try {
-            service.send(1234, sendMessage);
+            service.send(ProductCategory.LEVEL_PRODUCTS, 1234, sendMessage);
             fail("An exception shall be raised");
         } catch (AppCatalogMqiSendApiError mpee) {
             verify(restTemplate, times(2)).exchange(
                     Mockito.eq("uri/mqi/level_products/1234/send"),
                     Mockito.eq(HttpMethod.POST),
-                    Mockito.eq(new HttpEntity<MqiSendMessageDto>(sendMessage)),
+                    Mockito.eq(new HttpEntity<AppCatSendMessageDto>(sendMessage)),
                     Mockito.eq(Boolean.class));
             verifyNoMoreInteractions(restTemplate);
         }
@@ -210,11 +204,11 @@ public class GenericAppCatalogMqiServiceTest {
                                 Mockito.any(HttpEntity.class),
                                 Mockito.any(Class.class));
 
-        assertTrue(service.send(1234, sendMessage));
+        assertTrue(service.send(ProductCategory.LEVEL_PRODUCTS, 1234, sendMessage));
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234/send"),
                 Mockito.eq(HttpMethod.POST),
-                Mockito.eq(new HttpEntity<MqiSendMessageDto>(sendMessage)),
+                Mockito.eq(new HttpEntity<AppCatSendMessageDto>(sendMessage)),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
     }
@@ -233,11 +227,11 @@ public class GenericAppCatalogMqiServiceTest {
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        assertFalse(service.send(1234, sendMessage));
+        assertFalse(service.send(ProductCategory.LEVEL_PRODUCTS, 1234, sendMessage));
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234/send"),
                 Mockito.eq(HttpMethod.POST),
-                Mockito.eq(new HttpEntity<MqiSendMessageDto>(sendMessage)),
+                Mockito.eq(new HttpEntity<AppCatSendMessageDto>(sendMessage)),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
     }
@@ -255,11 +249,11 @@ public class GenericAppCatalogMqiServiceTest {
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        assertFalse(service.send(1234, sendMessage));
+        assertFalse(service.send(ProductCategory.LEVEL_PRODUCTS, 1234, sendMessage));
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234/send"),
                 Mockito.eq(HttpMethod.POST),
-                Mockito.eq(new HttpEntity<MqiSendMessageDto>(sendMessage)),
+                Mockito.eq(new HttpEntity<AppCatSendMessageDto>(sendMessage)),
                 Mockito.eq(Boolean.class));
         verifyNoMoreInteractions(restTemplate);
     }
@@ -285,7 +279,7 @@ public class GenericAppCatalogMqiServiceTest {
                 is("uri/mqi/level_products/topic/2/9876/read")));
         thrown.expect(hasProperty("dto", is(readMessage)));
 
-        service.read("topic", 2, 9876, readMessage);
+        service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
     }
 
     /**
@@ -296,10 +290,10 @@ public class GenericAppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadWhenResponseKO() throws AbstractCodedException {
-        doReturn(new ResponseEntity<MqiLightMessageDto>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<MqiLightMessageDto>(
+        doReturn(new ResponseEntity<AppCatMessageDto<ProductDto>>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<AppCatMessageDto<ProductDto>>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<MqiLightMessageDto>(HttpStatus.NOT_FOUND))
+                new ResponseEntity<AppCatMessageDto<ProductDto>>(HttpStatus.NOT_FOUND))
                         .when(restTemplate).exchange(Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
                                 Mockito.any(HttpEntity.class),
@@ -314,7 +308,7 @@ public class GenericAppCatalogMqiServiceTest {
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.read("topic", 2, 9876, readMessage);
+        service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
     }
 
     /**
@@ -325,7 +319,7 @@ public class GenericAppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadWhenResponseEmpty() throws AbstractCodedException {
-        doReturn(new ResponseEntity<MqiLightMessageDto>(HttpStatus.OK))
+        doReturn(new ResponseEntity<AppCatMessageDto<ProductDto>>(HttpStatus.OK))
                 .when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.any(HttpEntity.class),
@@ -338,7 +332,7 @@ public class GenericAppCatalogMqiServiceTest {
                 is("uri/mqi/level_products/topic/2/9876/read")));
         thrown.expect(hasProperty("dto", is(readMessage)));
 
-        service.read("topic", 2, 9876, readMessage);
+        service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
     }
 
     /**
@@ -349,23 +343,23 @@ public class GenericAppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRead1() throws AbstractCodedException {
-        doReturn(new ResponseEntity<MqiLightMessageDto>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<MqiLightMessageDto>(lightMessage,
+        doReturn(new ResponseEntity<AppCatMessageDto<ProductDto>>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<AppCatMessageDto<ProductDto>>(message,
                         HttpStatus.OK)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
                                 Mockito.any(HttpEntity.class),
                                 Mockito.any(Class.class));
 
-        MqiLightMessageDto ret = service.read("topic", 2, 9876, readMessage);
-        assertEquals(ret, lightMessage);
+        AppCatMessageDto<ProductDto> ret = (AppCatMessageDto<ProductDto>) service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
+        assertEquals(ret, message);
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/mqi/level_products/topic/2/9876/read"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<MqiGenericReadMessageDto<ProductDto>>(
+                        new HttpEntity<AppCatReadMessageDto<ProductDto>>(
                                 readMessage)),
-                Mockito.eq(MqiLightMessageDto.class));
+                Mockito.eq(AppCatMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
 
@@ -377,21 +371,21 @@ public class GenericAppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRead2() throws AbstractCodedException {
-        doReturn(new ResponseEntity<MqiLightMessageDto>(lightMessage,
+        doReturn(new ResponseEntity<AppCatMessageDto<ProductDto>>(message,
                 HttpStatus.OK)).when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        MqiLightMessageDto ret = service.read("topic", 2, 9876, readMessage);
-        assertEquals(ret, lightMessage);
+        AppCatMessageDto<ProductDto> ret = (AppCatMessageDto<ProductDto>) service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
+        assertEquals(ret, message);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/level_products/topic/2/9876/read"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<MqiGenericReadMessageDto<ProductDto>>(
+                        new HttpEntity<AppCatReadMessageDto<ProductDto>>(
                                 readMessage)),
-                Mockito.eq(MqiLightMessageDto.class));
+                Mockito.eq(AppCatMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
     }
 
@@ -410,10 +404,7 @@ public class GenericAppCatalogMqiServiceTest {
                         Mockito.any(Class.class));
 
         thrown.expect(AppCatalogMqiGetOffsetApiError.class);
-        thrown.expect(
-                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
-        thrown.expect(hasProperty("uri", is(
-                "uri/mqi/level_products/topic/2/earliestOffset?group=groupname")));
+        thrown.expect(hasProperty("uri", is("uri/mqi/topic/2/earliestOffset?group=groupname")));
 
         service.getEarliestOffset("topic", 2, "groupname");
     }
@@ -435,10 +426,8 @@ public class GenericAppCatalogMqiServiceTest {
                                 Mockito.any(Class.class));
 
         thrown.expect(AppCatalogMqiGetOffsetApiError.class);
-        thrown.expect(
-                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
         thrown.expect(hasProperty("uri", is(
-                "uri/mqi/level_products/topic/2/earliestOffset?group=groupname")));
+                "uri/mqi/topic/2/earliestOffset?group=groupname")));
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
@@ -475,7 +464,7 @@ public class GenericAppCatalogMqiServiceTest {
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(Class.class));
 
-        String uriStr = "uri/mqi/level_products/topic/2/earliestOffset";
+        String uriStr = "uri/mqi/topic/2/earliestOffset";
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(uriStr).queryParam("group", "groupname");
         URI expectedUri = builder.build().toUri();
@@ -501,7 +490,7 @@ public class GenericAppCatalogMqiServiceTest {
                         Mockito.any(HttpMethod.class), Mockito.isNull(),
                         Mockito.any(Class.class));
 
-        String uriStr = "uri/mqi/level_products/topic/2/earliestOffset";
+        String uriStr = "uri/mqi/topic/2/earliestOffset";
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(uriStr).queryParam("group", "groupname");
         URI expectedUri = builder.build().toUri();
@@ -534,7 +523,7 @@ public class GenericAppCatalogMqiServiceTest {
                 hasProperty("uri", is("uri/mqi/level_products/1234/ack")));
         thrown.expect(hasProperty("dto", is(Ack.ERROR)));
 
-        service.ack(1234, Ack.ERROR);
+        service.ack(ProductCategory.LEVEL_PRODUCTS, 1234, Ack.ERROR);
     }
 
     /**
@@ -561,7 +550,7 @@ public class GenericAppCatalogMqiServiceTest {
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.ack(1234, Ack.OK);
+        service.ack(ProductCategory.LEVEL_PRODUCTS, 1234, Ack.OK);
     }
 
     /**
@@ -578,7 +567,7 @@ public class GenericAppCatalogMqiServiceTest {
                                 Mockito.any(HttpMethod.class), Mockito.any(),
                                 Mockito.any(Class.class));
 
-        assertTrue(service.ack(1234, Ack.WARN));
+        assertTrue(service.ack(ProductCategory.LEVEL_PRODUCTS, 1234, Ack.WARN));
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234/ack"),
                 Mockito.eq(HttpMethod.POST),
@@ -600,7 +589,7 @@ public class GenericAppCatalogMqiServiceTest {
                         Mockito.any(HttpMethod.class), Mockito.any(),
                         Mockito.any(Class.class));
 
-        assertFalse(service.ack(1234, Ack.OK));
+        assertFalse(service.ack(ProductCategory.LEVEL_PRODUCTS, 1234, Ack.OK));
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/level_products/1234/ack"),
                 Mockito.eq(HttpMethod.POST),
@@ -624,10 +613,7 @@ public class GenericAppCatalogMqiServiceTest {
                         Mockito.any(Class.class));
 
         thrown.expect(AppCatalogMqiGetNbReadingApiError.class);
-        thrown.expect(
-                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
-        thrown.expect(hasProperty("uri", is(
-                "uri/mqi/level_products/topic1/nbReading?pod=pod-name")));
+        thrown.expect(hasProperty("uri", is("uri/mqi/topic1/nbReading?pod=pod-name")));
 
         service.getNbReadingMessages("topic1", "pod-name");
     }
@@ -649,10 +635,8 @@ public class GenericAppCatalogMqiServiceTest {
                                 Mockito.any(Class.class));
 
         thrown.expect(AppCatalogMqiGetNbReadingApiError.class);
-        thrown.expect(
-                hasProperty("category", is(ProductCategory.LEVEL_PRODUCTS)));
         thrown.expect(hasProperty("uri", is(
-                "uri/mqi/level_products/topic1/nbReading?pod=pod-name")));
+                "uri/mqi/topic1/nbReading?pod=pod-name")));
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
@@ -682,7 +666,7 @@ public class GenericAppCatalogMqiServiceTest {
             fail("An exception shall be raised");
         } catch (AppCatalogMqiGetNbReadingApiError mpee) {
             verify(restTemplate, times(2)).exchange(Mockito.eq(
-                    new URI("uri/mqi/level_products/topic1/nbReading?pod=pod-name")),
+                    new URI("uri/mqi/topic1/nbReading?pod=pod-name")),
                     Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                     Mockito.eq(Integer.class));
             verifyNoMoreInteractions(restTemplate);
@@ -708,7 +692,7 @@ public class GenericAppCatalogMqiServiceTest {
 
         assertEquals(15, service.getNbReadingMessages("topic1", "pod-name"));
         verify(restTemplate, times(2)).exchange(Mockito
-                .eq(new URI("uri/mqi/level_products/topic1/nbReading?pod=pod-name")),
+                .eq(new URI("uri/mqi/topic1/nbReading?pod=pod-name")),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(Integer.class));
         verifyNoMoreInteractions(restTemplate);
@@ -732,7 +716,7 @@ public class GenericAppCatalogMqiServiceTest {
 
         assertEquals(0, service.getNbReadingMessages("topic1", "pod-name"));
         verify(restTemplate, times(1)).exchange(Mockito
-                .eq(new URI("uri/mqi/level_products/topic1/nbReading?pod=pod-name")),
+                .eq(new URI("uri/mqi/topic1/nbReading?pod=pod-name")),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(Integer.class));
         verifyNoMoreInteractions(restTemplate);
@@ -755,7 +739,7 @@ public class GenericAppCatalogMqiServiceTest {
 
         assertEquals(0, service.getNbReadingMessages("topic1", "pod-name"));
         verify(restTemplate, times(1)).exchange(Mockito
-                .eq(new URI("uri/mqi/level_products/topic1/nbReading?pod=pod-name")),
+                .eq(new URI("uri/mqi/topic1/nbReading?pod=pod-name")),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
                 Mockito.eq(Integer.class));
         verifyNoMoreInteractions(restTemplate);

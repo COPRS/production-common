@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Viveris Technologies
  */
-public class MqiSendMessageDto {
+public class AppCatSendMessageDto {
 
     /**
      * Pod
@@ -23,7 +23,7 @@ public class MqiSendMessageDto {
     /**
      * Default constructor
      */
-    public MqiSendMessageDto() {
+    public AppCatSendMessageDto() {
         super();
     }
 
@@ -33,7 +33,7 @@ public class MqiSendMessageDto {
      * @param force
      * @param dto
      */
-    public MqiSendMessageDto(final String pod,
+    public AppCatSendMessageDto(final String pod,
             final boolean force) {
         super();
         this.pod = pod;
@@ -98,7 +98,7 @@ public class MqiSendMessageDto {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            MqiSendMessageDto other = (MqiSendMessageDto) obj;
+            AppCatSendMessageDto other = (AppCatSendMessageDto) obj;
             ret = Objects.equals(pod, other.pod) && force == other.force;
         }
         return ret;
