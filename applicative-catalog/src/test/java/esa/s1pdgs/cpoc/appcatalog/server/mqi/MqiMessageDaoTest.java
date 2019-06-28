@@ -204,7 +204,7 @@ public class MqiMessageDaoTest {
                 new MqiMessage(ProductCategory.AUXILIARY_FILES, "topic", 1, 5,
                         "group", MessageState.READ, "readingPod", null,
                         "sendingPod", null, null, 0, null, null);
-        doNothing().when(mongoClient).insert(Mockito.any(MqiMessage.class));
+        doReturn(messageToInsert).when(mongoClient).insert(Mockito.any(MqiMessage.class));
 
         mongoDBDAO.insert(messageToInsert);
 

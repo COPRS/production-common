@@ -77,13 +77,6 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka_2.11</artifactId>
-			<classifier>test</classifier>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-log4j-appender</artifactId>
