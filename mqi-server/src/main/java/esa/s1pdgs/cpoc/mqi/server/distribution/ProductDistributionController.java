@@ -96,7 +96,7 @@ public class ProductDistributionController {
      */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/next")
     public GenericMessageDto<? extends AbstractDto> next(@PathVariable("category") String categoryName) throws ProductDistributionException {
-    	final ProductCategory category = ProductCategory.valueOf(categoryName);    	
+    	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());    	
         LOGGER.debug("[MONITOR] [category {}] [api next] Starting", category);
 
         // We wait to be sure one message is read
@@ -118,7 +118,7 @@ public class ProductDistributionController {
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/ack")
     public void ack(@RequestBody final AckMessageDto ackDto, @PathVariable("category") String categoryName) 
     		throws ProductDistributionException {    	    	
-    	final ProductCategory category = ProductCategory.valueOf(categoryName);    	
+    	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());    	
     	LOGGER.info("[MONITOR] [category {}] [api ack] [messageId {}] Starting", category, ackDto.getMessageId());
     	
         try {
@@ -155,7 +155,7 @@ public class ProductDistributionController {
     		@RequestBody final GenericPublicationMessageDto<? extends AbstractDto> message, 
     		@PathVariable("category") String categoryName
     ) throws ProductDistributionException {    	
-    	final ProductCategory category = ProductCategory.valueOf(categoryName);    	
+    	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());    	
     	
         LOGGER.info(
                 "[MONITOR] [category {}] [api publish] [messageId {}] [productName: {}] Starting",
