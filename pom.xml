@@ -13,11 +13,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
 		<!-- dependency version definitions -->	
-		<spring.boot.version>2.0.3.RELEASE</spring.boot.version>
+		<spring.boot.version>2.1.6.RELEASE</spring.boot.version>
 		
 		<!-- S1PRO-78: Don't use the one provided with spring-boot but instead this version in order
 				to work with kafak 2.2.0 -->
-		<kafka.version>2.2.0</kafka.version>
+		<kafka.version>2.1.0</kafka.version>
 		
 		<commons.logging.version>1.2</commons.logging.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
