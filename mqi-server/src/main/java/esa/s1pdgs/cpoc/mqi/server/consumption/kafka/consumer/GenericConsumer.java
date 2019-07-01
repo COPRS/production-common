@@ -16,7 +16,7 @@ import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
@@ -40,7 +40,7 @@ public class GenericConsumer<T> {
     /**
      * Service for persisting data
      */
-    private final GenericAppCatalogMqiService service;
+    private final AppCatalogMqiService service;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -85,7 +85,7 @@ public class GenericConsumer<T> {
      */
     public GenericConsumer(final ProductCategory category,
     		final KafkaProperties properties,
-            final GenericAppCatalogMqiService service,
+            final AppCatalogMqiService service,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus, final String topic,
             final int priority,            

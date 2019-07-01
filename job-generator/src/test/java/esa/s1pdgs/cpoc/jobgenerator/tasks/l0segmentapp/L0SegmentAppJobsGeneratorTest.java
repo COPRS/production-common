@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -77,7 +77,7 @@ public class L0SegmentAppJobsGeneratorTest {
     private OutputProducerFactory JobsSender;
 
     @Mock
-    private AbstractAppCatalogJobService<ProductDto> appDataService;
+    private AppCatalogJobClient<ProductDto> appDataService;
 
     private TaskTable expectedTaskTable;
 

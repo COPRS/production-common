@@ -11,7 +11,6 @@ import java.util.Date;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -23,7 +22,7 @@ public class AppDataJobDtoTest {
      */
     @Test
     public void testConstructors() {
-        AppDataJobDto<ProductDto> obj = new AppDataJobDto<ProductDto>();
+        AppDataJobDto obj = new AppDataJobDto();
         
         AppDataJobProductDto product = new AppDataJobProductDto();
         product.setSessionId("session-id");

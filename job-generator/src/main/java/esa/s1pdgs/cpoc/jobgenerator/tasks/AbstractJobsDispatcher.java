@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
@@ -77,7 +77,7 @@ public abstract class AbstractJobsDispatcher<T> {
     /**
      * Applicative data service
      */
-    protected final AbstractAppCatalogJobService<T> appDataService;
+    protected final AppCatalogJobClient<T> appDataService;
 
     /**
      * Constructor
@@ -90,7 +90,7 @@ public abstract class AbstractJobsDispatcher<T> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AbstractAppCatalogJobService<T> appDataService) {
+            final AppCatalogJobClient<T> appDataService) {
         this.factory = factory;
         this.settings = settings;
         this.processSettings = processSettings;

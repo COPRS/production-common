@@ -25,7 +25,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
@@ -68,7 +68,7 @@ public class AbstractJobDispatcherTest {
     private ThreadPoolTaskScheduler jobGenerationTaskScheduler;
 
     @Mock
-    private AbstractAppCatalogJobService<String> appDataService;
+    private AppCatalogJobClient<String> appDataService;
 
     private AbstractJobsDispatcherImpl testDispatcher;
 
@@ -402,7 +402,7 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<String> {
             final ProcessSettings processSettings,
             JobsGeneratorFactory jobsGeneratorFactory,
             ThreadPoolTaskScheduler jobGenerationTaskScheduler,
-            final AbstractAppCatalogJobService<String> appDataService) {
+            final AppCatalogJobClient<String> appDataService) {
         super(taskTablesSettings, processSettings, jobsGeneratorFactory,
                 jobGenerationTaskScheduler, appDataService);
         this.counter = 0;

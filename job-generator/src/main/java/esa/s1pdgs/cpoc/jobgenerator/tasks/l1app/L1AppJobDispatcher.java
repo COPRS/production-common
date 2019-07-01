@@ -20,7 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -85,7 +85,7 @@ public class L1AppJobDispatcher
             final ThreadPoolTaskScheduler taskScheduler,
             final XmlConverter xmlConverter,
             @Value("${level1.pathroutingxmlfile}") String pathRoutingXmlFile,
-            @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<ProductDto> appDataService) {
+            @Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient<ProductDto> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
         this.xmlConverter = xmlConverter;

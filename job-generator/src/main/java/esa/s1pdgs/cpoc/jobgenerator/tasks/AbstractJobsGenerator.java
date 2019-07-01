@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
@@ -109,7 +109,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     /**
      * Applicative data service
      */
-    private final AbstractAppCatalogJobService<T> appDataService;
+    private final AppCatalogJobClient<T> appDataService;
 
     /**
      * Task table
@@ -148,7 +148,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<T> appDataService) {
+            final AppCatalogJobClient<T> appDataService) {
         this.xmlConverter = xmlConverter;
         this.metadataService = metadataService;
         this.l0ProcessSettings = l0ProcessSettings;

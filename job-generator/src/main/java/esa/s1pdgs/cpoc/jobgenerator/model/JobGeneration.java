@@ -22,12 +22,12 @@ import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
  * @author Cyrielle Gailliard
  * @param <T>
  */
-public class JobGeneration<T> {
+public class JobGeneration {
 
     /**
      * Applicative data job
      */
-    private AppDataJobDto<T> appDataJob;
+    private AppDataJobDto appDataJob;
 
     /**
      * Job generation
@@ -53,7 +53,7 @@ public class JobGeneration<T> {
      * @param stopTime
      * @param product
      */
-    public JobGeneration(final AppDataJobDto<T> appDataJob, final String taskTable) {
+    public JobGeneration(final AppDataJobDto appDataJob, final String taskTable) {
         this.appDataJob = appDataJob;
         this.metadataQueries = new HashMap<>();
         List<AppDataJobGenerationDto> generations = appDataJob.getGenerations();
@@ -70,7 +70,7 @@ public class JobGeneration<T> {
         }
     }
     
-    public void updateAppDataJob(final AppDataJobDto<T> appDataJob, final String taskTable) {
+    public void updateAppDataJob(final AppDataJobDto appDataJob, final String taskTable) {
         this.appDataJob = appDataJob;
         List<AppDataJobGenerationDto> generations = appDataJob.getGenerations();
         if (CollectionUtils.isEmpty(generations)) {
@@ -89,7 +89,7 @@ public class JobGeneration<T> {
     /**
      * @return the appDataJob
      */
-    public AppDataJobDto<T> getAppDataJob() {
+    public AppDataJobDto getAppDataJob() {
         return appDataJob;
     }
 
@@ -97,7 +97,7 @@ public class JobGeneration<T> {
      * @param appDataJob
      *            the appDataJob to set
      */
-    public void setAppDataJob(final AppDataJobDto<T> appDataJob) {
+    public void setAppDataJob(final AppDataJobDto appDataJob) {
         this.appDataJob = appDataJob;
     }
 
@@ -176,7 +176,7 @@ public class JobGeneration<T> {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            JobGeneration<?> other = (JobGeneration<?>) obj;
+            JobGeneration other = (JobGeneration) obj;
             ret = Objects.equals(appDataJob, other.appDataJob)
                     && Objects.equals(generation, other.generation)
                     && Objects.equals(jobOrder, other.jobOrder)

@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
@@ -54,7 +54,7 @@ public class L1AppConsumerTest {
     protected StatusService mqiStatusService;
 
     @Mock
-    protected AbstractAppCatalogJobService<ProductDto> appDataService;
+    protected AppCatalogJobClient<ProductDto> appDataService;
 
     /**
      * Application status

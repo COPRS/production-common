@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.common.MessageState;
@@ -60,7 +60,7 @@ public class GenericMessageListenerTest {
      * Service for persisting data
      */
     @Mock
-    private GenericAppCatalogMqiService service;
+    private AppCatalogMqiService service;
 
     /**
      * Service for checking if a message is processing or not by another

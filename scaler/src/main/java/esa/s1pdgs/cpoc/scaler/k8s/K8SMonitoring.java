@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStatusException;
 import esa.s1pdgs.cpoc.scaler.k8s.model.AddressType;
@@ -46,7 +46,7 @@ public class K8SMonitoring {
 
     private final WrapperService wrapperService;
 
-    private final GenericAppCatalogMqiService appCatalogService;
+    private final AppCatalogMqiService appCatalogService;
 
     /**
      * Kafka properties
@@ -57,7 +57,7 @@ public class K8SMonitoring {
     public K8SMonitoring(final WrapperProperties wrapperProperties,
             final NodeService nodeService, final PodService podService,
             final WrapperService wrapperService,
-            @Qualifier("persistenceServiceForLevelJobs") final GenericAppCatalogMqiService appCatalogService,
+            @Qualifier("persistenceServiceForLevelJobs") final AppCatalogMqiService appCatalogService,
             final KafkaMonitoringProperties kafkaProperties) {
         this.wrapperProperties = wrapperProperties;
         this.nodeService = nodeService;

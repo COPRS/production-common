@@ -35,11 +35,11 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
  * @author Viveris Technologies
  * @param <T>
  */
-public class GenericAppCatalogMqiService {
+public class AppCatalogMqiService {
     /**
      * Logger
      */
-    static final Log LOGGER = LogFactory.getLog(GenericAppCatalogMqiService.class);
+    static final Log LOGGER = LogFactory.getLog(AppCatalogMqiService.class);
 
     /**
      * Rest template
@@ -70,7 +70,7 @@ public class GenericAppCatalogMqiService {
      * @param maxRetries
      * @param tempoRetryMs
      */
-    public GenericAppCatalogMqiService(final RestTemplate restTemplate,
+    public AppCatalogMqiService(final RestTemplate restTemplate,
             final String hostUri,
             final int maxRetries, final int tempoRetryMs) {
         this.restTemplate = restTemplate;
@@ -82,21 +82,21 @@ public class GenericAppCatalogMqiService {
     /**
      * @return the hostUri
      */
-    public String getHostUri() {
+    String getHostUri() {
         return hostUri;
     }
 
 	/**
      * @return the maxRetries
      */
-    public int getMaxRetries() {
+    int getMaxRetries() {
         return maxRetries;
     }
 
     /**
      * @return the tempoRetryMs
      */
-    public int getTempoRetryMs() {
+    int getTempoRetryMs() {
         return tempoRetryMs;
     }
 
@@ -134,7 +134,8 @@ public class GenericAppCatalogMqiService {
      * @return
      * @throws AbstractCodedException
      */
-    public AppCatMessageDto<? extends AbstractDto> read(
+	@SuppressWarnings("unchecked")
+	public AppCatMessageDto<? extends AbstractDto> read(
     		final ProductCategory category,
     		final String topic, 
     		final int partition,
@@ -150,7 +151,8 @@ public class GenericAppCatalogMqiService {
             LogUtils.traceLog(LOGGER,
                     String.format("[uri %s] [body %s]", uri, body));
             try {
-                ResponseEntity<AppCatMessageDto> response =
+                @SuppressWarnings("rawtypes")
+				ResponseEntity<AppCatMessageDto> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
                                 new HttpEntity<AppCatReadMessageDto<?>>(body),
                                 AppCatMessageDto.class);
@@ -419,7 +421,8 @@ public class GenericAppCatalogMqiService {
                     + messageId;
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-                ResponseEntity<AppCatMessageDto> response =
+                @SuppressWarnings("rawtypes")
+				ResponseEntity<AppCatMessageDto> response =
                         restTemplate.exchange(uri, HttpMethod.GET, null,
                         		AppCatMessageDto.class);
                 if (response.getStatusCode() == HttpStatus.OK) {

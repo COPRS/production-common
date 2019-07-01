@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 
 /**
  * Configuration of applicative catalog client for data persistence.<br/>
@@ -57,10 +57,10 @@ public class PersistenceConfiguration {
      * @return
      */
     @Bean(name = "persistenceServiceForLevelJobs")
-    public GenericAppCatalogMqiService persistenceServiceForLevelJobs(
+    public AppCatalogMqiService persistenceServiceForLevelJobs(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
-        return new GenericAppCatalogMqiService(template, hostUriCatalog,
+        return new AppCatalogMqiService(template, hostUriCatalog,
                 maxRetries, tempoRetryMs);
     }
     

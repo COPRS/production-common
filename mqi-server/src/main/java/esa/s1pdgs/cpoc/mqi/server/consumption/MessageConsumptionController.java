@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.common.MessageState;
@@ -66,7 +66,7 @@ public class MessageConsumptionController {
     private final KafkaProperties kafkaProperties;
     
     
-    private final GenericAppCatalogMqiService service;
+    private final AppCatalogMqiService service;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -88,7 +88,7 @@ public class MessageConsumptionController {
     public MessageConsumptionController(
             final ApplicationProperties appProperties,
             final KafkaProperties kafkaProperties,
-            final GenericAppCatalogMqiService service,	
+            final AppCatalogMqiService service,	
             final OtherApplicationService otherAppService,
             final AppStatus appStatus) {
         this.consumers = new HashMap<>();
@@ -280,7 +280,7 @@ public class MessageConsumptionController {
      * @return
      * @throws AbstractCodedException
      */
-    protected boolean send(final ProductCategory category, final GenericAppCatalogMqiService service, final AppCatMessageDto<?> message) 
+    protected boolean send(final ProductCategory category, final AppCatalogMqiService service, final AppCatMessageDto<?> message) 
     		throws AbstractCodedException {
         boolean ret = false;
         if (message.getState() == MessageState.SEND) {

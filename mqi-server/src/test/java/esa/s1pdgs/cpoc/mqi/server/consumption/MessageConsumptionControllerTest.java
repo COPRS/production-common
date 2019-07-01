@@ -35,7 +35,7 @@ import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.common.MessageState;
@@ -80,7 +80,7 @@ public class MessageConsumptionControllerTest {
     private KafkaProperties kafkaProperties;
 
     @Mock
-    private GenericAppCatalogMqiService service;
+    private AppCatalogMqiService service;
 
     @Mock
     private OtherApplicationService otherService;

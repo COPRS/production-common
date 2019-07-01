@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
 import org.springframework.kafka.support.Acknowledgment;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.common.MessageState;
@@ -47,7 +47,7 @@ public class GenericMessageListener<T>
     /**
      * Service for persisting data
      */
-    private final GenericAppCatalogMqiService service;
+    private final AppCatalogMqiService service;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -77,7 +77,7 @@ public class GenericMessageListener<T>
     public GenericMessageListener(
     		final ProductCategory category,
     		final KafkaProperties properties,
-            final GenericAppCatalogMqiService service,
+            final AppCatalogMqiService service,
             final OtherApplicationService otherAppService,
             final GenericConsumer<T> genericConsumer,
             final AppStatus appStatus) {

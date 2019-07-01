@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.client.job.EdrsSessionsAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.client.job.LevelProductsAppCatalogJobService;
 import esa.s1pdgs.cpoc.appcatalog.client.job.LevelSegmentsAppCatalogJobService;
@@ -69,7 +69,7 @@ public class AppCatalogConfiguration {
 	 * @return
 	 */
 	@Bean(name = "appCatalogServiceForEdrsSessions")
-	public AbstractAppCatalogJobService<EdrsSessionDto> appCatalogServiceForEdrsSessions(
+	public AppCatalogJobClient<EdrsSessionDto> appCatalogServiceForEdrsSessions(
 			final RestTemplateBuilder builder) {
 		RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
 		return new EdrsSessionsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);
@@ -82,7 +82,7 @@ public class AppCatalogConfiguration {
 	 * @return
 	 */
 	@Bean(name = "appCatalogServiceForLevelProducts")
-	public AbstractAppCatalogJobService<ProductDto> appCatalogServiceForLevelProducts(
+	public AppCatalogJobClient<ProductDto> appCatalogServiceForLevelProducts(
 			final RestTemplateBuilder builder) {
 		RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
 		return new LevelProductsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);
@@ -95,7 +95,7 @@ public class AppCatalogConfiguration {
      * @return
      */
     @Bean(name = "appCatalogServiceForLevelSegments")
-    public AbstractAppCatalogJobService<ProductDto> appCatalogServiceForLevelSegments(
+    public AppCatalogJobClient<ProductDto> appCatalogServiceForLevelSegments(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
         return new LevelSegmentsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);

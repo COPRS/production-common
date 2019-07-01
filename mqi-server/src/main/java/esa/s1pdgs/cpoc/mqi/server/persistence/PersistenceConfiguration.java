@@ -6,7 +6,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 
 /**
  * Configuration of applicative catalog client for data persistence.<br/>
@@ -70,8 +70,8 @@ public class PersistenceConfiguration {
      * @return
      */
     @Bean
-    public GenericAppCatalogMqiService appCatService(final RestTemplateBuilder builder) {
-        return new GenericAppCatalogMqiService(builder.build(), hostUriCatalog, maxRetries, tempoRetryMs);
+    public AppCatalogMqiService appCatService(final RestTemplateBuilder builder) {
+        return new AppCatalogMqiService(builder.build(), hostUriCatalog, maxRetries, tempoRetryMs);
     }
 
     /**

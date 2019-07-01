@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
@@ -59,7 +59,7 @@ public class L0AppConsumerTest {
     protected StatusService mqiStatusService;
 
     @Mock
-    protected AbstractAppCatalogJobService<EdrsSessionDto> appDataService;
+    protected AppCatalogJobClient<EdrsSessionDto> appDataService;
     /**
      * Application status
      */

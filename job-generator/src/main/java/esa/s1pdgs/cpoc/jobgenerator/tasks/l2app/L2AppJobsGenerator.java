@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks.l2app;
 import java.util.HashMap;
 import java.util.Map;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
@@ -42,7 +42,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
             final ProcessSettings processSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<ProductDto> appDataService) {
+            final AppCatalogJobClient<ProductDto> appDataService) {
         super(xmlConverter, metadataService, processSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }

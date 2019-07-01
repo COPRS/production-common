@@ -22,7 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
@@ -58,7 +58,7 @@ public class L0SegmentAppConsumerTest {
     private StatusService mqiStatusService;
 
     @Mock
-    private AbstractAppCatalogJobService<ProductDto> appDataService;
+    private AppCatalogJobClient<ProductDto> appDataService;
 
     @Mock
     private AppStatus appStatus;

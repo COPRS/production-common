@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 
@@ -41,7 +41,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
      * Service of applicative data
      */
     @Mock
-    private GenericAppCatalogMqiService service;
+    private AppCatalogMqiService service;
 
     /**
      * Listener to test

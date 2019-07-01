@@ -50,7 +50,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
  * 
  * @author Viveris Technologies
  */
-public class GenericAppCatalogMqiServiceTest {
+public class AppCatalogMqiServiceTest {
 
     /**
      * To check the raised custom exceptions
@@ -67,7 +67,7 @@ public class GenericAppCatalogMqiServiceTest {
     /**
      * Service to test
      */
-    private GenericAppCatalogMqiService service;
+    private AppCatalogMqiService service;
 
     /**
      * DTO
@@ -85,13 +85,9 @@ public class GenericAppCatalogMqiServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new GenericAppCatalogMqiService(restTemplate, "uri", 2, 500);
-
+        service = new AppCatalogMqiService(restTemplate, "uri", 2, 500);
         message = new AppCatMessageDto<>(ProductCategory.LEVEL_PRODUCTS, 1234, "topic", 2, 9876);
-
-        readMessage = new AppCatReadMessageDto<ProductDto>("group",
-                "pod", false, dto);
-
+        readMessage = new AppCatReadMessageDto<ProductDto>("group","pod", false, dto);
         sendMessage = new AppCatSendMessageDto("pod", true);
     }
 
@@ -100,11 +96,9 @@ public class GenericAppCatalogMqiServiceTest {
         assertEquals(2, service.getMaxRetries());
         assertEquals(500, service.getTempoRetryMs());
         assertEquals("uri", service.getHostUri());
-
-        service = new GenericAppCatalogMqiService(restTemplate, "uri", 0, 500);
+        service = new AppCatalogMqiService(restTemplate, "uri", 0, 500);
         assertEquals(0, service.getMaxRetries());
-
-        service = new GenericAppCatalogMqiService(restTemplate, "uri", 15, 500);
+        service = new AppCatalogMqiService(restTemplate, "uri", 15, 500);
         assertEquals(15, service.getMaxRetries());
     }
 

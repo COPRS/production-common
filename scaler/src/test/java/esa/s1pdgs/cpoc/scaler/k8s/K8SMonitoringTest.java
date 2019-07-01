@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStatusException;
 import esa.s1pdgs.cpoc.scaler.k8s.model.AddressType;
@@ -57,7 +57,7 @@ public class K8SMonitoringTest {
     private WrapperService wrapperService;
 
     @Mock
-    private GenericAppCatalogMqiService appCatalogService;
+    private AppCatalogMqiService appCatalogService;
 
     @InjectMocks
     private K8SMonitoring k8SMonitoring;
