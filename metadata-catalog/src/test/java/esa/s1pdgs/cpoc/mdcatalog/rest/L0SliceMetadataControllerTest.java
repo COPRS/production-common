@@ -20,8 +20,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0AcnMetadataDto;
 import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0SliceMetadataDto;
 

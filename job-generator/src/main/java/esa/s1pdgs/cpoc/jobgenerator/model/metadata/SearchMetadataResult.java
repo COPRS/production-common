@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
 import java.util.List;
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+
 /**
  * Class representing the result of a search query for metadata
  * 

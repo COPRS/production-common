@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

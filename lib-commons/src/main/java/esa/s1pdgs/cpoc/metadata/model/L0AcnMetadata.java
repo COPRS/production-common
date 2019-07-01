@@ -1,23 +1,18 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
+package esa.s1pdgs.cpoc.metadata.model;
 
 import java.util.Objects;
 
-/**
- * 
- * @author Cyrielle Gailliard
- *
- */
-public class L0SliceMetadata extends AbstractMetadata {
+public class L0AcnMetadata extends AbstractMetadata {
 
 	/**
-	 * Instrument configuration identifier
+	 * Instrument configuration id
 	 */
 	private int instrumentConfigurationId;
 
 	/**
-	 * Slice number
+	 * Number of slices
 	 */
-	private int numberSlice;
+	private int numberOfSlices;
 
 	/**
 	 * Data take identifier
@@ -28,18 +23,19 @@ public class L0SliceMetadata extends AbstractMetadata {
 	 * @param instrumentConfigurationId
 	 * @param numberSlice
 	 */
-	public L0SliceMetadata(final String productName, final String productType, final String keyObjectStorage,
+	public L0AcnMetadata(final String productName, final String productType, final String keyObjectStorage,
 			final String validityStart, final String validityStop, final int instrumentConfigurationId,
-			final int numberSlice, final String dataTakeId) {
+			final int numberOfSlices, final String dataTakeId) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop);
 		this.instrumentConfigurationId = instrumentConfigurationId;
-		this.numberSlice = numberSlice;
+		this.numberOfSlices = numberOfSlices;
 		this.datatakeId = dataTakeId;
 	}
 	
-	public L0SliceMetadata() {
+	public L0AcnMetadata() {
 		
 	}
+
 	/**
 	 * @return the instrumentConfigurationId
 	 */
@@ -56,18 +52,18 @@ public class L0SliceMetadata extends AbstractMetadata {
 	}
 
 	/**
-	 * @return the numberSlice
+	 * @return the numberOfSlices
 	 */
-	public int getNumberSlice() {
-		return numberSlice;
+	public int getNumberOfSlices() {
+		return numberOfSlices;
 	}
 
 	/**
-	 * @param numberSlice
-	 *            the numberSlice to set
+	 * @param numberOfSlices
+	 *            the numberOfSlices to set
 	 */
-	public void setNumberSlice(final int numberSlice) {
-		this.numberSlice = numberSlice;
+	public void setNumberOfSlices(final int numberOfSlices) {
+		this.numberOfSlices = numberOfSlices;
 	}
 
 	/**
@@ -91,8 +87,8 @@ public class L0SliceMetadata extends AbstractMetadata {
 	@Override
 	public String toString() {
 		String superToString = super.toAbstractString();
-		return String.format("{%s, instrumentConfigurationId: %s, numberSlice: %s, datatakeId: %s}", superToString,
-				instrumentConfigurationId, numberSlice, datatakeId);
+		return String.format("{%s, instrumentConfigurationId: %s, numberOfSlices: %s, datatakeId: %s}", superToString,
+				instrumentConfigurationId, numberOfSlices, datatakeId);
 	}
 
 	/**
@@ -101,7 +97,7 @@ public class L0SliceMetadata extends AbstractMetadata {
 	@Override
 	public int hashCode() {
 		int superHash = super.hashCode();
-		return Objects.hash(instrumentConfigurationId, numberSlice, datatakeId, superHash);
+		return Objects.hash(instrumentConfigurationId, numberOfSlices, datatakeId, superHash);
 	}
 
 	/**
@@ -115,9 +111,9 @@ public class L0SliceMetadata extends AbstractMetadata {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			L0SliceMetadata other = (L0SliceMetadata) obj;
+			L0AcnMetadata other = (L0AcnMetadata) obj;
 			ret = super.equals(other) && instrumentConfigurationId == other.instrumentConfigurationId
-					&& numberSlice == other.numberSlice && Objects.equals(datatakeId, other.datatakeId);
+					&& numberOfSlices == other.numberOfSlices && Objects.equals(datatakeId, other.datatakeId);
 		}
 		return ret;
 	}

@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 
 /**
  *
