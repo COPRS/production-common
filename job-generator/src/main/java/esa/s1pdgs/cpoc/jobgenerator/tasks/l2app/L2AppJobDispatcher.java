@@ -37,8 +37,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 @Service
 @ConditionalOnProperty(name = "process.level", havingValue = "L2")
-public class L2AppJobDispatcher
-        extends AbstractJobsDispatcher<ProductDto> {
+public class L2AppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
 
     /**
      * Logger
@@ -77,7 +76,7 @@ public class L2AppJobDispatcher
             final ThreadPoolTaskScheduler taskScheduler,
             final XmlConverter xmlConverter,
             @Value("${level2.pathroutingxmlfile}") String pathRoutingXmlFile,
-            @Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient<ProductDto> appDataService) {
+            @Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
         this.xmlConverter = xmlConverter;
@@ -129,8 +128,7 @@ public class L2AppJobDispatcher
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(
-            final AppDataJobDto<ProductDto> job)
+    protected List<String> getTaskTables(final AppDataJobDto job)
             throws JobGenMissingRoutingEntryException {
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"

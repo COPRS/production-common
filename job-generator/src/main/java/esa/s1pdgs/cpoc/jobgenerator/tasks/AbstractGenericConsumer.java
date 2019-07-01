@@ -43,7 +43,7 @@ public abstract class AbstractGenericConsumer<T> {
     /**
      * Applicative data service
      */
-    protected final AppCatalogJobClient<T> appDataService;
+    protected final AppCatalogJobClient appDataService;
 
     /**
      * MQI service
@@ -62,7 +62,7 @@ public abstract class AbstractGenericConsumer<T> {
             final ProcessSettings processSettings,
             final GenericMqiService<T> mqiService,
             final StatusService mqiStatusService,
-            final AppCatalogJobClient<T> appDataService,
+            final AppCatalogJobClient appDataService,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender
     		) {

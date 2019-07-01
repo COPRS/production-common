@@ -35,7 +35,6 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0SegmentUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Test the class JobDispatcher
@@ -69,7 +68,7 @@ public class L0SegmentAppJobDispatcherTest {
     private L0SegmentAppJobDispatcher mockGenerator;
 
     @Mock
-    private AppCatalogJobClient<ProductDto> appDataService;
+    private AppCatalogJobClient appDataService;
 
     /**
      * Test set up
@@ -155,15 +154,15 @@ public class L0SegmentAppJobDispatcherTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<ProductDto> primaryCheckAppJob =
+        AppDataJobDto primaryCheckAppJob =
                 TestL0SegmentUtils.buildAppData();
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<ProductDto> readyAppJob =
+        AppDataJobDto readyAppJob =
                 TestL0SegmentUtils.buildAppData();
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<ProductDto> sentAppJob =
+        AppDataJobDto sentAppJob =
                 TestL0SegmentUtils.buildAppData();
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
@@ -235,7 +234,7 @@ public class L0SegmentAppJobDispatcherTest {
     @Test
     public void testGetTaskTable() throws JobGenMissingRoutingEntryException {
 
-        AppDataJobDto<ProductDto> appData =
+        AppDataJobDto appData =
                 TestL0SegmentUtils.buildAppData();
 
         // Init dispatcher

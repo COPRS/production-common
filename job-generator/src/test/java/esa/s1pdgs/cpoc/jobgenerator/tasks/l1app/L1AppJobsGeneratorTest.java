@@ -59,7 +59,6 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class L1AppJobsGeneratorTest {
 
@@ -89,13 +88,13 @@ public class L1AppJobsGeneratorTest {
     private L1AppJobsGenerator generator;
 
     @Mock
-    private AppCatalogJobClient<ProductDto> appDataPService;
+    private AppCatalogJobClient appDataPService;
 
-    private JobGeneration<ProductDto> jobA;
+    private JobGeneration jobA;
 
-    private AppDataJobDto<ProductDto> appDataJob;
+    private AppDataJobDto appDataJob;
 
-    private AppDataJobDto<ProductDto> appDataJobComplete;
+    private AppDataJobDto appDataJobComplete;
 
     private LevelJobDto publishedJob;
 
@@ -129,7 +128,7 @@ public class L1AppJobsGeneratorTest {
 
         appDataJob = TestL1Utils.buildJobGeneration(false);
         appDataJobComplete = TestL1Utils.buildJobGeneration(true);
-        jobA = new JobGeneration<>(appDataJob, "IW_RAW__0_GRDH_1.xml");
+        jobA = new JobGeneration(appDataJob, "IW_RAW__0_GRDH_1.xml");
     }
 
     private void mockProcessSettings() {
@@ -327,15 +326,15 @@ public class L1AppJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<ProductDto> primaryCheckAppJob =
+        AppDataJobDto primaryCheckAppJob =
                 TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<ProductDto> readyAppJob =
+        AppDataJobDto readyAppJob =
                 TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<ProductDto> sentAppJob =
+        AppDataJobDto sentAppJob =
                 TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
@@ -461,8 +460,8 @@ public class L1AppJobsGeneratorTest {
         JobOrder jobOrder = new JobOrder();
         jobOrder.setConf(conf);
 
-        JobGeneration<ProductDto> job =
-                new JobGeneration<>(appDataJobComplete, "IW_RAW__0_GRDH_1.xml");
+        JobGeneration job =
+                new JobGeneration(appDataJobComplete, "IW_RAW__0_GRDH_1.xml");
         job.setJobOrder(jobOrder);
 
         generator.customJobOrder(job);

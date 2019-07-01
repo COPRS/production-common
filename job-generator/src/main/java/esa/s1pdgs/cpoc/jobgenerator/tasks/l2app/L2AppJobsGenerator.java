@@ -42,7 +42,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
             final ProcessSettings processSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<ProductDto> appDataService) {
+            final AppCatalogJobClient appDataService) {
         super(xmlConverter, metadataService, processSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
@@ -52,7 +52,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
      * inputs
      */
     @Override
-    protected void preSearch(final JobGeneration<ProductDto> job)
+    protected void preSearch(final JobGeneration job)
             throws JobGenInputsMissingException {
         Map<String, String> missingMetadata = new HashMap<>();
         // Retrieve instrument configuration id and slice number
@@ -96,7 +96,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
      * Custom job order before building the job DTO
      */
     @Override
-    protected void customJobOrder(final JobGeneration<ProductDto> job) {
+    protected void customJobOrder(final JobGeneration job) {
         // Rewrite job order sensing time
         String jobOrderStart = DateUtils.convertToAnotherFormat(
                 job.getAppDataJob().getProduct().getSegmentStartDate(),
@@ -151,8 +151,7 @@ public class L2AppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
      * Customisation of the job DTO before sending it
      */
     @Override
-    protected void customJobDto(final JobGeneration<ProductDto> job,
-            final LevelJobDto dto) {
+    protected void customJobDto(final JobGeneration job, final LevelJobDto dto) {
         // NOTHING TO DO
 
     }

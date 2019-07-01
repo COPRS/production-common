@@ -64,10 +64,10 @@ public class JobsGeneratorFactoryTest {
     private OutputProducerFactory JobsSender;
 
     @Mock
-    private AppCatalogJobClient<EdrsSessionDto> appDataEService;
+    private AppCatalogJobClient appDataEService;
 
     @Mock
-    private AppCatalogJobClient<ProductDto> appDataPService;
+    private AppCatalogJobClient appDataPService;
 
     /**
      * Test set up

@@ -52,7 +52,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             @Qualifier("mqiServiceForEdrsSessions") final GenericMqiService<EdrsSessionDto> mqiService,
             final EdrsSessionFileService edrsService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
-            @Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient<EdrsSessionDto> appDataService,
+            @Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobDispatcher, processSettings, mqiService, mqiStatusService,
@@ -103,7 +103,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 }
                 reporting.reportStart("Start job generation using " + mqiMessage.getBody().getObjectStorageKey());
                 
-                AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
+                AppDataJobDto appDataJob = buildJob(mqiMessage);
                 productName = appDataJob.getProduct().getProductName();
 
                 // Dispatch
@@ -155,12 +155,11 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
 
     }
 
-    protected AppDataJobDto<EdrsSessionDto> buildJob(
-            GenericMessageDto<EdrsSessionDto> mqiMessage)
+    protected AppDataJobDto buildJob(GenericMessageDto<EdrsSessionDto> mqiMessage)
             throws AbstractCodedException {
     	
         // Check if a job is already created for message identifier
-        List<AppDataJobDto<EdrsSessionDto>> existingJobs = appDataService
+        List<AppDataJobDto> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -168,13 +167,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                     mqiMessage.getBody().getObjectStorageKey());
 
             // Search if session is already in progress
-            List<AppDataJobDto<EdrsSessionDto>> existingJobsForSession =
+            List<AppDataJobDto> existingJobsForSession =
                     appDataService.findByProductSessionId(file.getSessionId());
 
             if (CollectionUtils.isEmpty(existingJobsForSession)) {
 
                 // Create the JOB
-                AppDataJobDto<EdrsSessionDto> jobDto = new AppDataJobDto<>();
+                AppDataJobDto jobDto = new AppDataJobDto();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
@@ -213,17 +212,17 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 boolean update = false;
                 boolean updateMessage = false;
                 boolean updateProduct = false;
-                AppDataJobDto<EdrsSessionDto> jobDto =
-                        existingJobsForSession.get(0);
+                AppDataJobDto jobDto = existingJobsForSession.get(0);
                 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
                     update = true;
                 }
                 // Updates messages if needed
-                if (jobDto.getMessages().size() == 1 && jobDto.getMessages()
-                        .get(0).getBody().getChannelId() != mqiMessage.getBody()
-                                .getChannelId()) {
+                final EdrsSessionDto dto = (EdrsSessionDto) jobDto.getMessages()
+                        .get(0).getBody();
+                
+                if (jobDto.getMessages().size() == 1 && dto.getChannelId() != mqiMessage.getBody().getChannelId()) {
                     jobDto.getMessages().add(mqiMessage);
                     if (mqiMessage.getBody().getChannelId() == 1) {
                         jobDto.getProduct()
@@ -257,7 +256,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             boolean update = false;
             boolean updateMessage = false;
             boolean updateProduct = false;
-            AppDataJobDto<EdrsSessionDto> jobDto = existingJobs.get(0);
+            AppDataJobDto jobDto = existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());

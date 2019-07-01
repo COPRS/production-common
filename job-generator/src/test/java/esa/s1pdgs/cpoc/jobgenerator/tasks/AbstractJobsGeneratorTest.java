@@ -87,7 +87,7 @@ public class AbstractJobsGeneratorTest {
     private AbstractJobsGenerator<ProductDto> generator;
 
     @Mock
-    private AppCatalogJobClient<ProductDto> appDataPService;
+    private AppCatalogJobClient appDataPService;
 
     private TaskTable expectedTaskTable;
 
@@ -293,16 +293,13 @@ public class AbstractJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<ProductDto> primaryCheckAppJob =
-                TestL1Utils.buildJobGeneration(true);
+        AppDataJobDto primaryCheckAppJob = TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<ProductDto> readyAppJob =
-                TestL1Utils.buildJobGeneration(true);
+        AppDataJobDto readyAppJob = TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<ProductDto> sentAppJob =
-                TestL1Utils.buildJobGeneration(true);
+        AppDataJobDto sentAppJob = TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
         doReturn(TestL1Utils.buildJobGeneration(true)).when(appDataPService)
@@ -423,7 +420,7 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(jobGeneratorSettings).getWaitmetadatainput();
         
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto job1 = new AppDataJobDto();
         job1.setIdentifier(12L);
         job1.getGenerations().add(new AppDataJobGenerationDto());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
@@ -453,14 +450,14 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(jobGeneratorSettings).getWaitmetadatainput();
         
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto job1 = new AppDataJobDto();
         job1.setIdentifier(12L);
         job1.getGenerations().add(new AppDataJobGenerationDto());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
         job1.getGenerations().get(0).setState(AppDataJobGenerationDtoState.INITIAL);
         job1.getGenerations().get(0).setLastUpdateDate(new Date());
         
-        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
+        AppDataJobDto job2 = new AppDataJobDto();
         job2.setIdentifier(12L);
         job2.getGenerations().add(new AppDataJobGenerationDto());
         job2.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");

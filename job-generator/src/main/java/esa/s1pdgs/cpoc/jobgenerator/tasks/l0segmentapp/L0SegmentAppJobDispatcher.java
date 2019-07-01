@@ -34,8 +34,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
  */
 @Service
 @ConditionalOnProperty(name = "process.level", havingValue = "L0_SEGMENT")
-public class L0SegmentAppJobDispatcher
-        extends AbstractJobsDispatcher<ProductDto> {
+public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
 
     /**
      * Task table
@@ -54,7 +53,7 @@ public class L0SegmentAppJobDispatcher
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            @Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient<ProductDto> appDataService) {
+            @Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -84,8 +83,7 @@ public class L0SegmentAppJobDispatcher
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(
-            final AppDataJobDto<ProductDto> job)
+    protected List<String> getTaskTables(final AppDataJobDto job)
             throws JobGenMissingRoutingEntryException {
         return Arrays.asList(TASK_TABLE_NAME);
     }

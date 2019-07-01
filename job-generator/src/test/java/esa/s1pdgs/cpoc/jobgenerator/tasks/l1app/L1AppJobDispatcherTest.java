@@ -47,7 +47,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Routing;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class L1AppJobDispatcherTest {
 
@@ -79,7 +78,7 @@ public class L1AppJobDispatcherTest {
     private ThreadPoolTaskScheduler jobGenerationTaskScheduler;
 
     @Mock
-    private AppCatalogJobClient<ProductDto> appDataService;
+    private AppCatalogJobClient appDataService;
 
     @Mock
     private L1AppJobsGenerator mockGeneratorIW;
@@ -218,15 +217,15 @@ public class L1AppJobDispatcherTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<ProductDto> primaryCheckAppJob =
+        AppDataJobDto primaryCheckAppJob =
                 TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<ProductDto> readyAppJob =
+        AppDataJobDto readyAppJob =
                 TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<ProductDto> sentAppJob =
+        AppDataJobDto sentAppJob =
                 TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
@@ -361,10 +360,10 @@ public class L1AppJobDispatcherTest {
         this.dispatcher.initialize();
     }
 
-    private AppDataJobDto<ProductDto> buildAppDataJobDto(
+    private AppDataJobDto buildAppDataJobDto(
             String satelliteId, String acquisition)
             throws InternalErrorException {
-        AppDataJobDto<ProductDto> appDataJob =
+        AppDataJobDto appDataJob =
                 TestL1Utils.buildJobGeneration(false);
         appDataJob.getProduct().setAcquisition(acquisition);
         appDataJob.getProduct().setSatelliteId(satelliteId);
@@ -374,7 +373,7 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testGetTaskTablesIWA() throws ParseException {
         try {
-            AppDataJobDto<ProductDto> jobA = buildAppDataJobDto("A", "IW");
+            AppDataJobDto jobA = buildAppDataJobDto("A", "IW");
             this.dispatcher.initialize();
             assertEquals(5, this.dispatcher.getTaskTables(jobA).size());
 
@@ -386,7 +385,7 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testDispatchIWB() throws ParseException {
         try {
-            AppDataJobDto<ProductDto> jobA = buildAppDataJobDto("B", "IW");
+            AppDataJobDto jobA = buildAppDataJobDto("B", "IW");
             this.dispatcher.initialize();
             assertEquals(3, this.dispatcher.getTaskTables(jobA).size());
 
@@ -398,7 +397,7 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testDispatchS3A() throws ParseException {
         try {
-            AppDataJobDto<ProductDto> jobA = buildAppDataJobDto("A", "S3");
+            AppDataJobDto jobA = buildAppDataJobDto("A", "S3");
             this.dispatcher.initialize();
             assertEquals(6, this.dispatcher.getTaskTables(jobA).size());
 
@@ -410,7 +409,7 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testDispatchS5B() throws ParseException {
         try {
-            AppDataJobDto<ProductDto> jobA = buildAppDataJobDto("B", "S5");
+            AppDataJobDto jobA = buildAppDataJobDto("B", "S5");
             this.dispatcher.initialize();
             assertEquals(3, this.dispatcher.getTaskTables(jobA).size());
 
@@ -422,7 +421,7 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testDispatchOther() throws ParseException {
         try {
-            AppDataJobDto<ProductDto> jobA = buildAppDataJobDto("A", "EW");
+            AppDataJobDto jobA = buildAppDataJobDto("A", "EW");
             this.dispatcher.initialize();
             assertEquals(5, this.dispatcher.getTaskTables(jobA).size());
 
@@ -434,7 +433,7 @@ public class L1AppJobDispatcherTest {
     @Test(expected = AbstractCodedException.class)
     public void testDispatchInvalid()
             throws ParseException, AbstractCodedException {
-        AppDataJobDto<ProductDto> jobA = buildAppDataJobDto("A", "ZZ");
+        AppDataJobDto jobA = buildAppDataJobDto("A", "ZZ");
         this.dispatcher.initialize();
         this.dispatcher.getTaskTables(jobA).size();
     }

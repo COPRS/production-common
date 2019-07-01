@@ -109,7 +109,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     /**
      * Applicative data service
      */
-    private final AppCatalogJobClient<T> appDataService;
+    private final AppCatalogJobClient appDataService;
 
     /**
      * Task table
@@ -148,7 +148,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<T> appDataService) {
+            final AppCatalogJobClient appDataService) {
         this.xmlConverter = xmlConverter;
         this.metadataService = metadataService;
         this.l0ProcessSettings = l0ProcessSettings;
@@ -325,25 +325,25 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 
     @Override
     public void run() {
-        JobGeneration<T> job = null;
+        JobGeneration job = null;
         // Get a job to generate
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobGenerator");
         final Reporting reporting = reportingFactory.newReporting(0);
         
         try {
         	
-            List<AppDataJobDto<T>> jobs = appDataService
+            List<AppDataJobDto> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
             } else {
-                for (AppDataJobDto<T> appDataJob : jobs) {
+                for (AppDataJobDto appDataJob : jobs) {
                     // Check if we can do a loop
                     long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
-                    job = new JobGeneration<>(appDataJob, taskTableXmlName);
+                    job = new JobGeneration(appDataJob, taskTableXmlName);
                     switch (job.getGeneration().getState()) {
                         case INITIAL:                 
                             if (job.getGeneration().getLastUpdateDate() == null
@@ -414,7 +414,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                 "{} [productName {}] 1 - Checking the pre-requirements",
                                 this.prefixLogMonitor, productName);
                         this.preSearch(job);
-                        AppDataJobDto<T> modifiedJob = appDataService.patchJob(
+                        AppDataJobDto modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getIdentifier(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
@@ -503,7 +503,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         }
     }
 
-    private void updateState(JobGeneration<T> job,
+    private void updateState(JobGeneration job,
             AppDataJobGenerationDtoState newState,
             Reporting report
     )
@@ -515,7 +515,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 newState,
                 job.getGeneration()
         );
-        AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
+        AppDataJobDto modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
         
@@ -542,10 +542,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         }
     }
 
-    protected abstract void preSearch(JobGeneration<T> job)
+    protected abstract void preSearch(JobGeneration job)
             throws JobGenInputsMissingException;
 
-    protected void inputsSearch(JobGeneration<T> job)
+    protected void inputsSearch(JobGeneration job)
             throws JobGenInputsMissingException {
         // First, we evaluate each input query with no found file
         LOGGER.info("{} [productName {}] 2a - Requesting metadata",
@@ -768,7 +768,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         }
     }
 
-    protected void send(JobGeneration<T> job) throws AbstractCodedException {
+    protected void send(JobGeneration job) throws AbstractCodedException {
         LOGGER.info("{} [productName {}] 3a - Building common job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
@@ -916,7 +916,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         this.outputFactory.sendJob(job.getAppDataJob().getMessages().get(0), r);
     }
 
-    protected abstract void customJobOrder(JobGeneration<T> job);
+    protected abstract void customJobOrder(JobGeneration job);
 
-    protected abstract void customJobDto(JobGeneration<T> job, LevelJobDto dto);
+    protected abstract void customJobDto(JobGeneration job, LevelJobDto dto);
 }

@@ -21,20 +21,19 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 
-public class L0AppJobsGenerator
-        extends AbstractJobsGenerator<EdrsSessionDto> {
+public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
 
     public L0AppJobsGenerator(XmlConverter xmlConverter,
             MetadataService metadataService, ProcessSettings l0ProcessSettings,
             JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<EdrsSessionDto> appDataService) {
+            final AppCatalogJobClient appDataService) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
 
     @Override
-    protected void preSearch(JobGeneration<EdrsSessionDto> job)
+    protected void preSearch(JobGeneration job)
             throws JobGenInputsMissingException {
         Map<String, String> missingRaws = new HashMap<>();
         if (job.getAppDataJob() != null
@@ -74,7 +73,7 @@ public class L0AppJobsGenerator
     }
 
     @Override
-    protected void customJobOrder(JobGeneration<EdrsSessionDto> job) {
+    protected void customJobOrder(JobGeneration job) {
         // Add/Update mission Id
         boolean update = false;
         if (job.getJobOrder().getConf().getProcParams() != null) {
@@ -100,8 +99,7 @@ public class L0AppJobsGenerator
     }
 
     @Override
-    protected void customJobDto(JobGeneration<EdrsSessionDto> job,
-            LevelJobDto dto) {
+    protected void customJobDto(JobGeneration job, LevelJobDto dto) {
         // Add input relative to the channels
         if (job.getAppDataJob().getProduct() != null) {
             int nb1 = 0;

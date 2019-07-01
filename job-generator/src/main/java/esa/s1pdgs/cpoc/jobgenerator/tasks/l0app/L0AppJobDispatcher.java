@@ -30,8 +30,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
  */
 @Service
 @ConditionalOnProperty(name = "process.level", havingValue = "L0")
-public class L0AppJobDispatcher
-        extends AbstractJobsDispatcher<EdrsSessionDto> {
+public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
 
     /**
      * Task table
@@ -50,7 +49,7 @@ public class L0AppJobDispatcher
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            @Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient<EdrsSessionDto> appDataService) {
+            @Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -80,7 +79,7 @@ public class L0AppJobDispatcher
      */
     @Override
     protected List<String> getTaskTables(
-            final AppDataJobDto<EdrsSessionDto> job) {
+            final AppDataJobDto job) {
         return Arrays.asList(TASK_TABLE_NAME);
     }
 

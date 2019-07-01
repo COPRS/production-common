@@ -54,7 +54,7 @@ public class L1AppConsumerTest {
     protected StatusService mqiStatusService;
 
     @Mock
-    protected AppCatalogJobClient<ProductDto> appDataService;
+    protected AppCatalogJobClient appDataService;
 
     /**
      * Application status
@@ -206,12 +206,12 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistOtherPod()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto job1 = new AppDataJobDto();
         job1.setIdentifier(12L);
         job1.setPod("i-hostname");
         job1.setProduct(new AppDataJobProductDto());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
+        AppDataJobDto job2 = new AppDataJobDto();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());
@@ -238,12 +238,12 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistSamePodWaiting()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto job1 = new AppDataJobDto();
         job1.setIdentifier(12L);
         job1.setPod("hostname");
         job1.setProduct(new AppDataJobProductDto());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
+        AppDataJobDto job2 = new AppDataJobDto();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());
@@ -270,13 +270,13 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistSamePodGenerating()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJobDto job1 = new AppDataJobDto();
         job1.setIdentifier(12L);
         job1.setPod("hostname");
         job1.setState(AppDataJobDtoState.DISPATCHING);
         job1.setProduct(new AppDataJobProductDto());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
+        AppDataJobDto job2 = new AppDataJobDto();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());
