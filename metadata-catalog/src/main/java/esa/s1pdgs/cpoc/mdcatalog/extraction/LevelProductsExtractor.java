@@ -12,13 +12,10 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -114,65 +111,11 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
     ) 
     	throws AbstractCodedException
     {
-        switch (dto.getFamily()) {
-	        case L0_ACN:        	
-	        	final L0OutputFileDescriptor l0AcnDesc = extractFromFilename(
-	        			reportingFactory, 
-	        			() -> fileDescriptorBuilder.buildL0OutputFileDescriptor(metadataFile, dto)
-	        	);
-	        	return extractFromFile(
-	        			reportingFactory, 
-	        			() -> mdBuilder.buildL0AcnOutputFileMetadata(l0AcnDesc,metadataFile)
-	        	); 
-	        case L0_SLICE:
-	        	final L0OutputFileDescriptor l0Desc = extractFromFilename(
-	        			reportingFactory, 
-	        			() -> fileDescriptorBuilder.buildL0OutputFileDescriptor(metadataFile, dto)
-	        	);
-	        	return extractFromFile(
-	        			reportingFactory, 
-	        			() -> mdBuilder.buildL0SliceOutputFileMetadata(l0Desc,metadataFile)
-	        	);
-	        case L1_ACN:        	
-	        	final L1OutputFileDescriptor l1AcnDesc = extractFromFilename(
-	        			reportingFactory, 
-	        			() -> fileDescriptorBuilder.buildL1OutputFileDescriptor(metadataFile, dto)
-	        	);
-	        	return extractFromFile(
-	        			reportingFactory, 
-	        			() -> mdBuilder.buildL1AcnOutputFileMetadata(l1AcnDesc,metadataFile)
-	        	);
-	        case L1_SLICE:
-	        	final L1OutputFileDescriptor l1SliceDesc = extractFromFilename(
-	        			reportingFactory, 
-	        			() -> fileDescriptorBuilder.buildL1OutputFileDescriptor(metadataFile, dto)
-	        	);
-	        	return extractFromFile(
-	        			reportingFactory, 
-	        			() -> mdBuilder.buildL1SliceOutputFileMetadata(l1SliceDesc,metadataFile)
-	        	);
-	        case L2_ACN:
-	        	final L2OutputFileDescriptor l2AcnDesc = extractFromFilename(
-	        			reportingFactory,
-	        			() -> fileDescriptorBuilder.buildL2OutputFileDescriptor(metadataFile, dto)
-	        	);	        	
-	        	return extractFromFile(
-	        			reportingFactory, 
-	        			() -> mdBuilder.buildL2AcnOutputFileMetadata(l2AcnDesc, metadataFile)
-	        	);	  
-	        case L2_SLICE:
-	        	final L2OutputFileDescriptor l2SliceDesc = extractFromFilename(
-	        			reportingFactory,
-	        			() -> fileDescriptorBuilder.buildL2OutputFileDescriptor(metadataFile, dto)
-	        	);	  
-	        	return extractFromFile(
-	        			reportingFactory, 
-	        			() -> mdBuilder.buildL2SliceOutputFileMetadata(l2SliceDesc,metadataFile)
-	        	);	  
-	        default:
-	            throw new UnknownFamilyException(dto.getFamily().name(),
-	                    "Family not managed by the catalog for the category LEVEL_PRODUCTS");
-	    }
+    	
+    	final OutputFileDescriptor descriptor = extractFromFilename(reportingFactory, () -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, dto, dto.getFamily()));
+    	return extractFromFile(
+    			reportingFactory, 
+    			() -> mdBuilder.buildOutputFileMetadata(descriptor, metadataFile, dto.getFamily()));
     }
     
 

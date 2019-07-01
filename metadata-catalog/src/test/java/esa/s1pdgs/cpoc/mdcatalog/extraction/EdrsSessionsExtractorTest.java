@@ -123,7 +123,7 @@ public class EdrsSessionsExtractorTest {
         expectedDescriptor.setRelativePath("S1A/123/ch01/D_123_ch01_D.RAW");
         expectedDescriptor.setProductName("D_123_ch01_D.RAW");
         expectedDescriptor.setExtension(FileExtension.RAW);
-        expectedDescriptor.setProductType(EdrsSessionFileType.RAW);
+        expectedDescriptor.setEdrsSessionFileType(EdrsSessionFileType.RAW);
         expectedDescriptor.setMissionId("S1");
         expectedDescriptor.setSatelliteId("A");
         expectedDescriptor.setChannel(1);
