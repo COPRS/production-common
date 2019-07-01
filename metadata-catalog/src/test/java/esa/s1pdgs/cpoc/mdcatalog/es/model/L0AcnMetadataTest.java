@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -30,14 +30,14 @@ public class L0AcnMetadataTest {
 		
 		String str = obj.toString();
 		
-		assertTrue(str.contains("productName= name"));
-		assertTrue(str.contains("productType= type"));
-		assertTrue(str.contains("keyObjectStorage= kobs"));
-		assertTrue(str.contains("validityStart= start"));
-		assertTrue(str.contains("validityStop= stop"));
-		assertTrue(str.contains("instrumentConfigurationId= 15"));
-		assertTrue(str.contains("numberOfSlices= 11"));
-		assertTrue(str.contains("datatakeId= 14256"));
+		assertTrue(str.contains("productName: name"));
+		assertTrue(str.contains("productType: type"));
+		assertTrue(str.contains("keyObjectStorage: kobs"));
+		assertTrue(str.contains("validityStart: start"));
+		assertTrue(str.contains("validityStop: stop"));
+		assertTrue(str.contains("instrumentConfigurationId: 15"));
+		assertTrue(str.contains("numberOfSlices: 11"));
+		assertTrue(str.contains("datatakeId: 14256"));
 	}
 
 	/**

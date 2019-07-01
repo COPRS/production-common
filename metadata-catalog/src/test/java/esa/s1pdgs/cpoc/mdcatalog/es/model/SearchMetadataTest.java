@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -25,11 +25,11 @@ public class SearchMetadataTest {
 		obj.setValidityStart("start");
 		obj.setValidityStop("stop");
 		String str = obj.toString();
-		assertTrue(str.contains("productName= name"));
-		assertTrue(str.contains("productType= type"));
-		assertTrue(str.contains("keyObjectStorage= kobs"));
-		assertTrue(str.contains("validityStart= start"));
-		assertTrue(str.contains("validityStop= stop"));
+		assertTrue(str.contains("productName: name"));
+		assertTrue(str.contains("productType: type"));
+		assertTrue(str.contains("keyObjectStorage: kobs"));
+		assertTrue(str.contains("validityStart: start"));
+		assertTrue(str.contains("validityStop: stop"));
 	}
 
 	/**
