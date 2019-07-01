@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -228,7 +228,7 @@ public class LevelSegmentsExtractorTest {
         doReturn(file).when(obsService).downloadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.anyString());
 
-        L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+        OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
