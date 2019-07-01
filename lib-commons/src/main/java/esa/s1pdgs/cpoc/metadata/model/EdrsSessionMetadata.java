@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
+package esa.s1pdgs.cpoc.metadata.model;
 
 /**
  * 

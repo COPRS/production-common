@@ -29,11 +29,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.EdrsSessionMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0AcnMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 
 public class MetadataServiceTest {
