@@ -18,7 +18,6 @@ import java.util.concurrent.TimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +29,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -95,7 +94,7 @@ public class JobProcessor {
     /**
      * MQI service for reading message
      */
-    private final GenericMqiService<LevelJobDto> mqiService;
+    private final GenericMqiClient mqiService;
 
     /**
      * MQI service for stopping the MQI
@@ -120,9 +119,9 @@ public class JobProcessor {
             final ApplicationProperties properties,
             final DevProperties devProperties, final ObsService obsService,
             final OutputProcuderFactory procuderFactory,
-            @Qualifier("mqiServiceForLevelJobs") final GenericMqiService<LevelJobDto> mqiService,
+            final GenericMqiClient mqiService,
             final ErrorRepoAppender errorAppender,
-            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
+            final StatusService mqiStatusService) {
         this.appStatus = appStatus;
         this.devProperties = devProperties;
         this.properties = properties;
@@ -150,7 +149,7 @@ public class JobProcessor {
         }
         GenericMessageDto<LevelJobDto> message = null;
         try {
-            message = mqiService.next();
+            message = mqiService.next(ProductCategory.LEVEL_JOBS);
             this.appStatus.setWaiting();
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step 0] [code {}] {}",
@@ -449,7 +448,7 @@ public class JobProcessor {
                 getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
         try {
             mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
-                    errorMessage, stop));
+                    errorMessage, stop), ProductCategory.LEVEL_JOBS);
         } catch (AbstractCodedException ace) {
             LOGGER.error("{} [step 5] {} [code {}] {}",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
@@ -466,7 +465,7 @@ public class JobProcessor {
                 getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
         try {
             mqiService.ack(
-                    new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));
+                    new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
         } catch (AbstractCodedException ace) {
             LOGGER.error("{} [step 5] {} [code {}] {}",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),

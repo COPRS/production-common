@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -52,7 +52,7 @@ public class L0SegmentAppConsumerTest {
     private AbstractJobsDispatcher<ProductDto> jobsDispatcher;
 
     @Mock
-    private GenericMqiService<ProductDto> mqiService;
+    private GenericMqiClient mqiService;
 
     @Mock
     private StatusService mqiStatusService;
@@ -137,8 +137,8 @@ public class L0SegmentAppConsumerTest {
 
     public void mockMqiService() throws AbstractCodedException {
         doReturn(messages.get(0), messages.get(1), messages.get(2))
-                .when(mqiService).next();
-        doReturn(true).when(mqiService).ack(any());
+                .when(mqiService).next(Mockito.any());
+        doReturn(true).when(mqiService).ack(any(), Mockito.any());
     }
 
     public void mockAppDataService() throws AbstractCodedException {
@@ -194,7 +194,7 @@ public class L0SegmentAppConsumerTest {
     
     @Test
     public void testConsumeWhenNoMessage() throws AbstractCodedException {
-        doReturn(null).when(mqiService).next();
+        doReturn(null).when(mqiService).next(Mockito.any());
         
         consumer.consumeMessages();
 

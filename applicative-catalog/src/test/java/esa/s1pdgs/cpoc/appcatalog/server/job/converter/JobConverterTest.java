@@ -26,7 +26,6 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobInvalidState
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.EdrsSessionsMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -62,9 +61,9 @@ public class JobConverterTest {
         Date updateDateGen1 = new Date(System.currentTimeMillis() - 1200);
 
         GenericMessageDto<EdrsSessionDto> message1 =
-                new EdrsSessionsMessageDto(124, "input1", null);
+                new GenericMessageDto<EdrsSessionDto>(124, "input1", null);
         GenericMessageDto<EdrsSessionDto> message2 =
-                new EdrsSessionsMessageDto(12, "input2", null);
+                new GenericMessageDto<EdrsSessionDto>(12, "input2", null);
 
         jobDb = new AppDataJob();
         jobDb.setCategory(ProductCategory.EDRS_SESSIONS);

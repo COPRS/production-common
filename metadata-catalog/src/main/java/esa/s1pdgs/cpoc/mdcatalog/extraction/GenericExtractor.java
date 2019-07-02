@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -53,7 +53,7 @@ public abstract class GenericExtractor<T> {
     /**
      * Access to the MQI server
      */
-    protected final GenericMqiService<T> mqiService;
+    protected final GenericMqiClient mqiService;
 
     /**
      * Application status
@@ -87,8 +87,6 @@ public abstract class GenericExtractor<T> {
     
     private final ErrorRepoAppender errorAppender;
     
-    private final Class<T> messageClass;
-    
     private final ProcessConfiguration processConfiguration;
 
     /**
@@ -100,13 +98,12 @@ public abstract class GenericExtractor<T> {
      * @param pattern
      */
     public GenericExtractor(final EsServices esServices,
-            final GenericMqiService<T> mqiService, final AppStatus appStatus,
+            final GenericMqiClient mqiService, final AppStatus appStatus,
             final String localDirectory,
             final MetadataExtractorConfig extractorConfig, final String pattern,
             final ErrorRepoAppender errorAppender,
             final ProductCategory category,
-            final ProcessConfiguration processConfiguration,
-            final Class<T> messageClass) {
+            final ProcessConfiguration processConfiguration) {
         this.localDirectory = localDirectory;
         this.fileDescriptorBuilder =
                 new FileDescriptorBuilder(this.localDirectory,
@@ -118,7 +115,6 @@ public abstract class GenericExtractor<T> {
         this.appStatus = appStatus;
         this.category = category;
         this.errorAppender = errorAppender;
-        this.messageClass = messageClass;
         this.processConfiguration = processConfiguration;
     }
 
@@ -133,7 +129,7 @@ public abstract class GenericExtractor<T> {
         LOGGER.trace("[MONITOR] [step 0] [{}] Waiting message", category);
         GenericMessageDto<T> message = null;
         try {
-            message = mqiService.next();
+            message = mqiService.next(category);
             appStatus.setWaiting(category);
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step 0] [{}] [code {}] {}", category,
@@ -248,7 +244,7 @@ public abstract class GenericExtractor<T> {
         final Reporting reportAck = reportingFactory.newReporting(5);            
         reportAck.reportStart("Start acknowledging negatively");
         try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false));
+            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false), category);
             errorAppender.send(failedProc);            
             reportAck.reportStop("End acknowledging negatively");
         } catch (AbstractCodedException ace) {
@@ -268,7 +264,7 @@ public abstract class GenericExtractor<T> {
         reportAck.reportStart("Start acknowledging positively");
 
         try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false));
+            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false), category);
             reportAck.reportStop("End acknowledging positively");            
         } catch (AbstractCodedException ace) {            
         	reportAck.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());            

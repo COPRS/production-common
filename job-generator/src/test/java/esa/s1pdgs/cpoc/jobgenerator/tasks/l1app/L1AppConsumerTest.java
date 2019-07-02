@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -49,7 +49,7 @@ public class L1AppConsumerTest {
     private L0SlicePatternSettings l0SlicePatternSettings;
 
     @Mock
-    private GenericMqiService<ProductDto> mqiService;
+    private GenericMqiClient mqiService;
     @Mock
     protected StatusService mqiStatusService;
 
@@ -108,8 +108,8 @@ public class L1AppConsumerTest {
         this.mockProcessSettings();
 
         // Mock the MQI service
-        doReturn(message1, message2).when(mqiService).next();
-        doReturn(true).when(mqiService).ack(Mockito.any());
+        doReturn(message1, message2).when(mqiService).next(Mockito.any());
+        doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         // Mock app status
         doNothing().when(appStatus).setWaiting();
@@ -159,7 +159,7 @@ public class L1AppConsumerTest {
 
     @Test
     public void testProductNameNotMatch() throws AbstractCodedException {
-        doReturn(message2).when(mqiService).next();
+        doReturn(message2).when(mqiService).next(Mockito.any());
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
@@ -173,7 +173,7 @@ public class L1AppConsumerTest {
 
     @Test
     public void testReceiveOk() throws AbstractCodedException, ParseException {
-        doReturn(message1).when(mqiService).next();
+        doReturn(message1).when(mqiService).next(Mockito.any());
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
@@ -191,7 +191,7 @@ public class L1AppConsumerTest {
 
     @Test
     public void testReceiveNull() throws AbstractCodedException {
-        doReturn(null).when(mqiService).next();
+        doReturn(null).when(mqiService).next(Mockito.any());
 
         L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
@@ -216,7 +216,7 @@ public class L1AppConsumerTest {
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());
         job2.getProduct().setProductName("p2");
-        doReturn(message1).when(mqiService).next();
+        doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
 
@@ -248,7 +248,7 @@ public class L1AppConsumerTest {
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());
         job2.getProduct().setProductName("p2");
-        doReturn(message1).when(mqiService).next();
+        doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
 
@@ -281,7 +281,7 @@ public class L1AppConsumerTest {
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProductDto());
         job2.getProduct().setProductName("p1");
-        doReturn(message1).when(mqiService).next();
+        doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
 

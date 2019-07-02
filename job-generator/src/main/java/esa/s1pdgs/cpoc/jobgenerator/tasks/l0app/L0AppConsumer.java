@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -49,14 +49,14 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
     public L0AppConsumer(
             final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
             final ProcessSettings processSettings,
-            @Qualifier("mqiServiceForEdrsSessions") final GenericMqiService<EdrsSessionDto> mqiService,
+            final GenericMqiClient mqiService,
             final EdrsSessionFileService edrsService,
-            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
+            final StatusService mqiStatusService,
             @Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobDispatcher, processSettings, mqiService, mqiStatusService,
-                appDataService, appStatus, errorRepoAppender);
+                appDataService, appStatus, errorRepoAppender, ProductCategory.EDRS_SESSIONS);
         this.edrsService = edrsService;
     }
 

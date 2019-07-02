@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -54,7 +54,7 @@ public class L0AppConsumerTest {
     private EdrsSessionFileService edrsSessionFileService;
 
     @Mock
-    private GenericMqiService<EdrsSessionDto> mqiService;
+    private GenericMqiClient mqiService;
     @Mock
     protected StatusService mqiStatusService;
 
@@ -145,8 +145,8 @@ public class L0AppConsumerTest {
 
         // Mock the MQI service
         doReturn(message1, message2, message3, message4).when(mqiService)
-                .next();
-        doReturn(true).when(mqiService).ack(Mockito.any());
+                .next(Mockito.any());
+        doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         // Mock app status
         doNothing().when(appStatus).setWaiting();
@@ -203,7 +203,7 @@ public class L0AppConsumerTest {
     public void testReceiveSession() throws Exception {
 
         doReturn(message1, message3, message2, message4).when(mqiService)
-                .next();
+                .next(Mockito.any());
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
@@ -247,7 +247,7 @@ public class L0AppConsumerTest {
         doReturn(new GenericMessageDto<EdrsSessionDto>(1, "",
                 new EdrsSessionDto("KEY_OBS_SESSION_2_2", 2,
                         EdrsSessionFileType.RAW, "S1", "A"))).when(mqiService)
-                                .next();
+                                .next(Mockito.any());
         edrsSessionsConsumer.consumeMessages();
         Mockito.verify(edrsSessionFileService, never())
                 .createSessionFile(Mockito.anyString());
@@ -259,7 +259,7 @@ public class L0AppConsumerTest {
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, edrsSessionFileService,
                 mqiStatusService, appDataService, errorAppender, appStatus);
-        doReturn(message1, message1).when(mqiService).next();
+        doReturn(message1, message1).when(mqiService).next(Mockito.any());
 
         edrsSessionsConsumer.consumeMessages();
         Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
@@ -278,7 +278,7 @@ public class L0AppConsumerTest {
                 processSettings, mqiService, edrsSessionFileService,
                 mqiStatusService, appDataService, errorAppender, appStatus);
         dto1.setChannelId(3);
-        doReturn(message1).when(mqiService).next();
+        doReturn(message1).when(mqiService).next(Mockito.any());
 
         edrsSessionsConsumer.consumeMessages();
         Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());

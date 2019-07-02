@@ -6,11 +6,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiClientFactory;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 @Configuration
 public class MqiConfiguration {
@@ -32,9 +30,9 @@ public class MqiConfiguration {
     			.restTemplateSupplier(builder::build);
     }
 
-    @Bean(name = "mqiServiceForCompression")
-    public GenericMqiService<ProductDto> mqiServiceForCompression() {
-    	return mqiClientFactory.newProductServiceFor(ProductCategory.COMPRESSED_PRODUCTS);
+    @Bean
+    public GenericMqiClient genericMqiClient() {
+    	return mqiClientFactory.newGenericMqiService();
     }
 
     /**

@@ -35,7 +35,8 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterOperator;
-import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  *
@@ -115,8 +116,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("tast-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("tast-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -137,8 +138,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("tast-table-22");
         AppDataJobGeneration gen32 = new AppDataJobGeneration();
         gen3.setTaskTable("tast-table-32");
-        ProductMessageDto message12 = new ProductMessageDto(12, "topic12", null);
-        ProductMessageDto message22 = new ProductMessageDto(22, "topic12", null);
+        GenericMessageDto<ProductDto> message12 = new GenericMessageDto<ProductDto>(12, "topic12", null);
+        GenericMessageDto<ProductDto> message22 = new GenericMessageDto<ProductDto>(22, "topic12", null);
         obj2.setIdentifier(123);
         obj2.setLevel(ApplicationLevel.L1);
         obj2.setPod("pod-name-2");
@@ -168,8 +169,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -208,8 +209,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -250,8 +251,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -285,8 +286,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -327,8 +328,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -362,8 +363,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -406,8 +407,8 @@ public class AppDataJobServiceTest {
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
         gen3.setState(AppDataJobGenerationState.SENT);
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -449,8 +450,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -483,8 +484,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -513,8 +514,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
         obj.setIdentifier(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");

@@ -4,16 +4,6 @@ import java.util.function.Supplier;
 
 import org.springframework.web.client.RestTemplate;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.EdrsSessionsMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.LevelJobsMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.LevelReportsMessageDto;
-
 
 public final class MqiClientFactory {
     /**
@@ -44,52 +34,14 @@ public final class MqiClientFactory {
 		restTemplateBuilder = supplier;
 		return this;
 	}
-    
-	public final GenericMqiService<ProductDto> newProductServiceFor(final ProductCategory category)
-	{
-    	return new GenericMqiService<ProductDto>(
-    			restTemplateBuilder.get(), 
-    			category, 
-        		hostUri, 
-        		maxRetries, 
-        		tempoRetryMs, 
-        		ProductMessageDto.class
-        );
-	}
 	
-	public final GenericMqiService<LevelJobDto> newLevelJobsServiceFor()
+	public final GenericMqiClient newGenericMqiService()
 	{
-    	return new GenericMqiService<LevelJobDto>(
-    			restTemplateBuilder.get(), 
-    			ProductCategory.LEVEL_JOBS, 
+    	return new GenericMqiClient(
+    			restTemplateBuilder.get(),
         		hostUri, 
         		maxRetries, 
-        		tempoRetryMs, 
-        		LevelJobsMessageDto.class
-        );
-	}
-	
-	public final GenericMqiService<EdrsSessionDto> newErdsSessionService()
-	{
-    	return new GenericMqiService<EdrsSessionDto>(
-    			restTemplateBuilder.get(), 
-    			ProductCategory.EDRS_SESSIONS, 
-        		hostUri, 
-        		maxRetries, 
-        		tempoRetryMs, 
-        		EdrsSessionsMessageDto.class
-        );
-	}
-	
-	public final GenericMqiService<LevelReportDto> newReportsService()
-	{
-    	return new GenericMqiService<LevelReportDto>(
-    			restTemplateBuilder.get(), 
-    			ProductCategory.LEVEL_REPORTS, 
-        		hostUri, 
-        		maxRetries, 
-        		tempoRetryMs, 
-        		LevelReportsMessageDto.class
+        		tempoRetryMs
         );
 	}
 	

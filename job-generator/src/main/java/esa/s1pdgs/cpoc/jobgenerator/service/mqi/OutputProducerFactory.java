@@ -3,11 +3,11 @@ package esa.s1pdgs.cpoc.jobgenerator.service.mqi;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -28,7 +28,7 @@ public class OutputProducerFactory {
     /**
      * MQI client for LEVEL_JOBS
      */
-    private final GenericMqiService<LevelJobDto> senderJobs;
+    private final GenericMqiClient senderJobs;
 
     /**
      * Constructor
@@ -37,8 +37,7 @@ public class OutputProducerFactory {
      * @param senderReports
      */
     @Autowired
-    public OutputProducerFactory(
-            @Qualifier("mqiServiceForLevelJobs") final GenericMqiService<LevelJobDto> senderJobs) {
+    public OutputProducerFactory(final GenericMqiClient senderJobs) {
         this.senderJobs = senderJobs;
     }
 
@@ -55,6 +54,6 @@ public class OutputProducerFactory {
                         genericMessageDto.getIdentifier(), dto.getFamily(), dto);
         messageToPublish.setInputKey(genericMessageDto.getInputKey());
         messageToPublish.setOutputKey(dto.getFamily().name());
-        senderJobs.publish(messageToPublish);
+        senderJobs.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
     }    
 }

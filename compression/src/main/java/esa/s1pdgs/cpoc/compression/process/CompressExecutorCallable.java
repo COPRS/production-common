@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -28,8 +27,6 @@ public class CompressExecutorCallable implements Callable<Void> {
 	
 	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
 
-	private final ExecutorService execSrv;
-
 	private ProductDto job;
 
 	/**
@@ -47,8 +44,6 @@ public class CompressExecutorCallable implements Callable<Void> {
 	public CompressExecutorCallable(final ProductDto job, final String prefixLogs, ApplicationProperties properties) {
 		this.job = job;
 		this.properties = properties;
-
-		this.execSrv = Executors.newFixedThreadPool(1);
 	}
 
 	/**

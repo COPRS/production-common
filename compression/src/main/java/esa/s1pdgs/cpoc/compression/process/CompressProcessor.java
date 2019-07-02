@@ -18,13 +18,11 @@ import java.util.concurrent.TimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -36,7 +34,7 @@ import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.status.AppStatus;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -75,7 +73,7 @@ public class CompressProcessor {
 	/**
 	 * MQI service for reading message
 	 */
-	private final GenericMqiService<ProductDto> mqiService;
+	private final GenericMqiClient mqiService;
 
 	/**
 	 * MQI service for stopping the MQI
@@ -87,14 +85,13 @@ public class CompressProcessor {
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
 			final ObsService obsService, final OutputProducerFactory producerFactory,
-			@Qualifier("mqiServiceForCompression") final GenericMqiService<ProductDto> mqiService,
+			final GenericMqiClient mqiService,
 			final ErrorRepoAppender errorAppender,
-			@Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
+			final StatusService mqiStatusService) {
 		this.appStatus = appStatus;
 		this.properties = properties;
 		this.obsService = obsService;
 		this.producerFactory = producerFactory;
-
 		this.mqiService = mqiService;
 		this.mqiStatusService = mqiStatusService;
 		this.errorAppender = errorAppender;
@@ -118,7 +115,7 @@ public class CompressProcessor {
 		}
 		GenericMessageDto<ProductDto> message = null;
 		try {
-			message = mqiService.next();
+			message = mqiService.next(ProductCategory.COMPRESSED_PRODUCTS);
 			this.appStatus.setWaiting();
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[MONITOR] [step 0] [code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
@@ -355,14 +352,10 @@ public class CompressProcessor {
 			final String errorMessage) {
         LOGGER.info("Acknowledging negatively {} ",dto.getBody());
 		try {
-			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop));
+			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop), 
+					ProductCategory.COMPRESSED_PRODUCTS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm negatively request:{}",ace);
-//            LOGGER.error("{} [step 5] {} [code {}] {}",
-//                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
-//                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
-//                            dto.getBody()),
-//                    ace.getCode().getCode(), ace.getLogMessage());
 		}
 		appStatus.setError("PROCESSING");
 	}
@@ -370,14 +363,10 @@ public class CompressProcessor {
 	protected void ackPositively(final boolean stop, final GenericMessageDto<ProductDto> dto) {
 		LOGGER.info("Acknowledging positively {}", dto.getBody());
 		try {
-			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));
+			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), 
+					ProductCategory.COMPRESSED_PRODUCTS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm positively request:{}",ace);
-//            LOGGER.error("{} [step 5] {} [code {}] {}",
-//                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
-//                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
-//                            dto.getBody()),
-//                    ace.getCode().getCode(), ace.getLogMessage());
 			appStatus.setError("PROCESSING");
 		}
 	}

@@ -13,9 +13,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -35,19 +36,7 @@ public class OutputProducerFactoryTest {
      * Kafka producer for segments
      */
     @Mock
-    private GenericMqiService<ProductDto> senderSegments;
-
-    /**
-     * Kafka producer for L0 slices
-     */
-    @Mock
-    private GenericMqiService<ProductDto> senderProducts;
-
-    /**
-     * Kafka producer for report
-     */
-    @Mock
-    private GenericMqiService<LevelReportDto> senderReports;
+    private GenericMqiClient sender;
 
     /**
      * Factory to test
@@ -67,10 +56,10 @@ public class OutputProducerFactoryTest {
     @Before
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
-        doNothing().when(senderProducts).publish(Mockito.any());
-        doNothing().when(senderReports).publish(Mockito.any());
-        this.outputProcuderFactory = new OutputProcuderFactory(senderSegments,
-                senderProducts, senderReports);
+        doNothing().when(sender).publish(Mockito.any(), Mockito.any());
+
+        this.outputProcuderFactory = new OutputProcuderFactory(sender);
+        
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
                 new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST",
                         "work-dir", "job-order"));
@@ -88,13 +77,13 @@ public class OutputProducerFactoryTest {
                 new FileQueueMessage(ProductFamily.L0_REPORT, "test.txt",
                         new File("./test/data/report.txt")),
                 inputMessage);
-        verify(this.senderProducts, never()).publish(Mockito.any());
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
         GenericPublicationMessageDto<LevelReportDto> message =
                 new GenericPublicationMessageDto<LevelReportDto>(123,
                         ProductFamily.L0_REPORT, new LevelReportDto("test.txt",
                                 "Test report file", ProductFamily.L0_REPORT));
-        verify(this.senderReports, times(1)).publish(Mockito.eq(message));
-        verify(this.senderSegments, never()).publish(Mockito.any());
+        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_REPORTS));
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_SEGMENTS));
     }
 
     /**
@@ -112,9 +101,9 @@ public class OutputProducerFactoryTest {
                         ProductFamily.L0_SLICE, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L0_SLICE, "NRT"));
         message.setOutputKey("L0_SLICE");
-        verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
-        verify(this.senderReports, never()).publish(Mockito.any());
-        verify(this.senderSegments, never()).publish(Mockito.any());
+        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_SEGMENTS));
     }
 
     /**
@@ -131,9 +120,9 @@ public class OutputProducerFactoryTest {
                 new GenericPublicationMessageDto<ProductDto>(123,
                         ProductFamily.L0_SEGMENT, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L0_SEGMENT, "NRT"));
-        verify(this.senderSegments, times(1)).publish(Mockito.eq(message));
-        verify(this.senderProducts, never()).publish(Mockito.any());
-        verify(this.senderReports, never()).publish(Mockito.any());
+        
+        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_SEGMENTS));
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));
     }
 
     /**
@@ -151,8 +140,9 @@ public class OutputProducerFactoryTest {
                         ProductFamily.L0_ACN, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L0_ACN, "FAST"));
         message.setOutputKey("L0_ACN");
-        verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
-        verify(this.senderReports, never()).publish(Mockito.any());
+        
+        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));
     }
 
     /**
@@ -170,8 +160,8 @@ public class OutputProducerFactoryTest {
                 new GenericPublicationMessageDto<LevelReportDto>(123,
                         ProductFamily.L1_REPORT, new LevelReportDto("test.txt",
                                 "Test report file", ProductFamily.L1_REPORT));
-        verify(this.senderProducts, never()).publish(Mockito.any());
-        verify(this.senderReports, times(1)).publish(Mockito.eq(message));
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_REPORTS));
     }
 
     /**
@@ -189,8 +179,9 @@ public class OutputProducerFactoryTest {
                         ProductFamily.L1_SLICE, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L1_SLICE, "FAST"));
         message.setOutputKey("L1_SLICE");
-        verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
-        verify(this.senderReports, never()).publish(Mockito.any());
+        
+        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));        
     }
 
     /**
@@ -208,7 +199,8 @@ public class OutputProducerFactoryTest {
                         ProductFamily.L1_ACN, new ProductDto("test.txt",
                                 "test.txt", ProductFamily.L1_ACN, "NRT"));
         message.setOutputKey("L1_ACN");
-        verify(this.senderProducts, times(1)).publish(Mockito.eq(message));
-        verify(this.senderReports, never()).publish(Mockito.any());
+        
+        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
+        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));  
     }
 }

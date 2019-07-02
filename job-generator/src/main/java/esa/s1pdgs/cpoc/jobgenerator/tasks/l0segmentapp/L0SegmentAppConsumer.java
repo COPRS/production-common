@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -62,13 +61,13 @@ public class L0SegmentAppConsumer
             final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
             final L0SegmentAppProperties appProperties,
             final ProcessSettings processSettings,
-            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<ProductDto> mqiService,
-            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
-            @Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataService,
+            final GenericMqiClient mqiService,
+            final StatusService mqiStatusService,
+            final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
-                appDataService, appStatus, errorRepoAppender);
+                appDataService, appStatus, errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
         this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(),
                 Pattern.CASE_INSENSITIVE);
         this.patternGroups = appProperties.getNameRegexpGroups();

@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -55,7 +55,7 @@ public class LevelProductsExtractorTest {
 	 * MQI service
 	 */
 	@Mock
-	private GenericMqiService<ProductDto> mqiService;
+	private GenericMqiClient mqiService;
 
 	/**
 	 * 
@@ -119,7 +119,7 @@ public class LevelProductsExtractorTest {
 		doReturn(typeSliceLength).when(extractorConfig).getTypeSliceLength();
 
 		doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
-		doReturn(true).when(mqiService).ack(Mockito.any());
+		doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
 		inputMessage = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto("product-name", "key-obs", ProductFamily.L0_ACN, "NRT"));

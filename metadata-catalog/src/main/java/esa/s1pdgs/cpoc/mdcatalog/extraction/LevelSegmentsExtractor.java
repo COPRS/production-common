@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -54,7 +54,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> {
     @Autowired
     public LevelSegmentsExtractor(final EsServices esServices,
             final ObsService obsService,
-            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<ProductDto> mqiService,
+            final GenericMqiClient mqiService,
             final AppStatus appStatus,
             final MetadataExtractorConfig extractorConfig,
             @Value("${file.product-categories.level-segments.local-directory}") final String localDirectory,
@@ -65,7 +65,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> {
         super(esServices, mqiService, appStatus, localDirectory,
                 extractorConfig, PATTERN_CONFIG,
                 errorAppender,
-                ProductCategory.LEVEL_SEGMENTS, processConfiguration, ProductDto.class);
+                ProductCategory.LEVEL_SEGMENTS, processConfiguration);
         this.obsService = obsService;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;

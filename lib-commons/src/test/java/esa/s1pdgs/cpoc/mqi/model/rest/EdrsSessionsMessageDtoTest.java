@@ -24,13 +24,13 @@ public class EdrsSessionsMessageDtoTest {
     public void testGettersSettersConstructors() {
         EdrsSessionDto body = new EdrsSessionDto("key-obs", 2,
                 EdrsSessionFileType.RAW, "S1", "B");
-        EdrsSessionsMessageDto dto =
-                new EdrsSessionsMessageDto(123, "input-key", body);
+        
+        GenericMessageDto<EdrsSessionDto> dto = new GenericMessageDto<EdrsSessionDto>(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new EdrsSessionsMessageDto();
+        dto = new GenericMessageDto<EdrsSessionDto>();
         dto.setIdentifier(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -46,8 +46,7 @@ public class EdrsSessionsMessageDtoTest {
     public void testToString() {
         EdrsSessionDto body = new EdrsSessionDto("key-obs", 2,
                 EdrsSessionFileType.RAW, "S1", "B");
-        EdrsSessionsMessageDto dto =
-                new EdrsSessionsMessageDto(123, "input-key", body);
+        GenericMessageDto<EdrsSessionDto> dto = new GenericMessageDto<EdrsSessionDto>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("identifier: 123"));
@@ -62,7 +61,7 @@ public class EdrsSessionsMessageDtoTest {
      */
     @Test
     public void checkEquals() {
-        EqualsVerifier.forClass(EdrsSessionsMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(GenericMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

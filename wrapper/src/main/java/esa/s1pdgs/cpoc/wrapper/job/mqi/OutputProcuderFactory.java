@@ -3,13 +3,13 @@ package esa.s1pdgs.cpoc.wrapper.job.mqi;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -33,19 +33,9 @@ public class OutputProcuderFactory {
             LogManager.getLogger(OutputProcuderFactory.class);
 
     /**
-     * MQI client for LEVEL_SEGMENTS
+     * MQI client 
      */
-    private final GenericMqiService<ProductDto> senderSegments;
-
-    /**
-     * MQI client for LEVEL_PRODUCTS
-     */
-    private final GenericMqiService<ProductDto> senderProducts;
-
-    /**
-     * MQI client for LEVEL_REPORTS
-     */
-    private final GenericMqiService<LevelReportDto> senderReports;
+    private final GenericMqiClient sender;
 
 
     /**
@@ -55,13 +45,8 @@ public class OutputProcuderFactory {
      * @param senderReports
      */
     @Autowired
-    public OutputProcuderFactory(
-            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<ProductDto> senderSegments,
-            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> senderProducts,
-            @Qualifier("mqiServiceForLevelReports") final GenericMqiService<LevelReportDto> senderReports) {
-        this.senderSegments = senderSegments;
-        this.senderProducts = senderProducts;
-        this.senderReports = senderReports;
+    public OutputProcuderFactory(final GenericMqiClient sender) {
+        this.sender = sender;
     }
 
     /**
@@ -77,7 +62,14 @@ public class OutputProcuderFactory {
                 FileUtils.readFile(msg.getFile()), 
                 msg.getFamily()
         );
-        senderReports.publish(new GenericPublicationMessageDto<LevelReportDto>(inputMessage.getIdentifier(), msg.getFamily(), dtoReport));
+        sender.publish(
+        		new GenericPublicationMessageDto<LevelReportDto>(
+        				inputMessage.getIdentifier(), 
+        				msg.getFamily(), 
+        				dtoReport
+        		),
+        		ProductCategory.LEVEL_REPORTS
+        );
     }
 
     /**
@@ -96,11 +88,11 @@ public class OutputProcuderFactory {
 		);
     	    	
         if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
-            senderSegments.publish(messageToPublish);
+            sender.publish(messageToPublish, ProductCategory.LEVEL_SEGMENTS);
         } else {
     		messageToPublish.setInputKey(inputMessage.getInputKey());
     		messageToPublish.setOutputKey(msg.getFamily().name());
-            senderProducts.publish(messageToPublish);
+            sender.publish(messageToPublish, ProductCategory.LEVEL_PRODUCTS);
         }
     }
     

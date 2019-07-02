@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,7 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -55,7 +54,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
     @Autowired
     public LevelProductsExtractor(final EsServices esServices,
             final ObsService obsService,
-            @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> mqiService,
+            final GenericMqiClient mqiService,
             final AppStatus appStatus,
             final MetadataExtractorConfig extractorConfig,
             @Value("${file.product-categories.level-products.local-directory}") final String localDirectory,
@@ -64,7 +63,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
             final ProcessConfiguration processConfiguration,
             @Value("${file.file-with-manifest-ext}") final String fileManifestExt) {
         super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.LEVEL_PRODUCTS, processConfiguration, ProductDto.class);
+                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.LEVEL_PRODUCTS, processConfiguration);
         this.obsService = obsService;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;

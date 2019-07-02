@@ -7,7 +7,6 @@ import java.io.File;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -41,14 +40,14 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
 
     @Autowired
     public EdrsSessionsExtractor(final EsServices esServices,
-            @Qualifier("mqiServiceForEdrsSessions") final GenericMqiService<EdrsSessionDto> mqiService,
+            final GenericMqiClient mqiService,
             final AppStatus appStatus,
             @Value("${file.product-categories.edrs-sessions.local-directory}") final String localDirectory,
             final ErrorRepoAppender errorAppender,
             final ProcessConfiguration processConfiguration,
             final MetadataExtractorConfig extractorConfig) {
         super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_SESSION, errorAppender, ProductCategory.EDRS_SESSIONS, processConfiguration, EdrsSessionDto.class);
+                extractorConfig, PATTERN_SESSION, errorAppender, ProductCategory.EDRS_SESSIONS, processConfiguration);
     }
 
     /**

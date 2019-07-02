@@ -6,13 +6,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiClientFactory;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Configuration of MQI client.<br/>
@@ -42,49 +38,16 @@ public class MqiConfiguration {
     }
 
     /**
-     * Service for querying MQI for LEVEL_SEGMENT category
+     * Service for querying MQI
      * 
      * @param builder
      * @return
      */
-    @Bean(name = "mqiServiceForLevelSegments")
-    public GenericMqiService<ProductDto> mqiServiceForLevelSegments() {
-    	return mqiClientFactory.newProductServiceFor(ProductCategory.LEVEL_SEGMENTS);
+    @Bean
+    public GenericMqiClient mqiServiceForLevelSegments() {
+    	return mqiClientFactory.newGenericMqiService();
     }
-
-    /**
-     * Service for querying MQI for LEVEL_PRODUCT category
-     * 
-     * @param builder
-     * @return
-     */
-    @Bean(name = "mqiServiceForLevelProducts")
-    public GenericMqiService<ProductDto> mqiServiceForLevelProducts() {
-    	return mqiClientFactory.newProductServiceFor(ProductCategory.LEVEL_PRODUCTS);
-    }
-
-    /**
-     * Service for querying MQI for LEVEL_REPORTS category
-     * 
-     * @param builder
-     * @return
-     */
-    @Bean(name = "mqiServiceForLevelReports")
-    public GenericMqiService<LevelReportDto> mqiServiceForLevelReports() {
-    	return mqiClientFactory.newReportsService();
-    }
-
-    /**
-     * Service for querying MQI for LEVEL_JOBS category
-     * 
-     * @param builder
-     * @return
-     */
-    @Bean(name = "mqiServiceForLevelJobs")
-    public GenericMqiService<LevelJobDto> mqiServiceForLevelJobs() {
-    	return mqiClientFactory.newLevelJobsServiceFor();
-    }
-
+   
     /**
      * Service for stopping application
      * 

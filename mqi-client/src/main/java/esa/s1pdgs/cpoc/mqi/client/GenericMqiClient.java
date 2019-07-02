@@ -23,24 +23,17 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
  * @author Viveris Technologies
  * @param <T>
  */
-public class GenericMqiService<T> {
+public class GenericMqiClient {
 
     /**
      * Logger
      */
-    protected static final Log LOGGER = LogFactory.getLog(GenericMqiService.class);
+    protected static final Log LOGGER = LogFactory.getLog(GenericMqiClient.class);
 
     /**
      * Rest template
      */
     private final RestTemplate restTemplate;
-
-    /**
-     * Product category
-     */
-    private final ProductCategory category;
-    
-    private final Class<? extends GenericMessageDto<T>> className;
 
     /**
      * Host URI. Example: http://localhost:8081
@@ -66,33 +59,29 @@ public class GenericMqiService<T> {
      * @param maxRetries
      * @param tempoRetryMs
      */
-    public GenericMqiService(
+    public GenericMqiClient(
     		final RestTemplate restTemplate,
-            final ProductCategory category, 
             final String hostUri,
             final int maxRetries, 
-            final int tempoRetryMs,
-            final Class<? extends GenericMessageDto<T>> className
+            final int tempoRetryMs
     ) {
         this.restTemplate = restTemplate;
-        this.category = category;
         this.hostUri = hostUri;
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
-        this.className = className;
     }
     
-    private final String publishUri()
+    private final String publishUri(final ProductCategory category)
     {
     	return hostUri + "/messages/" + category.name().toLowerCase() + "/publish";
     }
     
-    private final String ackUri()
+    private final String ackUri(final ProductCategory category)
     {
     	return hostUri  + "/messages/" + category.name().toLowerCase() + "/ack";
     }
     
-    private final String nextUri()
+    private final String nextUri(final ProductCategory category)
     {
     	return hostUri  + "/messages/" + category.name().toLowerCase() + "/next";
     }
@@ -128,18 +117,20 @@ public class GenericMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public GenericMessageDto<T> next() throws AbstractCodedException {
+    public <T> GenericMessageDto<T> next(final ProductCategory category) throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            final String uri = nextUri();
+            final String uri = nextUri(category);
             try {
+            	final Class<T> clazz = category.getDtoClass();
+            	
                 @SuppressWarnings("unchecked")
 				final ResponseEntity<GenericMessageDto<T>> response = (ResponseEntity<GenericMessageDto<T>>) restTemplate.exchange(
                 		uri, 
                 		HttpMethod.GET, 
                 		null, 
-                		className
+                		clazz
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return response.getBody();
@@ -169,11 +160,11 @@ public class GenericMqiService<T> {
      * @return
      * @throws AbstractCodedException
      */
-    public boolean ack(final AckMessageDto ack) throws AbstractCodedException {
+    public boolean ack(final AckMessageDto ack, final ProductCategory category) throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            final String uri = ackUri();
+            final String uri = ackUri(category);
             LogUtils.traceLog(LOGGER,
                     String.format("[uri %s] [body %s]", uri, ack));
             try {
@@ -212,19 +203,18 @@ public class GenericMqiService<T> {
      * @param message
      * @throws AbstractCodedException
      */
-    public void publish(final GenericPublicationMessageDto<T> message)
+    public void publish(final GenericPublicationMessageDto<?> message, final ProductCategory category)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            final String uri = publishUri();
+            final String uri = publishUri(category);
             LogUtils.traceLog(LOGGER,
                     String.format("[uri %s] [body %s]", uri, message));
             try {
                 ResponseEntity<Void> response =
                         restTemplate.exchange(uri, HttpMethod.POST,
-                                new HttpEntity<GenericPublicationMessageDto<T>>(
-                                        message),
+                                new HttpEntity<GenericPublicationMessageDto<?>>(message),
                                 Void.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format(

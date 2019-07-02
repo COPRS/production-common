@@ -11,7 +11,8 @@ import java.util.Date;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.mqi.model.rest.ProductMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -32,8 +33,8 @@ public class AppDataJobDtoTest {
         gen2.setTaskTable("tast-table-2");
         AppDataJobGenerationDto gen3 = new AppDataJobGenerationDto();
         gen3.setTaskTable("tast-table-3");
-        ProductMessageDto message1 = new ProductMessageDto(1, "topic1", null);
-        ProductMessageDto message2 = new ProductMessageDto(2, "topic1", null);
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", new ProductDto());
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", new ProductDto());
         
         // check default constructor
         assertEquals(0, obj.getMessages().size());

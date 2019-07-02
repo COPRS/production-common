@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.compression.file.FileDownloader;
 import esa.s1pdgs.cpoc.compression.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.test.MockPropertiesTest;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -58,7 +58,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 //     * MQI service
 //     */
 //    @Mock
-//    private GenericMqiService<LevelJobDto> mqiService;
+//    private GenericMqiClient<LevelJobDto> mqiService;
 //
 //    /**
 //     * Job to process

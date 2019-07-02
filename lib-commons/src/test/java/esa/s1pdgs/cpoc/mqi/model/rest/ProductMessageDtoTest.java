@@ -23,13 +23,13 @@ public class ProductMessageDtoTest {
     @Test
     public void testGettersSettersConstructors() {
         ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
-        ProductMessageDto dto =
-                new ProductMessageDto(123, "input-key", body);
+        GenericMessageDto<ProductDto> dto =
+                new GenericMessageDto<ProductDto>(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new ProductMessageDto();
+        dto = new GenericMessageDto<ProductDto>();
         dto.setIdentifier(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -44,8 +44,8 @@ public class ProductMessageDtoTest {
     @Test
     public void testToString() {
         ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
-        ProductMessageDto dto =
-                new ProductMessageDto(123, "input-key", body);
+        GenericMessageDto<ProductDto> dto =
+                new GenericMessageDto<ProductDto>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("identifier: 123"));
@@ -60,7 +60,7 @@ public class ProductMessageDtoTest {
      */
     @Test
     public void checkEquals() {
-        EqualsVerifier.forClass(ProductMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(GenericMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

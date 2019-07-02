@@ -1,6 +1,11 @@
 package esa.s1pdgs.cpoc.common;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Group products per category
@@ -8,7 +13,13 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
  * @author Viveris Technologie
  */
 public enum ProductCategory {
-    AUXILIARY_FILES, EDRS_SESSIONS, LEVEL_JOBS, LEVEL_PRODUCTS, LEVEL_REPORTS, LEVEL_SEGMENTS, COMPRESSED_PRODUCTS;
+    AUXILIARY_FILES(ProductDto.class), 
+    EDRS_SESSIONS(EdrsSessionDto.class), 
+    LEVEL_JOBS(LevelJobDto.class), 
+    LEVEL_PRODUCTS(ProductDto.class), 
+    LEVEL_REPORTS(LevelReportDto.class), 
+    LEVEL_SEGMENTS(ProductDto.class), 
+    COMPRESSED_PRODUCTS(ProductDto.class);
 
     /**
      * Get the category for a given product family
@@ -62,4 +73,15 @@ public enum ProductCategory {
         }
         return ret;
     }
+    
+    private final Class<? extends AbstractDto> dtoClass;
+
+	private ProductCategory(Class<? extends AbstractDto> dtoClass) {
+		this.dtoClass = dtoClass;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> Class<T> getDtoClass() {
+		return (Class<T>) dtoClass;
+	}  
 }
