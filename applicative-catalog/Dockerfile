@@ -1,5 +1,6 @@
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:develop as build
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
 
+RUN echo "Building for branch ${BRANCH_TEXT}"
 WORKDIR /app
 
 FROM openjdk:8-jre-alpine

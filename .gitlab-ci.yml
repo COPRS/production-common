@@ -6,6 +6,7 @@ services:
 variables:
   DOCKER_HOST: tcp://localhost:2375
   MODULE: s1pro-core
+  BRANCH: develop
 
 stages:
   - build
@@ -14,13 +15,14 @@ stages:
   - deploy
 
 before_script:
+    - alias dockerbuild='docker build --network host --pull --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH'
     - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
 # Build procedure for master branch
 build-master:
   stage: build
   script:
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
+    - dockerbuild -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE"
   only:
     - master
@@ -29,7 +31,7 @@ build-master:
 build-develop:
   stage: build
   script:
-    - docker build --target final --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
+    - dockerbuild --target final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
   except:
     - master
