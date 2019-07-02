@@ -15,7 +15,7 @@ stages:
   - deploy
 
 before_script:
-    - alias dockerbuild='docker build --network host --pull --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH'
+    - alias dockerbuild="docker build --network host --pull --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH"
     - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
 # Build procedure for master branch
