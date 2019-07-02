@@ -16,7 +16,6 @@ import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.EdrsSessionMetadataDto;
 
 @RestController
 @RequestMapping(path = "/edrsSession")
@@ -32,32 +31,30 @@ public class EdrsSessionMetadataController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productType}/{productName:.+}")
-	public ResponseEntity<EdrsSessionMetadataDto> get(@PathVariable(name = "productType") String productType,
+	public ResponseEntity<EdrsSessionMetadata> get(@PathVariable(name = "productType") String productType,
 			@PathVariable(name = "productName") String productName) {
 		try {
-			EdrsSessionMetadata f = esServices.getEdrsSession(productType, productName);
+			EdrsSessionMetadata response = esServices.getEdrsSession(productType, productName);
 
-			if (f != null) {
-				EdrsSessionMetadataDto response = new EdrsSessionMetadataDto(f.getProductName(), f.getProductType(),
-						f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
-				return new ResponseEntity<EdrsSessionMetadataDto>(response, HttpStatus.OK);
+			if (response != null) {
+				return new ResponseEntity<EdrsSessionMetadata>(response, HttpStatus.OK);
 			} else {
 				LOGGER.warn("[productType {}] [productName {}] Not found", productType, productName);
-				return new ResponseEntity<EdrsSessionMetadataDto>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<EdrsSessionMetadata>(HttpStatus.NOT_FOUND);
 			}
 
 		} catch (MetadataNotPresentException em) {
 			LOGGER.warn("[productType {}] [productName {}] [code {}] {}", productType, productName, em.getCode().getCode(),
 					em.getLogMessage());
-			return new ResponseEntity<EdrsSessionMetadataDto>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<EdrsSessionMetadata>(HttpStatus.NOT_FOUND);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[productType {}] [productName {}] [code {}] {}", productType, productName, ace.getCode().getCode(),
 					ace.getLogMessage());
-			return new ResponseEntity<EdrsSessionMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<EdrsSessionMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exc) {
 			LOGGER.error("[productType {}] [productName {}] [code {}] [msg {}]", productType, productName,
 					ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
-			return new ResponseEntity<EdrsSessionMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<EdrsSessionMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

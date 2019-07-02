@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.metadata.model;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Class describing the metdata of a file
  * 
@@ -13,18 +15,21 @@ public abstract class AbstractMetadata {
     /**
      * 
      */
+	@JsonIgnore
     public final static DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 
     /**
      * 
      */
+	@JsonIgnore
     public final static DateTimeFormatter DATE_FORMATTER_26 =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
     /**
      * 
      */
+	@JsonIgnore
     public final static DateTimeFormatter DATE_FORMATTER_LIGTH =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -150,26 +155,11 @@ public abstract class AbstractMetadata {
         this.productType = productType;
     }
 
-    /**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return String.format(
-                "{productName: %s, productType: %s, keyObjectStorage: %s, validityStart: %s, validityStop: %s}",
-                productName, productType, keyObjectStorage, validityStart,
-                validityStop);
-    }
-
-    /**
-     *
-     */
-    public String toAbstractString() {
-        return String.format(
-                "productName: %s, productType: %s, keyObjectStorage: %s, validityStart: %s, validityStop: %s",
-                productName, productType, keyObjectStorage, validityStart,
-                validityStop);
-    }
+	public String toAbstractString() {
+		return String.format(
+				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\"",
+				productName, productType, keyObjectStorage, validityStart, validityStop);
+	}
 
     /**
      * @see java.lang.Object#hashCode()
@@ -201,6 +191,7 @@ public abstract class AbstractMetadata {
         return ret;
     }
     
+    @JsonIgnore
     public DateTimeFormatter getStartTimeFormatter() {
         if (validityStart.length() > 26) {
             return DATE_FORMATTER;
@@ -211,6 +202,7 @@ public abstract class AbstractMetadata {
         }
     }
     
+    @JsonIgnore
     public DateTimeFormatter getStopTimeFormatter() {
         if (validityStop.length() > 26) {
             return DATE_FORMATTER;

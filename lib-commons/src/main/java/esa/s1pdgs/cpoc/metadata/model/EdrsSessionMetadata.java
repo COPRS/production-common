@@ -22,4 +22,9 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	public EdrsSessionMetadata() {
 		super();
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("{%s}", super.toAbstractString());
+	}
 }

@@ -29,14 +29,14 @@ public class L0AcnMetadataTest {
 		obj.setDatatakeId("14256");
 		
 		String str = obj.toString();
-		assertTrue(str.contains("productName: name"));
-		assertTrue(str.contains("productType: type"));
-		assertTrue(str.contains("keyObjectStorage: kobs"));
-		assertTrue(str.contains("validityStart: start"));
-		assertTrue(str.contains("validityStop: stop"));
-		assertTrue(str.contains("instrumentConfigurationId: 15"));
-		assertTrue(str.contains("numberOfSlices: 11"));
-		assertTrue(str.contains("datatakeId: 14256"));
+		assertTrue(str.contains("productName\":\"name"));
+		assertTrue(str.contains("productType\":\"type"));
+		assertTrue(str.contains("keyObjectStorage\":\"kobs"));
+		assertTrue(str.contains("validityStart\":\"start"));
+		assertTrue(str.contains("validityStop\":\"stop"));
+		assertTrue(str.contains("instrumentConfigurationId\":15"));
+		assertTrue(str.contains("numberOfSlices\":11"));
+		assertTrue(str.contains("datatakeId\":\"14256"));
 	}
 
 	/**

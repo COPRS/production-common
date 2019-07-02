@@ -31,14 +31,14 @@ public class LevelSegmentMetadataTest {
 		
 		String str = obj.toString();
 		
-		assertTrue(str.contains("productName: name"));
-		assertTrue(str.contains("productType: type"));
-		assertTrue(str.contains("keyObjectStorage: "));
-		assertTrue(str.contains("validityStart: start"));
-		assertTrue(str.contains("validityStop: stop"));
-		assertTrue(str.contains("consolidation: consol"));
-		assertTrue(str.contains("polarisation: pol"));
-		assertTrue(str.contains("datatakeId: 14256"));
+		assertTrue(str.contains("\"productName\":\"name\""));
+		assertTrue(str.contains("\"productType\":\"type\""));
+		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
+		assertTrue(str.contains("\"validityStart\":\"start\""));
+		assertTrue(str.contains("\"validityStop\":\"stop\""));
+		assertTrue(str.contains("\"consolidation\":\"consol\""));
+		assertTrue(str.contains("\"polarisation\":\"pol\""));
+		assertTrue(str.contains("\"datatakeId\":\"14256\""));
 	}
 
 	/**

@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0SliceMetadataDto;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -16,8 +16,7 @@ public class L0SliceMetadataDtoTest {
 	//String productName, String productType, String keyObjectStorage, String validityStart,String validityStop
 	@Test
 	public void testToString() {
-		L0SliceMetadataDto obj = new L0SliceMetadataDto("name", "type", "kobs", "startDate", "stopDate");
-		obj = new L0SliceMetadataDto(obj);
+		L0SliceMetadata obj = new L0SliceMetadata("name", "type", "kobs", "startDate", "stopDate");
 		obj.setInstrumentConfigurationId(1);
 		obj.setDatatakeId("dataTakeId");
 		obj.setNumberSlice(8);
@@ -38,7 +37,7 @@ public class L0SliceMetadataDtoTest {
 	 */
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(L0SliceMetadataDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(L0SliceMetadata.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

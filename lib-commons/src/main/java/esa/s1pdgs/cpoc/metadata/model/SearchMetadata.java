@@ -31,7 +31,7 @@ public class SearchMetadata extends AbstractMetadata {
 	 */
 	@Override
 	public String toString() {
-		return super.toString();
+		return String.format("{%s}", super.toAbstractString());
 	}
 
 	/**

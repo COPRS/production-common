@@ -37,6 +37,11 @@ public class L0SliceMetadata extends AbstractMetadata {
 		this.datatakeId = dataTakeId;
 	}
 	
+	public L0SliceMetadata(final String productName, final String productType, final String keyObjectStorage,
+			final String validityStart, final String validityStop) {
+		super(productName, productType, keyObjectStorage, validityStart, validityStop);
+	}
+	
 	public L0SliceMetadata() {
 		
 	}
@@ -91,7 +96,7 @@ public class L0SliceMetadata extends AbstractMetadata {
 	@Override
 	public String toString() {
 		String superToString = super.toAbstractString();
-		return String.format("{%s, instrumentConfigurationId: %s, numberSlice: %s, datatakeId: %s}", superToString,
+		return String.format("{%s,\"instrumentConfigurationId\":%s,\"numberSlice\":%s,\"datatakeId\":\"%s\"}", superToString,
 				instrumentConfigurationId, numberSlice, datatakeId);
 	}
 

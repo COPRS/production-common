@@ -22,8 +22,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0AcnMetadataDto;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0SliceMetadataDto;
 
 public class L0SliceMetadataControllerTest extends RestControllerTest {
 
@@ -88,7 +86,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0SliceMetadata() throws Exception {
         // Expected Result
-        L0SliceMetadataDto expectedResult = new L0SliceMetadataDto("name",
+        L0SliceMetadata expectedResult = new L0SliceMetadata("name",
                 "type", "url", "validityStartTime", "validityStopTime");
         expectedResult.setInstrumentConfigurationId(0);
         expectedResult.setNumberSlice(2);
@@ -167,7 +165,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
     @Test
     public void testGetL0AcnMetadata() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
                 "url", "validityStartTime", "validityStopTime");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
@@ -193,15 +191,15 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0A", "type", "url",
+        L0AcnMetadata l0A = new L0AcnMetadata("name0A", "type", "url",
                 "validityStartTime", "validityStopTime");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
         expectedResult.add(l0A);
         expectedResult.add(l0A);
@@ -272,7 +270,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
     @Test
     public void testGetL0AcnMetadataOnlyOneInES() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
                 "url", "validityStartTime", "validityStopTime");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
@@ -298,15 +296,15 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0C", "type", "url",
+        L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
                 "validityStartTime", "validityStopTime");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
 
         this.mockGetL0Acn3Responses(null, l0AcnResponse, null);
@@ -325,7 +323,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
                 "url", "validityStartTime", "validityStopTime");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
@@ -351,15 +349,15 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0C", "type", "url",
+        L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
                 "validityStartTime", "validityStopTime");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
 
         this.mockGetL0Acn(l0AcnResponse);
@@ -378,7 +376,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn2() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
                 "url", "validityStartTime", "validityStopTime");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
@@ -404,15 +402,15 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0C", "type", "url",
+        L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
                 "validityStartTime", "validityStopTime");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
 
         this.mockGetL0Acn3Responses(null, l0AcnResponse, null);
@@ -431,7 +429,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn3() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
                 "url", "validityStartTime", "validityStopTime");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
@@ -457,15 +455,15 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0C", "type", "url",
+        L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
                 "validityStartTime", "validityStopTime");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
 
         this.mockGetL0Acn3Responses(null, null, l0AcnResponse);
@@ -484,7 +482,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
     @Test
     public void testGetL0AcnMetadataNoACN() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
                 "url", "validityStartTime", "validityStopTime");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
@@ -529,9 +527,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0AcnWithOneVariable() throws Exception {
         MvcResult result = request(get("/l0Slice//acns"))
-                .andExpect(MockMvcResultMatchers.status().is5xxServerError())
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andReturn();
         assertEquals("Result is not returning the HTTP NOT FOUND Status code",
-                500, result.getResponse().getStatus());
+                404, result.getResponse().getStatus());
     }
 }
