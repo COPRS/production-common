@@ -65,7 +65,6 @@ import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-@Ignore
 public class MessageConsumptionControllerTest {
 
     @ClassRule
