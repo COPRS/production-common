@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:{BRANCH} as build
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
 ARG BRANCH_TEXT
 
 WORKDIR /app
