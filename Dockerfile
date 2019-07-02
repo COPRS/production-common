@@ -35,10 +35,15 @@ RUN mvn -Dmaven.test.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/p
 ####
 
 # scratch seems not to work for some reason, we go for alpine...
-#FROM scatch
 FROM alpine as final
+ARG COMMIT_ID
+ARG BRANCH_TEXT
 
 WORKDIR /app
+RUN echo ${VERSION} >> VERSION
+RUN echo ${BRANCH_TEXT} >> VERSION
+RUN echo ${COMMIT_ID} >> VERSION
+
 COPY --from=buildenv /app/applicative-catalog/target /app/applicative-catalog/target
 COPY --from=buildenv /app/archives/target /app/archives/target
 COPY --from=buildenv /app/compression/target /app/compression/target

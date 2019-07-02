@@ -7,6 +7,7 @@ variables:
   DOCKER_HOST: tcp://localhost:2375
   MODULE: s1pro-core
   BRANCH: develop
+  VERSION: 0.4.0-SNAPSHOT
 
 stages:
   - build
@@ -15,26 +16,15 @@ stages:
   - deploy
 
 before_script:
-    - alias dockerbuild="docker build --network host --pull --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH"
+    - alias dockerbuild="docker build --network host --pull --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH --build-arg COMMIT_ID=$CI_COMMIT_SHA --build-arg VERSION=$VERSION"
+    - alias # just for debugging purpose
     - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
-# Build procedure for master branch
-build-master:
-  stage: build
-  script:
-    - dockerbuild -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE"
-  only:
-    - master
-
-# Build procedure for develop branch (and all others)
-build-develop:
+build:
   stage: build
   script:
     - dockerbuild --target final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
-  except:
-    - master
 
 include:
   - local: applicative-catalog/.gitlab-ci.yml
