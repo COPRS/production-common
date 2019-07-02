@@ -5,20 +5,9 @@ image: docker:latest
 variables:
   MODULE_COMPRESSION: s1pro-core-compression
 
-compression-build-master:
-  stage: module
-  script:
-    - cd compression
-    - dockerbuild -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_COMPRESSION" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_COMPRESSION"
-  only:
-    - master
-
 compression-build:
   stage: module
   script:
     - cd compression
     - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_COMPRESSION:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_COMPRESSION:$CI_COMMIT_REF_SLUG"
-  except:
-    - master

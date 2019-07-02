@@ -5,15 +5,6 @@ image: docker:latest
 variables:
   MODULE_ARCHIVES: s1pro-core-archives
 
-archives-build-master:
-  stage: module
-  script:
-    - cd archives
-    - dockerbuild -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ARCHIVES" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ARCHIVES"
-  only:
-    - master
-
 archives-build:
   stage: module
   script:

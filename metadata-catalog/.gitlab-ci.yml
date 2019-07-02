@@ -5,20 +5,9 @@ image: docker:latest
 variables:
   MODULE_METADATA_CATALOG: s1pro-core-metadata-catalog
 
-metadata-catalog-build-master:
-  stage: module
-  script:
-    - cd metadata-catalog
-    - dockerbuild -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG"
-  only:
-    - master
-
 metadata-catalog-build:
   stage: module
   script:
     - cd metadata-catalog
     - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_METADATA_CATALOG:$CI_COMMIT_REF_SLUG"
-  except:
-    - master
