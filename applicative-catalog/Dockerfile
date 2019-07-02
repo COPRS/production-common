@@ -6,7 +6,8 @@ WORKDIR /app
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
-RUN echo "${BRANCH_TEXT}" >> VERSION 
+RUN echo "${BRANCH_TEXT}"
+RUN echo "${BRANCH_TEXT}" >> /app/VERSION 
 COPY --from=build /app/applicative-catalog/target/s1pro-core-applicative-catalog-*.jar s1pdgs-applicative-catalog.jar
 RUN apk update && apk add wget
 COPY /config/start.sh start.sh
