@@ -523,13 +523,4 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
                 404, result.getResponse().getStatus());
 
     }
-
-    @Test
-    public void testGetL0AcnWithOneVariable() throws Exception {
-        MvcResult result = request(get("/l0Slice//acns"))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andReturn();
-        assertEquals("Result is not returning the HTTP INTERNAL SERVER ERROR Status code",
-                500, result.getResponse().getStatus());
-    }
 }

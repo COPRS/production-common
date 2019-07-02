@@ -38,12 +38,7 @@ public class L0SliceMetadataController {
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}")
 	public ResponseEntity<L0SliceMetadata> get(@PathVariable(name = "productName") String productName) {
 		try {
-			L0SliceMetadata response = esServices.getL0Slice(productName);
-			
-			if (response == null) {
-				throw new Exception(String.format("Nothing to get for productName ", productName));
-			}
-			
+			final L0SliceMetadata response = esServices.getL0Slice(productName);
 			return new ResponseEntity<L0SliceMetadata>(response, HttpStatus.OK);
 			
 		} catch (MetadataNotPresentException em) {
@@ -58,7 +53,7 @@ public class L0SliceMetadataController {
 			LOGGER.error("[L0_SLICE] [productName {}] [code {}] [msg {}]", productName,
 					ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
 			return new ResponseEntity<L0SliceMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		}		
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}/acns")
