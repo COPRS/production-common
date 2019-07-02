@@ -71,14 +71,17 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof EdrsSessionFileDescriptor))
-			return false;
+	    if (obj == null || getClass() != obj.getClass())
+	    	return false;
 		if (!super.equals(obj))
 			return false;
 		EdrsSessionFileDescriptor other = (EdrsSessionFileDescriptor) obj;
 		if (channel != other.channel)
 			return false;
-		if (edrsSessionFileType != other.edrsSessionFileType)
+		if (edrsSessionFileType == null) {
+			if (other.edrsSessionFileType != null)
+				return false;
+		} else if (!edrsSessionFileType.equals(other.edrsSessionFileType))
 			return false;
 		if (sessionIdentifier == null) {
 			if (other.sessionIdentifier != null)

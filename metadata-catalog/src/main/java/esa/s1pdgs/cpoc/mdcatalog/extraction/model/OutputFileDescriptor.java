@@ -106,8 +106,8 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof OutputFileDescriptor))
-			return false;
+	    if (obj == null || getClass() != obj.getClass())
+	    	return false;
 		if (!super.equals(obj))
 			return false;
 		OutputFileDescriptor other = (OutputFileDescriptor) obj;
