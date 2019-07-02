@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -100,9 +100,9 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> {
         
         final File metadataFile = download(reportingFactory, obsService, family, productName, keyObs);  
 
-    	final L0OutputFileDescriptor l0SegmentDesc = extractFromFilename(
+    	final OutputFileDescriptor l0SegmentDesc = extractFromFilename(
     			reportingFactory, 
-    			() -> fileDescriptorBuilder.buildL0SegmentFileDescriptor(metadataFile, dto)
+    			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, dto, dto.getFamily())
     	);
     	return extractFromFile(
     			reportingFactory, 

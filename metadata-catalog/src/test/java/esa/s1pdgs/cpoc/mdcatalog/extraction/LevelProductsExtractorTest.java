@@ -29,9 +29,7 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L2OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
@@ -193,7 +191,7 @@ public class LevelProductsExtractorTest {
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
-		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("manifest.safe");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -209,7 +207,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L0_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildL0SliceOutputFileMetadata(descriptor, file);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_SLICE);
 
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
 				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction").product(
@@ -243,7 +241,7 @@ public class LevelProductsExtractorTest {
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
-		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("manifest.safe");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -257,9 +255,9 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductType("IW_RAW__0S");
 		descriptor.setPolarisation("DV");
 		descriptor.setDataTakeId("021735");
-		descriptor.setProductFamily(ProductFamily.L0_SLICE);
+		descriptor.setProductFamily(ProductFamily.L0_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildL0SliceOutputFileMetadata(descriptor, file);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_ACN);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
 				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction").product(
 						ProductFamily.L0_ACN.toString(),
@@ -292,7 +290,7 @@ public class LevelProductsExtractorTest {
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
-		L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -308,7 +306,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildL1SliceOutputFileMetadata(descriptor, file);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_SLICE);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
 				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction").product(
 						ProductFamily.L1_SLICE.toString(),
@@ -340,7 +338,7 @@ public class LevelProductsExtractorTest {
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
-		L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename(l1acnName);
 		descriptor.setKeyObjectStorage(l1acnName);
@@ -356,7 +354,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L1_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildL1AcnOutputFileMetadata(descriptor, file);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_ACN);
 
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
 				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
@@ -387,7 +385,7 @@ public class LevelProductsExtractorTest {
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
-		L2OutputFileDescriptor descriptor = new L2OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename(l2SliceName);
 		descriptor.setKeyObjectStorage(l2SliceName);
@@ -403,7 +401,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("0313A0");
 		descriptor.setProductFamily(ProductFamily.L2_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildL2SliceOutputFileMetadata(descriptor, file);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L2_SLICE);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
 				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
 						.product(ProductFamily.L2_SLICE.toString(), l2SliceName);
@@ -433,7 +431,7 @@ public class LevelProductsExtractorTest {
 
 		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
-		L2OutputFileDescriptor descriptor = new L2OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename(l2acnName);
 		descriptor.setKeyObjectStorage(l2acnName);
@@ -449,7 +447,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("0313A0");
 		descriptor.setProductFamily(ProductFamily.L2_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildL2AcnOutputFileMetadata(descriptor, file);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L2_ACN);
 
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
 				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")

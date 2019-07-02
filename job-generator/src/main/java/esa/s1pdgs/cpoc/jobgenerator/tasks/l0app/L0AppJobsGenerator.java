@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 import java.util.HashMap;
 import java.util.Map;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
@@ -21,20 +21,19 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 
-public class L0AppJobsGenerator
-        extends AbstractJobsGenerator<EdrsSessionDto> {
+public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
 
     public L0AppJobsGenerator(XmlConverter xmlConverter,
             MetadataService metadataService, ProcessSettings l0ProcessSettings,
             JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<EdrsSessionDto> appDataService) {
+            final AppCatalogJobClient appDataService) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
 
     @Override
-    protected void preSearch(JobGeneration<EdrsSessionDto> job)
+    protected void preSearch(JobGeneration job)
             throws JobGenInputsMissingException {
         Map<String, String> missingRaws = new HashMap<>();
         if (job.getAppDataJob() != null
@@ -74,7 +73,7 @@ public class L0AppJobsGenerator
     }
 
     @Override
-    protected void customJobOrder(JobGeneration<EdrsSessionDto> job) {
+    protected void customJobOrder(JobGeneration job) {
         // Add/Update mission Id
         boolean update = false;
         if (job.getJobOrder().getConf().getProcParams() != null) {
@@ -100,8 +99,7 @@ public class L0AppJobsGenerator
     }
 
     @Override
-    protected void customJobDto(JobGeneration<EdrsSessionDto> job,
-            LevelJobDto dto) {
+    protected void customJobDto(JobGeneration job, LevelJobDto dto) {
         // Add input relative to the channels
         if (job.getAppDataJob().getProduct() != null) {
             int nb1 = 0;

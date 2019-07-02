@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
@@ -77,7 +77,7 @@ public abstract class AbstractJobsDispatcher<T> {
     /**
      * Applicative data service
      */
-    protected final AbstractAppCatalogJobService<T> appDataService;
+    protected final AppCatalogJobClient appDataService;
 
     /**
      * Constructor
@@ -90,7 +90,7 @@ public abstract class AbstractJobsDispatcher<T> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AbstractAppCatalogJobService<T> appDataService) {
+            final AppCatalogJobClient appDataService) {
         this.factory = factory;
         this.settings = settings;
         this.processSettings = processSettings;
@@ -133,11 +133,11 @@ public abstract class AbstractJobsDispatcher<T> {
 
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            List<AppDataJobDto<T>> generatingJobs = appDataService
+            List<AppDataJobDto> generatingJobs = appDataService
                     .findByPodAndState(processSettings.getHostname(),
                             AppDataJobDtoState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
-                for (AppDataJobDto<T> generation : generatingJobs) {
+                for (AppDataJobDto generation : generatingJobs) {
                     // TODO ask if bypass error
                     dispatch(generation);
                 }
@@ -169,7 +169,7 @@ public abstract class AbstractJobsDispatcher<T> {
      * @param job
      * @throws AbstractCodedException
      */
-    public void dispatch(final AppDataJobDto<T> job)
+    public void dispatch(final AppDataJobDto job)
             throws AbstractCodedException {
         String productName = job.getProduct().getProductName();
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Dispatch")
@@ -235,7 +235,7 @@ public abstract class AbstractJobsDispatcher<T> {
     /**
      * Get task tables to generate for given job
      */
-    protected abstract List<String> getTaskTables(final AppDataJobDto<T> job)
+    protected abstract List<String> getTaskTables(final AppDataJobDto job)
             throws AbstractCodedException;
 
     protected abstract String getTaskForFunctionalLog();

@@ -27,7 +27,7 @@ jobs:
       terminated: 600000
     generations:
       max-errors-initial: 50
-      max-errors-primary-check: 300
+      max-errors-primary-check: 301
   edrs-sessions:
     max-age-job-ms:
       waiting: 25200000
@@ -35,8 +35,8 @@ jobs:
       generating: 3600000
       terminated: 600000
     generations:
-      max-errors-initial: 50
-      max-errors-primary-check: 300
+      max-errors-initial: 51
+      max-errors-primary-check: 302
   level-segments:
     max-age-job-ms:
       waiting: 600000
@@ -44,5 +44,5 @@ jobs:
       generating: 3600000
       terminated: 600000
     generations:
-      max-errors-initial: 50
-      max-errors-primary-check: 300
+      max-errors-initial: 52
+      max-errors-primary-check: 303

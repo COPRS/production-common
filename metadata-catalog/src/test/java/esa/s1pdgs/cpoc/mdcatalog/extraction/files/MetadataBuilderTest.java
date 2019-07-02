@@ -18,10 +18,10 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 
@@ -118,7 +118,7 @@ public class MetadataBuilderTest {
 				LOGGER.error(e.getMessage());
 			}
 			return result;
-		}).when(extractor).processL0SliceProd(Mockito.any(L0OutputFileDescriptor.class), Mockito.any(File.class));
+		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_SLICE), Mockito.any(File.class));
 	}
 	
 	private void mockExtractorprocessL0ACNFile(JSONObject result) throws MetadataExtractionException {
@@ -129,7 +129,7 @@ public class MetadataBuilderTest {
 				LOGGER.error(e.getMessage());
 			}
 			return result;
-		}).when(extractor).processL0AcnProd(Mockito.any(L0OutputFileDescriptor.class), Mockito.any(File.class));
+		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_ACN), Mockito.any(File.class));
 	}
 	
 	private void mockExtractorprocessL1SliceFile(JSONObject result) throws MetadataExtractionException {
@@ -140,7 +140,7 @@ public class MetadataBuilderTest {
 				LOGGER.error(e.getMessage());
 			}
 			return result;
-		}).when(extractor).processL1SliceProd(Mockito.any(L1OutputFileDescriptor.class), Mockito.any(File.class));
+		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_SLICE), Mockito.any(File.class));
 	}
 	
 	private void mockExtractorprocessL1ACNFile(JSONObject result) throws MetadataExtractionException {
@@ -151,7 +151,7 @@ public class MetadataBuilderTest {
 				LOGGER.error(e.getMessage());
 			}
 			return result;
-		}).when(extractor).processL1AProd(Mockito.any(L1OutputFileDescriptor.class), Mockito.any(File.class));
+		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_ACN), Mockito.any(File.class));
 	}
 
 	@Test
@@ -350,7 +350,7 @@ public class MetadataBuilderTest {
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName("DCS_02_L20171109175634707000180_ch1_DSDB_00001.raw");
-		descriptor.setProductType(EdrsSessionFileType.RAW);
+		descriptor.setEdrsSessionFileType(EdrsSessionFileType.RAW);
 		descriptor.setRelativePath("S1A/707000180/ch01/DCS_02_L20171109175634707000180_ch1_DSDB_00001.raw");
 		descriptor.setChannel(1);
 		descriptor.setSessionIdentifier("707000180");
@@ -382,7 +382,7 @@ public class MetadataBuilderTest {
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName("DCS_02_SESSION1_ch1_DSIB.xml");
-		descriptor.setProductType(EdrsSessionFileType.SESSION);
+		descriptor.setEdrsSessionFileType(EdrsSessionFileType.SESSION);
 		descriptor.setRelativePath("S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml");
 		descriptor.setChannel(1);
 		descriptor.setSessionIdentifier("SESSION1");
@@ -407,7 +407,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessL0SliceFile(expectedResult);
 
 		// Build the parameters
-		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("manifest.safe");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
@@ -426,7 +426,7 @@ public class MetadataBuilderTest {
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			JSONObject dto = metadataBuilder.buildL0SliceOutputFileMetadata(descriptor, file);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_SLICE);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -444,7 +444,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessL0ACNFile(expectedResult);
 
 		// Build the parameters
-		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("manifest.safe");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
@@ -463,7 +463,7 @@ public class MetadataBuilderTest {
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			JSONObject dto = metadataBuilder.buildL0AcnOutputFileMetadata(descriptor, file);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_ACN);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -481,7 +481,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessL1SliceFile(expectedResult);
 
 		// Build the parameters
-		L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -500,7 +500,7 @@ public class MetadataBuilderTest {
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			JSONObject dto = metadataBuilder.buildL1SliceOutputFileMetadata(descriptor, file);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_SLICE);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -518,7 +518,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessL1ACNFile(expectedResult);
 
 		// Build the parameters
-		L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE");
@@ -537,7 +537,7 @@ public class MetadataBuilderTest {
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			JSONObject dto = metadataBuilder.buildL1AcnOutputFileMetadata(descriptor, file);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_ACN);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());

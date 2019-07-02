@@ -44,10 +44,9 @@ public class JobConverterTest {
     /**
      * DTO object
      */
-    private AppDataJobDto<EdrsSessionDto> jobDto;
+    private AppDataJobDto jobDto;
 
-    private JobConverter<EdrsSessionDto> converter =
-            new EdrsSessionJobConverter();
+    private JobConverter converter = new JobConverter();
 
     @Before
     public void init() {
@@ -120,7 +119,7 @@ public class JobConverterTest {
         gen2.setState(AppDataJobGenerationState.SENT);
         jobDb.setGenerations(Arrays.asList(gen1, gen2));
 
-        jobDto = new AppDataJobDto<>();
+        jobDto = new AppDataJobDto();
         jobDto.setCreationDate(creationDate);
         jobDto.setIdentifier(1123L);
         jobDto.setLevel(ApplicationLevel.L0);
@@ -177,8 +176,7 @@ public class JobConverterTest {
     public void testConvertDbToDto() throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         buildJobs(false, false, false);
-        AppDataJobDto<EdrsSessionDto> resultDto =
-                converter.convertJobFromDbToDto(jobDb);
+        AppDataJobDto resultDto = converter.convertJobFromDbToDto(jobDb, ProductCategory.EDRS_SESSIONS);
         assertEquals(jobDto, resultDto);
     }
 
@@ -186,7 +184,7 @@ public class JobConverterTest {
     public void testConvertDtoToDb() throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         buildJobs(false, false, false);
-        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto);
+        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto, ProductCategory.EDRS_SESSIONS);
         assertEquals(jobDb, resultDb);
     }
 
@@ -195,8 +193,7 @@ public class JobConverterTest {
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         buildJobs(true, false, false);
-        AppDataJobDto<EdrsSessionDto> resultDto =
-                converter.convertJobFromDbToDto(jobDb);
+        AppDataJobDto resultDto = converter.convertJobFromDbToDto(jobDb, ProductCategory.EDRS_SESSIONS);
         assertEquals(jobDto, resultDto);
     }
 
@@ -205,7 +202,7 @@ public class JobConverterTest {
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         buildJobs(true, false, false);
-        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto);
+        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto, ProductCategory.EDRS_SESSIONS);
         assertEquals(jobDb, resultDb);
     }
 
@@ -214,8 +211,7 @@ public class JobConverterTest {
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         buildJobs(false, true, false);
-        AppDataJobDto<EdrsSessionDto> resultDto =
-                converter.convertJobFromDbToDto(jobDb);
+        AppDataJobDto resultDto = converter.convertJobFromDbToDto(jobDb, ProductCategory.EDRS_SESSIONS);
         assertEquals(jobDto, resultDto);
     }
 
@@ -224,7 +220,7 @@ public class JobConverterTest {
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         buildJobs(false, true, false);
-        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto);
+        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto, ProductCategory.EDRS_SESSIONS);
         assertEquals(jobDb, resultDb);
     }
 
@@ -233,8 +229,7 @@ public class JobConverterTest {
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         buildJobs(false, false, true);
-        AppDataJobDto<EdrsSessionDto> resultDto =
-                converter.convertJobFromDbToDto(jobDb);
+        AppDataJobDto resultDto = converter.convertJobFromDbToDto(jobDb, ProductCategory.EDRS_SESSIONS);
         assertEquals(jobDto, resultDto);
     }
 
@@ -243,7 +238,7 @@ public class JobConverterTest {
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         buildJobs(false, false, true);
-        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto);
+        AppDataJob resultDb = converter.convertJobFromDtoToDb(jobDto, ProductCategory.EDRS_SESSIONS);
         assertEquals(jobDb, resultDb);
     }
 
@@ -329,20 +324,5 @@ public class JobConverterTest {
         assertEquals(AppDataJobGenerationDtoState.SENT,
                 converter.convertJobGenerationStateFromDbToDto(
                         AppDataJobGenerationState.SENT));
-    }
-}
-
-/**
- * Internal class for converting generic jobs for EDRS sessions
- * 
- * @author Viveris Technologies
- */
-class EdrsSessionJobConverter extends JobConverter<EdrsSessionDto> {
-
-    /**
-     * Constructor
-     */
-    public EdrsSessionJobConverter() {
-        super(ProductCategory.EDRS_SESSIONS);
     }
 }

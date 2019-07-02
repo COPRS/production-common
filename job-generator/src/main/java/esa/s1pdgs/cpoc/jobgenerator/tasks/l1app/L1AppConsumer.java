@@ -12,11 +12,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
@@ -67,7 +67,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<ProductDto> {
             final ProcessSettings processSettings,
             @Qualifier("mqiServiceForLevelProducts") final GenericMqiService<ProductDto> mqiService,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
-            @Qualifier("appCatalogServiceForLevelProducts") final AbstractAppCatalogJobService<ProductDto> appDataService,
+            @Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
@@ -107,7 +107,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<ProductDto> {
             LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job",
                     productName);
             reporting.reportStart("Start job generation using " + mqiMessage.getBody().getProductName());
-            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
+            AppDataJobDto appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -135,7 +135,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<ProductDto> {
             
             failedProc.processingType(mqiMessage.getInputKey())
       			.topic(mqiMessage.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
+	    		.processingStatus(MessageState.READ)
 	    		.productCategory(ProductCategory.LEVEL_PRODUCTS)
 	    		.failedPod(processSettings.getHostname())
 	            .failureDate(new Date())
@@ -150,13 +150,12 @@ public class L1AppConsumer extends AbstractGenericConsumer<ProductDto> {
         reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
     }
 
-    protected AppDataJobDto<ProductDto> buildJob(
-            GenericMessageDto<ProductDto> mqiMessage)
+    protected AppDataJobDto buildJob(GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJobDto<ProductDto>> existingJobs = appDataService
+        List<AppDataJobDto> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -177,7 +176,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<ProductDto> {
             String stopTime = m.group(this.patternSettings.getMGroupStopTime());
 
             // Create the JOB
-            AppDataJobDto<ProductDto> jobDto = new AppDataJobDto<>();
+            AppDataJobDto jobDto = new AppDataJobDto();
             // General details
             jobDto.setLevel(processSettings.getLevel());
             jobDto.setPod(processSettings.getHostname());
@@ -202,7 +201,7 @@ public class L1AppConsumer extends AbstractGenericConsumer<ProductDto> {
 
         } else {
             // Update pod if needed
-            AppDataJobDto<ProductDto> jobDto = existingJobs.get(0);
+            AppDataJobDto jobDto = existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());

@@ -76,14 +76,14 @@ public class TestL0SegmentUtils {
         return template;
     }
 
-    public static AppDataJobDto<ProductDto> buildAppData() {
-        AppDataJobDto<ProductDto> ret = new AppDataJobDto<>();
+    public static AppDataJobDto buildAppData() {
+        AppDataJobDto ret = new AppDataJobDto();
         ret.setIdentifier(123);
         ret.setState(AppDataJobDtoState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0_SEGMENT);
 
-        List<GenericMessageDto<ProductDto>> messages = new ArrayList<>();
+        List<GenericMessageDto<?>> messages = new ArrayList<>();
         GenericMessageDto<ProductDto> message1 =
                 new GenericMessageDto<ProductDto>(1, "input-key",
                         new ProductDto(
@@ -111,7 +111,7 @@ public class TestL0SegmentUtils {
         return ret;
     }
 
-    public static void setMessageToBuildData(AppDataJobDto<ProductDto> job,
+    public static void setMessageToBuildData(AppDataJobDto job,
             List<String> segmentNames) {
         job.setMessages(new ArrayList<>());
         int id = 1;

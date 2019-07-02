@@ -22,7 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
@@ -58,7 +58,7 @@ public class L0SegmentAppConsumerTest {
     private StatusService mqiStatusService;
 
     @Mock
-    private AbstractAppCatalogJobService<ProductDto> appDataService;
+    private AppCatalogJobClient appDataService;
 
     @Mock
     private AppStatus appStatus;
@@ -172,7 +172,7 @@ public class L0SegmentAppConsumerTest {
 
     @Test
     public void testBuildJobNew() throws AbstractCodedException {
-        AppDataJobDto<ProductDto> expectedData = new AppDataJobDto<>();
+        AppDataJobDto expectedData = new AppDataJobDto();
         expectedData.setLevel(processSettings.getLevel());
         expectedData.setPod(processSettings.getHostname());
         expectedData.getMessages().add(messages.get(0));
@@ -185,7 +185,7 @@ public class L0SegmentAppConsumerTest {
         productDto.setSatelliteId("B");
         expectedData.setProduct(productDto);
         
-        AppDataJobDto<ProductDto> result = consumer.buildJob(messages.get(0));
+        AppDataJobDto result = consumer.buildJob(messages.get(0));
         assertEquals(expectedData, result);
         verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
         verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
@@ -205,7 +205,7 @@ public class L0SegmentAppConsumerTest {
     
     @Test
     public void testConsumeWhenNewJob() throws AbstractCodedException {
-        AppDataJobDto<ProductDto> expectedData = new AppDataJobDto<>();
+        AppDataJobDto expectedData = new AppDataJobDto();
         expectedData.setLevel(processSettings.getLevel());
         expectedData.setPod(processSettings.getHostname());
         expectedData.setState(AppDataJobDtoState.DISPATCHING);

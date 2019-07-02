@@ -7,10 +7,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
 import org.springframework.kafka.support.Acknowledgment;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericReadMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiLightMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
+import esa.s1pdgs.cpoc.common.MessageState;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
@@ -46,7 +47,7 @@ public class GenericMessageListener<T>
     /**
      * Service for persisting data
      */
-    private final GenericAppCatalogMqiService<T> service;
+    private final AppCatalogMqiService service;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -62,6 +63,8 @@ public class GenericMessageListener<T>
      * Application status
      */
     private final AppStatus appStatus;
+    
+    private final ProductCategory category;
 
     /**
      * Constructor
@@ -71,11 +74,14 @@ public class GenericMessageListener<T>
      * @param otherAppService
      * @param genericConsumer
      */
-    public GenericMessageListener(final KafkaProperties properties,
-            final GenericAppCatalogMqiService<T> service,
+    public GenericMessageListener(
+    		final ProductCategory category,
+    		final KafkaProperties properties,
+            final AppCatalogMqiService service,
             final OtherApplicationService otherAppService,
             final GenericConsumer<T> genericConsumer,
             final AppStatus appStatus) {
+    	this.category = category;
         this.properties = properties;
         this.service = service;
         this.otherAppService = otherAppService;
@@ -93,9 +99,11 @@ public class GenericMessageListener<T>
 
         try {
             // Save message
-            MqiLightMessageDto result = service.read(data.topic(),
+        	AppCatMessageDto result = service.read(
+        			category,
+        			data.topic(),
                     data.partition(), data.offset(),
-                    new MqiGenericReadMessageDto<T>(
+                    new AppCatReadMessageDto<T>(
                             properties.getConsumer().getGroupId(),
                             properties.getHostname(), false, data.value()));
 
@@ -184,13 +192,12 @@ public class GenericMessageListener<T>
      */
     protected boolean messageShallBeIgnored(
             final ConsumerRecord<String, T> data,
-            final MqiLightMessageDto lightMessage)
+            final AppCatMessageDto lightMessage)
             throws AbstractCodedException {
         boolean ret = false;
         // Ask to the other application
         try {
-            ret = otherAppService.isProcessing(lightMessage.getSendingPod(),
-                    service.getCategory(), lightMessage.getIdentifier());
+            ret = otherAppService.isProcessing(lightMessage.getSendingPod(), category, lightMessage.getIdentifier());
         } catch (AbstractCodedException ace) {
             ret = false;
             LOGGER.warn(
@@ -198,12 +205,13 @@ public class GenericMessageListener<T>
                     ace.getLogMessage());
         }
         if (!ret) {
-            MqiLightMessageDto resultForce = service.read(data.topic(),
+			@SuppressWarnings("rawtypes")
+			AppCatMessageDto resultForce = service.read(category, data.topic(),
                     data.partition(), data.offset(),
-                    new MqiGenericReadMessageDto<T>(
+                    new AppCatReadMessageDto<T>(
                             properties.getConsumer().getGroupId(),
                             properties.getHostname(), true, data.value()));
-            if (resultForce.getState() != MqiStateMessageEnum.READ) {
+            if (resultForce.getState() != MessageState.READ) {
                 ret = true;
             }
             LOGGER.warn(

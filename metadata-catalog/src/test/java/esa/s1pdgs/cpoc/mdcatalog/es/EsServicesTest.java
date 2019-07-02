@@ -36,11 +36,11 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.EdrsSessionMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
 
 public class EsServicesTest{

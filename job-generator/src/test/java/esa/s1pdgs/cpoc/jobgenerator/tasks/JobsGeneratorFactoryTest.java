@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.StringUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
@@ -64,10 +64,10 @@ public class JobsGeneratorFactoryTest {
     private OutputProducerFactory JobsSender;
 
     @Mock
-    private AbstractAppCatalogJobService<EdrsSessionDto> appDataEService;
+    private AppCatalogJobClient appDataEService;
 
     @Mock
-    private AbstractAppCatalogJobService<ProductDto> appDataPService;
+    private AppCatalogJobClient appDataPService;
 
     /**
      * Test set up

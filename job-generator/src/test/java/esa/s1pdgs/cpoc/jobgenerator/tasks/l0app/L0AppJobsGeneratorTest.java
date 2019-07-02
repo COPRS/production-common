@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
@@ -37,8 +37,8 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.EdrsSessionMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
@@ -46,7 +46,6 @@ import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 
 /**
@@ -73,7 +72,7 @@ public class L0AppJobsGeneratorTest {
     private OutputProducerFactory JobsSender;
 
     @Mock
-    private AbstractAppCatalogJobService<EdrsSessionDto> appDataService;
+    private AppCatalogJobClient appDataService;
 
     private TaskTable expectedTaskTable;
     private L0AppJobsGenerator generator;
@@ -252,15 +251,15 @@ public class L0AppJobsGeneratorTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<EdrsSessionDto> primaryCheckAppJob =
+        AppDataJobDto primaryCheckAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<EdrsSessionDto> readyAppJob =
+        AppDataJobDto readyAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<EdrsSessionDto> sentAppJob =
+        AppDataJobDto sentAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
@@ -283,12 +282,12 @@ public class L0AppJobsGeneratorTest {
 
     @Test
     public void testPreSearch() {
-        AppDataJobDto<EdrsSessionDto> appDataJob =
+        AppDataJobDto appDataJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJobDto<EdrsSessionDto> appDataJobComplete =
+        AppDataJobDto appDataJobComplete =
                 TestL0Utils.buildAppDataEdrsSession(false);
-        JobGeneration<EdrsSessionDto> job =
-                new JobGeneration<>(appDataJob, "TaskTable.AIOP.xml");
+        JobGeneration job =
+                new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
 
         try {
             generator.preSearch(job);
@@ -318,10 +317,10 @@ public class L0AppJobsGeneratorTest {
         }).when(this.metadataService).getEdrsSession(Mockito.anyString(),
                 Mockito.anyString());
 
-        AppDataJobDto<EdrsSessionDto> appDataJob =
+        AppDataJobDto appDataJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        JobGeneration<EdrsSessionDto> job =
-                new JobGeneration<>(appDataJob, "TaskTable.AIOP.xml");
+        JobGeneration job =
+                new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
         try {
             generator.preSearch(job);
             fail("MetadataMissingException shall be raised");
@@ -335,10 +334,10 @@ public class L0AppJobsGeneratorTest {
 
     @Test
     public void testCustomDto() {
-        AppDataJobDto<EdrsSessionDto> appDataJob =
+        AppDataJobDto appDataJob =
                 TestL0Utils.buildAppDataEdrsSession(false);
-        JobGeneration<EdrsSessionDto> job =
-                new JobGeneration<>(appDataJob, "TaskTable.AIOP.xml");
+        JobGeneration job =
+                new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
         job.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
         ProductFamily family = ProductFamily.EDRS_SESSION;
         LevelJobDto dto = new LevelJobDto(family,
@@ -372,10 +371,10 @@ public class L0AppJobsGeneratorTest {
 
     @Test
     public void testCustomJobOrder() {
-        AppDataJobDto<EdrsSessionDto> appDataJob =
+        AppDataJobDto appDataJob =
                 TestL0Utils.buildAppDataEdrsSession(false);
-        JobGeneration<EdrsSessionDto> job =
-                new JobGeneration<>(appDataJob, "TaskTable.AIOP.xml");
+        JobGeneration job =
+                new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
         job.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
         generator.customJobOrder(job);
         job.getJobOrder().getConf().getProcParams().forEach(param -> {
@@ -384,10 +383,10 @@ public class L0AppJobsGeneratorTest {
             }
         });
 
-        AppDataJobDto<EdrsSessionDto> appDataJob1 =
+        AppDataJobDto appDataJob1 =
                 TestL0Utils.buildAppDataEdrsSession(false, "S2", true, true);
-        JobGeneration<EdrsSessionDto> job1 =
-                new JobGeneration<>(appDataJob1, "TaskTable.AIOP.xml");
+        JobGeneration job1 =
+                new JobGeneration(appDataJob1, "TaskTable.AIOP.xml");
         job1.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
         generator.customJobOrder(job1);
         job1.getJobOrder().getConf().getProcParams().forEach(param -> {

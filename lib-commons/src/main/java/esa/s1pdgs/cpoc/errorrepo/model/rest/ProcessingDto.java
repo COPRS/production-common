@@ -5,11 +5,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiGenericMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
-public class ProcessingDto extends MqiGenericMessageDto<Object> {
+public class ProcessingDto extends AppCatMessageDto<Object> {
 
 	private static class AscendingCreationTimeComparator implements Comparator<ProcessingDto>, Serializable {
 
@@ -59,7 +59,7 @@ public class ProcessingDto extends MqiGenericMessageDto<Object> {
 		return this;
 	}
 
-	public ProcessingDto processingStatus(MqiStateMessageEnum processingStatus) {
+	public ProcessingDto processingStatus(MessageState processingStatus) {
 		this.setState(processingStatus);
 		return this;
 	}
@@ -158,26 +158,26 @@ public class ProcessingDto extends MqiGenericMessageDto<Object> {
 		}
 		ProcessingDto failedProcessing = (ProcessingDto) o;
 
-		return Objects.equals(this.identifier, failedProcessing.identifier)
+		return Objects.equals(this.getIdentifier(), failedProcessing.getIdentifier())
 				&& Objects.equals(this.processingType, failedProcessing.processingType)
-				&& Objects.equals(this.state, failedProcessing.state)
-				&& Objects.equals(this.category, failedProcessing.category)
-				&& Objects.equals(this.partition, failedProcessing.partition)
-				&& Objects.equals(this.offset, failedProcessing.offset)
-				&& Objects.equals(this.group, failedProcessing.group)
+				&& Objects.equals(this.getState(), failedProcessing.getState())
+				&& Objects.equals(this.getCategory(), failedProcessing.getCategory())
+				&& Objects.equals(this.getPartition(), failedProcessing.getPartition())
+				&& Objects.equals(this.getOffset(), failedProcessing.getOffset())
+				&& Objects.equals(this.getGroup(), failedProcessing.getGroup())
 				&& Objects.equals(this.assignedPod, failedProcessing.assignedPod)
 				&& Objects.equals(this.lastAssignmentDate, failedProcessing.lastAssignmentDate)
-				&& Objects.equals(this.sendingPod, failedProcessing.sendingPod)
-				&& Objects.equals(this.lastSendDate, failedProcessing.lastSendDate)
-				&& Objects.equals(this.lastAckDate, failedProcessing.lastAckDate)
-				&& Objects.equals(this.nbRetries, failedProcessing.nbRetries)
-				&& Objects.equals(this.creationDate, failedProcessing.creationDate);
+				&& Objects.equals(this.getSendingPod(), failedProcessing.getSendingPod())
+				&& Objects.equals(this.getLastSendDate(), failedProcessing.getLastSendDate())
+				&& Objects.equals(this.getLastAckDate(), failedProcessing.getLastAckDate())
+				&& Objects.equals(this.getNbRetries(), failedProcessing.getNbRetries())
+				&& Objects.equals(this.getCreationDate(), failedProcessing.getCreationDate());
 	}
 
 	@Override
 	public int hashCode() {
-		return java.util.Objects.hash(identifier, processingType, state, category, partition, offset, group, assignedPod,
-				lastAssignmentDate, sendingPod, lastSendDate, lastAckDate, nbRetries, creationDate);
+		return java.util.Objects.hash(getIdentifier(), processingType, getState(), getCategory(), getPartition(), getOffset(), getGroup(), assignedPod,
+				lastAssignmentDate, getSendingPod(), getLastSendDate(), getLastAckDate(), getNbRetries(), getCreationDate());
 	}
 
 	@Override
@@ -185,20 +185,20 @@ public class ProcessingDto extends MqiGenericMessageDto<Object> {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class FailedProcessing {\n");
 
-		sb.append("    id: ").append(toIndentedString(identifier)).append("\n");
+		sb.append("    id: ").append(toIndentedString(getIdentifier())).append("\n");
 		sb.append("    processingType: ").append(toIndentedString(processingType)).append("\n");
-		sb.append("    processingStatus: ").append(toIndentedString(state)).append("\n");
-		sb.append("    productCategory: ").append(toIndentedString(category)).append("\n");
-		sb.append("    partition: ").append(toIndentedString(partition)).append("\n");
-		sb.append("    offset: ").append(toIndentedString(offset)).append("\n");
-		sb.append("    group: ").append(toIndentedString(group)).append("\n");
+		sb.append("    processingStatus: ").append(toIndentedString(getState())).append("\n");
+		sb.append("    productCategory: ").append(toIndentedString(getCategory())).append("\n");
+		sb.append("    partition: ").append(toIndentedString(getPartition())).append("\n");
+		sb.append("    offset: ").append(toIndentedString(getOffset())).append("\n");
+		sb.append("    group: ").append(toIndentedString(getGroup())).append("\n");
 		sb.append("    assignedPod: ").append(toIndentedString(assignedPod)).append("\n");
 		sb.append("    lastAssignmentDate: ").append(toIndentedString(lastAssignmentDate)).append("\n");
-		sb.append("    sendingPod: ").append(toIndentedString(sendingPod)).append("\n");
-		sb.append("    lastSendDate: ").append(toIndentedString(lastSendDate)).append("\n");
-		sb.append("    lastAckDate: ").append(toIndentedString(lastAckDate)).append("\n");
-		sb.append("    nbRetries: ").append(toIndentedString(nbRetries)).append("\n");
-		sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
+		sb.append("    sendingPod: ").append(toIndentedString(getSendingPod())).append("\n");
+		sb.append("    lastSendDate: ").append(toIndentedString(getLastSendDate())).append("\n");
+		sb.append("    lastAckDate: ").append(toIndentedString(getLastAckDate())).append("\n");
+		sb.append("    nbRetries: ").append(toIndentedString(getNbRetries())).append("\n");
+		sb.append("    creationDate: ").append(toIndentedString(getCreationDate())).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}

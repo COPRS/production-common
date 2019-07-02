@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.springframework.data.annotation.Id;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
@@ -42,7 +42,7 @@ public class MqiMessage {
     /**
      * State of the message
      */
-    private MqiStateMessageEnum state;
+    private MessageState state;
     /**
      * Pod who read the message
      */
@@ -101,7 +101,7 @@ public class MqiMessage {
      * @param dto
      */
     public MqiMessage(ProductCategory category, String topic,
-            int partition, long offset, String group, MqiStateMessageEnum state,
+            int partition, long offset, String group, MessageState state,
             String readingPod, Date lastReadDate, String sendingPod,
             Date lastSendDate, Date lastAckDate, int nbRetries, Object dto,
             Date creationDate) {
@@ -199,13 +199,13 @@ public class MqiMessage {
     /**
      * @return the state
      */
-    public MqiStateMessageEnum getState() {
+    public MessageState getState() {
         return state;
     }
     /**
      * @param state the state to set
      */
-    public void setState(MqiStateMessageEnum state) {
+    public void setState(MessageState state) {
         this.state = state;
     }
     /**

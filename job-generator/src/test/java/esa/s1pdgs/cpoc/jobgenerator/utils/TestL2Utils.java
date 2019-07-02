@@ -57,9 +57,9 @@ public class TestL2Utils {
         return r;
     }
 
-    public static AppDataJobDto<ProductDto> buildJobGeneration(
+    public static AppDataJobDto buildJobGeneration(
             boolean preSearchInfo) throws InternalErrorException {
-        AppDataJobDto<ProductDto> ret = new AppDataJobDto<>();
+        AppDataJobDto ret = new AppDataJobDto();
         ret.setIdentifier(123);
         ret.setState(AppDataJobDtoState.GENERATING);
         ret.setPod("hostname");

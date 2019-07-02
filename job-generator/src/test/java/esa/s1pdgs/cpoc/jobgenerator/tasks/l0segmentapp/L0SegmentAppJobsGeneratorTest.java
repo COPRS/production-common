@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -48,7 +48,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
@@ -57,7 +57,6 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0SegmentUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class L0SegmentAppJobsGeneratorTest {
 
@@ -77,18 +76,16 @@ public class L0SegmentAppJobsGeneratorTest {
     private OutputProducerFactory JobsSender;
 
     @Mock
-    private AbstractAppCatalogJobService<ProductDto> appDataService;
+    private AppCatalogJobClient appDataService;
 
     private TaskTable expectedTaskTable;
 
     private L0SegmentAppJobsGenerator generator;
 
-    private JobGeneration<ProductDto> job;
+    private JobGeneration job;
 
     @Mock
     private LevelJobDto mockJobDto;
-    
-    private LevelJobDto publishedJob;
 
     /**
      * Test set up
@@ -98,9 +95,9 @@ public class L0SegmentAppJobsGeneratorTest {
     @Before
     public void init() throws Exception {
 
-        AppDataJobDto<ProductDto> appDataJob =
+        AppDataJobDto appDataJob =
                 TestL0SegmentUtils.buildAppData();
-        job = new JobGeneration<>(appDataJob, "TaskTable.L0ASP.xml");
+        job = new JobGeneration(appDataJob, "TaskTable.L0ASP.xml");
 
         // Retrieve task table from the XML converter
         // TODO replace by L0_ASP
@@ -308,7 +305,6 @@ public class L0SegmentAppJobsGeneratorTest {
                     i.getArgument(0));
             mapper.writeValue(new File("./tmp/jobDtoL0Segment.json"),
                     i.getArgument(1));
-            publishedJob = i.getArgument(1);
             return null;
         }).when(this.JobsSender).sendJob(Mockito.any(), Mockito.any());
     }
@@ -574,10 +570,10 @@ public class L0SegmentAppJobsGeneratorTest {
 
     @Test
     public void testCustomJobDto() {
-        AppDataJobDto<ProductDto> appDataJob =
+        AppDataJobDto appDataJob =
                 TestL0SegmentUtils.buildAppData();
-        JobGeneration<ProductDto> job =
-                new JobGeneration<>(appDataJob, "TaskTable.L0ASP.xml");
+        JobGeneration job =
+                new JobGeneration(appDataJob, "TaskTable.L0ASP.xml");
 
         generator.customJobDto(job, mockJobDto);
         verifyZeroInteractions(mockJobDto);
@@ -587,12 +583,12 @@ public class L0SegmentAppJobsGeneratorTest {
     @Test
     public void testCustomJobOrder() {
         JobOrder jobOrder = TestL0Utils.buildJobOrderL20171109175634707000125();
-        AppDataJobDto<ProductDto> appDataJob =
+        AppDataJobDto appDataJob =
                 TestL0SegmentUtils.buildAppData();
         appDataJob.getProduct().setSatelliteId("B");
         appDataJob.getProduct().setMissionId("S1");
-        JobGeneration<ProductDto> job =
-                new JobGeneration<>(appDataJob, "TaskTable.L0ASP.xml");
+        JobGeneration job =
+                new JobGeneration(appDataJob, "TaskTable.L0ASP.xml");
         job.setJobOrder(jobOrder);
 
         for (JobOrderProcParam param : jobOrder.getConf().getProcParams()) {

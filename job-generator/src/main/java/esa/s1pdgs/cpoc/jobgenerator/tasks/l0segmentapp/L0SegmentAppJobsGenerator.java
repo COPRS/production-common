@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
@@ -34,8 +34,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobsGenerator
-        extends AbstractJobsGenerator<ProductDto> {
+public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
 
     /**
      * @param xmlConverter
@@ -49,7 +48,7 @@ public class L0SegmentAppJobsGenerator
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<ProductDto> appDataService) {
+            final AppCatalogJobClient appDataService) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
@@ -59,7 +58,7 @@ public class L0SegmentAppJobsGenerator
      * inputs
      */
     @Override
-    protected void preSearch(final JobGeneration<ProductDto> job)
+    protected void preSearch(final JobGeneration job)
             throws JobGenInputsMissingException {
         boolean fullCoverage = false;
 
@@ -70,9 +69,8 @@ public class L0SegmentAppJobsGenerator
                 new HashMap<>();
         String lastName = "";
         try {
-            for (GenericMessageDto<ProductDto> message : job
-                    .getAppDataJob().getMessages()) {
-                ProductDto dto = message.getBody();
+            for (GenericMessageDto<?> message : job.getAppDataJob().getMessages()) {
+                ProductDto dto = (ProductDto) message.getBody();
                 lastName = dto.getProductName();
                 LevelSegmentMetadata metadata = metadataService
                         .getLevelSegment(dto.getFamily(), dto.getProductName());
@@ -205,7 +203,7 @@ public class L0SegmentAppJobsGenerator
      * Custom job order before building the job DTO
      */
     @Override
-    protected void customJobOrder(final JobGeneration<ProductDto> job) {
+    protected void customJobOrder(final JobGeneration job) {
         this.updateProcParam(job.getJobOrder(), "Mission_Id",
                 job.getAppDataJob().getProduct().getMissionId()
                         + job.getAppDataJob().getProduct().getSatelliteId());
@@ -237,7 +235,7 @@ public class L0SegmentAppJobsGenerator
      * Customisation of the job DTO before sending it
      */
     @Override
-    protected void customJobDto(final JobGeneration<ProductDto> job,
+    protected void customJobDto(final JobGeneration job,
             final LevelJobDto dto) {
         // NOTHING TO DO
 

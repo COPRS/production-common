@@ -19,7 +19,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
@@ -82,7 +82,7 @@ public class MqiMessageDao {
      */
     public List<MqiMessage> searchByTopicPartitionGroup(final String topic,
             final int partition, final String group,
-            final Set<MqiStateMessageEnum> states) {
+            final Set<MessageState> states) {
         Query query = query(where("topic").is(topic).and("partition")
                 .is(partition).and("group").is(group).and("state").nin(states));
         query.with(new Sort(Direction.ASC, "lastReadDate"));
@@ -100,7 +100,7 @@ public class MqiMessageDao {
      */
     public List<MqiMessage> searchByPodStateCategory(final String pod,
             final ProductCategory category,
-            final Set<MqiStateMessageEnum> states) {
+            final Set<MessageState> states) {
         Query query = query(where("readingPod").is(pod).and("state").nin(states)
                 .and("category").is(category));
         query.with(new Sort(Direction.ASC, "creationDate"));
@@ -118,7 +118,7 @@ public class MqiMessageDao {
      */
     public int countReadingMessages(final String pod, final String topic) {
         Query query = query(where("readingPod").is(pod).and("state")
-                .is(MqiStateMessageEnum.READ).and("topic").is(topic));
+                .is(MessageState.READ).and("topic").is(topic));
         query.with(new Sort(Direction.ASC, "creationDate"));
         return find(query).size();
     }

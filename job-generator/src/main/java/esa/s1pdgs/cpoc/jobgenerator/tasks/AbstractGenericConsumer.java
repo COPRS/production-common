@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -43,7 +43,7 @@ public abstract class AbstractGenericConsumer<T> {
     /**
      * Applicative data service
      */
-    protected final AbstractAppCatalogJobService<T> appDataService;
+    protected final AppCatalogJobClient appDataService;
 
     /**
      * MQI service
@@ -62,7 +62,7 @@ public abstract class AbstractGenericConsumer<T> {
             final ProcessSettings processSettings,
             final GenericMqiService<T> mqiService,
             final StatusService mqiStatusService,
-            final AbstractAppCatalogJobService<T> appDataService,
+            final AppCatalogJobClient appDataService,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender
     		) {

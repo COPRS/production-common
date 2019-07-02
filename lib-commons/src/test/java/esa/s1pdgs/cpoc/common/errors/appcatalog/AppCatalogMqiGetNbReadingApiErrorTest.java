@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 
 /**
@@ -24,8 +23,7 @@ public class AppCatalogMqiGetNbReadingApiErrorTest {
     public void test() {
 
         AppCatalogMqiGetNbReadingApiError e1 = new AppCatalogMqiGetNbReadingApiError(
-                ProductCategory.EDRS_SESSIONS, "uri-mqi", "error-message");
-        assertEquals(ProductCategory.EDRS_SESSIONS, e1.getCategory());
+                "uri-mqi", "error-message");
         assertEquals("uri-mqi", e1.getUri());
         assertEquals("error-message", e1.getMessage());
         assertEquals(ErrorCode.APPCATALOG_MQI_NB_READ_API_ERROR,
@@ -33,14 +31,12 @@ public class AppCatalogMqiGetNbReadingApiErrorTest {
         assertNull(e1.getCause());
 
         String str1 = e1.getLogMessage();
-        assertTrue(str1.contains("[category EDRS_SESSIONS]"));
         assertTrue(str1.contains("[uri uri-mqi]"));
         assertTrue(str1.contains("[msg error-message]"));
 
         AppCatalogMqiGetNbReadingApiError e2 = new AppCatalogMqiGetNbReadingApiError(
-                ProductCategory.EDRS_SESSIONS, "uri-mqi", "error-message",
+                "uri-mqi", "error-message",
                 new Exception("cause-message"));
-        assertEquals(ProductCategory.EDRS_SESSIONS, e2.getCategory());
         assertEquals("uri-mqi", e1.getUri());
         assertEquals("error-message", e2.getMessage());
         assertEquals(ErrorCode.APPCATALOG_MQI_NB_READ_API_ERROR,
