@@ -1,9 +1,9 @@
 ARG BRANCH
 FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
-ARG BRANCH_TEXT
 WORKDIR /app
 
 FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-l2:${BRANCH}
+ARG BRANCH_TEXT
 WORKDIR /app
 RUN echo "${BRANCH_TEXT}" >> VERSION
 COPY --from=build /app/wrapper/target/s1pro-core-wrapper-*.jar s1pdgs-wrapper.jar
