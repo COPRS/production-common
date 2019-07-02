@@ -41,7 +41,7 @@ public class L0SliceMetadataController {
 			L0SliceMetadata response = esServices.getL0Slice(productName);
 			
 			if (response == null) {
-				throw new MetadataNotPresentException(productName);
+				throw new Exception(String.format("Nothing to get for productName ", productName));
 			}
 			
 			return new ResponseEntity<L0SliceMetadata>(response, HttpStatus.OK);
