@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -18,7 +19,7 @@ public class LevelSegmentMetadataDtoTest {
 	 */
 	@Test
 	public void testToString() {
-		LevelSegmentMetadataDto obj = new LevelSegmentMetadataDto("name", "type", "kobs", "start", "stop");
+		LevelSegmentMetadata obj = new LevelSegmentMetadata("name", "type", "kobs", "start", "stop");
 		assertEquals("name", obj.getProductName());
         assertEquals("type", obj.getProductType());
         assertEquals("kobs", obj.getKeyObjectStorage());
@@ -33,14 +34,14 @@ public class LevelSegmentMetadataDtoTest {
         assertEquals("pol", obj.getPolarisation());
 		
 		String str = obj.toString();
-		assertTrue(str.contains("productName: name"));
-		assertTrue(str.contains("productType: type"));
-		assertTrue(str.contains("keyObjectStorage: "));
-		assertTrue(str.contains("validityStart: start"));
-		assertTrue(str.contains("validityStop: stop"));
-		assertTrue(str.contains("consolidation: consol"));
-		assertTrue(str.contains("polarisation: pol"));
-		assertTrue(str.contains("datatakeId: 14256"));
+		assertTrue(str.contains("productName\":\"name"));
+		assertTrue(str.contains("productType\":\"type"));
+		assertTrue(str.contains("keyObjectStorage\":"));
+		assertTrue(str.contains("validityStart\":\"start"));
+		assertTrue(str.contains("validityStop\":\"stop"));
+		assertTrue(str.contains("consolidation\":\"consol"));
+		assertTrue(str.contains("polarisation\":\"pol"));
+		assertTrue(str.contains("datatakeId\":\"14256"));
 		
 		obj.setProductName("name2");
 		obj.setProductType("type2");
@@ -52,16 +53,6 @@ public class LevelSegmentMetadataDtoTest {
         assertEquals("kobs2", obj.getKeyObjectStorage());
         assertEquals("start2", obj.getValidityStart());
         assertEquals("stop2", obj.getValidityStop());
-		
-		LevelSegmentMetadataDto obj2 = new LevelSegmentMetadataDto(obj);
-        assertEquals("name2", obj2.getProductName());
-        assertEquals("type2", obj2.getProductType());
-        assertEquals("kobs2", obj2.getKeyObjectStorage());
-        assertEquals("start2", obj2.getValidityStart());
-        assertEquals("stop2", obj2.getValidityStop());
-        assertEquals("14256", obj2.getDatatakeId());
-        assertEquals("consol", obj2.getConsolidation());
-        assertEquals("pol", obj2.getPolarisation());
 	}
 
 	/**
@@ -69,7 +60,7 @@ public class LevelSegmentMetadataDtoTest {
 	 */
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(LevelSegmentMetadataDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(LevelSegmentMetadata.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

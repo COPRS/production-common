@@ -23,7 +23,6 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.SearchMetadataDto;
 
 @RestController
 @RequestMapping(path = "/metadata")
@@ -39,7 +38,7 @@ public class SearchMetadataController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
-	public ResponseEntity<List<SearchMetadataDto>> search(@PathVariable(name = "productFamily") String productFamily,
+	public ResponseEntity<List<SearchMetadata>> search(@PathVariable(name = "productFamily") String productFamily,
 	        @RequestParam(name = "productType", defaultValue = "NONE") String productType,
 			@RequestParam(name = "mode", defaultValue = "NONE") String mode, 
 			@RequestParam(name = "satellite", defaultValue = "NONE") String satellite,
@@ -49,7 +48,7 @@ public class SearchMetadataController {
 			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
 		try {
-		    List<SearchMetadataDto> response = new ArrayList<SearchMetadataDto>();
+		    List<SearchMetadata> response = new ArrayList<SearchMetadata>();
 			if ("LatestValCover".equals(mode)) {
 				SearchMetadata f = esServices.lastValCover(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
@@ -59,10 +58,10 @@ public class SearchMetadataController {
 						satellite, insConfId, processMode);
 				
 				if (f != null) {
-					response.add(new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
+					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
 							f.getValidityStart(), f.getValidityStop()));
 				}
-				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
+				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else if("ValIntersect".equals(mode)) {
 				LOGGER.debug("Using val intersect with productType={}, mode={}, t0={}, t1={}, proccessingMode={}, insConfId={}, dt0={}, dt1={}",productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1);
 			    List<SearchMetadata> f = esServices.valIntersect(convertDateForSearch(startDate, -dt0,
@@ -72,16 +71,16 @@ public class SearchMetadataController {
                         productType, processMode, satellite);			   			    
 			    
 			    if (f == null) {			    	
-			    	return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
+			    	return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 			    }
 			    
 			    LOGGER.debug("Query returned {} results",f.size());
 			    
 			    for(SearchMetadata m : f) {
-			        response.add(new SearchMetadataDto(m.getProductName(), m.getProductType(), 
+			        response.add(new SearchMetadata(m.getProductName(), m.getProductType(), 
 			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop()));
 			    }
-                return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
+                return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			}
 			else if ("ClosestStartValidity".equals(mode)) {
 				SearchMetadata f = esServices.closestStartValidity(productType, ProductFamily.fromValue(productFamily),
@@ -92,10 +91,10 @@ public class SearchMetadataController {
 						satellite, insConfId, processMode);
 				
 				if (f != null) {
-					response.add(new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
+					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
 							f.getValidityStart(), f.getValidityStop()));
 				}
-				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
+				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			}
 			else if ("ClosestStopValidity".equals(mode)) {
 				SearchMetadata f = esServices.closestStopValidity(productType, ProductFamily.fromValue(productFamily),
@@ -106,26 +105,26 @@ public class SearchMetadataController {
 						satellite, insConfId, processMode);
 				
 				if (f != null) {
-					response.add(new SearchMetadataDto(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
+					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
 							f.getValidityStart(), f.getValidityStop()));
 				}
-				return new ResponseEntity<List<SearchMetadataDto>>(response, HttpStatus.OK);
+				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			}
 			else {
 				LOGGER.error("[productType {}] [code {}] [mode {}] [msg Unknown mode]", productType,
 						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);
-				return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
 			}
 		} catch (AbstractCodedException e) {
 			LOGGER.error("[productType {}] [code {}] [mode {}] {}", productType, e.getCode().getCode(), mode,
 					e.getLogMessage());
-			return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			//TODO Temp test
 			e.printStackTrace();
 			LOGGER.error("[productType {}] [code {}] [mode {}] [msg {}]", productType,
 					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());
-			return new ResponseEntity<List<SearchMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}

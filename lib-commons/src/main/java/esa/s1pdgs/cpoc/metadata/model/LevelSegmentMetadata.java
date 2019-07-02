@@ -27,6 +27,13 @@ public class LevelSegmentMetadata extends AbstractMetadata {
         this.datatakeId = datatakeId;
     }
     
+    public LevelSegmentMetadata(final String productName,
+            final String productType, final String keyObjectStorage,
+            final String validityStart, final String validityStop) {
+        super(productName, productType, keyObjectStorage, validityStart,
+                validityStop);
+    }
+    
     public LevelSegmentMetadata() {
     	
     }
@@ -76,16 +83,15 @@ public class LevelSegmentMetadata extends AbstractMetadata {
         this.datatakeId = datatakeId;
     }
 
-    /**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return String.format(
-                "{productName: %s, productType: %s, keyObjectStorage: %s, validityStart: %s, validityStop: %s, datatakeId: %s, polarisation: %s, consolidation: %s}",
-                productName, productType, keyObjectStorage, validityStart,
-                validityStop, datatakeId, polarisation, consolidation);
-    }
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		String superToString = super.toAbstractString();
+		return String.format("{%s,\"datatakeId\":\"%s\",\"polarisation\":\"%s\",\"consolidation\":\"%s\"}",
+				superToString, datatakeId, polarisation, consolidation);
+	}
 
     /**
      * @see java.lang.Object#hashCode()

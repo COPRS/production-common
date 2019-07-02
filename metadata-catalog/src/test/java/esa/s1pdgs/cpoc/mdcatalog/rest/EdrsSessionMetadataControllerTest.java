@@ -20,7 +20,6 @@ import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.rest.EdrsSessionMetadataController;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.EdrsSessionMetadataDto;
 
 public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 
@@ -62,7 +61,7 @@ public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 		response.setValidityStart("startDate");
 		response.setValidityStop("stopDate");
 		this.mockGetEdrsSession(response);
-		EdrsSessionMetadataDto expectedResult = new EdrsSessionMetadataDto("name", "type", "kobs", "startDate", "stopDate");
+		EdrsSessionMetadata expectedResult = new EdrsSessionMetadata("name", "type", "kobs", "startDate", "stopDate");
 		MvcResult result = request(get("/edrsSession/type/name")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());

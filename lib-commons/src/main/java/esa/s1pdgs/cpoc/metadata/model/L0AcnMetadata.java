@@ -32,6 +32,11 @@ public class L0AcnMetadata extends AbstractMetadata {
 		this.datatakeId = dataTakeId;
 	}
 	
+	public L0AcnMetadata(final String productName, final String productType, final String keyObjectStorage,
+			final String validityStart, final String validityStop) {
+		super(productName, productType, keyObjectStorage, validityStart, validityStop);
+	}
+	
 	public L0AcnMetadata() {
 		
 	}
@@ -87,7 +92,7 @@ public class L0AcnMetadata extends AbstractMetadata {
 	@Override
 	public String toString() {
 		String superToString = super.toAbstractString();
-		return String.format("{%s, instrumentConfigurationId: %s, numberOfSlices: %s, datatakeId: %s}", superToString,
+		return String.format("{%s,\"instrumentConfigurationId\":%s,\"numberOfSlices\":%s,\"datatakeId\":\"%s\"}", superToString,
 				instrumentConfigurationId, numberOfSlices, datatakeId);
 	}
 
