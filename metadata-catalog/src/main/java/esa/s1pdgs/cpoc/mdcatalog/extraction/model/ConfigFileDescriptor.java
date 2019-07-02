@@ -32,8 +32,8 @@ public class ConfigFileDescriptor extends AbstractFileDescriptor {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof ConfigFileDescriptor))
-			return false;
+	    if (obj == null || getClass() != obj.getClass())
+	    	return false;
 		if (!super.equals(obj))
 			return false;
 		return true;
