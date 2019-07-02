@@ -3,9 +3,7 @@ package esa.s1pdgs.cpoc.compression.process;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -32,11 +30,6 @@ public class CompressExecutorCallable implements Callable<Void> {
 
 	private final ExecutorService execSrv;
 
-	/**
-	 * Tasks completion service
-	 */
-	private final CompletionService<TaskResult> completionSrv;
-
 	private ProductDto job;
 
 	/**
@@ -56,7 +49,6 @@ public class CompressExecutorCallable implements Callable<Void> {
 		this.properties = properties;
 
 		this.execSrv = Executors.newFixedThreadPool(1);
-		this.completionSrv = new ExecutorCompletionService<>(execSrv);
 	}
 
 	/**
