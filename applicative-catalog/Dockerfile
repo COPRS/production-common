@@ -2,11 +2,11 @@ ARG BRANCH
 FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
 ARG BRANCH_TEXT
 
-RUN echo "Building for branch ${BRANCH_TEXT}"
 WORKDIR /app
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
+RUN echo "${BRANCH_TEXT}" >> VERSION 
 COPY --from=build /app/applicative-catalog/target/s1pro-core-applicative-catalog-*.jar s1pdgs-applicative-catalog.jar
 RUN apk update && apk add wget
 COPY /config/start.sh start.sh
