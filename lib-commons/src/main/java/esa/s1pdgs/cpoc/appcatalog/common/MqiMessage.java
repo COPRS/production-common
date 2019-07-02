@@ -12,37 +12,13 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * 
  * @author Viveris Technologies
  */
-public class MqiMessage {
-    
-    /**
-     * Category of the product
-     */
-    private ProductCategory category;
-    /**
-     * Identifier of the message
-     */
-    @Id
-    private long identifier;
-    /**
-     * Topic name
-     */
-    private String topic;
-    /**
-     * Partition number
-     */
-    private int partition;
-    /**
-     * Offset of the message
-     */
-    private long offset;
-    /**
-     * Group of the message
-     */
-    private String group;
-    /**
-     * State of the message
-     */
-    private MessageState state;
+public class MqiMessage extends AbstractRequest {
+	/**
+	 * Identifier of the message
+	 */
+	@Id
+	protected long identifier;
+	
     /**
      * Pod who read the message
      */
@@ -52,162 +28,48 @@ public class MqiMessage {
      */
     private Date lastReadDate;
     /**
-     * Pod who send the message
-     */
-    private String sendingPod;
-    /**
-     * Date whe the pod last send the message
-     */
-    private Date lastSendDate;
-    /**
-     * Date where the message was last acknowledge
-     */
-    private Date lastAckDate;
-    /**
-     * Number of retries
-     */
-    private int nbRetries;
-    /**
-     * Dto of the message
-     */
-    private Object dto;
-    
-    /**
-     * Date of the insertion in MongoDB
-     */
-    private Date creationDate;
-    
-    /**
      * Default Constructor
      */
     public MqiMessage() {
-        
+        super();
     }
-    
-    /**
-     * @param category
-     * @param identifier
-     * @param topic
-     * @param partition
-     * @param offset
-     * @param group
-     * @param state
-     * @param readingPod
-     * @param lastReadDate
-     * @param sendingPod
-     * @param lastSendDate
-     * @param lastAckDate
-     * @param nbRetries
-     * @param dto
-     */
+
     public MqiMessage(ProductCategory category, String topic,
             int partition, long offset, String group, MessageState state,
             String readingPod, Date lastReadDate, String sendingPod,
             Date lastSendDate, Date lastAckDate, int nbRetries, Object dto,
             Date creationDate) {
         super();
-        this.category = category;
-        this.topic = topic;
-        this.partition = partition;
-        this.offset = offset;
-        this.group = group;
-        this.state = state;
+		this.category = category;
+		this.topic = topic;
+		this.partition = partition;
+		this.offset = offset;
+		this.group = group;
+		this.state = state;
+		this.sendingPod = sendingPod;
+		this.lastSendDate = lastSendDate;
+		this.lastAckDate = lastAckDate;
+		this.nbRetries = nbRetries;
+		this.dto = dto;
+		this.creationDate = creationDate;
         this.readingPod = readingPod;
         this.lastReadDate = lastReadDate;
-        this.sendingPod = sendingPod;
-        this.lastSendDate = lastSendDate;
-        this.lastAckDate = lastAckDate;
-        this.nbRetries = nbRetries;
-        this.dto = dto;
-        this.creationDate = creationDate;
     }
     
-    
-    /**
-     * @return the category
-     */
-    public ProductCategory getCategory() {
-        return category;
-    }
-    /**
-     * @param category the category to set
-     */
-    public void setCategory(ProductCategory category) {
-        this.category = category;
-    }
-    /**
-     * @return the identifier
-     */
-    public long getIdentifier() {
-        return identifier;
-    }
-    /**
+	/**
+	 * @return the identifier
+	 */
+	public long getIdentifier() {
+	    return identifier;
+	}
+
+	/**
 	 * @param identifier the identifier to set
 	 */
 	public void setIdentifier(long identifier) {
 		this.identifier = identifier;
 	}
 
-	/**
-     * @return the topic
-     */
-    public String getTopic() {
-        return topic;
-    }
-    /**
-     * @param topic the topic to set
-     */
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-    /**
-     * @return the partition
-     */
-    public int getPartition() {
-        return partition;
-    }
-    /**
-     * @param partition the partition to set
-     */
-    public void setPartition(int partition) {
-        this.partition = partition;
-    }
-    /**
-     * @return the offset
-     */
-    public long getOffset() {
-        return offset;
-    }
-    /**
-     * @param offset the offset to set
-     */
-    public void setOffset(long offset) {
-        this.offset = offset;
-    }
-    /**
-     * @return the group
-     */
-    public String getGroup() {
-        return group;
-    }
-    /**
-     * @param group the group to set
-     */
-    public void setGroup(String group) {
-        this.group = group;
-    }
-    /**
-     * @return the state
-     */
-    public MessageState getState() {
-        return state;
-    }
-    /**
-     * @param state the state to set
-     */
-    public void setState(MessageState state) {
-        this.state = state;
-    }
     /**
      * @return the readingPod
      */
@@ -231,81 +93,6 @@ public class MqiMessage {
      */
     public void setLastReadDate(Date lastReadDate) {
         this.lastReadDate = lastReadDate;
-    }
-    /**
-     * @return the sendingPod
-     */
-    public String getSendingPod() {
-        return sendingPod;
-    }
-    /**
-     * @param sendingPod the sendingPod to set
-     */
-    public void setSendingPod(String sendingPod) {
-        this.sendingPod = sendingPod;
-    }
-    /**
-     * @return the lastSendDate
-     */
-    public Date getLastSendDate() {
-        return lastSendDate;
-    }
-    /**
-     * @param lastSendDate the lastSendDate to set
-     */
-    public void setLastSendDate(Date lastSendDate) {
-        this.lastSendDate = lastSendDate;
-    }
-    /**
-     * @return the lastAckDate
-     */
-    public Date getLastAckDate() {
-        return lastAckDate;
-    }
-    /**
-     * @param lastAckDate the lastAckDate to set
-     */
-    public void setLastAckDate(Date lastAckDate) {
-        this.lastAckDate = lastAckDate;
-    }
-    /**
-     * @return the nbRetries
-     */
-    public int getNbRetries() {
-        return nbRetries;
-    }
-    /**
-     * @param nbRetries the nbRetries to set
-     */
-    public void setNbRetries(int nbRetries) {
-        this.nbRetries = nbRetries;
-    }
-    /**
-     * @return the dto
-     */
-    public Object getDto() {
-        return dto;
-    }
-    /**
-     * @param dto the dto to set
-     */
-    public void setDto(Object dto) {
-        this.dto = dto;
-    }
-
-
-    /**
-     * @return the creationDate
-     */
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    /**
-     * @param creationDate the creationDate to set
-     */
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
     }
 
     /* (non-Javadoc)

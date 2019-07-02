@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 
 /**
@@ -47,9 +47,8 @@ public class ErrorRepositoryController {
 	 * @param apiKey token agreed by server and client for authentication
 	 * @return
 	 */
-	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/failedProcessings")
-	public ResponseEntity<List<FailedProcessingDto>> getFailedProcessings(@RequestHeader("ApiKey") String apiKey) {
+	public ResponseEntity<List<FailedProcessing>> getFailedProcessings(@RequestHeader("ApiKey") String apiKey) {
 
 		LOGGER.info("get the list of failed processings");
 
@@ -60,7 +59,7 @@ public class ErrorRepositoryController {
 			// TODO test if it can be null
 		}
 
-		List<FailedProcessingDto> failedProcessings = new ArrayList<>();
+		List<FailedProcessing> failedProcessings = new ArrayList<>();
 
 		try {
 			failedProcessings = errorRepository.getFailedProcessings();
@@ -70,10 +69,10 @@ public class ErrorRepositoryController {
 		}
 
 		if (failedProcessings.size() > 1) {
-			Collections.sort(failedProcessings, FailedProcessingDto.ASCENDING_CREATION_TIME_COMPERATOR);
+			Collections.sort(failedProcessings, FailedProcessing.ASCENDING_CREATION_TIME_COMPARATOR);
 		}
 
-		return new ResponseEntity<List<FailedProcessingDto>>(failedProcessings, HttpStatus.OK);
+		return new ResponseEntity<List<FailedProcessing>>(failedProcessings, HttpStatus.OK);
 	}
 
 	/**
@@ -83,9 +82,8 @@ public class ErrorRepositoryController {
 	 * @param id     failed processing Id
 	 * @return
 	 */
-	@SuppressWarnings("rawtypes")
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/api/v1/failedProcessings/{id}")
-	public ResponseEntity<FailedProcessingDto> getFailedProcessingsById(@RequestHeader("ApiKey") String apiKey,
+	public ResponseEntity<FailedProcessing> getFailedProcessingsById(@RequestHeader("ApiKey") String apiKey,
 			@PathVariable("id") String id) {
 
 		LOGGER.info("get the failed processing with id {}", id);
@@ -95,7 +93,7 @@ public class ErrorRepositoryController {
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
 
-		FailedProcessingDto failedProcessing = null;
+		FailedProcessing failedProcessing = null;
 
 		try {
 
@@ -112,8 +110,7 @@ public class ErrorRepositoryController {
 			LOGGER.error("error while getting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-		return new ResponseEntity<FailedProcessingDto>(failedProcessing, HttpStatus.OK);
+		return new ResponseEntity<FailedProcessing>(failedProcessing, HttpStatus.OK);
 	}
 
 	/**

@@ -121,7 +121,7 @@ public class GenericExtractorTest {
                 "ack-msg", "error-ùmessage")).when(mqiService)
                         .ack(Mockito.any(), Mockito.any());
         
-        extractor.ackNegatively(reportingFactory, new FailedProcessingDto<>(), inputMessage, "error message");
+        extractor.ackNegatively(reportingFactory, new FailedProcessingDto(), inputMessage, "error message");
 
         verify(mqiService, times(1)).ack(
         		Mockito.eq(new AckMessageDto(123, Ack.ERROR, "error message", false)), 
@@ -140,7 +140,7 @@ public class GenericExtractorTest {
     public void testAckNegatively() throws AbstractCodedException {
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
-        extractor.ackNegatively(reportingFactory, new FailedProcessingDto<>(), inputMessage, "error message");
+        extractor.ackNegatively(reportingFactory, new FailedProcessingDto(), inputMessage, "error message");
 
         verify(mqiService, times(1)).ack(
         		Mockito.eq(new AckMessageDto(123, Ack.ERROR, "error message", false)),

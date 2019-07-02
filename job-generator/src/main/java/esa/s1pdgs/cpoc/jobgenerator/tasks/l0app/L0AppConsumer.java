@@ -17,7 +17,6 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
@@ -86,8 +85,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             appStatus.setProcessing(mqiMessage.getIdentifier());            
     	 	
             final Reporting reporting = reportingFactory.newReporting(0);
-            final FailedProcessingDto<GenericMessageDto<EdrsSessionDto>> failedProc =  
-            		new FailedProcessingDto<GenericMessageDto<EdrsSessionDto>>();
+            FailedProcessingDto failedProc = new FailedProcessingDto();
             
             try {
 
@@ -119,7 +117,6 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                                 false, false);
                     }
                     jobsDispatcher.dispatch(appDataJob);
-
                 }
                 // Ack
                 step++;
@@ -133,14 +130,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 
                 reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
                 
-                failedProc.processingType(mqiMessage.getInputKey())
-                		.topic(mqiMessage.getInputKey())
-                		.processingStatus(MessageState.READ)
-                		.productCategory(ProductCategory.EDRS_SESSIONS)
-                		.failedPod(processSettings.getHostname())
-                        .failureDate(new Date())
-                		.failureMessage(errorMessage)
-                		.processingDetails(mqiMessage);
+                failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
             }  
             
             // Ack and check if application shall stopped

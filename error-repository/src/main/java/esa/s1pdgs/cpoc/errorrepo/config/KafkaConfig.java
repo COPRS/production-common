@@ -82,7 +82,6 @@ public class KafkaConfig {
      * 
      * @return
      */
-    @SuppressWarnings("rawtypes")
 	@Bean
     public ConsumerFactory<String, FailedProcessingDto> consumerFactory() {
     	return new DefaultKafkaConsumerFactory<String,FailedProcessingDto>(consumerConfigs(), 
@@ -95,7 +94,6 @@ public class KafkaConfig {
      * 
      * @return
      */
-    @SuppressWarnings("rawtypes")
 	@Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, FailedProcessingDto>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, FailedProcessingDto> factory =

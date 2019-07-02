@@ -22,7 +22,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
@@ -246,8 +245,7 @@ public class JobProcessor {
         boolean ackOk = false;
         String errorMessage = "";
         
-        final FailedProcessingDto<GenericMessageDto<LevelJobDto>> failedProc =  
-        		new FailedProcessingDto<GenericMessageDto<LevelJobDto>>();
+        FailedProcessingDto failedProc =  new FailedProcessingDto();
         
         try {
             step = 3;
@@ -292,15 +290,8 @@ public class JobProcessor {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
             report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
-
-            failedProc.processingType(message.getInputKey())
-            	.topic(message.getInputKey())
-	    		.processingStatus(MessageState.READ)
-	    		.productCategory(ProductCategory.LEVEL_JOBS)
-	    		.failedPod(properties.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(message);
+            
+            failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
             
         } catch (InterruptedException e) {
             ackOk = false;
@@ -311,6 +302,7 @@ public class JobProcessor {
                     ErrorCode.INTERNAL_ERROR.getCode(),
                     properties.getLevel());
             report.reportError("Interrupted job processing");
+            failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
         } finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
@@ -404,7 +396,7 @@ public class JobProcessor {
      * @param ackOk
      * @param errorMessage
      */
-    protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto, 	final FailedProcessingDto<GenericMessageDto<LevelJobDto>> failed,
+    protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto, 	final FailedProcessingDto failed,
             final boolean ackOk, final String errorMessage) {
         boolean stopping = appStatus.getStatus().isStopping();
 

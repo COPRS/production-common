@@ -2,18 +2,16 @@ package esa.s1pdgs.cpoc.errorrepo.service;
 
 import java.util.List;
 
+import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 public interface ErrorRepository {
 
-	@SuppressWarnings("rawtypes")
 	void saveFailedProcessing(FailedProcessingDto failedProcessing);
 
-	@SuppressWarnings("rawtypes")
-	List<FailedProcessingDto> getFailedProcessings();
+	List<FailedProcessing> getFailedProcessings();
 
-	@SuppressWarnings("rawtypes")
-	FailedProcessingDto getFailedProcessingById(long id);
+	FailedProcessing getFailedProcessingById(long id);
 
 	void restartAndDeleteFailedProcessing(long id);
 

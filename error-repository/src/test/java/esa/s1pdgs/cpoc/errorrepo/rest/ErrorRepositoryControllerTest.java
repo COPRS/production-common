@@ -24,14 +24,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.kafka.producer.SubmissionClient;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.errorrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.errorrepo.repo.MqiMessageRepo;
 import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+
 @RunWith(SpringRunner.class)
 @WebMvcTest(ErrorRepositoryController.class)
 public class ErrorRepositoryControllerTest {
@@ -58,34 +59,37 @@ public class ErrorRepositoryControllerTest {
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 	}
 	
-	@SuppressWarnings("unchecked")
+	private final FailedProcessing newFailedProcessing() throws Exception
+	{
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+		
+		final FailedProcessing failedProcessingToReturn = new FailedProcessing();
+		failedProcessingToReturn.setId(1001);
+		failedProcessingToReturn.setTopic("dummyProcessingType");
+		failedProcessingToReturn.setState(MessageState.READ);
+		failedProcessingToReturn.setCategory(ProductCategory.AUXILIARY_FILES);
+		failedProcessingToReturn.setPartition(9);
+		failedProcessingToReturn.setOffset(1234);
+		failedProcessingToReturn.setGroup("dummyGroup");
+		failedProcessingToReturn.setFailedPod("pod1234");
+		failedProcessingToReturn.setLastAssignmentDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
+		failedProcessingToReturn.setSendingPod("pod5678");
+		failedProcessingToReturn.setLastSendDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
+		failedProcessingToReturn.setLastAckDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
+		failedProcessingToReturn.setNbRetries(3);
+		failedProcessingToReturn.setCreationDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
+		failedProcessingToReturn.setFailureDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
+		failedProcessingToReturn.setFailureMessage("dummyMessage");
+		failedProcessingToReturn.setDto(new GenericMessageDto<Object>()); 
+		return failedProcessingToReturn;
+	}
+
 	@Test
 	public void test_getFailedProcessings_200() throws Exception {
-		@SuppressWarnings("rawtypes")
-		List<FailedProcessingDto> failedProcessingsToReturn = new ArrayList<>();
-		
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
-		@SuppressWarnings("rawtypes")
-		FailedProcessingDto failedProcessing1 = new FailedProcessingDto();
-		failedProcessing1.setIdentifier(1001);
-		failedProcessing1.processingType("dummyProcessingType")
-		.processingStatus(MessageState.READ)
-		.productCategory(ProductCategory.AUXILIARY_FILES)
-		.partition(9)
-		.offset(1234)
-		.group("dummyGroup")
-		.failedPod("pod1234")
-		.lastAssignmentDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.sendingPod("pod5678")
-		.lastSendDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.lastAckDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.nbRetries(3)
-		.creationDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.failureDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.failureMessage("dummyMessage")
-		.processingDetails(new GenericMessageDto<Object>()); // TODO create more detailed dummy object
-		
-		failedProcessingsToReturn.add(failedProcessing1);
+		List<FailedProcessing> failedProcessingsToReturn = new ArrayList<>();
+
+		final FailedProcessing failedProcessing = newFailedProcessing();		
+		failedProcessingsToReturn.add(failedProcessing);
 
 		doReturn(failedProcessingsToReturn).when(errorRepository).getFailedProcessings();
 
@@ -127,31 +131,13 @@ public class ErrorRepositoryControllerTest {
 	    uut.perform(get("/api/v1/failedProcessings").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isInternalServerError());
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Test
 	public void test_getFailedProcessingById_200() throws Exception {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
-		@SuppressWarnings("rawtypes")
-		FailedProcessingDto failedProcessingToReturn = new FailedProcessingDto();
-		failedProcessingToReturn.setIdentifier(1001);
-		failedProcessingToReturn.processingType("dummyProcessingType")
-		.processingStatus(MessageState.READ)
-		.productCategory(ProductCategory.AUXILIARY_FILES)
-		.partition(9)
-		.offset(1234)
-		.group("dummyGroup")
-		.failedPod("pod1234")
-		.lastAssignmentDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.sendingPod("pod5678")
-		.lastSendDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.lastAckDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.nbRetries(3)
-		.creationDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.failureDate(dateFormat.parse("2019-06-18T11:09:03.805Z"))
-		.failureMessage("dummyMessage")
-		.processingDetails(new GenericMessageDto<Object>()); // TODO create more detailed dummy object
-		doReturn(failedProcessingToReturn).when(errorRepository).getFailedProcessingById(Mockito.anyLong());
+
+		final FailedProcessing failedProcessing = newFailedProcessing();		
+
+		doReturn(failedProcessing).when(errorRepository).getFailedProcessingById(Mockito.anyLong());
 		
 		String jsonContent = "{\n" + 
 				"    \"id\": 1001,\n" +

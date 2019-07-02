@@ -26,7 +26,6 @@ public class ErrorQueueConsumer {
 		this.errorRepository = errorRepository;
 	}
     
-    @SuppressWarnings("rawtypes") 
 	@KafkaListener(topics = "${kafka.topic.errors}", groupId = "${kafka.group-id}")
 	public void receive(FailedProcessingDto failedProcessing, final Acknowledgment acknowledgment) {
 		try {

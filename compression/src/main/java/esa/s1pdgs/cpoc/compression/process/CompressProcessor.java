@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
@@ -178,7 +177,7 @@ public class CompressProcessor {
 		boolean ackOk = false;
 		String errorMessage = "";
 
-		final FailedProcessingDto<GenericMessageDto<ProductDto>> failedProc = new FailedProcessingDto<GenericMessageDto<ProductDto>>();
+		FailedProcessingDto failedProc = null;
 
 		try {
 			step = 2;
@@ -213,10 +212,7 @@ public class CompressProcessor {
 					ace.getCode().getCode(), ace.getLogMessage());
 			report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 
-			failedProc.processingType(message.getInputKey()).topic(message.getInputKey())
-					.processingStatus(MessageState.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
-					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
-					.processingDetails(message);
+			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 
 		} catch (InterruptedException e) {
 			ackOk = false;
@@ -226,12 +222,7 @@ public class CompressProcessor {
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ErrorCode.INTERNAL_ERROR.getCode());
 			report.reportError("Interrupted job processing");
-
-			failedProc.processingType(message.getInputKey()).topic(message.getInputKey())
-					.processingStatus(MessageState.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
-					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
-					.processingDetails(message);
-
+			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 			cleanCompressionProcessing(job, procExecutorSrv);
 		}
 
@@ -311,7 +302,7 @@ public class CompressProcessor {
 	 * @param errorMessage
 	 */
 	protected void ackProcessing(final GenericMessageDto<ProductDto> dto,
-			final FailedProcessingDto<GenericMessageDto<ProductDto>> failed, final boolean ackOk,
+			final FailedProcessingDto failed, final boolean ackOk,
 			final String errorMessage) {
 		boolean stopping = appStatus.getStatus().isStopping();
 
@@ -331,10 +322,6 @@ public class CompressProcessor {
 				mqiStatusService.stop();
 			} catch (AbstractCodedException ace) {
 				LOGGER.error("MQI service couldn't be stopped {}",ace);
-//                LOGGER.error("{} {} Checking status consumer",
-//                        getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS,
-//                                dto.getBody()),
-//                        ace.getLogMessage());
 			}
 			System.exit(0);
 		} else if (appStatus.getStatus().isFatalError()) {

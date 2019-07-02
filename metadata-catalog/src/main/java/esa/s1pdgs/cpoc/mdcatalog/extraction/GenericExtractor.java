@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -158,8 +157,7 @@ public abstract class GenericExtractor<T> {
         report.reportStart("Starting metadata extraction");        
         appStatus.setProcessing(category, message.getIdentifier());
         
-        final FailedProcessingDto<GenericMessageDto<T>> failedProc =  
-        		new FailedProcessingDto<GenericMessageDto<T>>();
+        FailedProcessingDto failedProc = new FailedProcessingDto();
 
         try { 	
         	
@@ -186,34 +184,15 @@ public abstract class GenericExtractor<T> {
                     "[MONITOR] [%s] [productName %s] [code %s] %s", category,
                     extractProductNameFromDto(dto), e1.getCode().getCode(),
                     e1.getLogMessage());
-            
-            failedProc.processingType(message.getInputKey())
-      			.topic(message.getInputKey())
-	    		.processingStatus(MessageState.READ)
-	    		.productCategory(category)
-	    		.failedPod(processConfiguration.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(message);
-            
-            ackNegatively(reportingFactory, failedProc, message, errorMessage);
-            
+            failedProc = new FailedProcessingDto(processConfiguration.getHostname(),new Date(),errorMessage, message);              
+            ackNegatively(reportingFactory, failedProc, message, errorMessage);            
             
         } catch (Exception e) {
             String errorMessage = String.format(
                     "[MONITOR] [%s] [productName %s] [code %s] [msg %s]",
                     category, extractProductNameFromDto(dto),
                     ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
-            
-            failedProc.processingType(message.getInputKey())
-        		.topic(message.getInputKey())
-	    		.processingStatus(MessageState.READ)
-	    		.productCategory(category)
-	    		.failedPod(processConfiguration.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(message);
-            
+            failedProc = new FailedProcessingDto(processConfiguration.getHostname(),new Date(),errorMessage, message);              
             ackNegatively(reportingFactory,failedProc, message, errorMessage);
             
         } finally {        	
@@ -237,8 +216,8 @@ public abstract class GenericExtractor<T> {
      */
     final void ackNegatively(
     		final Reporting.Factory reportingFactory, 
-            final FailedProcessingDto<GenericMessageDto<T>> failedProc,
-    		final GenericMessageDto<T> message,
+            final FailedProcessingDto failedProc,
+    		final GenericMessageDto<?> message,
             final String errorMessage) {
     	
         final Reporting reportAck = reportingFactory.newReporting(5);            

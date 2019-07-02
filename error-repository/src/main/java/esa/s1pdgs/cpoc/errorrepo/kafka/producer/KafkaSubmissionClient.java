@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.errorrepo.kafka.producer;
 
 import org.springframework.kafka.core.KafkaTemplate;
 
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 
 public class KafkaSubmissionClient implements SubmissionClient {
 	
@@ -12,9 +12,8 @@ public class KafkaSubmissionClient implements SubmissionClient {
 		this.client = client;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public void resubmit(final FailedProcessingDto failedProcessing, final Object message) {    
+	public void resubmit(final FailedProcessing failedProcessing, final Object message) {    
         client.send(failedProcessing.getTopic(), message);
 	}
 

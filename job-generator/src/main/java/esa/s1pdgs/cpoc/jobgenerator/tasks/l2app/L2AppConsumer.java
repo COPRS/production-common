@@ -16,7 +16,6 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
-import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
@@ -97,8 +96,7 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
         String errorMessage = "";
         String productName = mqiMessage.getBody().getProductName();
         
-        final FailedProcessingDto<GenericMessageDto<ProductDto>> failedProc =  
-        		new FailedProcessingDto<GenericMessageDto<ProductDto>>();
+        FailedProcessingDto failedProc =  new FailedProcessingDto();
         
         try {
 
@@ -130,16 +128,8 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
             errorMessage = String.format(
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(), ace.getLogMessage());
-            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
-            
-            failedProc.processingType(mqiMessage.getInputKey())
-      			.topic(mqiMessage.getInputKey())
-	    		.processingStatus(MessageState.READ)
-	    		.productCategory(ProductCategory.LEVEL_PRODUCTS)
-	    		.failedPod(processSettings.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(mqiMessage);   
+            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());            
+            failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);  
         }
 
         // Ack and check if application shall stopped

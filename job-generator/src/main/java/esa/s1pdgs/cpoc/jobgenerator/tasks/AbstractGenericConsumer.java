@@ -102,7 +102,7 @@ public abstract class AbstractGenericConsumer<T> {
      * @param errorMessage
      */
     protected void ackProcessing(final GenericMessageDto<T> dto,
-    		final FailedProcessingDto<GenericMessageDto<T>> failed,
+    		final FailedProcessingDto failed,
             final boolean ackOk, final String productName,
             final String errorMessage) {
         boolean stopping = appStatus.getStatus().isStopping();

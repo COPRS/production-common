@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.ProcessingDto;
+import esa.s1pdgs.cpoc.appcatalog.common.Processing;
 import esa.s1pdgs.cpoc.errorrepo.repo.MqiMessageRepo;
 
 @Component
@@ -34,51 +34,28 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 	}
 	
 	@Override
-	public ProcessingDto getProcessing(long id) {		
+	public Processing getProcessing(long id) {		
 		final MqiMessage mess = processingRepo.findByIdentifier(id);
 		
-		if (mess == null)
-		{
+		if (mess == null) {
 			return null;
 		}	
-		return toProcessingDto(mess);
+		return new Processing(mess);
 	}
 	
 	@Override
-	public List<ProcessingDto> getProcessings() {
+	public List<Processing> getProcessings() {
 		return toExternal(processingRepo.findAll());
 	}
 
-	private final List<ProcessingDto> toExternal(final List<MqiMessage> messages)	{
+	private final List<Processing> toExternal(final List<MqiMessage> messages)	{
 		if (messages == null || messages.size() == 0)
 		{
 			return Collections.emptyList();
 		}		
 		return messages.stream()
-				.map(m -> toProcessingDto(m))
-				.sorted(ProcessingDto.ASCENDING_CREATION_TIME_COMPERATOR)
+				.map(m -> new Processing(m))
+				.sorted(Processing.ASCENDING_CREATION_TIME_COMPARATOR)
 				.collect(Collectors.toList());
 	}
-	
-	private final ProcessingDto toProcessingDto(final MqiMessage message)
-	{
-		return new ProcessingDto()
-				.identifier(message.getIdentifier())
-				.processingType(message.getTopic())
-				.processingStatus(message.getState())
-				.productCategory(message.getCategory())
-				.partition(message.getPartition())
-				.offset(message.getOffset())
-				.group(message.getGroup())
-				.topic(message.getTopic())
-				.assignedPod(message.getReadingPod())
-				.lastAssignmentDate(message.getLastReadDate())
-				.sendingPod(message.getSendingPod())
-				.lastSendDate(message.getLastSendDate())
-				.lastAckDate(message.getLastAckDate())
-				.nbRetries(message.getNbRetries())
-				.creationDate(message.getCreationDate())
-				.processingDetails(message.getDto());
-	}
-
 }
