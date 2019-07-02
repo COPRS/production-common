@@ -1,11 +1,9 @@
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:develop as build
-
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
 WORKDIR /app
 
-#FROM registry.tools.s1pdgs.eu/wo7/docker_l2:centos-7-6-1810
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-l2:develop
-
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-l2:${BRANCH}
 WORKDIR /app
+RUN echo "${BRANCH_TEXT}" >> VERSION
 COPY --from=build /app/wrapper/target/s1pro-core-wrapper-*.jar s1pdgs-wrapper.jar
 COPY --from=build /app/wrapper/config/start/start_l2.sh /app/start_l2.sh
 RUN chmod +x /app/start_l2.sh

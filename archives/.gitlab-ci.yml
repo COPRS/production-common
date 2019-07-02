@@ -9,7 +9,7 @@ archives-build-master:
   stage: module
   script:
     - cd archives
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ARCHIVES" .
+    - dockerbuild -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ARCHIVES" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ARCHIVES"
   only:
     - master
@@ -18,7 +18,7 @@ archives-build:
   stage: module
   script:
     - cd archives
-    - docker build --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ARCHIVES:$CI_COMMIT_REF_SLUG" .
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ARCHIVES:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ARCHIVES:$CI_COMMIT_REF_SLUG"
   except:
     - master

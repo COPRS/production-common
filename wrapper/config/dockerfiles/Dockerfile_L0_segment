@@ -1,11 +1,11 @@
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:develop as build
-
+ARG BRANCH
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
+ARG BRANCH_TEXT
 WORKDIR /app
 
-#FROM registry.tools.s1pdgs.eu/wo7/docker_l0asp:dev
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-l0-asp:develop
-
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-l0-asp:${BRANCH}
 WORKDIR /app
+RUN echo "${BRANCH_TEXT}" >> VERSION
 COPY --from=build /app/wrapper/target/s1pro-core-wrapper-*.jar s1pdgs-wrapper.jar
 COPY --from=build /app/wrapper/config/start/start_l0_segment.sh /app/start_l0_segment.sh
 RUN chmod +x /app/start_l0_segment.sh
