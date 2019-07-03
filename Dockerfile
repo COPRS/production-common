@@ -25,7 +25,7 @@ COPY mqi-server/ /app/mqi-server
 COPY obs-sdk/ /app/obs-sdk
 COPY scaler/ /app/scaler
 COPY wrapper/ /app/wrapper
-COPY error-repository/ /app/error-repository
+COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
 
 RUN mvn -Dmaven.test.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
@@ -54,5 +54,5 @@ COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
 COPY --from=buildenv /app/scaler/target /app/scaler/target
 COPY --from=buildenv /app/wrapper/target /app/wrapper/target
 COPY --from=buildenv /app/wrapper/config /app/wrapper/config
-COPY --from=buildenv /app/error-repository/target /app/error-repository/target
+COPY --from=buildenv /app/request-repository/target /app/request-repository/target
 COPY --from=buildenv /app/queue-watcher/target /app/queue-watcher/target

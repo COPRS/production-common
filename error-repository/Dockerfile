@@ -13,7 +13,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/error-repository/target/s1pro-core-error-repository-*.jar s1pdgs-error-repository.jar
+COPY --from=build /app/request-repository/target/s1pro-core-request-repository-*.jar s1pdgs-request-repository.jar
 RUN apk update && apk add wget
 RUN mkdir -p tmp
 COPY /config/start.sh start.sh
