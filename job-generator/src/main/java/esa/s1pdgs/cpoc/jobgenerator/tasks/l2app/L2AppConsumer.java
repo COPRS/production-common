@@ -146,7 +146,7 @@ public class L2AppConsumer extends AbstractGenericConsumer<LevelProductDto> {
         ackProcessing(mqiMessage, failedProc, ackOk, productName, errorMessage);
 
         LOGGER.info("[MONITOR] [step 0] [productName {}] End", productName);
-        reporting.reportStart("End job generation using " + mqiMessage.getBody().getProductName());
+        reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
     }
 
     protected AppDataJobDto<LevelProductDto> buildJob(
