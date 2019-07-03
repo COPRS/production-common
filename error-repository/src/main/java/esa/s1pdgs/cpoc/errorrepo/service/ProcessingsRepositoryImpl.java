@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
@@ -44,10 +46,11 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 	}
 	
 	@Override
-	public List<Processing> getProcessings() {
-		return toExternal(processingRepo.findAll());
+	public List<Processing> getProcessings(Pageable pageable) {		
+		final Page<MqiMessage> page = processingRepo.findAll(pageable);
+		return toExternal(page.getContent());
 	}
-
+	
 	private final List<Processing> toExternal(final List<MqiMessage> messages)	{
 		if (messages == null || messages.size() == 0)
 		{
@@ -55,7 +58,6 @@ public class ProcessingsRepositoryImpl implements ProcessingsRepository {
 		}		
 		return messages.stream()
 				.map(m -> new Processing(m))
-				.sorted(Processing.ASCENDING_CREATION_TIME_COMPARATOR)
 				.collect(Collectors.toList());
 	}
 }

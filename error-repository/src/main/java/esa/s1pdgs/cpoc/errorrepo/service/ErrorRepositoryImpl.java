@@ -1,11 +1,13 @@
 package esa.s1pdgs.cpoc.errorrepo.service;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
@@ -50,9 +52,9 @@ public class ErrorRepositoryImpl implements ErrorRepository {
 
 	@Override
 	public List<FailedProcessing> getFailedProcessings() {
-		List<FailedProcessing> failedProcessings = failedProcessingRepo.findAll();
-		Collections.sort(failedProcessings, FailedProcessing.ASCENDING_CREATION_TIME_COMPARATOR);				
-		return failedProcessings;
+		return failedProcessingRepo
+				.findAll(PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Direction.ASC, "creationTime")))
+				.getContent();
 	}
 
 	@Override

@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -82,8 +86,8 @@ public class ProcessingsController {
 			@RequestHeader(value="ApiKey") String apiKey,
 			@RequestParam(value = "processingType", required = false) List<String> processingType,
 			@RequestParam(value = "processingStatus", required = false) List<String> processingStatus,
-			@RequestParam(value = "pageSize", required = false) Integer pageSize,
-			@RequestParam(value = "pageNumber", required = false) Integer pageNumber) {
+			@RequestParam(value = "pageSize", required = false, defaultValue = "2147483647") Integer pageSize,
+			@RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer pageNumber) {
 		
 		LOGGER.info("get the list of processings");
 
@@ -93,28 +97,13 @@ public class ProcessingsController {
 		}
 
 		try {
-			final List<Processing> result = processingRepository.getProcessings().stream()
+			final Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Direction.ASC, "creationTime"));	
+	
+			final List<Processing> result = processingRepository.getProcessings(pageable).stream()
 					.filter(p -> (processingType==null || processingType.isEmpty() || processingType.contains(p.getTopic())))
 					.filter(p -> (processingStatus==null || processingStatus.isEmpty() || processingStatus.contains(p.getState().toString())))
-					.collect(Collectors.toList());
-			
-			if (pageSize == null || pageNumber==null)
-			{
-				return new ResponseEntity<List<Processing>>(result, HttpStatus.OK);				
-			}	
-			
-			final int startIndex = pageNumber*pageSize;
-			final int endIndex = (pageNumber+1)*pageSize;
-			
-			if (startIndex < 0 || endIndex < 0)
-			{
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			}			
-			if (startIndex >= result.size() || endIndex > result.size())
-			{
-				return new ResponseEntity<List<Processing>>(Collections.emptyList(), HttpStatus.OK);				
-			}			
-			return new ResponseEntity<List<Processing>>(result.subList(startIndex, endIndex), HttpStatus.OK);
+					.collect(Collectors.toList());		
+			return new ResponseEntity<List<Processing>>(result, HttpStatus.OK);
 			
 		} catch (RuntimeException e) {
 			LOGGER.error("error while getting the list of processings", e);

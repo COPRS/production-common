@@ -28,16 +28,17 @@ import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
  *
  */
 @RestController
-public class ErrorRepositoryController {
+public class FailedRequestController {
 
 	// TODO: put api_key in a crypted place
 	public static final String API_KEY = "LdbEo2020tffcEGS";
 
-	private static final Logger LOGGER = LogManager.getLogger(ErrorRepositoryController.class);
+	private static final Logger LOGGER = LogManager.getLogger(FailedRequestController.class);
 
 	private final ErrorRepository errorRepository;
 
-	public ErrorRepositoryController(@Autowired ErrorRepository errorRepository) {
+	@Autowired 
+	public FailedRequestController(final ErrorRepository errorRepository) {
 		this.errorRepository = errorRepository;
 	}
 
@@ -93,24 +94,21 @@ public class ErrorRepositoryController {
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
 
-		FailedProcessing failedProcessing = null;
-
 		try {
-
-			failedProcessing = errorRepository.getFailedProcessingById(Long.parseLong(id));
+			final FailedProcessing failedProcessing = errorRepository.getFailedProcessingById(Long.parseLong(id));
 
 			if (failedProcessing == null) {
 				LOGGER.warn("failed processing not found, id {}", id);
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
+			return new ResponseEntity<FailedProcessing>(failedProcessing, HttpStatus.OK);
 		} catch (NumberFormatException e) {
 			LOGGER.error("invalid id error while getting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (RuntimeException e) {
 			LOGGER.error("error while getting the failed processings with id {}:{}", id, e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<FailedProcessing>(failedProcessing, HttpStatus.OK);
+		}	
 	}
 
 	/**

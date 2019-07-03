@@ -34,10 +34,10 @@ import esa.s1pdgs.cpoc.errorrepo.service.ErrorRepository;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ErrorRepositoryController.class)
+@WebMvcTest(FailedRequestController.class)
 public class ErrorRepositoryControllerTest {
 	
-	private static final String API_KEY = ErrorRepositoryController.API_KEY;
+	private static final String API_KEY = FailedRequestController.API_KEY;
 
 	@MockBean
 	private MqiMessageRepo mqiMessageRepository;
