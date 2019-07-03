@@ -3,22 +3,11 @@
 image: docker:latest
 
 variables:
-  MODULE_ERROR_REPO: s1pro-core-error-repository
-
-error-repository-build-master:
-  stage: module
-  script:
-    - cd error-repository
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ERROR_REPO" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ERROR_REPO"
-  only:
-    - master
+  MODULE_REQUEST_REPO: s1pro-core-request-repository
 
 error-repository-build:
   stage: module
   script:
     - cd error-repository
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ERROR_REPO:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_ERROR_REPO:$CI_COMMIT_REF_SLUG"
-  except:
-    - master
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_REQUEST_REPO:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_REQUEST_REPO:$CI_COMMIT_REF_SLUG"
