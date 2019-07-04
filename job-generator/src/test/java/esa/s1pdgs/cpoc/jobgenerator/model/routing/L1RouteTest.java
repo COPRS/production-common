@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.l2routing;
+package esa.s1pdgs.cpoc.jobgenerator.model.routing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,11 +11,12 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
- * Test the object L2Route
+ * Test the object L1Route
  * 
+ * @author Cyrielle Gailliard
  *
  */
-public class L2RouteTest {
+public class L1RouteTest {
 	
 	/**
 	 * Test constructors
@@ -23,10 +24,10 @@ public class L2RouteTest {
 	@Test
 	public void testConstructors() {
 
-		L2RouteTo to = new L2RouteTo(Arrays.asList("tt1.xml","tt2.xml","tt3.xml"));
-		L2RouteFrom from = new L2RouteFrom("IW", "S1B");
+		LevelProductsRouteTo to = new LevelProductsRouteTo(Arrays.asList("tt1.xml","tt2.xml","tt3.xml"));
+		LevelProductsRouteFrom from = new LevelProductsRouteFrom("IW", "S1B");
 		
-		L2Route obj = new L2Route(from, to);
+		LevelProductsRoute obj = new LevelProductsRoute(from, to);
 		
 		assertEquals(from, obj.getRouteFrom());
 		assertEquals(to, obj.getRouteTo());
@@ -38,10 +39,10 @@ public class L2RouteTest {
 	@Test
 	public void testToString() {
 		
-		L2RouteTo to = new L2RouteTo(Arrays.asList("tt1.xml","tt2.xml","tt3.xml"));
-		L2RouteFrom from = new L2RouteFrom("IW", "S1B");
+		LevelProductsRouteTo to = new LevelProductsRouteTo(Arrays.asList("tt1.xml","tt2.xml","tt3.xml"));
+		LevelProductsRouteFrom from = new LevelProductsRouteFrom("IW", "S1B");
 		
-		L2Route obj = new L2Route();
+		LevelProductsRoute obj = new LevelProductsRoute();
 		obj.setRouteFrom(from);
 		obj.setRouteTo(to);
 		
@@ -55,7 +56,7 @@ public class L2RouteTest {
 	 */
 	@Test
 	public void equalsDto() {
-		EqualsVerifier.forClass(L2Route.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(LevelProductsRoute.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.tasks.l1app;
+package esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
@@ -85,7 +85,7 @@ public class L1AppJobsGeneratorTest {
 
     private TaskTable expectedTaskTable;
 
-    private L1AppJobsGenerator generator;
+    private LevelProductsJobsGenerator generator;
 
     @Mock
     private AppCatalogJobClient appDataPService;
@@ -121,10 +121,10 @@ public class L1AppJobsGeneratorTest {
         JobsGeneratorFactory factory =
                 new JobsGeneratorFactory(processSettings, jobGeneratorSettings,
                         xmlConverter, metadataService, JobsSender);
-        generator = (L1AppJobsGenerator) factory.createJobGeneratorForL0Slice(
+        generator = (LevelProductsJobsGenerator) factory.createJobGeneratorForL0Slice(
                 new File(
                         "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
-                ApplicationLevel.L1, appDataPService);
+                appDataPService);
 
         appDataJob = TestL1Utils.buildJobGeneration(false);
         appDataJobComplete = TestL1Utils.buildJobGeneration(true);

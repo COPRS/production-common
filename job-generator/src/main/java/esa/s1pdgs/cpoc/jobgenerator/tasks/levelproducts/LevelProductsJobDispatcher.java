@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.tasks.l1app;
+package esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,22 +13,16 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Routing;
+import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
@@ -36,22 +30,22 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
- * Dispatcher of L0 slice product<br/>
- * 1 product to 1 or several task table<br/>
- * The routing is given in a XML file and is done by mapping the acquisition and
- * the mission and satellite identifier to a list of task tables
  * 
- * @author Cyrielle Gailliard
+ * Dispatcher of L1 and L2 slice products.
+ * 
+ * The routing is given in a XML file and is done by mapping the acquisition and
+ * the mission and satellite identifier to a list of task tables.
+ * 
+ * @author birol_colak@net.werum
+ *
  */
-@Service
-@ConditionalOnProperty(name = "process.level", havingValue = "L1")
-public class L1AppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
+public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
 
-    /**
+	 /**
      * Logger
      */
     private static final Logger LOGGER =
-            LogManager.getLogger(L1AppJobDispatcher.class);
+            LogManager.getLogger(LevelProductsJobDispatcher.class);
 
     /**
      * XML converter
@@ -69,6 +63,12 @@ public class L1AppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
      * Path of the routinh XML file
      */
     protected final String pathRoutingXmlFile;
+    
+    /**
+     * 
+     */
+    private String taskForFunctionalLog;
+
 
     /**
      * @param settings
@@ -77,14 +77,13 @@ public class L1AppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
      * @param xmlConverter
      * @param pathRoutingXmlFile
      */
-    @Autowired
-    public L1AppJobDispatcher(final JobGeneratorSettings settings,
+    public LevelProductsJobDispatcher(final JobGeneratorSettings settings,
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
             final XmlConverter xmlConverter,
-            @Value("${level1.pathroutingxmlfile}") String pathRoutingXmlFile,
-            @Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient appDataService) {
+            final String pathRoutingXmlFile,
+            final AppCatalogJobClient appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
         this.xmlConverter = xmlConverter;
@@ -100,7 +99,7 @@ public class L1AppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
 
         // Init the routing map from XML file located in the task table folder
         try {
-            L1Routing routing = (L1Routing) xmlConverter
+            LevelProductsRouting routing = (LevelProductsRouting) xmlConverter
                     .convertFromXMLToObject(this.pathRoutingXmlFile);
             if (routing != null && routing.getRoutes() != null) {
                 routing.getRoutes().stream().forEach(route -> {
@@ -127,7 +126,7 @@ public class L1AppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
     @Override
     protected AbstractJobsGenerator<ProductDto> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
-        return this.factory.createJobGeneratorForL0Slice(xmlFile, ApplicationLevel.L1,
+        return this.factory.createJobGeneratorForL0Slice(xmlFile,
                 appDataService);
     }
 
@@ -164,7 +163,11 @@ public class L1AppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return "L1JobGeneration";
+    	return this.taskForFunctionalLog;
     }
-
+    
+    @Override
+    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    	this.taskForFunctionalLog = taskForFunctionalLog; 
+    }
 }

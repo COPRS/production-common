@@ -4,11 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
@@ -36,22 +32,24 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
-@Component
-@ConditionalOnProperty(name = "process.level", havingValue = "L0")
 public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
     /**
      * Service for EDRS session file
      */
     private final EdrsSessionFileService edrsService;
+    
+    /**
+     * 
+     */
+    private String taskForFunctionalLog;
 
-    @Autowired
     public L0AppConsumer(
             final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
             final EdrsSessionFileService edrsService,
             final StatusService mqiStatusService,
-            @Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataService,
+            final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobDispatcher, processSettings, mqiService, mqiStatusService,
@@ -265,6 +263,11 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return "L0JobGeneration";
+    	return this.taskForFunctionalLog;
+    }
+    
+    @Override
+    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 }

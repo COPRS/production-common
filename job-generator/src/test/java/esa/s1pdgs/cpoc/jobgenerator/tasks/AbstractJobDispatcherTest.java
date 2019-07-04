@@ -440,4 +440,10 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<String> {
     protected String getTaskForFunctionalLog() {
         return "Task";
     }
+
+	@Override
+	public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+		
+		
+	}
 }

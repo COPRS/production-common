@@ -20,7 +20,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import esa.s1pdgs.cpoc.jobgenerator.config.AppConfig;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Routing;
+import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInputAlternative;
@@ -356,10 +356,10 @@ public class XmlConverterTest {
     @Test
     public void testUnmarshalingL1Routing() {
         try {
-            L1Routing converted =
-                    (L1Routing) xmlConverter.convertFromXMLToObject(
+            LevelProductsRouting converted =
+                    (LevelProductsRouting) xmlConverter.convertFromXMLToObject(
                             "./test/data/l1_config/routing.xml");
-            L1Routing expected = TestL1Utils.buildL1Routing();
+            LevelProductsRouting expected = TestL1Utils.buildL1Routing();
 
             assertEquals("0", expected.getRoutes().get(0),
                     converted.getRoutes().get(0));

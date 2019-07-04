@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.l1routing;
+package esa.s1pdgs.cpoc.jobgenerator.model.routing;
 
 import java.util.Objects;
 
@@ -14,9 +14,9 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Cyrielle Gailliard
  *
  */
-@XmlRootElement(name = "l1_from")
+@XmlRootElement(name = "level_products_from")
 @XmlAccessorType(XmlAccessType.NONE)
-public class L1RouteFrom {
+public class LevelProductsRouteFrom {
 
 	/**
 	 * Acquisition (IW, EW, SM, EM)
@@ -33,7 +33,7 @@ public class L1RouteFrom {
 	/**
 	 * Default constructor
 	 */
-	public L1RouteFrom() {
+	public LevelProductsRouteFrom() {
 		super();
 	}
 
@@ -43,7 +43,7 @@ public class L1RouteFrom {
 	 * @param acquisition
 	 * @param satelliteId
 	 */
-	public L1RouteFrom(final String acquisition, final String satelliteId) {
+	public LevelProductsRouteFrom(final String acquisition, final String satelliteId) {
 		this();
 		this.acquisition = acquisition;
 		this.satelliteId = satelliteId;
@@ -106,7 +106,7 @@ public class L1RouteFrom {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			L1RouteFrom other = (L1RouteFrom) obj;
+			LevelProductsRouteFrom other = (LevelProductsRouteFrom) obj;
 			ret = Objects.equals(acquisition, other.acquisition) && Objects.equals(satelliteId, other.satelliteId);
 		}
 		return ret;

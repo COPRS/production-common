@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.l2routing;
+package esa.s1pdgs.cpoc.jobgenerator.model.routing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,11 +9,12 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
- * Test the object L2RouteFrom
+ * Test the object L1RouteFrom
  * 
+ * @author Cyrielle Gailliard
  *
  */
-public class L2RouteFromTest {
+public class L1RouteFromTest {
 	
 	/**
 	 * Test constructors
@@ -21,9 +22,9 @@ public class L2RouteFromTest {
 	@Test
 	public void testConstructors() {
 		
-		L2RouteFrom obj = new L2RouteFrom("WV", "S1B");
+		LevelProductsRouteFrom obj = new LevelProductsRouteFrom("IW", "S1B");
 		
-		assertEquals("WV", obj.getAcquisition());
+		assertEquals("IW", obj.getAcquisition());
 		assertEquals("S1B", obj.getSatelliteId());
 	}
 	
@@ -33,7 +34,7 @@ public class L2RouteFromTest {
 	@Test
 	public void testToString() {
 		
-		L2RouteFrom obj = new L2RouteFrom();
+		LevelProductsRouteFrom obj = new LevelProductsRouteFrom();
 		obj.setAcquisition("IW");
 		obj.setSatelliteId("S1B");
 		
@@ -47,7 +48,7 @@ public class L2RouteFromTest {
 	 */
 	@Test
 	public void equalsDto() {
-		EqualsVerifier.forClass(L2RouteFrom.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(LevelProductsRouteFrom.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }
