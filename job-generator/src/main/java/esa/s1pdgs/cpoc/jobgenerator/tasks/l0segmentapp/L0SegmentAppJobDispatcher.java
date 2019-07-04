@@ -6,15 +6,10 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
@@ -32,14 +27,17 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
  * 
  * @author Cyrielle Gailliard
  */
-@Service
-@ConditionalOnProperty(name = "process.level", havingValue = "L0_SEGMENT")
 public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
 
     /**
      * Task table
      */
     private static final String TASK_TABLE_NAME = "TaskTable.L0ASP.xml";
+    
+    /**
+     * 
+     */
+    private String taskForFunctionalLog;
 
     /**
      * @param settings
@@ -48,12 +46,11 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto
      * @param xmlConverter
      * @param pathRoutingXmlFile
      */
-    @Autowired
     public L0SegmentAppJobDispatcher(final JobGeneratorSettings settings,
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            @Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataService) {
+            final AppCatalogJobClient appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -90,7 +87,12 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return ApplicationLevel.L0_SEGMENT.name() + "JobGeneration";
+    	return this.taskForFunctionalLog;
+    }
+    
+    @Override
+    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 
 }

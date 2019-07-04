@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.l2routing;
+package esa.s1pdgs.cpoc.jobgenerator.model.routing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,27 +16,27 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Cyrielle Gailliard
  *
  */
-@XmlRootElement(name = "l2_routing")
+@XmlRootElement(name = "level_products_routing")
 @XmlAccessorType(XmlAccessType.NONE)
-public class L2Routing {
+public class LevelProductsRouting {
 
 	/**
 	 * List of configured routes
 	 */
-	@XmlElement(name = "l2_route")
-	private List<L2Route> routes;
+	@XmlElement(name = "level_products_route")
+	private List<LevelProductsRoute> routes;
 
 	/**
 	 * Default constructor
 	 */
-	public L2Routing() {
+	public LevelProductsRouting() {
 		this.routes = new ArrayList<>();
 	}
 
 	/**
 	 * @return the routes
 	 */
-	public List<L2Route> getRoutes() {
+	public List<LevelProductsRoute> getRoutes() {
 		return routes;
 	}
 
@@ -44,7 +44,7 @@ public class L2Routing {
 	 * @param routes
 	 *            the routes to set
 	 */
-	public void setRoutes(final List<L2Route> routes) {
+	public void setRoutes(final List<LevelProductsRoute> routes) {
 		this.routes = routes;
 	}
 
@@ -52,7 +52,7 @@ public class L2Routing {
 	 * @param routes
 	 *            the routes to set
 	 */
-	public void addRoute(final L2Route route) {
+	public void addRoute(final LevelProductsRoute route) {
 		this.routes.add(route);
 	}
 
@@ -83,7 +83,7 @@ public class L2Routing {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			L2Routing other = (L2Routing) obj;
+			LevelProductsRouting other = (LevelProductsRouting) obj;
 			ret = Objects.equals(routes, other.routes);
 		}
 		return ret;

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.l2routing;
+package esa.s1pdgs.cpoc.jobgenerator.model.routing;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,9 +18,9 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Cyrielle Gailliard
  *
  */
-@XmlRootElement(name = "l2_to")
+@XmlRootElement(name = "level_products_to")
 @XmlAccessorType(XmlAccessType.NONE)
-public class L2RouteTo {
+public class LevelProductsRouteTo {
 
 	/**
 	 * List of task tables (XML filenames)
@@ -32,7 +32,7 @@ public class L2RouteTo {
 	/**
 	 * Default constructor
 	 */
-	public L2RouteTo() {
+	public LevelProductsRouteTo() {
 		this.taskTables = new ArrayList<>();
 	}
 
@@ -40,7 +40,7 @@ public class L2RouteTo {
 	 * Constructor using fields
 	 * @param taskTables
 	 */
-	public L2RouteTo(final Collection<String> taskTables) {
+	public LevelProductsRouteTo(final Collection<String> taskTables) {
 		this();
 		this.taskTables.addAll(taskTables);
 	}
@@ -86,7 +86,7 @@ public class L2RouteTo {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			L2RouteTo other = (L2RouteTo) obj;
+			LevelProductsRouteTo other = (LevelProductsRouteTo) obj;
 			ret = Objects.equals(taskTables, other.taskTables);
 		}
 		return ret;

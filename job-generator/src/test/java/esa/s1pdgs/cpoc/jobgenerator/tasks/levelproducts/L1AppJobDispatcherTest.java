@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.tasks.l1app;
+package esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts;
 
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
@@ -43,7 +43,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.model.l1routing.L1Routing;
+import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
@@ -81,9 +81,9 @@ public class L1AppJobDispatcherTest {
     private AppCatalogJobClient appDataService;
 
     @Mock
-    private L1AppJobsGenerator mockGeneratorIW;
+    private LevelProductsJobsGenerator mockGeneratorIW;
     @Mock
-    private L1AppJobsGenerator mockGeneratorOther;
+    private LevelProductsJobsGenerator mockGeneratorOther;
 
     @Mock
     private XmlConverter xmlConverter;
@@ -98,7 +98,7 @@ public class L1AppJobDispatcherTest {
             new File("./test/data/l1_config/task_tables/IW_RAW__0_GRDH_1.xml");
     private int nbTaskTables;
 
-    private L1AppJobDispatcher dispatcher;
+    private LevelProductsJobDispatcher dispatcher;
 
     /**
      * Test set up
@@ -115,7 +115,7 @@ public class L1AppJobDispatcherTest {
         this.mockProcessSettings();
 
         // Mock the converter
-        L1Routing routing = TestL1Utils.buildL1Routing();
+        LevelProductsRouting routing = TestL1Utils.buildL1Routing();
         try {
             Mockito.when(
                     xmlConverter.convertFromXMLToObject(Mockito.anyString()))
@@ -152,7 +152,7 @@ public class L1AppJobDispatcherTest {
                 }
                 return this.mockGeneratorOther;
             }).when(jobsGeneratorFactory)
-                    .createJobGeneratorForL0Slice(Mockito.any(),  any(),Mockito.any());
+                    .createJobGeneratorForL0Slice(Mockito.any(), Mockito.any());
         } catch (JobGenBuildTaskTableException e) {
             fail("Exception occurred: " + e.getMessage());
         }
@@ -180,7 +180,7 @@ public class L1AppJobDispatcherTest {
         this.mockAppDataService();
 
         // Return the dispatcher
-        this.dispatcher = new L1AppJobDispatcher(jobGeneratorSettings,
+        this.dispatcher = new LevelProductsJobDispatcher(jobGeneratorSettings,
                 processSettings, jobsGeneratorFactory,
                 jobGenerationTaskScheduler, xmlConverter,
                 "./test/data/l1_config/routing.xml", appDataService);
@@ -248,9 +248,9 @@ public class L1AppJobDispatcherTest {
         try {
             this.dispatcher.createJobGenerator(taskTable1);
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(any(), any(), any());
+                    .createJobGeneratorForL0Slice(any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable1),any(), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable1), any());
         } catch (AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
@@ -272,15 +272,15 @@ public class L1AppJobDispatcherTest {
             verify(jobsGeneratorFactory, never())
                     .createJobGeneratorForEdrsSession(any(), any());
             verify(jobsGeneratorFactory, times(this.nbTaskTables))
-                    .createJobGeneratorForL0Slice(any(), any(), any());
+                    .createJobGeneratorForL0Slice(any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable1), any(), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable1), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable2), any(), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable2), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable3), any(), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable3), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable4),  any(), any());
+                    .createJobGeneratorForL0Slice(eq(taskTable4), any());
             assertTrue(dispatcher.getGenerators().size() == this.nbTaskTables);
             assertTrue(dispatcher.getGenerators()
                     .containsKey(taskTable1.getName()));
@@ -292,7 +292,7 @@ public class L1AppJobDispatcherTest {
                     .containsKey(taskTable4.getName()));
 
             // Verify creation of routing creation
-            L1Routing routing = TestL1Utils.buildL1Routing();
+            LevelProductsRouting routing = TestL1Utils.buildL1Routing();
             Map<String, List<String>> expectedRoutingMap = new HashMap<>();
             assertTrue("Invalid number of routes",
                     routing.getRoutes().size() == dispatcher.routingMap.size());

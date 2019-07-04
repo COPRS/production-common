@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.l2routing;
+package esa.s1pdgs.cpoc.jobgenerator.model.routing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,11 +12,12 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
- * Test the object L2RouteTo
+ * Test the object L1RouteTo
  * 
+ * @author Cyrielle Gailliard
  *
  */
-public class L2RouteToTest {
+public class L1RouteToTest {
 	
 	/**
 	 * Test constructors
@@ -25,7 +26,7 @@ public class L2RouteToTest {
 	public void testConstructors() {
 
 		List<String> tts = Arrays.asList("tt1.xml","tt2.xml","tt3.xml");
-		L2RouteTo obj = new L2RouteTo(tts);
+		LevelProductsRouteTo obj = new LevelProductsRouteTo(tts);
 		
 		assertTrue(obj.getTaskTables().size() == 3);
 		assertEquals("tt1.xml", obj.getTaskTables().get(0));
@@ -39,7 +40,7 @@ public class L2RouteToTest {
 	@Test
 	public void testToString() {
 		
-		L2RouteTo obj = new L2RouteTo();
+		LevelProductsRouteTo obj = new LevelProductsRouteTo();
 		List<String> tts = Arrays.asList("tt1.xml","tt2.xml","tt3.xml");
 		obj.setTaskTables(tts);
 		
@@ -52,7 +53,7 @@ public class L2RouteToTest {
 	 */
 	@Test
 	public void equalsDto() {
-		EqualsVerifier.forClass(L2RouteTo.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(LevelProductsRouteTo.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

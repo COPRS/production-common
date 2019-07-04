@@ -54,7 +54,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.l1app.L1AppJobsGenerator;
+import esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -120,7 +120,7 @@ public class AbstractJobsGeneratorTest {
 
         this.mockAppDataService();
 
-        generator = new L1AppJobsGenerator(xmlConverter, metadataService,
+        generator = new LevelProductsJobsGenerator(xmlConverter, metadataService,
                 processSettings, jobGeneratorSettings, JobsSender,
                 appDataPService);
         generator.initialize(new File(
@@ -325,7 +325,7 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, JobGenBuildTaskTableException {
         doThrow(new IOException("IO exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        AbstractJobsGenerator<ProductDto> gen = new L1AppJobsGenerator(
+        AbstractJobsGenerator<ProductDto> gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataService, processSettings,
                 jobGeneratorSettings, JobsSender, appDataPService);
         generator.setMode(ProductMode.SLICING);
@@ -343,7 +343,7 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, JobGenBuildTaskTableException {
         doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        AbstractJobsGenerator<ProductDto> gen = new L1AppJobsGenerator(
+        AbstractJobsGenerator<ProductDto> gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataService, processSettings,
                 jobGeneratorSettings, JobsSender, appDataPService);
         generator.setMode(ProductMode.SLICING);

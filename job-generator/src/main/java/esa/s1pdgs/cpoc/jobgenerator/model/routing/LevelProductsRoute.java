@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.l1routing;
+package esa.s1pdgs.cpoc.jobgenerator.model.routing;
 
 import java.util.Objects;
 
@@ -14,26 +14,26 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Cyrielle Gailliard
  *
  */
-@XmlRootElement(name = "l1_route")
+@XmlRootElement(name = "level_products_route")
 @XmlAccessorType(XmlAccessType.NONE)
-public class L1Route {
+public class LevelProductsRoute {
 
 	/**
 	 * Condition of the routing
 	 */
-	@XmlElement(name = "l1_from")
-	private L1RouteFrom routeFrom;
+	@XmlElement(name = "level_products_from")
+	private LevelProductsRouteFrom routeFrom;
 
 	/**
 	 * List of wanted task table
 	 */
-	@XmlElement(name = "l1_to")
-	private L1RouteTo routeTo;
+	@XmlElement(name = "level_products_to")
+	private LevelProductsRouteTo routeTo;
 
 	/**
 	 * Default constructor
 	 */
-	public L1Route() {
+	public LevelProductsRoute() {
 		super();
 	}
 
@@ -43,7 +43,7 @@ public class L1Route {
 	 * @param from
 	 * @param to
 	 */
-	public L1Route(final L1RouteFrom routeFrom, final L1RouteTo routeTo) {
+	public LevelProductsRoute(final LevelProductsRouteFrom routeFrom, final LevelProductsRouteTo routeTo) {
 		this();
 		this.routeFrom = routeFrom;
 		this.routeTo = routeTo;
@@ -52,7 +52,7 @@ public class L1Route {
 	/**
 	 * @return the routeFrom
 	 */
-	public L1RouteFrom getRouteFrom() {
+	public LevelProductsRouteFrom getRouteFrom() {
 		return routeFrom;
 	}
 
@@ -60,14 +60,14 @@ public class L1Route {
 	 * @param routeFrom
 	 *            the routeFrom to set
 	 */
-	public void setRouteFrom(final L1RouteFrom routeFrom) {
+	public void setRouteFrom(final LevelProductsRouteFrom routeFrom) {
 		this.routeFrom = routeFrom;
 	}
 
 	/**
 	 * @return the routeTo
 	 */
-	public L1RouteTo getRouteTo() {
+	public LevelProductsRouteTo getRouteTo() {
 		return routeTo;
 	}
 
@@ -75,7 +75,7 @@ public class L1Route {
 	 * @param routeTo
 	 *            the routeTo to set
 	 */
-	public void setRouteTo(final L1RouteTo routeTo) {
+	public void setRouteTo(final LevelProductsRouteTo routeTo) {
 		this.routeTo = routeTo;
 	}
 
@@ -106,7 +106,7 @@ public class L1Route {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			L1Route other = (L1Route) obj;
+			LevelProductsRoute other = (LevelProductsRoute) obj;
 			ret = Objects.equals(routeFrom, other.routeFrom) && Objects.equals(routeTo, other.routeTo);
 		}
 		return ret;

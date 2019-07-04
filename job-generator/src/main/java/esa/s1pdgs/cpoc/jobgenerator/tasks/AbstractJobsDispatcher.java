@@ -239,6 +239,8 @@ public abstract class AbstractJobsDispatcher<T> {
             throws AbstractCodedException;
 
     protected abstract String getTaskForFunctionalLog();
+    
+    public abstract void setTaskForFunctionalLog(String taskForFunctionalLog);
 
     /**
      * @return the generators

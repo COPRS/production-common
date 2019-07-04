@@ -42,189 +42,178 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class L0SegmentAppConsumerTest {
 
-    @Mock
-    private L0SegmentAppProperties appProperties;
+	@Mock
+	private L0SegmentAppProperties appProperties;
 
-    @Mock
-    private ProcessSettings processSettings;
+	@Mock
+	private ProcessSettings processSettings;
 
-    @Mock
-    private AbstractJobsDispatcher<ProductDto> jobsDispatcher;
+	@Mock
+	private AbstractJobsDispatcher<ProductDto> jobsDispatcher;
 
-    @Mock
-    private GenericMqiClient mqiService;
+	@Mock
+	private GenericMqiClient mqiService;
 
-    @Mock
-    private StatusService mqiStatusService;
+	@Mock
+	private StatusService mqiStatusService;
 
-    @Mock
-    private AppCatalogJobClient appDataService;
+	@Mock
+	private AppCatalogJobClient appDataService;
 
-    @Mock
-    private AppStatus appStatus;
+	@Mock
+	private AppStatus appStatus;
 
-    @Mock
-    private JobStatus jobStatus;
+	@Mock
+	private JobStatus jobStatus;
 
-    private List<GenericMessageDto<ProductDto>> messages;
+	private List<GenericMessageDto<ProductDto>> messages;
 
-    private L0SegmentAppConsumer consumer;
-    
-    private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
+	private L0SegmentAppConsumer consumer;
 
-    @Before
-    public void init() throws AbstractCodedException {
-        MockitoAnnotations.initMocks(this);
+	private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 
-        initMessages();
-        mockProperties();
-        mockJobDispatcher();
-        mockMqiService();
-        mockAppDataService();
-        mockAppStatus();
+	@Before
+	public void init() throws AbstractCodedException {
+		MockitoAnnotations.initMocks(this);
 
-        consumer = new L0SegmentAppConsumer(jobsDispatcher, appProperties,
-                processSettings, mqiService, mqiStatusService, appDataService, errorAppender,
-                appStatus);
-    }
+		initMessages();
+		mockProperties();
+		mockJobDispatcher();
+		mockMqiService();
+		mockAppDataService();
+		mockAppStatus();
 
-    public void mockProperties() {
-        HashMap<String, Integer> groups = new HashMap<>();
-        groups.put("missionId", 1);
-        groups.put("satelliteId", 2);
-        groups.put("acquisition", 4);
-        groups.put("polarisation", 5);
-        groups.put("startTime", 6);
-        groups.put("stopTime", 7);
-        groups.put("datatakeId", 9);
-        doReturn(groups).when(appProperties).getNameRegexpGroups();
-        doReturn(
-                "^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$")
-                        .when(appProperties).getNameRegexpPattern();
+		consumer = new L0SegmentAppConsumer(jobsDispatcher, appProperties, processSettings, mqiService,
+				mqiStatusService, appDataService, errorAppender, appStatus);
+		consumer.setTaskForFunctionalLog(processSettings.getLevel().name() + "JobGeneration");
+	}
 
-        doReturn(ApplicationLevel.L0_SEGMENT).when(processSettings).getLevel();
-        doReturn("hostname").when(processSettings).getHostname();
-    }
+	public void mockProperties() {
+		HashMap<String, Integer> groups = new HashMap<>();
+		groups.put("missionId", 1);
+		groups.put("satelliteId", 2);
+		groups.put("acquisition", 4);
+		groups.put("polarisation", 5);
+		groups.put("startTime", 6);
+		groups.put("stopTime", 7);
+		groups.put("datatakeId", 9);
+		doReturn(groups).when(appProperties).getNameRegexpGroups();
+		doReturn(
+				"^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$")
+						.when(appProperties).getNameRegexpPattern();
 
-    public void initMessages() {
-        messages = new ArrayList<>();
-        GenericMessageDto<ProductDto> message1 =
-                new GenericMessageDto<ProductDto>(1, "topic1",
-                        new ProductDto(
-                                "S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
-                                "S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
-                                ProductFamily.L0_SEGMENT, "FAST"));
-        messages.add(message1);
-        GenericMessageDto<ProductDto> message2 =
-                new GenericMessageDto<ProductDto>(2, "topic1",
-                        new ProductDto(
-                                "S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
-                                "S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
-                                ProductFamily.L0_SEGMENT, "FAST"));
-        messages.add(message2);
-        GenericMessageDto<ProductDto> message3 =
-                new GenericMessageDto<ProductDto>(1, "topic1",
-                        new ProductDto(
-                                "S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
-                                "S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
-                                ProductFamily.L0_SEGMENT, "FAST"));
-        messages.add(message3);
-    }
+		doReturn(ApplicationLevel.L0_SEGMENT).when(processSettings).getLevel();
+		doReturn("hostname").when(processSettings).getHostname();
+	}
 
-    public void mockJobDispatcher() throws AbstractCodedException {
-        doNothing().when(jobsDispatcher).dispatch(any());
-    }
+	public void initMessages() {
+		messages = new ArrayList<>();
+		GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1",
+				new ProductDto("S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+						"S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+						ProductFamily.L0_SEGMENT, "FAST"));
+		messages.add(message1);
+		GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1",
+				new ProductDto("S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
+						"S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
+						ProductFamily.L0_SEGMENT, "FAST"));
+		messages.add(message2);
+		GenericMessageDto<ProductDto> message3 = new GenericMessageDto<ProductDto>(1, "topic1",
+				new ProductDto("S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+						"S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+						ProductFamily.L0_SEGMENT, "FAST"));
+		messages.add(message3);
+	}
 
-    public void mockMqiService() throws AbstractCodedException {
-        doReturn(messages.get(0), messages.get(1), messages.get(2))
-                .when(mqiService).next(Mockito.any());
-        doReturn(true).when(mqiService).ack(any(), Mockito.any());
-    }
+	public void mockJobDispatcher() throws AbstractCodedException {
+		doNothing().when(jobsDispatcher).dispatch(any());
+	}
 
-    public void mockAppDataService() throws AbstractCodedException {
-        doReturn(new ArrayList<>()).when(appDataService)
-                .findByMessagesIdentifier(anyLong());
-        doReturn(new ArrayList<>()).when(appDataService)
-                .findByProductDataTakeId(anyString());
-        Mockito.doAnswer(i -> {
-            return i.getArgument(0);
-        }).when(appDataService).newJob(Mockito.any());
-        Mockito.doAnswer(i -> {
-            return i.getArgument(1);
-        }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
-                Mockito.anyBoolean(), Mockito.anyBoolean(),
-                Mockito.anyBoolean());
-    }
+	public void mockMqiService() throws AbstractCodedException {
+		doReturn(messages.get(0), messages.get(1), messages.get(2)).when(mqiService).next(Mockito.any());
+		doReturn(true).when(mqiService).ack(any(), Mockito.any());
+	}
 
-    public void mockAppStatus() {
-        doNothing().when(appStatus).setWaiting();
-        doNothing().when(appStatus).setProcessing(anyLong());
-        doNothing().when(appStatus).setError(anyString());
-        doReturn(jobStatus).when(appStatus).getStatus();
-        doReturn(false).when(jobStatus).isStopping();
-    }
+	public void mockAppDataService() throws AbstractCodedException {
+		doReturn(new ArrayList<>()).when(appDataService).findByMessagesIdentifier(anyLong());
+		doReturn(new ArrayList<>()).when(appDataService).findByProductDataTakeId(anyString());
+		Mockito.doAnswer(i -> {
+			return i.getArgument(0);
+		}).when(appDataService).newJob(Mockito.any());
+		Mockito.doAnswer(i -> {
+			return i.getArgument(1);
+		}).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+				Mockito.anyBoolean());
+	}
 
-    @Test
-    public void testGetTaskForFunctionalLog() {
-        assertEquals("L0_SEGMENTJobGeneration",
-                consumer.getTaskForFunctionalLog());
-    }
+	public void mockAppStatus() {
+		doNothing().when(appStatus).setWaiting();
+		doNothing().when(appStatus).setProcessing(anyLong());
+		doNothing().when(appStatus).setError(anyString());
+		doReturn(jobStatus).when(appStatus).getStatus();
+		doReturn(false).when(jobStatus).isStopping();
+	}
 
-    @Test
-    public void testBuildJobNew() throws AbstractCodedException {
-        AppDataJobDto expectedData = new AppDataJobDto();
-        expectedData.setLevel(processSettings.getLevel());
-        expectedData.setPod(processSettings.getHostname());
-        expectedData.getMessages().add(messages.get(0));
-        AppDataJobProductDto productDto = new AppDataJobProductDto();
-        productDto.setAcquisition("IW");
-        productDto.setMissionId("S1");
-        productDto.setDataTakeId("00F9CD");
-        productDto.setProductName("l0_segments_for_00F9CD");
-        productDto.setProcessMode("FAST");
-        productDto.setSatelliteId("B");
-        expectedData.setProduct(productDto);
-        
-        AppDataJobDto result = consumer.buildJob(messages.get(0));
-        assertEquals(expectedData, result);
-        verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
-        verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
-        verify(appDataService, times(1)).newJob(eq(expectedData));
-    }
-    
-    @Test
-    public void testConsumeWhenNoMessage() throws AbstractCodedException {
-        doReturn(null).when(mqiService).next(Mockito.any());
-        
-        consumer.consumeMessages();
+	@Test
+	public void testGetTaskForFunctionalLog() {
+		assertEquals("L0_SEGMENTJobGeneration", consumer.getTaskForFunctionalLog());
+	}
 
-        verifyZeroInteractions(jobsDispatcher, appDataService);
-        verify(appStatus, never()).setProcessing(Mockito.eq(2L));
-        verify(appStatus, times(1)).setWaiting();
-    }
-    
-    @Test
-    public void testConsumeWhenNewJob() throws AbstractCodedException {
-        AppDataJobDto expectedData = new AppDataJobDto();
-        expectedData.setLevel(processSettings.getLevel());
-        expectedData.setPod(processSettings.getHostname());
-        expectedData.setState(AppDataJobDtoState.DISPATCHING);
-        expectedData.getMessages().add(messages.get(0));
-        AppDataJobProductDto productDto = new AppDataJobProductDto();
-        productDto.setAcquisition("IW");
-        productDto.setMissionId("S1");
-        productDto.setDataTakeId("00F9CD");
-        productDto.setProductName("l0_segments_for_00F9CD");
-        productDto.setProcessMode("FAST");
-        productDto.setSatelliteId("B");
-        expectedData.setProduct(productDto);
-        
-        consumer.consumeMessages();
-        
-        verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
-        verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
-        verify(appDataService, times(1)).newJob(any());
-        verify(appDataService, times(1)).patchJob(anyLong(), any(), eq(false), eq(false), eq(false));
-        verify(jobsDispatcher).dispatch(eq(expectedData));
-    }
+	@Test
+	public void testBuildJobNew() throws AbstractCodedException {
+		AppDataJobDto expectedData = new AppDataJobDto();
+		expectedData.setLevel(processSettings.getLevel());
+		expectedData.setPod(processSettings.getHostname());
+		expectedData.getMessages().add(messages.get(0));
+		AppDataJobProductDto productDto = new AppDataJobProductDto();
+		productDto.setAcquisition("IW");
+		productDto.setMissionId("S1");
+		productDto.setDataTakeId("00F9CD");
+		productDto.setProductName("l0_segments_for_00F9CD");
+		productDto.setProcessMode("FAST");
+		productDto.setSatelliteId("B");
+		expectedData.setProduct(productDto);
+
+		AppDataJobDto result = consumer.buildJob(messages.get(0));
+		assertEquals(expectedData, result);
+		verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
+		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
+		verify(appDataService, times(1)).newJob(eq(expectedData));
+	}
+
+	@Test
+	public void testConsumeWhenNoMessage() throws AbstractCodedException {
+		doReturn(null).when(mqiService).next(Mockito.any());
+
+		consumer.consumeMessages();
+
+		verifyZeroInteractions(jobsDispatcher, appDataService);
+		verify(appStatus, never()).setProcessing(Mockito.eq(2L));
+		verify(appStatus, times(1)).setWaiting();
+	}
+
+	@Test
+	public void testConsumeWhenNewJob() throws AbstractCodedException {
+		AppDataJobDto expectedData = new AppDataJobDto();
+		expectedData.setLevel(processSettings.getLevel());
+		expectedData.setPod(processSettings.getHostname());
+		expectedData.setState(AppDataJobDtoState.DISPATCHING);
+		expectedData.getMessages().add(messages.get(0));
+		AppDataJobProductDto productDto = new AppDataJobProductDto();
+		productDto.setAcquisition("IW");
+		productDto.setMissionId("S1");
+		productDto.setDataTakeId("00F9CD");
+		productDto.setProductName("l0_segments_for_00F9CD");
+		productDto.setProcessMode("FAST");
+		productDto.setSatelliteId("B");
+		expectedData.setProduct(productDto);
+
+		consumer.consumeMessages();
+
+		verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
+		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
+		verify(appDataService, times(1)).newJob(any());
+		verify(appDataService, times(1)).patchJob(anyLong(), any(), eq(false), eq(false), eq(false));
+		verify(jobsDispatcher).dispatch(eq(expectedData));
+	}
 }

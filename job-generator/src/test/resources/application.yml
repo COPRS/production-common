@@ -24,7 +24,7 @@ level0:
   maxagesession: 25200000
   dir-extractor-sessions: ./tmp/
   
-level1:
+level-products:
   pathroutingxmlfile: ./test/data/l1_config/routing.xml
 
 job-generator:

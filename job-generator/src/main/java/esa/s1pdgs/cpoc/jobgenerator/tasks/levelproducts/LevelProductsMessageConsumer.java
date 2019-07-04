@@ -1,15 +1,11 @@
-package esa.s1pdgs.cpoc.jobgenerator.tasks.l2app;
+package esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts;
 
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
@@ -34,44 +30,41 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
-@Component
-@ConditionalOnProperty(name = "process.level", havingValue = "L2")
-public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
+/**
+ * @author birol_colak@net.werum
+ *
+ */
+public class LevelProductsMessageConsumer extends AbstractGenericConsumer<ProductDto> {
 
-    /**
-     * Settings used to extract information from L0 product name
+	 /**
+     * Settings used to extract information from product name
      */
     private final L0SlicePatternSettings patternSettings;
 
     /**
      * Pattern built from the regular expression given in configuration
      */
-    private final Pattern l2SLicesPattern;
-
+    private final Pattern l0SLicesPattern;
+    
     /**
-     * Constructor
      * 
-     * @param jobsDispatcher
-     * @param patternSettings
-     * @param processSettings
-     * @param mqiService
-     * @param appDataService
-     * @param appStatus
      */
-    @Autowired
-    public L2AppConsumer(
+    private String taskForFunctionalLog;
+
+  
+    public LevelProductsMessageConsumer(
             final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
             final L0SlicePatternSettings patternSettings,
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
             final StatusService mqiStatusService,
-            @Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient appDataService,
+            final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
                 appDataService, appStatus, errorRepoAppender, ProductCategory.LEVEL_PRODUCTS);
         this.patternSettings = patternSettings;
-        this.l2SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
+        this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
                 Pattern.CASE_INSENSITIVE);
     }
 
@@ -80,7 +73,7 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
      */
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {
-    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L2JobGeneration"); 
+    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L1JobGeneration"); 
     	final Reporting reporting = reportingFactory.newReporting(0);
     	
         // First, consume message
@@ -95,7 +88,7 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
         boolean ackOk = false;
         String errorMessage = "";
         String productName = mqiMessage.getBody().getProductName();
-        
+
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
         try {
@@ -118,7 +111,7 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
                         appDataJob, false, false, false);
             }
             jobsDispatcher.dispatch(appDataJob);
-
+            
             // Ack
             step++;
             ackOk = true;
@@ -128,7 +121,8 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
             errorMessage = String.format(
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(), ace.getLogMessage());
-            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());            
+            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            
             failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);  
         }
 
@@ -149,7 +143,7 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
 
         if (CollectionUtils.isEmpty(existingJobs)) {
             // Job does not exists => create it
-            Matcher m = l2SLicesPattern.matcher(leveldto.getProductName());
+            Matcher m = l0SLicesPattern.matcher(leveldto.getProductName());
             if (!m.matches()) {
                 throw new InvalidFormatProduct(
                         "Don't match with regular expression "
@@ -204,6 +198,10 @@ public class L2AppConsumer extends AbstractGenericConsumer<ProductDto> {
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return "L2JobGeneration";
+    	return this.taskForFunctionalLog;
+    }
+    
+    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 }

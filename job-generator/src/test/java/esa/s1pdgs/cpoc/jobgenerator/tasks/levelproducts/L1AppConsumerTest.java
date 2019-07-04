@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.tasks.l1app;
+package esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -161,7 +161,7 @@ public class L1AppConsumerTest {
     public void testProductNameNotMatch() throws AbstractCodedException {
         doReturn(message2).when(mqiService).next(Mockito.any());
 
-        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService, errorAppender, appStatus);
         consumer.consumeMessages();
@@ -175,7 +175,7 @@ public class L1AppConsumerTest {
     public void testReceiveOk() throws AbstractCodedException, ParseException {
         doReturn(message1).when(mqiService).next(Mockito.any());
 
-        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
@@ -193,7 +193,7 @@ public class L1AppConsumerTest {
     public void testReceiveNull() throws AbstractCodedException {
         doReturn(null).when(mqiService).next(Mockito.any());
 
-        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
@@ -220,7 +220,7 @@ public class L1AppConsumerTest {
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
 
-        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
@@ -252,7 +252,7 @@ public class L1AppConsumerTest {
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
 
-        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();
@@ -285,7 +285,7 @@ public class L1AppConsumerTest {
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
 
-        L1AppConsumer consumer = new L1AppConsumer(l0SliceJobsDispatcher,
+        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus);
         consumer.consumeMessages();

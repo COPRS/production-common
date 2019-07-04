@@ -33,9 +33,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
-@Component
-@ConditionalOnProperty(name = "process.level", havingValue = "L0_SEGMENT")
-
 public class L0SegmentAppConsumer
         extends AbstractGenericConsumer<ProductDto> {
 
@@ -43,7 +40,16 @@ public class L0SegmentAppConsumer
      * Pattern built from the regular expression given in configuration
      */
     private final Pattern pattern;
+    
+    /**
+     * 
+     */
     private final Map<String, Integer> patternGroups;
+    
+    /**
+     * 
+     */
+    private String taskForFunctionalLog;
 
     /**
      * Constructor
@@ -55,7 +61,6 @@ public class L0SegmentAppConsumer
      * @param appDataService
      * @param appStatus
      */
-    @Autowired
     public L0SegmentAppConsumer(
             final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
             final L0SegmentAppProperties appProperties,
@@ -228,6 +233,11 @@ public class L0SegmentAppConsumer
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return "L0_SEGMENTJobGeneration";
+    	return this.taskForFunctionalLog;
+    }
+    
+    @Override
+    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 }

@@ -177,5 +177,7 @@ public abstract class AbstractGenericConsumer<T> {
     }
 
     protected abstract String getTaskForFunctionalLog();
+    
+    public abstract void setTaskForFunctionalLog(String taskForFunctionalLog);
 
 }
