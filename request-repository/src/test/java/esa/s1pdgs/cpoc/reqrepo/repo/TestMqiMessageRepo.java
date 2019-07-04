@@ -12,6 +12,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -163,13 +165,10 @@ public class TestMqiMessageRepo {
     	
     	uut.deleteAll();
     }
-    
-    // TODO more test!
 
-    /*
 
     @Test
-    public final void testFindByStateInAndTopicIn_All_NoFilter() throws Exception
+    public final void testFindByStateInAndTopicIn_OnNoFilter_ShallReturnAll() throws Exception
     {
     	final List<MqiMessage> expected = Arrays.asList(
     			newMqiMessage(4),
@@ -177,49 +176,20 @@ public class TestMqiMessageRepo {
     			newMqiMessage(5),
     			newMqiMessage(3)
     	); 
-    	for (final MqiMessage mess : expected)    	{
+    	for (final MqiMessage mess : expected) {
     		ops.insert(mess);  
     	}    	
     	List<MqiMessage> actual = uut.findByStateInAndTopicIn(
     			RequestRepository.PROCESSING_STATE_LIST, 
     			RequestRepository.PROCESSING_TYPES_LIST,
-    			PageRequest.of(0, 100)
+    			PageRequest.of(0, Integer.MAX_VALUE)
     	).getContent();
-    	assertEquals(4, actual.size()); 
-    	
+    	assertEquals(4, actual.size());
     	uut.deleteAll();
     }
     
     @Test
-    public final void testFindByStateInAndTopicIn_All_WithFilter() throws Exception
-    {
-    	final List<MqiMessage> expected = Arrays.asList(
-    			newMqiMessage(4),
-    			newMqiMessage(2),
-    			newMqiMessage(5),
-    			newMqiMessage(3)
-    	); 
-    	for (final MqiMessage mess : expected)    	{
-    		ops.insert(mess);  
-    	}    	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicIn(
-    			Collections.singletonList(MessageState.READ), 
-    			RequestRepository.PROCESSING_TYPES_LIST,
-    			PageRequest.of(0, 100)
-    	).getContent();    
-    	assertEquals(4, actual.size()); 
-    	
-    	// assert correct order of returned objects
-    	assertEquals(4, actual.get(0).getIdentifier()); 
-    	assertEquals(2, actual.get(1).getIdentifier()); 
-    	assertEquals(5, actual.get(2).getIdentifier()); 
-    	assertEquals(3, actual.get(3).getIdentifier()); 
-    	
-    	uut.deleteAll();
-    }
-    
-    @Test
-    public final void testFindByStateInAndTopicIn_All_WithFilterAndPaging() throws Exception
+    public final void testFindByStateInAndTopicIn_OnNoFilterAndPagesizeTwo_ShallReturnTwoResults() throws Exception
     {
     	final List<MqiMessage> expected = Arrays.asList(
     			newMqiMessage(4),
@@ -235,37 +205,42 @@ public class TestMqiMessageRepo {
     			RequestRepository.PROCESSING_TYPES_LIST,
     			PageRequest.of(0, 2)
     	).getContent();    
-    	
     	assertEquals(2, actual.size()); 
+    	
     	// assert correct order of returned objects
     	assertEquals(4, actual.get(0).getIdentifier()); 
-    	assertEquals(2, actual.get(1).getIdentifier()); 
-    	
+    	assertEquals(2, actual.get(1).getIdentifier());     	
     	uut.deleteAll();
     }
     
-    
-//    @Test
-//    public final void testFindByStateInAndTopicIn_OnFilteredTopic_ShallFilterResults() throws Exception
-//    {
-//    	ops.insert(newMqiMessage(6));  
-//    	ops.insert(newMqiMessage(7));    	
-//    	ops.insert(newMqiMessage(5));    
-//    	ops.insert(newMqiMessage(9));
-//    	
-//    	List<MqiMessage> actual = uut.findByStateInAndTopicIn(    			
-//    			RequestRepository.PROCESSING_STATE_LIST,
-//    			Collections.singletonList("t-pdgs-edrs-sessions")
-//    	);
-//    	assertEquals(0, actual.size()); 
-//    	actual = uut.findByStateInAndTopicIn(    			
-//    			Collections.singletonList(MessageState.SEND), 
-//    			RequestRepository.PROCESSING_TYPES_LIST
-//    	);
-//    	assertEquals(0, actual.size());     	
-//    	uut.deleteAll();
-//    }
-    */
+    @Test
+    public final void testFindByStateInAndTopicIn_OnPartiallMatchingStateFilterAndPagingOrderByCreationDate_ShallReturnSubset() throws Exception
+    {
+       	final List<MqiMessage> expected = Arrays.asList(
+    			newMqiMessage(4),
+    			newMqiMessage(2),
+    			newMqiMessage(5),
+    			newMqiMessage(3)
+    	);        	
+       	expected.get(1).setState(MessageState.ACK_KO);
+     	expected.get(3).setState(MessageState.ACK_KO);
+    	for (final MqiMessage mess : expected)    	{
+    		ops.insert(mess);  
+    	}    	
+    	List<MqiMessage> actual = uut.findByStateInAndTopicIn(
+    			Collections.singletonList(MessageState.ACK_KO), 
+    			RequestRepository.PROCESSING_TYPES_LIST,
+    			PageRequest.of(0, 2, Sort.by(Direction.ASC,"creationDate"))
+    	).getContent();    
+    	
+    	assertEquals(2, actual.size()); 
+    	System.err.println(actual);
+    	// assert correct order of returned objects
+    	assertEquals(2, actual.get(0).getIdentifier()); 
+    	assertEquals(3, actual.get(1).getIdentifier()); 
+    	
+    	uut.deleteAll();
+    }
     
     private final MqiMessage newMqiMessage(long id) throws InterruptedException
     {

@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 
-public class ErrorRepositoryTest {
+public class RequestRepositoryTest {
 
 	@Mock
 	private FailedProcessingRepo failedProcessingRepo;
