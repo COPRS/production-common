@@ -129,9 +129,8 @@ public class RequestRepositoryController {
 			@PathVariable("id") final String id
 	) {
 		LOGGER.info("get processing with id {}", id);
-		assertValidApiKey(apiKey);
-		
-		final Processing result = requestRepository.getProcessing(Long.parseLong(id));
+		assertValidApiKey(apiKey);		
+		final Processing result = requestRepository.getProcessing(parseId(id));
 		assertElementFound("processing", result, id);
 		return result;
 	}

@@ -1,15 +1,14 @@
 package esa.s1pdgs.cpoc.reqrepo.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -18,12 +17,17 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
+import esa.s1pdgs.cpoc.appcatalog.common.Processing;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
@@ -31,192 +35,256 @@ import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 
 public class RequestRepositoryTest {
-
 	@Mock
 	private FailedProcessingRepo failedProcessingRepo;
-
 	@Mock
-	private MqiMessageRepo mqiMessageRepository;
-	
+	private MqiMessageRepo mqiMessageRepository;	
 	@Mock
 	private SubmissionClient submissionClient;
 
-	private RequestRepository requestRepository;
+	private RequestRepository uut;
 
 	@Before
-	public void init() {
+	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		this.requestRepository = new RequestRepositoryImpl(mqiMessageRepository, failedProcessingRepo, submissionClient);
+		this.uut = new RequestRepositoryImpl(
+				mqiMessageRepository, 
+				failedProcessingRepo, 
+				submissionClient
+		);
 	}
 
+	
 	@Test
-	public void getFailedProcessings() {
-		List<FailedProcessing> failedProcessingsToReturn = new ArrayList<>();
-		
-		GenericMessageDto<?> levelProductsMsgDto = new GenericMessageDto<>();
-		FailedProcessing fpDto = new FailedProcessing();
-		fpDto.setId(123);
-		fpDto.setDto(levelProductsMsgDto);
-		failedProcessingsToReturn.add(fpDto);
-
-		doReturn(failedProcessingsToReturn)
+	public void testGetFailedProcessings_OnInvocation_ShallReturnAllElements() {
+		doReturn(Arrays.asList(newFailedProcessing(123), newFailedProcessing(456)))
 			.when(failedProcessingRepo)
 			.findAll(Mockito.any(Sort.class));
 
-		List<FailedProcessing> failedProcessings = requestRepository.getFailedProcessings();
-
-		assertEquals(123, failedProcessings.get(0).getId());
-		assertTrue(failedProcessings.get(0).getDto() instanceof GenericMessageDto);
+		final List<FailedProcessing> actual = uut.getFailedProcessings();
+		
+		assertEquals(2, actual.size());
+		assertEquals(123, actual.get(0).getId());
 	}
 
 	@Test
-	public void getFailedProcessingById_Existing() {
+	public void testGetFailedProcessingById_OnExistingId_ShallReturnProduct() {
+		doReturn(newFailedProcessing(123))
+			.when(failedProcessingRepo)
+			.findById(123);
 
-		GenericMessageDto<?> levelProductsMsgDto = new GenericMessageDto<>();
-		FailedProcessing fpDtoToReturn = new FailedProcessing();
-		fpDtoToReturn.setId(123);
-		fpDtoToReturn.setDto(levelProductsMsgDto);
+		final FailedProcessing actual = uut.getFailedProcessingById(123);
+		
+		assertNotNull(actual);
+		assertEquals(123, actual.getId());
+	}
 
-		doReturn(fpDtoToReturn).when(failedProcessingRepo).findById(123);
-
-		FailedProcessing failedProcessing = requestRepository.getFailedProcessingById(123);
-
-		assertEquals(123, failedProcessing.getId());
-		assertTrue(failedProcessing.getDto() instanceof GenericMessageDto<?>);
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetFailedProcessingById_OnNonExistingId_ShallReturnNull() {
+		doReturn(null)
+			.when(failedProcessingRepo)
+			.findById(456);
+		
+		uut.getFailedProcessingById(456);
 	}
 
 	@Test
-	public void getFailedProcessingById_NotExisting() {
-		doReturn(null).when(failedProcessingRepo).findById(456);
-		try {
-			requestRepository.getFailedProcessingById(456);
-			fail("IllegalArguementException expected");
-		} catch (IllegalArgumentException e) {
-			// Expected
-		}
+	public void testDeleteFailedProcessing_OnExistingId_ShallDeleteElement() {
+		doReturn(newFailedProcessing(123))
+			.when(failedProcessingRepo)
+			.findById(123);
 
-	}
-
-	@Test
-	public void deleteFailedProcessing_Existing() {
-		GenericMessageDto<?> levelProductsMsgDto = new GenericMessageDto<>();
-		FailedProcessing fpDto = new FailedProcessing();
-		fpDto.setId(123);
-		fpDto.setDto(levelProductsMsgDto);
-
-		doReturn(fpDto).when(failedProcessingRepo).findById(123);
-
-		requestRepository.deleteFailedProcessing(123);
+		uut.deleteFailedProcessing(123);
 
 		verify(failedProcessingRepo).deleteById(123L);
 	}
 
-	@Test
-	public void deleteFailedProcessing_NotExisting() {
-		doReturn(null).when(failedProcessingRepo).findById(456);
+	@Test(expected=IllegalArgumentException.class)
+	public void testDeleteFailedProcessing_OnNonExistingId_ShallThrowException() {
+		doReturn(null)
+			.when(failedProcessingRepo)
+			.findById(456);
 		
-		try {
-			requestRepository.deleteFailedProcessing(456);
-			fail("IllegalArgumentException expected");
-		} catch (IllegalArgumentException e) {
-			// expected
-			verify(failedProcessingRepo, never()).deleteById(123L);
-		}
+		uut.deleteFailedProcessing(456);
 	}
-
+	
 	@Test
-	public void saveFailedProcessing_MessageExisting() {
-		MqiMessage mqiMsg = new MqiMessage();
-		mqiMsg.setIdentifier(456);
+	public void testSaveFailedProcessing_OnExistingMessage_ShallPersistFailedProcessing() {
+		doReturn(newMqiMessage(456))
+			.when(mqiMessageRepository)
+			.findByIdentifier(456);
 		
-		GenericMessageDto<?> levelProductsMsgDto = new GenericMessageDto<>();
-		levelProductsMsgDto.setIdentifier(mqiMsg.getIdentifier());
-
-		FailedProcessingDto fpDto = new FailedProcessingDto();	
-		fpDto.setProcessingDetails(levelProductsMsgDto);
-
-		doReturn(mqiMsg).when(mqiMessageRepository).findByIdentifier(456);
-
-		requestRepository.saveFailedProcessing(fpDto);
+		uut.saveFailedProcessing(newFailedProcessingDto(456));
+		
 		verify(mqiMessageRepository, times(1)).findByIdentifier(456);
 		verify(failedProcessingRepo, times(1)).save(Mockito.any());
 	}
 
-	@Test
-	public void saveFailedProcessing_MessageNotExisting() {
-
-		GenericMessageDto<?> levelProductsMsgDto = new GenericMessageDto<>();
-		levelProductsMsgDto.setIdentifier(789);
-		FailedProcessingDto fpDto = new FailedProcessingDto();
-		fpDto.setProcessingDetails(levelProductsMsgDto);
-
-		doReturn(null).when(failedProcessingRepo).findById(123);
-
-		try {
-			requestRepository.saveFailedProcessing(fpDto);
-			fail("IllegalArgumentException expected");
-		} catch (IllegalArgumentException e) {
-			// expected
-		}
-		verify(failedProcessingRepo, never()).save(Mockito.any());
+	@Test(expected = IllegalArgumentException.class)
+	public void testSaveFailedProcessing_OnMissingMessage_ShallThrowException() {
+		doReturn(null)
+			.when(failedProcessingRepo)
+			.findById(123);
+		
+		uut.saveFailedProcessing(newFailedProcessingDto(123));
 	}
 
 	@Test
-	public void restartAndDeleteFailedProcessing_ExistingWithTopic() {
-		final MqiMessage mqiMsg = new MqiMessage();
-		mqiMsg.setIdentifier(123);
-		mqiMsg.setTopic("myTopic");
-		
-		final ProductDto dto = new ProductDto("fooBar","123", ProductFamily.AUXILIARY_FILE);
-		
-		final GenericMessageDto<ProductDto> levelProductsMsgDto = new GenericMessageDto<>();
-		levelProductsMsgDto.setBody(dto);
-		
-		final FailedProcessing fp = FailedProcessing.valueOf(
-				mqiMsg, 
-				new FailedProcessingDto("localHost", new Date(), "Expected", levelProductsMsgDto)
-		);
+	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRequest_ShallResubmitAndDelete() {	
+		final FailedProcessing fp = newFailedProcessing(123, new ProductDto("f","b", ProductFamily.AUXILIARY_FILE)); 
+		doReturn(fp)
+			.when(failedProcessingRepo)
+			.findById(123);
 
-		doReturn(fp).when(failedProcessingRepo).findById(123);
-
-		requestRepository.restartAndDeleteFailedProcessing(123);
+		uut.restartAndDeleteFailedProcessing(123);
+		
 		verify(failedProcessingRepo, times(1)).findById(123);
 		verify(failedProcessingRepo, times(1)).deleteById(123);
-		verify(submissionClient, times(1)).resubmit(fp, dto);
+		verify(submissionClient, times(1)).resubmit(fp, fp.getDto());
 	}
 
-	@Test
-	public void restartAndDeleteFailedProcessing_ExistingWithoutTopic() {
-		GenericMessageDto<?> levelProductsMsgDto = new GenericMessageDto<>();
-		FailedProcessing fpDto = new FailedProcessing();
-		fpDto.setId(456);
-		fpDto.setDto(levelProductsMsgDto);
+	@Test(expected = RuntimeException.class)
+	public void testRestartAndDeleteFailedProcessing_OnTopicNull_ShallThrowException() {		
+		final FailedProcessing fp = newFailedProcessing(456, new ProductDto("f","b", ProductFamily.AUXILIARY_FILE));
+		fp.setTopic(null);
 
-		doReturn(fpDto).when(failedProcessingRepo).findById(456);
-
-		try {
-			requestRepository.restartAndDeleteFailedProcessing(456);
-			fail("IllegalArguemtException expected");
-		} catch (RuntimeException e) {
-			// Expected
-		}
-		verify(failedProcessingRepo, times(1)).findById(456);
-		verify(failedProcessingRepo, never()).deleteById(456);
-		verify(submissionClient, never()).resubmit(fpDto, levelProductsMsgDto.getBody());
+		doReturn(fp)
+			.when(failedProcessingRepo)
+			.findById(456);
+		
+		uut.restartAndDeleteFailedProcessing(456);
 	}
 
-	@Test
-	public void restartAndDeleteFailedProcessing_NotExisting() {
-		doReturn(null).when(failedProcessingRepo).findById(789);
+	@Test(expected = IllegalArgumentException.class)
+	public final void testRestartAndDeleteFailedProcessing_OnMissingRequest_ShallThrowException() {
+		doReturn(null)
+			.when(failedProcessingRepo)
+			.findById(789);
 
-		try {
-			requestRepository.restartAndDeleteFailedProcessing(789);
-			fail("IllegalArguemtException expected");
-		} catch (IllegalArgumentException e) {
-			// Expected
-		}
-		verify(failedProcessingRepo, times(1)).findById(789);
-		verify(failedProcessingRepo, never()).deleteById(789);
-		verify(submissionClient, never()).resubmit(any(), any());
+		uut.restartAndDeleteFailedProcessing(789);
+	}
+	
+	@Test
+	public final void testGetProcessingTypes_OnInvocation_ShallReturnProcessingTypes() {
+		assertEquals(RequestRepository.PROCESSING_TYPES_LIST, uut.getProcessingTypes());
+	}
+	
+	@Test
+	public final void testGetProcessingById_OnExistingId_ShallReturnElement()
+	{
+		doReturn(newMqiMessage(123))
+			.when(mqiMessageRepository)
+			.findByIdentifier(123);
+		
+		final Processing actual = uut.getProcessing(123);
+		assertNotNull(actual);
+		assertEquals(123, actual.getIdentifier());
+	}
+	
+	@Test
+	public final void testGetProcessingById_OnNonExistingId_ShallReturnNull()
+	{
+		doReturn(null)
+			.when(mqiMessageRepository)
+			.findByIdentifier(123);
+		
+		assertNull(uut.getProcessing(123));
+	}
+	
+	@Test
+	public final void testGetProcessings_OnNoFilterAndNoPaging_ShallReturnAllResults()
+	{
+		doReturn(Arrays.asList(newMqiMessage(1),newMqiMessage(2),newMqiMessage(3),newMqiMessage(4)))
+			.when(mqiMessageRepository)
+			.findByStateInAndTopicInOrderByCreationDate(
+					Mockito.eq(RequestRepository.PROCESSING_STATE_LIST), 
+					Mockito.eq(RequestRepository.PROCESSING_TYPES_LIST)
+			);
+		
+		final List<Processing> actual = uut.getProcessings(null, 0, Collections.emptyList(), Collections.emptyList());
+		assertEquals(4, actual.size());		
+	}
+	
+	@Test
+	public final void testGetProcessings_OnStateFilterAndNoPaging_ShallReturnResultsWithSameState()
+	{
+		doReturn(Arrays.asList(newMqiMessage(1),newMqiMessage(2),newMqiMessage(3),newMqiMessage(4)))
+			.when(mqiMessageRepository)
+			.findByStateInAndTopicInOrderByCreationDate(Mockito.any(),Mockito.any());
+		
+		final List<Processing> actual = uut.getProcessings(null, 0, Collections.emptyList(), Collections.singletonList(MessageState.READ));
+		assertEquals(4, actual.size());		
+	}
+	
+	@Test
+	public final void testGetProcessings_OnProcessingTypeFilterAndNoPaging_ShallReturnResultsWithSameProcessingType()
+	{
+		doReturn(Arrays.asList(newMqiMessage(1),newMqiMessage(2),newMqiMessage(3),newMqiMessage(4)))
+			.when(mqiMessageRepository)
+			.findByStateInAndTopicInOrderByCreationDate(Mockito.any(),Mockito.any());
+		
+		final List<Processing> actual = uut.getProcessings(null, 0, Collections.singletonList("t-pdgs-l0-segments"), Collections.emptyList());
+		assertEquals(4, actual.size());		
+	}
+	
+	@Test
+	public final void testGetProcessings_OnNoFilterAndPaging_ShallReturnResultsOfFirstPage()
+	{
+		doReturn(new PageImpl<>(Arrays.asList(newMqiMessage(1),newMqiMessage(2)), PageRequest.of(0,2), 2))
+			.when(mqiMessageRepository)
+			.findByStateInAndTopicIn(Mockito.any(),Mockito.any(), Mockito.any());
+		
+		final List<Processing> actual = uut.getProcessings(2, 0, Collections.emptyList(), Collections.emptyList());
+		assertEquals(2, actual.size());		
+	}
+	
+	@Test
+	public final void testGetProcessings_OnRepoReturningNull_ShallReturnEmptyCollection()
+	{
+		doReturn(null)
+			.when(mqiMessageRepository)
+			.findByStateInAndTopicInOrderByCreationDate(Mockito.any(),Mockito.any());
+		
+		final List<Processing> actual = uut.getProcessings(null, 0, Collections.emptyList(), Collections.emptyList());
+		assertEquals(0, actual.size());	
+	}
+	
+	
+	
+	
+	
+	private final FailedProcessingDto newFailedProcessingDto(long id) {
+		final GenericMessageDto<?> mess = new GenericMessageDto<>();
+		mess.setIdentifier(id);
+		
+		final FailedProcessingDto fpDto = new FailedProcessingDto();
+		fpDto.setProcessingDetails(mess);
+		fpDto.setFailureMessage("expected error");
+		return fpDto;
+	}
+	
+	private final FailedProcessing newFailedProcessing(final long id) {
+		return newFailedProcessing(id, new ProductDto());
+	}
+	
+	private final FailedProcessing newFailedProcessing(final long id, final AbstractDto mess) {
+		final FailedProcessing fpDto = new FailedProcessing();
+		fpDto.setId(123);
+		fpDto.setDto(mess);
+		fpDto.setTopic("myTopic");
+		return fpDto;
+	}
+	
+	private final MqiMessage newMqiMessage(final long id) {
+		return newMqiMessage(id, MessageState.READ);
+	}
+	
+	private final MqiMessage newMqiMessage(final long id, final MessageState state) {
+		final MqiMessage mqiMsg = new MqiMessage();
+		mqiMsg.setIdentifier(id);
+		mqiMsg.setCreationDate(new Date());
+		mqiMsg.setState(state);
+		mqiMsg.setTopic("t-pdgs-l0-segments");
+		return mqiMsg;
 	}
 }
