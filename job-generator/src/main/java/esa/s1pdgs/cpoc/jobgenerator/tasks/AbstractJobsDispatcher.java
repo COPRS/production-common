@@ -180,6 +180,10 @@ public abstract class AbstractJobsDispatcher<T> {
     	
         try {
             List<String> taskTables = getTaskTables(job);
+            if (taskTables.isEmpty())
+            {
+             LOGGER.info("Nothing to do as no TaskTables found for {}.",productName);
+            }
             List<String> notDealTaskTables = new ArrayList<>(taskTables);
             List<AppDataJobGenerationDto> jobGens = job.getGenerations();
 

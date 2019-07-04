@@ -149,8 +149,8 @@ public class L2AppJobDispatcher
             }
         });
         if (taskTables.isEmpty()) {
-            throw new JobGenMissingRoutingEntryException(
-                    String.format("No found routing entries for %s", key));
+//            throw new JobGenMissingRoutingEntryException(
+//                    String.format("No found routing entries for %s", key));
         }
         return taskTables;
     }
