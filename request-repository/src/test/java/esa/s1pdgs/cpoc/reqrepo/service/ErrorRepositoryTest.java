@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Sort;
 
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
@@ -28,8 +29,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
-import esa.s1pdgs.cpoc.reqrepo.service.ErrorRepository;
-import esa.s1pdgs.cpoc.reqrepo.service.ErrorRepositoryImpl;
 
 public class ErrorRepositoryTest {
 
@@ -42,28 +41,29 @@ public class ErrorRepositoryTest {
 	@Mock
 	private SubmissionClient submissionClient;
 
-	private ErrorRepository errorRepository;
+	private RequestRepository requestRepository;
 
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		this.errorRepository = new ErrorRepositoryImpl(mqiMessageRepository, failedProcessingRepo, submissionClient);
+		this.requestRepository = new RequestRepositoryImpl(mqiMessageRepository, failedProcessingRepo, submissionClient);
 	}
 
 	@Test
 	public void getFailedProcessings() {
-
 		List<FailedProcessing> failedProcessingsToReturn = new ArrayList<>();
-
+		
 		GenericMessageDto<?> levelProductsMsgDto = new GenericMessageDto<>();
 		FailedProcessing fpDto = new FailedProcessing();
 		fpDto.setId(123);
 		fpDto.setDto(levelProductsMsgDto);
 		failedProcessingsToReturn.add(fpDto);
 
-		doReturn(failedProcessingsToReturn).when(failedProcessingRepo).findAll();
+		doReturn(failedProcessingsToReturn)
+			.when(failedProcessingRepo)
+			.findAll(Mockito.any(Sort.class));
 
-		List<FailedProcessing> failedProcessings = errorRepository.getFailedProcessings();
+		List<FailedProcessing> failedProcessings = requestRepository.getFailedProcessings();
 
 		assertEquals(123, failedProcessings.get(0).getId());
 		assertTrue(failedProcessings.get(0).getDto() instanceof GenericMessageDto);
@@ -77,9 +77,9 @@ public class ErrorRepositoryTest {
 		fpDtoToReturn.setId(123);
 		fpDtoToReturn.setDto(levelProductsMsgDto);
 
-		doReturn(fpDtoToReturn).when(failedProcessingRepo).findByIdentifier(123);
+		doReturn(fpDtoToReturn).when(failedProcessingRepo).findById(123);
 
-		FailedProcessing failedProcessing = errorRepository.getFailedProcessingById(123);
+		FailedProcessing failedProcessing = requestRepository.getFailedProcessingById(123);
 
 		assertEquals(123, failedProcessing.getId());
 		assertTrue(failedProcessing.getDto() instanceof GenericMessageDto<?>);
@@ -87,9 +87,9 @@ public class ErrorRepositoryTest {
 
 	@Test
 	public void getFailedProcessingById_NotExisting() {
-		doReturn(null).when(failedProcessingRepo).findByIdentifier(456);
+		doReturn(null).when(failedProcessingRepo).findById(456);
 		try {
-			errorRepository.getFailedProcessingById(456);
+			requestRepository.getFailedProcessingById(456);
 			fail("IllegalArguementException expected");
 		} catch (IllegalArgumentException e) {
 			// Expected
@@ -104,23 +104,23 @@ public class ErrorRepositoryTest {
 		fpDto.setId(123);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(123);
+		doReturn(fpDto).when(failedProcessingRepo).findById(123);
 
-		errorRepository.deleteFailedProcessing(123);
+		requestRepository.deleteFailedProcessing(123);
 
-		verify(failedProcessingRepo).deleteByIdentifier(123L);
+		verify(failedProcessingRepo).deleteById(123L);
 	}
 
 	@Test
 	public void deleteFailedProcessing_NotExisting() {
-		doReturn(null).when(failedProcessingRepo).findByIdentifier(456);
+		doReturn(null).when(failedProcessingRepo).findById(456);
 		
 		try {
-			errorRepository.deleteFailedProcessing(456);
+			requestRepository.deleteFailedProcessing(456);
 			fail("IllegalArgumentException expected");
 		} catch (IllegalArgumentException e) {
 			// expected
-			verify(failedProcessingRepo, never()).deleteByIdentifier(123L);
+			verify(failedProcessingRepo, never()).deleteById(123L);
 		}
 	}
 
@@ -137,7 +137,7 @@ public class ErrorRepositoryTest {
 
 		doReturn(mqiMsg).when(mqiMessageRepository).findByIdentifier(456);
 
-		errorRepository.saveFailedProcessing(fpDto);
+		requestRepository.saveFailedProcessing(fpDto);
 		verify(mqiMessageRepository, times(1)).findByIdentifier(456);
 		verify(failedProcessingRepo, times(1)).save(Mockito.any());
 	}
@@ -150,10 +150,10 @@ public class ErrorRepositoryTest {
 		FailedProcessingDto fpDto = new FailedProcessingDto();
 		fpDto.setProcessingDetails(levelProductsMsgDto);
 
-		doReturn(null).when(failedProcessingRepo).findByIdentifier(123);
+		doReturn(null).when(failedProcessingRepo).findById(123);
 
 		try {
-			errorRepository.saveFailedProcessing(fpDto);
+			requestRepository.saveFailedProcessing(fpDto);
 			fail("IllegalArgumentException expected");
 		} catch (IllegalArgumentException e) {
 			// expected
@@ -177,11 +177,11 @@ public class ErrorRepositoryTest {
 				new FailedProcessingDto("localHost", new Date(), "Expected", levelProductsMsgDto)
 		);
 
-		doReturn(fp).when(failedProcessingRepo).findByIdentifier(123);
+		doReturn(fp).when(failedProcessingRepo).findById(123);
 
-		errorRepository.restartAndDeleteFailedProcessing(123);
-		verify(failedProcessingRepo, times(1)).findByIdentifier(123);
-		verify(failedProcessingRepo, times(1)).deleteByIdentifier(123);
+		requestRepository.restartAndDeleteFailedProcessing(123);
+		verify(failedProcessingRepo, times(1)).findById(123);
+		verify(failedProcessingRepo, times(1)).deleteById(123);
 		verify(submissionClient, times(1)).resubmit(fp, dto);
 	}
 
@@ -192,31 +192,31 @@ public class ErrorRepositoryTest {
 		fpDto.setId(456);
 		fpDto.setDto(levelProductsMsgDto);
 
-		doReturn(fpDto).when(failedProcessingRepo).findByIdentifier(456);
+		doReturn(fpDto).when(failedProcessingRepo).findById(456);
 
 		try {
-			errorRepository.restartAndDeleteFailedProcessing(456);
+			requestRepository.restartAndDeleteFailedProcessing(456);
 			fail("IllegalArguemtException expected");
-		} catch (IllegalArgumentException e) {
+		} catch (RuntimeException e) {
 			// Expected
 		}
-		verify(failedProcessingRepo, times(1)).findByIdentifier(456);
-		verify(failedProcessingRepo, never()).deleteByIdentifier(456);
+		verify(failedProcessingRepo, times(1)).findById(456);
+		verify(failedProcessingRepo, never()).deleteById(456);
 		verify(submissionClient, never()).resubmit(fpDto, levelProductsMsgDto.getBody());
 	}
 
 	@Test
 	public void restartAndDeleteFailedProcessing_NotExisting() {
-		doReturn(null).when(failedProcessingRepo).findByIdentifier(789);
+		doReturn(null).when(failedProcessingRepo).findById(789);
 
 		try {
-			errorRepository.restartAndDeleteFailedProcessing(789);
+			requestRepository.restartAndDeleteFailedProcessing(789);
 			fail("IllegalArguemtException expected");
 		} catch (IllegalArgumentException e) {
 			// Expected
 		}
-		verify(failedProcessingRepo, times(1)).findByIdentifier(789);
-		verify(failedProcessingRepo, never()).deleteByIdentifier(789);
+		verify(failedProcessingRepo, times(1)).findById(789);
+		verify(failedProcessingRepo, never()).deleteById(789);
 		verify(submissionClient, never()).resubmit(any(), any());
 	}
 }

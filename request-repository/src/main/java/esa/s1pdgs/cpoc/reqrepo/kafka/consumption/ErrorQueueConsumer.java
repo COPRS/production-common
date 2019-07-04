@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.reqrepo.service.ErrorRepository;
+import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
 @Controller
 public class ErrorQueueConsumer {
@@ -20,16 +20,16 @@ public class ErrorQueueConsumer {
     private static final Logger LOGGER =
             LogManager.getLogger(ErrorQueueConsumer.class);
 
-    private final ErrorRepository errorRepository; 
+    private final RequestRepository requestRepository; 
 	
-    public ErrorQueueConsumer(@Autowired final ErrorRepository errorRepository) {
-		this.errorRepository = errorRepository;
+    public ErrorQueueConsumer(@Autowired final RequestRepository requestRepository) {
+		this.requestRepository = requestRepository;
 	}
     
 	@KafkaListener(topics = "${kafka.topic.errors}", groupId = "${kafka.group-id}")
 	public void receive(FailedProcessingDto failedProcessing, final Acknowledgment acknowledgment) {
 		try {
-			errorRepository.saveFailedProcessing(failedProcessing);		
+			requestRepository.saveFailedProcessing(failedProcessing);		
 	    	acknowledgment.acknowledge();
 	    } catch (Exception e) {
 	    	LOGGER.error("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());

@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -31,14 +32,13 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
-import esa.s1pdgs.cpoc.reqrepo.rest.FailedRequestController;
-import esa.s1pdgs.cpoc.reqrepo.service.ErrorRepository;
+import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(FailedRequestController.class)
-public class ErrorRepositoryControllerTest {
+@WebMvcTest(RequestRepositoryController.class)
+public class RequestRepositoryControllerTest {
 	
-	private static final String API_KEY = FailedRequestController.API_KEY;
+	private static final String API_KEY = RequestRepositoryController.API_KEY;
 
 	@MockBean
 	private MqiMessageRepo mqiMessageRepository;
@@ -50,7 +50,7 @@ public class ErrorRepositoryControllerTest {
 	private SubmissionClient submissionClient;
 	
 	@MockBean
-	private ErrorRepository errorRepository;
+	private RequestRepository requestRepository;
 	
 	@Autowired
 	private MockMvc uut;
@@ -87,12 +87,9 @@ public class ErrorRepositoryControllerTest {
 
 	@Test
 	public void test_getFailedProcessings_200() throws Exception {
-		List<FailedProcessing> failedProcessingsToReturn = new ArrayList<>();
-
-		final FailedProcessing failedProcessing = newFailedProcessing();		
-		failedProcessingsToReturn.add(failedProcessing);
-
-		doReturn(failedProcessingsToReturn).when(errorRepository).getFailedProcessings();
+		doReturn(Collections.singletonList(newFailedProcessing()))
+			.when(requestRepository)
+			.getFailedProcessings();
 
 		String jsonContent = "[{\n" + 
 				"    \"id\": 1001,\n" +
@@ -117,7 +114,9 @@ public class ErrorRepositoryControllerTest {
 		uut.perform(get("/api/v1/failedProcessings")
 			      .contentType(MediaType.APPLICATION_JSON)
 			      .header("ApiKey", API_KEY)
-        ).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andExpect(content().json(jsonContent));
+        ).andExpect(status().isOk())
+		.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+		.andExpect(content().json(jsonContent));
 	}
 	
 	@Test
@@ -128,7 +127,7 @@ public class ErrorRepositoryControllerTest {
 
 	@Test
 	public void test_getFailedProcessings_500() throws Exception {
-	    doThrow(new RuntimeException()).when(errorRepository).getFailedProcessings();
+	    doThrow(new RuntimeException()).when(requestRepository).getFailedProcessings();
 	    uut.perform(get("/api/v1/failedProcessings").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isInternalServerError());
 	}
@@ -138,7 +137,7 @@ public class ErrorRepositoryControllerTest {
 
 		final FailedProcessing failedProcessing = newFailedProcessing();		
 
-		doReturn(failedProcessing).when(errorRepository).getFailedProcessingById(Mockito.anyLong());
+		doReturn(failedProcessing).when(requestRepository).getFailedProcessingById(Mockito.anyLong());
 		
 		String jsonContent = "{\n" + 
 				"    \"id\": 1001,\n" +
@@ -180,14 +179,14 @@ public class ErrorRepositoryControllerTest {
 
 	@Test
 	public void test_getFailedProcessingById_404() throws Exception {
-		doReturn(null).when(errorRepository).getFailedProcessingById(Mockito.anyLong());
+		doReturn(null).when(requestRepository).getFailedProcessingById(Mockito.anyLong());
 	    uut.perform(get("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void test_getFailedProcessingById_500() throws Exception {
-	    doThrow(new RuntimeException()).when(errorRepository).getFailedProcessingById(1);
+	    doThrow(new RuntimeException()).when(requestRepository).getFailedProcessingById(1);
 	    uut.perform(get("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 	        API_KEY)).andExpect(status().isInternalServerError());
 	}
@@ -215,7 +214,7 @@ public class ErrorRepositoryControllerTest {
 	@Test
 	public void test_deleteFailedProcessing_404() throws Exception {
 
-		doThrow(new IllegalArgumentException()).when(errorRepository).deleteFailedProcessing(1);
+		doThrow(new IllegalArgumentException()).when(requestRepository).deleteFailedProcessing(1);
 
 		uut.perform(
 				delete("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
@@ -225,7 +224,7 @@ public class ErrorRepositoryControllerTest {
 	@Test
 	public void test_deleteFailedProcessing_500() throws Exception {
 
-		doThrow(new RuntimeException()).when(errorRepository).deleteFailedProcessing(1);
+		doThrow(new RuntimeException()).when(requestRepository).deleteFailedProcessing(1);
 
 		uut.perform(
 				delete("/api/v1/failedProcessings/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey", API_KEY))
@@ -255,7 +254,7 @@ public class ErrorRepositoryControllerTest {
 	@Test
 	public void test_restartAndDeleteFailedProcessing_404() throws Exception {
 
-		doThrow(new IllegalArgumentException()).when(errorRepository).restartAndDeleteFailedProcessing(1);
+		doThrow(new IllegalArgumentException()).when(requestRepository).restartAndDeleteFailedProcessing(1);
 		uut.perform(post("/api/v1/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isNotFound());
 	}
@@ -263,7 +262,7 @@ public class ErrorRepositoryControllerTest {
 	@Test
 	public void test_restartAndDeleteFailedProcessing_500() throws Exception {
 
-		doThrow(new RuntimeException()).when(errorRepository).restartAndDeleteFailedProcessing(1);
+		doThrow(new RuntimeException()).when(requestRepository).restartAndDeleteFailedProcessing(1);
 		uut.perform(post("/api/v1/failedProcessings/1/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isInternalServerError());
 	}

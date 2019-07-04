@@ -39,8 +39,9 @@ public class MongoConfiguration {
     
     @Value("${mongodb.database}")
     private String mongoDBDatabase;
-    
-    public @Bean MongoClient mongoClient() {
+
+    @Bean
+    public MongoClient mongoClient() {
         LOGGER.info("New constructor");
         List<ServerAddress> servers = new ArrayList<>();
         mongoDBHost.forEach(host -> {
@@ -49,8 +50,8 @@ public class MongoConfiguration {
         return new MongoClient(servers);
     }
 
-    public @Bean MongoTemplate mongoTemplate() {
+    @Bean
+    public MongoTemplate mongoTemplate() {
         return new MongoTemplate(mongoClient(), mongoDBDatabase);
     }  
-
 }
