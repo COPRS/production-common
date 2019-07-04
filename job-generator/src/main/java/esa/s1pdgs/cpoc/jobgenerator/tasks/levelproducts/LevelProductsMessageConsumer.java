@@ -201,6 +201,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
     	return this.taskForFunctionalLog;
     }
     
+    @Override
     public void setTaskForFunctionalLog(String taskForFunctionalLog) {
     	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
