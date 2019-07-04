@@ -54,6 +54,8 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 @Service
 public class EsServices {
 
+	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
+
 	private static final String PRODUCT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
 
 	/**
@@ -170,7 +172,7 @@ public class EsServices {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("productType.keyword", productType));
 		}
 		// Instrument configuration id
-		if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
+		if (instrumentConfId != -1 && productType.toLowerCase().matches(REQUIRED_INSTRUMENT_ID_PATTERN)) {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId));
 		}
 		// Process mode
@@ -325,7 +327,7 @@ public class EsServices {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("productType.keyword", productType));
 		}
 		// Instrument configuration id
-		if (instrumentConfId != -1 && !productType.toLowerCase().startsWith("aux_res")) {
+		if (instrumentConfId != -1 && productType.toLowerCase().matches(REQUIRED_INSTRUMENT_ID_PATTERN)) {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId));
 		}
 		// Process mode
