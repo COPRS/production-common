@@ -154,10 +154,6 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
                 }
             }
         });
-        if (taskTables.isEmpty()) {
-            throw new JobGenMissingRoutingEntryException(
-                    String.format("No found routing entries for %s", key));
-        }
         return taskTables;
     }
 
