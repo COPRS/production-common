@@ -179,8 +179,10 @@ public class EsServices {
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		}
+		LOGGER.debug("query composed is {}", queryBuilder);
+		
 		sourceBuilder.query(queryBuilder);
-
+		
 		String index = null;
 		if (ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
 			index = productType.toLowerCase();
@@ -334,6 +336,8 @@ public class EsServices {
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		}
+		LOGGER.debug("query composed is {}", queryBuilder);
+		
 		sourceBuilder.query(queryBuilder);
 
 		String index = null;
@@ -345,7 +349,7 @@ public class EsServices {
 		sourceBuilder.size(1);
 		sourceBuilder.sort(sortOrder);
 
-		LOGGER.debug("query composed is {}", queryBuilder);
+		
 
 		final SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.types(indexType);
