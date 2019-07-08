@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.reqrepo.rest;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -150,6 +151,11 @@ public class RequestRepositoryController {
 	
 	static final List<MessageState> toMessageStates(final List<String> processingStatus)
 	{
+		if (processingStatus == null)
+		{
+			return Collections.emptyList();
+		}
+		
 		try {
 			return processingStatus.stream()
 					.map(s -> MessageState.valueOf(s))
