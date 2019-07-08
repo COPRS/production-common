@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobInvalidStateException;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -47,8 +48,13 @@ public class JobConverter {
         jobDto.setState(convertJobStateFromDbToDto(jobDb.getState()));
         jobDto.setCreationDate(jobDb.getCreationDate());
         jobDto.setLastUpdateDate(jobDb.getLastUpdateDate());
-        for (Object jobMsgDb : jobDb.getMessages()) {
-            jobDto.getMessages().add((GenericMessageDto<?>) jobMsgDb);
+        for (Object jobMsgDb : jobDb.getMessages()) {        	
+        	
+        	@SuppressWarnings("unchecked")
+			final GenericMessageDto<? extends AbstractDto> mess = 
+        			(GenericMessageDto<? extends AbstractDto>) jobMsgDb;
+            	
+            jobDto.getMessages().add(mess);
         }
         for (AppDataJobGeneration jobGenDb : jobDb.getGenerations()) {
             jobDto.getGenerations()
