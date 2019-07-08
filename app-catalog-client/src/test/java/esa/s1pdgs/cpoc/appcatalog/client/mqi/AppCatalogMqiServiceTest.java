@@ -770,7 +770,7 @@ public class AppCatalogMqiServiceTest {
                 .toUri();
 
         final List<AppCatMessageDto<? extends AbstractDto>> result = service.next(ProductCategory.LEVEL_PRODUCTS, "pod-name");
-        //assertEquals(message, result);
+        assertEquals(messages, result);
         verify(restTemplate, times(2)).exchange(
         		Mockito.eq(expectedUri),
                 Mockito.eq(HttpMethod.GET), 
