@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -124,13 +126,15 @@ public class GenericMqiClient {
             final String uri = nextUri(category);
             try {
             	final Class<T> clazz = category.getDtoClass();
-            	
-                @SuppressWarnings("unchecked")
-				final ResponseEntity<GenericMessageDto<T>> response = (ResponseEntity<GenericMessageDto<T>>) restTemplate.exchange(
+            	final ResolvableType type = ResolvableType.forClassWithGenerics(
+            			GenericMessageDto.class, 
+            			clazz
+            	);   
+				final ResponseEntity<GenericMessageDto<T>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.GET, 
                 		null, 
-                		clazz
+                		ParameterizedTypeReference.forType(type.getType())
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return response.getBody();

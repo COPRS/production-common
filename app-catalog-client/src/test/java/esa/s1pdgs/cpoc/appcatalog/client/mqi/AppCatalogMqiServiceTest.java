@@ -15,6 +15,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,6 +25,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -42,6 +45,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetNbReadingApiErro
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
@@ -73,6 +77,7 @@ public class AppCatalogMqiServiceTest {
      * DTO
      */
     private AppCatMessageDto<ProductDto> message;
+    private List<AppCatMessageDto<ProductDto>> messages;
     private AppCatReadMessageDto<ProductDto> readMessage;
     private AppCatSendMessageDto sendMessage;
     private ProductDto dto =
@@ -87,6 +92,7 @@ public class AppCatalogMqiServiceTest {
 
         service = new AppCatalogMqiService(restTemplate, "uri", 2, 500);
         message = new AppCatMessageDto<>(ProductCategory.LEVEL_PRODUCTS, 1234, "topic", 2, 9876);
+        messages = Collections.singletonList(message);
         readMessage = new AppCatReadMessageDto<ProductDto>("group","pod", false, dto);
         sendMessage = new AppCatSendMessageDto("pod", true);
     }
@@ -738,4 +744,98 @@ public class AppCatalogMqiServiceTest {
                 Mockito.eq(Integer.class));
         verifyNoMoreInteractions(restTemplate);
     }
+    
+    /**
+     * Test next when the first time fails and the second works
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testNext1() throws AbstractCodedException {
+    	
+        doReturn(new ResponseEntity<List<AppCatMessageDto<ProductDto>>>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<List<AppCatMessageDto<ProductDto>>>(messages, HttpStatus.OK))
+        	.when(restTemplate).exchange(
+        			Mockito.any(URI.class),
+                    Mockito.any(HttpMethod.class), 
+                    Mockito.isNull(),
+                    Mockito.any(ParameterizedTypeReference.class)
+            );
+        
+        final URI expectedUri = UriComponentsBuilder
+                .fromUriString("uri/mqi/level_products/next")
+                .queryParam("pod", "pod-name")
+                .build()
+                .toUri();
+
+        final List<AppCatMessageDto<? extends AbstractDto>> result = service.next(ProductCategory.LEVEL_PRODUCTS, "pod-name");
+        assertEquals(message, result);
+        verify(restTemplate, times(2)).exchange(
+        		Mockito.eq(expectedUri),
+                Mockito.eq(HttpMethod.GET), 
+                Mockito.eq(null), 
+                Mockito.eq(AppCatalogMqiService.forCategory(ProductCategory.LEVEL_PRODUCTS))
+        );
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test next when the first time works
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testNext2() throws AbstractCodedException {
+        doReturn(new ResponseEntity<List<MqiLevelProductMessageDto>>(messages2,
+                HttpStatus.OK)).when(restTemplate).exchange(
+                        Mockito.any(URI.class), Mockito.any(HttpMethod.class),
+                        Mockito.isNull(),
+                        Mockito.any(ParameterizedTypeReference.class));
+
+        String uriStr = "uri/mqi/level_products/next";
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uriStr).queryParam("pod", "pod-name");
+        URI expectedUri = builder.build().toUri();
+
+        List<MqiGenericMessageDto<ProductDto>> result =
+                service.next("pod-name");
+        assertEquals(messages, result);
+        verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null), Mockito.eq(
+                        new ParameterizedTypeReference<List<MqiLevelProductMessageDto>>() {
+                        }));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
+    /**
+     * Test next when the server returns an empty body
+     * 
+     * @throws AbstractCodedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testNextEmptyBody() throws AbstractCodedException {
+        doReturn(new ResponseEntity<List<MqiLevelProductMessageDto>>(
+                HttpStatus.OK)).when(restTemplate).exchange(
+                        Mockito.any(URI.class), Mockito.any(HttpMethod.class),
+                        Mockito.isNull(),
+                        Mockito.any(ParameterizedTypeReference.class));
+
+        String uriStr = "uri/mqi/level_products/next";
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uriStr).queryParam("pod", "pod-name");
+        URI expectedUri = builder.build().toUri();
+
+        List<MqiGenericMessageDto<ProductDto>> result =
+                service.next("pod-name");
+        assertEquals(0, result.size());
+        verify(restTemplate, times(1)).exchange(Mockito.eq(expectedUri),
+                Mockito.eq(HttpMethod.GET), Mockito.eq(null), Mockito.eq(
+                        new ParameterizedTypeReference<List<MqiLevelProductMessageDto>>() {
+                        }));
+        verifyNoMoreInteractions(restTemplate);
+    }
+
 }

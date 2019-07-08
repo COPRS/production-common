@@ -79,6 +79,20 @@ public class AppCatalogMqiService {
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
     }
+    
+    static final <T> ParameterizedTypeReference<T> forCategory(final ProductCategory category)
+    {
+    	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
+    			AppCatMessageDto.class, 
+    			category.getDtoClass()
+    	);   
+    	
+    	final ResolvableType type = ResolvableType.forClassWithGenerics(
+    			List.class, 
+    			appCatMessageType
+    	);   
+    	return ParameterizedTypeReference.forType(type.getType());
+    }
 
     /**
      * @return the hostUri
@@ -371,19 +385,6 @@ public class AppCatalogMqiService {
             }
         }
     }
-   
-
-//	public <T extends AbstractDto> List<AppCatMessageDto<T>> makeRequest(URI uri, Class<T> clazz) {		
-//		final ResolvableType type = ResolvableType.forClassWithGenerics(List.class, AppCatMessageDto.class, clazz);
-//			
-//		final ResponseEntity<List<AppCatMessageDto<T>>> response = restTemplate.exchange(
-//	        uri,
-//	        HttpMethod.GET,
-//	        null,
-//	        ParameterizedTypeReference.forType(type.getType())
-//	    );
-//	    return response;
-//	}
 
     public List<AppCatMessageDto<? extends AbstractDto>> next(final ProductCategory category, String podName)
             throws AbstractCodedException {
@@ -396,21 +397,13 @@ public class AppCatalogMqiService {
                     .fromUriString(uriStr).queryParam("pod", podName);
             URI uri = builder.build().toUri();
             try {
-            	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-            			AppCatMessageDto.class, 
-            			category.getDtoClass()
-            	);   
-            	
-            	final ResolvableType type = ResolvableType.forClassWithGenerics(
-            			List.class, 
-            			appCatMessageType
-            	);            	
+    	
                 final ResponseEntity<List<AppCatMessageDto<? extends AbstractDto>>> response =
                         restTemplate.exchange(
                         		uri, 
                         		HttpMethod.GET, 
                         		null, 
-                        		ParameterizedTypeReference.forType(type.getType())
+                        		forCategory(category)
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     List<AppCatMessageDto<? extends AbstractDto>> body = response.getBody();
