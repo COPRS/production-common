@@ -429,12 +429,4 @@ public class L1AppJobDispatcherTest {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
-
-    @Test(expected = AbstractCodedException.class)
-    public void testDispatchInvalid()
-            throws ParseException, AbstractCodedException {
-        AppDataJobDto jobA = buildAppDataJobDto("A", "ZZ");
-        this.dispatcher.initialize();
-        this.dispatcher.getTaskTables(jobA).size();
-    }
 }
