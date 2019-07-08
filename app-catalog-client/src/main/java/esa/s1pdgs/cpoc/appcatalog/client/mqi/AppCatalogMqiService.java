@@ -396,10 +396,14 @@ public class AppCatalogMqiService {
                     .fromUriString(uriStr).queryParam("pod", podName);
             URI uri = builder.build().toUri();
             try {
-            	final ResolvableType type = ResolvableType.forClassWithGenerics(
-            			List.class, 
+            	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
             			AppCatMessageDto.class, 
             			category.getDtoClass()
+            	);   
+            	
+            	final ResolvableType type = ResolvableType.forClassWithGenerics(
+            			List.class, 
+            			appCatMessageType
             	);            	
                 final ResponseEntity<List<AppCatMessageDto<? extends AbstractDto>>> response =
                         restTemplate.exchange(
