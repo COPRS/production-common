@@ -107,16 +107,7 @@ public class ProductDistributionController {
                     "[MONITOR] [category {}] [api next] Interrupted exception during waiting",
                     category);
         }
-        
-        //FIXME: For debugging
-        GenericMessageDto<? extends AbstractDto> msg = null;
-        try {
-        	msg = nextMessage(category);
-        	return msg;
-        } catch (Exception ex) {
-        	ex.printStackTrace();
-        }
-        return null;        
+        return nextMessage(category);
     }
 
     /**
