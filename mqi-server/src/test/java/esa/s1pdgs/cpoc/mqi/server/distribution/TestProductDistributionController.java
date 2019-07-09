@@ -14,6 +14,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -146,8 +149,10 @@ public class TestProductDistributionController {
 		    		ProductFamily.AUXILIARY_FILE,
 		    		dto
 		    );
+        	final ObjectMapper objMapper = new ObjectMapper();
+        	final JsonNode json = objMapper.convertValue(mess, JsonNode.class);		    
 		    
-		    controller.publish(mess, ProductCategory.AUXILIARY_FILES.name().toString());
+		    controller.publish(json, ProductCategory.AUXILIARY_FILES.name().toString());
 			fail();
 		} catch (ProductDistributionException e) {
 			// expected
@@ -179,8 +184,10 @@ public class TestProductDistributionController {
 		    		ProductFamily.AUXILIARY_FILE,
 		    		new ProductDto("test321", "bar", ProductFamily.AUXILIARY_FILE)
 		    );
+        	final ObjectMapper objMapper = new ObjectMapper();
+        	final JsonNode json = objMapper.convertValue(mess, JsonNode.class);	
 		    
-		    controller.publish(mess, ProductCategory.AUXILIARY_FILES.name().toString());
+		    controller.publish(json, ProductCategory.AUXILIARY_FILES.name().toString());
 			fail();
 		} catch (ProductDistributionException e) {
 			// expected
