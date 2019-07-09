@@ -73,7 +73,7 @@ public final class LoggerReporting implements Reporting  {
 	@Override
 	public final void reportDebug(String comment, final Object... objects)
 	{
-		report(Level.DEBUG, comment);	
+		report(Level.DEBUG, comment, objects);	
 	}
 	
 	@Override
