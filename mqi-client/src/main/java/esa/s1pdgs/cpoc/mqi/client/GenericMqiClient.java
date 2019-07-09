@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -207,7 +208,7 @@ public class GenericMqiClient {
      * @param message
      * @throws AbstractCodedException
      */
-    public void publish(final GenericPublicationMessageDto<?> message, final ProductCategory category)
+    public <E extends AbstractDto> void publish(final GenericPublicationMessageDto<E> message, final ProductCategory category)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -217,14 +218,17 @@ public class GenericMqiClient {
                     String.format("[uri %s] [body %s]", uri, message));
             try {
                 ResponseEntity<Void> response =
-                        restTemplate.exchange(uri, HttpMethod.POST,
-                                new HttpEntity<GenericPublicationMessageDto<?>>(message),
-                                Void.class);
+                        restTemplate.exchange(
+                        		uri, 
+                        		HttpMethod.POST,
+                                new HttpEntity<GenericPublicationMessageDto<E>>(message),
+                                Void.class
+                );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format(
                             "[uri %s] [body %s] [ret OK]", uri, message));
                     return;
-                } else {
+                } else {                	
                     waitOrThrow(retries,
                             new MqiPublishApiError(category, message,
                                     "HTTP status code "
@@ -232,6 +236,7 @@ public class GenericMqiClient {
                             "publish");
                 }
             } catch (RestClientException rce) {
+            	LOGGER.error(rce);
                 waitOrThrow(retries, new MqiPublishApiError(category, message,
                         "RestClientException occurred: " + rce.getMessage(),
                         rce), "publish");

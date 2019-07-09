@@ -920,9 +920,9 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         LOGGER.info("{} [productName {}] 3c - Publishing job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
-        
-        @SuppressWarnings("unchecked")
-		final AppDataJobDto<? extends AbstractDto> dto = job.getAppDataJob();
+
+		@SuppressWarnings("unchecked")
+		final AppDataJobDto<T> dto = job.getAppDataJob();
 
         this.outputFactory.sendJob(dto.getMessages().get(0), r);
     }
