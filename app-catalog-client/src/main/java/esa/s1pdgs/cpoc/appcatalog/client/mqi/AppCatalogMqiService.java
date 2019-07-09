@@ -80,20 +80,20 @@ public class AppCatalogMqiService {
         this.tempoRetryMs = tempoRetryMs;
     }
     
-    static final <T> ParameterizedTypeReference<T> forCategory(final ProductCategory category)
-    {
-    	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-    			AppCatMessageDto.class, 
-    			category.getDtoClass()
-    	);   
-    	
-    	final ResolvableType type = ResolvableType.forClassWithGenerics(
-    			List.class, 
-    			appCatMessageType
-    	);   
-    	return ParameterizedTypeReference.forType(type.getType());
-    }
-
+	static final <T> ParameterizedTypeReference<T> forCategory(final ProductCategory category)
+	{
+		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
+				AppCatMessageDto.class, 
+				category.getDtoClass()
+		);   
+		
+		final ResolvableType type = ResolvableType.forClassWithGenerics(
+				List.class, 
+				appCatMessageType
+		);   
+		return ParameterizedTypeReference.forType(type.getType());
+	}
+    
     /**
      * @return the hostUri
      */

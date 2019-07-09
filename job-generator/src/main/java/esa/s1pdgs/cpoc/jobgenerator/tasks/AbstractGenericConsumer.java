@@ -12,11 +12,12 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-public abstract class AbstractGenericConsumer<T> {
+public abstract class AbstractGenericConsumer<T extends AbstractDto> {
 
     protected static final Logger LOGGER =
             LogManager.getLogger(AbstractGenericConsumer.class);

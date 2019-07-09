@@ -57,6 +57,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0SegmentUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class L0SegmentAppJobsGeneratorTest {
 
@@ -95,7 +96,7 @@ public class L0SegmentAppJobsGeneratorTest {
     @Before
     public void init() throws Exception {
 
-        AppDataJobDto appDataJob =
+        AppDataJobDto<ProductDto> appDataJob =
                 TestL0SegmentUtils.buildAppData();
         job = new JobGeneration(appDataJob, "TaskTable.L0ASP.xml");
 
@@ -570,7 +571,7 @@ public class L0SegmentAppJobsGeneratorTest {
 
     @Test
     public void testCustomJobDto() {
-        AppDataJobDto appDataJob =
+        AppDataJobDto<ProductDto> appDataJob =
                 TestL0SegmentUtils.buildAppData();
         JobGeneration job =
                 new JobGeneration(appDataJob, "TaskTable.L0ASP.xml");
@@ -583,7 +584,7 @@ public class L0SegmentAppJobsGeneratorTest {
     @Test
     public void testCustomJobOrder() {
         JobOrder jobOrder = TestL0Utils.buildJobOrderL20171109175634707000125();
-        AppDataJobDto appDataJob =
+        AppDataJobDto<ProductDto> appDataJob =
                 TestL0SegmentUtils.buildAppData();
         appDataJob.getProduct().setSatelliteId("B");
         appDataJob.getProduct().setMissionId("S1");

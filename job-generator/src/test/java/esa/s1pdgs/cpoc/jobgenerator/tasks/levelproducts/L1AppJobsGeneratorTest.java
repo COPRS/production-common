@@ -59,6 +59,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class L1AppJobsGeneratorTest {
 
@@ -92,9 +93,9 @@ public class L1AppJobsGeneratorTest {
 
     private JobGeneration jobA;
 
-    private AppDataJobDto appDataJob;
+    private AppDataJobDto<ProductDto> appDataJob;
 
-    private AppDataJobDto appDataJobComplete;
+    private AppDataJobDto<ProductDto> appDataJobComplete;
 
     private LevelJobDto publishedJob;
 
@@ -326,15 +327,15 @@ public class L1AppJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto primaryCheckAppJob =
+        AppDataJobDto<ProductDto> primaryCheckAppJob =
                 TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto readyAppJob =
+        AppDataJobDto<ProductDto> readyAppJob =
                 TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto sentAppJob =
+        AppDataJobDto<ProductDto> sentAppJob =
                 TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);

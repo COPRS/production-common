@@ -37,10 +37,12 @@ public class JobConverter {
      * @throws AppCatalogJobInvalidStateException
      * @throws AppCatalogJobGenerationInvalidStateException
      */
-    public AppDataJobDto convertJobFromDbToDto(final AppDataJob jobDb, final ProductCategory category)
-            throws AppCatalogJobInvalidStateException,
-            AppCatalogJobGenerationInvalidStateException {
-        AppDataJobDto jobDto = new AppDataJobDto();
+    public <E extends AbstractDto> AppDataJobDto<E> convertJobFromDbToDto(
+    		final AppDataJob jobDb, 
+    		final ProductCategory category
+    )
+    	throws AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException {
+        AppDataJobDto<E> jobDto = new AppDataJobDto<E>();
         jobDto.setIdentifier(jobDb.getIdentifier());
         jobDto.setLevel(jobDb.getLevel());
         jobDto.setProduct(convertJobProductFromDbToDto(jobDb.getProduct()));
@@ -48,12 +50,9 @@ public class JobConverter {
         jobDto.setState(convertJobStateFromDbToDto(jobDb.getState()));
         jobDto.setCreationDate(jobDb.getCreationDate());
         jobDto.setLastUpdateDate(jobDb.getLastUpdateDate());
-        for (Object jobMsgDb : jobDb.getMessages()) {        	
-        	
+        for (Object jobMsgDb : jobDb.getMessages()) {
         	@SuppressWarnings("unchecked")
-			final GenericMessageDto<? extends AbstractDto> mess = 
-        			(GenericMessageDto<? extends AbstractDto>) jobMsgDb;
-            	
+			final GenericMessageDto<E> mess = (GenericMessageDto<E>) jobMsgDb;            	
             jobDto.getMessages().add(mess);
         }
         for (AppDataJobGeneration jobGenDb : jobDb.getGenerations()) {
@@ -71,7 +70,7 @@ public class JobConverter {
      * @throws AppCatalogJobInvalidStateException
      * @throws AppCatalogJobGenerationInvalidStateException
      */
-    public AppDataJob convertJobFromDtoToDb(final AppDataJobDto jobDto, final ProductCategory category)
+    public AppDataJob convertJobFromDtoToDb(final AppDataJobDto<?> jobDto, final ProductCategory category)
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         AppDataJob jobDb = new AppDataJob();

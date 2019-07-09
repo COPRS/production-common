@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -41,7 +42,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  * 
  * @param <T>
  */
-public abstract class AbstractJobsDispatcher<T> {
+public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
 
     /**
      * Logger
@@ -133,11 +134,11 @@ public abstract class AbstractJobsDispatcher<T> {
 
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            List<AppDataJobDto> generatingJobs = appDataService
+            List<AppDataJobDto<T>> generatingJobs = appDataService
                     .findByPodAndState(processSettings.getHostname(),
                             AppDataJobDtoState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
-                for (AppDataJobDto generation : generatingJobs) {
+                for (AppDataJobDto<T> generation : generatingJobs) {
                     // TODO ask if bypass error
                     dispatch(generation);
                 }
@@ -169,7 +170,7 @@ public abstract class AbstractJobsDispatcher<T> {
      * @param job
      * @throws AbstractCodedException
      */
-    public void dispatch(final AppDataJobDto job)
+    public void dispatch(final AppDataJobDto<T> job)
             throws AbstractCodedException {
         String productName = job.getProduct().getProductName();
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Dispatch")
@@ -239,7 +240,7 @@ public abstract class AbstractJobsDispatcher<T> {
     /**
      * Get task tables to generate for given job
      */
-    protected abstract List<String> getTaskTables(final AppDataJobDto job)
+    protected abstract List<String> getTaskTables(final AppDataJobDto<T> job)
             throws AbstractCodedException;
 
     protected abstract String getTaskForFunctionalLog();

@@ -183,7 +183,7 @@ public class JobController {
 
         // Create it
         return jobConverter
-                .convertJobFromDbToDto(appDataJobService.newJob(newJobDb),category);
+                .convertJobFromDbToDto(appDataJobService.newJob(newJobDb), category);
     }
 
     /**
