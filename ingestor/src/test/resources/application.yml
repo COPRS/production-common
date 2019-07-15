@@ -2,9 +2,10 @@ spring:
   application:
     name: s1pdgs-ingestor
     
-# Logging
+# Logging     
 logging:
-  config: ./src/test/resources/log4j2-test.yml
+  config: classpath:log4j2-test.yml
+ 
 
 # KAFKA
 kafka:

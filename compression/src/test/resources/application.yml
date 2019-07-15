@@ -2,7 +2,7 @@ spring:
   application:
     name: s1pdgs-compression
     
-# Logging
+# Logging     
 logging:
   config: classpath:log4j2-test.yml
   
