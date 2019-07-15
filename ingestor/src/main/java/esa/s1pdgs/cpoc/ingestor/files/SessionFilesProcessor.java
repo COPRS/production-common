@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ingestor.files;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -25,8 +26,9 @@ public class SessionFilesProcessor extends AbstractFileProcessor<EdrsSessionDto>
 	 */
 	@Autowired
 	public SessionFilesProcessor(final ObsService obsService, final KafkaSessionProducer publisher,
-			final EdrsSessionFileDescriptorService extractor,final AppStatus appStatus) {
-		super(obsService, publisher, extractor, ProductFamily.EDRS_SESSION, appStatus);
+			final EdrsSessionFileDescriptorService extractor,final AppStatus appStatus,
+			@Value("${file.backup-directory}") final String backupDirectory) {
+		super(obsService, publisher, extractor, ProductFamily.EDRS_SESSION, appStatus, backupDirectory);
 	}
 
 	/**

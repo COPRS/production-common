@@ -41,5 +41,5 @@ file:
     clean-empty-directory-rate: 10000
     clean-empty-min-age: 13000
     cache-max-capacity: 70
-
+  backup-directory: /data/local-ingestor/backup/
     

@@ -128,7 +128,7 @@ public class KafkaService {
             		continue;
             	}
                 long currentOffset = lastCommitedOffset.offset();
-                LOGGER.debug("topic partition {} current offset is {}",currentOffset);
+                LOGGER.debug("topic partition {} current offset is {}",tp,currentOffset);
                 
                 consumer.assign(Arrays.asList(tp));
                 consumer.seekToEnd(Arrays.asList(tp));

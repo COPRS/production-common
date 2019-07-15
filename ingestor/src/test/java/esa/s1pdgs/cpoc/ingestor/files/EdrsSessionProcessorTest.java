@@ -35,7 +35,6 @@ public class EdrsSessionProcessorTest {
     @Mock
     private EdrsSessionFileDescriptorService extractor;
     
-
     /**
      * Application status
      */
@@ -46,6 +45,11 @@ public class EdrsSessionProcessorTest {
      * Service to test
      */
     private SessionFilesProcessor service;
+    
+    /**
+     * 
+     */
+    private String backupDirectory = "/tmp";
 
     /**
      * Initialization
@@ -53,7 +57,7 @@ public class EdrsSessionProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new SessionFilesProcessor(obsService, publisher, extractor, appStatus);
+        service = new SessionFilesProcessor(obsService, publisher, extractor, appStatus, backupDirectory);
     }
 
     /**

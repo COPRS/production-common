@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,6 +79,13 @@ public class AbstractFileProcessorTest {
      * File test
      */
     private File file = new File("test.xml");
+    
+    /**
+     * 
+     */
+    private String BACKUPDIRECTORY = "/tmp";
+    
+    private File backupFile;
 
     /**
      * To check the raised custom exceptions
@@ -95,10 +103,12 @@ public class AbstractFileProcessorTest {
         MockitoAnnotations.initMocks(this);
 
         file.createNewFile();
+        
+        backupFile = Paths.get(BACKUPDIRECTORY, file.getName()).toFile();
 
         doReturn(file).when(message).getPayload();
 
-        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus);
+        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus, BACKUPDIRECTORY);
     }
 
     /**
@@ -108,6 +118,10 @@ public class AbstractFileProcessorTest {
     public void clean() {
         if (file.exists()) {
             file.delete();
+        }
+        
+        if (backupFile.exists()) {
+        	backupFile.delete();
         }
     }
 
@@ -122,6 +136,7 @@ public class AbstractFileProcessorTest {
         verifyZeroInteractions(publisher);
         verifyZeroInteractions(extractor);
         assertTrue(file.exists());
+        assertFalse(backupFile.exists());
     }
 
     /**
@@ -145,6 +160,7 @@ public class AbstractFileProcessorTest {
         verifyZeroInteractions(obsService);
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
+        assertTrue(backupFile.exists());
     }
 
     /**
@@ -168,6 +184,7 @@ public class AbstractFileProcessorTest {
         verifyZeroInteractions(obsService);
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
+        assertTrue(backupFile.exists());
     }
 
     @Test
@@ -185,6 +202,7 @@ public class AbstractFileProcessorTest {
                 Mockito.eq(desc.getKeyObjectStorage()));
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
+        assertTrue(backupFile.exists());
     }
 
     @Test
@@ -205,7 +223,8 @@ public class AbstractFileProcessorTest {
         verify(obsService, never()).uploadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.any());
         verifyZeroInteractions(publisher);
-        assertTrue(file.exists());
+        assertFalse(file.exists());
+        assertTrue(backupFile.exists());
     }
 
     @Test
@@ -229,7 +248,30 @@ public class AbstractFileProcessorTest {
         verify(obsService, times(1)).uploadFile(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()), Mockito.eq(file));
         verifyZeroInteractions(publisher);
+        assertFalse(file.exists());
+        assertTrue(backupFile.exists());
+    }
+    
+    @Test
+    public void testProcessWhenBackupError() throws IngestorFilePathException, IngestorIgnoredFileException, ObsException, IOException {
+        FileDescriptor desc = getFileDescriptor(true);
+        doReturn(desc).when(extractor).extractDescriptor(Mockito.any());
+
+        ObsException exc = new ObsException(ProductFamily.BLANK, "key-obs",
+                new Exception("cause"));
+        doThrow(exc).when(obsService).exist(Mockito.any(), Mockito.anyString());
+
+        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus, "/");
+        service.processFile(message);
+
+        verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
+        verify(obsService, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
+                Mockito.eq(desc.getKeyObjectStorage()));
+        verify(obsService, never()).uploadFile(Mockito.any(),
+                Mockito.anyString(), Mockito.any());
+        verifyZeroInteractions(publisher);
         assertTrue(file.exists());
+        assertFalse(backupFile.exists());
     }
 
     @Test
@@ -251,7 +293,9 @@ public class AbstractFileProcessorTest {
                 Mockito.eq(desc.getKeyObjectStorage()), Mockito.eq(file));
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
+        assertFalse(backupFile.exists());
     }
+    
 
     @Test
     public void testProcessWhenNeedPublication()
@@ -273,6 +317,7 @@ public class AbstractFileProcessorTest {
                 Mockito.eq(desc.getKeyObjectStorage()), Mockito.eq(file));
         verify(publisher, times(1)).send(Mockito.eq(desc.getProductName()));
         assertFalse(file.exists());
+        assertFalse(backupFile.exists());
     }
 
     private FileDescriptor getFileDescriptor(boolean published) {
@@ -302,8 +347,9 @@ class FileProcessorImpl extends AbstractFileProcessor<String> {
     public FileProcessorImpl(final ObsService obsService,
             final PublicationServices<String> publisher,
             final AbstractFileDescriptorService extractor,
-            final AppStatus appStatus) {
-        super(obsService, publisher, extractor, ProductFamily.BLANK, appStatus);
+            final AppStatus appStatus,
+            final String backupDirectory) {
+        super(obsService, publisher, extractor, ProductFamily.BLANK, appStatus, backupDirectory);
     }
 
     /**
