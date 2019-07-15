@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ingestor.files;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -54,17 +55,24 @@ public abstract class AbstractFileProcessor<T> {
      * Application status for archives
      */
     private final AppStatus appStatus;
+    
+    /**
+     * Backup Directory
+     */
+    private final String backupDirectory;
 
     public AbstractFileProcessor(final ObsService obsService,
             final PublicationServices<T> publisher,
             final AbstractFileDescriptorService extractor,
             final ProductFamily family,
-            final AppStatus appStatus) {
+            final AppStatus appStatus,
+            final String backupDirectory) {
         this.obsService = obsService;
         this.publisher = publisher;
         this.extractor = extractor;
         this.family = family;
         this.appStatus = appStatus;
+        this.backupDirectory = backupDirectory;
     }
 
     /**
@@ -87,57 +95,58 @@ public abstract class AbstractFileProcessor<T> {
     }
 
 	private final void handleFile(final File file) {
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Ingestion")
-        		.product(extractor.getFamily(), file.getName());
-        
-        final Reporting reportProcessing = reportingFactory.newReporting(0);        
-        reportProcessing.reportStart("Start processing of " + file.getName());
-        this.appStatus.setProcessing(family);
-		
-		try {			
-		    uploadAndPublish(reportingFactory, reportProcessing, file);
-		    delete(reportingFactory, file);
-		
-		// this is done to bypass product deletion on OBS upload errors. Don't know why, though
-		} catch (ObsException ace) {
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Ingestion")
+				.product(extractor.getFamily(), file.getName());
+
+		final Reporting reportProcessing = reportingFactory.newReporting(0);
+		reportProcessing.reportStart(String.format("Start processing of %s", file.getName()));
+		this.appStatus.setProcessing(family);
+
+		try {
+			uploadAndPublish(reportingFactory, reportProcessing, file);
+			delete(reportingFactory, file, 3);
+
+		} catch (AbstractCodedException ace) {
 			// is already logged
-		    this.appStatus.setError(family);
+			this.appStatus.setError(family);
+			try {
+				copyToBackupDirectory(reportingFactory, file);
+				delete(reportingFactory, file, 4);
+			} catch (IOException e) {
+				LOGGER.warn("failed to backup file {}, not deleted", file.getName());
+			}
 		}
-	   reportProcessing.reportStop("End processing of " + file.getName());
-       this.appStatus.setWaiting();
+		reportProcessing.reportStop(String.format("End processing of %s", file.getName()));
+		this.appStatus.setWaiting();
 	}
 
-	private final void uploadAndPublish(final Reporting.Factory reportingFactory,  final Reporting reportProcessing, final File file) throws ObsException {
+	private final void uploadAndPublish(final Reporting.Factory reportingFactory, final Reporting reportProcessing,
+			final File file) throws AbstractCodedException {
 		String productName = file.getName();
+		final Reporting reportUpload = reportingFactory.newReporting(1);
 		try {
-		    FileDescriptor descriptor = extractor.extractDescriptor(file);
-		    productName = descriptor.getProductName();
-		    reportingFactory.product(extractor.getFamily(), productName);
-		    
-		    final Reporting reportUpload = reportingFactory.newReporting(1);		    
-		    reportUpload.reportStart("Start uploading file " + file.getName() +" in OBS");
-		    		    
-		    // Store in object storage
-		    try {
-				upload(file, productName, descriptor);
-				reportUpload.reportStop("End uploading file " + file.getName() +" in OBS");
-			} catch (ObsAlreadyExist ace) {
-				reportUpload.reportError("file {} already exist in OBS", file.getName());
-				return;
-			} catch (ObsException e) {
-				reportUpload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
-				throw e;
-			}
-		    // Send metadata
-		    publish(reportingFactory, productName, descriptor);
-		    
-		} catch (IngestorIgnoredFileException ce) {
-			reportProcessing.reportDebug("[code {}] {}", ce.getCode().getCode(), ce.getLogMessage());
-		} catch (ObsException ace) {	
-			// this is done to bypass product deletion on OBS upload errors. Don't know why, though
-		    throw ace;
-		} catch (AbstractCodedException ace) {
-		    this.appStatus.setError(family);
+			FileDescriptor descriptor = extractor.extractDescriptor(file);
+			productName = descriptor.getProductName();
+			reportingFactory.product(extractor.getFamily(), productName);
+
+			reportUpload.reportStart("Start uploading file " + file.getName() + " in OBS");
+
+			// Store in object storage
+			upload(file, productName, descriptor);
+			reportUpload.reportStop("End uploading file " + file.getName() + " in OBS");
+
+			// Send metadata
+			publish(reportingFactory, productName, descriptor);
+
+		} catch (IngestorIgnoredFileException e) {
+			reportProcessing.reportDebug("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			throw e;
+		} catch (ObsAlreadyExist e) {
+			reportUpload.reportError("file {} already exist in OBS", file.getName());
+			throw e;
+		} catch (ObsException e) {
+			reportUpload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			throw e;
 		}
 	}
 
@@ -161,9 +170,23 @@ public abstract class AbstractFileProcessor<T> {
 			}
 		}
 	}
+	
 
-	private final void delete(final Reporting.Factory reportingFactory, final File file) {		
-		final Reporting reportDelete = reportingFactory.newReporting(3);	
+	private void copyToBackupDirectory(final Reporting.Factory reportingFactory, final File file) throws IOException {
+		final Reporting reportBackup = reportingFactory.newReporting(3);
+		reportBackup.reportStart(String.format("Start copying file %s to %s", file.getName(), backupDirectory));
+		try {
+			Files.copy(Paths.get(file.getPath()), Paths.get(backupDirectory, file.getName()));
+			reportBackup.reportStop(String.format("End copying file %s to %s", file.getName(), backupDirectory));
+		} catch (IOException e) {
+			reportBackup.reportError(
+					String.format("Error copying file %s to %s: %s", file.getName(), backupDirectory, e.getMessage()));
+			throw e;
+		}
+	}
+
+	private final void delete(final Reporting.Factory reportingFactory, final File file, int reportingStep) {		
+		final Reporting reportDelete = reportingFactory.newReporting(reportingStep);	
 		reportDelete.reportStart("Start removing file " + file.getName());
 		try {
 		    Files.delete(Paths.get(file.getPath()));

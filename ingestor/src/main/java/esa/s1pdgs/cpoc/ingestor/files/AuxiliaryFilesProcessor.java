@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ingestor.files;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -27,8 +28,9 @@ public class AuxiliaryFilesProcessor
     public AuxiliaryFilesProcessor(final ObsService obsService,
             final KafkaConfigFileProducer publisher,
             final AuxiliaryFileDescriptorService extractor,
-            final AppStatus appStatus) {
-        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE, appStatus);
+            final AppStatus appStatus,
+            @Value("${file.backup-directory}") final String backupDirectory) {
+        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE, appStatus, backupDirectory);
     }
 
     /**
