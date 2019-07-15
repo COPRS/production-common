@@ -147,6 +147,9 @@ public abstract class AbstractFileProcessor<T> {
 		} catch (ObsException e) {
 			reportUpload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
+		} catch (AbstractCodedException e) {
+			reportUpload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			throw e;
 		}
 	}
 
