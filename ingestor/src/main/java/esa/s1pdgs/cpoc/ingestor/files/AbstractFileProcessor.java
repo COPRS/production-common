@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsAlreadyExist;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.processing.IngestorIgnoredFileException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
@@ -216,7 +217,7 @@ public abstract class AbstractFileProcessor<T> {
 			reportDelete.reportStop("End removing file " + file.getName());
 		} catch (Exception e) {
 			reportDelete.reportError("[code {}] file {} cannot be removed from FTP storage: {}",
-					AbstractCodedException.ErrorCode.INGESTOR_CLEAN.getCode(), file.getPath(), e.getMessage());
+					AbstractCodedException.ErrorCode.INGESTOR_CLEAN.getCode(), file.getPath(), LogUtils.toString(e));
 			this.appStatus.setError(family);
 		}
 	}

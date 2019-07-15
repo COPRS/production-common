@@ -1,8 +1,10 @@
 spring:
   application:
     name: s1pdgs-applicative-catalog
+# Logging     
 logging:
-  config: ./test/log4j2-test.yml
+  config: classpath:log4j2-test.yml
+ 
 mongodb:
   host: 127.0.0.1
   port: 27017

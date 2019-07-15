@@ -7,21 +7,16 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%msg %n"
+        Pattern: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-queue-watcher-app:1.0.0 %-5level: %msg [%thread] %n"       
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
-        level: info
+      - name: esa.s1pdgs.cpoc
+        level: INFO
         additivity: false
         AppenderRef:
           - ref: STDOUT
       - name: org.springframework
         level: error
-        additivity: false
-        AppenderRef:
-          - ref: STDOUT
-      - name: kafka
-        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
@@ -36,6 +31,6 @@ Configuration:
         AppenderRef:
           - ref: STDOUT
     Root:
-      level: info
+      level: error
       AppenderRef:
         ref: STDOUT

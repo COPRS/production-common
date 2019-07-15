@@ -8,6 +8,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Controller;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
@@ -32,7 +33,7 @@ public class ErrorQueueConsumer {
 			requestRepository.saveFailedProcessing(failedProcessing);		
 	    	acknowledgment.acknowledge();
 	    } catch (Exception e) {
-	    	LOGGER.error("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
+	    	LOGGER.error("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
 	    }
 	}
 }

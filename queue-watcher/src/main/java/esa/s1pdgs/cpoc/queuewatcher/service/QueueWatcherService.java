@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -118,8 +119,7 @@ public class QueueWatcherService {
 			LOGGER.error("Error Code: {}, Message: {}", ace.getCode().getCode(),
 					ace.getLogMessage());
 		} catch (Exception e) {
-			LOGGER.error("Error occured while writing to CSV {}",e.getMessage());
-			 //this.mqiServiceForCompressedProducts.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, null, false));
+			LOGGER.error("Error occured while writing to CSV {}", LogUtils.toString(e));
 		}
 		return;
 	}

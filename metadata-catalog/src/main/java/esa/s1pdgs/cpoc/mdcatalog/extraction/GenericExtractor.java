@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
@@ -173,7 +174,7 @@ public abstract class GenericExtractor<T> {
 			    reportPublish.reportStop("End publishing metadata");
 				
 			} catch (Exception e) {
-				reportPublish.reportError("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
+				reportPublish.reportError("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
 				throw e;
 			}
             // Acknowledge
@@ -191,7 +192,9 @@ public abstract class GenericExtractor<T> {
             String errorMessage = String.format(
                     "[MONITOR] [%s] [productName %s] [code %s] [msg %s]",
                     category, extractProductNameFromDto(dto),
-                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
+                    ErrorCode.INTERNAL_ERROR.getCode(), 
+                    LogUtils.toString(e)
+            );
             failedProc = new FailedProcessingDto(processConfiguration.getHostname(),new Date(),errorMessage, message);              
             ackNegatively(reportingFactory,failedProc, message, errorMessage);
             
