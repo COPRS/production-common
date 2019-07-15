@@ -183,7 +183,6 @@ public abstract class AbstractFileProcessor<T> {
 		}
 	}
 	
-
 	private void copyToBackupDirectory(final Reporting.Factory reportingFactory, final File file) throws IOException {
 		final Reporting reportBackup = reportingFactory.newReporting(3);
 		reportBackup.reportStart(String.format("Start copying file %s to %s", file.getName(), backupDirectory));
@@ -192,7 +191,7 @@ public abstract class AbstractFileProcessor<T> {
 			reportBackup.reportStop(String.format("End copying file %s to %s", file.getName(), backupDirectory));
 		} catch (IOException e) {
 			reportBackup.reportError(
-					String.format("Error copying file %s to %s: %s", file.getName(), backupDirectory, e.getMessage()));
+					String.format("Error copying file %s to %s: %s", file.getName(), backupDirectory, LogUtils.toString(e)));
 			throw e;
 		}
 	}
