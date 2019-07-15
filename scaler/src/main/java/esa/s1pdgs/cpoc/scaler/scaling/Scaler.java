@@ -556,8 +556,8 @@ public class Scaler {
                         "[MONITOR] [step 6] [serverId {}] 3 - Starting removing server",
                         node.getDescription().getExternalId());
                 try {
-                	LOGGER.info("### node name"+node.getDescription().getName());
-                	LOGGER.info("### externalId"+node.getDescription().getExternalId());
+                	LOGGER.info("### node name{}", node.getDescription().getName());
+                	LOGGER.info("### externalId{}", node.getDescription().getExternalId());
                     this.osAdministration.deleteServer(                    		
                             node.getDescription().getExternalId());
                 } catch (OsEntityException e) {
