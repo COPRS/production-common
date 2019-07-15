@@ -27,8 +27,9 @@ public class SessionFilesProcessor extends AbstractFileProcessor<EdrsSessionDto>
 	@Autowired
 	public SessionFilesProcessor(final ObsService obsService, final KafkaSessionProducer publisher,
 			final EdrsSessionFileDescriptorService extractor,final AppStatus appStatus,
+			@Value("${file.session-files.local-directory}") final String pickupDirectory,
 			@Value("${file.backup-directory}") final String backupDirectory) {
-		super(obsService, publisher, extractor, ProductFamily.EDRS_SESSION, appStatus, backupDirectory);
+		super(obsService, publisher, extractor, ProductFamily.EDRS_SESSION, appStatus, pickupDirectory, backupDirectory);
 	}
 
 	/**

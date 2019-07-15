@@ -58,7 +58,7 @@ public class AuxiliaryFilesProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new AuxiliaryFilesProcessor(obsService, publisher, extractor, appStatus, backupDirectory);
+        service = new AuxiliaryFilesProcessor(obsService, publisher, extractor, appStatus, backupDirectory ,backupDirectory);
     }
 
     /**
