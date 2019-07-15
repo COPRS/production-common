@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 
 @RestController
 @RequestMapping(path = "/metadata")
@@ -123,7 +124,7 @@ public class SearchMetadataController {
 			//TODO Temp test
 			e.printStackTrace();
 			LOGGER.error("[productType {}] [code {}] [mode {}] [msg {}]", productType,
-					ErrorCode.INTERNAL_ERROR.getCode(), mode, e.getMessage());
+					ErrorCode.INTERNAL_ERROR.getCode(), mode, LogUtils.toString(e));
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
