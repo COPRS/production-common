@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ingestor.files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
@@ -57,6 +58,11 @@ public abstract class AbstractFileProcessor<T> {
     private final AppStatus appStatus;
     
     /**
+     * Pickup Directory
+     */
+    private final String pickupDirectory;
+    
+    /**
      * Backup Directory
      */
     private final String backupDirectory;
@@ -66,12 +72,14 @@ public abstract class AbstractFileProcessor<T> {
             final AbstractFileDescriptorService extractor,
             final ProductFamily family,
             final AppStatus appStatus,
+            final String pickupDirectory,
             final String backupDirectory) {
         this.obsService = obsService;
         this.publisher = publisher;
         this.extractor = extractor;
         this.family = family;
         this.appStatus = appStatus;
+        this.pickupDirectory = pickupDirectory;
         this.backupDirectory = backupDirectory;
     }
 
@@ -179,7 +187,7 @@ public abstract class AbstractFileProcessor<T> {
 		final Reporting reportBackup = reportingFactory.newReporting(3);
 		reportBackup.reportStart(String.format("Start copying file %s to %s", file.getName(), backupDirectory));
 		try {
-			Files.copy(Paths.get(file.getPath()), Paths.get(backupDirectory, file.getName()));
+			createDirAndCopy(file, pickupDirectory, backupDirectory);
 			reportBackup.reportStop(String.format("End copying file %s to %s", file.getName(), backupDirectory));
 		} catch (IOException e) {
 			reportBackup.reportError(
@@ -187,21 +195,29 @@ public abstract class AbstractFileProcessor<T> {
 			throw e;
 		}
 	}
+	
+	private void createDirAndCopy(File file, String pickupDir, String backupDir) throws IOException {
+		Path relativePath = new File(pickupDir).toPath().relativize(file.toPath());
+		Path bkpPath = new File(backupDir).toPath().resolve(relativePath);
+		Files.createDirectories(bkpPath.getParent());
 
-	private final void delete(final Reporting.Factory reportingFactory, final File file, int reportingStep) {		
-		final Reporting reportDelete = reportingFactory.newReporting(reportingStep);	
+		if (!Files.exists(bkpPath)) {
+			Files.copy(file.toPath(), bkpPath);
+		} else {
+			LOGGER.warn("File exists already: {}", bkpPath);
+		}
+	}
+
+	private final void delete(final Reporting.Factory reportingFactory, final File file, int reportingStep) {
+		final Reporting reportDelete = reportingFactory.newReporting(reportingStep);
 		reportDelete.reportStart("Start removing file " + file.getName());
 		try {
-		    Files.delete(Paths.get(file.getPath()));
+			Files.delete(Paths.get(file.getPath()));
 			reportDelete.reportStop("End removing file " + file.getName());
 		} catch (Exception e) {
-			reportDelete.reportError(
-					"[code {}] file {} cannot be removed from FTP storage: {}", 
-		            AbstractCodedException.ErrorCode.INGESTOR_CLEAN .getCode(),
-		            file.getPath(), 
-		            e.getMessage()
-		    );
-		    this.appStatus.setError(family);
+			reportDelete.reportError("[code {}] file {} cannot be removed from FTP storage: {}",
+					AbstractCodedException.ErrorCode.INGESTOR_CLEAN.getCode(), file.getPath(), e.getMessage());
+			this.appStatus.setError(family);
 		}
 	}
     
