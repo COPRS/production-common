@@ -20,6 +20,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -340,10 +342,11 @@ public class GenericMqiClientTest {
     @Test
     public void testNextWhenNoResponse() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
-                .when(restTemplate).exchange(Mockito.anyString(),
+                .when(restTemplate).exchange(
+                		Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.isNull(),
-                        Mockito.any(Class.class));
+                        Mockito.any(ParameterizedTypeReference.class));
 
         thrown.expect(MqiNextApiError.class);
         thrown.expect(
@@ -370,7 +373,7 @@ public class GenericMqiClientTest {
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
                                 Mockito.isNull(),
-                                Mockito.any(Class.class));
+                                Mockito.any(ParameterizedTypeReference.class));
 
         thrown.expect(MqiNextApiError.class);
         thrown.expect(
@@ -397,14 +400,19 @@ public class GenericMqiClientTest {
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
                                 Mockito.isNull(),
-                                Mockito.any(Class.class));
+                                Mockito.any(ParameterizedTypeReference.class));
 
         GenericMessageDto<ProductDto> ret = service.next(ProductCategory.AUXILIARY_FILES);
         assertEquals(message, ret);
+        
+    	final ResolvableType type = ResolvableType.forClassWithGenerics(
+    			GenericMessageDto.class, 
+    			ProductDto.class
+    	);           
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/messages/auxiliary_files/next"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                Mockito.eq(ProductDto.class));
+                Mockito.eq(ParameterizedTypeReference.forType(type.getType())));
         verifyNoMoreInteractions(restTemplate);
     }
 
@@ -420,14 +428,20 @@ public class GenericMqiClientTest {
                 .when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.isNull(),
-                        Mockito.any(Class.class));
+                        Mockito.any(ParameterizedTypeReference.class));
 
         GenericMessageDto<ProductDto> ret = service.next(ProductCategory.AUXILIARY_FILES);
+        
+    	final ResolvableType type = ResolvableType.forClassWithGenerics(
+    			GenericMessageDto.class, 
+    			ProductDto.class
+    	);         
+        
         assertEquals(message, ret);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/messages/auxiliary_files/next"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
-                Mockito.eq(ProductDto.class));
+                Mockito.eq(ParameterizedTypeReference.forType(type.getType())));
         verifyNoMoreInteractions(restTemplate);
     }
 }

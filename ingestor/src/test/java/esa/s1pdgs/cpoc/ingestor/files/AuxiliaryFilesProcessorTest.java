@@ -46,6 +46,11 @@ public class AuxiliaryFilesProcessorTest {
      * Service to test
      */
     private AuxiliaryFilesProcessor service;
+    
+    /**
+     * 
+     */
+    private String backupDirectory = "/tmp";
 
     /**
      * Initialization
@@ -53,7 +58,7 @@ public class AuxiliaryFilesProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new AuxiliaryFilesProcessor(obsService, publisher, extractor, appStatus);
+        service = new AuxiliaryFilesProcessor(obsService, publisher, extractor, appStatus, backupDirectory);
     }
 
     /**

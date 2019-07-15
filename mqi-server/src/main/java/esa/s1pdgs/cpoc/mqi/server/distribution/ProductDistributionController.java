@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.server.distribution;
 
+import java.io.IOException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
@@ -107,16 +114,7 @@ public class ProductDistributionController {
                     "[MONITOR] [category {}] [api next] Interrupted exception during waiting",
                     category);
         }
-        
-        //FIXME: For debugging
-        GenericMessageDto<? extends AbstractDto> msg = null;
-        try {
-        	msg = nextMessage(category);
-        	return msg;
-        } catch (Exception ex) {
-        	ex.printStackTrace();
-        }
-        return null;        
+        return nextMessage(category);
     }
 
     /**
@@ -161,30 +159,43 @@ public class ProductDistributionController {
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/publish")
     public void publish(
-    		@RequestBody final GenericPublicationMessageDto<? extends AbstractDto> message, 
+    		@RequestBody final JsonNode message, 
     		@PathVariable("category") String categoryName
     ) throws ProductDistributionException {    	
-    	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());    	
-    	
-        LOGGER.info(
-                "[MONITOR] [category {}] [api publish] [messageId {}] [productName: {}] Starting",
-                category, message.getInputMessageId(), message.getMessageToPublish().getProductName()
-        );
+    	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());   
         try {
-            publication.publish(category, message.getMessageToPublish(), message.getInputKey(), message.getOutputKey());
+        	
+        	final ObjectMapper objMapper = new ObjectMapper();
+        	final TypeFactory typeFactory = objMapper.getTypeFactory();
+        	final JavaType javaType = typeFactory.constructParametricType(
+        			GenericPublicationMessageDto.class, 
+        			category.getDtoClass()
+        	);
+        	final GenericPublicationMessageDto<? extends AbstractDto> mess = objMapper
+        			.readValue(objMapper.treeAsTokens(message), javaType);
+        	
+            LOGGER.info(
+                    "[MONITOR] [category {}] [api publish] [messageId {}] [productName: {}] Starting",
+                    category, mess.getInputMessageId(), mess.getMessageToPublish().getProductName());
+        	
+            publication.publish(category, mess.getMessageToPublish(), mess.getInputKey(), mess.getOutputKey());
+            
+            LOGGER.info(
+                    "[MONITOR] [category {}] [api publish] [httpCode {}] [messageId {}] [productName: {}] End",
+                    category, 200, mess.getInputMessageId(), mess.getMessageToPublish().getProductName()
+            );
         } catch (MqiPublicationError kse) {
             LOGGER.error("[publish] KafkaSendException occurred: {}", kse.getMessage());
             throw new ProductDistributionException(HttpStatus.GATEWAY_TIMEOUT);
         } catch (MqiCategoryNotAvailable | MqiRouteNotAvailable mcna) {
             LOGGER.error(
-                    "[MONITOR] [category {}] [api publish] [productName: {}] [code {}] [error {}]",
-                    category, message.getMessageToPublish().getProductName(), mcna.getCode().getCode(), mcna.getLogMessage());
+                    "[MONITOR] [category {}] [api publish] [code {}] [error {}]",
+                    category, mcna.getCode().getCode(), mcna.getLogMessage());
             throw new ProductDistributionException();
-        }
-        LOGGER.info(
-                "[MONITOR] [category {}] [api publish] [httpCode {}] [messageId {}] [productName: {}] End",
-                category, 200, message.getInputMessageId(), message.getMessageToPublish().getProductName()
-        );
+        } catch (IOException e) {
+        	LOGGER.error("Could not deserialize JSON {}", message);
+        	LOGGER.error(e);
+		} 
     }
     
     private final GenericMessageDto<? extends AbstractDto> nextMessage(final ProductCategory category) throws ProductDistributionException

@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 
 /**
  * Test the class JobDispatcher
@@ -153,15 +154,15 @@ public class L0AppJobDispatcherTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto primaryCheckAppJob =
+        AppDataJobDto<EdrsSessionDto> primaryCheckAppJob =
                 TestL0Utils.buildAppDataEdrsSession(false);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto readyAppJob =
+        AppDataJobDto<EdrsSessionDto> readyAppJob =
                 TestL0Utils.buildAppDataEdrsSession(false);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto sentAppJob =
+        AppDataJobDto<EdrsSessionDto> sentAppJob =
                 TestL0Utils.buildAppDataEdrsSession(false);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
@@ -231,7 +232,7 @@ public class L0AppJobDispatcherTest {
     @Test
     public void testGetTaskTable() {
 
-        AppDataJobDto appData =
+        AppDataJobDto<EdrsSessionDto> appData =
                 TestL0Utils.buildAppDataEdrsSession(false);
 
         // Init dispatcher

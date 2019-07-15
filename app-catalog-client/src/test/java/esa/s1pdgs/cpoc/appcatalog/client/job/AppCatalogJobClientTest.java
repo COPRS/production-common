@@ -34,11 +34,14 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchGenerationApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 
@@ -61,6 +64,8 @@ public class AppCatalogJobClientTest {
      * Client to test
      */
     private AppCatalogJobClient client;
+    
+    private static final ProductDto DUMMY = new ProductDto("testProd", "testKey", ProductFamily.BLANK);
 
     /**
      * Initialization
@@ -98,7 +103,7 @@ public class AppCatalogJobClientTest {
     @SuppressWarnings("unchecked")
 	private final void runSearchTest(final Callable<Void> callable, final String uriArgs) throws Exception {   
     	final URI expectedUri = new URI("http://localhost:8080/level_products/jobs/search?" + uriArgs);
-    	doReturn(new ResponseEntity<AppDataJobDto>(HttpStatus.OK))
+    	doReturn(new ResponseEntity<AppDataJobDto<ProductDto>>(HttpStatus.OK))
 	    	.when(restTemplate).exchange(
 		        		Mockito.any(URI.class),
 		                Mockito.any(HttpMethod.class),
@@ -111,7 +116,7 @@ public class AppCatalogJobClientTest {
                 Mockito.eq(expectedUri),
                 Mockito.eq(HttpMethod.GET),
                 Mockito.isNull(),
-                Mockito.eq(new ParameterizedTypeReference<List<AppDataJobDto>>() {})
+                Mockito.eq(new ParameterizedTypeReference<List<AppDataJobDto<ProductDto>>>() {})
         );
         verifyNoMoreInteractions(restTemplate);
     }
@@ -164,8 +169,8 @@ public class AppCatalogJobClientTest {
     	);
     }
 
-    private AppDataJobDto buildJob() {
-        AppDataJobDto job = new AppDataJobDto();
+    private AppDataJobDto<ProductDto> buildJob() {
+        AppDataJobDto<ProductDto> job = new AppDataJobDto<>();
         job.setIdentifier(142);
         job.setState(AppDataJobDtoState.DISPATCHING);
         
@@ -173,8 +178,8 @@ public class AppCatalogJobClientTest {
         product.setProductName("toto");
         job.setProduct(product);
         
-        GenericMessageDto<String> message1 = new GenericMessageDto<String>(1, "key1", "body1");
-        GenericMessageDto<String> message2 = new GenericMessageDto<String>(2, "key2", "body2");
+        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "key1", DUMMY);
+        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "key2", DUMMY);
         job.setMessages(Arrays.asList(message1, message2));
         
         AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();
@@ -195,7 +200,7 @@ public class AppCatalogJobClientTest {
 	        		Mockito.anyString(),
 	                Mockito.eq(HttpMethod.POST),
 	                Mockito.any(HttpEntity.class),
-	                Mockito.any(Class.class)
+	                Mockito.any(ParameterizedTypeReference.class)
 	    );
         client.newJob(buildJob());
     }
@@ -203,21 +208,21 @@ public class AppCatalogJobClientTest {
     @SuppressWarnings("unchecked")
 	@Test
     public void testNew() throws AbstractCodedException {
-    	final AppDataJobDto job = buildJob();
-    	doReturn(new ResponseEntity<AppDataJobDto>(job, HttpStatus.OK))
+    	final AppDataJobDto<ProductDto> job = buildJob();
+    	doReturn(new ResponseEntity<AppDataJobDto<ProductDto>>(job, HttpStatus.OK))
 	    	.when(restTemplate).exchange(
 	        		Mockito.anyString(),
 	                Mockito.eq(HttpMethod.POST),
 	                Mockito.any(HttpEntity.class),
-	                Mockito.any(Class.class)
+	                Mockito.any(ParameterizedTypeReference.class)
 	    );
-        final AppDataJobDto result = client.newJob(job);
+        final AppDataJobDto<ProductDto> result = client.newJob(job);
         assertEquals(job, result);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("http://localhost:8080/level_products/jobs"),
                 Mockito.eq(HttpMethod.POST),
-                Mockito.eq(new HttpEntity<AppDataJobDto>(job)),
-                Mockito.eq(AppDataJobDto.class)
+                Mockito.eq(new HttpEntity<AppDataJobDto<ProductDto>>(job)),
+                Mockito.eq(new ParameterizedTypeReference<AppDataJobDto<ProductDto>>(){})
         );
         verifyNoMoreInteractions(restTemplate);        
     }
@@ -230,27 +235,27 @@ public class AppCatalogJobClientTest {
 	        		Mockito.anyString(),
 	                Mockito.eq(HttpMethod.PATCH),
 	                Mockito.any(HttpEntity.class),
-	                Mockito.any(Class.class)
+	                Mockito.any(ParameterizedTypeReference.class)
 	    );    	
-        final AppDataJobDto job = buildJob();
+        final AppDataJobDto<ProductDto> job = buildJob();
         client.patchJob(job.getIdentifier(), job, true, true, true);
     }
     
 	@SuppressWarnings("unchecked")
-	private final AppDataJobDto runPatchTest(final AppDataJobDto job, final Callable<AppDataJobDto> callable) throws Exception {   
-    	doReturn(new ResponseEntity<AppDataJobDto>(job, HttpStatus.OK))
+	private final AppDataJobDto<ProductDto> runPatchTest(final AppDataJobDto<ProductDto> job, final Callable<AppDataJobDto<ProductDto>> callable) throws Exception {   
+    	doReturn(new ResponseEntity<AppDataJobDto<ProductDto>>(job, HttpStatus.OK))
 	    	.when(restTemplate).exchange(
 	        		Mockito.anyString(),
 	                Mockito.eq(HttpMethod.PATCH),
 	                Mockito.any(HttpEntity.class),
-	                Mockito.any(Class.class)
+	                Mockito.any(ParameterizedTypeReference.class)
 	    );
-        final AppDataJobDto result = callable.call();
+        final AppDataJobDto<ProductDto> result = callable.call();
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("http://localhost:8080/level_products/jobs/142"),
                 Mockito.eq(HttpMethod.PATCH),
-                Mockito.eq(new HttpEntity<AppDataJobDto>(result)),
-                Mockito.eq(AppDataJobDto.class)
+                Mockito.eq(new HttpEntity<AppDataJobDto<ProductDto>>(result)),
+                Mockito.eq(new ParameterizedTypeReference<AppDataJobDto<ProductDto>>() {})
         );
         verifyNoMoreInteractions(restTemplate);
         return result;
@@ -258,8 +263,8 @@ public class AppCatalogJobClientTest {
 
 	@Test
     public void testPatch() throws Exception {
-    	final AppDataJobDto job = buildJob();
-    	final AppDataJobDto result = runPatchTest(
+    	final AppDataJobDto<ProductDto> job = buildJob();
+    	final AppDataJobDto<ProductDto> result = runPatchTest(
     			job,
     			() -> client.patchJob(job.getIdentifier(), job, true, true, true)
     	);
@@ -268,8 +273,8 @@ public class AppCatalogJobClientTest {
 
 	@Test
     public void testPatchNotMessages() throws Exception {
-        final AppDataJobDto job = buildJob();
-        final AppDataJobDto result = runPatchTest(
+        final AppDataJobDto<ProductDto> job = buildJob();
+        final AppDataJobDto<ProductDto> result = runPatchTest(
     			job,
     			() -> client.patchJob(job.getIdentifier(), job, false, true, true)
     	);        
@@ -280,8 +285,8 @@ public class AppCatalogJobClientTest {
 
 	@Test
     public void testPatchNoProducts() throws Exception {
-        final AppDataJobDto job = buildJob();
-        final AppDataJobDto result = runPatchTest(
+        final AppDataJobDto<ProductDto> job = buildJob();
+        final AppDataJobDto<ProductDto> result = runPatchTest(
     			job,
     			() -> client.patchJob(job.getIdentifier(), job, true, false, true)
     	);     
@@ -292,8 +297,8 @@ public class AppCatalogJobClientTest {
 
     @Test
     public void testPatchNoGeneration() throws Exception {
-        final AppDataJobDto job = buildJob();
-        final AppDataJobDto result = runPatchTest(
+        final AppDataJobDto<ProductDto> job = buildJob();
+        final AppDataJobDto<ProductDto> result = runPatchTest(
     			job,
     			() -> client.patchJob(job.getIdentifier(), job, true, true, false)
     	);     
@@ -304,8 +309,8 @@ public class AppCatalogJobClientTest {
 
     @Test
     public void testPatchNoMessagesNorGeneration() throws Exception {
-        final AppDataJobDto job = buildJob();
-        final AppDataJobDto result = runPatchTest(
+        final AppDataJobDto<ProductDto> job = buildJob();
+        final AppDataJobDto<ProductDto> result = runPatchTest(
     			job,
     			() -> client.patchJob(job.getIdentifier(), job, false, true, false)
     	);     
@@ -317,13 +322,13 @@ public class AppCatalogJobClientTest {
     @SuppressWarnings("unchecked")
 	@Test(expected = AppCatalogJobPatchGenerationApiError.class)
     public void testPatchTaskTableWhenError() throws AbstractCodedException {
-        final AppDataJobDto job = buildJob();
+        final AppDataJobDto<? extends AbstractDto> job = buildJob();
         doThrow(new RestClientException("rest client exception"))
 	    	.when(restTemplate).exchange(
 	    		Mockito.anyString(),
 	            Mockito.eq(HttpMethod.PATCH),
 	            Mockito.any(HttpEntity.class),
-	            Mockito.any(Class.class)
+	            Mockito.any(ParameterizedTypeReference.class)
 	    );   
         client.patchTaskTableOfJob(
         		job.getIdentifier(),
@@ -335,13 +340,13 @@ public class AppCatalogJobClientTest {
     @SuppressWarnings("unchecked")
 	@Test
     public void testPatchTaskTable() throws Exception {
-    	final AppDataJobDto job = buildJob();    	
-    	doReturn(new ResponseEntity<AppDataJobDto>(job, HttpStatus.OK))
+    	final AppDataJobDto<ProductDto> job = buildJob();    	
+    	doReturn(new ResponseEntity<AppDataJobDto<ProductDto>>(job, HttpStatus.OK))
 	    	.when(restTemplate).exchange(
 	        		Mockito.anyString(),
 	                Mockito.eq(HttpMethod.PATCH),
 	                Mockito.any(HttpEntity.class),
-	                Mockito.any(Class.class)
+	                Mockito.any(ParameterizedTypeReference.class)
 	    );
 	    client.patchTaskTableOfJob(
                 job.getIdentifier(), 
@@ -352,7 +357,7 @@ public class AppCatalogJobClientTest {
 	            Mockito.eq("http://localhost:8080/level_products/jobs/142/generations/tasktable2"),
 	            Mockito.eq(HttpMethod.PATCH),
 	            Mockito.any(),
-	            Mockito.eq(AppDataJobDto.class)
+	            Mockito.eq(new ParameterizedTypeReference<AppDataJobDto<ProductDto>>() {})
 	    );
 	    verifyNoMoreInteractions(restTemplate);
     }

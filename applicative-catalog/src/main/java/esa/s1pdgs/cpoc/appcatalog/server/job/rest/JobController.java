@@ -171,7 +171,7 @@ public class JobController {
      * @throws AppCatalogJobInvalidStateException
      * @throws AppCatalogJobGenerationInvalidStateException
      */
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/jobs")
     public AppDataJobDto newJob(
     		@PathVariable(name = "category") final String categoryName,
     		@RequestBody final AppDataJobDto newJob)
@@ -183,7 +183,7 @@ public class JobController {
 
         // Create it
         return jobConverter
-                .convertJobFromDbToDto(appDataJobService.newJob(newJobDb),category);
+                .convertJobFromDbToDto(appDataJobService.newJob(newJobDb), category);
     }
 
     /**

@@ -11,6 +11,7 @@ import java.util.Map;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
@@ -69,7 +70,10 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
                 new HashMap<>();
         String lastName = "";
         try {
-            for (GenericMessageDto<?> message : job.getAppDataJob().getMessages()) {
+        	@SuppressWarnings("unchecked")
+			final AppDataJobDto<ProductDto> appDataJob = job.getAppDataJob();
+        	
+            for (GenericMessageDto<ProductDto> message : appDataJob.getMessages()) {
                 ProductDto dto = (ProductDto) message.getBody();
                 lastName = dto.getProductName();
                 LevelSegmentMetadata metadata = metadataService

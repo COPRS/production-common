@@ -90,7 +90,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	
 	@Override
 	public List<Processing> getProcessings(Integer pageSize, Integer pageNumber, List<String> processingTypes, List<MessageState> processingStatus) {	
-		final List<String> topics = processingTypes.isEmpty() ? PROCESSING_TYPES_LIST : processingTypes;
+		final List<String> topics = processingTypes == null || processingTypes.isEmpty() ? PROCESSING_TYPES_LIST : processingTypes;
 		final List<MessageState> states = processingStatus.isEmpty() ? PROCESSING_STATE_LIST : processingStatus;
 
 		// no paging?

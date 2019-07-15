@@ -102,26 +102,26 @@ public class TestL0Utils {
         return r;
     }
 
-    public static AppDataJobDto buildAppDataEdrsSession(
+    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSession(
             boolean xmlOnlyForRaws) {
         return buildAppDataEdrsSession(xmlOnlyForRaws, "S1", true, true);
     }
 
-    public static AppDataJobDto buildAppDataEdrsSessionWithRaw2(
+    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSessionWithRaw2(
             boolean xmlOnlyForRaws) {
         return buildAppDataEdrsSession(xmlOnlyForRaws, "S1", false, true);
     }
 
-    public static AppDataJobDto buildAppDataEdrsSession(
+    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSession(
             boolean xmlOnlyForRaws, String missionId, boolean raw1,
             boolean raw2) {
-        AppDataJobDto ret = new AppDataJobDto();
+        AppDataJobDto<EdrsSessionDto> ret = new AppDataJobDto<>();
         ret.setIdentifier(123);
         ret.setState(AppDataJobDtoState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);
 
-        List<GenericMessageDto<?>> messages = new ArrayList<>();
+        List<GenericMessageDto<EdrsSessionDto>> messages = new ArrayList<>();
         if (raw1) {
             GenericMessageDto<EdrsSessionDto> message1 =
                     new GenericMessageDto<EdrsSessionDto>(1, "input-key",
