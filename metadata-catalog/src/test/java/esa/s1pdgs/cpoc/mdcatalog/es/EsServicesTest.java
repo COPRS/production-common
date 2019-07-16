@@ -36,6 +36,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -219,13 +220,13 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("validityStartTime");
-		expectedResult.setValidityStop("validityStopTime");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
+		        + ":\"url\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
@@ -252,12 +253,12 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("2012-05-05T10:10:12.00012Z");
+		expectedResult.setValidityStart("2012-05-05T10:10:12.000120Z");
 		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.00012Z\",\"validityStopTime\":"
+		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.000120Z\",\"validityStopTime\":"
 		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
@@ -271,7 +272,7 @@ public class EsServicesTest{
 
 		//"yyyy-MM-dd'T'HH:mm:ss.999999'Z'
 		SearchMetadata result = esServices.closestStartValidity("type", ProductFamily.L0_ACN, 
-		        "2012-05-05T10:10:12.00012Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
+		        "2012-05-05T10:10:12.000120Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
 		assertEquals("Search metadata are not equals", expectedResult, result);
 
 	}
@@ -283,7 +284,7 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("2012-05-05T10:10:12.00012Z");
+		expectedResult.setValidityStart("2012-05-05T10:10:12.000120Z");
 		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
 		
 		//Response
@@ -317,13 +318,13 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("aux_res");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("validityStartTime");
-		expectedResult.setValidityStop("validityStopTime");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\", \"productType\": \"aux_res\"}");
+		        + ":\"url\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"aux_res\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		SearchHit[] hits = {hit};
@@ -381,15 +382,15 @@ public class EsServicesTest{
         r.setProductName("name");
         r.setProductType("product_type");
         r.setKeyObjectStorage("url");
-        r.setValidityStart("validityStartTime");
-        r.setValidityStop("validityStopTime");
+        r.setValidityStart("2000-01-01T00:00:00.000000Z");
+        r.setValidityStop("2001-01-01T00:00:00.000000Z");
         List<SearchMetadata> expectedResult = new ArrayList<>();
         expectedResult.add(r);
         
         //Response
         BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"productType\": \"product_type\"}");
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
         SearchHit hit = new SearchHit(1);
         hit.sourceRef(source);
         SearchHit[] hits = {hit};
@@ -445,13 +446,13 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("type");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("validityStartTime");
-		expectedResult.setValidityStop("validityStopTime");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
 		
 		//Response 
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
+		        + ":\"url\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
@@ -493,16 +494,16 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("validityStartTime");
-		expectedResult.setValidityStop("validityStopTime");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
 		expectedResult.setInstrumentConfigurationId(0);
 		expectedResult.setNumberSlice(2);
 		expectedResult.setDatatakeId("datatakeId");
 		
 		//Response 
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, "
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, "
 		        + "\"dataTakeId\":\"datatakeId\","
 		        + "\"productType\": \"product_type\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
@@ -552,7 +553,7 @@ public class EsServicesTest{
 		}
 		//MISSING startTime
 		source = new BytesArray("{\"url\""
-		        + ":\"url\",\"stopTime\":\"validityStopTime\", "
+		        + ":\"url\",\"stopTime\":\"2001-01-01T00:00:00.000000Z\", "
 		        + "\"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
@@ -567,7 +568,7 @@ public class EsServicesTest{
 		}
 		//MISSING stopTime
 		source = new BytesArray("{\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\","
+		        + ":\"url\",\"startTime\":\"2001-01-01T00:00:00.000000Z\","
 		        + " \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
@@ -582,8 +583,8 @@ public class EsServicesTest{
 		}
 		//MISSING instrumentConfigurationId
 		source = new BytesArray("{\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		getResponse = new GetResponse(getResult);
@@ -597,8 +598,8 @@ public class EsServicesTest{
 		}
 		//MISSING sliceNumber
 		source = new BytesArray("{\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"dataTakeId\":\"datatakeId\","
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		getResponse = new GetResponse(getResult);
@@ -612,8 +613,8 @@ public class EsServicesTest{
 		}
 		//MISSING dataTakeId
 		source = new BytesArray("{\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2,"
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2,"
                 + "\"productType\": \"product_type\"}");
 		getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		getResponse = new GetResponse(getResult);
@@ -627,8 +628,8 @@ public class EsServicesTest{
 		}
         //MISSING product type
         source = new BytesArray("{\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2}");
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2}");
         getResult = new GetResult("index", "type", "id", 0, true, source, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
@@ -649,16 +650,16 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
-		expectedResult.setValidityStart("validityStartTime");
-		expectedResult.setValidityStop("validityStopTime");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
 		expectedResult.setInstrumentConfigurationId(0);
 		expectedResult.setNumberOfSlices(2);
 		expectedResult.setDatatakeId("datatakeId");
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, "
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, "
                 + "\"dataTakeId\":\"datatakeId\", \"productFamily\":\"l0_acn\","
                 + "\"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
@@ -711,8 +712,8 @@ public class EsServicesTest{
 	@Test
 	public void getL0AcnMalformedTest() throws Exception {
 		//MISSING productName
-		BytesReference source = new BytesArray("{\"url\":\"url\",\"startTime\":\"validityStartTime\","
-				+ "\"stopTime\":\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, "
+		BytesReference source = new BytesArray("{\"url\":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\","
+				+ "\"stopTime\":\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, "
 				+ "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
@@ -730,8 +731,8 @@ public class EsServicesTest{
 					"productName", ((MetadataMalformedException) e).getMissingField());
 		}
 		//MISSING URL
-		source = new BytesArray("{\"productName\":\"name\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
+		source = new BytesArray("{\"productName\":\"name\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
@@ -749,7 +750,7 @@ public class EsServicesTest{
 		}
 		//MISSING startTime
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"stopTime\":\"validityStopTime\", \"instrumentConfigurationId\":0, "
+		        + ":\"url\",\"stopTime\":\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, "
 		        + "\"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
@@ -768,7 +769,7 @@ public class EsServicesTest{
 		}
 		//MISSING stopTime
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\","
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\","
 		        + "\"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
@@ -787,8 +788,8 @@ public class EsServicesTest{
 		}
 		//MISSING instrumentConfigurationId
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"totalNumberOfSlice\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
@@ -806,8 +807,8 @@ public class EsServicesTest{
 		}
 		//MISSING totalNumberOfSlice
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0,\"dataTakeId\":\"datatakeId\","
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0,\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
@@ -825,8 +826,8 @@ public class EsServicesTest{
 		}
 		//MISSING dataTakeId
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2,"
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2,"
                 + "\"productType\": \"product_type\"}");
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
@@ -844,8 +845,8 @@ public class EsServicesTest{
 		}
         //MISSING dataTakeId
         source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2}");
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"totalNumberOfSlice\":2}");
         hit = new SearchHit(1);
         hit.sourceRef(source);
         hits[0] = hit;
@@ -870,16 +871,16 @@ public class EsServicesTest{
         expectedResult.setProductName("name");
         expectedResult.setProductType("product_type");
         expectedResult.setKeyObjectStorage("url");
-        expectedResult.setValidityStart("validityStartTime");
-        expectedResult.setValidityStop("validityStopTime");
+        expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+        expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
         expectedResult.setConsolidation("FULL");
         expectedResult.setPolarisation("SV");
         expectedResult.setDatatakeId("datatakeId");
         
         //Response 
         BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
         GetResult getResult = new GetResult("index", "l0_segment", "id", 0, true, source, null);
@@ -899,8 +900,8 @@ public class EsServicesTest{
     @Test(expected = MetadataNotPresentException.class)
     public void getLevelSegmentNoHitTest() throws Exception {
         BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
         GetResult getResult = new GetResult("index", "l0_segment", "id", 0, false, source, null);
@@ -916,8 +917,8 @@ public class EsServicesTest{
     public void getLevelSegmentMalformedTest() throws Exception {
         //MISSING URL
         BytesReference source = new BytesArray("{\"productName\":\"name\","
-                + "\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
         GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
@@ -933,7 +934,7 @@ public class EsServicesTest{
         //MISSING startTime
         source = new BytesArray("{\"productName\":\"name\",\"url\""
                 + ":\"url\",\"stopTime\":"
-                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
         getResult = new GetResult("index", "type", "id", 0, true, source, null);
@@ -948,7 +949,7 @@ public class EsServicesTest{
         }
         //MISSING stopTime
         source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\","
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\","
                 + "\"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
@@ -964,8 +965,8 @@ public class EsServicesTest{
         }
         //MISSING instrumentConfigurationId
         source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"polarisation\":\"SV\", "
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
         getResult = new GetResult("index", "type", "id", 0, true, source, null);
@@ -980,8 +981,8 @@ public class EsServicesTest{
         }
         //MISSING sliceNumber
         source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", "
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
         getResult = new GetResult("index", "type", "id", 0, true, source, null);
@@ -996,8 +997,8 @@ public class EsServicesTest{
         }
         //MISSING dataTakeId
         source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"productType\": \"product_type\"}");
         getResult = new GetResult("index", "type", "id", 0, true, source, null);
         getResponse = new GetResponse(getResult);
@@ -1011,8 +1012,8 @@ public class EsServicesTest{
         }
         //MISSING product type
         source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
-                + "\"validityStopTime\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\"}");
         getResult = new GetResult("index", "type", "id", 0, true, source, null);
         getResponse = new GetResponse(getResult);
