@@ -32,6 +32,7 @@ include:
   - local: compression/.gitlab-ci.yml
   - local: request-repository/.gitlab-ci.yml
   - local: ingestor/.gitlab-ci.yml
+  - local: inbox-polling/.gitlab-ci.yml
   - local: job-generator/.gitlab-ci.yml
   - local: metadata-catalog/.gitlab-ci.yml
   - local: mqi-server/.gitlab-ci.yml

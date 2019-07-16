@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: s1pdgs-inbox-polling
+    
+logging:
+  config: log4j2.yml
+
+# REST controller
+server:
+  port: 8081      
+
+  
