@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -49,9 +50,9 @@ public class L0SliceMetadataController {
 			LOGGER.error("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					ace.getCode().getCode(), ace.getLogMessage());
 			return new ResponseEntity<L0SliceMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
-		} catch (Exception exc) {
+		} catch (Exception e) {
 			LOGGER.error("[L0_SLICE] [productName {}] [code {}] [msg {}]", productName,
-					ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
+					ErrorCode.INTERNAL_ERROR.getCode(),   LogUtils.toString(e));
 			return new ResponseEntity<L0SliceMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}
@@ -133,7 +134,7 @@ public class L0SliceMetadataController {
 			return new ResponseEntity<List<L0AcnMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			LOGGER.error("[L0_SLICE] [productName {}] [code {}] [msg {}]", productName,
-					ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
+					ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
 			return new ResponseEntity<List<L0AcnMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

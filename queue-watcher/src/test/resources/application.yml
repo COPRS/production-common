@@ -3,10 +3,10 @@ spring:
   application:
     name: s1pdgs-queue-watcher
     
-# Logging
+# Logging     
 logging:
-  config: log4j2.yml
-
+  config: classpath:log4j2-test.yml
+ 
 watcher:
   csvFile: /data/notificationSimulatorService.csv     
 

@@ -29,8 +29,9 @@ public class AuxiliaryFilesProcessor
             final KafkaConfigFileProducer publisher,
             final AuxiliaryFileDescriptorService extractor,
             final AppStatus appStatus,
+            @Value("${file.auxiliary-files.local-directory}") final String pickupDirectory,
             @Value("${file.backup-directory}") final String backupDirectory) {
-        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE, appStatus, backupDirectory);
+        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE, appStatus, pickupDirectory, backupDirectory);
     }
 
     /**

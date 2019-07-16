@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 
@@ -54,10 +55,10 @@ public class LevelSegmentController {
                     productName, ace.getCode().getCode(), ace.getLogMessage());
             return new ResponseEntity<LevelSegmentMetadata>(
                     HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception exc) {
+        } catch (Exception e) {
             LOGGER.error("[{}] [productName {}] [code {}] [msg {}]", family,
                     productName, ErrorCode.INTERNAL_ERROR.getCode(),
-                    exc.getMessage());
+                    LogUtils.toString(e));
             return new ResponseEntity<LevelSegmentMetadata>(
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -263,15 +263,16 @@
 		<module>archives</module>
 		<module>compression</module>
 		<module>ingestor</module>
+		<module>inbox-polling</module>
 		<module>job-generator</module>
 		<module>lib-commons</module>
+		<module>wrapper</module>
+		<module>request-repository</module>
+		<module>queue-watcher</module>
 		<module>metadata-catalog</module>
 		<module>mqi-client</module>
 		<module>mqi-server</module>
 		<module>obs-sdk</module>
 		<module>scaler</module>
-		<module>wrapper</module>
-		<module>request-repository</module>
-		<module>queue-watcher</module>
 	</modules>
 </project>

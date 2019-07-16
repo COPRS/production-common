@@ -2,9 +2,9 @@ spring:
   application:
     name: scaler
     
-# Logging
+# Logging     
 logging:
-  config: ./test/log4j2-test.yml
+  config: classpath:log4j2-test.yml
   
 # Kafka
 kafka:

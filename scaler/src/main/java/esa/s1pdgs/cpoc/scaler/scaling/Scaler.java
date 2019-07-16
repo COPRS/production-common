@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.common.errors.k8s.K8sUnknownResourceException;
 import esa.s1pdgs.cpoc.common.errors.k8s.PodResourceException;
 import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStopException;
 import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.scaler.DevProperties;
 import esa.s1pdgs.cpoc.scaler.k8s.K8SAdministration;
 import esa.s1pdgs.cpoc.scaler.k8s.K8SMonitoring;
@@ -141,7 +142,7 @@ public class Scaler {
                     e.getLogMessage());
         } catch (Exception e) {
             LOGGER.error("[INIT] [code {}] [msg {}]",
-                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage(), e);
+                    ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
         }
 
     }
@@ -293,7 +294,7 @@ public class Scaler {
                     e.getCode().getCode(), e.getLogMessage());
         } catch (Exception e) {
             LOGGER.error("[MONITOR] [step {}] [code {}] [msg {}]", step,
-                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage(), e);
+                    ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
         }
         LOGGER.info("[MONITOR] [step 0] End");
     }

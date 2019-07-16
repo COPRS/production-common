@@ -1,8 +1,11 @@
 spring:
   application:
     name: s1pdgs-mqi-app
+    
+# Logging     
 logging:
-  config: ./src/test/resources/log4j2.yml
+  config: classpath:log4j2-test.yml
+ 
 kafka:
   bootstrap-servers: ${spring.embedded.kafka.brokers}
   hostname: wrapper-0

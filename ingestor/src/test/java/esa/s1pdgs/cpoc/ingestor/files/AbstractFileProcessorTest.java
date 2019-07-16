@@ -12,7 +12,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Files;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,14 +78,9 @@ public class AbstractFileProcessorTest {
     /**
      * File test
      */
-    private File file = new File("test.xml");
+    private File file = new File("/tmp/test.xml");
     
-    /**
-     * 
-     */
-    private String BACKUPDIRECTORY = "/tmp";
-    
-    private File backupFile;
+    private File backupFile = new File("/tmp/bkp/test.xml");
 
     /**
      * To check the raised custom exceptions
@@ -104,11 +99,11 @@ public class AbstractFileProcessorTest {
 
         file.createNewFile();
         
-        backupFile = Paths.get(BACKUPDIRECTORY, file.getName()).toFile();
-
+        Files.createDirectory(backupFile.getParentFile().toPath());
+        
         doReturn(file).when(message).getPayload();
 
-        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus, BACKUPDIRECTORY);
+        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus, file.getParent(), backupFile.getParent());
     }
 
     /**
@@ -122,6 +117,12 @@ public class AbstractFileProcessorTest {
         
         if (backupFile.exists()) {
         	backupFile.delete();
+        }
+        
+        
+        if (backupFile.getParentFile().exists())
+        {
+        	backupFile.getParentFile().delete();
         }
     }
 
@@ -261,7 +262,7 @@ public class AbstractFileProcessorTest {
                 new Exception("cause"));
         doThrow(exc).when(obsService).exist(Mockito.any(), Mockito.anyString());
 
-        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus, "/");
+        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus, file.getParent(), "/");
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
@@ -348,8 +349,9 @@ class FileProcessorImpl extends AbstractFileProcessor<String> {
             final PublicationServices<String> publisher,
             final AbstractFileDescriptorService extractor,
             final AppStatus appStatus,
+            final String pickupDirectory,
             final String backupDirectory) {
-        super(obsService, publisher, extractor, ProductFamily.BLANK, appStatus, backupDirectory);
+        super(obsService, publisher, extractor, ProductFamily.BLANK, appStatus, pickupDirectory, backupDirectory);
     }
 
     /**

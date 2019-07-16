@@ -12,6 +12,7 @@ import org.springframework.kafka.listener.ConsumerAwareRebalanceListener;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 
 /**
  * Rebalance listener when messages are in memory
@@ -110,10 +111,10 @@ public class MemoryConsumerAwareRebalanceListener
                 LOGGER.error(
                         "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",
                         defaultMode, ace.getLogMessage());
-            } catch (Exception exc) {
+            } catch (Exception e) {
                 LOGGER.error(
                         "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",
-                        defaultMode, exc.getMessage());
+                        defaultMode, LogUtils.toString(e));
             }
             if (startingOffset == -3) {
                 LOGGER.info("[MONITOR] [rebalance] Leaving it alone");

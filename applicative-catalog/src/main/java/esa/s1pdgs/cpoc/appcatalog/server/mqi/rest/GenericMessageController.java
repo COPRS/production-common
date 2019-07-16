@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.mqi.MessageManager;
 import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
@@ -75,8 +76,8 @@ public class GenericMessageController<T> {
     	   LOGGER.error("[Read Message] [Topic {}] [Partition {}] [Offset {}] [Body {}] ERROR", topic, partition, offset, body.getGroup(), e);
            this.appStatus.setError("MQI");
             
-        } catch (Exception exc) {
-            LOGGER.error("[read] {}", exc.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("[read] {}", LogUtils.toString(e));
             this.appStatus.setError("MQI");            
         }
         return new ResponseEntity<AppCatMessageDto<T>>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -101,8 +102,8 @@ public class GenericMessageController<T> {
 
             this.appStatus.setWaiting("MQI");            
             return new ResponseEntity<List<AppCatMessageDto<T>>>(messagesToReturn, HttpStatus.OK);          
-        } catch (Exception exc) {
-            LOGGER.error("[next] {}", exc.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("[next] {}", LogUtils.toString(e));
             this.appStatus.setError("MQI");            
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -122,8 +123,8 @@ public class GenericMessageController<T> {
             LOGGER.error("[Send Message] [MessageID {}] No MqiMessage found", messageID);
             this.appStatus.setWaiting("MQI");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);	
-        } catch (Exception exc) {
-            LOGGER.error("[send] {}", exc.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("[send] {}", LogUtils.toString(e));
             this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -142,8 +143,8 @@ public class GenericMessageController<T> {
             LOGGER.error("[Ack Message] [MessageID {}] [Ack {}] {}", messageID, ack, exc.getMessage());
             this.appStatus.setWaiting("MQI");
             return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
-        } catch (Exception exc) {
-            LOGGER.error("[ack] {}", exc.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("[ack] {}", LogUtils.toString(e));
             this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -165,8 +166,8 @@ public class GenericMessageController<T> {
             LOGGER.error("[Get] [MessageID {}] No MqiMessage Found with MessageID", messageID);
             this.appStatus.setWaiting("MQI");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception exc) {
-            LOGGER.error("[Get] {}", exc.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("[Get] {}", LogUtils.toString(e));
             this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -182,8 +183,8 @@ public class GenericMessageController<T> {
            	this.appStatus.setWaiting("MQI");
            	return new ResponseEntity<Long>(Long.valueOf(offset), HttpStatus.OK);
        
-        } catch (Exception exc) {
-            LOGGER.error("[earliestOffset] {}", exc.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("[earliestOffset] {}", LogUtils.toString(e));
             this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -202,8 +203,8 @@ public class GenericMessageController<T> {
         	final int number = messageManager.countReadingMessages(pod, topic);
             this.appStatus.setWaiting("MQI");
             return new ResponseEntity<Integer>(Integer.valueOf(number), HttpStatus.OK);
-        } catch (Exception exc) {
-            LOGGER.error("[nbMessages] {}", exc.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("[nbMessages] {}", LogUtils.toString(e));
             this.appStatus.setError("MQI");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -7,18 +7,7 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-jobgenerator-app:1.0.0 %-5level: %msg [%thread] %n"
-    RollingFile:
-      name: FILE
-      fileName: ${env:job_logging_file:-./s1pdgs-jobgenerator.log}
-      filePattern: "${env:job_logging_file:-./s1pdgs-jobgenerator.log}.%d{yyyy-MM-dd-hh-mm}.gz"
-      PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-jobgenerator-app:1.0.0 %-5level: %msg [%thread] %n"
-      Policies:
-        SizeBasedTriggeringPolicy:
-          size: 10 MB
-      DefaultRollOverStrategy:
-        max: 30
+        Pattern: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} hostname-local s1pdgs-metadata-catalog-app-1.0.0 %-5level: %msg [%thread] %n"
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc
@@ -26,25 +15,26 @@ Configuration:
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
       - name: org.springframework
         level: error
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
+      - name: kafka
+        level: warn
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
       - name: org.apache
         level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
       - name: com.amazonaws
         level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
     Root:
       level: debug
       AppenderRef:

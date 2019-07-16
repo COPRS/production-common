@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 
 @RestController
@@ -51,9 +52,9 @@ public class EdrsSessionMetadataController {
 			LOGGER.error("[productType {}] [productName {}] [code {}] {}", productType, productName, ace.getCode().getCode(),
 					ace.getLogMessage());
 			return new ResponseEntity<EdrsSessionMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
-		} catch (Exception exc) {
+		} catch (Exception e) {
 			LOGGER.error("[productType {}] [productName {}] [code {}] [msg {}]", productType, productName,
-					ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
+					ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
 			return new ResponseEntity<EdrsSessionMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

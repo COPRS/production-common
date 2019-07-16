@@ -57,7 +57,7 @@ public class EdrsSessionProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new SessionFilesProcessor(obsService, publisher, extractor, appStatus, backupDirectory);
+        service = new SessionFilesProcessor(obsService, publisher, extractor, appStatus, backupDirectory, backupDirectory);
     }
 
     /**
