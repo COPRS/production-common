@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.scaler.openstack;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,6 +75,16 @@ public class OpenStackAdministration {
         this.osProperties = osProperties;
         this.serverService = serverService;
         this.volumeService = volumeService;
+    }
+    
+    public String lookUpServerId(String serverName) {
+        for (Server server :  osClient().compute().servers().list()) {
+            if (server.getName().equals(serverName)) {
+            	return server.getId();
+            }
+        }
+        
+        return null;
     }
 
     /**
