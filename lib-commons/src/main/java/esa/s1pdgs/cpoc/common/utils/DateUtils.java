@@ -64,7 +64,7 @@ public class DateUtils {
     }
     
     public static String convertToMetadataDateTimeFormat(String datetime) {
-        if (datetime.length() == 27) {
+        if (datetime.endsWith("Z")) {
             return convertToAnotherFormat(datetime, METADATA_DATE_FORMATTER, METADATA_DATE_FORMATTER); // "convert" to validate
         } else if (datetime.length() == 26) {
             return convertToAnotherFormat(datetime, DATE_FORMATTER_26, METADATA_DATE_FORMATTER);
