@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsAlreadyExist;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.processing.IngestorIgnoredFileException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.TreeCopier;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
@@ -187,7 +188,15 @@ public abstract class AbstractFileProcessor<T> {
 		final Reporting reportBackup = reportingFactory.newReporting(3);
 		reportBackup.reportStart(String.format("Start copying file %s to %s", file.getName(), backupDirectory));
 		try {
-			createDirAndCopy(file, pickupDirectory, backupDirectory);
+			Path pickupPath = new File(pickupDirectory).toPath();
+			Path backupPath = new File(backupDirectory).toPath();
+			
+			Path productDir = pickupPath.relativize(file.toPath()).subpath(0, 1);
+			Path dirToCopy = pickupPath.resolve(productDir);
+			Path target = backupPath.resolve(productDir);
+			TreeCopier tc = new TreeCopier(dirToCopy, target, true);
+			Files.walkFileTree(dirToCopy, tc);
+			
 			reportBackup.reportStop(String.format("End copying file %s to %s", file.getName(), backupDirectory));
 		} catch (IOException e) {
 			reportBackup.reportError(
@@ -196,17 +205,17 @@ public abstract class AbstractFileProcessor<T> {
 		}
 	}
 	
-	private void createDirAndCopy(File file, String pickupDir, String backupDir) throws IOException {
-		Path relativePath = new File(pickupDir).toPath().relativize(file.toPath());
-		Path bkpPath = new File(backupDir).toPath().resolve(relativePath);
-		Files.createDirectories(bkpPath.getParent());
-
-		if (!Files.exists(bkpPath)) {
-			Files.copy(file.toPath(), bkpPath);
-		} else {
-			LOGGER.warn("File exists already: {}", bkpPath);
-		}
-	}
+//	private void createDirAndCopy(File file, String pickupDir, String backupDir) throws IOException {
+//		Path relativePath = new File(pickupDir).toPath().relativize(file.toPath());
+//		Path bkpPath = new File(backupDir).toPath().resolve(relativePath);
+//		Files.createDirectories(bkpPath.getParent());
+//
+//		if (!Files.exists(bkpPath)) {
+//			Files.copy(file.toPath(), bkpPath);
+//		} else {
+//			LOGGER.warn("File exists already: {}", bkpPath);
+//		}
+//	}
 
 	private final void delete(final Reporting.Factory reportingFactory, final File file, int reportingStep) {
 		final Reporting reportDelete = reportingFactory.newReporting(reportingStep);
