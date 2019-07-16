@@ -84,7 +84,11 @@ public class OpenStackAdministration {
      */
     public void deleteServer(final String serverId) throws OsEntityException {
         final OSClientV3 osClient = osClient();
+        LOGGER.info("Deleting server '{}' via OpenStack API",serverId);
         final Server s = serverService.get(osClient, serverId);
+        if (s == null) {
+        	 LOGGER.warn("[serverId {}] Server was requested to delete, but does not exist", serverId);
+        }
         final OpenStackServerProperties.ServerProperties serverProperties =
                 osProperties.getServerWrapper();
         if (serverProperties.isFloatActivation()) {
