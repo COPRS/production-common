@@ -96,7 +96,8 @@ public class FileUtils {
     public static void delete(final String path) throws IOException {
         Path pathObj = Paths.get(path);
         Files.walk(pathObj, FileVisitOption.FOLLOW_LINKS)
-                .sorted(Comparator.reverseOrder()).map(Path::toFile)
-                .peek(System.out::println).forEach(File::delete);
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
     }
 }
