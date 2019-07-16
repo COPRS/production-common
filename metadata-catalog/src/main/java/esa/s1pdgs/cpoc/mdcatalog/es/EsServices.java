@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -200,10 +201,10 @@ public class EsServices {
 				r.setProductType(source.get("productType").toString());
 				r.setKeyObjectStorage(source.get("url").toString());
 				if (source.containsKey("validityStartTime")) {
-					r.setValidityStart(source.get("validityStartTime").toString());
+					r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
 				}
 				if (source.containsKey("validityStopTime")) {
-					r.setValidityStop(source.get("validityStopTime").toString());
+					r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
 				}
 				return r;
 			}
@@ -304,10 +305,10 @@ public class EsServices {
 		r.setProductType(source.get("productType").toString());
 		r.setKeyObjectStorage(source.get("url").toString());
 		if (source.containsKey("validityStartTime")) {
-			r.setValidityStart(source.get("validityStartTime").toString());
+			r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
 		}
 		if (source.containsKey("validityStopTime")) {
-			r.setValidityStop(source.get("validityStopTime").toString());
+			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
 		}		
 		return r;
 	}
@@ -460,10 +461,10 @@ public class EsServices {
 					local.setProductType(source.get("productType").toString());
 					local.setKeyObjectStorage(source.get("url").toString());
 					if (source.containsKey("startTime")) {
-						local.setValidityStart(source.get("startTime").toString());
+						local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
 					}
 					if (source.containsKey("stopTime")) {
-						local.setValidityStop(source.get("stopTime").toString());
+						local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
 					}
 					r.add(local);
 				}
@@ -497,10 +498,10 @@ public class EsServices {
 		}
 		r.setKeyObjectStorage(source.get("url").toString());
 		if (source.containsKey("validityStartTime")) {
-			r.setValidityStart(source.get("validityStartTime").toString());
+			r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
 		}
 		if (source.containsKey("validityStopTime")) {
-			r.setValidityStop(source.get("validityStopTime").toString());
+			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
 		}
 		return r;
 	}
@@ -585,12 +586,12 @@ public class EsServices {
 			throw new MetadataMalformedException("totalNumberOfSlice");
 		}
 		if (source.containsKey("startTime")) {
-			r.setValidityStart(source.get("startTime").toString());
+			r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
 		} else {
 			throw new MetadataMalformedException("startTime");
 		}
 		if (source.containsKey("stopTime")) {
-			r.setValidityStop(source.get("stopTime").toString());
+			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat((source.get("stopTime").toString())));
 		} else {
 			throw new MetadataMalformedException("stopTime");
 		}
@@ -631,12 +632,12 @@ public class EsServices {
 			throw new MetadataMalformedException("sliceNumber");
 		}
 		if (source.containsKey("startTime")) {
-			r.setValidityStart(source.get("startTime").toString());
+			r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
 		} else {
 			throw new MetadataMalformedException("startTime");
 		}
 		if (source.containsKey("stopTime")) {
-			r.setValidityStop(source.get("stopTime").toString());
+			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
 		} else {
 			throw new MetadataMalformedException("stopTime");
 		}
@@ -685,12 +686,12 @@ public class EsServices {
 			throw new MetadataMalformedException("url");
 		}
 		if (source.containsKey("startTime")) {
-			r.setValidityStart(source.get("startTime").toString());
+			r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
 		} else {
 			throw new MetadataMalformedException("startTime");
 		}
 		if (source.containsKey("stopTime")) {
-			r.setValidityStop(source.get("stopTime").toString());
+			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
 		} else {
 			throw new MetadataMalformedException("stopTime");
 		}

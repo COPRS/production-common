@@ -560,12 +560,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                             job.getAppDataJob().getProduct()
                                                     .getStartTime(),
                                             AppDataJobProductDto.TIME_FORMATTER,
-                                            AbstractMetadata.DATE_FORMATTER),
+                                            AbstractMetadata.METADATA_DATE_FORMATTER),
                                     DateUtils.convertToAnotherFormat(
                                             job.getAppDataJob().getProduct()
                                                     .getStopTime(),
                                             AppDataJobProductDto.TIME_FORMATTER,
-                                            AbstractMetadata.DATE_FORMATTER),
+                                            AbstractMetadata.METADATA_DATE_FORMATTER),
                                     job.getAppDataJob().getProduct()
                                             .getSatelliteId(),
                                     job.getAppDataJob().getProduct()
@@ -663,12 +663,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                                                 DateUtils
                                                                         .convertToAnotherFormat(
                                                                                 file.getValidityStart(),
-                                                                                file.getStartTimeFormatter(),
+                                                                                AbstractMetadata.METADATA_DATE_FORMATTER,
                                                                                 JobOrderTimeInterval.DATE_FORMATTER),
                                                                 DateUtils
                                                                         .convertToAnotherFormat(
                                                                                 file.getValidityStop(),
-                                                                                file.getStopTimeFormatter(),
+                                                                                AbstractMetadata.METADATA_DATE_FORMATTER,
                                                                                 JobOrderTimeInterval.DATE_FORMATTER),
                                                                 file.getProductName()))
                                                         .collect(Collectors
