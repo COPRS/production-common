@@ -17,6 +17,7 @@ COPY applicative-catalog/ /app/applicative-catalog
 COPY archives/ /app/archives
 COPY compression/ /app/compression
 COPY ingestor/ /app/ingestor
+COPY inbox-polling/ /app/inbox-polling
 COPY job-generator/ /app/job-generator
 COPY lib-commons/ /app/lib-commons
 COPY metadata-catalog/ /app/metadata-catalog
