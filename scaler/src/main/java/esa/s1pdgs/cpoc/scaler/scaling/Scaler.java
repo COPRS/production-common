@@ -557,12 +557,12 @@ public class Scaler {
             	 * This should basically never worked as expected and its not clear why this decision
             	 * was made. We are now using the server name as this seems to be the most obvious approach.
             	 */
+            	String serverId = osAdministration.lookUpServerId(node.getDescription().getName());
                 LOGGER.info(
                         "[MONITOR] [step 6] [serverId {}] 3 - Starting removing server",
-                        node.getDescription().getName());
+                        serverId);
                 try {
-                    this.osAdministration.deleteServer(                    		
-                            node.getDescription().getName());
+                    this.osAdministration.deleteServer(serverId);
                 } catch (OsEntityException e) {
                     LOGGER.error("[MONITOR] [step 6] [code {}] {}",
                             e.getCode().getCode(), e.getLogMessage());
