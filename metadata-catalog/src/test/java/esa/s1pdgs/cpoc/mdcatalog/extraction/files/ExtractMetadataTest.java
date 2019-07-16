@@ -616,8 +616,6 @@ public class ExtractMetadataTest {
 
         try {
             JSONObject result = extractor.processProduct(descriptor,ProductFamily.L0_ACN, file);
-            System.out.println(expectedResult);
-            System.out.println(result);
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
