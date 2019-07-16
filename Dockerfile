@@ -49,6 +49,7 @@ COPY --from=buildenv /app/applicative-catalog/target /app/applicative-catalog/ta
 COPY --from=buildenv /app/archives/target /app/archives/target
 COPY --from=buildenv /app/compression/target /app/compression/target
 COPY --from=buildenv /app/ingestor/target /app/ingestor/target
+COPY --from=buildenv /app/inbox-polling/target /app/inbox-polling/target
 COPY --from=buildenv /app/job-generator/target /app/job-generator/target
 COPY --from=buildenv /app/metadata-catalog /app/metadata-catalog
 COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
