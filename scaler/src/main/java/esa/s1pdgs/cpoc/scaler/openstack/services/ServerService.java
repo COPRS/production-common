@@ -159,6 +159,7 @@ public class ServerService {
     	org.openstack4j.api.compute.ServerService service = osClient.compute().servers();
     	for (Server server: service.list()) {
     		LOGGER.debug("list server: {} {} {}",server.getName(), server.getHost(), server.getId(), server.getUuid());
+    		LOGGER.debug(server);
     	}
     	
         return osClient.compute().servers().get(serverId);
