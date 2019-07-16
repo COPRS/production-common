@@ -551,14 +551,17 @@ public class Scaler {
         // Remove the corresponding VM
         if (!CollectionUtils.isEmpty(nodesToDelete)) {
             nodesToDelete.forEach(node -> {
+            	/*
+            	 * Previous versions had been using externalId in order to address the server.
+            	 * This should basically never worked as expected and its not clear why this decision
+            	 * was made. We are now using the server name as this seems to be the most obvious approach.
+            	 */
                 LOGGER.info(
                         "[MONITOR] [step 6] [serverId {}] 3 - Starting removing server",
-                        node.getDescription().getExternalId());
+                        node.getDescription().getName());
                 try {
-                	LOGGER.info("### node name"+node.getDescription().getName());
-                	LOGGER.info("### externalId"+node.getDescription().getExternalId());
                     this.osAdministration.deleteServer(                    		
-                            node.getDescription().getExternalId());
+                            node.getDescription().getName());
                 } catch (OsEntityException e) {
                     LOGGER.error("[MONITOR] [step 6] [code {}] {}",
                             e.getCode().getCode(), e.getLogMessage());
