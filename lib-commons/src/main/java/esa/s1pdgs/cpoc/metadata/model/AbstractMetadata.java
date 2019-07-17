@@ -3,36 +3,16 @@ package esa.s1pdgs.cpoc.metadata.model;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
- * Class describing the metdata of a file
+ * Class describing the metadata of a file
  * 
  * @author Cyrielle Gailliard
  */
 public abstract class AbstractMetadata {
 
-    /**
-     * 
-     */
-	@JsonIgnore
-    public final static DateTimeFormatter DATE_FORMATTER =
+	public final static DateTimeFormatter METADATA_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
-
-    /**
-     * 
-     */
-	@JsonIgnore
-    public final static DateTimeFormatter DATE_FORMATTER_26 =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-
-    /**
-     * 
-     */
-	@JsonIgnore
-    public final static DateTimeFormatter DATE_FORMATTER_LIGTH =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
+	
     /**
      * Product name
      */
@@ -77,7 +57,6 @@ public abstract class AbstractMetadata {
     }
     
     public AbstractMetadata() {
-    	
     }
 
     /**
@@ -190,26 +169,5 @@ public abstract class AbstractMetadata {
         }
         return ret;
     }
-    
-    @JsonIgnore
-    public DateTimeFormatter getStartTimeFormatter() {
-        if (validityStart.length() > 26) {
-            return DATE_FORMATTER;
-        } else if (validityStart.length() == 26) {
-            return DATE_FORMATTER_26;
-        } else {
-            return DATE_FORMATTER_LIGTH;
-        }
-    }
-    
-    @JsonIgnore
-    public DateTimeFormatter getStopTimeFormatter() {
-        if (validityStop.length() > 26) {
-            return DATE_FORMATTER;
-        } else if (validityStop.length() == 26) {
-            return DATE_FORMATTER_26;
-        } else {
-            return DATE_FORMATTER_LIGTH;
-        }
-    }
+
 }

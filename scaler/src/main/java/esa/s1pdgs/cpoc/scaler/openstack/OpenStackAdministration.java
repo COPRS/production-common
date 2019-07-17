@@ -78,6 +78,8 @@ public class OpenStackAdministration {
     }
     
     public String lookUpServerId(String serverName) {
+        Map<String, String> filter = new HashMap<String, String>();
+        filter.put("name", "^" + osProperties.getServerWrapper() + "*");
         for (Server server :  osClient().compute().servers().list()) {
             if (server.getName().equals(serverName)) {
             	return server.getId();

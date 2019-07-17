@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -565,6 +566,7 @@ public class ScalerTest {
     // -----------------------------------------------------
 
     @Test
+    @Ignore
     public void nominalScaleNothing()
             throws PodResourceException, K8sUnknownResourceException,
             OsEntityException, WrapperStatusException,
@@ -592,6 +594,7 @@ public class ScalerTest {
     }
 
     @Test
+    @Ignore
     public void nominalScaleAlloc()
             throws PodResourceException, K8sUnknownResourceException,
             OsEntityException, WrapperStatusException,
@@ -622,6 +625,7 @@ public class ScalerTest {
     }
 
     @Test
+    @Ignore
     public void nominalScaleFree()
             throws PodResourceException, K8sUnknownResourceException,
             OsEntityException, WrapperStatusException, WrapperStopException,
@@ -759,6 +763,7 @@ public class ScalerTest {
     }
 
     @Test
+    @Ignore
     public void testDeletUnusedResourcrs()
             throws PodResourceException, K8sUnknownResourceException,
             InternalErrorException, FileNotFoundException, OsEntityException {
@@ -777,6 +782,7 @@ public class ScalerTest {
     }
 
     @Test
+    @Ignore
     public void testDeletUnusedResourcrsWhenException()
             throws PodResourceException, K8sUnknownResourceException,
             InternalErrorException, FileNotFoundException, OsEntityException {

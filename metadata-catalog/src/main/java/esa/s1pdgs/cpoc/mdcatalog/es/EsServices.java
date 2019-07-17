@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mdcatalog.es;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -204,10 +206,18 @@ public class EsServices {
 				r.setProductType(source.get("productType").toString());
 				r.setKeyObjectStorage(source.get("url").toString());
 				if (source.containsKey("validityStartTime")) {
-					r.setValidityStart(source.get("validityStartTime").toString());
+					try {
+						r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+					} catch(DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStartTime");
+					}
 				}
 				if (source.containsKey("validityStopTime")) {
-					r.setValidityStop(source.get("validityStopTime").toString());
+					try {
+						r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+					} catch(DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStopTime");
+					}
 				}
 				return r;
 			}
@@ -308,10 +318,10 @@ public class EsServices {
 		r.setProductType(source.get("productType").toString());
 		r.setKeyObjectStorage(source.get("url").toString());
 		if (source.containsKey("validityStartTime")) {
-			r.setValidityStart(source.get("validityStartTime").toString());
+			r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
 		}
 		if (source.containsKey("validityStopTime")) {
-			r.setValidityStop(source.get("validityStopTime").toString());
+			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
 		}		
 		return r;
 	}
@@ -466,10 +476,18 @@ public class EsServices {
 					local.setProductType(source.get("productType").toString());
 					local.setKeyObjectStorage(source.get("url").toString());
 					if (source.containsKey("startTime")) {
-						local.setValidityStart(source.get("startTime").toString());
+						try {
+							local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch(DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
 					}
 					if (source.containsKey("stopTime")) {
-						local.setValidityStop(source.get("stopTime").toString());
+						try {
+							local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch(DateTimeParseException e) {
+							throw new MetadataMalformedException("stopTime");
+						}
 					}
 					r.add(local);
 				}
@@ -503,10 +521,18 @@ public class EsServices {
 		}
 		r.setKeyObjectStorage(source.get("url").toString());
 		if (source.containsKey("validityStartTime")) {
-			r.setValidityStart(source.get("validityStartTime").toString());
+			try {
+				r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStartTime");
+			}
 		}
 		if (source.containsKey("validityStopTime")) {
-			r.setValidityStop(source.get("validityStopTime").toString());
+			try {
+				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStopTime");
+			}
 		}
 		return r;
 	}
@@ -591,12 +617,20 @@ public class EsServices {
 			throw new MetadataMalformedException("totalNumberOfSlice");
 		}
 		if (source.containsKey("startTime")) {
-			r.setValidityStart(source.get("startTime").toString());
+			try {
+				r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("startTime");
+			}
 		} else {
 			throw new MetadataMalformedException("startTime");
 		}
 		if (source.containsKey("stopTime")) {
-			r.setValidityStop(source.get("stopTime").toString());
+			try {
+				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat((source.get("stopTime").toString())));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("stopTime");
+			}
 		} else {
 			throw new MetadataMalformedException("stopTime");
 		}
@@ -637,12 +671,20 @@ public class EsServices {
 			throw new MetadataMalformedException("sliceNumber");
 		}
 		if (source.containsKey("startTime")) {
-			r.setValidityStart(source.get("startTime").toString());
+			try {
+				r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("startTime");
+			}
 		} else {
 			throw new MetadataMalformedException("startTime");
 		}
 		if (source.containsKey("stopTime")) {
-			r.setValidityStop(source.get("stopTime").toString());
+			try {
+				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("stopTime");
+			}
 		} else {
 			throw new MetadataMalformedException("stopTime");
 		}
@@ -691,12 +733,20 @@ public class EsServices {
 			throw new MetadataMalformedException("url");
 		}
 		if (source.containsKey("startTime")) {
-			r.setValidityStart(source.get("startTime").toString());
+			try {
+				r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("startTime");
+			}
 		} else {
 			throw new MetadataMalformedException("startTime");
 		}
 		if (source.containsKey("stopTime")) {
-			r.setValidityStop(source.get("stopTime").toString());
+			try {
+				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("stopTime");
+			}
 		} else {
 			throw new MetadataMalformedException("stopTime");
 		}
