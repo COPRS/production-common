@@ -15,18 +15,18 @@ import org.junit.Test;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.inbox.polling.InboxEntry;
 import esa.s1pdgs.cpoc.inbox.polling.filter.InboxFilter;
-import esa.s1pdgs.cpoc.inbox.polling.fs.FilesystemInbox;
+import esa.s1pdgs.cpoc.inbox.polling.fs.FilesystemInboxAdapter;
 import esa.s1pdgs.cpoc.inbox.polling.fs.FilesystemInboxEntry;
 
 public class TestFilesystemInbox {
 	
 	private File testDir;
-	private FilesystemInbox uut;
+	private FilesystemInboxAdapter uut;
 	
 	@Before
 	public final void setUp() throws IOException {
 		testDir = Files.createTempDirectory(TestFilesystemInbox.class.getSimpleName()).toFile();
-		uut = new FilesystemInbox(testDir);
+		uut = new FilesystemInboxAdapter(testDir);
 	}
 	
 	@After
