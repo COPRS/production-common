@@ -289,7 +289,7 @@ public class EsServicesTest{
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.00012Z\",\"validityStopTime\":"
+		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.000120Z\",\"validityStopTime\":"
 		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
