@@ -1,7 +1,9 @@
 spring:
   application:
     name: s1pdgs-inbox-polling
-    
+  datasource:
+    url: jdbc:hsqldb:file:/app/db/db;create=true
+      
 logging:
   config: log4j2.yml
 
