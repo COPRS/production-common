@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.inbox;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import esa.s1pdgs.cpoc.inbox.config.InboxPollingConfigurationProperties;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Ignore
 public class TestApplication {			
 	@Autowired 
 	private InboxPollingService service;
