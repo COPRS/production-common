@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperPodMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoring;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
 import esa.s1pdgs.cpoc.scaler.openstack.OpenStackAdministration;
+import esa.s1pdgs.cpoc.scaler.openstack.OpenStackServerProperties.ServerProperties;
 
 /**
  * L1 resources scaler
@@ -562,6 +563,7 @@ public class Scaler {
             		LOGGER.error(
                             "[MONITOR] [step 6] [serverName {}] 3 - Unable to identify server",
                             node.getDescription().getName());
+            		continue;
             	}
                 LOGGER.info(
                         "[MONITOR] [step 6] [serverId {}] 3 - Starting removing server '{}'",
