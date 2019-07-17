@@ -78,7 +78,7 @@ public class ExtractMetadata {
 	 */
 	public ExtractMetadata(Map<String, Float> typeOverlap, Map<String, Float> typeSliceLength, String xsltDirectory) {
 		this.transFactory = TransformerFactory.newInstance();
-		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 		this.typeOverlap = typeOverlap;
 		this.typeSliceLength = typeSliceLength;
 		this.xsltDirectory = xsltDirectory;
