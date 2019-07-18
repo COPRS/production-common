@@ -10,13 +10,13 @@ Configuration:
         Pattern: "%msg %n"
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
-        level: info
+      - name: esa.s1pdgs.cpoc.inbox
+        level: debug
         additivity: false
         AppenderRef:
           - ref: STDOUT
-      - name: org.springframework
-        level: debug
+      - name: org
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT

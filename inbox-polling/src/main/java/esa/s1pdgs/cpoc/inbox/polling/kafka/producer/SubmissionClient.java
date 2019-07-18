@@ -6,7 +6,7 @@ public interface SubmissionClient {
 	
 	public static final SubmissionClient NULL = new SubmissionClient() {
 		@Override
-		public void resubmit(final String topic, IngestionDto dto) {}
+		public void publish(IngestionDto dto) {}
 	};	
-	void resubmit(final String topic, final IngestionDto dto);
+	void publish(final IngestionDto dto);
 }

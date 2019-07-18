@@ -11,5 +11,10 @@ final class FakeInboxEntry implements InboxEntry {
 	@Override
 	public final String getName() {
 		return name;
+	}
+	
+	@Override
+	public String getUrl() {
+		return "test://" + name;
 	}		
 }

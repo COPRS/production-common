@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +44,7 @@ public class MetadataBuilderTest {
 		MockitoAnnotations.initMocks(this);
 	}
 
-	private void mockExtractorProcessEOFFIle(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorProcessEOFFIle(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -54,7 +55,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processEOFFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
 	}
 
-	private void mockExtractorprocessEOFFileWithoutNamespace(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessEOFFileWithoutNamespace(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -66,7 +67,7 @@ public class MetadataBuilderTest {
 				Mockito.any(File.class));
 	}
 
-	private void mockExtractorprocessXMLFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessXMLFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -77,7 +78,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processXMLFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
 	}
 
-	private void mockExtractorprocessSAFEFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessSAFEFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -155,7 +156,7 @@ public class MetadataBuilderTest {
 	}
 
 	@Test
-	public void testBuildConfigFileMetadataXml() throws JSONException, MetadataExtractionException {
+	public void testBuildConfigFileMetadataXml() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.XML);
@@ -186,7 +187,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataEOF() throws JSONException, MetadataExtractionException {
+	public void testBuildConfigFileMetadataEOF() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -217,7 +218,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataAUXRESORB() throws JSONException, MetadataExtractionException {
+	public void testBuildConfigFileMetadataAUXRESORB() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -248,7 +249,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataSAFE() throws JSONException, MetadataExtractionException {
+	public void testBuildConfigFileMetadataSAFE() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -279,7 +280,7 @@ public class MetadataBuilderTest {
 	}
 
 	@Test
-	public void testBuildConfigFileMetadataInvalidExtension() throws MetadataExtractionException {
+	public void testBuildConfigFileMetadataInvalidExtension() throws MetadataExtractionException, MetadataMalformedException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");

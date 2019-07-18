@@ -15,4 +15,9 @@ public class BlacklistRegexNameInboxFilter implements InboxFilter {
 	public boolean accept(InboxEntry entry) {
 		return !pattern.matcher(entry.getName()).matches();
 	}
+
+	@Override
+	public String toString() {
+		return "BlacklistRegexNameInboxFilter [pattern=" + pattern + "]";
+	}
 }
