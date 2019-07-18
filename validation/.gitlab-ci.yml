@@ -3,11 +3,11 @@
 image: docker:latest
 
 variables:
-  MODULE_QUEUE_WATCHER: s1pro-core-validation
+  MODULE_VALIDATION: s1pro-core-validation
 
-queue-watcher-build:
+validation-build:
   stage: module
   script:
     - cd validation
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER:$CI_COMMIT_REF_SLUG"
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_VALIDATION:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_VALIDATION:$CI_COMMIT_REF_SLUG"
