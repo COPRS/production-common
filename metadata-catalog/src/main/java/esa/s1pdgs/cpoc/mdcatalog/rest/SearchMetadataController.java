@@ -69,6 +69,10 @@ public class SearchMetadataController {
 		try {
 			List<SearchMetadata> results = esServices.intervalQuery(startTime, stopTime, productType,
 					ProductFamily.fromValue(productFamily));
+			if (results == null) {
+				LOGGER.error("No results returned.");
+				return new ResponseEntity<List<SearchMetadata>>(HttpStatus.OK);
+			}
 			LOGGER.debug("Query returned {} results", results.size());
 
 			for (SearchMetadata result : results) {
