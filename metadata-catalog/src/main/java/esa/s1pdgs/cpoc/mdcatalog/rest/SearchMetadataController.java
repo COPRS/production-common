@@ -45,14 +45,14 @@ public class SearchMetadataController {
 			@RequestParam(name = "intervalStart", defaultValue = "NONE") String intervalStart,
 			@RequestParam(name = "intervalStop", defaultValue = "NONE") String intervalStop) {		
 		
-		LOGGER.info("Received interval query for family {}, product type {}, startTime {}, stopTime{}",productFamily, productType, intervalStart, intervalStop);
+		LOGGER.info("Received interval query for family '{}', product type '{}', startTime '{}', stopTime '{}'",productFamily, productType, intervalStart, intervalStop);
 		
 		List<SearchMetadata> response = new ArrayList<SearchMetadata>();
 		String startTime = null;
 		String stopTime = null;
 		try {
 			startTime = convertDateForSearch(intervalStart, -0.0f,
-					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'"));
+					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'"));
 
 			stopTime = convertDateForSearch(intervalStop, 0.0f,
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'"));
@@ -65,7 +65,7 @@ public class SearchMetadataController {
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
 		}
 
-		LOGGER.info("Performing metadata interval search in interval {} and {}", startTime, stopTime);
+		LOGGER.info("Performing metadata interval search in interval between {} and {}", startTime, stopTime);
 		try {
 			List<SearchMetadata> results = esServices.intervalQuery(startTime, stopTime, productType,
 					ProductFamily.fromValue(productFamily));

@@ -508,11 +508,19 @@ public class EsServices {
 				//.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 				//.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+		
+		LOGGER.debug("query composed is {}", queryBuilder);
+		
 		sourceBuilder.query(queryBuilder);
 		sourceBuilder.size(20);
 		
-		//TODO: Why is this L0_Segment in valIntersect.This looks broken!
-		SearchRequest searchRequest = new SearchRequest(productFamily.name().toLowerCase());
+		String index = null;
+		if (ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
+			index = productType.toLowerCase();
+		} else {
+			index = productFamily.name().toLowerCase();
+		}
+		SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		
