@@ -504,9 +504,9 @@ public class EsServices {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(startTime))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(stopTime))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(stopTime));
 				//.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+				//.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 				//.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		
 		LOGGER.debug("query composed is {}", queryBuilder);
