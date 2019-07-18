@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -493,5 +494,12 @@ class AbstractObsClientIncrementImpl extends AbstractObsClient {
     public int getUploadExecutionTimeoutS() throws ObsServiceException {
         return counterGetUploadTm.incrementAndGet();
     }
+
+	@Override
+	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd,
+			ObsFamily obsFamily) throws SdkClientException, ObsServiceException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

@@ -11,12 +11,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
@@ -47,6 +54,18 @@ public class S3ObsClientTest {
      */
     @Mock
     private S3ObsServices service;
+    
+    /**
+     * 
+     */
+    @Mock
+    private ObjectListing objListing1;
+    
+    /**
+     * 
+     */
+    @Mock
+    private ObjectListing objListing2;
 
     /**
      * Client to test
@@ -255,4 +274,106 @@ public class S3ObsClientTest {
         verify(service, never()).uploadDirectory(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
     }
+    
+	@Test
+	public void testGetListOfObjectsOfTimeFrameOfFamilyOneExists() throws ObsServiceException, SdkClientException {
+
+		Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+		Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
+		Date obj1Date = Date.from(Instant.parse("2020-01-02T00:00:00Z"));
+
+		S3ObjectSummary obj1 = new S3ObjectSummary();
+		obj1.setKey("obj1");
+		obj1.setLastModified(obj1Date);
+
+		List<S3ObjectSummary> objSums = new ArrayList<>();
+		objSums.add(obj1);
+
+		doReturn(objSums).when(objListing1).getObjectSummaries();
+		doReturn(false).when(objListing1).isTruncated();
+		doReturn(objListing1).when(service).listObjectsFromBucket("l0-slices");
+
+		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
+				ObsFamily.L0_SLICE);
+
+		assertEquals(1, returnedObjs.size());
+		assertEquals("obj1", returnedObjs.get(0).getKey());
+		verify(service, times(1)).listObjectsFromBucket("l0-slices");
+		verify(service, never()).listNextBatchOfObjectsFromBucket(Mockito.anyString(), Mockito.any());
+	}
+
+	@Test
+	public void testGetListOfObjectsOfTimeFrameOfFamilyNoneExists() throws ObsServiceException, SdkClientException {
+
+		Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+		Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
+		Date obj1Date = Date.from(Instant.parse("2020-01-04T00:00:00Z"));
+
+		S3ObjectSummary obj1 = new S3ObjectSummary();
+		obj1.setKey("obj1");
+		obj1.setLastModified(obj1Date);
+
+		List<S3ObjectSummary> objSums = new ArrayList<>();
+		objSums.add(obj1);
+
+		doReturn(objSums).when(objListing1).getObjectSummaries();
+		doReturn(false).when(objListing1).isTruncated();
+		doReturn(objListing1).when(service).listObjectsFromBucket("l0-slices");
+
+		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
+				ObsFamily.L0_SLICE);
+
+		assertEquals(0, returnedObjs.size());
+		verify(service, times(1)).listObjectsFromBucket("l0-slices");
+		verify(service, never()).listNextBatchOfObjectsFromBucket(Mockito.anyString(), Mockito.any());
+	}
+
+	@Test
+	public void testGetListOfObjectsOfTimeFrameOfFamilyWithTruncatedList()
+			throws ObsServiceException, SdkClientException {
+
+		Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+		Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
+
+		Date obj1Date = Date.from(Instant.parse("2020-01-02T00:00:00Z"));
+		Date obj2Date = Date.from(Instant.parse("2020-01-04T00:00:00Z"));
+		Date obj3Date = Date.from(Instant.parse("2020-01-02T03:00:00Z"));
+
+		S3ObjectSummary obj1 = new S3ObjectSummary();
+		obj1.setKey("obj1");
+		obj1.setLastModified(obj1Date);
+
+		S3ObjectSummary obj2 = new S3ObjectSummary();
+		obj2.setKey("obj2");
+		obj2.setLastModified(obj2Date);
+
+		S3ObjectSummary obj3 = new S3ObjectSummary();
+		obj3.setKey("obj3");
+		obj3.setLastModified(obj3Date);
+
+		List<S3ObjectSummary> objSums1 = new ArrayList<>();
+		objSums1.add(obj1);
+		objSums1.add(obj2);
+
+		List<S3ObjectSummary> objSums2 = new ArrayList<>();
+		objSums2.add(obj3);
+
+		doReturn(objSums1).when(objListing1).getObjectSummaries();
+		doReturn(true).when(objListing1).isTruncated();
+		doReturn(objListing1).when(service).listObjectsFromBucket("l0-slices");
+
+		doReturn(objSums2).when(objListing2).getObjectSummaries();
+		doReturn(false).when(objListing2).isTruncated();
+		doReturn(objListing2).when(service).listNextBatchOfObjectsFromBucket("l0-slices", objListing1);
+
+		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
+				ObsFamily.L0_SLICE);
+
+		assertEquals(2, returnedObjs.size());
+		assertEquals("obj1", returnedObjs.get(0).getKey());
+		assertEquals("obj3", returnedObjs.get(1).getKey());
+		verify(service, times(1)).listObjectsFromBucket(Mockito.anyString());
+		verify(service, times(1)).listNextBatchOfObjectsFromBucket(Mockito.anyString(), Mockito.any());
+	}    
+    
 }
