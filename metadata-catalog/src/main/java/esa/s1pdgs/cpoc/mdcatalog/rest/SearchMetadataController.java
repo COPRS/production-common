@@ -43,9 +43,11 @@ public class SearchMetadataController {
 			@PathVariable(name = "productFamily") String productFamily,
 			@RequestParam(name = "productType", defaultValue = "NONE") String productType,
 			@RequestParam(name = "intervalStart", defaultValue = "NONE") String intervalStart,
-			@RequestParam(name = "intervalStop", defaultValue = "NONE") String intervalStop) {
+			@RequestParam(name = "intervalStop", defaultValue = "NONE") String intervalStop) {		
+		
+		LOGGER.info("Received interval query for family {}, product type {}, startTime {}, stopTime{}",productFamily, productType, intervalStart, intervalStop);
+		
 		List<SearchMetadata> response = new ArrayList<SearchMetadata>();
-
 		String startTime = null;
 		String stopTime = null;
 		try {
