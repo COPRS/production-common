@@ -498,6 +498,58 @@ public class EsServices {
 		}
 		return null;
 	}
+	
+	
+	public List<SearchMetadata> intervalQuery(String startTime, String stopTime, String productType, ProductFamily productFamily) throws Exception {
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("startTime").lt(startTime))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(stopTime))
+				//.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+				//.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.size(20);
+		
+		//TODO: Why is this L0_Segment in valIntersect.This looks broken!
+		SearchRequest searchRequest = new SearchRequest(productFamily.name().toLowerCase());
+		searchRequest.types(indexType);
+		searchRequest.source(sourceBuilder);
+		
+		try {
+			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (searchResponse.getHits().totalHits >= 1) {
+				List<SearchMetadata> r = new ArrayList<>();
+				for (SearchHit hit : searchResponse.getHits().getHits()) {
+					Map<String, Object> source = hit.getSourceAsMap();
+					SearchMetadata local = new SearchMetadata();
+					local.setProductName(source.get("productName").toString());
+					local.setProductType(source.get("productType").toString());
+					local.setKeyObjectStorage(source.get("url").toString());
+					if (source.containsKey("startTime")) {
+						try {
+							local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch(DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
+					}
+					if (source.containsKey("stopTime")) {
+						try {
+							local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch(DateTimeParseException e) {
+							throw new MetadataMalformedException("stopTime");
+						}
+					}
+					r.add(local);
+				}
+				return r;
+			}
+		} catch (IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Function which return the product that correspond to the lastValCover
