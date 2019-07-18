@@ -503,8 +503,8 @@ public class EsServices {
 	public List<SearchMetadata> intervalQuery(String startTime, String stopTime, String productType, ProductFamily productFamily) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("insertionTime").lt(startTime))
-				.must(QueryBuilders.rangeQuery("insertionTime").gt(stopTime));
+				.must(QueryBuilders.rangeQuery("insertionTime").lt(startTime).gt(stopTime));
+				//.must(QueryBuilders.rangeQuery("insertionTime").gt(stopTime));
 				//.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 				//.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 				//.must(QueryBuilders.termQuery("processMode.keyword", processMode));
