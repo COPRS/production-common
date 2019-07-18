@@ -2,7 +2,7 @@
 <OnBoardMemoryConfigurationUpdate>
 <Creation_Time>UTC=2014-02-12T12:28:19</Creation_Time>
 <Validity_Start>UTC=2014-02-01T00:00:00</Validity_Start>
-<Validity_Stop>9999-99-99T99:99:99</Validity_Stop>
+<Validity_Stop>2099-12-31T23:59:59</Validity_Stop>
 <List_of_PacketStoreAssociations>
 <PacketStoreAssociation>
 <PacketStoreId>PS-0</PacketStoreId>

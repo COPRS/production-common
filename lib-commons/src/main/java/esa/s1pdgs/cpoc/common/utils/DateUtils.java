@@ -10,7 +10,16 @@ import java.util.Date;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
 public class DateUtils {
-
+	
+	private final static DateTimeFormatter METADATA_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+	private final static DateTimeFormatter DATE_FORMATTER_26 =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+    private final static DateTimeFormatter DATE_FORMATTER_SHORT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+	private final static DateTimeFormatter DATE_FORMATTER_UTC_PREFIXED_SHORT =
+            DateTimeFormatter.ofPattern("'UTC='yyyy-MM-dd'T'HH:mm:ss");
+	
     /**
      * Convert a date in ISO format "yyyyMMdd'T'HHmmss"
      * 
@@ -54,5 +63,17 @@ public class DateUtils {
             DateTimeFormatter inFormatter, DateTimeFormatter outFormatter) {
         LocalDateTime dateToConvert = LocalDateTime.parse(dateStr, inFormatter);
         return dateToConvert.format(outFormatter);
+    }
+    
+    public static String convertToMetadataDateTimeFormat(String datetime) {
+        if (datetime.length() == 27 && datetime.endsWith("Z")) {
+            return convertToAnotherFormat(datetime, METADATA_DATE_FORMATTER, METADATA_DATE_FORMATTER); // "convert" to validate
+        } else if (datetime.length() == 26) {
+            return convertToAnotherFormat(datetime, DATE_FORMATTER_26, METADATA_DATE_FORMATTER);
+        } else if (datetime.length() == 23 && datetime.startsWith("UTC=")) {
+        	return convertToAnotherFormat(datetime, DATE_FORMATTER_UTC_PREFIXED_SHORT, METADATA_DATE_FORMATTER);
+        } else {
+            return convertToAnotherFormat(datetime, DATE_FORMATTER_SHORT, METADATA_DATE_FORMATTER);
+        }
     }
 }

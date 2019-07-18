@@ -1,3 +1,4 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,23 +8,21 @@
 		<artifactId>s1pro-core</artifactId>
 		<version>0.5.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>s1pro-core-inbox-polling</artifactId>
+	<artifactId>s1pro-core-validation</artifactId>
 	<packaging>jar</packaging>
+
+	<!-- <parent> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-parent</artifactId> 
+		<version>2.0.0.RELEASE</version> <relativePath /> </parent> -->
+
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-inbox-polling</project.build.finalName>
-		<project.artifactId>s1pdgs-inbox-polling</project.artifactId>
-		<start-class>esa.s1pdgs.cpoc.inbox.Application</start-class>
+		<project.build.finalName>s1pdgs-validation</project.build.finalName>
+		<project.artifactId>s1pdgs-queue-watcher</project.artifactId>
+		<start-class>esa.s1pdgs.cpoc.validation.Application</start-class>
 	</properties>
 
-	<dependencies>
 
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-lib-commons</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-	
+	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -47,15 +46,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 		</dependency>
-	    <dependency>
-	      <groupId>org.springframework.boot</groupId>
-	      <artifactId>spring-boot-starter-data-jpa</artifactId>
-	    </dependency>  
-		<dependency>
-	      <groupId>org.hsqldb</groupId>
-	      <artifactId>hsqldb</artifactId>
-	    </dependency>
-				
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -67,6 +58,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<dependency>
+			<scope>test</scope>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-xml</artifactId>
+		</dependency>
+    	
 	</dependencies>
 
 	<build>

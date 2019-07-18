@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import esa.s1pdgs.cpoc.inbox.polling.filter.InboxFilter;
 
-public interface Inbox {
-	public Collection<InboxEntry> read(final InboxFilter filter);		
+public interface InboxAdapter {
+	public Collection<InboxEntry> read(final InboxFilter filter);
+	public String description();
 }

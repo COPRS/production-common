@@ -28,6 +28,7 @@ COPY scaler/ /app/scaler
 COPY wrapper/ /app/wrapper
 COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
+COPY validation/ /app/validation
 
 RUN mvn -Dmaven.test.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
@@ -58,3 +59,4 @@ COPY --from=buildenv /app/wrapper/target /app/wrapper/target
 COPY --from=buildenv /app/wrapper/config /app/wrapper/config
 COPY --from=buildenv /app/request-repository/target /app/request-repository/target
 COPY --from=buildenv /app/queue-watcher/target /app/queue-watcher/target
+COPY --from=buildenv /app/validation/target /app/validation/target
