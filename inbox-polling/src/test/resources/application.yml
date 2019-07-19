@@ -3,7 +3,16 @@ spring:
     name: s1pdgs-inbox-polling
   datasource:
     url: jdbc:hsqldb:mem:testDb;create=true
-   
+    password:
+    username: sa
+    driver-class-name: "org.hsqldb.jdbc.JDBCDriver"
+  jpa:
+    hibernate:
+      ddl-auto: create  
+      
+scheduling:
+  enable: false
+    
 logging:
   config: classpath:log4j2-test.yml
   

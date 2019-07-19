@@ -5,15 +5,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import esa.s1pdgs.cpoc.inbox.polling.InboxAdapter;
-import esa.s1pdgs.cpoc.inbox.polling.InboxEntry;
-import esa.s1pdgs.cpoc.inbox.polling.filter.InboxFilter;
-import esa.s1pdgs.cpoc.inbox.polling.kafka.producer.SubmissionClient;
-import esa.s1pdgs.cpoc.inbox.polling.repo.PickupContentConverter;
-import esa.s1pdgs.cpoc.inbox.polling.repo.PickupContentRepository;
+import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
+import esa.s1pdgs.cpoc.inbox.entity.InboxEntryRepository;
+import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
+import esa.s1pdgs.cpoc.inbox.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 
 public final class Inbox {	
@@ -21,34 +21,32 @@ public final class Inbox {
 	
 	private final InboxAdapter inboxAdapter;
 	private final InboxFilter filter;
-	private final PickupContentRepository pickupContentRepository;
-	private final PickupContentConverter converter;
+	private final InboxEntryRepository inboxEntryRepository;
 	private final SubmissionClient client;
 	
-	public Inbox(
+	Inbox(
 			final InboxAdapter inboxAdapter, 
 			final InboxFilter filter, 
-			final PickupContentRepository pickupContentRepository,
-			final PickupContentConverter converter,
+			final InboxEntryRepository inboxEntryRepository,
 			final SubmissionClient client
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
-		this.pickupContentRepository = pickupContentRepository;
-		this.converter = converter;
+		this.inboxEntryRepository = inboxEntryRepository;
 		this.client = client;
 	}
 	
 	private final Set<InboxEntry> existingContent() {		
-		return StreamSupport.stream(pickupContentRepository.findAll().spliterator(), false)
-			.map(p -> converter.toInboxEntry(p))
+		return StreamSupport.stream(inboxEntryRepository.findAll().spliterator(), false)
 			.collect(Collectors.toCollection(HashSet::new));
 	}
 	
+	@Transactional
 	public final void poll() {
 		try {
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(filter));
 			final Set<InboxEntry> persistedContent = existingContent();
+			LOG.debug("Hello: {}", persistedContent);
 
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
 			newElements.removeAll(persistedContent);
@@ -62,7 +60,7 @@ public final class Inbox {
 			// persistence so it will not be ignored if it occurs again on the inbox
 			for (final InboxEntry entry : finishedElements) {
 				LOG.debug("Deleting {}", entry);
-				pickupContentRepository.deleteByUrl(entry.getUrl());				
+				inboxEntryRepository.deleteByUrl(entry.getUrl());
 			}	
 			
 			// all products not stored in the repo are considered new and shall be added to the 
@@ -72,7 +70,7 @@ public final class Inbox {
 				client.publish(new IngestionDto(entry.getName(), entry.getUrl()));
 				
 				LOG.debug("Adding {}", entry);
-				pickupContentRepository.save(converter.toPickupContent(entry));	
+				inboxEntryRepository.save(entry);	
 			}
 		} catch (Exception e) {
 			LOG.error(String.format("Error on polling %s", description()), e);

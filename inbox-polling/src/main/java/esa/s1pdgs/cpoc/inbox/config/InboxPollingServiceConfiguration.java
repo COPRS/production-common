@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import esa.s1pdgs.cpoc.inbox.InboxPollingService;
 import esa.s1pdgs.cpoc.inbox.Inbox;
 import esa.s1pdgs.cpoc.inbox.InboxFactory;
+import esa.s1pdgs.cpoc.inbox.InboxPollingService;
 
 @Configuration
 public class InboxPollingServiceConfiguration {

@@ -4,8 +4,13 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+
+@ConditionalOnProperty(value = "scheduling.enable", havingValue = "true", matchIfMissing = true)
+@EnableScheduling
 public class InboxPollingService {		
 	private static final Logger LOG = LoggerFactory.getLogger(InboxPollingService.class);
 	
@@ -15,7 +20,7 @@ public class InboxPollingService {
 		this.inboxes = inboxes;
 	}
 	
-    @Scheduled(fixedRateString = "${inbox.polling-interval-ms}")
+    @Scheduled(fixedRateString = "${inbox.polling-interval-ms}")    
 	public void pollAll() {
     	LOG.trace("Polling all");
     	for (final Inbox inbox : inboxes) {

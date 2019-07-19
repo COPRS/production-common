@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.inbox.polling.fs;
+package esa.s1pdgs.cpoc.inbox.fs;
 
 import java.io.File;
 import java.util.Arrays;
@@ -10,17 +10,23 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import esa.s1pdgs.cpoc.inbox.polling.InboxAdapter;
-import esa.s1pdgs.cpoc.inbox.polling.InboxEntry;
-import esa.s1pdgs.cpoc.inbox.polling.filter.InboxFilter;
+import esa.s1pdgs.cpoc.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.inbox.InboxEntryFactory;
+import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
+import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
 
 public class FilesystemInboxAdapter implements InboxAdapter {
 	private static final Logger LOG = LoggerFactory.getLogger(FilesystemInboxAdapter.class);
 	
+	private final InboxEntryFactory inboxEntryFactory;
 	private final File inboxDirectory;
 
-	public FilesystemInboxAdapter(final File inboxDirectory) {
+	public FilesystemInboxAdapter(
+			final File inboxDirectory,
+			final InboxEntryFactory inboxEntryFactory
+	) {
 		this.inboxDirectory = inboxDirectory;
+		this.inboxEntryFactory = inboxEntryFactory;
 	}
 
 	@Override
@@ -30,7 +36,7 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 		LOG.trace("Reading inbox filesystem directory '{}'", inboxDirectory);
 		for (final File entry : list()) {
 			LOG.trace("Found '{}' in inbox filesystem directory '{}'", entry, inboxDirectory);
-			final InboxEntry inboxEntry = new FilesystemInboxEntry(new File(entry.getPath()));
+			final InboxEntry inboxEntry = inboxEntryFactory.newInboxEntry(entry.getPath());
 			if (!filter.accept(inboxEntry)) {
 				LOG.debug("Entry '{}' in inbox filesystem directory '{}' is ignored by {}", inboxEntry, inboxDirectory, filter);
 				continue;
@@ -60,6 +66,4 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 		}
 		return Arrays.asList(listing);		
 	}
-
-
 }

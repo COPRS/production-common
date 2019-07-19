@@ -1,6 +1,6 @@
-package esa.s1pdgs.cpoc.inbox.polling.filter;
+package esa.s1pdgs.cpoc.inbox.filter;
 
-import esa.s1pdgs.cpoc.inbox.polling.InboxEntry;
+import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
 
 @FunctionalInterface
 public interface InboxFilter {

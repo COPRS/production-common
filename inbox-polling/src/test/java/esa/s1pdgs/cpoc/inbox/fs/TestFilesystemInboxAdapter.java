@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.inbox.polling.fs;
+package esa.s1pdgs.cpoc.inbox.fs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -13,20 +13,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
-import esa.s1pdgs.cpoc.inbox.polling.InboxEntry;
-import esa.s1pdgs.cpoc.inbox.polling.filter.InboxFilter;
-import esa.s1pdgs.cpoc.inbox.polling.fs.FilesystemInboxAdapter;
-import esa.s1pdgs.cpoc.inbox.polling.fs.FilesystemInboxEntry;
+import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
+import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
+import esa.s1pdgs.cpoc.inbox.fs.FilesystemInboxAdapter;
+import esa.s1pdgs.cpoc.inbox.fs.FilesystemInboxEntryFactory;
 
-public class TestFilesystemInbox {
+public class TestFilesystemInboxAdapter {	
+	private final FilesystemInboxEntryFactory factory = new FilesystemInboxEntryFactory();
 	
 	private File testDir;
 	private FilesystemInboxAdapter uut;
 	
 	@Before
 	public final void setUp() throws IOException {
-		testDir = Files.createTempDirectory(TestFilesystemInbox.class.getSimpleName()).toFile();
-		uut = new FilesystemInboxAdapter(testDir);
+		testDir = Files.createTempDirectory(TestFilesystemInboxAdapter.class.getSimpleName()).toFile();
+		uut = new FilesystemInboxAdapter(testDir, factory);
 	}
 	
 	@After
@@ -52,9 +53,9 @@ public class TestFilesystemInbox {
 		assertTrue(product3.mkdir());
 		
 		final Collection<InboxEntry> actual = uut.read(InboxFilter.ALLOW_ALL);
-		assertEquals(true, actual.contains(new FilesystemInboxEntry(product1)));
-		assertEquals(true, actual.contains(new FilesystemInboxEntry(product2)));
-		assertEquals(true, actual.contains(new FilesystemInboxEntry(product3)));
+		assertEquals(true, actual.contains(factory.newInboxEntry(product1.getPath())));
+		assertEquals(true, actual.contains(factory.newInboxEntry(product2.getPath())));
+		assertEquals(true, actual.contains(factory.newInboxEntry(product3.getPath())));
 	}
 	
 	@Test
