@@ -532,7 +532,7 @@ public class ExtractMetadata {
 	
 
 	public JSONObject processL0Segment(OutputFileDescriptor descriptor, File file)
-			throws MetadataExtractionException {
+			throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			String xsltFilename = this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST;
@@ -543,10 +543,20 @@ public class ExtractMetadata {
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile(OUTPUT_L0_SEGMENT_XML, Charset.defaultCharset()));
 			if (metadataJSONObject.has("startTime")) {
-				metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));
+				try {
+					metadataJSONObject.put("validityStartTime",
+						DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("startTime")));
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
 			}
 			if (metadataJSONObject.has("stopTime")) {
-				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
+				try {
+					metadataJSONObject.put("validityStopTime",
+						DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("stopTime")));
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
 			}
 			String pass = PASS_DFT;
 			if (metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("pass").isEmpty()) {
@@ -585,9 +595,10 @@ public class ExtractMetadata {
 	 * 
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
 	 */
 	public JSONObject processProduct(OutputFileDescriptor descriptor, ProductFamily productFamily, File file)
-			throws MetadataExtractionException {
+			throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			Source xsltMANIFEST = new StreamSource(new File(this.xsltDirectory + xsltMap.get(productFamily)));
@@ -605,11 +616,24 @@ public class ExtractMetadata {
 				metadataJSONObject.put("sliceCoordinates", processCoordinates(descriptor.getProductName(),
 						metadataJSONObject.getString("sliceCoordinates"), pass));
 			}
+
+			
 			if (metadataJSONObject.has("startTime")) {
-				metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));
+				try {
+					metadataJSONObject.put("validityStartTime",
+					DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("startTime")));
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
 			}
+			
 			if (metadataJSONObject.has("stopTime")) {
-				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
+				try {
+					metadataJSONObject.put("validityStopTime",
+						DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("stopTime")));
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
 			}
 			
 			if(ProductFamily.L0_ACN.equals(productFamily)|| ProductFamily.L0_SLICE.equals(productFamily)) {
