@@ -544,16 +544,18 @@ public class ExtractMetadata {
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile(OUTPUT_L0_SEGMENT_XML, Charset.defaultCharset()));
 			if (metadataJSONObject.has("startTime")) {
 				try {
-					metadataJSONObject.put("validityStartTime",
-						DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("startTime")));
+					String t = DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("startTime")); 
+					metadataJSONObject.put("startTime", t);
+					metadataJSONObject.put("validityStartTime", t);
 				} catch(DateTimeParseException e) {
 					throw new MetadataMalformedException("validityStartTime");
 				}
 			}
 			if (metadataJSONObject.has("stopTime")) {
 				try {
-					metadataJSONObject.put("validityStopTime",
-						DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("stopTime")));
+					String t = DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("stopTime")); 
+					metadataJSONObject.put("stopTime", t);
+					metadataJSONObject.put("validityStopTime", t);
 				} catch(DateTimeParseException e) {
 					throw new MetadataMalformedException("validityStopTime");
 				}
@@ -620,8 +622,9 @@ public class ExtractMetadata {
 			
 			if (metadataJSONObject.has("startTime")) {
 				try {
-					metadataJSONObject.put("validityStartTime",
-					DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("startTime")));
+					String t = DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("startTime")); 
+					metadataJSONObject.put("startTime", t);
+					metadataJSONObject.put("validityStartTime", t);
 				} catch(DateTimeParseException e) {
 					throw new MetadataMalformedException("validityStartTime");
 				}
@@ -629,8 +632,9 @@ public class ExtractMetadata {
 			
 			if (metadataJSONObject.has("stopTime")) {
 				try {
-					metadataJSONObject.put("validityStopTime",
-						DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("stopTime")));
+					String t = DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("stopTime")); 
+					metadataJSONObject.put("stopTime", t);
+					metadataJSONObject.put("validityStopTime", t);
 				} catch(DateTimeParseException e) {
 					throw new MetadataMalformedException("validityStopTime");
 				}
