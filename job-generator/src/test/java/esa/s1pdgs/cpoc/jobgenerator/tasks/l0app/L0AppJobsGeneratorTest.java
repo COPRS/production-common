@@ -157,7 +157,7 @@ public class L0AppJobsGeneratorTest {
             return r;
         }).when(jobGeneratorSettings).getOutputfamilies();
         Mockito.doAnswer(i -> {
-            return "L0_PRODUCT";
+            return ProductFamily.L0_ACN.toString();
         }).when(jobGeneratorSettings).getDefaultfamily();
         Mockito.doAnswer(i -> {
             return 2;
