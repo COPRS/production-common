@@ -111,7 +111,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processSESSIONFile(Mockito.any(EdrsSessionFileDescriptor.class));
 	}
 	
-	private void mockExtractorprocessL0SliceFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessL0SliceFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -122,7 +122,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_SLICE), Mockito.any(File.class));
 	}
 	
-	private void mockExtractorprocessL0ACNFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessL0ACNFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -133,7 +133,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_ACN), Mockito.any(File.class));
 	}
 	
-	private void mockExtractorprocessL1SliceFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessL1SliceFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -144,7 +144,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_SLICE), Mockito.any(File.class));
 	}
 	
-	private void mockExtractorprocessL1ACNFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessL1ACNFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -400,7 +400,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testbuildL0SliceOutputFileMetadata() throws JSONException, MetadataExtractionException {
+	public void testbuildL0SliceOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"theoreticalSliceLength\":\"25\",\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"sliceNumber\":\"13\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"sliceOverlap\":\"7.4\",\"startTimeANX\":\"596091.6080\"}");
@@ -437,7 +437,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testbuildL0ACNOutputFileMetadata() throws JSONException, MetadataExtractionException {
+	public void testbuildL0ACNOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"totalNumberOfSlice\":20.159704,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"startTimeANX\":\"296088.9120\"}");
@@ -474,7 +474,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testbuildL1SliceOutputFileMetadata() throws JSONException, MetadataExtractionException {
+	public void testbuildL1SliceOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"theoreticalSliceLength\":\"25\",\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"sliceNumber\":\"13\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"sliceOverlap\":\"7.4\",\"startTimeANX\":\"596091.6080\"}");
@@ -511,7 +511,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testbuildL1ACNOutputFileMetadata() throws JSONException, MetadataExtractionException {
+	public void testbuildL1ACNOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"totalNumberOfSlice\":20.159704,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"startTimeANX\":\"296088.9120\"}");

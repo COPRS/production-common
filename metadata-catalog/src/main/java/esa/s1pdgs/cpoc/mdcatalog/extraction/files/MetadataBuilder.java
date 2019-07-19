@@ -118,9 +118,10 @@ public class MetadataBuilder {
      * @return the JSONObject containing the metadata to index
      * 
      * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
      */
     public JSONObject buildL0SegmentOutputFileMetadata(OutputFileDescriptor descriptor, File file)
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
         JSONObject metadataToIndex = new JSONObject();
         metadataToIndex = extractor.processL0Segment(descriptor, file);        
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
@@ -138,9 +139,10 @@ public class MetadataBuilder {
      * @return the JSONObject containing the metadata to index
      * 
      * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
      */
     public JSONObject buildOutputFileMetadata(OutputFileDescriptor descriptor, File file, ProductFamily productFamily)
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
         JSONObject metadataToIndex = new JSONObject();
         metadataToIndex = extractor.processProduct(descriptor, productFamily, file);        
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
