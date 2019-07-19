@@ -75,11 +75,20 @@ public class ValidationService {
 		for (SearchMetadata smd: metadataResults) {
 			if (filesResult.get(smd.getKeyObjectStorage()) == null) {
 				// Metadata and product exists
-				LOGGER.debug("Product {} does exist in metadata and OBS");
+				LOGGER.debug("Product {} does exist in metadata and OBS", smd.getKeyObjectStorage());
+				filesResult.remove(smd.getKeyObjectStorage());
 			} else {
 				// Metadata does exist, but no product in OBS
-				LOGGER.info("Product {} does exist in metadata, but not in OBS");
+				LOGGER.info("Product {} does exist in metadata, but not in OBS", smd.getKeyObjectStorage());
 			}
+		}
+		
+		if (filesResult.size() > 0) {
+			LOGGER.info("Found {} products that exist in OBS, but not in metdata");
+			for (ObsObject product: filesResult.values()) {
+				LOGGER.info("Product {} does exist in OBS, but not in metadata", product.getKey());
+			}
+			
 		}
 		
 	}
