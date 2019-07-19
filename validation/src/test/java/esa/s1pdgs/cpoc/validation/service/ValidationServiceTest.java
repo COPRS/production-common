@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.validation.service;
 
-import java.util.Date;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,8 +12,8 @@ public class ValidationServiceTest {
 	
 	@Test
 	public void test() {
-		ValidationService vs = new ValidationService();
-		vs.process(new Date(), new Date());
+//		ValidationService vs = new ValidationService();
+//		vs.process(new Date(), new Date());
 	}
 	
 }
