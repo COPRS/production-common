@@ -74,12 +74,12 @@ public class ValidationService {
 		
 		for (SearchMetadata smd: metadataResults) {
 			if (filesResult.get(smd.getKeyObjectStorage()) == null) {
+				// Metadata does exist, but no product in OBS
+				LOGGER.info("Product {} does exist in metadata, but not in OBS", smd.getKeyObjectStorage());
+			} else {				
 				// Metadata and product exists
 				LOGGER.debug("Product {} does exist in metadata and OBS", smd.getKeyObjectStorage());
 				filesResult.remove(smd.getKeyObjectStorage());
-			} else {
-				// Metadata does exist, but no product in OBS
-				LOGGER.info("Product {} does exist in metadata, but not in OBS", smd.getKeyObjectStorage());
 			}
 		}
 		
