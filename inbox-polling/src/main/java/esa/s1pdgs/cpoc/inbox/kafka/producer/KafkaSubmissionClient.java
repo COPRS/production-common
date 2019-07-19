@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.inbox.polling.kafka.producer;
+package esa.s1pdgs.cpoc.inbox.kafka.producer;
 
 import org.springframework.kafka.core.KafkaTemplate;
 

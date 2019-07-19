@@ -1,8 +1,8 @@
-package esa.s1pdgs.cpoc.inbox.polling.filter;
+package esa.s1pdgs.cpoc.inbox.filter;
 
 import java.util.regex.Pattern;
 
-import esa.s1pdgs.cpoc.inbox.polling.InboxEntry;
+import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
 
 public class BlacklistRegexNameInboxFilter implements InboxFilter {
 	private final Pattern pattern;

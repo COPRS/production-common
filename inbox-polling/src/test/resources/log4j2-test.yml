@@ -7,7 +7,7 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%msg %n"
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level: %msg [%thread] %n"
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc.inbox
