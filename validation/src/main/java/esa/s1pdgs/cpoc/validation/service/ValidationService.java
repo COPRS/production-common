@@ -1,4 +1,6 @@
 package esa.s1pdgs.cpoc.validation.service;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -29,7 +31,7 @@ public class ValidationService {
 		this.obsService = obsService;
 	}
 
-	public void process(ProductFamily family, Date intervalStart, Date intervalStop) {
+	public void process(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop) {
 		LOGGER.info("Validating for inconsistancy between time interval from {} and {}", intervalStart, intervalStop);
 		
 		//TODO hardcoded!
@@ -56,7 +58,10 @@ public class ValidationService {
 		
 		List<ObsObject> filesResult = null; 
 		try {
-			filesResult = obsService.listInterval(family, intervalStart, intervalStop);
+			Date startDate = Date.from(intervalStart.atZone(ZoneId.systemDefault()).toInstant());
+			Date stopDate = Date.from(intervalStop.atZone(ZoneId.systemDefault()).toInstant());
+			
+			filesResult = obsService.listInterval(family, startDate, stopDate);
 			LOGGER.info("obs query for family '{}' returned {} results",family,filesResult.size());
 		} catch (SdkClientException ex) {
 			String errorMessage = String.format(
