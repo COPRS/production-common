@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
@@ -54,7 +55,7 @@ public class ExtractMetadataTest {
     public void testProcessXMLFile() {
 
         JSONObject expectedResult = new JSONObject(
-                "{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2014-02-12T12:28:19\",\"insertionTime\":\"2018-05-31T14:34:17\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-02-01T00:00:00\",\"productName\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"url\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"productType\":\"AUX_OBMEMC\",\"productFamily\":\"AUXILIARY_FILE\"}");
+                "{\"validityStopTime\":\"9999-12-31T23:59:59.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2014-02-12T12:28:19.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-02-01T00:00:00.000000Z\",\"productName\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"url\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"productType\":\"AUX_OBMEMC\",\"productFamily\":\"AUXILIARY_FILE\"}");
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.XML);
@@ -87,7 +88,7 @@ public class ExtractMetadataTest {
         }
 
         expectedResult = new JSONObject(
-                "{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2014-02-12T12:28:19\",\"insertionTime\":\"2018-06-04T09:38:40\",\"satelliteId\":\"B\",\"validityStartTime\":\"2014-02-01T00:00:00\",\"productName\":\"S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml\",\"productType\":\"AUX_OBMEMC\",\"url\":\"S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml\",\"productFamily\":\"AUXILIARY_FILE\"}");
+                "{\"validityStopTime\":\"2099-12-31T23:59:59.000000Z\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2014-02-12T12:28:19.000000Z\",\"insertionTime\":\"2018-06-04T09:38:40.000000Z\",\"satelliteId\":\"B\",\"validityStartTime\":\"2014-02-01T00:00:00.000000Z\",\"productName\":\"S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml\",\"productType\":\"AUX_OBMEMC\",\"url\":\"S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml\",\"productFamily\":\"AUXILIARY_FILE\"}");
 
         descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.XML);
@@ -123,7 +124,7 @@ public class ExtractMetadataTest {
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessXMLMissingFileFail()
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.XML);
@@ -149,7 +150,7 @@ public class ExtractMetadataTest {
     public void testProcessEOFFile() {
 
         JSONObject expectedResult = new JSONObject(
-                "{\"validityStopTime\":\"2017-12-15T20:03:09\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-08T20:02:13\",\"insertionTime\":\"2018-05-31T14:34:17\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-08T20:03:09\",\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"productType\":\"MPL_ORBPRE\",\"productFamily\":\"AUXILIARY_FILE\"}");
+                "{\"validityStopTime\":\"2017-12-15T20:03:09.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-08T20:02:13.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-08T20:03:09.000000Z\",\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"productType\":\"MPL_ORBPRE\",\"productFamily\":\"AUXILIARY_FILE\"}");
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
@@ -186,7 +187,7 @@ public class ExtractMetadataTest {
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessEOFMissingFileFail()
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
@@ -213,7 +214,7 @@ public class ExtractMetadataTest {
     public void testProcessEOFFileWithoutFile() {
 
         JSONObject expectedResult = new JSONObject(
-                "{\"validityStopTime\":\"2017-12-13T13:45:07\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38\",\"insertionTime\":\"2018-05-31T14:34:18\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-13T10:27:37\",\"version\":\"0001\",\"productType\":\"AUX_RESORB\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"url\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"productFamily\":\"AUXILIARY_FILE\"}");
+                "{\"validityStopTime\":\"2017-12-13T13:45:07.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38.000000Z\",\"insertionTime\":\"2018-05-31T14:34:18.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-13T10:27:37.000000Z\",\"version\":\"0001\",\"productType\":\"AUX_RESORB\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"url\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"productFamily\":\"AUXILIARY_FILE\"}");
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
@@ -251,7 +252,7 @@ public class ExtractMetadataTest {
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessEOFFileWithoutMissingFileFail()
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
@@ -275,10 +276,10 @@ public class ExtractMetadataTest {
     }
 
     @Test
-    public void testProcessSAFEFile() {
+    public void testProcessSAFEFile() throws MetadataExtractionException {
 
         JSONObject expectedResult = new JSONObject(
-                "{\"validityStopTime\":\"9999-12-31T23:59:59\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:00.000000\",\"insertionTime\":\"2018-05-31T14:34:17\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000\",\"productName\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productType\":\"AUX_CAL\",\"url\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productFamily\":\"AUXILIARY_FILE\"}");
+                "{\"validityStopTime\":\"9999-12-31T23:59:59.000000Z\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:00.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000Z\",\"productName\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productType\":\"AUX_CAL\",\"url\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productFamily\":\"AUXILIARY_FILE\"}");
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -298,7 +299,7 @@ public class ExtractMetadataTest {
         File file = new File(
                 "test/workDir/S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE/manifest.safe");
 
-        try {
+       try {
             JSONObject result = extractor.processSAFEFile(descriptor, file);
 
             assertNotNull("JSON object should not be null", result);
@@ -307,13 +308,13 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("validityStartTime").toString(),
                     result.get("validityStartTime").toString());
-        } catch (AbstractCodedException fe) {
+       } catch (AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
-        }
+       }
     }
 
     @Test(expected = AbstractCodedException.class)
-    public void testProcessSAFEFileFail() throws MetadataExtractionException {
+    public void testProcessSAFEFileFail() throws MetadataExtractionException, MetadataMalformedException {
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -488,7 +489,7 @@ public class ExtractMetadataTest {
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessL0SlicesMissingFileFail()
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
 
         OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -518,7 +519,7 @@ public class ExtractMetadataTest {
     public void testProcessL0SegmentFile() {
 
         JSONObject expectedResult = new JSONObject(
-                "{\"missionDataTakeId\":72627,\"productFamily\":\"L0_SEGMENT\",\"insertionTime\":\"2018-10-15T11:44:03\",\"creationTime\":\"2018-10-15T11:44:03\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":9809,\"resolution\":\"_\",\"circulationFlag\":7,\"productName\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":9809,\"validityStopTime\":\"2018-02-27T12:53:00.422905Z\",\"instrumentConfigurationId\":1,\"relativeStopOrbit\":158,\"relativeStartOrbit\":158,\"startTime\":\"2018-02-27T12:51:14.794304Z\",\"stopTime\":\"2018-02-27T12:53:00.422905Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"DESCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":1849446.881,\"url\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"startTimeANX\":1743818.281,\"validityStartTime\":\"2018-02-27T12:51:14.794304Z\",\"segmentCoordinates\":{\"coordinates\":[[[-94.8783,73.8984],[-98.2395,67.6029],[-88.9623,66.8368],[-82.486,72.8925],[-94.8783,73.8984]]],\"type\":\"polygon\"},\"processMode\":\"FAST\"}");
+                "{\"missionDataTakeId\":72627,\"productFamily\":\"L0_SEGMENT\",\"insertionTime\":\"2018-10-15T11:44:03.000000Z\",\"creationTime\":\"2018-10-15T11:44:03.000000Z\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":9809,\"resolution\":\"_\",\"circulationFlag\":7,\"productName\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":9809,\"validityStopTime\":\"2018-02-27T12:53:00.422905Z\",\"instrumentConfigurationId\":1,\"relativeStopOrbit\":158,\"relativeStartOrbit\":158,\"startTime\":\"2018-02-27T12:51:14.794304Z\",\"stopTime\":\"2018-02-27T12:53:00.422905Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"DESCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":1849446.881,\"url\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"startTimeANX\":1743818.281,\"validityStartTime\":\"2018-02-27T12:51:14.794304Z\",\"segmentCoordinates\":{\"coordinates\":[[[-94.8783,73.8984],[-98.2395,67.6029],[-88.9623,66.8368],[-82.486,72.8925],[-94.8783,73.8984]]],\"type\":\"polygon\"},\"processMode\":\"FAST\"}");
 
         OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -545,7 +546,7 @@ public class ExtractMetadataTest {
 
         try {
             JSONObject result = extractor.processL0Segment(descriptor, file);
-
+            
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -559,7 +560,7 @@ public class ExtractMetadataTest {
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessL0SegmentMissingFileFail()
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
 
         OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -616,8 +617,6 @@ public class ExtractMetadataTest {
 
         try {
             JSONObject result = extractor.processProduct(descriptor,ProductFamily.L0_ACN, file);
-            System.out.println(expectedResult);
-            System.out.println(result);
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -710,7 +709,7 @@ public class ExtractMetadataTest {
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessL0ACNMissingFileFail()
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
 
         OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -766,7 +765,6 @@ public class ExtractMetadataTest {
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
-
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -779,6 +777,8 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("absoluteStopOrbit").toString(),
                     result.get("absoluteStopOrbit").toString());
+            assertEquals("2018-02-27T14:53:44.184986Z", result.get("validityStartTime"));
+            assertEquals("2018-02-27T14:54:13.190581Z", result.get("validityStopTime"));
         } catch (AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
@@ -866,7 +866,7 @@ public class ExtractMetadataTest {
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessL1SlicesMissingFileFail()
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
 
         OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -935,7 +935,7 @@ public class ExtractMetadataTest {
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessL1AMissingFileFail()
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
 
         OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);

@@ -365,4 +365,78 @@ public class S3ObsServices {
         }
         return ret;
     }
+    
+	/**
+	 * @param bucketName
+	 * @return
+	 * @throws S3ObsServiceException
+	 * @throws S3SdkClientException
+	 */
+	public ObjectListing listObjectsFromBucket(final String bucketName)
+			throws S3ObsServiceException, S3SdkClientException {
+
+		for (int nbretry = 1;; nbretry++) {
+			try {
+				log(String.format("Listing objects from bucket %s", bucketName));
+				return s3client.listObjects(bucketName);
+
+			} catch (com.amazonaws.AmazonServiceException ase) {
+				throw new S3ObsServiceException(bucketName, "",
+						String.format("Listing objects fails: %s", ase.getMessage()), ase);
+			} catch (com.amazonaws.SdkClientException sce) {
+				if (nbretry <= nbRetry) {
+					LOGGER.warn(String.format("Listing objects from bucket %s failed: Attempt : %d / %d", bucketName,
+							nbretry, nbRetry));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (InterruptedException e) {
+						throw new S3SdkClientException(bucketName, "",
+								String.format("Listing objects fails: %s", sce.getMessage()), sce);
+					}
+					continue;
+				} else {
+					throw new S3SdkClientException(bucketName, "",
+							String.format("Listing objects fails: %s", sce.getMessage()), sce);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param bucketName
+	 * @param previousObjectListing
+	 * @return
+	 * @throws S3ObsServiceException
+	 * @throws S3SdkClientException
+	 */
+	public ObjectListing listNextBatchOfObjectsFromBucket(final String bucketName,
+			final ObjectListing previousObjectListing) throws S3ObsServiceException, S3SdkClientException {
+
+		for (int nbretry = 1;; nbretry++) {
+			try {
+				log(String.format("Listing next batch of objects from bucket %s", bucketName));
+				return s3client.listNextBatchOfObjects(previousObjectListing);
+
+			} catch (com.amazonaws.AmazonServiceException ase) {
+				throw new S3ObsServiceException(bucketName, "",
+						String.format("Listing next batch of objects fails: %s", ase.getMessage()), ase);
+			} catch (com.amazonaws.SdkClientException sce) {
+				if (nbretry <= nbRetry) {
+					LOGGER.warn(String.format("Listing next batch of objects from bucket %s failed: Attempt : %d / %d",
+							bucketName, nbretry, nbRetry));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (InterruptedException e) {
+						throw new S3SdkClientException(bucketName, "",
+								String.format("Listing next batch of objects fails: %s", sce.getMessage()), sce);
+					}
+					continue;
+				} else {
+					throw new S3SdkClientException(bucketName, "",
+							String.format("Listing next batch of objects fails: %s", sce.getMessage()), sce);
+				}
+			}
+		}
+	}
+    
 }

@@ -38,10 +38,60 @@ public class SearchMetadataController {
 		this.esServices = esServices;
 	}
 
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/searchInterval")
+	public ResponseEntity<List<SearchMetadata>> searchTimeInterval(
+			@PathVariable(name = "productFamily") String productFamily,
+			@RequestParam(name = "productType", defaultValue = "NONE") String productType,
+			@RequestParam(name = "intervalStart", defaultValue = "NONE") String intervalStart,
+			@RequestParam(name = "intervalStop", defaultValue = "NONE") String intervalStop) {		
+		
+		LOGGER.info("Received interval query for family '{}', product type '{}', startTime '{}', stopTime '{}'",productFamily, productType, intervalStart, intervalStop);
+		
+		List<SearchMetadata> response = new ArrayList<SearchMetadata>();
+		String startTime = null;
+		String stopTime = null;
+		try {
+			startTime = convertDateForSearch(intervalStart, -0.0f,
+					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'"));
+
+			stopTime = convertDateForSearch(intervalStop, 0.0f,
+					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'"));
+		} catch (ParseException ex) {
+			// FIXME TAI: Is this exception logging really okay?
+			// LOGGER.error("[productType {}] [code {}] [mode {}] {}", productType,
+			// e.getLogMessage());
+			LOGGER.error("[productType {}] Parse error while doing intervalSearch: {}", productType,
+					LogUtils.toString(ex));
+			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
+		}
+
+		LOGGER.info("Performing metadata interval search in interval between {} and {}", startTime, stopTime);
+		try {
+			List<SearchMetadata> results = esServices.intervalQuery(startTime, stopTime, productType,
+					ProductFamily.fromValue(productFamily));
+			if (results == null) {
+				LOGGER.info("No results returned.");
+				return new ResponseEntity<List<SearchMetadata>>(HttpStatus.OK);
+			}
+			LOGGER.debug("Query returned {} results", results.size());
+
+			for (SearchMetadata result : results) {
+				response.add(new SearchMetadata(result.getProductName(), result.getProductType(),
+						result.getKeyObjectStorage(), result.getValidityStart(), result.getValidityStop()));
+			}
+		} catch (Exception ex) {
+			LOGGER.error("[productType {}] Query error while doing intervalSearch: {}", productType,
+					LogUtils.toString(ex));
+			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
+	}
+
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
 	public ResponseEntity<List<SearchMetadata>> search(@PathVariable(name = "productFamily") String productFamily,
-	        @RequestParam(name = "productType", defaultValue = "NONE") String productType,
-			@RequestParam(name = "mode", defaultValue = "NONE") String mode, 
+			@RequestParam(name = "productType", defaultValue = "NONE") String productType,
+			@RequestParam(name = "mode", defaultValue = "NONE") String mode,
 			@RequestParam(name = "satellite", defaultValue = "NONE") String satellite,
 			@RequestParam(name = "t0") String startDate, @RequestParam(name = "t1") String stopDate,
 			@RequestParam(name = "processMode", defaultValue = "NONE") String processMode,
@@ -49,7 +99,7 @@ public class SearchMetadataController {
 			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
 		try {
-		    List<SearchMetadata> response = new ArrayList<SearchMetadata>();
+			List<SearchMetadata> response = new ArrayList<SearchMetadata>();
 			if ("LatestValCover".equals(mode)) {
 				SearchMetadata f = esServices.lastValCover(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
@@ -57,61 +107,61 @@ public class SearchMetadataController {
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'")),
 						satellite, insConfId, processMode);
-				
+
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
 							f.getValidityStart(), f.getValidityStop()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
-			} else if("ValIntersect".equals(mode)) {
-				LOGGER.debug("Using val intersect with productType={}, mode={}, t0={}, t1={}, proccessingMode={}, insConfId={}, dt0={}, dt1={}",productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1);
-			    List<SearchMetadata> f = esServices.valIntersect(convertDateForSearch(startDate, -dt0,
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-                        convertDateForSearch(stopDate, dt1,
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-                        productType, processMode, satellite);			   			    
-			    
-			    if (f == null) {			    	
-			    	return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
-			    }
-			    
-			    LOGGER.debug("Query returned {} results",f.size());
-			    
-			    for(SearchMetadata m : f) {
-			        response.add(new SearchMetadata(m.getProductName(), m.getProductType(), 
-			                m.getKeyObjectStorage(), m.getValidityStart(), m.getValidityStop()));
-			    }
-                return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
-			}
-			else if ("ClosestStartValidity".equals(mode)) {
+			} else if ("ValIntersect".equals(mode)) {
+				LOGGER.debug(
+						"Using val intersect with productType={}, mode={}, t0={}, t1={}, proccessingMode={}, insConfId={}, dt0={}, dt1={}",
+						productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1);
+				List<SearchMetadata> f = esServices.valIntersect(
+						convertDateForSearch(startDate, -dt0,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						convertDateForSearch(stopDate, dt1,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						productType, processMode, satellite);
+
+				if (f == null) {
+					return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+
+				LOGGER.debug("Query returned {} results", f.size());
+
+				for (SearchMetadata m : f) {
+					response.add(new SearchMetadata(m.getProductName(), m.getProductType(), m.getKeyObjectStorage(),
+							m.getValidityStart(), m.getValidityStop()));
+				}
+				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
+			} else if ("ClosestStartValidity".equals(mode)) {
 				SearchMetadata f = esServices.closestStartValidity(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						satellite, insConfId, processMode);
-				
+
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
 							f.getValidityStart(), f.getValidityStop()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
-			}
-			else if ("ClosestStopValidity".equals(mode)) {
+			} else if ("ClosestStopValidity".equals(mode)) {
 				SearchMetadata f = esServices.closestStopValidity(productType, ProductFamily.fromValue(productFamily),
 						convertDateForSearch(startDate, -dt0,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						satellite, insConfId, processMode);
-				
+
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
 							f.getValidityStart(), f.getValidityStop()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
-			}
-			else {
+			} else {
 				LOGGER.error("[productType {}] [code {}] [mode {}] [msg Unknown mode]", productType,
 						ErrorCode.ES_INVALID_SEARCH_MODE.getCode(), mode);
 				return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
@@ -121,7 +171,7 @@ public class SearchMetadataController {
 					e.getLogMessage());
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
-			//TODO Temp test
+			// TODO Temp test
 			e.printStackTrace();
 			LOGGER.error("[productType {}] [code {}] [mode {}] [msg {}]", productType,
 					ErrorCode.INTERNAL_ERROR.getCode(), mode, LogUtils.toString(e));
@@ -133,7 +183,8 @@ public class SearchMetadataController {
 	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter)
 			throws ParseException {
 
-		LocalDateTime time = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
+		LocalDateTime time = LocalDateTime.parse(dateStr,
+				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
 		return timePlus.format(outFormatter);
 	}

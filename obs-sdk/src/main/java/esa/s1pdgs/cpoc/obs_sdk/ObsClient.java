@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -133,5 +134,18 @@ public interface ObsClient {
      * @throws ObsServiceException
      */
     int getUploadExecutionTimeoutS() throws ObsServiceException;
+    
+	/**
+	 * Gets the list of ObsObject's of an ObsFamily whose modification times in OBS are within the time frame provided.
+	 * 
+	 * @param timeFrameBegin as {@link Date}
+	 * @param timeFrameEnd as {@link Date}
+	 * @param obsFamily as {@link ObsFamily}
+	 * @return list of ObsObject's, never null
+	 * @throws SdkClientException
+	 * @throws ObsServiceException
+	 */
+	List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd, ObsFamily obsFamily)
+			throws SdkClientException, ObsServiceException;
 
 }

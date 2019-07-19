@@ -200,7 +200,7 @@ public abstract class AbstractFileProcessor<T> {
 			reportBackup.reportStop(String.format("End copying file %s to %s", file.getName(), backupDirectory));
 		} catch (IOException e) {
 			reportBackup.reportError(
-					String.format("Error copying file %s to %s: %s", file.getName(), backupDirectory, LogUtils.toString(e)));
+					"Error copying file {} to {}: {}", file.getName(), backupDirectory, LogUtils.toString(e));
 			throw e;
 		}
 	}

@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,8 @@ import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
@@ -267,8 +270,9 @@ public class ExtractMetadata {
 	 * @param file       The file containing the metadata
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
 	 */
-	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
+	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			String xsltFilename = this.xsltDirectory + XSLT_MPL_EOF;
@@ -278,14 +282,28 @@ public class ExtractMetadata {
 			transformerMPL.transform(mplMetadataFile, new StreamResult(new File("tmp/output.xml")));
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-			if (metadataJSONObject.getString("validityStopTime").equals("UTC=9999-99-99T99:99:99")) {
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
-			} else {
+			
+			try {
 				metadataJSONObject.put("validityStopTime",
-						metadataJSONObject.getString("validityStopTime").substring(4));
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStopTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStopTime");
 			}
-			metadataJSONObject.put("creationTime", metadataJSONObject.getString("creationTime").substring(4));
-			metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("validityStartTime").substring(4));
+			
+			try {
+				metadataJSONObject.put("creationTime",
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("creationTime");
+			}
+			
+			try {
+				metadataJSONObject.put("validityStartTime",
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStartTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStartTime");
+			}
+			
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
 			metadataJSONObject.put("productType", descriptor.getProductType());
@@ -307,9 +325,10 @@ public class ExtractMetadata {
 	 * @param file       The file containing the metadata
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
 	 */
 	public JSONObject processEOFFileWithoutNamespace(ConfigFileDescriptor descriptor, File file)
-			throws MetadataExtractionException {
+			throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			String xsltFilename = this.xsltDirectory + XSLT_AUX_EOF;
@@ -319,12 +338,28 @@ public class ExtractMetadata {
 			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-			metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("validityStopTime").toString()
-					.substring(4, metadataJSONObject.getString("validityStopTime").toString().length()));
-			metadataJSONObject.put("creationTime", metadataJSONObject.getString("creationTime").toString().substring(4,
-					metadataJSONObject.getString("creationTime").toString().length()));
-			metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("validityStartTime").toString()
-					.substring(4, metadataJSONObject.getString("validityStartTime").toString().length()));
+			
+			try {
+				metadataJSONObject.put("validityStopTime",
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStopTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStopTime");
+			}
+			
+			try {
+				metadataJSONObject.put("creationTime",
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("creationTime");
+			}
+			
+			try {
+				metadataJSONObject.put("validityStartTime",
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStartTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStartTime");
+			}
+						
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
 			metadataJSONObject.put("productType", descriptor.getProductType());
@@ -346,8 +381,9 @@ public class ExtractMetadata {
 	 * @param file       The file containing the metadata
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
 	 */
-	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
+	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			String xsltFilename = this.xsltDirectory + XSLT_AUX_XML;
@@ -357,19 +393,28 @@ public class ExtractMetadata {
 			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-			if (metadataJSONObject.getString("validityStopTime").equals("UTC=9999-99-99T99:99:99")) {
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
-			} else {
+			
+			try {
 				metadataJSONObject.put("validityStopTime",
-						metadataJSONObject.getString("validityStopTime").substring(4));
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStopTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStopTime");
 			}
-			if (metadataJSONObject.getString("validityStartTime").substring(0, 4).equals("UTC=")) {
+			
+			try {
 				metadataJSONObject.put("validityStartTime",
-						metadataJSONObject.getString("validityStartTime").substring(4));
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStartTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStartTime");
 			}
-			if (metadataJSONObject.getString("creationTime").substring(0, 4).equals("UTC=")) {
-				metadataJSONObject.put("creationTime", metadataJSONObject.getString("creationTime").substring(4));
+			
+			try {
+				metadataJSONObject.put("creationTime",
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+			} catch(DateTimeParseException e) {
+				throw new MetadataMalformedException("creationTime");
 			}
+			
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
 			metadataJSONObject.put("productType", descriptor.getProductType());
@@ -392,8 +437,9 @@ public class ExtractMetadata {
 	 * @param file       The file containing the metadata
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
 	 */
-	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException {
+	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File file) throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			String xsltFilename = this.xsltDirectory + XSLT_AUX_MANIFEST;
@@ -403,7 +449,7 @@ public class ExtractMetadata {
 			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-			metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999");
+			metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productType", descriptor.getProductType());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
@@ -411,6 +457,25 @@ public class ExtractMetadata {
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+			
+			if (metadataJSONObject.has("validityStartTime")) {
+				try {
+					metadataJSONObject.put("validityStartTime",
+						DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.get("validityStartTime")));
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
+			}
+					
+			if (metadataJSONObject.has("validityStopTime")) {
+				try {
+					metadataJSONObject.put("validityStopTime",
+						DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.get("validityStopTime")));
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
+			}
+
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -467,7 +532,7 @@ public class ExtractMetadata {
 	
 
 	public JSONObject processL0Segment(OutputFileDescriptor descriptor, File file)
-			throws MetadataExtractionException {
+			throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			String xsltFilename = this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST;
@@ -478,10 +543,22 @@ public class ExtractMetadata {
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile(OUTPUT_L0_SEGMENT_XML, Charset.defaultCharset()));
 			if (metadataJSONObject.has("startTime")) {
-				metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));
+				try {
+					String t = DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("startTime")); 
+					metadataJSONObject.put("startTime", t);
+					metadataJSONObject.put("validityStartTime", t);
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
 			}
 			if (metadataJSONObject.has("stopTime")) {
-				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
+				try {
+					String t = DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("stopTime")); 
+					metadataJSONObject.put("stopTime", t);
+					metadataJSONObject.put("validityStopTime", t);
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
 			}
 			String pass = PASS_DFT;
 			if (metadataJSONObject.has("sliceCoordinates") && !metadataJSONObject.getString("pass").isEmpty()) {
@@ -520,9 +597,10 @@ public class ExtractMetadata {
 	 * 
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
 	 */
 	public JSONObject processProduct(OutputFileDescriptor descriptor, ProductFamily productFamily, File file)
-			throws MetadataExtractionException {
+			throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			Source xsltMANIFEST = new StreamSource(new File(this.xsltDirectory + xsltMap.get(productFamily)));
@@ -540,11 +618,26 @@ public class ExtractMetadata {
 				metadataJSONObject.put("sliceCoordinates", processCoordinates(descriptor.getProductName(),
 						metadataJSONObject.getString("sliceCoordinates"), pass));
 			}
+
+			
 			if (metadataJSONObject.has("startTime")) {
-				metadataJSONObject.put("validityStartTime", metadataJSONObject.getString("startTime"));
+				try {
+					String t = DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("startTime")); 
+					metadataJSONObject.put("startTime", t);
+					metadataJSONObject.put("validityStartTime", t);
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
 			}
+			
 			if (metadataJSONObject.has("stopTime")) {
-				metadataJSONObject.put("validityStopTime", metadataJSONObject.getString("stopTime"));
+				try {
+					String t = DateUtils.convertToMetadataDateTimeFormat((String)metadataJSONObject.getString("stopTime")); 
+					metadataJSONObject.put("stopTime", t);
+					metadataJSONObject.put("validityStopTime", t);
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
 			}
 			
 			if(ProductFamily.L0_ACN.equals(productFamily)|| ProductFamily.L0_SLICE.equals(productFamily)) {
