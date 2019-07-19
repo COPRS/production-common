@@ -37,9 +37,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
-import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3UploadFile;
-import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 
 /**
  * Test the ObsService

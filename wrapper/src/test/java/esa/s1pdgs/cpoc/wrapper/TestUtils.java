@@ -10,7 +10,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
-import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
 
 public class TestUtils {
 
