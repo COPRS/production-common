@@ -84,7 +84,7 @@ public class ValidationService {
 		}
 		
 		if (filesResult.size() > 0) {
-			LOGGER.info("Found {} products that exist in OBS, but not in metdata");
+			LOGGER.info("Found {} products that exist in OBS, but not in metdata", filesResult.size());
 			for (ObsObject product: filesResult.values()) {
 				LOGGER.info("Product {} does exist in OBS, but not in metadata", product.getKey());
 			}
