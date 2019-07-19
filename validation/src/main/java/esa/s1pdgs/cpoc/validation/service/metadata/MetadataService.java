@@ -43,7 +43,7 @@ public class MetadataService {
     private final int temporetryms;
 
 	@Autowired
-	public MetadataService(@Qualifier("restMetadataTemplate") final RestTemplate restTemplate,
+	public MetadataService(@Qualifier("restValidationTemplate") final RestTemplate restTemplate,
 			@Value("${metadata.host}") final String metadataHostname,
 			@Value("${metadata.rest-api_nb-retry}") final int nbretry,
 			@Value("${metadata.rest-api_tempo-retry-ms}") final int temporetryms) {

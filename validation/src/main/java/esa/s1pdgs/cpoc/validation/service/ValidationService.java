@@ -58,8 +58,9 @@ public class ValidationService {
 		
 		List<ObsObject> filesResult = null; 
 		try {
-			Date startDate = Date.from(intervalStart.atZone(ZoneId.systemDefault()).toInstant());
-			Date stopDate = Date.from(intervalStop.atZone(ZoneId.systemDefault()).toInstant());
+			
+			Date startDate = Date.from(intervalStart.atZone(ZoneId.of("UTC")).toInstant());
+			Date stopDate = Date.from(intervalStop.atZone(ZoneId.of("UTC")).toInstant());
 			
 			filesResult = obsService.listInterval(family, startDate, stopDate);
 			LOGGER.info("obs query for family '{}' returned {} results",family,filesResult.size());
