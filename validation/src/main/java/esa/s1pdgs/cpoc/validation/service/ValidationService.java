@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.validation.service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,8 @@ public class ValidationService {
 	private final MetadataService metadataService;
 	
 	private final ObsService obsService;
+	
+	private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 
 	@Autowired
 	public ValidationService(MetadataService metadataService, ObsService obsService) {
@@ -35,13 +38,9 @@ public class ValidationService {
 	public void process(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop) {
 		LOGGER.info("Validating for inconsistancy between time interval from {} and {}", intervalStart, intervalStop);
 		
-		//TODO hardcoded!
-		family = ProductFamily.L0_ACN;
-		
 		List<SearchMetadata> metadataResults = null;
 		try {
-			metadataResults = metadataService.query(family, null, "2000-01-01T00:00:00.123456Z",
-					"2019-12-01T00:00:00.123456Z");
+			metadataResults = metadataService.query(family, null, intervalStart.format(dateFormatter),intervalStop.format(dateFormatter));
 			if (metadataResults == null) {
 				// TODO: we might handle this differently.
 				return;
