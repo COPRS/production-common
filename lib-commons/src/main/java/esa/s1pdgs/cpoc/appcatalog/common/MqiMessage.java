@@ -2,8 +2,6 @@ package esa.s1pdgs.cpoc.appcatalog.common;
 
 import java.util.Date;
 
-import org.springframework.data.annotation.Id;
-
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
@@ -16,7 +14,6 @@ public class MqiMessage extends AbstractRequest {
 	/**
 	 * Identifier of the message
 	 */
-	@Id
 	protected long identifier;
 	
     /**
