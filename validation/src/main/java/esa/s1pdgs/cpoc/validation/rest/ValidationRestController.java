@@ -27,8 +27,8 @@ public class ValidationRestController {
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/validate")
 	public void validate(@PathVariable(name = "productFamily") String productFamily,
-			@RequestParam(name = "intervalStart", defaultValue = "NONE") String intervalStart,
-			@RequestParam(name = "intervalStop", defaultValue = "NONE") String intervalStop) {
+			@RequestParam(name = "intervalStart") String intervalStart,
+			@RequestParam(name = "intervalStop") String intervalStop) {
 
 		LOGGER.info("Received validation request for family '{}' within interval '{}' and '{}'", productFamily, intervalStart, intervalStop);
 		
