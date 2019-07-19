@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.validation.service.obs;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +13,6 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 @Service
@@ -50,10 +51,14 @@ public class ObsService {
         }
     }
     
-    public List<ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException {
+    public Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException {
     	ObsFamily obsFamily = getObsFamily(family);
-    	List<ObsObject> results = client.getListOfObjectsOfTimeFrameOfFamily(intervalStart, intervalEnd, obsFamily);    	
-    	return results;
+    	
+    	List<ObsObject> results = client.getListOfObjectsOfTimeFrameOfFamily(intervalStart, intervalEnd, obsFamily);
+    	Map<String, ObsObject> map = results.stream()
+    		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
+    	    	
+    	return map;
     }
 
 

@@ -3,6 +3,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +57,7 @@ public class ValidationService {
 			return;
 		}
 		
-		List<ObsObject> filesResult = null; 
+		Map<String,ObsObject> filesResult = null; 
 		try {
 			
 			Date startDate = Date.from(intervalStart.atZone(ZoneId.of("UTC")).toInstant());
@@ -69,6 +70,16 @@ public class ValidationService {
 					"[ValidationTask] [subTask retrieveObs] [STOP KO] %s [step %d] %s %s",
 					"LOG_ERROR",  ex.getMessage());
 			LOGGER.error(errorMessage);	
+		}
+		
+		for (SearchMetadata smd: metadataResults) {
+			if (filesResult.get(smd.getKeyObjectStorage()) == null) {
+				// Metadata and product exists
+				LOGGER.debug("Product {} does exist in metadata and OBS");
+			} else {
+				// Metadata does exist, but no product in OBS
+				LOGGER.info("Product {} does exist in metadata, but not in OBS");
+			}
 		}
 		
 	}
