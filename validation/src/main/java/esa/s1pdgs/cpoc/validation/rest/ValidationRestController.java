@@ -30,8 +30,8 @@ public class ValidationRestController {
 			@RequestParam(name = "intervalStart", defaultValue = "NONE") String intervalStart,
 			@RequestParam(name = "intervalStop", defaultValue = "NONE") String intervalStop) {
 
-		LOGGER.info("Received validation request for family '{}' within interval '{}' and '{}'");
-				
+		LOGGER.info("Received validation request for family '{}' within interval '{}' and '{}'", productFamily, intervalStart, intervalStop);
+		
 		LocalDateTime startTime = LocalDateTime.parse(intervalStart,
 				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		
