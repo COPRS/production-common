@@ -14,11 +14,11 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
-import esa.s1pdgs.cpoc.compression.model.obs.S3UploadFile;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 

@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.compression.obs;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,20 +14,20 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.compression.model.obs.S3DownloadFile;
-import esa.s1pdgs.cpoc.compression.model.obs.S3UploadFile;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 
 /**
  * Service for accessing to the OBS
  * 
  * @author Viveris Technologies
+ * 
  */
 @Service
 public class ObsService {
@@ -55,7 +57,7 @@ public class ObsService {
      */
     public boolean exist(final ProductFamily family, final String key)
             throws ObsException {
-        ObsObject object = new ObsObject(key, getObsFamily(family));
+        final ObsObject object = new ObsObject(key, getObsFamily(family));
         try {
             return client.doesObjectExist(object);
         } catch (SdkClientException exc) {
@@ -74,8 +76,7 @@ public class ObsService {
      * @throws ObsUnknownObject
      */
     public File downloadFile(final ProductFamily family, final String key,
-            final String targetDir)
-            throws ObsException, ObsUnknownObject {
+            final String targetDir) throws ObsException, ObsUnknownObject {
         // If case of session we ignore folder in the key
         String id = key;
         if (family == ProductFamily.EDRS_SESSION) {
@@ -120,7 +121,7 @@ public class ObsService {
             throw new ObsParallelAccessException(exc);
         }
     }
-
+    
     /**
      * Upload a file in object storage
      * 
@@ -129,10 +130,8 @@ public class ObsService {
      * @param file
      * @throws ObsException
      */
-    public void uploadFile(final ProductFamily family, final String key,
-            final File file) throws ObsException {
-        ObsUploadObject object =
-                new ObsUploadObject(key, getObsFamily(family), file);
+    public void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException {
+        ObsUploadObject object = new ObsUploadObject(key, getObsFamily(family), file);
         try {
             client.uploadObject(object);
         } catch (SdkClientException exc) {
@@ -160,6 +159,16 @@ public class ObsService {
         } catch (SdkClientException exc) {
             throw new ObsParallelAccessException(exc);
         }
+    }
+
+    public Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException {
+    	ObsFamily obsFamily = getObsFamily(family);
+    	
+    	List<ObsObject> results = client.getListOfObjectsOfTimeFrameOfFamily(intervalStart, intervalEnd, obsFamily);
+    	Map<String, ObsObject> map = results.stream()
+    		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
+    	    	
+    	return map;
     }
 
     /**

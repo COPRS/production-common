@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.compression.model.obs;
+package esa.s1pdgs.cpoc.obs_sdk.s3;
 
 import java.util.Objects;
 
