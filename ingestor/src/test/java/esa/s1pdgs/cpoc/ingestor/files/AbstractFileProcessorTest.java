@@ -34,8 +34,8 @@ import esa.s1pdgs.cpoc.ingestor.FileUtils;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
-import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 
 public class AbstractFileProcessorTest {
 

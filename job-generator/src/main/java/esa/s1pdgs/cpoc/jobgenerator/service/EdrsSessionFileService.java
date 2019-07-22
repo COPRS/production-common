@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
-import esa.s1pdgs.cpoc.jobgenerator.service.s3.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 
 /**
  * Class for managing EDRS session files

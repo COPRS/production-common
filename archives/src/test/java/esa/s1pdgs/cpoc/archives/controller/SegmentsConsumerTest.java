@@ -19,13 +19,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.archives.DevProperties;
-import esa.s1pdgs.cpoc.archives.services.ObsService;
 import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 
 public class SegmentsConsumerTest {
 

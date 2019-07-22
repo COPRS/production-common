@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.validation.service.obs;
+package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.File;
 import java.util.Date;
@@ -14,12 +14,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
-import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
-import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 
@@ -120,7 +114,7 @@ public class ObsService {
             throw new ObsParallelAccessException(exc);
         }
     }
-
+    
 	/**
 	 * Upload a file in object storage
 	 * 
@@ -137,7 +131,7 @@ public class ObsService {
 			throw new ObsException(family, key, exc);
 		}
 	}
-
+	
 	/**
      * Upload files per batch
      * 
@@ -176,7 +170,7 @@ public class ObsService {
      * @param family
      * @return
      */
-    protected ObsFamily getObsFamily(final ProductFamily family) {
+    public ObsFamily getObsFamily(final ProductFamily family) {
         ObsFamily ret;
         switch (family) {
             case AUXILIARY_FILE:

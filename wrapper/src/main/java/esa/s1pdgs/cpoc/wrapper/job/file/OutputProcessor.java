@@ -24,13 +24,13 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
-import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
 
 /**
  * Process outputs according their family: - publication in message queue system

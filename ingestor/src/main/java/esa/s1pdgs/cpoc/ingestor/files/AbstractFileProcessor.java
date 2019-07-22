@@ -21,8 +21,8 @@ import esa.s1pdgs.cpoc.common.utils.TreeCopier;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
-import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
