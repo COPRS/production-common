@@ -48,4 +48,12 @@ public class DateUtilsTest {
                         DateTimeFormatter
                                 .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")));
     }
+    
+    @Test
+    public void testConvertToMetadataDateTimeFormat() {
+    	assertEquals("2000-01-01T00:00:00.123456Z", DateUtils.convertToMetadataDateTimeFormat("2000-01-01T00:00:00.123456Z"));
+    	assertEquals("2000-01-01T00:00:00.123456Z", DateUtils.convertToMetadataDateTimeFormat("2000-01-01T00:00:00.123456"));
+    	assertEquals("2000-01-01T00:00:00.000000Z", DateUtils.convertToMetadataDateTimeFormat("2000-01-01T00:00:00"));
+    	assertEquals("2000-01-01T00:00:00.000000Z", DateUtils.convertToMetadataDateTimeFormat("UTC=2000-01-01T00:00:00"));
+    }
 }
