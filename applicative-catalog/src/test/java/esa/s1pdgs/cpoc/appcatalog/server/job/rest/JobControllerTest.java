@@ -30,7 +30,6 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundExce
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class JobControllerTest extends RestControllerTest{
 
@@ -73,10 +72,10 @@ public class JobControllerTest extends RestControllerTest{
         params.put("product.stopTime", "20180227T104128");
         
         List<FilterCriterion> filters = new ArrayList<>();
-        filters.add(new FilterCriterion("product.stopTime", DateUtils.convertDateIso("20180227T104128")));
+        filters.add(new FilterCriterion("product.stopTime", jobController.convertDateIso("20180227T104128")));
         filters.add(new FilterCriterion("messages.identifier", 124L));
         filters.add(new FilterCriterion("_id", 123L));
-        filters.add(new FilterCriterion("creationDate", DateUtils.convertDateIso("20180227T104128")));
+        filters.add(new FilterCriterion("creationDate", jobController.convertDateIso("20180227T104128")));
         
         List<AppDataJob> jobsDb = new ArrayList<>();
         doReturn(jobsDb).when(appDataJobService).search(Mockito.any(), Mockito.any(), Mockito.any());
@@ -85,8 +84,7 @@ public class JobControllerTest extends RestControllerTest{
         
         verify(appDataJobService, times(1)).search(Mockito.eq(filters), 
                 Mockito.eq(ProductCategory.LEVEL_JOBS), 
-                Mockito.eq(new Sort(Direction.DESC, "valueFilter1")));
-        
+                Mockito.eq(new Sort(Direction.DESC, "valueFilter1")));        
        
     }
     

@@ -2,10 +2,10 @@ package esa.s1pdgs.cpoc.mdcatalog.es;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +57,8 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 public class EsServices {
 
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
-
-	private static final String PRODUCT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
+//
+//	private static final String PRODUCT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
 
 	/**
 	 * Logger
@@ -245,7 +245,9 @@ public class EsServices {
 				productType, beginDate, endDate);
 		
 		// mimic the same behaviour used in the old processing system	
-		final String centreTime = calculateCentreTime(beginDate, endDate);
+		final LocalDateTime cTime = calculateCentreTime(beginDate, endDate);
+		final String centreTime = DateUtils.formatToMetadataDateTimeFormat(cTime);
+		
 		final SearchRequest beforeRequest = newQueryFor(
 				productType, 
 				productFamily, 
@@ -288,14 +290,11 @@ public class EsServices {
 			// "merge" functionality from old processing system implementation 
 			final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
 			final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
+
+			final Duration durationBefore = Duration.between(DateUtils.parse(metaBefore.getValidityStart()), cTime).abs();
+			final Duration durationAfter = Duration.between(DateUtils.parse(metaAfter.getValidityStart()), cTime).abs();
 			
-			// only use millisecond precision here to avoid copying too much code from the old implementation
-			// TODO evaluate if this is sufficient			
-			final long centreTimeLong =parseDate(centreTime).getTime();
-			final long millisBefore = Math.abs(parseDate(metaBefore.getValidityStart()).getTime() - centreTimeLong);
-			final long millisAfter = Math.abs(parseDate(metaBefore.getValidityStart()).getTime() - centreTimeLong);
-			
-			if (millisBefore <= millisAfter) {
+			if (durationBefore.compareTo(durationAfter) <= 0) {
 				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
 				return metaBefore;
 			}
@@ -379,7 +378,9 @@ public class EsServices {
 				productType, beginDate, endDate);
 		
 		// mimic the same behaviour used in the old processing system	
-		final String centreTime = calculateCentreTime(beginDate, endDate);
+		final LocalDateTime cTime = calculateCentreTime(beginDate, endDate);
+		final String centreTime = DateUtils.formatToMetadataDateTimeFormat(cTime);
+		
 		final SearchRequest beforeRequest = newQueryFor(
 				productType, 
 				productFamily, 
@@ -419,13 +420,10 @@ public class EsServices {
 			final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
 			final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
 			
-			// only use millisecond precision here to avoid copying too much code from the old implementation
-			final long centreTimeLong =parseDate(centreTime).getTime();
-			final long millisBefore = Math.abs(parseDate(metaBefore.getValidityStart()).getTime() - centreTimeLong);
-			final long millisAfter = Math.abs(parseDate(metaBefore.getValidityStart()).getTime() - centreTimeLong);
-		
+			final Duration durationBefore = Duration.between(DateUtils.parse(metaBefore.getValidityStop()), cTime).abs();
+			final Duration durationAfter = Duration.between(DateUtils.parse(metaAfter.getValidityStop()), cTime).abs();
 			
-			if (millisBefore <= millisAfter) {
+			if (durationBefore.compareTo(durationAfter) <= 0) {
 				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
 				return metaBefore;
 			}
@@ -625,13 +623,11 @@ public class EsServices {
 		return null;
 	}
 
-	private String calculateCentreTime(String startDate, String stopDate) throws ParseException {
-		Date date1 = parseDate(startDate);
-		Date date2 = parseDate(stopDate);
-		long millis = (date1.getTime() + date2.getTime());
-		Date averageDate = new Date(millis / 2);
-		String formattedDateStr = toString(averageDate);
-		return formattedDateStr;
+	private LocalDateTime calculateCentreTime(String startDate, String stopDate) throws ParseException {
+		final LocalDateTime start = DateUtils.parse(startDate);
+		final LocalDateTime stop = DateUtils.parse(stopDate);
+		// centre time calculation similar to legacy
+		return start.plus(Duration.between(start, stop).dividedBy(2));
 	}
 
 	private Map<String, Object> getRequest(String index, String productName) throws Exception {
@@ -827,35 +823,4 @@ public class EsServices {
 		}
 		return r;
 	}
-	
-	//FIXME it's a workaround to handle multiple format of date coming from inventory
-	private String toString(Date date)	{
-		 final SimpleDateFormat dateFormat = new SimpleDateFormat(PRODUCT_DATE_FORMAT);
-		 return dateFormat.format(date);
-	}
-	
-	   private Date parseDate(String date) {
-                 
-		   final SimpleDateFormat dateFormat =	     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
-		   final SimpleDateFormat dateFormat_26 =	 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");  
-		   final SimpleDateFormat dateFormat_SHORT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		   
-		   SimpleDateFormat formatter;           
-	        if (date.length() > 26) {       	
-
-	        	formatter= dateFormat;
-	        } else if (date.length() == 26) {
-	        	formatter=  dateFormat_26;
-	        } else {
-	        	formatter=  dateFormat_SHORT;
-	        }	    
-	        
-	        try {
-				return formatter.parse(date);
-			} catch (ParseException e) {
-				throw new IllegalArgumentException(String.format("Error parsing date %s: %s", date, e.getMessage()), e);
-			}
-	    }
-
-
 }

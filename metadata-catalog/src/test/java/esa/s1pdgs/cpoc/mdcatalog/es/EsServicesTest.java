@@ -36,7 +36,6 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -303,7 +302,7 @@ public class EsServicesTest{
 		
 		try {
 			SearchMetadata result = esServices.closestStopValidity("type", ProductFamily.L2_ACN, 
-			        "2012-05-05T10:10:12.00012Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
+			        "2012-05-05T10:10:12.000120Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());

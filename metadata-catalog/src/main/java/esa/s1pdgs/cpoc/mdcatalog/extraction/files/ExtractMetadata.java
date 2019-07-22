@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,10 +60,6 @@ public class ExtractMetadata {
 	 * XSLT transformer factory
 	 */
 	private TransformerFactory transFactory;
-	/**
-	 * Date Format
-	 */
-	private SimpleDateFormat dateFormat;
 
 	/**
 	 * Map of all the overlap for the different slice type
@@ -81,7 +78,6 @@ public class ExtractMetadata {
 	 */
 	public ExtractMetadata(Map<String, Float> typeOverlap, Map<String, Float> typeSliceLength, String xsltDirectory) {
 		this.transFactory = TransformerFactory.newInstance();
-		this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 		this.typeOverlap = typeOverlap;
 		this.typeSliceLength = typeSliceLength;
 		this.xsltDirectory = xsltDirectory;
@@ -242,17 +238,21 @@ public class ExtractMetadata {
 	 * @param type
 	 * @return an int which is the number of Slices
 	 */
-	private int totalNumberOfSlice(Long startTimeLong, Long stopTimeLong, String type) {
+	private int totalNumberOfSlice(String startTime, String stopTime, String type) {		
+		final Duration duration = Duration.between(
+				DateUtils.parse(stopTime), 
+				DateUtils.parse(startTime)
+		);
+
 		float sliceLength = this.typeSliceLength.get(type);
 
 		// Case of their is no slice information in manifest
 		if (sliceLength <= 0) {
 			return 1;
 		}
-
 		float overlap = this.typeOverlap.get(type);
 
-		float tmpNumberOfSlices = (stopTimeLong - startTimeLong - overlap) / sliceLength;
+		float tmpNumberOfSlices = (duration.get(ChronoUnit.SECONDS) - overlap) / sliceLength;
 		double fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
 		int totalNumberOfSlices = 0;
 		if ((fracNumberOfSlices * sliceLength) < overlap) {
@@ -303,14 +303,13 @@ public class ExtractMetadata {
 			} catch(DateTimeParseException e) {
 				throw new MetadataMalformedException("validityStartTime");
 			}
-			
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
 			metadataJSONObject.put("productType", descriptor.getProductType());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
@@ -366,7 +365,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
@@ -421,7 +420,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 
@@ -455,7 +454,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			
 			if (metadataJSONObject.has("validityStartTime")) {
@@ -498,7 +497,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (JSONException e) {
@@ -522,7 +521,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", dateFormat.format(new Date()));
+			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			return metadataJSONObject;
 		} catch (JSONException e) {
@@ -579,7 +578,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("processMode", descriptor.getMode());
-			String dt = dateFormat.format(new Date());
+			String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
 			metadataJSONObject.put("insertionTime", dt);
 			metadataJSONObject.put("creationTime", dt);
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
@@ -646,16 +645,16 @@ public class ExtractMetadata {
 					metadataJSONObject.put("sliceNumber", 1);
 				} else if (StringUtils.isEmpty(metadataJSONObject.get("sliceNumber").toString())) {
 					metadataJSONObject.put("sliceNumber", 1);
-				}
-				
-				if (descriptor.getProductClass().equals("A") || descriptor.getProductClass().equals("C")
-						|| descriptor.getProductClass().equals("N")) {
+				}	
+				if (Arrays.asList("A","C","N").contains(descriptor.getProductClass())) {
 					if (metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
 						metadataJSONObject.put("totalNumberOfSlice",
 								totalNumberOfSlice(
-										dateFormat.parse(metadataJSONObject.getString("startTime")).getTime() / 1000,
-										dateFormat.parse(metadataJSONObject.getString("stopTime")).getTime() / 1000,
-										descriptor.getSwathtype().matches("S[1-6]") ? "SM" : descriptor.getSwathtype()));
+										metadataJSONObject.getString("startTime"),
+										metadataJSONObject.getString("stopTime"),
+										descriptor.getSwathtype().matches("S[1-6]") ? "SM" : descriptor.getSwathtype()
+								)
+						);
 					}
 				}
 			}
@@ -670,13 +669,13 @@ public class ExtractMetadata {
 			metadataJSONObject.put("polarisation", descriptor.getPolarisation());
 			metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			String dt = dateFormat.format(new Date());
+			String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
 			metadataJSONObject.put("insertionTime", dt);
 			metadataJSONObject.put("creationTime", dt);
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			metadataJSONObject.put("processMode", descriptor.getMode());
 			return metadataJSONObject;
-		} catch (IOException | TransformerException | JSONException | ParseException e) {
+		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
 		}
 	}

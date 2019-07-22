@@ -3,8 +3,7 @@ package esa.s1pdgs.cpoc.queuewatcher.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -36,9 +36,6 @@ public class QueueWatcherService {
 	 * MQI service for reading message ProductDto
 	 */
 	private final GenericMqiClient service;
-
-
-	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
 	
 	@Autowired
 	private ApplicationProperties properties;
@@ -111,8 +108,7 @@ public class QueueWatcherService {
 		            return;
 		        }
 			LOGGER.info("reveived {}: {}", category, message.getBody().getProductName());
-			String timeStamp = new SimpleDateFormat(DATE_FORMAT).format(new Date());
-			writeCSV(timeStamp,  message.getBody().getProductName());
+			writeCSV(DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()),  message.getBody().getProductName());
 			this.service.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true), category);
 
 		} catch (AbstractCodedException ace) {

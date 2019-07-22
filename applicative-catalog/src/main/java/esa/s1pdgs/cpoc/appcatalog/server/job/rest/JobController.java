@@ -1,6 +1,10 @@
 package esa.s1pdgs.cpoc.appcatalog.server.job.rest;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +39,6 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterUtils;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 /**
  * @author Viveris Technologies
@@ -119,13 +122,11 @@ public class JobController {
                             break;
                         case PK_CREATION:
                         case PK_UPDATE:
-                            criterion.setValue(
-                                    DateUtils.convertDateIso(valueFilter));
+                            criterion.setValue(convertDateIso(valueFilter));
                             break;
                         case PK_PRODUCT_START:
                         case PK_PRODUCT_STOP:
-                            criterion.setValue(
-                                    DateUtils.convertDateIso(valueFilter));
+                            criterion.setValue(convertDateIso(valueFilter));
                             break;
                     }
                     filters.add(criterion);
@@ -256,6 +257,16 @@ public class JobController {
             // TODO publish error message in kafka
         }
         return ret;
+    }
+    
+    final Date convertDateIso(final String dateStr)
+            throws InternalErrorException {
+        try {
+		    final DateFormat format = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+		    return format.parse(dateStr);
+		} catch (ParseException pe) {
+		    throw new InternalErrorException("Cannot convert date " + dateStr, pe);
+		}
     }
     
     private final int getFor(ProductCategory category, AppDataJobGenerationDtoState state)
