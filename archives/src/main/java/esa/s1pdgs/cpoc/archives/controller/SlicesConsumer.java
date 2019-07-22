@@ -11,12 +11,12 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.archives.DevProperties;
-import esa.s1pdgs.cpoc.archives.services.ObsService;
 import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 

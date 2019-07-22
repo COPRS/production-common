@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.validation.service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +15,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.validation.service.metadata.MetadataService;
-import esa.s1pdgs.cpoc.validation.service.obs.ObsService;
 
 @Service
 public class ValidationService {
@@ -25,6 +26,8 @@ public class ValidationService {
 	private final MetadataService metadataService;
 	
 	private final ObsService obsService;
+	
+	private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 
 	@Autowired
 	public ValidationService(MetadataService metadataService, ObsService obsService) {
@@ -35,13 +38,9 @@ public class ValidationService {
 	public void process(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop) {
 		LOGGER.info("Validating for inconsistancy between time interval from {} and {}", intervalStart, intervalStop);
 		
-		//TODO hardcoded!
-		family = ProductFamily.L0_ACN;
-		
 		List<SearchMetadata> metadataResults = null;
 		try {
-			metadataResults = metadataService.query(family, null, "2000-01-01T00:00:00.123456Z",
-					"2019-12-01T00:00:00.123456Z");
+			metadataResults = metadataService.query(family, null, intervalStart.format(dateFormatter),intervalStop.format(dateFormatter));
 			if (metadataResults == null) {
 				// TODO: we might handle this differently.
 				return;
@@ -74,17 +73,17 @@ public class ValidationService {
 		
 		for (SearchMetadata smd: metadataResults) {
 			if (filesResult.get(smd.getKeyObjectStorage()) == null) {
+				// Metadata does exist, but no product in OBS
+				LOGGER.info("Product {} does exist in metadata, but not in OBS", smd.getKeyObjectStorage());
+			} else {				
 				// Metadata and product exists
 				LOGGER.debug("Product {} does exist in metadata and OBS", smd.getKeyObjectStorage());
 				filesResult.remove(smd.getKeyObjectStorage());
-			} else {
-				// Metadata does exist, but no product in OBS
-				LOGGER.info("Product {} does exist in metadata, but not in OBS", smd.getKeyObjectStorage());
 			}
 		}
 		
 		if (filesResult.size() > 0) {
-			LOGGER.info("Found {} products that exist in OBS, but not in metdata");
+			LOGGER.info("Found {} products that exist in OBS, but not in metdata", filesResult.size());
 			for (ObsObject product: filesResult.values()) {
 				LOGGER.info("Product {} does exist in OBS, but not in metadata", product.getKey());
 			}

@@ -19,12 +19,12 @@ import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 

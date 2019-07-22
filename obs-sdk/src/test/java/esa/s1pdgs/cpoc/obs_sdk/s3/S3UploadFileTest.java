@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.wrapper.job.model.obs;
+package esa.s1pdgs.cpoc.obs_sdk.s3;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,7 +8,7 @@ import java.io.File;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3UploadFile;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

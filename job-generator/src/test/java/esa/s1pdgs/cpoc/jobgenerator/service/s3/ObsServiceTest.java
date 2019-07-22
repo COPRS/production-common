@@ -21,14 +21,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.jobgenerator.service.s3.ObsService;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;

@@ -29,7 +29,6 @@ import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.file.FileDownloader;
 import esa.s1pdgs.cpoc.compression.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.status.AppStatus;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -39,6 +38,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 

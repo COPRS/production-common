@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
@@ -41,7 +42,6 @@ import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
 import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.wrapper.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
-import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.wrapper.status.AppStatus;
 

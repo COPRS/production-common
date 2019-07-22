@@ -17,16 +17,14 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.FileCopyUtils;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
-import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
-import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.s3.ObsService;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
-import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 
 public class EdrsSessionFileServiceTest {
 

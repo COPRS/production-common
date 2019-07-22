@@ -8,9 +8,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
-import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 
 /**
  * 

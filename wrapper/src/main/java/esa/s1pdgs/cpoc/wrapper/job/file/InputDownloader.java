@@ -18,10 +18,10 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
-import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
 
 /**

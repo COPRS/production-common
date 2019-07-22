@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.wrapper.job.model.obs;
+package esa.s1pdgs.cpoc.obs_sdk.s3;
 
 import java.io.File;
 import java.util.Objects;

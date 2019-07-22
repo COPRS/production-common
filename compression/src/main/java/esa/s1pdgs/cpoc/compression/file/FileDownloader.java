@@ -13,9 +13,9 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.compression.model.obs.S3DownloadFile;
-import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 

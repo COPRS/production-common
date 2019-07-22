@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.compression.model.obs.S3DownloadFile;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
 
 public class TestUtils {
 
