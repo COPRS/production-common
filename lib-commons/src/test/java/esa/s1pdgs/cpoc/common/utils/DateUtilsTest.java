@@ -2,7 +2,14 @@ package esa.s1pdgs.cpoc.common.utils;
 
 import static org.junit.Assert.assertEquals;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.junit.Test;
 
@@ -25,6 +32,22 @@ public class DateUtilsTest {
         DateUtils.convertWithSimpleDateFormat("2018012512633",
                 "yyyyMMdd'T'HHmmss");
     }
+
+//	@Test
+//	public void testConvert_HandlingOfMicroseconds() throws ParseException {
+//
+//		final DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+//		format.setTimeZone(TimeZone.getTimeZone("UTC"));
+//		final Date res = format.parse("2019-01-01T00:00:00.123456Z");
+//		System.out.println("Lutz " + format.format(res));
+//
+//		final DateTimeFormatter uut = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+//		final LocalDateTime parsedDate = LocalDateTime.parse("2019-01-01T00:00:00.123456Z", uut);		
+//		System.out.println("Lutz " + uut.format(parsedDate));
+//
+//    }
+    
+    
 
     /*
      * @Test public void testconvertIso() throws InternalErrorException { Date
