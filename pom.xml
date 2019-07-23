@@ -273,7 +273,7 @@
 		<module>mqi-client</module>
 		<module>mqi-server</module>
 		<module>obs-sdk</module>
-		<module>scaler</module>
 		<module>validation</module>
+		<module>scaler</module>
 	</modules>
 </project>
