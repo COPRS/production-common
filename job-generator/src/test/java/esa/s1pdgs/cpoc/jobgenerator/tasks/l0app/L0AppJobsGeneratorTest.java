@@ -70,7 +70,7 @@ public class L0AppJobsGeneratorTest {
     private JobGeneratorSettings jobGeneratorSettings;
 
     @Mock
-    private OutputProducerFactory JobsSender;
+    private OutputProducerFactory jobsSender;
 
     @Mock
     private AppCatalogJobClient appDataService;
@@ -102,7 +102,7 @@ public class L0AppJobsGeneratorTest {
 
         JobsGeneratorFactory factory = new JobsGeneratorFactory(
                 l0ProcessSettings, jobGeneratorSettings, xmlConverter,
-                metadataService, JobsSender);
+                metadataService, jobsSender);
         generator = (L0AppJobsGenerator) factory
                 .createJobGeneratorForEdrsSession(new File(
                         "./test/data/generic_config/task_tables/TaskTable.AIOP.xml"),
@@ -209,21 +209,21 @@ public class L0AppJobsGeneratorTest {
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                             "MPL_ORBPRE",
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
-                            "2017-12-05T20:03:09", "2017-12-15T20:03:09"));
+                            "2017-12-05T20:03:09.123456Z", "2017-12-15T20:03:09.123456Z"));
                 } else if ("MPL_ORBSCT"
                         .equalsIgnoreCase(query.getProductType())) {
                     return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
                             "MPL_ORBSCT",
                             "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
-                            "2014-04-03T22:46:09", "9999-12-31T23:59:59"));
+                            "2014-04-03T22:46:09.123456Z", "9999-12-31T23:59:59.123456Z"));
                 } else if ("AUX_OBMEMC"
                         .equalsIgnoreCase(query.getProductType())) {
                     return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                             "AUX_OBMEMC",
                             "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-                            "2014-02-01T00:00:00", "9999-12-31T23:59:59"));
+                            "2014-02-01T00:00:00.123456Z", "9999-12-31T23:59:59.123456Z"));
                 }
                 return null;
             }).when(this.metadataService).search(Mockito.any(), Mockito.any(),
@@ -243,7 +243,7 @@ public class L0AppJobsGeneratorTest {
                     i.getArgument(1));
             publishedJob = i.getArgument(1);
             return null;
-        }).when(this.JobsSender).sendJob(Mockito.any(), Mockito.any());
+        }).when(this.jobsSender).sendJob(Mockito.any(), Mockito.any());
     }
 
     private void mockAppDataService()
@@ -398,28 +398,24 @@ public class L0AppJobsGeneratorTest {
     }
 
     @Test
-    public void testRun() {
-        try {
-            mockAppDataService();
+    public void testRun() throws InternalErrorException, AbstractCodedException {
 
-            generator.run();
+        mockAppDataService();
 
-            Mockito.verify(JobsSender).sendJob(Mockito.any(), Mockito.any());
-            
-            assertEquals(ProductFamily.L0_JOB, publishedJob.getFamily());
-            assertEquals("", publishedJob.getProductProcessMode());
-            assertEquals("L20171109175634707000125", publishedJob.getProductIdentifier());
-            assertEquals(expectedTaskTable.getPools().size(), publishedJob.getPools().size());
-            for (int i = 0; i < expectedTaskTable.getPools().size(); i++) {
-                assertEquals(expectedTaskTable.getPools().get(i).getTasks().size(), publishedJob.getPools().get(i).getTasks().size());
-                for (int j = 0; j < expectedTaskTable.getPools().get(i).getTasks().size(); j++) {
-                    assertEquals(expectedTaskTable.getPools().get(i).getTasks().get(j).getFileName(), publishedJob.getPools().get(i).getTasks().get(j).getBinaryPath());
-                }
+        generator.run();
+
+        Mockito.verify(jobsSender).sendJob(Mockito.any(), Mockito.any());
+        
+        assertEquals(ProductFamily.L0_JOB, publishedJob.getFamily());
+        assertEquals("", publishedJob.getProductProcessMode());
+        assertEquals("L20171109175634707000125", publishedJob.getProductIdentifier());
+        assertEquals(expectedTaskTable.getPools().size(), publishedJob.getPools().size());
+        for (int i = 0; i < expectedTaskTable.getPools().size(); i++) {
+            assertEquals(expectedTaskTable.getPools().get(i).getTasks().size(), publishedJob.getPools().get(i).getTasks().size());
+            for (int j = 0; j < expectedTaskTable.getPools().get(i).getTasks().size(); j++) {
+                assertEquals(expectedTaskTable.getPools().get(i).getTasks().get(j).getFileName(), publishedJob.getPools().get(i).getTasks().get(j).getBinaryPath());
             }
-
-            // TODO to improve to check dto ok
-        } catch (Exception e) {
-            fail(e.getMessage());
         }
+
     }
 }
