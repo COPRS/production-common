@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClientBuilder;
+import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 
 /**
@@ -25,5 +26,10 @@ public class ObsConfig {
 	@Bean
 	public ObsClient obsClient() throws ObsServiceException {
 		return ObsClientBuilder.defaultClient();
+	}
+	
+	@Bean
+	public ObsService obsService() throws ObsServiceException {
+		return new ObsService(obsClient());
 	}
 }
