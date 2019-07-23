@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class AuxiliaryFilesExtractorTest {
@@ -49,7 +49,7 @@ public class AuxiliaryFilesExtractorTest {
      * Elasticsearch services
      */
     @Mock
-    protected ObsService obsService;
+    protected ObsClient obsClient;
 
     /**
      * MQI service
@@ -133,7 +133,7 @@ public class AuxiliaryFilesExtractorTest {
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.AUXILIARY_FILE));
 
-        extractor = new AuxiliaryFilesExtractor(esServices, obsService,
+        extractor = new AuxiliaryFilesExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath()
                         + File.separator,
@@ -169,7 +169,7 @@ public class AuxiliaryFilesExtractorTest {
                 "./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"))
                         .createNewFile();
 
-        extractor = new AuxiliaryFilesExtractor(esServices, obsService,
+        extractor = new AuxiliaryFilesExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig, "./test/workDir2/",
                 "manifest.safe", errorAppender, new ProcessConfiguration(),".safe");
         assertTrue((new File(
@@ -276,7 +276,7 @@ public class AuxiliaryFilesExtractorTest {
         		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
         		.product("test", file.getName());
 
-		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		ConfigFileDescriptor expectedDescriptor = new ConfigFileDescriptor();
 		expectedDescriptor.setExtension(fileExtension);
@@ -298,7 +298,7 @@ public class AuxiliaryFilesExtractorTest {
 			}
 		}
 
-		verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(metadataFile),
+		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(metadataFile),
 				Mockito.eq(extractor.localDirectory));
 	}
 

@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -58,7 +58,7 @@ public class OutputProcessorTest {
      * OBS service
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * Output producer factory for message queue system
@@ -161,11 +161,11 @@ public class OutputProcessorTest {
                 new File("p3")));
 
         processor =
-                new OutputProcessor(obsService, procuderFactory, inputMessage,
+                new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0);
 
         // Mocks
-        doNothing().when(obsService).uploadFilesPerBatch(Mockito.any());
+        doNothing().when(obsClient).uploadFilesPerBatch(Mockito.any());
         doNothing().when(procuderFactory)
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         doNothing().when(procuderFactory)
@@ -367,7 +367,7 @@ public class OutputProcessorTest {
     @Test
     public void testSortOutputsForLOSegmentFast() throws AbstractCodedException {
         processor =
-                new OutputProcessor(obsService, procuderFactory, inputMessage,
+                new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT);
         
         List<S3UploadFile> uploadBatch = new ArrayList<>();
@@ -449,7 +449,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForL1Nrt() throws AbstractCodedException {
         inputMessage.getBody().setProductProcessMode("NRT");
         processor =
-                new OutputProcessor(obsService, procuderFactory, inputMessage,
+                new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1);
         
         List<S3UploadFile> uploadBatch = new ArrayList<>();
@@ -517,7 +517,7 @@ public class OutputProcessorTest {
     @Test
     public void testSortOutputsForL1RealOutputs() throws AbstractCodedException {
         processor =
-                new OutputProcessor(obsService, procuderFactory, inputMessage,
+                new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1);
         
         List<S3UploadFile> uploadBatch = new ArrayList<>();
@@ -697,11 +697,11 @@ public class OutputProcessorTest {
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
 
         // check OBS service
-        verify(obsService, times(2)).uploadFilesPerBatch(Mockito.any());
+        verify(obsClient, times(2)).uploadFilesPerBatch(Mockito.any());
         List<S3UploadFile> batch1 = uploadBatch.subList(0, 2);
-        verify(obsService, times(1)).uploadFilesPerBatch(Mockito.eq(batch1));
+        verify(obsClient, times(1)).uploadFilesPerBatch(Mockito.eq(batch1));
         List<S3UploadFile> batch2 = uploadBatch.subList(2, 3);
-        verify(obsService, times(1)).uploadFilesPerBatch(Mockito.eq(batch2));
+        verify(obsClient, times(1)).uploadFilesPerBatch(Mockito.eq(batch2));
     }
 
     @Test
@@ -715,6 +715,6 @@ public class OutputProcessorTest {
                 .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
 
         // check OBS service
-        verify(obsService, times(2)).uploadFilesPerBatch(Mockito.any());
+        verify(obsClient, times(2)).uploadFilesPerBatch(Mockito.any());
     }
 }

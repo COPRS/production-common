@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
@@ -39,7 +39,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
     /**
      * Amazon S3 service for configuration files
      */
-    private final ObsService obsService;
+    private final ObsClient obsClient;
 
     /**
      * Manifest filename
@@ -53,7 +53,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
 
     @Autowired
     public LevelProductsExtractor(final EsServices esServices,
-            final ObsService obsService,
+            final ObsClient obsClient,
             final GenericMqiClient mqiService,
             final AppStatus appStatus,
             final MetadataExtractorConfig extractorConfig,
@@ -64,7 +64,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
             @Value("${file.file-with-manifest-ext}") final String fileManifestExt) {
         super(esServices, mqiService, appStatus, localDirectory,
                 extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.LEVEL_PRODUCTS, processConfiguration);
-        this.obsService = obsService;
+        this.obsClient = obsClient;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;
     }
@@ -97,7 +97,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
         
         reportingFactory.product(family.toString(), productName);
         
-        final File metadataFile = download(reportingFactory, obsService, family, productName, keyObs);        
+        final File metadataFile = download(reportingFactory, obsClient, family, productName, keyObs);        
         return extract(reportingFactory, dto, metadataFile, productName, family);
     }
     

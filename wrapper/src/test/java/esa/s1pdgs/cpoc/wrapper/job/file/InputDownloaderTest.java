@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
@@ -40,7 +40,7 @@ public class InputDownloaderTest {
      * OBS service
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * Pool processor executable
@@ -70,15 +70,15 @@ public class InputDownloaderTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(this.obsService).downloadFilesPerBatch(Mockito.any());
+        doNothing().when(this.obsClient).downloadFilesPerBatch(Mockito.any());
         doNothing().when(this.poolProcessorExecutor)
                 .setActive(Mockito.anyBoolean());
 
-        downloaderL0 = new InputDownloader(obsService, TestUtils.WORKDIR,
+        downloaderL0 = new InputDownloader(obsClient, TestUtils.WORKDIR,
                 dtol0.getInputs(), 5, "prefix-logs", this.poolProcessorExecutor,
                 ApplicationLevel.L0);
 
-        downloaderL1 = new InputDownloader(obsService, TestUtils.WORKDIR,
+        downloaderL1 = new InputDownloader(obsClient, TestUtils.WORKDIR,
                 dtol1.getInputs(), 5, "prefix-logs", this.poolProcessorExecutor,
                 ApplicationLevel.L1);
     }
@@ -154,10 +154,10 @@ public class InputDownloaderTest {
 
         // We have one file per input + status.txt
         assertTrue(workDirectory.list().length == 4);
-        verify(obsService, times(2)).downloadFilesPerBatch(Mockito.any());
-        verify(obsService, times(1)).downloadFilesPerBatch(
+        verify(obsClient, times(2)).downloadFilesPerBatch(Mockito.any());
+        verify(obsClient, times(1)).downloadFilesPerBatch(
                 Mockito.eq(downloadToBatch.subList(0, 5)));
-        verify(obsService, times(1)).downloadFilesPerBatch(
+        verify(obsClient, times(1)).downloadFilesPerBatch(
                 Mockito.eq(downloadToBatch.subList(5, 8)));
 
         // Check jobOrder.txt
@@ -189,10 +189,10 @@ public class InputDownloaderTest {
 
         // We have one file per input + status.txt
         assertTrue(workDirectory.list().length == 4);
-        verify(this.obsService, times(2)).downloadFilesPerBatch(Mockito.any());
-        verify(this.obsService, times(1)).downloadFilesPerBatch(
+        verify(this.obsClient, times(2)).downloadFilesPerBatch(Mockito.any());
+        verify(this.obsClient, times(1)).downloadFilesPerBatch(
                 Mockito.eq(downloadToBatch.subList(0, 5)));
-        verify(this.obsService, times(1)).downloadFilesPerBatch(
+        verify(this.obsClient, times(1)).downloadFilesPerBatch(
                 Mockito.eq(downloadToBatch.subList(5, 8)));
 
         // Check jobOrder.txt

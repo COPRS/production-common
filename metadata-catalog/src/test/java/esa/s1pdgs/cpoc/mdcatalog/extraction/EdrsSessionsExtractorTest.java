@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class EdrsSessionsExtractorTest {
@@ -42,7 +42,7 @@ public class EdrsSessionsExtractorTest {
      * Elasticsearch services
      */
     @Mock
-    protected ObsService obsService;
+    protected ObsClient obsClient;
 
     /**
      * MQI service

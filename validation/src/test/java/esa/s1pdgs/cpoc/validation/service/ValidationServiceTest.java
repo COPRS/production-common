@@ -23,9 +23,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.validation.service.metadata.MetadataService;
 
@@ -35,14 +35,14 @@ public class ValidationServiceTest {
 	private MetadataService metadataService;
 
 	@Mock
-	private ObsService obsService;
+	private ObsClient obsClient;
 
 	private ValidationService validationService;
 
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		validationService = new ValidationService(metadataService, obsService);
+		validationService = new ValidationService(metadataService, obsClient);
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class ValidationServiceTest {
 		obsResults.put("product1", ob1);
 
 		doReturn(metadataResults).when(metadataService).query(family, null, intervalStart, intervalStop);
-		doReturn(obsResults).when(obsService).listInterval(family, startDate, stopDate);
+		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		boolean consistent = validationService.checkConsistencyForFamilyAndTimeFrame(family, intervalStart,
 				intervalStop);
@@ -110,7 +110,7 @@ public class ValidationServiceTest {
 		obsResults.put("product2", ob2);
 
 		doReturn(metadataResults).when(metadataService).query(family, null, intervalStart, intervalStop);
-		doReturn(obsResults).when(obsService).listInterval(family, startDate, stopDate);
+		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		boolean consistent = validationService.checkConsistencyForFamilyAndTimeFrame(family, intervalStart,
 				intervalStop);
@@ -140,7 +140,7 @@ public class ValidationServiceTest {
 		Map<String, ObsObject> obsResults = new HashMap<>();
 
 		doReturn(metadataResults).when(metadataService).query(family, null, intervalStart, intervalStop);
-		doReturn(obsResults).when(obsService).listInterval(family, startDate, stopDate);
+		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		boolean consistent = validationService.checkConsistencyForFamilyAndTimeFrame(family, intervalStart,
 				intervalStop);
@@ -177,7 +177,7 @@ public class ValidationServiceTest {
 		obsResults.put("product2", ob2);
 
 		doReturn(metadataResults).when(metadataService).query(family, null, intervalStart, intervalStop);
-		doReturn(obsResults).when(obsService).listInterval(family, startDate, stopDate);
+		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		boolean consistent = validationService.checkConsistencyForFamilyAndTimeFrame(family, intervalStart,
 				intervalStop);
@@ -207,7 +207,7 @@ public class ValidationServiceTest {
 		obsResults.put("product1", ob1);
 
 		doReturn(metadataResults).when(metadataService).query(family, null, intervalStart, intervalStop);
-		doReturn(obsResults).when(obsService).listInterval(family, startDate, stopDate);
+		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		boolean consistent = validationService.checkConsistencyForFamilyAndTimeFrame(family, intervalStart,
 				intervalStop);
@@ -243,7 +243,7 @@ public class ValidationServiceTest {
 		obsResults.put("product2", ob2);
 
 		doReturn(metadataResults).when(metadataService).query(family, null, intervalStart, intervalStop);
-		doReturn(obsResults).when(obsService).listInterval(family, startDate, stopDate);
+		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		boolean consistent = validationService.checkConsistencyForFamilyAndTimeFrame(family, intervalStart,
 				intervalStop);
@@ -277,7 +277,7 @@ public class ValidationServiceTest {
 		obsResults.put("product1", ob1);
 
 		doReturn(metadataResults).when(metadataService).query(family, null, intervalStart, intervalStop);
-		doReturn(obsResults).when(obsService).listInterval(family, startDate, stopDate);
+		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		boolean consistent = validationService.checkConsistencyForFamilyAndTimeFrame(family, intervalStart,
 				intervalStop);

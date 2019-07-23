@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
@@ -65,7 +65,7 @@ public class JobProcessorTest extends MockPropertiesTest {
      * Output processsor
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * MQI service
@@ -133,7 +133,7 @@ public class JobProcessorTest extends MockPropertiesTest {
             workingDir.mkdir();
         }
         processor = new JobProcessor(appStatus, properties, devProperties,
-                obsService, procuderFactory, mqiService, errorAppender, mqiStatusService);
+                obsClient, procuderFactory, mqiService, errorAppender, mqiStatusService);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }

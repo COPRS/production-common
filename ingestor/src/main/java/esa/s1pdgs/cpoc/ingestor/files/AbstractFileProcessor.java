@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -37,7 +37,7 @@ public abstract class AbstractFileProcessor<T> {
     /**
      * Amazon S3 service for configuration files
      */
-    private final ObsService obsService;
+    private final ObsClient obsClient;
 
     /**
      * KAFKA producer on the topic "metadata"
@@ -69,14 +69,14 @@ public abstract class AbstractFileProcessor<T> {
      */
     private final String backupDirectory;
 
-    public AbstractFileProcessor(final ObsService obsService,
+    public AbstractFileProcessor(final ObsClient obsClient,
             final PublicationServices<T> publisher,
             final AbstractFileDescriptorService extractor,
             final ProductFamily family,
             final AppStatus appStatus,
             final String pickupDirectory,
             final String backupDirectory) {
-        this.obsService = obsService;
+        this.obsClient = obsClient;
         this.publisher = publisher;
         this.extractor = extractor;
         this.family = family;
@@ -164,10 +164,10 @@ public abstract class AbstractFileProcessor<T> {
 	}
 
 	private final void upload(final File file, final String productName, final FileDescriptor descriptor) throws ObsException, ObsAlreadyExist {		
-		if (obsService.exist(family,descriptor.getKeyObjectStorage())) {
+		if (obsClient.exist(family,descriptor.getKeyObjectStorage())) {
 			throw new ObsAlreadyExist(family, descriptor.getProductName(), new Exception("File already exist in object storage"));
 		}
-		obsService.uploadFile(family,descriptor.getKeyObjectStorage(), file);
+		obsClient.uploadFile(family,descriptor.getKeyObjectStorage(), file);
 	}
 
 	private final void publish(final Reporting.Factory reportingFactory, final String productName, final FileDescriptor descriptor) throws MqiPublicationError {

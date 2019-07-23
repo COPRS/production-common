@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class AuxiliaryFilesProcessorTest {
 
@@ -22,7 +22,7 @@ public class AuxiliaryFilesProcessorTest {
      * Amazon S3 service for configuration files
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * KAFKA producer on the topic "metadata"
@@ -58,7 +58,7 @@ public class AuxiliaryFilesProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new AuxiliaryFilesProcessor(obsService, publisher, extractor, appStatus, backupDirectory ,backupDirectory);
+        service = new AuxiliaryFilesProcessor(obsClient, publisher, extractor, appStatus, backupDirectory ,backupDirectory);
     }
 
     /**

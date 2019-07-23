@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -51,7 +51,7 @@ public class InputDownloader {
     /**
      * Factory for accessing to the object storage
      */
-    private final ObsService obsService;
+    private final ObsClient obsClient;
 
     /**
      * Path to the local working directory
@@ -87,7 +87,7 @@ public class InputDownloader {
     /**
      * Constructor
      * 
-     * @param obsService
+     * @param obsClient
      * @param localWorkingDir
      * @param inputs
      * @param sizeS3DownloadBatch
@@ -95,12 +95,12 @@ public class InputDownloader {
      * @param poolProcessorExecutor
      * @param appLevel
      */
-    public InputDownloader(final ObsService obsService,
+    public InputDownloader(final ObsClient obsClient,
             final String localWorkingDir, final List<LevelJobInputDto> inputs,
             final int sizeDownBatch, final String prefixMonitorLogs,
             final PoolExecutorCallable poolProcExecutor,
             final ApplicationLevel appLevel) {
-        this.obsService = obsService;
+        this.obsClient = obsClient;
         this.localWorkingDir = localWorkingDir;
         this.inputs = inputs;
         this.sizeDownBatch = sizeDownBatch;
@@ -265,7 +265,7 @@ public class InputDownloader {
                 LOGGER.info("{} 4 - Starting downloading batch {}", prefixMonitorLogs, i);
                 int lastIndex = Math.min((i + 1) * sizeDownBatch, downloadToBatch.size());                
                 List<S3DownloadFile> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
-                this.obsService.downloadFilesPerBatch(subListS3);
+                this.obsClient.downloadFilesPerBatch(subListS3);
                 if (appLevel == ApplicationLevel.L0 && nbUploadedRaw < 2) {
                     nbUploadedRaw += subListS3.stream().filter(
                             file -> file.getFamily() == ProductFamily.EDRS_SESSION)

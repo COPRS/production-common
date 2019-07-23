@@ -5,7 +5,7 @@ package esa.s1pdgs.cpoc.compression.process;
 //     * Output processsor
 //     */
 //    @Mock
-//    private ObsService obsService;
+//    private ObsClient obsClient;
 //    
 //    @Mock
 //    private FileDownloader fileDownloader;
@@ -70,7 +70,7 @@ package esa.s1pdgs.cpoc.compression.process;
 //        }
 //        //TODO FIX
 ////        processor = new CompressProcessor(appStatus, properties,
-////                obsService,mqiService, mqiStatusService);
+////                obsClient,mqiService, mqiStatusService);
 //        
 //        procExecutorSrv = Executors.newSingleThreadExecutor();
 //        procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
