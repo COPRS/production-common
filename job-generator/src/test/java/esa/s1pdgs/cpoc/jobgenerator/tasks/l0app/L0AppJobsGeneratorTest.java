@@ -209,21 +209,21 @@ public class L0AppJobsGeneratorTest {
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                             "MPL_ORBPRE",
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
-                            "2017-12-05T20:03:09", "2017-12-15T20:03:09"));
+                            "2017-12-05T20:03:09.000000Z", "2017-12-15T20:03:09.000000Z"));
                 } else if ("MPL_ORBSCT"
                         .equalsIgnoreCase(query.getProductType())) {
                     return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
                             "MPL_ORBSCT",
                             "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
-                            "2014-04-03T22:46:09", "9999-12-31T23:59:59"));
+                            "2014-04-03T22:46:09.000000Z", "9999-12-31T23:59:59.000000Z"));
                 } else if ("AUX_OBMEMC"
                         .equalsIgnoreCase(query.getProductType())) {
                     return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                             "AUX_OBMEMC",
                             "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-                            "2014-02-01T00:00:00", "9999-12-31T23:59:59"));
+                            "2014-02-01T00:00:00.000000Z", "9999-12-31T23:59:59.000000Z"));
                 }
                 return null;
             }).when(this.metadataService).search(Mockito.any(), Mockito.any(),
