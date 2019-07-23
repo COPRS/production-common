@@ -17,7 +17,6 @@
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-validation</project.build.finalName>
-		<project.artifactId>s1pdgs-queue-watcher</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.validation.Application</start-class>
 	</properties>
 
