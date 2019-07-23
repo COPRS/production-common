@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class AbstractFileProcessorTest {
 
@@ -43,7 +43,7 @@ public class AbstractFileProcessorTest {
      * Amazon S3 service for configuration files
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * KAFKA producer on the topic "metadata"
@@ -103,7 +103,7 @@ public class AbstractFileProcessorTest {
         
         doReturn(file).when(message).getPayload();
 
-        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus, file.getParent(), backupFile.getParent());
+        service = new FileProcessorImpl(obsClient, publisher, extractor, appStatus, file.getParent(), backupFile.getParent());
     }
 
     /**
@@ -133,7 +133,7 @@ public class AbstractFileProcessorTest {
     public void testProcessWhenDirectory() {
         doReturn(FileUtils.TEST_DIR).when(message).getPayload();
         service.processFile(message);
-        verifyZeroInteractions(obsService);
+        verifyZeroInteractions(obsClient);
         verifyZeroInteractions(publisher);
         verifyZeroInteractions(extractor);
         assertTrue(file.exists());
@@ -158,7 +158,7 @@ public class AbstractFileProcessorTest {
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
-        verifyZeroInteractions(obsService);
+        verifyZeroInteractions(obsClient);
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
         assertTrue(backupFile.exists());
@@ -182,7 +182,7 @@ public class AbstractFileProcessorTest {
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
-        verifyZeroInteractions(obsService);
+        verifyZeroInteractions(obsClient);
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
         assertTrue(backupFile.exists());
@@ -193,13 +193,13 @@ public class AbstractFileProcessorTest {
             IngestorFilePathException, IngestorIgnoredFileException {
         FileDescriptor desc = getFileDescriptor(true);
         doReturn(desc).when(extractor).extractDescriptor(Mockito.any());
-        doReturn(true).when(obsService).exist(Mockito.any(),
+        doReturn(true).when(obsClient).exist(Mockito.any(),
                 Mockito.anyString());
 
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
-        verify(obsService, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()));
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
@@ -214,14 +214,14 @@ public class AbstractFileProcessorTest {
 
         ObsException exc = new ObsException(ProductFamily.BLANK, "key-obs",
                 new Exception("cause"));
-        doThrow(exc).when(obsService).exist(Mockito.any(), Mockito.anyString());
+        doThrow(exc).when(obsClient).exist(Mockito.any(), Mockito.anyString());
 
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
-        verify(obsService, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()));
-        verify(obsService, never()).uploadFile(Mockito.any(),
+        verify(obsClient, never()).uploadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.any());
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
@@ -233,20 +233,20 @@ public class AbstractFileProcessorTest {
             IngestorFilePathException, IngestorIgnoredFileException {
         FileDescriptor desc = getFileDescriptor(true);
         doReturn(desc).when(extractor).extractDescriptor(Mockito.any());
-        doReturn(false).when(obsService).exist(Mockito.any(),
+        doReturn(false).when(obsClient).exist(Mockito.any(),
                 Mockito.anyString());
 
         ObsException exc = new ObsException(ProductFamily.BLANK, "key-obs",
                 new Exception("cause"));
-        doThrow(exc).when(obsService).uploadFile(Mockito.any(),
+        doThrow(exc).when(obsClient).uploadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.any());
 
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
-        verify(obsService, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()));
-        verify(obsService, times(1)).uploadFile(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).uploadFile(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()), Mockito.eq(file));
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
@@ -260,15 +260,15 @@ public class AbstractFileProcessorTest {
 
         ObsException exc = new ObsException(ProductFamily.BLANK, "key-obs",
                 new Exception("cause"));
-        doThrow(exc).when(obsService).exist(Mockito.any(), Mockito.anyString());
+        doThrow(exc).when(obsClient).exist(Mockito.any(), Mockito.anyString());
 
-        service = new FileProcessorImpl(obsService, publisher, extractor, appStatus, file.getParent(), "/");
+        service = new FileProcessorImpl(obsClient, publisher, extractor, appStatus, file.getParent(), "/");
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
-        verify(obsService, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()));
-        verify(obsService, never()).uploadFile(Mockito.any(),
+        verify(obsClient, never()).uploadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.any());
         verifyZeroInteractions(publisher);
         assertTrue(file.exists());
@@ -280,17 +280,17 @@ public class AbstractFileProcessorTest {
             IngestorFilePathException, IngestorIgnoredFileException {
         FileDescriptor desc = getFileDescriptor(false);
         doReturn(desc).when(extractor).extractDescriptor(Mockito.any());
-        doReturn(false).when(obsService).exist(Mockito.any(),
+        doReturn(false).when(obsClient).exist(Mockito.any(),
                 Mockito.anyString());
-        doNothing().when(obsService).uploadFile(Mockito.any(),
+        doNothing().when(obsClient).uploadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.any());
 
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
-        verify(obsService, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()));
-        verify(obsService, times(1)).uploadFile(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).uploadFile(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()), Mockito.eq(file));
         verifyZeroInteractions(publisher);
         assertFalse(file.exists());
@@ -304,17 +304,17 @@ public class AbstractFileProcessorTest {
             IngestorIgnoredFileException, MqiPublicationError {
         FileDescriptor desc = getFileDescriptor(true);
         doReturn(desc).when(extractor).extractDescriptor(Mockito.any());
-        doReturn(false).when(obsService).exist(Mockito.any(),
+        doReturn(false).when(obsClient).exist(Mockito.any(),
                 Mockito.anyString());
-        doNothing().when(obsService).uploadFile(Mockito.any(),
+        doNothing().when(obsClient).uploadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.any());
 
         service.processFile(message);
 
         verify(extractor, times(1)).extractDescriptor(Mockito.eq(file));
-        verify(obsService, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).exist(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()));
-        verify(obsService, times(1)).uploadFile(Mockito.eq(ProductFamily.BLANK),
+        verify(obsClient, times(1)).uploadFile(Mockito.eq(ProductFamily.BLANK),
                 Mockito.eq(desc.getKeyObjectStorage()), Mockito.eq(file));
         verify(publisher, times(1)).send(Mockito.eq(desc.getProductName()));
         assertFalse(file.exists());
@@ -341,17 +341,17 @@ public class AbstractFileProcessorTest {
 class FileProcessorImpl extends AbstractFileProcessor<String> {
 
     /**
-     * @param obsService
+     * @param obsClient
      * @param publisher
      * @param extractor
      */
-    public FileProcessorImpl(final ObsService obsService,
+    public FileProcessorImpl(final ObsClient obsClient,
             final PublicationServices<String> publisher,
             final AbstractFileDescriptorService extractor,
             final AppStatus appStatus,
             final String pickupDirectory,
             final String backupDirectory) {
-        super(obsService, publisher, extractor, ProductFamily.BLANK, appStatus, pickupDirectory, backupDirectory);
+        super(obsClient, publisher, extractor, ProductFamily.BLANK, appStatus, pickupDirectory, backupDirectory);
     }
 
     /**

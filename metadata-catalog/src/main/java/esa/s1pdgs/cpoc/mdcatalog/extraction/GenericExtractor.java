@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -281,7 +281,7 @@ public abstract class GenericExtractor<T> {
 
     final File download(
     		final Reporting.Factory reportingFactory,
-    		final ObsService obsService,
+    		final ObsClient obsClient,
     		final ProductFamily family, 
     		final String productName,
     		final String keyObs
@@ -295,7 +295,7 @@ public abstract class GenericExtractor<T> {
         reportDownload.reportStart("Starting download of " + keyObs);
 
 		try {
-			final File metadataFile = obsService.downloadFile(family, keyObs, this.localDirectory);
+			final File metadataFile = obsClient.downloadFile(family, keyObs, this.localDirectory);
 			reportDownload.reportStop("End download of " + keyObs);
 			return metadataFile;
 		} catch (AbstractCodedException e) {

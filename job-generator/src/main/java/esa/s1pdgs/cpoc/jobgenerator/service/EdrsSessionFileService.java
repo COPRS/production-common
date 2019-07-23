@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 /**
  * Class for managing EDRS session files
@@ -28,7 +28,7 @@ public class EdrsSessionFileService {
 	/**
 	 * S3 service
 	 */
-	private final ObsService obsService;
+	private final ObsClient obsClient;
 
 	/**
 	 * XML converter
@@ -48,9 +48,9 @@ public class EdrsSessionFileService {
 	 * @param pathTempDirectory
 	 */
 	@Autowired
-	public EdrsSessionFileService(final ObsService obsService, final XmlConverter xmlConverter,
+	public EdrsSessionFileService(final ObsClient obsClient, final XmlConverter xmlConverter,
 			@Value("${level0.dir-extractor-sessions}") final String pathTempDirectory) {
-		this.obsService = obsService;
+		this.obsClient = obsClient;
 		this.xmlConverter = xmlConverter;
 		this.pathTempDirectory = pathTempDirectory;
 	}
@@ -68,7 +68,7 @@ public class EdrsSessionFileService {
 	public EdrsSessionFile createSessionFile(final String keyObjectStorage) throws AbstractCodedException {
 
 		// Download file
-		File tmpFile = obsService.downloadFile(ProductFamily.EDRS_SESSION, keyObjectStorage, this.pathTempDirectory);
+		File tmpFile = obsClient.downloadFile(ProductFamily.EDRS_SESSION, keyObjectStorage, this.pathTempDirectory);
 
 		// Convert it
 		try {

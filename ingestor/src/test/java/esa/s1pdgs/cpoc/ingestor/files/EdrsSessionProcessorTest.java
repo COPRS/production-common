@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.ingestor.files.services.EdrsSessionFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaSessionProducer;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class EdrsSessionProcessorTest {
 
@@ -21,7 +21,7 @@ public class EdrsSessionProcessorTest {
      * Amazon S3 service for configuration files
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * KAFKA producer on the topic "metadata"
@@ -57,7 +57,7 @@ public class EdrsSessionProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new SessionFilesProcessor(obsService, publisher, extractor, appStatus, backupDirectory, backupDirectory);
+        service = new SessionFilesProcessor(obsClient, publisher, extractor, appStatus, backupDirectory, backupDirectory);
     }
 
     /**

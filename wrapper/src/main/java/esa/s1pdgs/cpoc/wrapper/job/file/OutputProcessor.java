@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -64,7 +64,7 @@ public class OutputProcessor {
     /**
      * OBS service
      */
-    private final ObsService obsService;
+    private final ObsClient obsClient;
 
     /**
      * Output producer factory for message queue system
@@ -109,7 +109,7 @@ public class OutputProcessor {
     /**
      * Constructor
      * 
-     * @param obsService
+     * @param obsClient
      * @param outputProcuderFactory
      * @param workDirectory
      * @param authorizedOutputs
@@ -117,12 +117,12 @@ public class OutputProcessor {
      * @param sizeS3UploadBatch
      * @param prefixMonitorLogs
      */
-    public OutputProcessor(final ObsService obsService,
+    public OutputProcessor(final ObsClient obsClient,
             final OutputProcuderFactory procuderFactory,
             final GenericMessageDto<LevelJobDto> inputMessage,
             final String listFile, final int sizeUploadBatch,
             final String prefixMonitorLogs, final ApplicationLevel appLevel) {
-        this.obsService = obsService;
+        this.obsClient = obsClient;
         this.procuderFactory = procuderFactory;
         this.listFile = listFile;
         this.inputMessage = inputMessage;
@@ -388,7 +388,7 @@ public class OutputProcessor {
                 if (Thread.currentThread().isInterrupted()) {
                     throw new InternalErrorException("The current thread as been interrupted");
                 } 
-                this.obsService.uploadFilesPerBatch(sublist);
+                this.obsClient.uploadFilesPerBatch(sublist);
                 report.reportStop("End uploading batch " + i + " of outputs " + listProducts);
               
             } catch (AbstractCodedException e) {

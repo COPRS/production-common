@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class EdrsSessionFileServiceTest {
 
@@ -32,7 +32,7 @@ public class EdrsSessionFileServiceTest {
 	 * S3 service
 	 */
 	@Mock
-	private ObsService obsService;
+	private ObsClient obsService;
 
 	/**
 	 * XML converter

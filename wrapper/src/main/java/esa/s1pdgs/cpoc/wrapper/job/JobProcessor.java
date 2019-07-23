@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
@@ -88,7 +88,7 @@ public class JobProcessor {
     /**
      * Output processsor
      */
-    private final ObsService obsService;
+    private final ObsClient obsClient;
 
     /**
      * MQI service for reading message
@@ -109,14 +109,14 @@ public class JobProcessor {
      * @param devProperties
      * @param kafkaContainerId
      * @param kafkaRegistry
-     * @param obsService
+     * @param obsClient
      * @param procuderFactory
      * @param outputListFile
      */
     @Autowired
     public JobProcessor(final AppStatus appStatus,
             final ApplicationProperties properties,
-            final DevProperties devProperties, final ObsService obsService,
+            final DevProperties devProperties, final ObsClient obsClient,
             final OutputProcuderFactory procuderFactory,
             final GenericMqiClient mqiService,
             final ErrorRepoAppender errorAppender,
@@ -124,7 +124,7 @@ public class JobProcessor {
         this.appStatus = appStatus;
         this.devProperties = devProperties;
         this.properties = properties;
-        this.obsService = obsService;
+        this.obsClient = obsClient;
         this.procuderFactory = procuderFactory;
         this.mqiService = mqiService;
         this.mqiStatusService = mqiStatusService;
@@ -193,13 +193,13 @@ public class JobProcessor {
                 new ExecutorCompletionService<>(procExecutorSrv);
         // Initialize the input downloader
         InputDownloader inputDownloader =
-                new InputDownloader(obsService, job.getWorkDirectory(),
+                new InputDownloader(obsClient, job.getWorkDirectory(),
                         job.getInputs(), this.properties.getSizeBatchDownload(),
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
                         procExecutor, this.properties.getLevel());
         // Initiliaze the output processor
         OutputProcessor outputProcessor =
-                new OutputProcessor(obsService, procuderFactory, message,
+                new OutputProcessor(obsClient, procuderFactory, message,
                         outputListFile, this.properties.getSizeBatchUpload(),
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), this.properties.getLevel());
 

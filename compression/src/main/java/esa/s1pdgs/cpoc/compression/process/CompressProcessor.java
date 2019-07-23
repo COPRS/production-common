@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -62,7 +62,7 @@ public class CompressProcessor {
 	/**
 	 * Output processsor
 	 */
-	private final ObsService obsService;
+	private final ObsClient obsClient;
 
 	/**
 	 * Output processsor
@@ -83,13 +83,13 @@ public class CompressProcessor {
 
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
-			final ObsService obsService, final OutputProducerFactory producerFactory,
+			final ObsClient obsClient, final OutputProducerFactory producerFactory,
 			final GenericMqiClient mqiService,
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService) {
 		this.appStatus = appStatus;
 		this.properties = properties;
-		this.obsService = obsService;
+		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
 		this.mqiService = mqiService;
 		this.mqiStatusService = mqiStatusService;
@@ -153,12 +153,12 @@ public class CompressProcessor {
 		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		FileDownloader fileDownloader = new FileDownloader(obsService, workDir, job,
+		FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, job,
 				this.properties.getSizeBatchDownload(),
 				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				"CompressionProcessor");
 
-		FileUploader fileUploader = new FileUploader(obsService, producerFactory, workDir, message, job);
+		FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job);
 
 		// ----------------------------------------------------------
 		// Process message

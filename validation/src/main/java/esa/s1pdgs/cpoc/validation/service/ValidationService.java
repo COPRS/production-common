@@ -17,8 +17,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.validation.service.metadata.MetadataService;
 
@@ -28,12 +28,12 @@ public class ValidationService {
 
 	private final MetadataService metadataService;
 
-	private final ObsService obsService;
+	private final ObsClient obsClient;
 
 	@Autowired
-	public ValidationService(MetadataService metadataService, ObsService obsService) {
+	public ValidationService(MetadataService metadataService, ObsClient obsClient) {
 		this.metadataService = metadataService;
-		this.obsService = obsService;
+		this.obsClient = obsClient;
 	}
 
 	public boolean checkConsistencyForFamilyAndTimeFrame(ProductFamily family, String intervalStart, String intervalEnd)
@@ -68,7 +68,7 @@ public class ValidationService {
 			Date startDate = Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant());
 			Date endDate = Date.from(localDateTimeEnd.atZone(ZoneId.of("UTC")).toInstant());
 
-			obsResults = obsService.listInterval(family, startDate, endDate);
+			obsResults = obsClient.listInterval(family, startDate, endDate);
 			LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 		} catch (SdkClientException | DateTimeParseException ex) {
 			String errorMessage = String.format("[ValidationTask] [subTask retrieveObs] [STOP KO] %s %s", "LOG_ERROR",

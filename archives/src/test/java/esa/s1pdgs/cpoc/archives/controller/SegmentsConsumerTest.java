@@ -24,12 +24,12 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class SegmentsConsumerTest {
 
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
     
     @Mock
     private DevProperties devProperties;
@@ -58,7 +58,7 @@ public class SegmentsConsumerTest {
 
     private void mockSliceDownloadFiles(File result)
             throws ObsException, ObsUnknownObject {
-        doReturn(result).when(obsService).downloadFile(
+        doReturn(result).when(obsClient).downloadFile(
                 Mockito.any(ProductFamily.class), Mockito.anyString(),
                 Mockito.anyString());
     }
@@ -66,7 +66,7 @@ public class SegmentsConsumerTest {
     private void mockSliceObjectStorageException()
             throws ObsException, ObsUnknownObject {
         doThrow(new ObsException(ProductFamily.L0_SEGMENT, "kobs",
-                new Throwable())).when(obsService).downloadFile(
+                new Throwable())).when(obsClient).downloadFile(
                         Mockito.any(ProductFamily.class), Mockito.anyString(),
                         Mockito.anyString());
     }
@@ -74,7 +74,7 @@ public class SegmentsConsumerTest {
     private void mockSliceObsUnknownObjectException()
             throws ObsUnknownObject, ObsException {
         doThrow(new ObsUnknownObject(ProductFamily.BLANK, "kobs"))
-                .when(obsService).downloadFile(Mockito.any(ProductFamily.class),
+                .when(obsClient).downloadFile(Mockito.any(ProductFamily.class),
                         Mockito.anyString(), Mockito.anyString());
     }
 
@@ -82,7 +82,7 @@ public class SegmentsConsumerTest {
     public void testReceiveL0Segment()
             throws ObsException, ObsUnknownObject {
         SegmentsConsumer consumer =
-                new SegmentsConsumer(obsService, "test/data/segments", devProperties,
+                new SegmentsConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
         File expectedResult =
                 new File("test/data/segments/l0_segment/productName");
@@ -93,7 +93,7 @@ public class SegmentsConsumerTest {
                 new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
-        verify(obsService, times(1)).downloadFile(
+        verify(obsClient, times(1)).downloadFile(
                 Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq("kobs"),
                 Mockito.eq("test/data/segments/l0_segment"));
     }
@@ -102,7 +102,7 @@ public class SegmentsConsumerTest {
     public void testReceiveL0SegmentOnlyManifest()
             throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/segments", devProperties,
+                new SlicesConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
         File expectedResult =
                 new File("test/data/segments/l0_segment/productName");
@@ -112,7 +112,7 @@ public class SegmentsConsumerTest {
                 new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
-        verify(obsService, times(1)).downloadFile(
+        verify(obsClient, times(1)).downloadFile(
                 Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq("kobs/manifest.safe"),
                 Mockito.eq("test/data/segments/l0_segment"));
     }
@@ -121,7 +121,7 @@ public class SegmentsConsumerTest {
     public void testReceiveL0SegmentObjectStorageException()
             throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/segments", devProperties,
+                new SlicesConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
@@ -134,7 +134,7 @@ public class SegmentsConsumerTest {
     public void testReceiveL0SegmentObsUnknownObjectException()
             throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/segments", devProperties,
+                new SlicesConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
@@ -147,7 +147,7 @@ public class SegmentsConsumerTest {
     public void testReceiveL0SegmentAckException()
             throws ObsException, ObsUnknownObject {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/segments", devProperties,
+                new SlicesConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
         File expectedResult =
                 new File("test/data/segments/l0_segment/productName");

@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsService;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -52,12 +52,12 @@ public class FileUploader {
 	/**
 	 * OBS service
 	 */
-	private final ObsService obsService;
+	private final ObsClient obsClient;
 
-	public FileUploader(final ObsService obsService, final OutputProducerFactory producerFactory,
+	public FileUploader(final ObsClient obsClient, final OutputProducerFactory producerFactory,
 			final String workingDir, final GenericMessageDto<ProductDto> inputMessage,
 			final ProductDto job) {
-		this.obsService = obsService;
+		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
 		this.workingDir = workingDir;
 		this.inputMessage = inputMessage;
@@ -106,7 +106,7 @@ public class FileUploader {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		this.obsService.uploadFilesPerBatch(Collections.singletonList(uploadFile));
+		this.obsClient.uploadFilesPerBatch(Collections.singletonList(uploadFile));
 
 
 		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
