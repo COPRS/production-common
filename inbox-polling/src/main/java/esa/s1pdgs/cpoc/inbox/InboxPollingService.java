@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-
+// make scheduling configurable via property to allow disabling it in unit tests
 @ConditionalOnProperty(value = "scheduling.enable", havingValue = "true", matchIfMissing = true)
 @EnableScheduling
 public class InboxPollingService {		
