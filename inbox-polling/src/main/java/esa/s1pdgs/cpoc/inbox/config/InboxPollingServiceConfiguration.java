@@ -19,6 +19,9 @@ public class InboxPollingServiceConfiguration {
 	@Autowired
 	public InboxPollingServiceConfiguration(
 			final InboxPollingConfigurationProperties properties,
+			// InboxFactory is autowired here without a qualifier because there is only one
+			// implementation of it in the classpath. This needs to be changed in the future 
+			// when there are other types of inboxes available
 			final InboxFactory inboxFactory
 	) {
 		this.properties = properties;
