@@ -1,6 +1,8 @@
 spring:
   application:
     name: s1pdgs-request-repo
+  main:
+     allow-bean-definition-overriding: true
    
 logging:
   config: classpath:log4j2-test.yml
