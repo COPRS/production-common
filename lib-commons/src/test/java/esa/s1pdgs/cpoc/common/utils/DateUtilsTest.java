@@ -30,6 +30,12 @@ public class DateUtilsTest {
     	assertEquals("2017-12-24T14:22:15.123456Z", DateUtils.formatToMetadataDateTimeFormat(time));    	
     }
     
+    @Test(expected=IllegalArgumentException.class)
+    public final void testParse_FullLengthButInvalidLetter_ShallThrowException() {
+    	final LocalDateTime time = DateUtils.parse("2017-12-24T14:22:15.123456X");    	
+    	assertEquals("2017-12-24T14:22:15.123456Z", DateUtils.formatToMetadataDateTimeFormat(time));    	
+    }
+    
     @Test
     public final void testParse_NoTrailingUtcZ() {
     	final LocalDateTime time = DateUtils.parse("2017-12-24T14:22:15.123456");    	
@@ -39,6 +45,12 @@ public class DateUtilsTest {
     @Test
     public final void testParse_UtcPrefix() {
     	final LocalDateTime time = DateUtils.parse("UTC=2017-12-24T14:22:15");    	
+    	assertEquals("2017-12-24T14:22:15.000000Z", DateUtils.formatToMetadataDateTimeFormat(time));    	
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public final void testParse_UtcPrefixInvalidPrefix_ShallThrowException() {
+    	final LocalDateTime time = DateUtils.parse("WTF=2017-12-24T14:22:15");    	
     	assertEquals("2017-12-24T14:22:15.000000Z", DateUtils.formatToMetadataDateTimeFormat(time));    	
     }
     
