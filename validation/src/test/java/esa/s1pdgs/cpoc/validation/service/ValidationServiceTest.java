@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
@@ -37,7 +37,7 @@ public class ValidationServiceTest {
 	@Mock
 	private ObsService obsService;
 
-	ValidationService validationService;
+	private ValidationService validationService;
 
 	@Before
 	public void setUp() {
@@ -47,7 +47,7 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testCheckConsistencyForFamilyAndTimeFrameWhenConsistent()
-			throws SdkClientException, AbstractCodedException {
+			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
 		ObsFamily obsFamily = ObsFamily.L0_SLICE;
@@ -80,7 +80,7 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testCheckConsistencyForFamilyAndTimeFrameWhenConsistent2()
-			throws SdkClientException, AbstractCodedException {
+			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
 		ObsFamily obsFamily = ObsFamily.L0_SLICE;
@@ -119,7 +119,7 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testCheckConsistencyForFamilyAndTimeFrameWhenInconsistentObs()
-			throws SdkClientException, AbstractCodedException {
+			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
 
@@ -149,7 +149,7 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testCheckConsistencyForFamilyAndTimeFrameWhenInconsistentObs2()
-			throws SdkClientException, AbstractCodedException {
+			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
 		ObsFamily obsFamily = ObsFamily.L0_SLICE;
@@ -186,7 +186,7 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testCheckConsistencyForFamilyAndTimeFrameWhenInconsistentMetadata()
-			throws SdkClientException, AbstractCodedException {
+			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
 		ObsFamily obsFamily = ObsFamily.L0_SLICE;
@@ -216,7 +216,7 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testCheckConsistencyForFamilyAndTimeFrameWhenInconsistentMetadata2()
-			throws SdkClientException, AbstractCodedException {
+			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
 		ObsFamily obsFamily = ObsFamily.L0_SLICE;
@@ -252,7 +252,7 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testCheckConsistencyForFamilyAndTimeFrameWhenInconsistentMetadataAndObs()
-			throws SdkClientException, AbstractCodedException {
+			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
 		ObsFamily obsFamily = ObsFamily.L0_SLICE;
@@ -285,7 +285,7 @@ public class ValidationServiceTest {
 	}
 
 	@Test
-	public void testCheckConsistencyForFamilyAndTimeFrameWhenX() throws SdkClientException, AbstractCodedException {
+	public void testCheckConsistencyForFamilyAndTimeFrameWhenX() throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
 		ObsFamily obsFamily = ObsFamily.L0_SLICE;

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.validation.service.ValidationService;
@@ -30,22 +30,22 @@ public class ValidationRestController {
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/validate")
 	public void validate(@PathVariable(name = "productFamily") String productFamily,
-			@RequestParam(name = "ingestionStart") String ingestionStart,
-			@RequestParam(name = "ingestionStop") String ingestionStop) {
+			@RequestParam(name = "intervalStart") String intervalStart,
+			@RequestParam(name = "intervalEnd") String intervalEnd) {
 
 		LOGGER.info("Received validation request for family '{}' within interval '{}' and '{}'", productFamily,
-				ingestionStart, ingestionStop);
+				intervalStart, intervalEnd);
 
 		assertValidProductFamily("productFamily", productFamily);
-		assertValidDateTime("ingestionStart", ingestionStart);
-		assertValidDateTime("ingestionStop", ingestionStop);
+		assertValidDateTime("intervalStart", intervalStart);
+		assertValidDateTime("intervalEnd", intervalEnd);
 
 		ProductFamily family = ProductFamily.valueOf(productFamily);
-		LOGGER.debug("family={}, startTime={}, stopTime={}", family, ingestionStart, ingestionStop);
+		LOGGER.debug("family={}, intervalStart={}, intervalEnd={}", family, intervalStart, intervalEnd);
 
 		try {
-			validationService.checkConsistencyForFamilyAndTimeFrame(family, ingestionStart, ingestionStop);
-		} catch (AbstractCodedException | SdkClientException e) {
+			validationService.checkConsistencyForFamilyAndTimeFrame(family, intervalStart, intervalEnd);
+		} catch (MetadataQueryException | SdkClientException e) {
 			throw new RuntimeException(e);
 		}
 	}

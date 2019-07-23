@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -36,15 +36,15 @@ public class ValidationService {
 		this.obsService = obsService;
 	}
 
-	public boolean checkConsistencyForFamilyAndTimeFrame(ProductFamily family, String intervalStart,
-			String intervalStop) throws AbstractCodedException, SdkClientException {
-		LOGGER.info("Validating for inconsistancy between time interval from {} and {}", intervalStart, intervalStop);
+	public boolean checkConsistencyForFamilyAndTimeFrame(ProductFamily family, String intervalStart, String intervalEnd)
+			throws MetadataQueryException, SdkClientException {
+		LOGGER.info("Validating for inconsistancy between time interval from {} and {}", intervalStart, intervalEnd);
 
 		boolean consistent = true;
 
 		List<SearchMetadata> metadataResults = null;
 		try {
-			metadataResults = metadataService.query(family, null, intervalStart, intervalStop);
+			metadataResults = metadataService.query(family, null, intervalStart, intervalEnd);
 			if (metadataResults == null) {
 				// set to empty list
 				metadataResults = new ArrayList<>();
@@ -52,7 +52,7 @@ public class ValidationService {
 
 			LOGGER.info("Metadata query for family '{}' returned {} results", family, metadataResults.size());
 
-		} catch (AbstractCodedException ex) {
+		} catch (MetadataQueryException ex) {
 			String errorMessage = String.format("[ValidationTask] [subTask retrieveMetadata] [STOP KO] %s [code %d] %s",
 					"LOG_ERROR", ex.getCode().getCode(), ex.getLogMessage());
 			LOGGER.error(errorMessage);
@@ -63,12 +63,12 @@ public class ValidationService {
 		try {
 
 			LocalDateTime localDateTimeStart = LocalDateTime.parse(intervalStart, DateUtils.METADATA_DATE_FORMATTER);
-			LocalDateTime localDateTimeStop = LocalDateTime.parse(intervalStop, DateUtils.METADATA_DATE_FORMATTER);
+			LocalDateTime localDateTimeEnd = LocalDateTime.parse(intervalEnd, DateUtils.METADATA_DATE_FORMATTER);
 
 			Date startDate = Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant());
-			Date stopDate = Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant());
+			Date endDate = Date.from(localDateTimeEnd.atZone(ZoneId.of("UTC")).toInstant());
 
-			obsResults = obsService.listInterval(family, startDate, stopDate);
+			obsResults = obsService.listInterval(family, startDate, endDate);
 			LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 		} catch (SdkClientException | DateTimeParseException ex) {
 			String errorMessage = String.format("[ValidationTask] [subTask retrieveObs] [STOP KO] %s %s", "LOG_ERROR",
