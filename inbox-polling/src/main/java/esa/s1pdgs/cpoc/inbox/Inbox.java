@@ -46,7 +46,6 @@ public final class Inbox {
 		try {
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(filter));
 			final Set<InboxEntry> persistedContent = existingContent();
-			LOG.debug("Hello: {}", persistedContent);
 
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
 			newElements.removeAll(persistedContent);
