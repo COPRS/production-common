@@ -217,7 +217,7 @@ public class AbstractJobsGeneratorTest {
                                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                                 "IW_RAW__0S",
                                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                                "2017-12-13T12:16:23", "2017-12-13T12:16:56"));
+                                "2017-12-13T12:16:23.00000", "2017-12-13T12:16:56"));
                     } else if ("IW_RAW__0A"
                             .equalsIgnoreCase(query.getProductType())) {
                         return Arrays.asList(new SearchMetadata(
