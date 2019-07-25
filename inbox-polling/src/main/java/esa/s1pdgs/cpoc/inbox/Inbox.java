@@ -16,7 +16,8 @@ import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
 import esa.s1pdgs.cpoc.inbox.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 
-public final class Inbox {	
+@Transactional
+public class Inbox {	
 	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
 	
 	private final InboxAdapter inboxAdapter;
@@ -58,7 +59,7 @@ public final class Inbox {
 			// persistence so it will not be ignored if it occurs again on the inbox
 			for (final InboxEntry entry : finishedElements) {
 				LOG.debug("Deleting {}", entry);
-				deleteByUrl(entry);
+				inboxEntryRepository.deleteByUrl(entry.getUrl());
 			}	
 			
 			// all products not stored in the repo are considered new and shall be added to the 
@@ -67,23 +68,11 @@ public final class Inbox {
 				LOG.info("Publishing new entry to kafka queue: {}", entry);
 				client.publish(new IngestionDto(entry.getName(), entry.getUrl()));				
 				LOG.debug("Adding {}", entry);
-				save(entry);	
+				inboxEntryRepository.save(entry);		
 			}
 		} catch (Exception e) {
 			LOG.error(String.format("Error on polling %s", description()), e);
 		}
-	}
-	
-	@Transactional
-	public void deleteByUrl(final InboxEntry entry)
-	{
-		inboxEntryRepository.deleteByUrl(entry.getUrl());
-	}
-	
-	@Transactional
-	public void save(final InboxEntry entry)
-	{
-		inboxEntryRepository.save(entry);	
 	}
 	
 	public String description() {
