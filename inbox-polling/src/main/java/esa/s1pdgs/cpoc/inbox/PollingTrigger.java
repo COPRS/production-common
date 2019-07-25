@@ -14,7 +14,7 @@ public class PollingTrigger {
 	
     @Scheduled(fixedRateString = "${inbox.polling-interval-ms}")   
 	public void poll() {
-    	LOG.info("Trigger polling of all inboxes");
+    	LOG.debug("Trigger polling of all inboxes");
     	pollingService.pollAll();
 	}	
 
