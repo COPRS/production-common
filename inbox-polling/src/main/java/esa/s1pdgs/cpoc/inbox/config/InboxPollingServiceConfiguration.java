@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.inbox.Inbox;
 import esa.s1pdgs.cpoc.inbox.InboxFactory;
 import esa.s1pdgs.cpoc.inbox.InboxPollingService;
+import esa.s1pdgs.cpoc.inbox.PollingTrigger;
 
 @Configuration
 public class InboxPollingServiceConfiguration {
