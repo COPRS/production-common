@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.inbox.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,9 +28,6 @@ public class KafkaConfig {
     @Value("${kafka.max-retries:10}")
     private int maxRetries;
     
-    @Value("${kafka.group-id}")    
-    private String kafkaGroupId;
-    
     @Bean
     public KafkaTemplate<String, IngestionDto> kafkaProducerClient()    {
         final Map<String, Object> props = new HashMap<>();
@@ -40,9 +36,7 @@ public class KafkaConfig {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         props.put(ProducerConfig.RETRIES_CONFIG, maxRetries);    
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
-                
+                 
         return new KafkaTemplate<String, IngestionDto>(new DefaultKafkaProducerFactory<>(props));
     }
-
 }

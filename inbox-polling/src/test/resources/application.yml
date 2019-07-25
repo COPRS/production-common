@@ -29,9 +29,7 @@ inbox:
 # KAFKA
 kafka:
   bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
-  group-id: ingestors
   max-retries: 10
-  topic: t-pdgs-ingestion
   
 # REST controller
 server:

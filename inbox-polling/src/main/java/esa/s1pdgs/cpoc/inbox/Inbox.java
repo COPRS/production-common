@@ -58,21 +58,32 @@ public final class Inbox {
 			// persistence so it will not be ignored if it occurs again on the inbox
 			for (final InboxEntry entry : finishedElements) {
 				LOG.debug("Deleting {}", entry);
-				inboxEntryRepository.deleteByUrl(entry.getUrl());
+				deleteByUrl(entry);
 			}	
 			
 			// all products not stored in the repo are considered new and shall be added to the 
 			// configured queue.
 			for (final InboxEntry entry : newElements) {		
 				LOG.info("Publishing new entry to kafka queue: {}", entry);
-				client.publish(new IngestionDto(entry.getName(), entry.getUrl()));
-				
+				client.publish(new IngestionDto(entry.getName(), entry.getUrl()));				
 				LOG.debug("Adding {}", entry);
-				inboxEntryRepository.save(entry);	
+				save(entry);	
 			}
 		} catch (Exception e) {
 			LOG.error(String.format("Error on polling %s", description()), e);
 		}
+	}
+	
+	@Transactional
+	public void deleteByUrl(final InboxEntry entry)
+	{
+		inboxEntryRepository.deleteByUrl(entry.getUrl());
+	}
+	
+	@Transactional
+	public void save(final InboxEntry entry)
+	{
+		inboxEntryRepository.save(entry);	
 	}
 	
 	public String description() {
