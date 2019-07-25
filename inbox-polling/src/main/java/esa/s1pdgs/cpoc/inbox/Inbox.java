@@ -40,9 +40,8 @@ public final class Inbox {
 		return StreamSupport.stream(inboxEntryRepository.findAll().spliterator(), false)
 			.collect(Collectors.toCollection(HashSet::new));
 	}
-	
-	@Transactional
-	public final void poll() {
+
+	public void poll() {
 		try {
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(filter));
 			final Set<InboxEntry> persistedContent = existingContent();
