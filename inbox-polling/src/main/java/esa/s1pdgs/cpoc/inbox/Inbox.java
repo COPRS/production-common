@@ -75,9 +75,9 @@ public final class Inbox {
 	private void handleNew(final InboxEntry entry) {
 		try {
 			LOG.info("Publishing new entry to kafka queue: {}", entry);
-			client.publish(new IngestionDto(entry.getName(), entry.getUrl()));				
-			LOG.debug("Adding {} to persistence", entry);
-			inboxPollingServiceTransactional.add(entry);
+			client.publish(new IngestionDto(entry.getName(), entry.getUrl()));
+			final InboxEntry persisted = inboxPollingServiceTransactional.add(entry);
+			LOG.debug("Added {} to persistence", persisted);		
 		} catch (Exception e) {
 			LOG.error(String.format("Error on handling %s in %s", entry, description()), e);
 		}	
