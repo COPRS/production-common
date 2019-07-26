@@ -28,7 +28,7 @@ public class TestInbox {
 		final Inbox uut = new Inbox(
 				fakeAdapter, 
 				InboxFilter.ALLOW_ALL, 
-				fakeRepo,
+				new InboxPollingServiceTransactional(fakeRepo),
 				fakeKafkaClient
 		);
 		uut.poll();
@@ -60,7 +60,7 @@ public class TestInbox {
 		final Inbox uut = new Inbox(
 				fakeAdapter, 
 				InboxFilter.ALLOW_ALL, 
-				fakeRepo,
+				new InboxPollingServiceTransactional(fakeRepo),
 				fakeKafkaClient
 		);
 		uut.poll();

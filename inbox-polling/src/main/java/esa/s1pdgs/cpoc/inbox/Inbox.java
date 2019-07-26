@@ -2,50 +2,39 @@ package esa.s1pdgs.cpoc.inbox;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
-import esa.s1pdgs.cpoc.inbox.entity.InboxEntryRepository;
 import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
 import esa.s1pdgs.cpoc.inbox.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 
-@Transactional
 public class Inbox {	
 	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
 	
 	private final InboxAdapter inboxAdapter;
 	private final InboxFilter filter;
-	private final InboxEntryRepository inboxEntryRepository;
+	private final InboxPollingServiceTransactional inboxPollingServiceTransactional;
 	private final SubmissionClient client;
 	
 	Inbox(
 			final InboxAdapter inboxAdapter, 
 			final InboxFilter filter, 
-			final InboxEntryRepository inboxEntryRepository,
+			final InboxPollingServiceTransactional inboxPollingServiceTransactional,
 			final SubmissionClient client
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
-		this.inboxEntryRepository = inboxEntryRepository;
+		this.inboxPollingServiceTransactional = inboxPollingServiceTransactional;
 		this.client = client;
-	}
-	
-	private final Set<InboxEntry> existingContent() {		
-		return StreamSupport.stream(inboxEntryRepository.findAll().spliterator(), false)
-			.collect(Collectors.toCollection(HashSet::new));
 	}
 
 	public void poll() {
 		try {
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(filter));
-			final Set<InboxEntry> persistedContent = existingContent();
+			final Set<InboxEntry> persistedContent = inboxPollingServiceTransactional.getAll();
 
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
 			newElements.removeAll(persistedContent);
@@ -57,19 +46,13 @@ public class Inbox {
 			
 			// when a product has been removed from the inbox directory, it shall be removed from the
 			// persistence so it will not be ignored if it occurs again on the inbox
-			for (final InboxEntry entry : finishedElements) {
-				LOG.debug("Deleting {}", entry);
-				inboxEntryRepository.deleteByUrl(entry.getUrl());
-			}	
-			
+			LOG.debug("Deleting all {}", finishedElements);
+			inboxPollingServiceTransactional.removeFinished(finishedElements);
+
 			// all products not stored in the repo are considered new and shall be added to the 
-			// configured queue.
-			for (final InboxEntry entry : newElements) {		
-				LOG.info("Publishing new entry to kafka queue: {}", entry);
-				client.publish(new IngestionDto(entry.getName(), entry.getUrl()));				
-				LOG.debug("Adding {}", entry);
-				inboxEntryRepository.save(entry);		
-			}
+			// configured queue.			
+			newElements.stream()
+				.forEach(e -> handleNew(e));
 		} catch (Exception e) {
 			LOG.error(String.format("Error on polling %s", description()), e);
 		}
@@ -83,5 +66,16 @@ public class Inbox {
 	public String toString() {
 		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", client=" + client + "]";
 	}	
+	
+	private void handleNew(final InboxEntry entry) {
+		try {
+			LOG.info("Publishing new entry to kafka queue: {}", entry);
+			client.publish(new IngestionDto(entry.getName(), entry.getUrl()));				
+			LOG.debug("Adding {}", entry);
+			inboxPollingServiceTransactional.add(entry);
+		} catch (Exception e) {
+			LOG.error(String.format("Error on handling %s in %s", entry, description()), e);
+		}	
+	}
 	
 }

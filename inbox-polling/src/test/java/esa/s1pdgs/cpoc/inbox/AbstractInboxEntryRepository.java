@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.inbox;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -56,5 +57,5 @@ public abstract class AbstractInboxEntryRepository implements InboxEntryReposito
 	public void deleteAll() {}
 
 	@Override
-	public void deleteByUrl(String url) {}
+	public void deleteByUrlIn(Collection<String> url) {}
 }
