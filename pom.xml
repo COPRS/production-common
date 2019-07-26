@@ -264,6 +264,7 @@
 		<module>compression</module>
 		<module>ingestor</module>
 		<module>inbox-polling</module>
+		<module>inbox-ingestion</module>
 		<module>job-generator</module>
 		<module>lib-commons</module>
 		<module>wrapper</module>
