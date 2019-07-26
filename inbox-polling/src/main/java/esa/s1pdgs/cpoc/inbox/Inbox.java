@@ -11,7 +11,7 @@ import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
 import esa.s1pdgs.cpoc.inbox.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 
-public class Inbox {	
+public final class Inbox {	
 	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
 	
 	private final InboxAdapter inboxAdapter;
@@ -31,39 +31,44 @@ public class Inbox {
 		this.client = client;
 	}
 
-	public void poll() {
+	public final void poll() {
 		try {
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(filter));
 			final Set<InboxEntry> persistedContent = inboxPollingServiceTransactional.getAll();
 
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
 			newElements.removeAll(persistedContent);
-			LOG.debug("Got {} new elements: {}", newElements.size(), newElements);
-			
+
 			final Set<InboxEntry> finishedElements = new HashSet<>(persistedContent); 
 			finishedElements.removeAll(pickupContent);
-			LOG.debug("Got {} finished elements: {}", finishedElements.size(), finishedElements);
 			
-			// when a product has been removed from the inbox directory, it shall be removed from the
-			// persistence so it will not be ignored if it occurs again on the inbox
-			LOG.debug("Deleting all {}", finishedElements);
-			inboxPollingServiceTransactional.removeFinished(finishedElements);
-
-			// all products not stored in the repo are considered new and shall be added to the 
-			// configured queue.			
-			newElements.stream()
-				.forEach(e -> handleNew(e));
+			if (finishedElements.size() != 0) {
+				LOG.info("Got {} finished elements: {}", finishedElements.size(), finishedElements);
+				// when a product has been removed from the inbox directory, it shall be removed from the
+				// persistence so it will not be ignored if it occurs again on the inbox				
+				LOG.debug("Deleting all {} from persistence", finishedElements);
+				inboxPollingServiceTransactional.removeFinished(finishedElements);
+			}
+			
+			if (newElements.size() != 0) {
+				LOG.info("Got {} new elements: {}", newElements.size(), newElements);
+				
+				// all products not stored in the repo are considered new and shall be added to the 
+				// configured queue.			
+				newElements.stream()
+					.forEach(e -> handleNew(e));
+			}
 		} catch (Exception e) {
 			LOG.error(String.format("Error on polling %s", description()), e);
 		}
 	}
 	
-	public String description() {
+	public final String description() {
 		return inboxAdapter.description() + " ("+ filter + ")";
  	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", client=" + client + "]";
 	}	
 	
@@ -71,7 +76,7 @@ public class Inbox {
 		try {
 			LOG.info("Publishing new entry to kafka queue: {}", entry);
 			client.publish(new IngestionDto(entry.getName(), entry.getUrl()));				
-			LOG.debug("Adding {}", entry);
+			LOG.debug("Adding {} to persistence", entry);
 			inboxPollingServiceTransactional.add(entry);
 		} catch (Exception e) {
 			LOG.error(String.format("Error on handling %s in %s", entry, description()), e);
