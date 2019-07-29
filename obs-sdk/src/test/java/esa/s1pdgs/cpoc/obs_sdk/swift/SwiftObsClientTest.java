@@ -68,10 +68,11 @@ public class SwiftObsClientTest {
      * Initialization
      * 
      * @throws ObsServiceException
-     * @throws S3SdkClientException
+     * @throws SwiftSdkClientException
+     * @throws SwiftSdkClientException 
      */
     @Before
-    public void init() throws ObsServiceException, S3SdkClientException {
+    public void init() throws ObsServiceException, SwiftSdkClientException, SwiftSdkClientException {
         // Init mocks
         MockitoAnnotations.initMocks(this);
         // Mock service
