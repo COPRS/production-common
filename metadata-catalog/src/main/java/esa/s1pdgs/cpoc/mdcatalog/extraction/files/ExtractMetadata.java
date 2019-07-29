@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.WVFootPrintExtension;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
@@ -112,10 +113,23 @@ public class ExtractMetadata {
 	 * @return the coordinates in good format
 	 * @throws MetadataExtractionException
 	 */
-	private JSONObject processCoordinates(String productName, String rawCoordinates, String pass)
+	private JSONObject processCoordinates(File manifest,OutputFileDescriptor descriptor, String rawCoordinates, String pass)
 			throws MetadataExtractionException {
+		
+//        <xsl:when test="($productType='WV_OCN__2S') or ($productType='WV_SLC__1S') or ($productType = 'WV_GRDM_1S')">
+		String productType = descriptor.getProductType();
 		JSONObject geoShape = new JSONObject();
 		JSONArray coordinates = new JSONArray();
+		if (productType.equals("WV_OCN__2S")||
+			productType.equals("WV_SLC__1S")||
+			productType.equals("WV_GRDM_1S"))
+		{
+			return WVFootPrintExtension.getBoundingPolygon(manifest.getAbsolutePath());
+			
+		}
+		
+		
+		
 		try {
 			// Extract all coordinates (seperated by **, last index is not a
 			// coordinates)
@@ -530,14 +544,14 @@ public class ExtractMetadata {
 	}
 	
 
-	public JSONObject processL0Segment(OutputFileDescriptor descriptor, File file)
+	public JSONObject processL0Segment(OutputFileDescriptor descriptor, File manifestFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			// XSLT Transformation
 			String xsltFilename = this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST;
 			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
 			Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);
-			Source l1File = new StreamSource(file);
+			Source l1File = new StreamSource(manifestFile);
 			transformerL0.transform(l1File, new StreamResult(new File(OUTPUT_L0_SEGMENT_XML)));
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile(OUTPUT_L0_SEGMENT_XML, Charset.defaultCharset()));
@@ -564,7 +578,7 @@ public class ExtractMetadata {
 				pass = metadataJSONObject.getString("pass");
 			}
 			if (metadataJSONObject.has("segmentCoordinates")) {
-				metadataJSONObject.put("segmentCoordinates", processCoordinates(descriptor.getProductName(),
+				metadataJSONObject.put("segmentCoordinates", processCoordinates(manifestFile,descriptor,
 						metadataJSONObject.getString("segmentCoordinates"), pass));
 			}
 			metadataJSONObject.put("productName", descriptor.getProductName());
@@ -591,20 +605,23 @@ public class ExtractMetadata {
 	 * Function which extracts metadata from product
 	 * 
 	 * @param descriptor
-	 * @param file
+	 * @param manifestFile
 	 * @param output
 	 * 
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
 	 */
-	public JSONObject processProduct(OutputFileDescriptor descriptor, ProductFamily productFamily, File file)
+	public JSONObject processProduct(OutputFileDescriptor descriptor, ProductFamily productFamily, File manifestFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 		try {
+			
+	
+			
 			// XSLT Transformation
 			Source xsltMANIFEST = new StreamSource(new File(this.xsltDirectory + xsltMap.get(productFamily)));
 			Transformer transformer = transFactory.newTransformer(xsltMANIFEST);
-			Source inputFile = new StreamSource(file);
+			Source inputFile = new StreamSource(manifestFile);
 			transformer.transform(inputFile, new StreamResult(new File(OUTPUT_XML)));
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(readFile(OUTPUT_XML, Charset.defaultCharset()));
@@ -614,7 +631,7 @@ public class ExtractMetadata {
 			}
 			if (metadataJSONObject.has("sliceCoordinates")
 					&& !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
-				metadataJSONObject.put("sliceCoordinates", processCoordinates(descriptor.getProductName(),
+				metadataJSONObject.put("sliceCoordinates", processCoordinates(manifestFile,descriptor,
 						metadataJSONObject.getString("sliceCoordinates"), pass));
 			}
 
