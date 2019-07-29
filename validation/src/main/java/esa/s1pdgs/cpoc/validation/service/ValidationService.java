@@ -102,17 +102,17 @@ public class ValidationService {
 			}
 
 			if (obsResults.size() > 0) {
-				LOGGER.info("Found {} products that exist in OBS, but not in metdata catalog", obsResults.size());
+				LOGGER.info("Found {} products that exist in OBS, but not in MetadataCatalog", obsResults.size());
 				for (ObsObject product : obsResults.values()) {
 					metadataDiscrepancies.add(product.getKey());
-					LOGGER.info("Product {} does exist in OBS, but not in metadata catalog", product.getKey());
+					LOGGER.info("Product {} does exist in OBS, but not in MetadataCatalog", product.getKey());
 				}
 			}
 
 			if (metadataDiscrepancies.isEmpty()) {
-				reportingMetadata.reportStop("No discrepancies found in metadata catalog");
+				reportingMetadata.reportStop("No discrepancies found in MetadataCatalog");
 			} else {
-				reportingMetadata.reportError("Product(s) not present in metadata catalog: {}",
+				reportingMetadata.reportError("Products not present in MetadataCatalog: {}",
 						buildProductList(metadataDiscrepancies));
 			}
 
