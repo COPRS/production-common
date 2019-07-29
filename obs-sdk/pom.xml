@@ -41,6 +41,13 @@
 			<artifactId>aws-java-sdk-s3</artifactId>
 		</dependency>
 
+		<!-- SWIFT -->
+		<dependency>
+            <groupId>org.javaswift</groupId>
+            <artifactId>joss</artifactId>
+            <version>0.10.2</version>
+        </dependency>
+
 		<!-- Spring utils -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -53,7 +60,7 @@
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
+		
 		<!-- Tests -->
 		<dependency>
 			<groupId>junit</groupId>
