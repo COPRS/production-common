@@ -276,6 +276,17 @@ public class SwiftConfiguration {
                     + key + ": " + convE.getMessage(), convE);
         }
     }
+    
+    /**
+     * Get a configured value as String
+     * 
+     * @param key
+     * @return
+     * @throws ObsServiceException
+     */
+    public String getStringOfConfiguration(final String key) throws ObsServiceException {
+    	return configuration.getString(key);
+    }
 
     /**
      * Build the default swift client
