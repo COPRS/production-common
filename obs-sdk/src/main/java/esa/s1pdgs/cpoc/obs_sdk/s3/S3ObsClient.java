@@ -56,10 +56,8 @@ public class S3ObsClient extends AbstractObsClient {
         TransferManager manager =
                 configuration.defaultS3TransferManager(client);
         s3Services = new S3ObsServices(client, manager,
-                configuration.getConfiguration()
-                        .getInt("retry-policy.condition.max-retries"),
-                configuration.getConfiguration().getInt(
-                        "retry-policy.backoff.throttled-base-delay-ms"));
+                configuration.getIntOfConfiguration("retry-policy.condition.max-retries"),
+                configuration.getIntOfConfiguration("retry-policy.backoff.throttled-base-delay-ms"));
     }
 
     /**

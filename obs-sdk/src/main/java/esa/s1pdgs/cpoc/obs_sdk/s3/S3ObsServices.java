@@ -173,6 +173,7 @@ public class S3ObsServices {
      * @param bucketName
      * @param prefixKey
      * @param directoryPath
+     * @param ignoreFolders
      * @return the number of download objects
      * @throws SdkClientException
      * @throws ObsServiceException
