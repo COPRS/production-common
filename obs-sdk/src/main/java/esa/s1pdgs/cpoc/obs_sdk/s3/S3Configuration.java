@@ -188,13 +188,6 @@ public class S3Configuration {
     }
 
     /**
-     * @return
-     */
-    public PropertiesConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    /**
      * Get a configured value in int format
      * 
      * @param key
@@ -209,6 +202,17 @@ public class S3Configuration {
             throw new ObsServiceException("Cannot get configuration value of "
                     + key + ": " + convE.getMessage(), convE);
         }
+    }
+    
+    /**
+     * Get a configured value as String
+     * 
+     * @param key
+     * @return
+     * @throws ObsServiceException
+     */
+    public String getStringOfConfiguration(final String key) throws ObsServiceException {
+    	return configuration.getString(key);
     }
 
     /**
