@@ -4,14 +4,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
-// make scheduling configurable via property to allow disabling it in unit tests
-@ConditionalOnProperty(value = "scheduling.enable", havingValue = "true", matchIfMissing = true)
-@EnableScheduling
-public class InboxPollingService {		
+public final class InboxPollingService {		
 	private static final Logger LOG = LoggerFactory.getLogger(InboxPollingService.class);
 	
 	private final List<Inbox> inboxes;
@@ -19,9 +13,8 @@ public class InboxPollingService {
 	public InboxPollingService(List<Inbox> inboxes) {
 		this.inboxes = inboxes;
 	}
-	
-    @Scheduled(fixedRateString = "${inbox.polling-interval-ms}")    
-	public void pollAll() {
+	 
+	public final void pollAll() {
     	LOG.trace("Polling all");
     	for (final Inbox inbox : inboxes) {
         	LOG.debug("Polling {}", inbox.description());   

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: s1pdgs-inbox-ingestion
+    
+logging:
+  config: classpath:log4j2-test.yml
+ 
