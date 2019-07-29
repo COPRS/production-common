@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +23,7 @@ public class ValidationRestController {
 
 	static final Logger LOGGER = LogManager.getLogger(ValidationRestController.class);
 
-	@RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/validate")
+	@RequestMapping(method = RequestMethod.POST, path = "/validate")
 	public void validate() {	
 		LocalDateTime startInterval = LocalDateTime.now().minusSeconds(properties.getIntervalOffset());
 		LocalDateTime endInterval = LocalDateTime.now().minusSeconds(properties.getIntervalDelay());
