@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.ProductFamilyValidation;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -38,91 +38,99 @@ public class ValidationService {
 		this.obsClient = obsClient;
 	}
 
-	public boolean checkConsistencyForFamilyAndTimeFrame(ProductFamily family, String intervalStart, String intervalEnd)
-			throws MetadataQueryException, SdkClientException {
-
+	public void checkConsistencyForInterval(LocalDateTime startInterval, LocalDateTime endInterval) {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		for (ProductFamilyValidation family : ProductFamilyValidation.values()) {
+			validateProductFamily(reportingFactory, family, startInterval, endInterval);
+		}
+	}
+
+	private void validateProductFamily(Reporting.Factory reportingFactory, ProductFamilyValidation family,
+			LocalDateTime startInterval, LocalDateTime endInterval) {
 		final Reporting reportingValidation = reportingFactory.newReporting(0);
 		reportingValidation
-				.reportStart(String.format("Starting validation task from %s to %s", intervalStart, intervalEnd));
+				.reportStart(String.format("Starting validation task from %s to %s for family {}", startInterval, endInterval, family));
 
 		final Reporting reportingMetadata = reportingFactory.newReporting(1);
-		List<SearchMetadata> metadataResults = null;
+
 		try {
-			reportingMetadata.reportStart("Gathering discrepancies in metadata catalog");
-			metadataResults = metadataService.query(family, null, intervalStart, intervalEnd);
-			if (metadataResults == null) {
-				// set to empty list
-				metadataResults = new ArrayList<>();
+
+			List<SearchMetadata> metadataResults = null;
+			try {
+				reportingMetadata.reportStart("Gathering discrepancies in metadata catalog");
+				metadataResults = metadataService.query(ProductFamily.valueOf(family.name()), null, startInterval,
+						endInterval);
+				if (metadataResults == null) {
+					// set to empty list
+					metadataResults = new ArrayList<>();
+				}
+				LOGGER.info("Metadata query for family '{}' returned {} results", family, metadataResults.size());
+
+			} catch (MetadataQueryException e) {
+				reportingMetadata.reportError("Error occured while performing metadata catalog query task [code {}] {}",
+						e.getCode().getCode(), e.getLogMessage());
+				throw e;
 			}
-			LOGGER.info("Metadata query for family '{}' returned {} results", family, metadataResults.size());
 
-		} catch (MetadataQueryException e) {
-			reportingMetadata.reportError("Error occured while performing metadata catalog query task [code {}] {}",
-					e.getCode().getCode(), e.getLogMessage());
-			throw e;
-		}
+			final Reporting reportingObs = reportingFactory.newReporting(2);
+			Map<String, ObsObject> obsResults = null;
+			try {
+				reportingObs.reportStart("Gathering discrepancies in OBS");
 
-		final Reporting reportingObs = reportingFactory.newReporting(2);
-		Map<String, ObsObject> obsResults = null;
-		try {
-			reportingObs.reportStart("Gathering discrepancies in OBS");
-			LocalDateTime localDateTimeStart = LocalDateTime.parse(intervalStart, DateUtils.METADATA_DATE_FORMATTER);
-			LocalDateTime localDateTimeEnd = LocalDateTime.parse(intervalEnd, DateUtils.METADATA_DATE_FORMATTER);
+				Date startDate = Date.from(startInterval.atZone(ZoneId.of("UTC")).toInstant());
+				Date endDate = Date.from(endInterval.atZone(ZoneId.of("UTC")).toInstant());
 
-			Date startDate = Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant());
-			Date endDate = Date.from(localDateTimeEnd.atZone(ZoneId.of("UTC")).toInstant());
+				obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate);
+				LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 
-			obsResults = obsClient.listInterval(family, startDate, endDate);
-			LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
+			} catch (SdkClientException | DateTimeParseException e) {
+				reportingObs.reportError("Error occured while performing obs query task: {}", e.getMessage());
+				throw e;
+			}
 
-		} catch (SdkClientException | DateTimeParseException e) {
-			reportingObs.reportError("Error occured while performing obs query task: {}", e.getMessage());
-			throw e;
-		}
-		
-		List<String> metadataDiscrepancies = new ArrayList<>();
-		List<String> obsDiscrepancies = new ArrayList<>();
+			List<String> metadataDiscrepancies = new ArrayList<>();
+			List<String> obsDiscrepancies = new ArrayList<>();
 
-		for (SearchMetadata smd : metadataResults) {
-			if (obsResults.get(smd.getKeyObjectStorage()) == null) {
-				obsDiscrepancies.add(smd.getKeyObjectStorage());
-				LOGGER.info("Product {} does exist in metadata catalog, but not in OBS", smd.getKeyObjectStorage());
+			for (SearchMetadata smd : metadataResults) {
+				if (obsResults.get(smd.getKeyObjectStorage()) == null) {
+					obsDiscrepancies.add(smd.getKeyObjectStorage());
+					LOGGER.info("Product {} does exist in metadata catalog, but not in OBS", smd.getKeyObjectStorage());
+				} else {
+					LOGGER.debug("Product {} does exist in metadata catalog and OBS", smd.getKeyObjectStorage());
+					obsResults.remove(smd.getKeyObjectStorage());
+				}
+			}
+
+			if (obsResults.size() > 0) {
+				LOGGER.info("Found {} products that exist in OBS, but not in metdata catalog", obsResults.size());
+				for (ObsObject product : obsResults.values()) {
+					metadataDiscrepancies.add(product.getKey());
+					LOGGER.info("Product {} does exist in OBS, but not in metadata catalog", product.getKey());
+				}
+			}
+
+			if (metadataDiscrepancies.isEmpty()) {
+				reportingMetadata.reportStop("No discrepancies found in metadata catalog");
 			} else {
-				LOGGER.debug("Product {} does exist in metadata catalog and OBS", smd.getKeyObjectStorage());
-				obsResults.remove(smd.getKeyObjectStorage());
+				reportingMetadata.reportError("Product(s) not present in metadata catalog: {}",
+						buildProductList(metadataDiscrepancies));
 			}
-		}
 
-		if (obsResults.size() > 0) {
-			LOGGER.info("Found {} products that exist in OBS, but not in metdata catalog", obsResults.size());
-			for (ObsObject product : obsResults.values()) {
-				metadataDiscrepancies.add(product.getKey());
-				LOGGER.info("Product {} does exist in OBS, but not in metadata catalog", product.getKey());
+			if (obsDiscrepancies.isEmpty()) {
+				reportingObs.reportStop("No discepancies found in OBS");
+			} else {
+				reportingObs.reportError("Product(s) not present in OBS: {}", buildProductList(obsDiscrepancies));
 			}
-		}
-		
-		if (metadataDiscrepancies.isEmpty()) {
-			reportingMetadata.reportStop("No discrepancies found in metadata catalog");
-		} else {
-			reportingMetadata.reportError("Product(s) not present in metadata catalog: {}",
-					buildProductList(metadataDiscrepancies));
-		}
 
-		if (obsDiscrepancies.isEmpty()) {
-			reportingObs.reportStop("No discepancies found in OBS");
-		} else {
-			reportingObs.reportError("Product(s) not present in OBS: {}", buildProductList(obsDiscrepancies));
-		}
+			if (metadataDiscrepancies.isEmpty() && obsDiscrepancies.isEmpty()) {
+				reportingValidation.reportStop("No discrepancy found");
 
-		if (metadataDiscrepancies.isEmpty() && obsDiscrepancies.isEmpty()) {
-			reportingValidation.reportStop("No discrepancy found");
-			return true;
-
-		} else {
-			int discrepancies = metadataDiscrepancies.size() + obsDiscrepancies.size();
-			reportingValidation.reportError("Discrepancy found for {} product(s)", discrepancies);
-			return false;
+			} else {
+				int discrepancies = metadataDiscrepancies.size() + obsDiscrepancies.size();
+				reportingValidation.reportError("Discrepancy found for {} product(s)", discrepancies);
+			}
+		} catch (Exception ex) {
+			reportingValidation.reportError("Error occured while performing validation task: {}", ex.getMessage());
 		}
 	}
 
