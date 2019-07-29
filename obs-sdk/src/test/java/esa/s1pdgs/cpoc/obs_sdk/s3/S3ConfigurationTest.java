@@ -42,7 +42,7 @@ public class S3ConfigurationTest {
                 .getString(S3Configuration.BCK_EDRS_SESSIONS));
         assertEquals("l0-slices", config.getConfiguration()
                 .getString(S3Configuration.BCK_L0_SLICES));
-        assertEquals("acns", config.getConfiguration()
+        assertEquals("l0-acns", config.getConfiguration()
                 .getString(S3Configuration.BCK_L0_ACNS));
         assertEquals("l1-slices", config.getConfiguration()
                 .getString(S3Configuration.BCK_L1_SLICES));
@@ -68,7 +68,7 @@ public class S3ConfigurationTest {
         assertEquals("auxiliary-files", config.getBucketForFamily(ObsFamily.AUXILIARY_FILE));
         assertEquals("session-files", config.getBucketForFamily(ObsFamily.EDRS_SESSION));
         assertEquals("l0-slices", config.getBucketForFamily(ObsFamily.L0_SLICE));
-        assertEquals("acns", config.getBucketForFamily(ObsFamily.L0_ACN));
+        assertEquals("l0-acns", config.getBucketForFamily(ObsFamily.L0_ACN));
         assertEquals("l1-slices", config.getBucketForFamily(ObsFamily.L1_SLICE));
         assertEquals("l1-acns", config.getBucketForFamily(ObsFamily.L1_ACN));
     }
