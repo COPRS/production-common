@@ -22,6 +22,24 @@
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-mqi-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+      		<type>test-jar</type>
+      		<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

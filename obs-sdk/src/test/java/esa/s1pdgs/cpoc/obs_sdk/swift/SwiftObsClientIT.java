@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URISyntaxException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -13,6 +14,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 
+@Ignore
 public class SwiftObsClientIT {
 
 	public final static ProductFamily auxiliaryFiles = ProductFamily.AUXILIARY_FILE;

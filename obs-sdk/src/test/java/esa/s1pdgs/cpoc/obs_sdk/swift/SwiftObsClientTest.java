@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,6 +34,7 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3Configuration;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 
+@Ignore
 public class SwiftObsClientTest {
 
     /**
