@@ -9,6 +9,7 @@ public enum ProductFamily {
     EDRS_SESSION, //
     AUXILIARY_FILE, //
     BLANK, //
+    INVALID,
     JOB_ORDER, //
     L0_ACN, //
     L0_BLANK, //
