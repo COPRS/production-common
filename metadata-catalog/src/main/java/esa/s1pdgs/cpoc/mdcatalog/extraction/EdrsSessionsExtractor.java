@@ -66,7 +66,7 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
      */
     @Override
     protected String extractProductNameFromDto(final EdrsSessionDto dto) {
-        return dto.getObjectStorageKey();
+        return dto.getKeyObjectStorage();
     }
 
     /**
