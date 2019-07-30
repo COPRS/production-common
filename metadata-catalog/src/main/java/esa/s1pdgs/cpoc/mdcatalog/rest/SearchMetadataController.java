@@ -60,6 +60,7 @@ public class SearchMetadataController {
 			// FIXME TAI: Is this exception logging really okay?
 			// LOGGER.error("[productType {}] [code {}] [mode {}] {}", productType,
 			// e.getLogMessage());
+			ex.printStackTrace();
 			LOGGER.error("[productType {}] Parse error while doing intervalSearch: {}", productType,
 					LogUtils.toString(ex));
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
@@ -80,6 +81,7 @@ public class SearchMetadataController {
 						result.getKeyObjectStorage(), result.getValidityStart(), result.getValidityStop()));
 			}
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			LOGGER.error("[productType {}] Query error while doing intervalSearch: {}", productType,
 					LogUtils.toString(ex));
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);

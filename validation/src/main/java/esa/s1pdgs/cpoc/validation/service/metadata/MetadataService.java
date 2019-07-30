@@ -58,7 +58,7 @@ public class MetadataService {
 		for (int retries = 0;; retries++) {
             try {
                 String uri = this.uriBase + "/"
-                        + family.toString().toLowerCase() + "/searchInterval";
+                        + family.toString() + "/searchInterval";
                 
                 UriComponentsBuilder builder = UriComponentsBuilder
                         .fromUriString(uri)
