@@ -55,7 +55,7 @@ public class EdrsSessionDto extends AbstractDto {
     /**
      * @return the objectStorageKey
      */
-    public String getObjectStorageKey() {
+    public String getKeyObjectStorage() {
         return getProductName();
     }
 
@@ -63,8 +63,8 @@ public class EdrsSessionDto extends AbstractDto {
      * @param objectStorageKey
      *            the objectStorageKey to set
      */
-    public void setObjectStorageKey(final String objectStorageKey) {
-        this.setProductName(objectStorageKey);
+    public void setKeyObjectStorage(final String keyObjectStorage) {
+        this.setProductName(keyObjectStorage);
     }
 
     /**
@@ -134,7 +134,7 @@ public class EdrsSessionDto extends AbstractDto {
     public String toString() {
         return String.format(
                 "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s}",
-                getObjectStorageKey(), channelId, productType, satelliteId,
+                getKeyObjectStorage(), channelId, productType, satelliteId,
                 missionId);
     }
 
@@ -143,7 +143,7 @@ public class EdrsSessionDto extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getObjectStorageKey(), getFamily(), channelId, productType,
+        return Objects.hash(getKeyObjectStorage(), getFamily(), channelId, productType,
                 satelliteId, missionId);
     }
 
@@ -160,7 +160,7 @@ public class EdrsSessionDto extends AbstractDto {
         } else {
             EdrsSessionDto other = (EdrsSessionDto) obj;
             // field comparison
-            ret = Objects.equals(getObjectStorageKey(), other.getObjectStorageKey())
+            ret = Objects.equals(getKeyObjectStorage(), other.getKeyObjectStorage())
             		&&  Objects.equals(getFamily(), other.getFamily())
                     && channelId == other.channelId
                     && Objects.equals(productType, other.productType)

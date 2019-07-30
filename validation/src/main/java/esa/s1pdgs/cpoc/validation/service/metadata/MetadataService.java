@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.validation.service.metadata;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -53,7 +54,7 @@ public class MetadataService {
 		this.temporetryms = temporetryms;
 	}
 	
-	public List<SearchMetadata> query(ProductFamily family, String productType, String intervalStart, String intervalStop) throws MetadataQueryException {
+	public List<SearchMetadata> query(ProductFamily family, String productType, LocalDateTime intervalStart, LocalDateTime intervalStop) throws MetadataQueryException {
 		for (int retries = 0;; retries++) {
             try {
                 String uri = this.uriBase + "/"

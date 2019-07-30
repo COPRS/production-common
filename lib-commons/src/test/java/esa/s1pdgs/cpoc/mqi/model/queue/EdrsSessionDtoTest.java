@@ -24,19 +24,19 @@ public class EdrsSessionDtoTest {
 	@Test
 	public void testGettersSettersConstructors() {
 		EdrsSessionDto dto = new EdrsSessionDto("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B");
-		assertEquals("key-obs", dto.getObjectStorageKey());
+		assertEquals("key-obs", dto.getKeyObjectStorage());
 		assertEquals(2, dto.getChannelId());
 		assertEquals(EdrsSessionFileType.RAW, dto.getProductType());
 		assertEquals("S1", dto.getMissionId());
 		assertEquals("B", dto.getSatelliteId());
 
 		dto = new EdrsSessionDto();
-		dto.setObjectStorageKey("other-key");
+		dto.setKeyObjectStorage("other-key");
 		dto.setChannelId(15);
 		dto.setMissionId("other-mission");
 		dto.setSatelliteId("other-sat");
 		dto.setProductType(EdrsSessionFileType.SESSION);
-		assertEquals("other-key", dto.getObjectStorageKey());
+		assertEquals("other-key", dto.getKeyObjectStorage());
 		assertEquals(15, dto.getChannelId());
 		assertEquals(EdrsSessionFileType.SESSION, dto.getProductType());
 		assertEquals("other-mission", dto.getMissionId());

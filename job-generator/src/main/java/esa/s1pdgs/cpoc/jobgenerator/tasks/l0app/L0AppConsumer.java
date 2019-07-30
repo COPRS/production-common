@@ -71,7 +71,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
 
         // Second process message
         EdrsSessionDto leveldto = mqiMessage.getBody();
-        String productName = leveldto.getObjectStorageKey();
+        String productName = leveldto.getKeyObjectStorage();
 
         if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
 
@@ -92,13 +92,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 step = 1;
                 LOGGER.info(
                         "[MONITOR] [step {}] [productName {}] Building product",
-                        step, leveldto.getObjectStorageKey());
+                        step, leveldto.getKeyObjectStorage());
                 if (leveldto.getChannelId() != 1
                         && leveldto.getChannelId() != 2) {
                     throw new InvalidFormatProduct("Invalid channel identifier "
                             + leveldto.getChannelId());
                 }
-                reporting.reportStart("Start job generation using " + mqiMessage.getBody().getObjectStorageKey());
+                reporting.reportStart("Start job generation using " + mqiMessage.getBody().getKeyObjectStorage());
                 
                 AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
                 productName = appDataJob.getProduct().getProductName();
@@ -137,9 +137,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
 
             step = 0;
             LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,
-                    leveldto.getObjectStorageKey());
+                    leveldto.getKeyObjectStorage());
             
-            reporting.reportStop("End job generation using " + mqiMessage.getBody().getObjectStorageKey());
+            reporting.reportStop("End job generation using " + mqiMessage.getBody().getKeyObjectStorage());
         }
 
     }
@@ -153,7 +153,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
 
         if (CollectionUtils.isEmpty(existingJobs)) {
             EdrsSessionFile file = edrsService.createSessionFile(
-                    mqiMessage.getBody().getObjectStorageKey());
+                    mqiMessage.getBody().getKeyObjectStorage());
 
             // Search if session is already in progress
             List<AppDataJobDto<EdrsSessionDto>> existingJobsForSession =
