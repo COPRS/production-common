@@ -243,6 +243,7 @@ public static JSONObject getBoundingPolygon(String _manifestFile)
 		return null;
 	}
 	
+	geoShape.put("type", "polygon");
 	geoShape.put("orientation", "counterclockwise");
 	geoShape.put("coordinates", new JSONArray().put(coordinates));
 	
