@@ -1,13 +1,16 @@
 package esa.s1pdgs.cpoc.obs_sdk.swift;
 
+import java.io.File;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
+import org.javaswift.joss.model.StoredObject;
 
 import com.amazonaws.services.s3.model.ObjectListing;
 
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsServices;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 
 public class SwiftObsServices {
 
@@ -20,10 +23,34 @@ public class SwiftObsServices {
      * Swift client
      */
     protected final Account client;
+
+    /**
+     * Number of retries until client error
+     */
+    private final int numRetries;
+
+    /**
+     * Delay before retrying
+     */
+    private final int retryDelay;
+
     
-    public SwiftObsServices(Account client) {
+    public SwiftObsServices(Account client, final int numRetries, final int retryDelay) {
     	this.client = client;
+        this.numRetries = numRetries;
+        this.retryDelay = retryDelay;
 	}
+    
+    /**
+     * Internal function to log messages
+     * 
+     * @param message
+     */
+    private void log(final String message) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(message);
+        }
+    }
     
 	/**
      * Check if object with such key in container exists
@@ -78,9 +105,42 @@ public class SwiftObsServices {
 	 * @throws SwiftObsServiceException
 	 * @throws SwiftSdkClientException
 	 */
-	public void uploadFile(String containerName, String keyName, Object uploadDirectory) {
-		// TODO Auto-generated method stub
-		
+	public void uploadFile(String containerName, String keyName, final File uploadFile) throws SwiftObsServiceException, SwiftSdkClientException {
+	    for (int retryCount = 1;; retryCount++) {
+            try {
+                log(String.format("Uploading object %s in container %s", keyName,
+                		containerName));
+
+                Container container = client.getContainer(containerName);		
+                if (!container.exists()) {
+                	throw new SwiftObsServiceException(containerName, keyName,
+                            String.format("Upload fails: %s", uploadFile));
+                }
+
+                StoredObject object = container.getObject(keyName);
+                object.uploadObject(uploadFile);
+
+                log(String.format("Upload object %s in container %s succeeded",
+                        keyName, containerName));
+                break;
+            } catch (Exception e) {
+                if (retryCount <= numRetries) {
+                    LOGGER.warn(String.format(
+                            "Upload object %s from container %s failed: Attempt : %d / %d",
+                            keyName, containerName, retryCount, numRetries));
+                    try {
+                        Thread.sleep(retryDelay);
+                    } catch (InterruptedException ie) {
+                        throw new SwiftSdkClientException(containerName, keyName,
+                                String.format("Upload fails: %s", ie.getMessage()), ie);
+                    }
+                    continue;
+                } else {
+                    throw new SwiftSdkClientException(containerName, keyName,
+                            String.format("Upload fails: %s", e.getMessage()), e);
+                }
+            }
+        }
 	}
 
 	/**
@@ -93,6 +153,45 @@ public class SwiftObsServices {
 	public int uploadDirectory(String containerName, String keyName, Object uploadFile) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+
+	public void delete(String containerName, String keyName) throws SwiftSdkClientException {
+		for (int retryCount = 1;; retryCount++) {
+            try {
+                log(String.format("Deleting object %s from container %s", keyName,
+                		containerName));
+
+                Container container = client.getContainer(containerName);		
+                if (!container.exists()) {
+                	throw new SwiftObsServiceException(containerName, keyName,
+                            String.format("Delete fails: %s from %s", keyName, container));
+                }
+
+                StoredObject object = container.getObject(keyName);
+                object.delete();
+
+                log(String.format("Deleted object %s from container %s succeeded",
+                        keyName, containerName));
+                break;
+            } catch (Exception e) {
+                if (retryCount <= numRetries) {
+                    LOGGER.warn(String.format(
+                            "Delete object %s from container %s failed: Attempt : %d / %d",
+                            keyName, containerName, retryCount, numRetries));
+                    try {
+                        Thread.sleep(retryDelay);
+                    } catch (InterruptedException ie) {
+                        throw new SwiftSdkClientException(containerName, keyName,
+                                String.format("Delete fails: %s", ie.getMessage()), ie);
+                    }
+                    continue;
+                } else {
+                    throw new SwiftSdkClientException(containerName, keyName,
+                            String.format("Delete fails: %s", e.getMessage()), e);
+                }
+            }
+        }
 		
 	}
 

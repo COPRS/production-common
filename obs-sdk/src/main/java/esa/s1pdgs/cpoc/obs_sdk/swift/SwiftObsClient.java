@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.javaswift.joss.model.Account;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -28,7 +29,9 @@ public class SwiftObsClient extends AbstractObsClient {
         super();
         configuration = new SwiftConfiguration();
         Account client = configuration.defaultClient();
-        swiftObsServices = new SwiftObsServices(client);
+        swiftObsServices = new SwiftObsServices(client,
+        		configuration.getIntOfConfiguration("retry-policy.condition.max-retries"),
+        		configuration.getIntOfConfiguration("retry-policy.backoff.throttled-base-delay-ms"));
     }
     
     /**
@@ -66,9 +69,22 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public int uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-		//return 0;
+		int nbUpload;
+        if (object.getFile().isDirectory()) {
+            nbUpload = swiftObsServices.uploadDirectory(
+                    configuration.getContainerForFamily(object.getFamily()),
+                    object.getKey(), object.getFile());
+        } else {
+            swiftObsServices.uploadFile(
+                    configuration.getContainerForFamily(object.getFamily()),
+                    object.getKey(), object.getFile());
+            nbUpload = 1;
+        }
+        return nbUpload;
+	}
+	
+	public void deleteObject(final ProductFamily family, final String key) throws SwiftSdkClientException, ObsServiceException {
+		swiftObsServices.delete(configuration.getContainerForFamily(getObsFamily(family)), key);
 	}
 
 	/**
