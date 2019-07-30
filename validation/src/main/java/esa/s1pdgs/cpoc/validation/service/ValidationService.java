@@ -38,20 +38,25 @@ public class ValidationService {
 		this.obsClient = obsClient;
 	}
 
-	public void checkConsistencyForInterval(LocalDateTime startInterval, LocalDateTime endInterval) {
+	public int checkConsistencyForInterval(LocalDateTime startInterval, LocalDateTime endInterval) {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		int discrepancies = 0;
 		for (ProductFamilyValidation family : ProductFamilyValidation.values()) {
-			validateProductFamily(reportingFactory, family, startInterval, endInterval);
+			discrepancies += validateProductFamily(reportingFactory, family, startInterval, endInterval);
 		}
+		return discrepancies;
 	}
 
-	private void validateProductFamily(Reporting.Factory reportingFactory, ProductFamilyValidation family,
+	int validateProductFamily(Reporting.Factory reportingFactory, ProductFamilyValidation family,
 			LocalDateTime startInterval, LocalDateTime endInterval) {
+
 		final Reporting reportingValidation = reportingFactory.newReporting(0);
-		reportingValidation
-				.reportStart(String.format("Starting validation task from %s to %s for family {}", startInterval, endInterval, family));
+		reportingValidation.reportStart(String.format("Starting validation task from %s to %s for family %s",
+				startInterval, endInterval, family));
 
 		final Reporting reportingMetadata = reportingFactory.newReporting(1);
+
+		int discrepancies = 0;
 
 		try {
 
@@ -126,12 +131,14 @@ public class ValidationService {
 				reportingValidation.reportStop("No discrepancy found");
 
 			} else {
-				int discrepancies = metadataDiscrepancies.size() + obsDiscrepancies.size();
+				discrepancies = metadataDiscrepancies.size() + obsDiscrepancies.size();
 				reportingValidation.reportError("Discrepancy found for {} product(s)", discrepancies);
 			}
 		} catch (Exception ex) {
 			reportingValidation.reportError("Error occured while performing validation task: {}", ex.getMessage());
 		}
+
+		return discrepancies;
 	}
 
 	private String buildProductList(List<String> products) {
