@@ -220,7 +220,8 @@ public static JSONObject getBoundingPolygon(String _manifestFile)
 	for (Point p : boundingPolygon)
 	{
 
-		coordinates.put(new JSONArray("[" + String.format ("%f", p.getLat()) + "," + String.format ("%f", p.getLon()) + "]"));
+		//coordinates.put(new JSONArray("[" + String.format ("%f", p.getLat()) + "," + String.format ("%f", p.getLon()) + "]"));
+		coordinates.put(new JSONArray("[" + String.format ("%f", p.getLon()) + "," + String.format ("%f", p.getLat()) + "]"));
 //		boundingPolygonAsString.append("<point>\n");
 //		boundingPolygonAsString.append("\t<latitude>" + String.format ("%f", p.getLat()) + "</latitude>\n");
 //		boundingPolygonAsString.append("\t<longitude>" + String.format ("%f", p.getLon()) + "</longitude>\n");
