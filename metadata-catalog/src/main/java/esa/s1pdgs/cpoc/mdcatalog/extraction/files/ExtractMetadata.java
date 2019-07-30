@@ -470,6 +470,15 @@ public class ExtractMetadata {
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+	
+			if (metadataJSONObject.has("creationTime")) {
+				try {
+					metadataJSONObject.put("creationTime",
+							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+				} catch(DateTimeParseException e) {
+					throw new MetadataMalformedException("creationTime");
+				}
+			}
 			
 			if (metadataJSONObject.has("validityStartTime")) {
 				try {
