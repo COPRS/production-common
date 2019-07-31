@@ -21,6 +21,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +33,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.WVFootPrintExtension;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
@@ -72,6 +75,9 @@ public class ExtractMetadata {
 	private Map<String, Float> typeSliceLength;
 
 	private String xsltDirectory;
+	
+	 
+	private static final Logger LOGGER = LogManager.getLogger(ExtractMetadata.class);
 
 	/**
 	 * Constructor
@@ -563,6 +569,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
+	//FIXEME probably it means SAFE AUX FILE ???
 	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor,
 			File file)
 			throws MetadataExtractionException, MetadataMalformedException {
@@ -738,6 +745,8 @@ public class ExtractMetadata {
 			metadataJSONObject.put("creationTime", dt);
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
+
+			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -847,6 +856,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
 			metadataJSONObject.put("processMode", descriptor.getMode());
+			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
