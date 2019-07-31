@@ -41,12 +41,12 @@ public class SearchMetadataController {
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/searchInterval")
 	public ResponseEntity<List<SearchMetadata>> searchTimeInterval(
 			@PathVariable(name = "productFamily") String productFamily,
-			@RequestParam(name = "productType", defaultValue = "NONE") String productType,
-			@RequestParam(name = "intervalStart", defaultValue = "NONE") String intervalStart,
-			@RequestParam(name = "intervalStop", defaultValue = "NONE") String intervalStop) {		
-		
-		LOGGER.info("Received interval query for family '{}', product type '{}', startTime '{}', stopTime '{}'",productFamily, productType, intervalStart, intervalStop);
-		
+			@RequestParam(name = "intervalStart") String intervalStart,
+			@RequestParam(name = "intervalStop") String intervalStop) {
+
+		LOGGER.info("Received interval query for family '{}', startTime '{}', stopTime '{}'", productFamily,
+				intervalStart, intervalStop);
+
 		List<SearchMetadata> response = new ArrayList<SearchMetadata>();
 		String startTime = null;
 		String stopTime = null;
@@ -61,14 +61,13 @@ public class SearchMetadataController {
 			// LOGGER.error("[productType {}] [code {}] [mode {}] {}", productType,
 			// e.getLogMessage());
 			ex.printStackTrace();
-			LOGGER.error("[productType {}] Parse error while doing intervalSearch: {}", productType,
-					LogUtils.toString(ex));
+			LOGGER.error("Parse error while doing intervalSearch: {}", LogUtils.toString(ex));
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
 		}
 
 		LOGGER.info("Performing metadata interval search in interval between {} and {}", startTime, stopTime);
 		try {
-			List<SearchMetadata> results = esServices.intervalQuery(startTime, stopTime, productType,
+			List<SearchMetadata> results = esServices.intervalQuery(startTime, stopTime,
 					ProductFamily.fromValue(productFamily));
 			if (results == null) {
 				LOGGER.info("No results returned.");
@@ -82,8 +81,7 @@ public class SearchMetadataController {
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			LOGGER.error("[productType {}] Query error while doing intervalSearch: {}", productType,
-					LogUtils.toString(ex));
+			LOGGER.error("Query error while doing intervalSearch: {}", LogUtils.toString(ex));
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -100,7 +98,8 @@ public class SearchMetadataController {
 			@RequestParam(name = "insConfId", defaultValue = "-1") int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
-		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",productFamily, productType, mode, satellite );
+		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",
+				productFamily, productType, mode, satellite);
 		try {
 			List<SearchMetadata> response = new ArrayList<SearchMetadata>();
 			if ("LatestValCover".equals(mode)) {
