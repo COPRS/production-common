@@ -22,10 +22,6 @@ import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -98,107 +94,30 @@ public class MessageConsumptionController {
         this.service = service;        
         this.appStatus = appStatus;
     }
-
+    
     /**
      * Start consumers according the configuration
      */
     @PostConstruct
     public void startConsumers() {
-
         // Init the list of consumers
-        for (ProductCategory cat : appProperties.getProductCategories()
-                .keySet()) {
-            ProductCategoryProperties catProp =
-                    appProperties.getProductCategories().get(cat);
-            ProductCategoryConsumptionProperties prop =
-                    catProp.getConsumption();
+        for (final Map.Entry<ProductCategory,ProductCategoryProperties> catEntry : appProperties.getProductCategories().entrySet()) {
+            final ProductCategory cat = catEntry.getKey();
+            final ProductCategoryConsumptionProperties prop = catEntry.getValue().getConsumption();
             if (prop.isEnable()) {
-                LOGGER.info(
-                        "Creating consumers on topics {} with for category {}",
-                        prop.getTopicsWithPriority(), cat);
-                Map<String, GenericConsumer<?>> catConsumers = new HashMap<>();
-                for (String topic : prop.getTopicsWithPriority().keySet()) {
-                    switch (cat) {
-                        case AUXILIARY_FILES:
-                            catConsumers.put(topic,
-                                    new GenericConsumer<ProductDto>(
-                                    		cat,
-                                            kafkaProperties,
-                                            service,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            ProductDto.class));
-                            break;
-                        case EDRS_SESSIONS:
-                            catConsumers.put(topic,
-                                    new GenericConsumer<EdrsSessionDto>(
-                                    		cat,
-                                            kafkaProperties,
-                                            service,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            EdrsSessionDto.class));
-                            break;
-                        case LEVEL_JOBS:
-                            catConsumers.put(topic,
-                                    new GenericConsumer<LevelJobDto>(
-                                    		cat,
-                                            kafkaProperties,
-                                            service,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            LevelJobDto.class));
-                            break;
-                        case LEVEL_PRODUCTS:
-                            catConsumers.put(topic,
-                                    new GenericConsumer<ProductDto>(
-                                    		cat,
-                                            kafkaProperties,
-                                            service,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            ProductDto.class));
-                            break;
-                        case LEVEL_REPORTS:
-                            catConsumers.put(topic,
-                                    new GenericConsumer<LevelReportDto>(
-                                    		cat,
-                                            kafkaProperties,
-                                            service,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            LevelReportDto.class));
-                            break;
-                        case LEVEL_SEGMENTS:
-                            catConsumers.put(topic,
-                                    new GenericConsumer<ProductDto>(
-                                    		cat,
-                                            kafkaProperties,
-                                            service,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            ProductDto.class));
-                            break;
-                        case COMPRESSED_PRODUCTS:
-                        	catConsumers.put(topic,
-                                    new GenericConsumer<ProductDto>(
-                                    		cat,
-                                            kafkaProperties,
-                                            service,
-                                            otherAppService, appStatus, topic,
-                                            prop.getTopicsWithPriority().get(topic),
-                                            ProductDto.class));
-                    }
+                LOGGER.info("Creating consumers on topics {} with for category {}", prop.getTopicsWithPriority(),cat);
+                final Map<String, GenericConsumer<?>> catConsumers = new HashMap<>();
+                for (final Map.Entry<String, Integer> entry : prop.getTopicsWithPriority().entrySet()) {
+                	final String topic = entry.getKey();               	                	
+                	catConsumers.put(topic, newConsumerFor(cat, entry.getValue(), topic, cat.getDtoClass()));
                 }
                 consumers.put(cat, catConsumers);
             }
         }
         // Start the consumers
-        for (Map<String, GenericConsumer<?>> catConsumers : consumers
-                .values()) {
+        for (final Map<String, GenericConsumer<?>> catConsumers : consumers.values()) {
             for (GenericConsumer<?> consumer : catConsumers.values()) {
-                LOGGER.info("Starting consumer on topic {}",
-                        consumer.getTopic());
+                LOGGER.info("Starting consumer on topic {}", consumer.getTopic());
                 consumer.start();
             }
         }
@@ -212,20 +131,23 @@ public class MessageConsumptionController {
      * @throws AbstractCodedException
      */
     public GenericMessageDto<? extends AbstractDto> nextMessage(final ProductCategory category)
-            throws AbstractCodedException {
-        GenericMessageDto<? extends AbstractDto> message = null;
-        if (consumers.containsKey(category)) {
-        	message = nextMessageByCat(category);
-            // if no message and consumer is pause => resume it
-            if (message == null) {
-                for(GenericConsumer<?> consumer: consumers.get(category).values()) {
-                    consumer.resume();
-                }
-            }
-        } else {
+    		throws AbstractCodedException {
+    	// invalid category
+    	if (!consumers.containsKey(category)) {
             throw new MqiCategoryNotAvailable(category, "consumer");
+    	}
+    	final GenericMessageDto<? extends AbstractDto> message = nextMessageByCat(category);
+        // if no message and consumer is pause => resume it
+        if (message == null) {
+            for(final GenericConsumer<?> consumer : consumers.get(category).values()) {
+                consumer.resume();
+            }
         }
         return message;
+    }
+    
+    private final <E> GenericConsumer<E> newConsumerFor(final ProductCategory cat,final int prio, final String topic,final Class<E> clazz) {
+    	return new GenericConsumer<E>(cat,kafkaProperties,service,otherAppService,appStatus,topic,prio,clazz);
     }
     
     private final Comparator<AppCatMessageDto<? extends AbstractDto>> priorityComparatorFor(final ProductCategory category)

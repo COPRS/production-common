@@ -56,7 +56,7 @@ public class SearchMetadataController {
 
 			stopTime = convertDateForSearch(intervalStop, 0.0f,
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'"));
-		} catch (ParseException ex) {
+		} catch (Exception ex) {
 			// FIXME TAI: Is this exception logging really okay?
 			// LOGGER.error("[productType {}] [code {}] [mode {}] {}", productType,
 			// e.getLogMessage());
@@ -100,6 +100,7 @@ public class SearchMetadataController {
 			@RequestParam(name = "insConfId", defaultValue = "-1") int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
+		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",productFamily, productType, mode, satellite );
 		try {
 			List<SearchMetadata> response = new ArrayList<SearchMetadata>();
 			if ("LatestValCover".equals(mode)) {
@@ -182,9 +183,7 @@ public class SearchMetadataController {
 
 	}
 
-	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter)
-			throws ParseException {
-
+	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter) {
 		LocalDateTime time = LocalDateTime.parse(dateStr,
 				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
