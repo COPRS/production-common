@@ -31,7 +31,7 @@ COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
 COPY validation/ /app/validation
 
-RUN mvn -Dmaven.test.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
+RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
 ####
 # An empty image that will be just used to gather all build artifacts into a small image
