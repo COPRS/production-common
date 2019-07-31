@@ -153,7 +153,7 @@ public class ExtractMetadata {
 			} // ------------ LEVEL 2 --------------------//
 			else if (productType.matches(".._OCN__2.")) {
 
-				if (productType.equals("WV_OCN__2S")) {
+				if (productType.startsWith("WV_OCN")) {
 					// WV L2:
 					// derive larger footprint from multiple smaller patches
 					return WVFootPrintExtension
