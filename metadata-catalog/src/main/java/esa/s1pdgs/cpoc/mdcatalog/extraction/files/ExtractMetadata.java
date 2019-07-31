@@ -33,7 +33,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.WVFootPrintExtension;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
@@ -193,7 +192,7 @@ public class ExtractMetadata {
 		final String startNadirLatitude = startNadirPoint[0];
 		final String startNadirLongitude = startNadirPoint[1];
 
-		final String[] stopNadirPoint = points[0].split(",");
+		final String[] stopNadirPoint = points[1].split(",");
 		final String stopNadirLatitude = stopNadirPoint[0];
 		final String stopNadirLongitude = stopNadirPoint[1];
 
@@ -205,6 +204,7 @@ public class ExtractMetadata {
 		geoShapeCoordinates.put(new JSONArray(
 				"[" + stopNadirLongitude + "," + stopNadirLatitude + "]"));
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
+		//geoShape.put("orientation", "counterclockwise");
 
 		return geoShape;
 	}
