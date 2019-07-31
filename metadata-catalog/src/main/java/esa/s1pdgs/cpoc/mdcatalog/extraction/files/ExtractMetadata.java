@@ -120,13 +120,55 @@ public class ExtractMetadata {
 		String productType = descriptor.getProductType();
 		JSONObject geoShape = new JSONObject();
 		JSONArray coordinates = new JSONArray();
+		
+//		if(productType.matches(".._RAW__0.")) {
+//			if (productType.startsWith("WV")) {
+//				//only 2 Nadir-Points in manifest --> Howto handle?
+//			} else {
+//				//should be 4 coordinates --> else exception
+//				//copy from manifest -->  manifest is counterclockwise
+//			}
+//			
+//		} else if(productType.matches(".._(GRD|SLC)._1.")) {
+//			//L1
+//			if (productType.startsWith("WV"))
+//				{
+//				//WV L1:
+//				//derive larger footprint from multiple smaller patches 
+//					return WVFootPrintExtension.getBoundingPolygon(manifest.getAbsolutePath());
+//				} else {
+//					//should be 4 coordinates --> else exception
+//					//copy from manifest -->  manifest is counterclockwise
+//				}
+//		} else if(productType.matches(".._OCN__2.")) {
+//			//l2
+//			if (productType.equals("WV_OCN__2S"))
+//				{
+//				//WV L2:
+//				//derive larger footprint from multiple smaller patches 
+//					return WVFootPrintExtension.getBoundingPolygon(manifest.getAbsolutePath());
+//				} else {
+//					//should be 4 coordinates --> else exception
+//					//copy from manifest -->  manifest is counterclockwise
+//				}
+//
+//		} else {
+//			//AUX and other
+//			//???
+//		}
+		
+		
+		
 		if (productType.equals("WV_OCN__2S")||
 			productType.equals("WV_SLC__1S")||
 			productType.equals("WV_GRDM_1S"))
 		{
 			return WVFootPrintExtension.getBoundingPolygon(manifest.getAbsolutePath());
+		} else if(productType.equals("WV_RAW__0S")){
 			
-		}
+		} else if(productType.matches(".._RAW__0.")) {
+			//copy from manifest -->  manifest is counterclockwise
+		} else 
 		
 		
 		
@@ -168,6 +210,7 @@ public class ExtractMetadata {
 					geoShape.put("coordinates", new JSONArray().put(coordinates));
 				}
 			} else if (nbCoordinates == 2) {
+				//WV L0 Products
 				geoShape.put("type", "envelope");
 				// Le premier point doit être extrait à partir de l’avant
 				// dernier coordinate, et avec le premier point.
