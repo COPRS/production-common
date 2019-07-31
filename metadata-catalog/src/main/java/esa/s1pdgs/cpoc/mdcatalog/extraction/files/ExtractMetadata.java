@@ -148,7 +148,7 @@ public class ExtractMetadata {
 				} else {
 					// Should be 4 coordinates --> else exception
 					// copy and adjust from manifest --> manifest is clockwise
-					processCoordinatesforL1andL2(rawCoordinates);
+					return processCoordinatesforL1andL2(rawCoordinates);
 				}
 			} // ------------ LEVEL 2 --------------------//
 			else if (productType.matches(".._OCN__2.")) {
@@ -174,8 +174,6 @@ public class ExtractMetadata {
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
 		}
-		return null;
-
 	}
 
 	private JSONObject processCoordinatesforWVL0(
