@@ -47,6 +47,7 @@ public enum ProductCategory {
             case INVALID: // --> failed ingestion    
             case BLANK: // --> nominal polling ingestion
             	ret = ProductCategory.INGESTION;
+            	break;
             case L0_JOB:
             case L1_JOB:
             case L2_JOB:
