@@ -1,6 +1,5 @@
-package esa.s1pdgs.cpoc.obs_sdk.s3;
+package esa.s1pdgs.cpoc.obs_sdk;
 
-import java.io.File;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -8,29 +7,29 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 /**
  * @author Viveris Technologies
  */
-public class S3UploadFile extends S3CustomObject {
+public class ObsDownloadFile extends ObsCustomObject {
 
     /**
-     * File to upload
+     * Target directory
      */
-    private final File file;
+    private final String targetDir;
 
     /**
      * @param family
      * @param key
-     * @param file
+     * @param targetDir
      */
-    public S3UploadFile(final ProductFamily family, final String key,
-            final File file) {
+    public ObsDownloadFile(final ProductFamily family, final String key,
+            final String targetDir) {
         super(family, key);
-        this.file = file;
+        this.targetDir = targetDir;
     }
 
     /**
-     * @return the file
+     * @return the targetDir
      */
-    public File getFile() {
-        return file;
+    public String getTargetDir() {
+        return targetDir;
     }
 
     /**
@@ -39,7 +38,7 @@ public class S3UploadFile extends S3CustomObject {
     @Override
     public String toString() {
         String superStr = super.toStringForExtendedClasses();
-        return String.format("{%s, file: %s}", superStr, file);
+        return String.format("{%s, targetDir: %s}", superStr, targetDir);
     }
 
     /**
@@ -48,7 +47,7 @@ public class S3UploadFile extends S3CustomObject {
     @Override
     public int hashCode() {
         int superHash = super.hashCode();
-        return Objects.hash(superHash, file);
+        return Objects.hash(superHash, targetDir);
     }
 
     /**
@@ -62,9 +61,10 @@ public class S3UploadFile extends S3CustomObject {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            S3UploadFile other = (S3UploadFile) obj;
+            ObsDownloadFile other = (ObsDownloadFile) obj;
             // field comparison
-            ret = super.equals(other) && Objects.equals(file, other.file);
+            ret = super.equals(other)
+                    && Objects.equals(targetDir, other.targetDir);
         }
         return ret;
     }

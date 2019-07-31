@@ -47,6 +47,14 @@ public class SwiftObsClient extends AbstractObsClient {
         this.configuration = configuration;
         this.swiftObsServices = swiftObsServices;
     }
+
+	public boolean doesContainerExist(ProductFamily family) throws ObsServiceException {
+		return swiftObsServices.containerExist(configuration.getContainerForFamily(getObsFamily(family)));
+	}
+	
+	public int numberOfObjects(ProductFamily family, String prefixKey) throws SwiftSdkClientException, ObsServiceException {
+		return swiftObsServices.getNbObjects(configuration.getContainerForFamily(getObsFamily(family)), prefixKey);
+	}
     
 	@Override
 	public boolean doesObjectExist(ObsObject object) throws SdkClientException, ObsServiceException {
@@ -55,16 +63,17 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public boolean doesPrefixExist(ObsObject object) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-		//return false;
+		return swiftObsServices.getNbObjects(
+                configuration.getContainerForFamily(object.getFamily()),
+                object.getKey()) > 0;
 	}
 
 	@Override
 	public int downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-		//return 0;
+		return swiftObsServices.downloadObjectsWithPrefix(
+                configuration.getContainerForFamily(object.getFamily()),
+                object.getKey(), object.getTargetDir(),
+                object.isIgnoreFolders());
 	}
 
 	@Override
@@ -81,6 +90,10 @@ public class SwiftObsClient extends AbstractObsClient {
             nbUpload = 1;
         }
         return nbUpload;
+	}
+	
+	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
+		swiftObsServices.createContainer(configuration.getContainerForFamily(getObsFamily(family)));
 	}
 	
 	public void deleteObject(final ProductFamily family, final String key) throws SwiftSdkClientException, ObsServiceException {

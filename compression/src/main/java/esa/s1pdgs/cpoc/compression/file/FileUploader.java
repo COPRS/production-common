@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -81,7 +81,7 @@ public class FileUploader {
 						
 			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getFamily());
 			ProductFamily zipProductFamily = getCompressedProductFamily(job.getFamily());
-			S3UploadFile uploadFile = new S3UploadFile(zipProductFamily, zipFileName, productPath);
+			ObsUploadFile uploadFile = new ObsUploadFile(zipProductFamily, zipFileName, productPath);
 			
 			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName,zipFileName);
 			outputToPublish.add(cpqm);
@@ -100,7 +100,7 @@ public class FileUploader {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
-	final void processProducts(final Reporting.Factory reportingFactory, final S3UploadFile uploadFile,
+	final void processProducts(final Reporting.Factory reportingFactory, final ObsUploadFile uploadFile,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		if (Thread.currentThread().isInterrupted()) {

@@ -31,8 +31,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3Configuration;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 
 @Ignore
 public class SwiftObsClientTest {

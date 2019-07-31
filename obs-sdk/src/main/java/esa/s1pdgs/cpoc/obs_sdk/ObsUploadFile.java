@@ -1,5 +1,6 @@
-package esa.s1pdgs.cpoc.obs_sdk.s3;
+package esa.s1pdgs.cpoc.obs_sdk;
 
+import java.io.File;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -7,29 +8,29 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 /**
  * @author Viveris Technologies
  */
-public class S3DownloadFile extends S3CustomObject {
+public class ObsUploadFile extends ObsCustomObject {
 
     /**
-     * Target directory
+     * File to upload
      */
-    private final String targetDir;
+    private final File file;
 
     /**
      * @param family
      * @param key
-     * @param targetDir
+     * @param file
      */
-    public S3DownloadFile(final ProductFamily family, final String key,
-            final String targetDir) {
+    public ObsUploadFile(final ProductFamily family, final String key,
+            final File file) {
         super(family, key);
-        this.targetDir = targetDir;
+        this.file = file;
     }
 
     /**
-     * @return the targetDir
+     * @return the file
      */
-    public String getTargetDir() {
-        return targetDir;
+    public File getFile() {
+        return file;
     }
 
     /**
@@ -38,7 +39,7 @@ public class S3DownloadFile extends S3CustomObject {
     @Override
     public String toString() {
         String superStr = super.toStringForExtendedClasses();
-        return String.format("{%s, targetDir: %s}", superStr, targetDir);
+        return String.format("{%s, file: %s}", superStr, file);
     }
 
     /**
@@ -47,7 +48,7 @@ public class S3DownloadFile extends S3CustomObject {
     @Override
     public int hashCode() {
         int superHash = super.hashCode();
-        return Objects.hash(superHash, targetDir);
+        return Objects.hash(superHash, file);
     }
 
     /**
@@ -61,10 +62,9 @@ public class S3DownloadFile extends S3CustomObject {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            S3DownloadFile other = (S3DownloadFile) obj;
+            ObsUploadFile other = (ObsUploadFile) obj;
             // field comparison
-            ret = super.equals(other)
-                    && Objects.equals(targetDir, other.targetDir);
+            ret = super.equals(other) && Objects.equals(file, other.file);
         }
         return ret;
     }

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.obs_sdk.s3;
+package esa.s1pdgs.cpoc.obs_sdk;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -15,14 +15,14 @@ import nl.jqno.equalsverifier.Warning;
  * 
  * @author Viveris Technologies
  */
-public class S3DownloadFileTest {
+public class ObsDownloadFileTest {
 
     /**
      * Test constructors
      */
     @Test
     public void testConstructors() {
-        S3DownloadFile obj = new S3DownloadFile(ProductFamily.AUXILIARY_FILE,
+        ObsDownloadFile obj = new ObsDownloadFile(ProductFamily.AUXILIARY_FILE,
                 "key-obs", "target-dir");
         assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
         assertEquals("key-obs", obj.getKey());
@@ -34,7 +34,7 @@ public class S3DownloadFileTest {
      */
     @Test
     public void testToString() {
-        S3DownloadFile obj = new S3DownloadFile(ProductFamily.L0_SLICE,
+        ObsDownloadFile obj = new ObsDownloadFile(ProductFamily.L0_SLICE,
                 "key-obs", "target-dir");
         String str = obj.toString();
         assertTrue(str.contains("family: L0_SLICE"));
@@ -43,11 +43,11 @@ public class S3DownloadFileTest {
     }
 
     /**
-     * Check equals and hascode methods
+     * Check equals and hashcode methods
      */
     @Test
     public void testEquals() {
-        EqualsVerifier.forClass(S3DownloadFile.class).usingGetClass()
+        EqualsVerifier.forClass(ObsDownloadFile.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

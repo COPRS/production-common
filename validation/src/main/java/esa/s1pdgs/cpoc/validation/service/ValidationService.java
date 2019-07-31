@@ -69,8 +69,6 @@ public class ValidationService {
 					// set to empty list
 					metadataResults = new ArrayList<>();
 				}
-				LOGGER.info("Metadata query for family '{}' returned {} results", family, metadataResults.size());
-
 			} catch (MetadataQueryException e) {
 				reportingMetadata.reportError("Error occured while performing metadata catalog query task [code {}] {}",
 						e.getCode().getCode(), e.getLogMessage());

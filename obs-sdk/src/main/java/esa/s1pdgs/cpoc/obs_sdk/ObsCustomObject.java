@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.obs_sdk.s3;
+package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.util.Objects;
 
@@ -7,7 +7,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 /**
  * @author Viveris technlogies
  */
-public class S3CustomObject {
+public class ObsCustomObject {
 
     /**
      * Product family
@@ -23,7 +23,7 @@ public class S3CustomObject {
      * @param family
      * @param key
      */
-    public S3CustomObject(final ProductFamily family, final String key) {
+    public ObsCustomObject(final ProductFamily family, final String key) {
         this.family = family;
         this.key = key;
     }
@@ -76,7 +76,7 @@ public class S3CustomObject {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            S3CustomObject other = (S3CustomObject) obj;
+            ObsCustomObject other = (ObsCustomObject) obj;
             // field comparison
             ret = Objects.equals(key, other.key)
                     && Objects.equals(family, other.family);

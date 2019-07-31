@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.obs_sdk.s3;
+package esa.s1pdgs.cpoc.obs_sdk;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,7 +8,7 @@ import java.io.File;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -17,7 +17,7 @@ import nl.jqno.equalsverifier.Warning;
  * 
  * @author Viveris Technologies
  */
-public class S3UploadFileTest {
+public class ObsUploadFileTest {
 
     /**
      * File
@@ -29,8 +29,8 @@ public class S3UploadFileTest {
      */
     @Test
     public void testConstructors() {
-        S3UploadFile obj =
-                new S3UploadFile(ProductFamily.AUXILIARY_FILE, "key-obs", FILE);
+        ObsUploadFile obj =
+                new ObsUploadFile(ProductFamily.AUXILIARY_FILE, "key-obs", FILE);
         assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
         assertEquals("key-obs", obj.getKey());
         assertEquals(FILE, obj.getFile());
@@ -41,8 +41,8 @@ public class S3UploadFileTest {
      */
     @Test
     public void testToString() {
-        S3UploadFile obj =
-                new S3UploadFile(ProductFamily.L0_SLICE, "key-obs", FILE);
+        ObsUploadFile obj =
+                new ObsUploadFile(ProductFamily.L0_SLICE, "key-obs", FILE);
         String str = obj.toString();
         assertTrue(str.contains("family: L0_SLICE"));
         assertTrue(str.contains("key: key-obs"));
@@ -50,11 +50,11 @@ public class S3UploadFileTest {
     }
 
     /**
-     * Check equals and hascode methods
+     * Check equals and hashcode methods
      */
     @Test
     public void testEquals() {
-        EqualsVerifier.forClass(S3UploadFile.class).usingGetClass()
+        EqualsVerifier.forClass(ObsUploadFile.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

@@ -39,8 +39,8 @@ public class SwiftSdkClientException extends SdkClientException {
     /**
      * Constructor
      * 
-     * @param key
      * @param container
+     * @param key
      * @param cause
      */
     public SwiftSdkClientException(final String container, final String key,
@@ -50,6 +50,18 @@ public class SwiftSdkClientException extends SdkClientException {
         this.container = container;
     }
 
+    /**
+     * Constructor
+     * 
+     * @param container
+     * @param cause
+     */
+    public SwiftSdkClientException(final String container, final String message, final Throwable cause) {
+        super(message, cause);
+        this.key = null;
+        this.container = container;
+    }
+    
     /**
      * @return the key
      */
@@ -70,9 +82,14 @@ public class SwiftSdkClientException extends SdkClientException {
      * @return
      */
     public String getMessage() {
-        return String.format(
+    	if (null != key) {
+    		return String.format(
                 "{'container': \"%s\", 'key': \"%s\", 'msg': \"%s\" }", container,
                 key, super.getMessage());
+    	} else {
+    		return String.format(
+                    "{'container': \"%s\", 'msg': \"%s\" }", container, super.getMessage());    		
+    	}
     }
 
 }
