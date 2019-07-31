@@ -1,9 +1,14 @@
 package esa.s1pdgs.cpoc.obs_sdk.swift;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javaswift.joss.model.Account;
+import org.javaswift.joss.model.StoredObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
@@ -19,6 +24,9 @@ public class SwiftObsClient extends AbstractObsClient {
 
     protected final SwiftConfiguration configuration;
     protected final SwiftObsServices swiftObsServices;
+    
+    private static final Logger LOGGER =
+            LogManager.getLogger(SwiftObsClient.class);
     
 	/**
      * Default constructor
@@ -130,9 +138,40 @@ public class SwiftObsClient extends AbstractObsClient {
 	@Override
 	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd,
 			ObsFamily obsFamily) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-		//return null;
+		long methodStartTime = System.currentTimeMillis();
+
+		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
+		String container = configuration.getContainerForFamily(obsFamily);
+		Collection<StoredObject> objListing = swiftObsServices.listObjectsFromContainer(container);
+		boolean possiblyTruncated = false;
+		String marker = "";
+		do {
+			if (objListing == null || objListing.size() == 0) {
+				break;
+			}
+			
+			for (StoredObject o : objListing) {
+				marker = o.getPath();
+				Date lastModified = o.getLastModifiedAsDate();
+
+				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {
+					ObsObject obsObj = new ObsObject(o.getPath(), obsFamily);
+					objectsOfTimeFrame.add(obsObj);
+				}
+			}
+
+			possiblyTruncated = objListing.size() == swiftObsServices.MAX_RESULTS_PER_LIST;
+			if (possiblyTruncated) {
+				objListing = swiftObsServices.listNextBatchOfObjectsFromContainer(container, marker);
+			}
+
+		} while (possiblyTruncated);
+
+		float methodDuration = (System.currentTimeMillis() - methodStartTime) / 1000f;
+		LOGGER.debug(String.format("Time for OBS listing objects from bucket %s within time frame: %.2fs", container,
+				methodDuration));
+
+		return objectsOfTimeFrame;
 	}
 
 }

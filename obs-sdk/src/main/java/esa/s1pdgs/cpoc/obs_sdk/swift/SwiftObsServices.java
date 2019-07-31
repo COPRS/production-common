@@ -38,7 +38,7 @@ public class SwiftObsServices {
      */
     private final int retryDelay;
     
-    private final int MAX_RESULTS_PER_LIST = 8000;
+    public final int MAX_RESULTS_PER_LIST = 8000;
     
     public SwiftObsServices(Account client, final int numRetries, final int retryDelay) {
     	this.client = client;
@@ -107,7 +107,7 @@ public class SwiftObsServices {
                         throw new SwiftSdkClientException(containerName, prefixKey,
                                 String.format(
                                         "Getting number of objects fails: %s",
-                                        ie.getMessage()), ie);
+                                        e.getMessage()), e);
                     }
                 } else {
                     throw new SwiftSdkClientException(containerName, prefixKey,
@@ -252,7 +252,7 @@ public class SwiftObsServices {
                         Thread.sleep(retryDelay);
                     } catch (InterruptedException ie) {
                         throw new SwiftSdkClientException(containerName, keyName,
-                                String.format("Upload fails: %s", ie.getMessage()), ie);
+                                String.format("Upload fails: %s", e.getMessage()), e);
                     }
                     continue;
                 } else {
@@ -267,12 +267,33 @@ public class SwiftObsServices {
      * @param containerName
      * @param keyName
      * @param uploadFile
-	 * @throws SwiftObsServiceException
-	 * @throws SwiftSdkClientException
+	 * @throws SwiftSdkClientException 
+	 * @throws SwiftObsServiceException 
      */
-	public int uploadDirectory(String containerName, String keyName, Object uploadFile) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int uploadDirectory(final String containerName, final String keyName,
+            final File uploadDirectory) throws SwiftObsServiceException, SwiftSdkClientException {
+		int ret = 0;
+        if (uploadDirectory.isDirectory()) {
+            File[] childs = uploadDirectory.listFiles();
+            if (childs != null) {
+                for (File child : childs) {
+                    if (child.isDirectory()) {
+                        ret += this.uploadDirectory(containerName,
+                                keyName + File.separator + child.getName(),
+                                child);
+                    } else {
+                        this.uploadFile(containerName,
+                                keyName + File.separator + child.getName(),
+                                child);
+                        ret += 1;
+                    }
+                }
+            }
+        } else {
+            this.uploadFile(containerName, keyName, uploadDirectory);
+            ret = 1;
+        }
+        return ret;
 	}
 	
 	public void createContainer(String containerName) throws SwiftSdkClientException {
@@ -293,7 +314,7 @@ public class SwiftObsServices {
                         Thread.sleep(retryDelay);
                     } catch (InterruptedException ie) {
                     	throw new SwiftSdkClientException(containerName,
-                                String.format("Create container fails: %s", ie.getMessage()), ie);
+                                String.format("Create container fails: %s", e.getMessage()), e);
                     }
                     continue;
                 } else {
@@ -331,7 +352,7 @@ public class SwiftObsServices {
                         Thread.sleep(retryDelay);
                     } catch (InterruptedException ie) {
                         throw new SwiftSdkClientException(containerName, keyName,
-                                String.format("Delete fails: %s", ie.getMessage()), ie);
+                                String.format("Delete fails: %s", e.getMessage()), e);
                     }
                     continue;
                 } else {
@@ -346,26 +367,41 @@ public class SwiftObsServices {
 	/**
 	 * @param containerName
 	 * @return
-	 * @throws SwiftObsServiceException
-	 * @throws SwiftSdkClientException
+	 * @throws SwiftSdkClientException 
 	 */
-	public ObjectListing listObjectsFromContainer(String containerName) {
-		// TODO Auto-generated method stub
-		return null;
-		
+	public Collection<StoredObject> listObjectsFromContainer(String containerName) throws SwiftSdkClientException {
+		return listNextBatchOfObjectsFromContainer(containerName, "");
 	}
 
 	/**
 	 * @param containerName
-	 * @param previousObjectListing
+	 * @param marker
 	 * @return
-	 * @throws SwiftObsServiceException
-	 * @throws SwiftSdkClientException
+	 * @throws SwiftSdkClientException 
 	 */
-	public ObjectListing listNextBatchOfObjectsFromContainer(String containerName, ObjectListing previousObjectListing) {
-		// TODO Auto-generated method stub
-		return null;
-		
+	public Collection<StoredObject> listNextBatchOfObjectsFromContainer(String containerName, String marker) throws SwiftSdkClientException {
+		for (int retryCount = 1;; retryCount++) {
+			try {
+				log(String.format("Listing objects from bucket %s", containerName));
+				Container container = client.getContainer(containerName);
+                return container.list("", marker, MAX_RESULTS_PER_LIST);
+			} catch (Exception e) {
+				if (retryCount <= numRetries) {
+					LOGGER.warn(String.format("Listing objects from bucket %s failed: Attempt : %d / %d", containerName,
+							retryCount, numRetries));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (InterruptedException ie) {
+						throw new SwiftSdkClientException(containerName, "",
+								String.format("Listing objects fails: %s", e.getMessage()), e);
+					}
+					continue;
+				} else {
+					throw new SwiftSdkClientException(containerName, "",
+							String.format("Listing objects fails: %s", e.getMessage()), e);
+				}
+			}
+		}
 	}
 
 }
