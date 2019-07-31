@@ -30,7 +30,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3Configuration;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 
 public class SwiftObsClientTest {
@@ -70,9 +69,10 @@ public class SwiftObsClientTest {
      * @throws ObsServiceException
      * @throws SwiftSdkClientException
      * @throws SwiftSdkClientException 
+     * @throws S3SdkClientException 
      */
     @Before
-    public void init() throws ObsServiceException, SwiftSdkClientException, SwiftSdkClientException {
+    public void init() throws ObsServiceException, SwiftSdkClientException, SwiftSdkClientException, S3SdkClientException {
         // Init mocks
         MockitoAnnotations.initMocks(this);
         // Mock service
