@@ -21,6 +21,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,6 +74,9 @@ public class ExtractMetadata {
 	private Map<String, Float> typeSliceLength;
 
 	private String xsltDirectory;
+	
+	 
+	private static final Logger LOGGER = LogManager.getLogger(ExtractMetadata.class);
 
 	/**
 	 * Constructor
@@ -143,12 +148,12 @@ public class ExtractMetadata {
 				} else {
 					// Should be 4 coordinates --> else exception
 					// copy and adjust from manifest --> manifest is clockwise
-					processCoordinatesforL1andL2(rawCoordinates);
+					return processCoordinatesforL1andL2(rawCoordinates);
 				}
 			} // ------------ LEVEL 2 --------------------//
 			else if (productType.matches(".._OCN__2.")) {
 
-				if (productType.equals("WV_OCN__2S")) {
+				if (productType.startsWith("WV_OCN")) {
 					// WV L2:
 					// derive larger footprint from multiple smaller patches
 					return WVFootPrintExtension
@@ -169,8 +174,6 @@ public class ExtractMetadata {
 		} catch (JSONException e) {
 			throw new MetadataExtractionException(e);
 		}
-		return null;
-
 	}
 
 	private JSONObject processCoordinatesforWVL0(
@@ -187,7 +190,7 @@ public class ExtractMetadata {
 		final String startNadirLatitude = startNadirPoint[0];
 		final String startNadirLongitude = startNadirPoint[1];
 
-		final String[] stopNadirPoint = points[0].split(",");
+		final String[] stopNadirPoint = points[1].split(",");
 		final String stopNadirLatitude = stopNadirPoint[0];
 		final String stopNadirLongitude = stopNadirPoint[1];
 
@@ -198,7 +201,8 @@ public class ExtractMetadata {
 				"[" + startNadirLongitude + "," + startNadirLatitude + "]"));
 		geoShapeCoordinates.put(new JSONArray(
 				"[" + stopNadirLongitude + "," + stopNadirLatitude + "]"));
-		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
+		geoShape.put("coordinates", geoShapeCoordinates);
+		//geoShape.put("orientation", "counterclockwise");
 
 		return geoShape;
 	}
@@ -563,6 +567,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
+	//FIXEME probably it means SAFE AUX FILE ???
 	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor,
 			File file)
 			throws MetadataExtractionException, MetadataMalformedException {
@@ -738,6 +743,8 @@ public class ExtractMetadata {
 			metadataJSONObject.put("creationTime", dt);
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
+
+			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -847,6 +854,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
 			metadataJSONObject.put("processMode", descriptor.getMode());
+			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);

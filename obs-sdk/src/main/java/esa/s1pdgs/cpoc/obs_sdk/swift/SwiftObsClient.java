@@ -51,6 +51,10 @@ public class SwiftObsClient extends AbstractObsClient {
 	public boolean doesContainerExist(ProductFamily family) throws ObsServiceException {
 		return swiftObsServices.containerExist(configuration.getContainerForFamily(getObsFamily(family)));
 	}
+	
+	public int numberOfObjects(ProductFamily family, String prefixKey) throws SwiftSdkClientException, ObsServiceException {
+		return swiftObsServices.getNbObjects(configuration.getContainerForFamily(getObsFamily(family)), prefixKey);
+	}
     
 	@Override
 	public boolean doesObjectExist(ObsObject object) throws SdkClientException, ObsServiceException {
@@ -59,9 +63,9 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public boolean doesPrefixExist(ObsObject object) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-		//return false;
+		return swiftObsServices.getNbObjects(
+                configuration.getContainerForFamily(object.getFamily()),
+                object.getKey()) > 0;
 	}
 
 	@Override

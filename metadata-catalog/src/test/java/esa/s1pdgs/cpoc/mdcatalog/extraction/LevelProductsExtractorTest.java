@@ -328,7 +328,7 @@ public class LevelProductsExtractorTest {
 	@Test
 	public void testExtractMetadataL1Acn() throws MetadataExtractionException, AbstractCodedException {
 
-		String l1acnName = "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE";
+		String l1acnName = "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE";
 
 		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l1acnName
 				+ File.separator + "manifest.safe");
@@ -347,11 +347,11 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductName(l1acnName);
 		descriptor.setRelativePath(l1acnName);
 		descriptor.setSwathtype("IW");
-		descriptor.setResolution("_");
+		descriptor.setResolution("H");
 		descriptor.setProductClass("A");
-		descriptor.setProductType("IW_RAW__0A");
+		descriptor.setProductType("IW_GRDH_1A");
 		descriptor.setPolarisation("DV");
-		descriptor.setDataTakeId("021735");
+		descriptor.setDataTakeId("023A69");
 		descriptor.setProductFamily(ProductFamily.L1_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_ACN);

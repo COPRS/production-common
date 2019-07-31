@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -30,8 +31,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 
+@Ignore
 public class SwiftObsClientTest {
 
     /**
@@ -69,10 +70,9 @@ public class SwiftObsClientTest {
      * @throws ObsServiceException
      * @throws SwiftSdkClientException
      * @throws SwiftSdkClientException 
-     * @throws S3SdkClientException 
      */
     @Before
-    public void init() throws ObsServiceException, SwiftSdkClientException, SwiftSdkClientException, S3SdkClientException {
+    public void init() throws ObsServiceException, SwiftSdkClientException, SwiftSdkClientException {
         // Init mocks
         MockitoAnnotations.initMocks(this);
         // Mock service

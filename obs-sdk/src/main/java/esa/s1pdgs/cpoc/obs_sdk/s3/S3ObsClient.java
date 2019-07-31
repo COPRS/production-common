@@ -93,7 +93,7 @@ public class S3ObsClient extends AbstractObsClient {
             throws SdkClientException, ObsServiceException {
         return s3Services.getNbObjects(
                 configuration.getBucketForFamily(object.getFamily()),
-                object.getKey()) > 0 ? true : false;
+                object.getKey()) > 0;
     }
 
     /**

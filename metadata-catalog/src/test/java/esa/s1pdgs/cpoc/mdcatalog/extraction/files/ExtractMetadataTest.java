@@ -437,7 +437,6 @@ public class ExtractMetadataTest {
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
-
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -476,9 +475,10 @@ public class ExtractMetadataTest {
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
+            System.out.println(result);
 
             assertNotNull("JSON object should not be null", result);
-            assertEquals("envelope", result.getJSONObject("sliceCoordinates").getString("type"));
+            assertEquals("linestring", result.getJSONObject("sliceCoordinates").getString("type"));
             assertEquals(new JSONArray("[108.5909,-62.2900]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").get(0).toString());
             assertEquals(new JSONArray("[105.8055,-65.5655]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").get(1).toString());
             assertEquals(1, result.getInt("sliceNumber"));
@@ -628,7 +628,7 @@ public class ExtractMetadataTest {
         }
 
         expectedResult = new JSONObject(
-                "{\"missionDataTakeId\":146024,\"totalNumberOfSlice\":1,\"sliceCoordinates\":{\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-06-04T09:23:00\",\"creationTime\":\"2018-06-04T09:23:00\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0S\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"sliceNumber\":\"\",\"sliceOverlap\":\"\",\"theoreticalSliceLength\":\"\",\"processMode\":\"NRT\",\"productFamily\":\"L0_ACN\"}");
+                "{\"missionDataTakeId\":146024,\"productFamily\":\"L0_SLICE\",\"totalNumberOfSlice\":1,\"theoreticalSliceLength\":\"\",\"sliceCoordinates\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2019-07-31T14:12:50.250000Z\",\"creationTime\":\"2019-07-31T14:12:50.250000Z\",\"polarisation\":\"DV\",\"sliceNumber\":1,\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0C\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"sliceOverlap\":\"\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"processMode\":\"NRT\"}");
 
         descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -667,25 +667,25 @@ public class ExtractMetadataTest {
         }
 
         expectedResult = new JSONObject(
-                "{\"missionDataTakeId\":017EEF,\"totalNumberOfSlice\":1,\"sliceCoordinates\":{\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-06-04T09:23:00\",\"creationTime\":\"2018-06-04T09:23:00\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0S\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"sliceNumber\":\"\",\"sliceOverlap\":\"\",\"theoreticalSliceLength\":\"\",\"processMode\":\"NRT\",\"productFamily\":\"L0_ACN\"}");
+                "{\"missionDataTakeId\":146024,\"productFamily\":\"L0_SLICE\",\"totalNumberOfSlice\":1,\"theoreticalSliceLength\":\"\",\"sliceCoordinates\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2019-07-31T14:13:49.988000Z\",\"creationTime\":\"2019-07-31T14:13:49.988000Z\",\"polarisation\":\"DV\",\"sliceNumber\":1,\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0C\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"sliceOverlap\":\"\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"processMode\":\"NRT\"}");
 
         descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
-                "S1B_WV_RAW__0ASV_20181001T115404_20181001T115416_012958_017EEF_95EE.SAFE");
+                "S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE");
         descriptor.setMissionId("S1");
         descriptor.setSatelliteId("B");
         descriptor.setProductName(
-                "S1B_WV_RAW__0ASV_20181001T115404_20181001T115416_012958_017EEF_95EE.SAFE");
+                "S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE");
         descriptor.setRelativePath(
-                "S1B_WV_RAW__0ASV_20181001T115404_20181001T115416_012958_017EEF_95EE.SAFE");
-        descriptor.setSwathtype("WV");
+                "S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE");
+        descriptor.setSwathtype("EW");
         descriptor.setResolution("_");
-        descriptor.setProductClass("A");
-        descriptor.setProductType("WV_RAW__0A");
-        descriptor.setPolarisation("SV");
-        descriptor.setDataTakeId("017EEF");
+        descriptor.setProductClass("C");
+        descriptor.setProductType("EW_RAW__0C");
+        descriptor.setPolarisation("DV");
+        descriptor.setDataTakeId("023A68");
         descriptor.setProductFamily(ProductFamily.L0_SLICE);
         descriptor.setMode("NRT");
 
@@ -694,6 +694,8 @@ public class ExtractMetadataTest {
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
+            
+            System.out.println(result);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -755,7 +757,7 @@ public class ExtractMetadataTest {
         descriptor.setSwathtype("IW");
         descriptor.setResolution("_");
         descriptor.setProductClass("S");
-        descriptor.setProductType("IW_GRDH_0S");
+        descriptor.setProductType("IW_GRDH_1S");
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("023A69");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
@@ -769,11 +771,11 @@ public class ExtractMetadataTest {
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
             assertEquals("polygon", result.getJSONObject("sliceCoordinates").getString("type"));
-            assertEquals(new JSONArray("[48.27924,12.378114]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(0).toString());
-            assertEquals(new JSONArray("[50.603844,12.829241]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(1).toString());
-            assertEquals(new JSONArray("[50.958828,11.081389]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
-            assertEquals(new JSONArray("[48.64994,10.625828]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
-            assertEquals(new JSONArray("[48.27924,12.378114]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
+            assertEquals(new JSONArray("[48.64994,10.625828]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(0).toString());
+            assertEquals(new JSONArray("[48.27924,12.378114]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(1).toString());
+            assertEquals(new JSONArray("[50.603844,12.829241]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
+            assertEquals(new JSONArray("[50.958828,11.081389]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
+            assertEquals(new JSONArray("[48.64994,10.625828]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("absoluteStopOrbit").toString(),
                     result.get("absoluteStopOrbit").toString());
@@ -991,7 +993,7 @@ public class ExtractMetadataTest {
         descriptor.setSwathtype("IW");
         descriptor.setResolution("_");
         descriptor.setProductClass("A");
-        descriptor.setProductType("IW_GRDH_0A");
+        descriptor.setProductType("IW_GRDH_1A");
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("023A69");
         descriptor.setProductFamily(ProductFamily.L1_ACN);

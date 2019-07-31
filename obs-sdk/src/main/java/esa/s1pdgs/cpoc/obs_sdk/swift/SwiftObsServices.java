@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
+import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.services.s3.model.ObjectListing;
 
@@ -36,7 +37,8 @@ public class SwiftObsServices {
      * Delay before retrying
      */
     private final int retryDelay;
-
+    
+    private final int MAX_RESULTS_PER_LIST = 8000;
     
     public SwiftObsServices(Account client, final int numRetries, final int retryDelay) {
     	this.client = client;
@@ -80,7 +82,6 @@ public class SwiftObsServices {
 		return container.exists();
 	}
 
-
 	/**
      * Get the number of objects in the container whose key matches with prefix
      * 
@@ -89,13 +90,33 @@ public class SwiftObsServices {
      * @return
 	 * @throws SwiftSdkClientException
      */
-	public int getNbObjects(String containerName, String prefixKey) {
-		Container container = client.getContainer(containerName);
-		
-		
-		// TODO
-		return 0;
-	}
+	public int getNbObjects(String containerName, String prefixKey) throws SwiftSdkClientException {
+        for (int retryCount = 1;; retryCount++) {
+            try {
+                Container container = client.getContainer(containerName);
+                Collection<StoredObject> objectListing = container.list(prefixKey, "", MAX_RESULTS_PER_LIST);
+                return objectListing.size();
+            } catch (Exception e) {
+                if (retryCount <= numRetries) {
+                    LOGGER.warn(String.format(
+                            "Getting number of objects %s failed: Attempt : %d / %d",
+                            prefixKey, retryCount, numRetries));
+                    try {
+                        Thread.sleep(retryDelay);
+                    } catch (InterruptedException ie) {
+                        throw new SwiftSdkClientException(containerName, prefixKey,
+                                String.format(
+                                        "Getting number of objects fails: %s",
+                                        ie.getMessage()), ie);
+                    }
+                } else {
+                    throw new SwiftSdkClientException(containerName, prefixKey,
+                            String.format("Getting number of objects fails: %s",
+                                    e.getMessage()), e);
+                }
+            }
+        }
+    }
 
 	/**
      * Download objects of the given container with a key matching the prefix
@@ -122,10 +143,10 @@ public class SwiftObsServices {
             // List all objects with given prefix
             try {
             	String marker = "";
-            	final int fetchSize = 25;
+            	
             	Collection<StoredObject> results;
             	do {
-	       			 results = client.getContainer(containerName).list(prefixKey, marker, fetchSize);
+	       			 results = client.getContainer(containerName).list(prefixKey, marker, MAX_RESULTS_PER_LIST);
 	       			 for (StoredObject object : results) {
 	       				 marker = object.getPath(); // store marker for next retrival
 	       				 // Build temporarly filename
@@ -169,7 +190,7 @@ public class SwiftObsServices {
                         }
                         nbObj++;
 	       			 }
-            	} while (results.size() == fetchSize);           	
+            	} while (results.size() == MAX_RESULTS_PER_LIST);           	
                 log(String.format(
                         "Download %d objects with prefix %s from bucket %s in %s succeeded",
                         nbObj, prefixKey, containerName, directoryPath));
