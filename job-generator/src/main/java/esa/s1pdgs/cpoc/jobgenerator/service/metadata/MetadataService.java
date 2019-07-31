@@ -398,6 +398,7 @@ public class MetadataService {
                                         response.getStatusCode().name()));
                     }
                 } else {
+                	LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results", query.getProductFamily().toString(), query.getProductType(),response.getBody().size());
                     return response.getBody();
                 }
             } catch (RestClientException e) {
