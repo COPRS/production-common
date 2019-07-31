@@ -23,6 +23,7 @@ public class SwiftObsClientIT {
 	public final static ProductFamily auxiliaryFiles = ProductFamily.AUXILIARY_FILE;
 	public final static String testFilePrefix = "abc/def/";
 	public final static String testFileName1 = "testfile1.txt";
+	public final static String testFileName2 = "testfile2.txt";
 	public final static String nonExistentFileName = "non-existent.txt";
 	public final static File testFile1 = getResource("/" + testFileName1);
 	
@@ -48,9 +49,17 @@ public class SwiftObsClientIT {
 		if (uut.exist(auxiliaryFiles, testFileName1)) {
 			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFileName1);
 		}
-		
+
+		if (uut.exist(auxiliaryFiles, testFileName2)) {
+			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFileName2);
+		}
+
 		if (uut.exist(auxiliaryFiles, testFilePrefix + testFileName1)) {
 			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
+		}
+
+		if (uut.exist(auxiliaryFiles, testFilePrefix + testFileName2)) {
+			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFilePrefix + testFileName2);
 		}
 	}
 	
@@ -124,6 +133,36 @@ public class SwiftObsClientIT {
 		String send1 = new String(Files.readAllBytes(testFile1.toPath()));
 		String received1 = new String(Files.readAllBytes((new File(targetDir + "/auxiliary-files/" + testFilePrefix.replace("/", "%2F") + testFileName1)).toPath()));
 		assertEquals(send1, received1);
+	}
+
+	@Test
+	public void numberOfObjectsWithoutPrefixTest() throws ObsServiceException, ObsException, SwiftSdkClientException, IOException {	
+		// upload
+		assertFalse(uut.exist(auxiliaryFiles, testFileName1));
+		assertFalse(uut.exist(auxiliaryFiles, testFileName2));
+		uut.uploadFile(auxiliaryFiles, testFileName1, testFile1);
+		uut.uploadFile(auxiliaryFiles, testFileName2, testFile1);
+		assertTrue(uut.exist(auxiliaryFiles, testFileName1));
+		assertTrue(uut.exist(auxiliaryFiles, testFileName2));
+		
+		// count
+		int count = ((SwiftObsClient)uut).numberOfObjects(auxiliaryFiles, "");
+		assertEquals(2, count);
+	}
+
+	@Test
+	public void numberOfObjectsWithPrefixTest() throws ObsServiceException, ObsException, SwiftSdkClientException, IOException {	
+		// upload
+		assertFalse(uut.exist(auxiliaryFiles, testFilePrefix + testFileName1));
+		assertFalse(uut.exist(auxiliaryFiles, testFilePrefix + testFileName2));
+		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName1, testFile1);
+		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName2, testFile1);
+		assertTrue(uut.exist(auxiliaryFiles, testFilePrefix + testFileName1));
+		assertTrue(uut.exist(auxiliaryFiles, testFilePrefix + testFileName2));
+		
+		// count
+		int count = ((SwiftObsClient)uut).numberOfObjects(auxiliaryFiles, testFilePrefix);
+		assertEquals(2, count);
 	}
 
 }

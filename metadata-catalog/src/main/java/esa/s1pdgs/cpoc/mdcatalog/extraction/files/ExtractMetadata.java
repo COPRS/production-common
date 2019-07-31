@@ -21,6 +21,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,6 +74,9 @@ public class ExtractMetadata {
 	private Map<String, Float> typeSliceLength;
 
 	private String xsltDirectory;
+	
+	 
+	private static final Logger LOGGER = LogManager.getLogger(ExtractMetadata.class);
 
 	/**
 	 * Constructor
@@ -187,7 +192,7 @@ public class ExtractMetadata {
 		final String startNadirLatitude = startNadirPoint[0];
 		final String startNadirLongitude = startNadirPoint[1];
 
-		final String[] stopNadirPoint = points[0].split(",");
+		final String[] stopNadirPoint = points[1].split(",");
 		final String stopNadirLatitude = stopNadirPoint[0];
 		final String stopNadirLongitude = stopNadirPoint[1];
 
@@ -199,6 +204,7 @@ public class ExtractMetadata {
 		geoShapeCoordinates.put(new JSONArray(
 				"[" + stopNadirLongitude + "," + stopNadirLatitude + "]"));
 		geoShape.put("coordinates", geoShapeCoordinates);
+		//geoShape.put("orientation", "counterclockwise");
 
 		return geoShape;
 	}
@@ -563,6 +569,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
+	//FIXEME probably it means SAFE AUX FILE ???
 	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor,
 			File file)
 			throws MetadataExtractionException, MetadataMalformedException {
@@ -738,6 +745,8 @@ public class ExtractMetadata {
 			metadataJSONObject.put("creationTime", dt);
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
+
+			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
@@ -847,6 +856,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
 			metadataJSONObject.put("processMode", descriptor.getMode());
+			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
 			throw new MetadataExtractionException(e);
