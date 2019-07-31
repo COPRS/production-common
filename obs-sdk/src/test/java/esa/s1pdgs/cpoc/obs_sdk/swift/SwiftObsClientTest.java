@@ -13,17 +13,19 @@ import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.javaswift.joss.client.impl.StoredObjectImpl;
+import org.javaswift.joss.client.mock.AccountMock;
+import org.javaswift.joss.client.mock.ContainerMock;
+import org.javaswift.joss.model.Container;
+import org.javaswift.joss.model.StoredObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
@@ -32,7 +34,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
-@Ignore
 public class SwiftObsClientTest {
 
     /**
@@ -48,17 +49,10 @@ public class SwiftObsClientTest {
     private SwiftObsServices service;
     
     /**
-     * 
+     * Mock account
      */
-    @Mock
-    private ObjectListing objListing1;
+    private AccountMock account;
     
-    /**
-     * 
-     */
-    @Mock
-    private ObjectListing objListing2;
-
     /**
      * Client to test
      */
@@ -73,6 +67,7 @@ public class SwiftObsClientTest {
      */
     @Before
     public void init() throws ObsServiceException, SwiftSdkClientException, SwiftSdkClientException {
+    	account = new AccountMock();
         // Init mocks
         MockitoAnnotations.initMocks(this);
         // Mock service
@@ -262,15 +257,13 @@ public class SwiftObsClientTest {
 		Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
 		Date obj1Date = Date.from(Instant.parse("2020-01-02T00:00:00Z"));
 
-		S3ObjectSummary obj1 = new S3ObjectSummary();
-		obj1.setKey("obj1");
+		Container container = new ContainerMock(account, "l0-slices");
+		StoredObject obj1 = new StoredObjectImpl(container, "obj1", false);
 		obj1.setLastModified(obj1Date);
 
-		List<S3ObjectSummary> objSums = new ArrayList<>();
-		objSums.add(obj1);
+		List<StoredObject> objListing1 = new LinkedList<>();
+		objListing1.add(obj1);
 
-		doReturn(objSums).when(objListing1).getObjectSummaries();
-		doReturn(false).when(objListing1).isTruncated();
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
 
 		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
@@ -289,17 +282,16 @@ public class SwiftObsClientTest {
 		Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
 		Date obj1Date = Date.from(Instant.parse("2020-01-04T00:00:00Z"));
 
-		S3ObjectSummary obj1 = new S3ObjectSummary();
-		obj1.setKey("obj1");
-		obj1.setLastModified(obj1Date);
+		Container container = new ContainerMock(account, "l0-slices");
+		StoredObject obj1 = new StoredObjectImpl(container, "obj1", false);	
+		obj1.setLastModified(obj1Date);		
+		System.out.println(obj1.getLastModified());
+		System.out.println(obj1.getLastModifiedAsDate());
 
-		List<S3ObjectSummary> objSums = new ArrayList<>();
-		objSums.add(obj1);
+	  	List<StoredObject> objListing1 = new LinkedList<>();
+		objListing1.add(obj1);
 
-		doReturn(objSums).when(objListing1).getObjectSummaries();
-		doReturn(false).when(objListing1).isTruncated();
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
-
 		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
 				ObsFamily.L0_SLICE);
 
@@ -319,32 +311,25 @@ public class SwiftObsClientTest {
 		Date obj2Date = Date.from(Instant.parse("2020-01-04T00:00:00Z"));
 		Date obj3Date = Date.from(Instant.parse("2020-01-02T03:00:00Z"));
 
-		S3ObjectSummary obj1 = new S3ObjectSummary();
-		obj1.setKey("obj1");
+		Container container = new ContainerMock(account, "l0-slices");
+		StoredObject obj1 = new StoredObjectImpl(container, "obj1", false);
 		obj1.setLastModified(obj1Date);
 
-		S3ObjectSummary obj2 = new S3ObjectSummary();
-		obj2.setKey("obj2");
+		StoredObject obj2 = new StoredObjectImpl(container, "obj2", false);
 		obj2.setLastModified(obj2Date);
 
-		S3ObjectSummary obj3 = new S3ObjectSummary();
-		obj3.setKey("obj3");
+		StoredObject obj3 = new StoredObjectImpl(container, "obj3", false);
 		obj3.setLastModified(obj3Date);
 
-		List<S3ObjectSummary> objSums1 = new ArrayList<>();
-		objSums1.add(obj1);
-		objSums1.add(obj2);
+		List<StoredObject> objListing1 = new ArrayList<>();
+		objListing1.add(obj1);
+		objListing1.add(obj2);
 
-		List<S3ObjectSummary> objSums2 = new ArrayList<>();
-		objSums2.add(obj3);
+		List<StoredObject> objListing2 = new ArrayList<>();
+		objListing2.add(obj3);
 
-		doReturn(objSums1).when(objListing1).getObjectSummaries();
-		doReturn(true).when(objListing1).isTruncated();
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
-
-		doReturn(objSums2).when(objListing2).getObjectSummaries();
-		doReturn(false).when(objListing2).isTruncated();
-		doReturn(objListing2).when(service).listNextBatchOfObjectsFromContainer("l0-slices", objListing1);
+		doReturn(objListing2).when(service).listNextBatchOfObjectsFromContainer("l0-slices", Mockito.anyString());
 
 		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
 				ObsFamily.L0_SLICE);
