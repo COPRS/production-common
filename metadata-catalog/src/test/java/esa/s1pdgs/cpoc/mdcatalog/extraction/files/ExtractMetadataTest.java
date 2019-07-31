@@ -823,6 +823,86 @@ public class ExtractMetadataTest {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
+    
+    @Test
+    public void testProcessL1SlicesWVFile2() {
+        
+        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        descriptor.setExtension(FileExtension.SAFE);
+        descriptor.setFilename("manifest.safe");
+        descriptor.setKeyObjectStorage(
+                "S1B_WV_SLC__1SSH_20170702T130912_20170702T133355_006309_00B17D_BC10.SAFE");
+        descriptor.setMissionId("S1");
+        descriptor.setSatelliteId("B");
+        descriptor.setProductName(
+                "S1B_WV_SLC__1SSH_20170702T130912_20170702T133355_006309_00B17D_BC10.SAFE");
+        descriptor.setRelativePath(
+                "S1B_WV_SLC__1SSH_20170702T130912_20170702T133355_006309_00B17D_BC10.SAFE");
+        descriptor.setSwathtype("WV");
+        descriptor.setResolution("_");
+        descriptor.setProductClass("S");
+        descriptor.setProductType("WV_SLC__1S");
+        descriptor.setPolarisation("DV");
+        descriptor.setDataTakeId("017EF8");
+        descriptor.setProductFamily(ProductFamily.L1_SLICE);
+
+        File file = new File(
+                "test/workDir/S1B_WV_SLC__1SSH_20170702T130912_20170702T133355_006309_00B17D_BC10.SAFE/manifest.safe");
+
+        try {
+            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
+
+            assertNotNull("JSON object should not be null", result);
+            assertEquals("polygon", result.getJSONObject("sliceCoordinates").getString("type"));
+            assertEquals(new JSONArray("[-162.062683,-76.17926]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(0).toString());
+            assertEquals(new JSONArray("[-169.470245,-75.217514]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(1).toString());
+            assertEquals(new JSONArray("[-110.519669,8.143796]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
+            assertEquals(new JSONArray("[-108.503227,8.657177]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
+            assertEquals(new JSONArray("[-162.062683,-76.17926]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
+        } catch (AbstractCodedException fe) {
+            fail("Exception occurred: " + fe.getMessage());
+        }
+    }
+    
+    @Test
+    public void testProcessL2SlicesWVFile() {
+        
+        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        descriptor.setExtension(FileExtension.SAFE);
+        descriptor.setFilename("manifest.safe");
+        descriptor.setKeyObjectStorage(
+                "S1B_WV_OCN__2SSH_20170702T130912_20170702T133355_006309_00B17D_3B01.SAFE");
+        descriptor.setMissionId("S1");
+        descriptor.setSatelliteId("B");
+        descriptor.setProductName(
+                "S1B_WV_OCN__2SSH_20170702T130912_20170702T133355_006309_00B17D_3B01.SAFE");
+        descriptor.setRelativePath(
+                "S1B_WV_OCN__2SSH_20170702T130912_20170702T133355_006309_00B17D_3B01.SAFE");
+        descriptor.setSwathtype("WV");
+        descriptor.setResolution("_");
+        descriptor.setProductClass("S");
+        descriptor.setProductType("WV_OCN__2S");
+        descriptor.setPolarisation("DV");
+        descriptor.setDataTakeId("017EF8");
+        descriptor.setProductFamily(ProductFamily.L2_SLICE);
+
+        File file = new File(
+                "test/workDir/S1B_WV_OCN__2SSH_20170702T130912_20170702T133355_006309_00B17D_3B01.SAFE/manifest.safe");
+
+        try {
+            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L2_SLICE, file);
+
+            assertNotNull("JSON object should not be null", result);
+            assertEquals("polygon", result.getJSONObject("sliceCoordinates").getString("type"));
+            assertEquals(new JSONArray("[-162.062119,-76.179138]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(0).toString());
+            assertEquals(new JSONArray("[-169.469604,-75.217407]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(1).toString());
+            assertEquals(new JSONArray("[-110.51963,8.143985]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
+            assertEquals(new JSONArray("[-108.503189,8.657347]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
+            assertEquals(new JSONArray("[-162.062119,-76.179138]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
+        } catch (AbstractCodedException fe) {
+            fail("Exception occurred: " + fe.getMessage());
+        }
+    }
 
     @Test
     public void testProcessL1SlicesWVFile3raw() {
@@ -855,7 +935,7 @@ public class ExtractMetadataTest {
             assertNotNull("JSON object should not be null", result);
             assertEquals("polygon", result.getJSONObject("sliceCoordinates").getString("type"));
             assertEquals(new JSONArray("[98.145752,-63.219410]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(0).toString());
-            assertEquals(new JSONArray("[101.982521,-63.093563]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(1).toString());
+            assertEquals(new JSONArray("[97.84906,-63.146168]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(1).toString());
             assertEquals(new JSONArray("[102.146751,-62.931400]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
             assertEquals(new JSONArray("[100.111465,-61.471767]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
             assertEquals(new JSONArray("[98.145752,-63.219410]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
