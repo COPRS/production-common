@@ -198,7 +198,7 @@ public class ExtractMetadata {
 				"[" + startNadirLongitude + "," + startNadirLatitude + "]"));
 		geoShapeCoordinates.put(new JSONArray(
 				"[" + stopNadirLongitude + "," + stopNadirLatitude + "]"));
-		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
+		geoShape.put("coordinates", geoShapeCoordinates);
 
 		return geoShape;
 	}
