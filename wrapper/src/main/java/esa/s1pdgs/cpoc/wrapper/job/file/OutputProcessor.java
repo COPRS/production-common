@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
@@ -161,7 +161,7 @@ public class OutputProcessor {
      * @throws UnknownFamilyException
      */
     final long sortOutputs(final List<String> lines,
-            final List<S3UploadFile> uploadBatch,
+            final List<ObsUploadFile> uploadBatch,
             final List<ObsQueueMessage> outputToPublish,
             final List<FileQueueMessage> reportToPublish)
             throws AbstractCodedException {
@@ -209,7 +209,7 @@ public class OutputProcessor {
                                         "Output {} is considered as belonging to the family {}",
                                         productName, matchOutput.getFamily());
                                 
-                                uploadBatch.add(new S3UploadFile(family, productName, file));
+                                uploadBatch.add(new ObsUploadFile(family, productName, file));
                                 outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
                                 productSize += size(file);
                                 
@@ -217,7 +217,7 @@ public class OutputProcessor {
                                 LOGGER.info(
                                         "Output {} is considered as belonging to the family {}",
                                         productName, ProductFamily.L0_SEGMENT);
-                                uploadBatch.add(new S3UploadFile(ProductFamily.L0_SEGMENT, productName,file));
+                                uploadBatch.add(new ObsUploadFile(ProductFamily.L0_SEGMENT, productName,file));
                                 outputToPublish.add(new ObsQueueMessage( ProductFamily.L0_SEGMENT, productName, productName, "FAST24"));
                                 productSize += size(file);
                             } else {
@@ -227,7 +227,7 @@ public class OutputProcessor {
                             LOGGER.info(
                                     "Output {} is considered as belonging to the family {}",
                                     productName, matchOutput.getFamily());
-                            uploadBatch.add(new S3UploadFile(family, productName, file));
+                            uploadBatch.add(new ObsUploadFile(family, productName, file));
                             outputToPublish.add( new ObsQueueMessage(family, productName, productName, inputMessage.getBody().getProductProcessMode()));
                             productSize += size(file);
                         }
@@ -240,14 +240,14 @@ public class OutputProcessor {
                                 LOGGER.info(
                                         "Output {} is considered as belonging to the family {}",
                                         productName, matchOutput.getFamily());
-                                uploadBatch.add(new S3UploadFile(family,  productName, file));
+                                uploadBatch.add(new ObsUploadFile(family,  productName, file));
                                 outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
                                 productSize += size(file);
                             } else if (line.contains("FAST24")) {
                                 LOGGER.info(
                                         "Output {} is considered as belonging to the family {}",
                                         productName, matchOutput.getFamily());
-                                uploadBatch.add(new S3UploadFile(family, productName, file));
+                                uploadBatch.add(new ObsUploadFile(family, productName, file));
                                 outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
                                 productSize += size(file);
                             } else {
@@ -259,7 +259,7 @@ public class OutputProcessor {
                             LOGGER.info(
                                     "Output {} is considered as belonging to the family {}",
                                     productName, matchOutput.getFamily());
-                            uploadBatch.add(new S3UploadFile(family, productName,file));
+                            uploadBatch.add(new ObsUploadFile(family, productName,file));
                             outputToPublish.add(
                                     new ObsQueueMessage(family, productName,
                                             productName, inputMessage.getBody()
@@ -276,7 +276,7 @@ public class OutputProcessor {
                         LOGGER.info(
                                 "Output {} is considered as belonging to the family {}",
                                 productName, matchOutput.getFamily());
-                        uploadBatch.add(new S3UploadFile(family, productName,
+                        uploadBatch.add(new ObsUploadFile(family, productName,
                                 file));
                         outputToPublish.add(new ObsQueueMessage(family,
                                 productName, productName, inputMessage.getBody()
@@ -364,7 +364,7 @@ public class OutputProcessor {
      */
     final void processProducts(
     		final Reporting.Factory reportingFactory,
-    		final List<S3UploadFile> uploadBatch,
+    		final List<ObsUploadFile> uploadBatch,
             final List<ObsQueueMessage> outputToPublish)
             throws AbstractCodedException {
 
@@ -373,8 +373,8 @@ public class OutputProcessor {
 
         for (int i = 0; i < nbPool; i++) {
             int lastIndex = Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());
-            List<S3UploadFile> sublist =uploadBatch.subList(i * sizeUploadBatch, lastIndex);
-            String listProducts = sublist.stream().map(S3UploadFile::getKey).collect(Collectors.joining(","));
+            List<ObsUploadFile> sublist =uploadBatch.subList(i * sizeUploadBatch, lastIndex);
+            String listProducts = sublist.stream().map(ObsUploadFile::getKey).collect(Collectors.joining(","));
             
             if (i > 0) {
                 this.publishAccordingUploadFiles(reportingFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
@@ -491,12 +491,12 @@ public class OutputProcessor {
         List<String> lines = extractFiles();
 
         // Sort outputs
-        List<S3UploadFile> uploadBatch = new ArrayList<>();
+        List<ObsUploadFile> uploadBatch = new ArrayList<>();
         List<ObsQueueMessage> outputToPublish = new ArrayList<>();
         List<FileQueueMessage> reportToPublish = new ArrayList<>();
     	final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish);
         
-        final String listoutputs = uploadBatch.stream().map(S3UploadFile::getKey)
+        final String listoutputs = uploadBatch.stream().map(ObsUploadFile::getKey)
                 .collect(Collectors.joining(","));
         
         final Reporting reporting = reportingFactory.newReporting(0);

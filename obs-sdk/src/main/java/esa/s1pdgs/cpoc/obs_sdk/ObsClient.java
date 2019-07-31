@@ -9,8 +9,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 
 /**
  * <p>
@@ -161,11 +159,11 @@ public interface ObsClient {
 	
 	File downloadFile(final ProductFamily family, final String key, final String targetDir) throws ObsException, ObsUnknownObject;
 	
-	void downloadFilesPerBatch(final List<S3DownloadFile> filesToDownload) throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
+	void downloadFilesPerBatch(final List<ObsDownloadFile> filesToDownload) throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
 	
 	void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException;
 	
-	void uploadFilesPerBatch(final List<S3UploadFile> filesToUpload)  throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
+	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
 	
 	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
 	

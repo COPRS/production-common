@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
 
@@ -106,8 +106,8 @@ public class InputDownloaderTest {
 
         dtol0.addInput(TestUtils.buildBlankInputDto());
 
-        List<S3DownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
-        List<S3DownloadFile> result = downloaderL0.sortInputs();
+        List<ObsDownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
+        List<ObsDownloadFile> result = downloaderL0.sortInputs();
 
         // Check work directory and subdirectories are created
         assertTrue(workDirectory.isDirectory());
@@ -145,7 +145,7 @@ public class InputDownloaderTest {
 
         downloaderL0.processInputs();
 
-        List<S3DownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
+        List<ObsDownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
 
         // Check work directory and subdirectories are created
         assertTrue(workDirectory.isDirectory());
@@ -180,7 +180,7 @@ public class InputDownloaderTest {
             throws AbstractCodedException, IOException {
         downloaderL1.processInputs();
 
-        List<S3DownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
+        List<ObsDownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
 
         // Check work directory and subdirectories are created
         assertTrue(workDirectory.isDirectory());

@@ -18,8 +18,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3DownloadFile;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3UploadFile;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
@@ -201,7 +199,7 @@ public abstract class AbstractObsClient implements ObsClient {
      * @throws AbstractCodedException
      */
     public void downloadFilesPerBatch(
-            final List<S3DownloadFile> filesToDownload)
+            final List<ObsDownloadFile> filesToDownload)
             throws AbstractCodedException {
         // Build objects
         List<ObsDownloadObject> objects = filesToDownload.stream()
@@ -239,7 +237,7 @@ public abstract class AbstractObsClient implements ObsClient {
      * @param filesToUpload
      * @throws AbstractCodedException
      */
-    public void uploadFilesPerBatch(final List<S3UploadFile> filesToUpload)
+    public void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)
             throws AbstractCodedException {
 
         // Build objects

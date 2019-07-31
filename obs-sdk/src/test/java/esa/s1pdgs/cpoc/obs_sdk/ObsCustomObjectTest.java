@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.obs_sdk.s3;
+package esa.s1pdgs.cpoc.obs_sdk;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3CustomObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsCustomObject;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -16,15 +16,15 @@ import nl.jqno.equalsverifier.Warning;
  * 
  * @author Viveris Technologies
  */
-public class S3CustomObjectTest {
+public class ObsCustomObjectTest {
 
     /**
      * Test constructors
      */
     @Test
     public void testConstructors() {
-        S3CustomObject obj =
-                new S3CustomObject(ProductFamily.AUXILIARY_FILE, "key-obs");
+        ObsCustomObject obj =
+                new ObsCustomObject(ProductFamily.AUXILIARY_FILE, "key-obs");
         assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
         assertEquals("key-obs", obj.getKey());
     }
@@ -34,8 +34,8 @@ public class S3CustomObjectTest {
      */
     @Test
     public void testToString() {
-        S3CustomObject obj =
-                new S3CustomObject(ProductFamily.L0_SLICE, "key-obs");
+        ObsCustomObject obj =
+                new ObsCustomObject(ProductFamily.L0_SLICE, "key-obs");
         String str = obj.toString();
         assertTrue(str.startsWith("{"));
         assertTrue(str.contains("family: L0_SLICE"));
@@ -50,11 +50,11 @@ public class S3CustomObjectTest {
     }
 
     /**
-     * Check equals and hascode methods
+     * Check equals and hashcode methods
      */
     @Test
     public void testEquals() {
-        EqualsVerifier.forClass(S3CustomObject.class).usingGetClass()
+        EqualsVerifier.forClass(ObsCustomObject.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 
