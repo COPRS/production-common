@@ -110,8 +110,10 @@ public class FileUtils {
     						)
     				);
     			}  			
-    			LOG.warn("Error on deleting {} ({}/{}), retrying in {}ms: {}", file, attempt, numRetries+1, retrySleep, 
-    					LogUtils.toString(e));
+    			if (LOG.isWarnEnabled()) {
+        			LOG.warn("Error on deleting {} ({}/{}), retrying in {}ms: {}", file, attempt, numRetries+1, retrySleep, 
+        					LogUtils.toString(e));
+    			}
     			Thread.sleep(retrySleep);
     		}
     	}
