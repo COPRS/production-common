@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
 @Service
@@ -64,8 +65,8 @@ public class MetadataService {
                         .fromUriString(uri)
                         // FIXME: Maybe we not need a productType anyways!
                         //.queryParam("productType", productType)
-                        .queryParam("intervalStart", intervalStart)
-                        .queryParam("intervalStop", intervalStop);
+                        .queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
+                        .queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
                 
                 LOGGER.debug("Call rest metadata on [{}]",
                         builder.build().toUri());
