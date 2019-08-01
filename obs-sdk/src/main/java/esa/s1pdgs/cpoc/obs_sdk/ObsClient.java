@@ -163,6 +163,8 @@ public interface ObsClient {
 	
 	void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException;
 	
+	void moveFile(final ProductFamily from, final ProductFamily to,final File file) throws ObsException;
+	
 	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
 	
 	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;

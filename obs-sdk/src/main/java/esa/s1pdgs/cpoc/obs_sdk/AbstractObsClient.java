@@ -338,4 +338,8 @@ public abstract class AbstractObsClient implements ObsClient {
         return ret;
     }
 
+	@Override
+	public void moveFile(ProductFamily from, ProductFamily to, File file) throws ObsException {
+		throw new UnsupportedOperationException();		
+	}
 }
