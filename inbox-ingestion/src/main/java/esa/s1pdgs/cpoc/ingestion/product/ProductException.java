@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion;
+package esa.s1pdgs.cpoc.ingestion.product;
 
 @SuppressWarnings("serial")
 public class ProductException extends RuntimeException {	

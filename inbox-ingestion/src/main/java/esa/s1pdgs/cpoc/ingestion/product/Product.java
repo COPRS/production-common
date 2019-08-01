@@ -1,19 +1,41 @@
 package esa.s1pdgs.cpoc.ingestion.product;
 
+import java.io.File;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
-public class Product<E extends AbstractDto> {
-
+public class Product<E extends AbstractDto> {	
+	private ProductFamily family;
+	private File file;
+	private E dto;
+	
 	public ProductFamily getFamily() {
-		// TODO Auto-generated method stub
-		return null;
+		return family;
+	}
+	
+	public void setFamily(ProductFamily family) {
+		this.family = family;
 	}
 	
 	public E getDto() {
-		// TODO Auto-generated method stub
-		return null;
+		return dto;
+	}
+	
+	public void setDto(E dto) {
+		this.dto = dto;
 	}
 
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
+	}
+
+	@Override
+	public String toString() {
+		return "Product [family=" + family + ", file=" + file + ", dto=" + dto + "]";
+	}
 }

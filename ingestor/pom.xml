@@ -101,9 +101,6 @@
 			<classifier>tests</classifier>
       		<type>test-jar</type>
       		<scope>test</scope>
-     <!-- dirty workaround because Maven skips deploying test artifacts if tests are skipped while requiring
-	them nevertheless if scope is 'test' in depending project... -->
-      		<optional>true</optional>
 		</dependency>
 
 		<dependency>

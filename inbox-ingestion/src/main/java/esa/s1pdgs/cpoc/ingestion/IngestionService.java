@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.ingestion;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +22,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ingestion.config.IngestionServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.config.IngestionTypeConfiguration;
 import esa.s1pdgs.cpoc.ingestion.product.Product;
+import esa.s1pdgs.cpoc.ingestion.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.product.ProductService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
@@ -52,14 +55,14 @@ public class IngestionService {
 		this.properties = properties;
 		this.productService = productService;
 	}
-	
+
 	public void poll() {		
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOG, "Ingestion");	
 		
 		try {
 			final GenericMessageDto<IngestionDto> message = client.next(ProductCategory.INGESTION);			
 			if (message == null || message.getBody() == null) {
-				LOG.trace(" No message received: continue");
+				LOG.trace("No message received: continue");
 				return;
 			}
 			final IngestionDto ingestion = message.getBody();
@@ -67,33 +70,11 @@ public class IngestionService {
 			
 			final Reporting reporting = reportingFactory
 					.product(ingestion.getFamily().toString(), ingestion.getProductName())
-					.newReporting(0);	
-			
+					.newReporting(0);
 			reporting.reportStart("Start processing of " + ingestion.getProductName());	
-			
-			Product<? extends AbstractDto> result = null;
+
 			try {
-				try {	
-					final ProductFamily family = getFamilyFor(ingestion);
-					// update family information
-					reportingFactory.product(family.toString(), ingestion.getProductName());											
-					result = productService.ingest(family, ingestion, reportingFactory);
-					reporting.reportStop("End processing of " + ingestion.getProductName());
-					
-				// is thrown if product shall be marked as invalid	
-				} catch (ProductException e) {		
-					message.getBody().setFamily(ProductFamily.INVALID);
-					
-					// TODO move to invalid bucket
-					
-					final FailedProcessingDto failed = new FailedProcessingDto(
-							properties.getHostname(), 
-							new Date(), 
-							e.getMessage(), 
-							message
-					);
-					errorRepoAppender.send(failed);	
-				}
+				final List<Product<AbstractDto>> result = identifyAndUpload(reportingFactory, message, ingestion);
 				publish(result, message, reportingFactory);				
 				delete(ingestion, reportingFactory);
 				reporting.reportStop("End processing of " + ingestion.getProductName());
@@ -110,32 +91,68 @@ public class IngestionService {
 		}	
 	}
 
+	final List<Product<AbstractDto>> identifyAndUpload(
+			final Reporting.Factory reportingFactory,
+			final GenericMessageDto<IngestionDto> message, 
+			final IngestionDto ingestion
+	) throws InternalErrorException {		
+		List<Product<AbstractDto>> result = new ArrayList<>();		
+		try {	
+			final ProductFamily family = getFamilyFor(ingestion);
+			
+			final Reporting reportObs = reportingFactory
+					// update family information
+					.product(family.toString(), ingestion.getProductName())
+					.newReporting(1);
+			
+			reportObs.reportStart("Start uploading " + ingestion.getProductName() + " in OBS");	
+			
+			try {
+				result = productService.ingest(family, ingestion);					
+			} catch (ProductException e) {
+				reportObs.reportError("Error uploading " + ingestion.getProductName() + " in OBS: {}", e.getMessage());
+				throw e;
+			}
+			reportObs.reportStop("End uploading " + ingestion.getProductName() + " in OBS");
+		// is thrown if product shall be marked as invalid	
+		} catch (ProductException e) {		
+			productService.markInvalid(ingestion);
+			message.getBody().setFamily(ProductFamily.INVALID);					
+			final FailedProcessingDto failed = new FailedProcessingDto(
+					properties.getHostname(), 
+					new Date(), 
+					e.getMessage(), 
+					message
+			);
+			errorRepoAppender.send(failed);	
+		}
+		return result;
+	}
+
 	void publish(
-			final Product<? extends AbstractDto> product, 
+			final List<Product<AbstractDto>> products, 
 			final GenericMessageDto<IngestionDto> message,
 			final Reporting.Factory reportingFactory
-	) throws InternalErrorException {		
-		if (product != null) {				
+	) throws InternalErrorException {
+		for (final Product<AbstractDto> product : products) {
 			final GenericPublicationMessageDto<? extends AbstractDto> result = new GenericPublicationMessageDto<>(
 					message.getIdentifier(), 
 					product.getFamily(),
 					product.getDto()
 			);			
 			result.setInputKey(message.getInputKey());
-			result.setOutputKey(product.getFamily().toString());
-			
+			result.setOutputKey(product.getFamily().toString());			
 			LOG.info("publishing : {}", result);
 
 			final Reporting reporting = reportingFactory
 				.product(product.getFamily().toString(), message.getBody().getProductName())
 				.newReporting(3);
 			
-			final ProductCategory category = ProductCategory.fromProductFamily(product.getFamily());
-			
-			reporting.reportStart("Start publishing file in topic");
+			final ProductCategory category = ProductCategory.fromProductFamily(product.getFamily());			
+			reporting.reportStart("Start publishing file " + message.getBody().getProductName() + " in topic");
 			try {
 				client.publish(result, category);
-				reporting.reportStop("End publishing file in topic");				
+				reporting.reportStop("End publishing file " + message.getBody().getProductName() + " in topic");				
 			} catch (AbstractCodedException e) {
 				reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			}
@@ -152,42 +169,6 @@ public class IngestionService {
 			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
 		}
 	}
-
-//	public Product<? extends AbstractDto> handle(
-//			final GenericMessageDto<IngestionDto> ingestionMessage,
-//			final Reporting.Factory reportingFactory
-//	) {		
-//		final IngestionDto ingestion = ingestionMessage.getBody();		
-//		
-//		Reporting reporting = reportingFactory
-//				.product(ingestion.getFamily().toString(), ingestion.getProductName())
-//				.newReporting(0);	
-//				
-//		Product<? extends AbstractDto> result = null;		
-//		try {	
-//			final ProductFamily family = getFamilyFor(ingestion);
-//			
-//			reporting = reportingFactory
-//					.product(family.toString(), ingestion.getProductName())
-//					.newReporting(0);
-//			reporting.reportStart("Start processing of " + ingestion.getProductName());				
-//			result = productService.ingest(family, ingestion, reportingFactory);
-//			reporting.reportStop("End processing of " + ingestion.getProductName());
-//			
-//		// is thrown if product shall be marked as invalid	
-//		} catch (ProductException e) {		
-//			ingestionMessage.getBody().setFamily(ProductFamily.INVALID);
-//			
-//			final FailedProcessingDto failed = new FailedProcessingDto(
-//					properties.getHostname(), 
-//					new Date(), 
-//					e.getMessage(), 
-//					ingestionMessage
-//			);
-//			errorRepoAppender.send(failed);	
-//		}
-//		return result;
-//	}
 
 	ProductFamily getFamilyFor(final IngestionDto dto) throws ProductException {
 		for (final IngestionTypeConfiguration config : properties.getTypes()) {			
