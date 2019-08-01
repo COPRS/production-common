@@ -95,6 +95,15 @@ public class SwiftObsServices {
             try {
                 Container container = client.getContainer(containerName);
                 Collection<StoredObject> objectListing = container.list(prefixKey, "", MAX_RESULTS_PER_LIST);
+                Collection<StoredObject> tmpCol = objectListing;
+                while (tmpCol.size() == MAX_RESULTS_PER_LIST) { // possibly more results available to fetch
+                    String marker = "";
+                	for (StoredObject o : tmpCol) {
+                		marker = o.getName(); 
+                	}
+                	tmpCol = container.list(prefixKey, marker, MAX_RESULTS_PER_LIST);
+              		objectListing.addAll(tmpCol);
+                }
                 return objectListing.size();
             } catch (Exception e) {
                 if (retryCount <= numRetries) {
@@ -148,9 +157,9 @@ public class SwiftObsServices {
             	do {
 	       			 results = client.getContainer(containerName).list(prefixKey, marker, MAX_RESULTS_PER_LIST);
 	       			 for (StoredObject object : results) {
-	       				 marker = object.getPath(); // store marker for next retrival
+	       				 marker = object.getName(); // store marker for next retrival
 	       				 // Build temporarly filename
-                         String key = object.getPath();
+                         String key = object.getName();
                          String targetDir = directoryPath;
                          if (!targetDir.endsWith(File.separator)) {
                              targetDir += File.separator;

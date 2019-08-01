@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.time.Instant;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -113,10 +112,10 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exist(auxiliaryFiles, testFileName1));
 		
 		// single file download
-		String targetDir = "/tmp/obsSwift-" + Instant.now().getEpochSecond();
+        String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
 		uut.downloadFile(auxiliaryFiles, testFileName1, targetDir);
 		String send1 = new String(Files.readAllBytes(testFile1.toPath()));
-		String received1 = new String(Files.readAllBytes((new File(targetDir + "/auxiliary-files/" + testFileName1)).toPath()));
+		String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testFileName1)).toPath()));
 		assertEquals(send1, received1);
 	}
 
@@ -128,10 +127,10 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exist(auxiliaryFiles, testFilePrefix + testFileName1));
 		
 		// single file download
-		String targetDir = "/tmp/obsSwift-" + Instant.now().getEpochSecond();
+        String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
 		uut.downloadFile(auxiliaryFiles, testFilePrefix + testFileName1, targetDir);
 		String send1 = new String(Files.readAllBytes(testFile1.toPath()));
-		String received1 = new String(Files.readAllBytes((new File(targetDir + "/auxiliary-files/" + testFilePrefix.replace("/", "%2F") + testFileName1)).toPath()));
+		String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testFilePrefix + testFileName1)).toPath()));
 		assertEquals(send1, received1);
 	}
 
