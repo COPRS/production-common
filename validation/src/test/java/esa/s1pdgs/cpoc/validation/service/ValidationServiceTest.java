@@ -21,7 +21,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.validation.service.metadata.MetadataService;
@@ -47,7 +46,6 @@ public class ValidationServiceTest {
 			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
-		ObsFamily obsFamily = ObsFamily.L0_SLICE;
 
 		String intervalStart = "2000-01-01T00:00:00.000000Z";
 		String intervalStop = "2000-01-03T00:00:00.000000Z";
@@ -63,7 +61,7 @@ public class ValidationServiceTest {
 		List<SearchMetadata> metadataResults = new ArrayList<>();
 		metadataResults.add(md1);
 
-		ObsObject ob1 = new ObsObject("product1", obsFamily);
+		ObsObject ob1 = new ObsObject("product1", family);
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product1", ob1);
 
@@ -79,7 +77,6 @@ public class ValidationServiceTest {
 			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
-		ObsFamily obsFamily = ObsFamily.L0_SLICE;
 
 		String intervalStart = "2000-01-01T00:00:00.000000Z";
 		String intervalStop = "2000-01-03T00:00:00.000000Z";
@@ -99,8 +96,8 @@ public class ValidationServiceTest {
 		metadataResults.add(md1);
 		metadataResults.add(md2);
 
-		ObsObject ob1 = new ObsObject("product1", obsFamily);
-		ObsObject ob2 = new ObsObject("product2", obsFamily);
+		ObsObject ob1 = new ObsObject("product1", family);
+		ObsObject ob2 = new ObsObject("product2", family);
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product1", ob1);
 		obsResults.put("product2", ob2);
@@ -146,7 +143,6 @@ public class ValidationServiceTest {
 			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
-		ObsFamily obsFamily = ObsFamily.L0_SLICE;
 
 		String intervalStart = "2000-01-01T00:00:00.000000Z";
 		String intervalStop = "2000-01-03T00:00:00.000000Z";
@@ -166,7 +162,7 @@ public class ValidationServiceTest {
 		metadataResults.add(md1);
 		metadataResults.add(md2);
 
-		ObsObject ob2 = new ObsObject("product2", obsFamily);
+		ObsObject ob2 = new ObsObject("product2", family);
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product2", ob2);
 
@@ -182,7 +178,6 @@ public class ValidationServiceTest {
 			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
-		ObsFamily obsFamily = ObsFamily.L0_SLICE;
 
 		String intervalStart = "2000-01-01T00:00:00.000000Z";
 		String intervalStop = "2000-01-03T00:00:00.000000Z";
@@ -195,7 +190,7 @@ public class ValidationServiceTest {
 
 		List<SearchMetadata> metadataResults = new ArrayList<>();
 
-		ObsObject ob1 = new ObsObject("product1", obsFamily);
+		ObsObject ob1 = new ObsObject("product1", family);
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product1", ob1);
 
@@ -211,7 +206,6 @@ public class ValidationServiceTest {
 			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
-		ObsFamily obsFamily = ObsFamily.L0_SLICE;
 
 		String intervalStart = "2000-01-01T00:00:00.000000Z";
 		String intervalStop = "2000-01-03T00:00:00.000000Z";
@@ -228,9 +222,9 @@ public class ValidationServiceTest {
 		List<SearchMetadata> metadataResults = new ArrayList<>();
 		metadataResults.add(md2);
 
-		ObsObject ob1 = new ObsObject("product1", obsFamily);
-		ObsObject ob2 = new ObsObject("product2", obsFamily);
-		ObsObject ob3 = new ObsObject("product3", obsFamily);
+		ObsObject ob1 = new ObsObject("product1", family);
+		ObsObject ob2 = new ObsObject("product2", family);
+		ObsObject ob3 = new ObsObject("product3", family);
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product1", ob1);
 		obsResults.put("product2", ob2);
@@ -248,7 +242,6 @@ public class ValidationServiceTest {
 			throws SdkClientException, MetadataQueryException {
 
 		ProductFamily family = ProductFamily.L0_SLICE;
-		ObsFamily obsFamily = ObsFamily.L0_SLICE;
 
 		String intervalStart = "2000-01-01T00:00:00.000000Z";
 		String intervalStop = "2000-01-03T00:00:00.000000Z";
@@ -265,7 +258,7 @@ public class ValidationServiceTest {
 		List<SearchMetadata> metadataResults = new ArrayList<>();
 		metadataResults.add(md2);
 
-		ObsObject ob1 = new ObsObject("product1", obsFamily);
+		ObsObject ob1 = new ObsObject("product1", family);
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product1", ob1);
 
