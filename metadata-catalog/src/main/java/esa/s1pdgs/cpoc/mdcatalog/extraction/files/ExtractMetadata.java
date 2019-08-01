@@ -127,7 +127,8 @@ public class ExtractMetadata {
 			// ------------ LEVEL 0 --------------------//
 			if (productType.matches(".._RAW__0.")) {
 
-				if (productType.startsWith("WV")) {
+				if (productType.startsWith("WV")||
+					productType.startsWith("RF")) {
 					// Only 2 Nadir-Points in manifest -->
 					// PIC HANDLES WRONGLY
 					return processCoordinatesforWVL0(rawCoordinates);
@@ -378,6 +379,10 @@ public class ExtractMetadata {
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(
 					readFile("tmp/output.xml", Charset.defaultCharset()));
+			
+			// Adding also max validity stop for EOF files as it is done in SAFE
+			metadataJSONObject.put("validityStopTime",
+					"9999-12-31T23:59:59.999999Z");
 
 			try {
 				metadataJSONObject.put("validityStopTime",
