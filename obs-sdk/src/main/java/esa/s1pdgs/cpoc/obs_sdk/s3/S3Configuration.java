@@ -19,7 +19,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 
@@ -72,67 +72,6 @@ public class S3Configuration {
     public static final String TM_MIN_UPLOAD_PART_SIZE_MB =
             "transfer.manager.minimum-upload-part-size-mb";
 
-    /**
-     * Name of the bucket dedicated to the family
-     * {@link ObsFamily#AUXILIARY_FILE}
-     */
-    public static final String BCK_AUX_FILES = "bucket.auxiliary-files";
-
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#EDRS_SESSION}
-     */
-    public static final String BCK_EDRS_SESSIONS = "bucket.edrs-sessions";
-
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L0_SLICE}
-     */
-    public static final String BCK_L0_SLICES = "bucket.l0-slices";
-
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L0_ACN}
-     */
-    public static final String BCK_L0_ACNS = "bucket.l0-acns";
-
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L1_SLICE}
-     */
-    public static final String BCK_L1_SLICES = "bucket.l1-slices";
-
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L1_ACN}
-     */
-    public static final String BCK_L1_ACNS = "bucket.l1-acns";
-
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L0_SEGMENT}
-     */
-    public static final String BCK_L0_SEGMENT = "bucket.l0-segments";
-
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L0_BLANK}
-     */
-    public static final String BCK_L0_BLANK = "bucket.l0-blanks";
-    
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L2_SLICE}
-     */
-    public static final String BCK_L2_SLICES = "bucket.l2-slices";
-    /**
-     * Name of the bucket dedicated to the family {@link ObsFamily#L2_ACN}
-     */
-    public static final String BCK_L2_ACNS = "bucket.l2-acns";
-    
-    public static final String BCK_AUX_FILE_ZIP = "bucket.auxiliary-files-zip";
-    public static final String BCK_L0_SEGMENT_ZIP = "bucket.l0-segments-zip";
-    
-    public static final String BCK_L0_ACNS_ZIP = "bucket.l0-acns-zip";
-    public static final String BCK_L1_ACNS_ZIP = "bucket.l1-acns-zip";
-    public static final String BCK_L2_ACNS_ZIP = "bucket.l2-acns-zip";
-    
-    public static final String BCK_L0_SLICES_ZIP = "bucket.l0-slices-zip";
-    public static final String BCK_L1_SLICES_ZIP = "bucket.l1-slices-zip";
-    public static final String BCK_L2_SLICES_ZIP = "bucket.l2-slices-zip";
-    public static final String BCK_L0_BLANK_ZIP = "bucket.l0-blanks-zip";
     /**
      * Timeout in second for shutdown a thread
      */
@@ -222,73 +161,9 @@ public class S3Configuration {
      * @return
      * @throws ObsServiceException
      */
-    public String getBucketForFamily(final ObsFamily family)
-            throws ObsServiceException {
-        String bucket;
-        switch (family) {
-            case AUXILIARY_FILE:
-                bucket = configuration.getString(BCK_AUX_FILES);
-                break;
-            case EDRS_SESSION:
-                bucket = configuration.getString(BCK_EDRS_SESSIONS);
-                break;
-            case L0_ACN:
-                bucket = configuration.getString(BCK_L0_ACNS);
-                break;
-            case L0_SLICE:
-                bucket = configuration.getString(BCK_L0_SLICES);
-                break;
-            case L1_ACN:
-                bucket = configuration.getString(BCK_L1_ACNS);
-                break;
-            case L1_SLICE:
-                bucket = configuration.getString(BCK_L1_SLICES);
-                break;
-            case L0_SEGMENT:
-                bucket = configuration.getString(BCK_L0_SEGMENT);
-                break;
-            case L0_BLANK:
-                bucket = configuration.getString(BCK_L0_BLANK);
-                break;
-            case L2_SLICE:
-            	bucket = configuration.getString(BCK_L2_SLICES);
-            	break;
-            case L2_ACN:
-            	bucket = configuration.getString(BCK_L2_ACNS);
-            	break;
-            // ZIP Buckets
-            case L0_ACN_ZIP:
-            	bucket = configuration.getString(BCK_L0_ACNS_ZIP);
-            	break;
-            case L1_ACN_ZIP:
-            	bucket = configuration.getString(BCK_L1_ACNS_ZIP);
-            	break;
-            case L2_ACN_ZIP:
-            	bucket = configuration.getString(BCK_L2_ACNS_ZIP);
-            	break;
-            case L0_SLICE_ZIP:
-            	bucket = configuration.getString(BCK_L0_SLICES_ZIP);
-            	break;
-            case L1_SLICE_ZIP:
-            	bucket = configuration.getString(BCK_L1_SLICES_ZIP);
-            	break;
-            case L2_SLICE_ZIP:
-            	bucket = configuration.getString(BCK_L2_SLICES_ZIP);
-            	break;
-            case L0_SEGMENT_ZIP:
-            	bucket = configuration.getString(BCK_L0_SEGMENT_ZIP);
-            	break;
-            case AUXILIARY_FILE_ZIP:
-            	bucket = configuration.getString(BCK_AUX_FILE_ZIP);
-            	break;
-            case L0_BLANK_ZIP:
-                bucket = configuration.getString(BCK_L0_BLANK_ZIP);
-                break;            	
-            default:
-                throw new ObsServiceException(
-                        "Invalid object storage family " + family);
-        }
-        return bucket;
+    public String getBucketForFamily(final ProductFamily family)
+            throws ObsServiceException {    	
+    	return configuration.getString("bucket." + family.toString().toLowerCase().replace('_', '-'));
     }
 
     /**

@@ -13,7 +13,7 @@ import org.javaswift.joss.client.factory.AccountFactory;
 import org.javaswift.joss.client.factory.AuthenticationMethod;
 import org.javaswift.joss.model.Account;
 
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 
 public class SwiftConfiguration {
@@ -184,82 +184,6 @@ public class SwiftConfiguration {
         }
     }
     
-	/**
-     * Get the name of the container to use according the OBS family
-     * 
-     * @param family
-     * @return
-     * @throws ObsServiceException
-     */
-    public String getContainerForFamily(final ObsFamily family)
-            throws ObsServiceException {
-        String bucket;
-        switch (family) {
-            case AUXILIARY_FILE:
-                bucket = configuration.getString(BCK_AUX_FILES);
-                break;
-            case EDRS_SESSION:
-                bucket = configuration.getString(BCK_EDRS_SESSIONS);
-                break;
-            case L0_ACN:
-                bucket = configuration.getString(BCK_L0_ACNS);
-                break;
-            case L0_SLICE:
-                bucket = configuration.getString(BCK_L0_SLICES);
-                break;
-            case L1_ACN:
-                bucket = configuration.getString(BCK_L1_ACNS);
-                break;
-            case L1_SLICE:
-                bucket = configuration.getString(BCK_L1_SLICES);
-                break;
-            case L0_SEGMENT:
-                bucket = configuration.getString(BCK_L0_SEGMENT);
-                break;
-            case L0_BLANK:
-                bucket = configuration.getString(BCK_L0_BLANK);
-                break;
-            case L2_SLICE:
-            	bucket = configuration.getString(BCK_L2_SLICES);
-            	break;
-            case L2_ACN:
-            	bucket = configuration.getString(BCK_L2_ACNS);
-            	break;
-            // ZIP Buckets
-            case L0_ACN_ZIP:
-            	bucket = configuration.getString(BCK_L0_ACNS_ZIP);
-            	break;
-            case L1_ACN_ZIP:
-            	bucket = configuration.getString(BCK_L1_ACNS_ZIP);
-            	break;
-            case L2_ACN_ZIP:
-            	bucket = configuration.getString(BCK_L2_ACNS_ZIP);
-            	break;
-            case L0_SLICE_ZIP:
-            	bucket = configuration.getString(BCK_L0_SLICES_ZIP);
-            	break;
-            case L1_SLICE_ZIP:
-            	bucket = configuration.getString(BCK_L1_SLICES_ZIP);
-            	break;
-            case L2_SLICE_ZIP:
-            	bucket = configuration.getString(BCK_L2_SLICES_ZIP);
-            	break;
-            case L0_SEGMENT_ZIP:
-            	bucket = configuration.getString(BCK_L0_SEGMENT_ZIP);
-            	break;
-            case AUXILIARY_FILE_ZIP:
-            	bucket = configuration.getString(BCK_AUX_FILE_ZIP);
-            	break;
-            case L0_BLANK_ZIP:
-                bucket = configuration.getString(BCK_L0_BLANK_ZIP);
-                break;            	
-            default:
-                throw new ObsServiceException(
-                        "Invalid object storage family " + family);
-        }
-        return bucket;
-    }
-    
     /**
      * Get a configured value in int format
      * 
@@ -288,6 +212,18 @@ public class SwiftConfiguration {
     	return configuration.getString(key);
     }
 
+    /**
+     * Get the name of the bucket to use according the OBS family
+     * 
+     * @param family
+     * @return
+     * @throws ObsServiceException
+     */
+    public String getContainerForFamily(final ProductFamily family)
+            throws ObsServiceException {    	
+    	return configuration.getString("bucket." + family.toString().toLowerCase().replace('_', '-'));
+    }
+    
     /**
      * Build the default swift client
      * 

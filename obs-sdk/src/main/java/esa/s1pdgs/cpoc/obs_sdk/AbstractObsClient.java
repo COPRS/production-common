@@ -150,7 +150,7 @@ public abstract class AbstractObsClient implements ObsClient {
      */
 	public boolean exist(final ProductFamily family, final String key)
             throws ObsException {
-        final ObsObject object = new ObsObject(key, getObsFamily(family));
+        final ObsObject object = new ObsObject(key, family);
         try {
             return doesObjectExist(object);
         } catch (SdkClientException exc) {
@@ -179,7 +179,7 @@ public abstract class AbstractObsClient implements ObsClient {
 			}
 		}
 		// Download object
-		ObsDownloadObject object = new ObsDownloadObject(key, getObsFamily(family), targetDir);
+		ObsDownloadObject object = new ObsDownloadObject(key, family, targetDir);
 		try {
 			int nbObjects = downloadObject(object);
 			if (nbObjects <= 0) {
@@ -203,8 +203,7 @@ public abstract class AbstractObsClient implements ObsClient {
             throws AbstractCodedException {
         // Build objects
         List<ObsDownloadObject> objects = filesToDownload.stream()
-                .map(file -> new ObsDownloadObject(file.getKey(),
-                        getObsFamily(file.getFamily()), file.getTargetDir()))
+                .map(file -> new ObsDownloadObject(file.getKey(),file.getFamily(), file.getTargetDir()))
                 .collect(Collectors.toList());
         // Download
         try {
@@ -223,7 +222,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	 * @throws ObsException
 	 */
 	public void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException {
-		ObsUploadObject object = new ObsUploadObject(key, getObsFamily(family), file);
+		ObsUploadObject object = new ObsUploadObject(key, family, file);
 		try {
 			uploadObject(object);
 		} catch (SdkClientException exc) {
@@ -242,8 +241,7 @@ public abstract class AbstractObsClient implements ObsClient {
 
         // Build objects
         List<ObsUploadObject> objects = filesToUpload.stream()
-                .map(file -> new ObsUploadObject(file.getKey(),
-                        getObsFamily(file.getFamily()), file.getFile()))
+                .map(file -> new ObsUploadObject(file.getKey(),file.getFamily(), file.getFile()))
                 .collect(Collectors.toList());
         // Upload
         try {
@@ -254,88 +252,12 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
     public Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException {
-    	ObsFamily obsFamily = getObsFamily(family);
     	
-    	List<ObsObject> results = getListOfObjectsOfTimeFrameOfFamily(intervalStart, intervalEnd, obsFamily);
+    	List<ObsObject> results = getListOfObjectsOfTimeFrameOfFamily(intervalStart, intervalEnd, family);
     	Map<String, ObsObject> map = results.stream()
     		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
     	    	
     	return map;
-    }
-
-    /**
-     * Get ObsFamily from ProductFamily
-     * 
-     * @param family
-     * @return
-     */
-    public ObsFamily getObsFamily(final ProductFamily family) {
-        ObsFamily ret;
-        switch (family) {
-            case AUXILIARY_FILE:
-                ret = ObsFamily.AUXILIARY_FILE;
-                break;
-            case EDRS_SESSION:
-                ret = ObsFamily.EDRS_SESSION;
-                break;
-            case L0_SLICE:
-                ret = ObsFamily.L0_SLICE;
-                break;
-            case L0_SEGMENT:
-                ret = ObsFamily.L0_SEGMENT;
-                break;
-            case L0_BLANK:
-                ret = ObsFamily.L0_BLANK;
-                break;
-            case L0_ACN:
-                ret = ObsFamily.L0_ACN;
-                break;
-            case L1_SLICE:
-                ret = ObsFamily.L1_SLICE;
-                break;
-            case L1_ACN:
-                ret = ObsFamily.L1_ACN;
-                break;
-            case L2_SLICE:
-            	ret = ObsFamily.L2_SLICE;
-            	break;
-            case L2_ACN:
-            	ret = ObsFamily.L2_ACN;
-            	break;
-            	
-            // COMPRESSED PRODUCTS
-            case AUXILIARY_FILE_ZIP:
-                ret = ObsFamily.AUXILIARY_FILE_ZIP;
-                break;
-            case L0_SLICE_ZIP:
-                ret = ObsFamily.L0_SLICE_ZIP;
-                break;
-            case L0_SEGMENT_ZIP:
-                ret = ObsFamily.L0_SEGMENT_ZIP;
-                break;
-            case L0_BLANK_ZIP:
-                ret = ObsFamily.L0_BLANK_ZIP;
-                break;
-            case L0_ACN_ZIP:
-                ret = ObsFamily.L0_ACN_ZIP;
-                break;
-            case L1_SLICE_ZIP:
-                ret = ObsFamily.L1_SLICE_ZIP;
-                break;
-            case L1_ACN_ZIP:
-                ret = ObsFamily.L1_ACN_ZIP;
-                break;
-            case L2_SLICE_ZIP:
-            	ret = ObsFamily.L2_SLICE_ZIP;
-            	break;
-            case L2_ACN_ZIP:
-            	ret = ObsFamily.L2_ACN_ZIP;
-            	break;
-            default:
-                ret = ObsFamily.UNKNOWN;
-                break;
-        }
-        return ret;
     }
 
 	@Override

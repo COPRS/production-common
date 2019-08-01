@@ -10,8 +10,8 @@ import java.io.File;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
@@ -27,12 +27,12 @@ import nl.jqno.equalsverifier.Warning;
 public class ObsObjectTest {
 
     /**
-     * Test the enum ObsFamily
+     * Test the enum ProductFamily
      */
     @Test
-    public void testObsFamilyValueOf() {
-        assertEquals(ObsFamily.AUXILIARY_FILE,
-                ObsFamily.valueOf("AUXILIARY_FILE"));
+    public void testProductFamilyValueOf() {
+        assertEquals(ProductFamily.AUXILIARY_FILE,
+                ProductFamily.valueOf("AUXILIARY_FILE"));
     }
 
     // ---------------------------------------------------
@@ -44,15 +44,15 @@ public class ObsObjectTest {
      */
     @Test
     public void obsObjTest() {
-        ObsObject obj = new ObsObject("key-t", ObsFamily.L0_ACN);
+        ObsObject obj = new ObsObject("key-t", ProductFamily.L0_ACN);
         assertEquals("key-t", obj.getKey());
-        assertEquals(ObsFamily.L0_ACN, obj.getFamily());
+        assertEquals(ProductFamily.L0_ACN, obj.getFamily());
 
         obj.setKey("2eme-key");
         assertEquals("2eme-key", obj.getKey());
 
-        obj.setFamily(ObsFamily.AUXILIARY_FILE);
-        assertEquals(ObsFamily.AUXILIARY_FILE, obj.getFamily());
+        obj.setFamily(ProductFamily.AUXILIARY_FILE);
+        assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
     }
 
     /**
@@ -60,7 +60,7 @@ public class ObsObjectTest {
      */
     @Test
     public void obsObjTestToString() {
-        ObsObject obj = new ObsObject("key-t", ObsFamily.L0_ACN);
+        ObsObject obj = new ObsObject("key-t", ProductFamily.L0_ACN);
         String str = obj.toString();
         assertTrue(str.contains("key: key-t"));
         assertTrue(str.contains("family: L0_ACN"));
@@ -85,17 +85,17 @@ public class ObsObjectTest {
     @Test
     public void obsDwObjTest() {
         ObsDownloadObject obj =
-                new ObsDownloadObject("key-t", ObsFamily.L0_ACN, "targetDir-t");
+                new ObsDownloadObject("key-t", ProductFamily.L0_ACN, "targetDir-t");
         assertEquals("key-t", obj.getKey());
-        assertEquals(ObsFamily.L0_ACN, obj.getFamily());
+        assertEquals(ProductFamily.L0_ACN, obj.getFamily());
         assertEquals("targetDir-t", obj.getTargetDir());
         assertFalse(obj.isIgnoreFolders());
 
         obj.setKey("2eme-key");
         assertEquals("2eme-key", obj.getKey());
 
-        obj.setFamily(ObsFamily.AUXILIARY_FILE);
-        assertEquals(ObsFamily.AUXILIARY_FILE, obj.getFamily());
+        obj.setFamily(ProductFamily.AUXILIARY_FILE);
+        assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
 
         obj.setTargetDir("2eme-local-path");
         assertEquals("2eme-local-path", obj.getTargetDir());
@@ -110,7 +110,7 @@ public class ObsObjectTest {
     @Test
     public void obsDownObjTestToString() {
         ObsDownloadObject obj = new ObsDownloadObject("key-t",
-                ObsFamily.EDRS_SESSION, "local-path-t");
+                ProductFamily.EDRS_SESSION, "local-path-t");
         String str = obj.toString();
         assertTrue(str.contains("key: key-t"));
         assertTrue(str.contains("family: EDRS_SESSION"));
@@ -123,25 +123,25 @@ public class ObsObjectTest {
     @Test
     public void obsDownObjTestIgnoreFolders() {
         ObsDownloadObject obj = new ObsDownloadObject("key-t",
-                ObsFamily.EDRS_SESSION, "local-path-t");
+                ProductFamily.EDRS_SESSION, "local-path-t");
         assertTrue(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ObsFamily.AUXILIARY_FILE,
+        obj = new ObsDownloadObject("key-t", ProductFamily.AUXILIARY_FILE,
                 "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ObsFamily.L0_SLICE,
+        obj = new ObsDownloadObject("key-t", ProductFamily.L0_SLICE,
                 "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ObsFamily.L0_ACN, "local-path-t");
+        obj = new ObsDownloadObject("key-t", ProductFamily.L0_ACN, "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ObsFamily.L1_SLICE,
+        obj = new ObsDownloadObject("key-t", ProductFamily.L1_SLICE,
                 "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ObsFamily.L1_ACN, "local-path-t");
+        obj = new ObsDownloadObject("key-t", ProductFamily.L1_ACN, "local-path-t");
         assertFalse(obj.isIgnoreFolders());
     }
 
@@ -165,16 +165,16 @@ public class ObsObjectTest {
     public void obsUpObjTest() {
         File file = new File("./test");
         ObsUploadObject obj =
-                new ObsUploadObject("key-t", ObsFamily.L0_ACN, file);
+                new ObsUploadObject("key-t", ProductFamily.L0_ACN, file);
         assertEquals("key-t", obj.getKey());
-        assertEquals(ObsFamily.L0_ACN, obj.getFamily());
+        assertEquals(ProductFamily.L0_ACN, obj.getFamily());
         assertEquals(file, obj.getFile());
 
         obj.setKey("2eme-key");
         assertEquals("2eme-key", obj.getKey());
 
-        obj.setFamily(ObsFamily.AUXILIARY_FILE);
-        assertEquals(ObsFamily.AUXILIARY_FILE, obj.getFamily());
+        obj.setFamily(ProductFamily.AUXILIARY_FILE);
+        assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
 
         File file2 = new File("./test2");
         obj.setFile(file2);
@@ -188,7 +188,7 @@ public class ObsObjectTest {
     public void obsUpObjTestToString() {
         File file = new File("./test");
         ObsUploadObject obj =
-                new ObsUploadObject("key-t", ObsFamily.EDRS_SESSION, file);
+                new ObsUploadObject("key-t", ProductFamily.EDRS_SESSION, file);
         String str = obj.toString();
         assertTrue(str.contains("key: key-t"));
         assertTrue(str.contains("family: EDRS_SESSION"));

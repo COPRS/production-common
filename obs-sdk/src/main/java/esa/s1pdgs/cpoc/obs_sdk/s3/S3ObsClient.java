@@ -12,10 +12,10 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
@@ -160,12 +160,12 @@ public class S3ObsClient extends AbstractObsClient {
 	 */
 	@Override
 	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(final Date timeFrameBegin, final Date timeFrameEnd,
-			final ObsFamily obsFamily) throws SdkClientException, ObsServiceException {
+			final ProductFamily family) throws SdkClientException, ObsServiceException {
 
 		long methodStartTime = System.currentTimeMillis();
 
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
-		String bucket = configuration.getBucketForFamily(obsFamily);
+		String bucket = configuration.getBucketForFamily(family);
 		ObjectListing objListing = s3Services.listObjectsFromBucket(bucket);
 		boolean truncated = false;
 
@@ -184,7 +184,7 @@ public class S3ObsClient extends AbstractObsClient {
 				Date lastModified = s.getLastModified();
 
 				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {
-					ObsObject obsObj = new ObsObject(s.getKey(), obsFamily);
+					ObsObject obsObj = new ObsObject(s.getKey(), family);
 					objectsOfTimeFrame.add(obsObj);
 				}
 			}
