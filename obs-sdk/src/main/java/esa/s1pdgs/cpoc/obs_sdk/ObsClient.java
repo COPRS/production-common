@@ -152,7 +152,7 @@ public interface ObsClient {
 	 * @throws SdkClientException
 	 * @throws ObsServiceException
 	 */
-	List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd, ObsFamily obsFamily)
+	List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd, ProductFamily obsFamily)
 			throws SdkClientException, ObsServiceException;
 	
 	boolean exist(final ProductFamily family, final String key) throws ObsException;
@@ -168,6 +168,4 @@ public interface ObsClient {
 	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
 	
 	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
-	
-	ObsFamily getObsFamily(final ProductFamily family);
 }

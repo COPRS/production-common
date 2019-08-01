@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.amazonaws.services.s3.AmazonS3;
 
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3Configuration;
 
@@ -30,12 +30,12 @@ public class S3ConfigurationTest {
         assertEquals("Hii85WDNXQyt21YzScOhcMhlt2MRKJ4ReBGeaHqI", config.getStringOfConfiguration(S3Configuration.USER_SECRET));
         assertEquals("http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/", config.getStringOfConfiguration(S3Configuration.ENDPOINT));
         assertEquals("eu-west-0", config.getStringOfConfiguration(S3Configuration.ENDPOINT_REGION));
-        assertEquals("auxiliary-files", config.getStringOfConfiguration(S3Configuration.BCK_AUX_FILES));
-        assertEquals("session-files", config.getStringOfConfiguration(S3Configuration.BCK_EDRS_SESSIONS));
-        assertEquals("l0-slices", config.getStringOfConfiguration(S3Configuration.BCK_L0_SLICES));
-        assertEquals("l0-acns", config.getStringOfConfiguration(S3Configuration.BCK_L0_ACNS));
-        assertEquals("l1-slices", config.getStringOfConfiguration(S3Configuration.BCK_L1_SLICES));
-        assertEquals("l1-acns", config.getStringOfConfiguration(S3Configuration.BCK_L1_ACNS));
+        assertEquals("auxiliary-files", config.getStringOfConfiguration("bucket.auxiliary-file"));
+        assertEquals("session-files", config.getStringOfConfiguration("bucket.edrs-session"));
+        assertEquals("l0-slices", config.getStringOfConfiguration("bucket.l0-slice"));
+        assertEquals("l0-acns", config.getStringOfConfiguration("bucket.l0-acn"));
+        assertEquals("l1-slices", config.getStringOfConfiguration("bucket.l1-slice"));
+        assertEquals("l1-acns", config.getStringOfConfiguration("bucket.l1-acn"));
 
         assertEquals("10", config.getStringOfConfiguration(S3Configuration.TM_S_SHUTDOWN));
         assertEquals("15", config.getStringOfConfiguration(S3Configuration.TM_S_DOWN_EXEC));
@@ -50,23 +50,14 @@ public class S3ConfigurationTest {
     public void testBucketForFamily() throws ObsServiceException {
         S3Configuration config = new S3Configuration();
         
-        assertEquals("auxiliary-files", config.getBucketForFamily(ObsFamily.AUXILIARY_FILE));
-        assertEquals("session-files", config.getBucketForFamily(ObsFamily.EDRS_SESSION));
-        assertEquals("l0-slices", config.getBucketForFamily(ObsFamily.L0_SLICE));
-        assertEquals("l0-acns", config.getBucketForFamily(ObsFamily.L0_ACN));
-        assertEquals("l1-slices", config.getBucketForFamily(ObsFamily.L1_SLICE));
-        assertEquals("l1-acns", config.getBucketForFamily(ObsFamily.L1_ACN));
+        assertEquals("auxiliary-files", config.getBucketForFamily(ProductFamily.AUXILIARY_FILE));
+        assertEquals("session-files", config.getBucketForFamily(ProductFamily.EDRS_SESSION));
+        assertEquals("l0-slices", config.getBucketForFamily(ProductFamily.L0_SLICE));
+        assertEquals("l0-acns", config.getBucketForFamily(ProductFamily.L0_ACN));
+        assertEquals("l1-slices", config.getBucketForFamily(ProductFamily.L1_SLICE));
+        assertEquals("l1-acns", config.getBucketForFamily(ProductFamily.L1_ACN));
     }
-    
-    /**
-     * Test get bucket when family is invalid
-     */
-    @Test(expected = ObsServiceException.class)
-    public void testBucketForNullFamily() throws ObsServiceException {
-        S3Configuration config = new S3Configuration();
-        config.getBucketForFamily(ObsFamily.UNKNOWN);
-    }
-    
+
     /**
      * Test s3 client
      * @throws ObsServiceException

@@ -41,43 +41,43 @@ public class AbstractObsClientTest {
 
       doThrow(new ObsServiceException("error 1 message")).when(uut)
               .doesObjectExist(Mockito.eq(
-                      new ObsObject("error-key", ObsFamily.AUXILIARY_FILE)));
+                      new ObsObject("error-key", ProductFamily.AUXILIARY_FILE)));
       doThrow(new SdkClientException("error 2 message")).when(uut)
               .doesObjectExist(Mockito.eq(
-                      new ObsObject("error-key", ObsFamily.EDRS_SESSION)));
+                      new ObsObject("error-key", ProductFamily.EDRS_SESSION)));
       doReturn(true).when(uut).doesObjectExist(Mockito
-              .eq(new ObsObject("test-key", ObsFamily.AUXILIARY_FILE)));
+              .eq(new ObsObject("test-key", ProductFamily.AUXILIARY_FILE)));
       doReturn(false).when(uut).doesObjectExist(
-              Mockito.eq(new ObsObject("test-key", ObsFamily.EDRS_SESSION)));
+              Mockito.eq(new ObsObject("test-key", ProductFamily.EDRS_SESSION)));
 
       doThrow(new ObsServiceException("error 1 message")).when(uut)
               .uploadObject(Mockito.eq(new ObsUploadObject("error-key",
-                      ObsFamily.AUXILIARY_FILE, new File("pom.xml"))));
+                      ProductFamily.AUXILIARY_FILE, new File("pom.xml"))));
       doThrow(new SdkClientException("error 2 message")).when(uut)
               .uploadObject(Mockito.eq(new ObsUploadObject("error-key",
-                      ObsFamily.EDRS_SESSION, new File("pom.xml"))));
+                      ProductFamily.EDRS_SESSION, new File("pom.xml"))));
       doReturn(2).when(uut)
               .uploadObject(Mockito.eq(new ObsUploadObject("test-key",
-                      ObsFamily.AUXILIARY_FILE, new File("pom.xml"))));
+                      ProductFamily.AUXILIARY_FILE, new File("pom.xml"))));
       doReturn(1).when(uut)
               .uploadObject(Mockito.eq(new ObsUploadObject("test-key",
-                      ObsFamily.EDRS_SESSION, new File("pom.xml"))));
+                      ProductFamily.EDRS_SESSION, new File("pom.xml"))));
 
       doThrow(new ObsServiceException("error 1 message")).when(uut)
               .downloadObject(Mockito.eq(new ObsDownloadObject("error-key",
-                      ObsFamily.AUXILIARY_FILE, "test/")));
+                      ProductFamily.AUXILIARY_FILE, "test/")));
       doThrow(new SdkClientException("error 2 message")).when(uut)
               .downloadObject(Mockito.eq(new ObsDownloadObject("error-key",
-                      ObsFamily.EDRS_SESSION, "test/")));
+                      ProductFamily.EDRS_SESSION, "test/")));
       doReturn(0).when(uut)
               .downloadObject(Mockito.eq(new ObsDownloadObject("test-key",
-                      ObsFamily.AUXILIARY_FILE, "test/")));
+                      ProductFamily.AUXILIARY_FILE, "test/")));
       doReturn(1).when(uut)
               .downloadObject(Mockito.eq(new ObsDownloadObject("test-key",
-                      ObsFamily.EDRS_SESSION, "test/")));
+                      ProductFamily.EDRS_SESSION, "test/")));
       doReturn(2).when(uut).downloadObject(
               Mockito.eq(new ObsDownloadObject("test-key/key2",
-                      ObsFamily.EDRS_SESSION, "test/")));
+                      ProductFamily.EDRS_SESSION, "test/")));
       */
 	}
 	
@@ -92,13 +92,13 @@ public class AbstractObsClientTest {
             throws ObsServiceException, SdkClientException {
 
         List<ObsDownloadObject> objects = new ArrayList<>();
-        objects.add(new ObsDownloadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key1", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key2", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsDownloadObject("key2", ProductFamily.EDRS_SESSION,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key3", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key3", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key/key4", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsDownloadObject("key/key4", ProductFamily.EDRS_SESSION,
                 "target-dir"));
         uut.downloadObjects(objects);
 
@@ -120,11 +120,11 @@ public class AbstractObsClientTest {
     public void testdownloadObjectsSequentialSdkException()
             throws ObsServiceException, SdkClientException {
         List<ObsDownloadObject> objects = new ArrayList<>();
-        objects.add(new ObsDownloadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key1", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key-sdk", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsDownloadObject("key-sdk", ProductFamily.EDRS_SESSION,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key3", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key3", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
         try {
         	uut.downloadObjects(objects);
@@ -148,11 +148,11 @@ public class AbstractObsClientTest {
     public void testdownloadObjectsSequentialServiceException()
             throws ObsServiceException, SdkClientException {
         List<ObsDownloadObject> objects = new ArrayList<>();
-        objects.add(new ObsDownloadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key1", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key2", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsDownloadObject("key2", ProductFamily.EDRS_SESSION,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key-aws", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key-aws", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
         try {
         	uut.downloadObjects(objects);
@@ -176,11 +176,11 @@ public class AbstractObsClientTest {
     public void testdownloadObjectsParallel()
             throws ObsServiceException, SdkClientException {
         List<ObsDownloadObject> objects = new ArrayList<>();
-        objects.add(new ObsDownloadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key1", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key2", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsDownloadObject("key2", ProductFamily.EDRS_SESSION,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key3", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key3", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
         uut.downloadObjects(objects, true);
 
@@ -201,11 +201,11 @@ public class AbstractObsClientTest {
     public void testdownloadObjectsParallelSdkException()
             throws ObsServiceException, SdkClientException {
         List<ObsDownloadObject> objects = new ArrayList<>();
-        objects.add(new ObsDownloadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key1", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key-sdk", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsDownloadObject("key-sdk", ProductFamily.EDRS_SESSION,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key3", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key3", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
         try {
         	uut.downloadObjects(objects, true);
@@ -229,11 +229,11 @@ public class AbstractObsClientTest {
     public void testdownloadObjectsParallelServiceException()
             throws ObsServiceException, SdkClientException {
         List<ObsDownloadObject> objects = new ArrayList<>();
-        objects.add(new ObsDownloadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key1", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key2", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsDownloadObject("key2", ProductFamily.EDRS_SESSION,
                 "target-dir"));
-        objects.add(new ObsDownloadObject("key-aws", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsDownloadObject("key-aws", ProductFamily.AUXILIARY_FILE,
                 "target-dir"));
         try {
         	uut.downloadObjects(objects, true);
@@ -257,11 +257,11 @@ public class AbstractObsClientTest {
     public void testuploadObjectsSequential()
             throws ObsServiceException, SdkClientException {
         List<ObsUploadObject> objects = new ArrayList<>();
-        objects.add(new ObsUploadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key1", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key2", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsUploadObject("key2", ProductFamily.EDRS_SESSION,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key3", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key3", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
         uut.uploadObjects(objects);
 
@@ -282,11 +282,11 @@ public class AbstractObsClientTest {
     public void testuploadObjectsSequentialSdkException()
             throws ObsServiceException, SdkClientException {
         List<ObsUploadObject> objects = new ArrayList<>();
-        objects.add(new ObsUploadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key1", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key-sdk", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsUploadObject("key-sdk", ProductFamily.EDRS_SESSION,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key3", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key3", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
         try {
         	uut.uploadObjects(objects);
@@ -310,11 +310,11 @@ public class AbstractObsClientTest {
     public void testuploadObjectsSequentialServiceException()
             throws ObsServiceException, SdkClientException {
         List<ObsUploadObject> objects = new ArrayList<>();
-        objects.add(new ObsUploadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key1", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key2", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsUploadObject("key2", ProductFamily.EDRS_SESSION,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key-aws", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key-aws", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
         try {
         	uut.uploadObjects(objects);
@@ -338,11 +338,11 @@ public class AbstractObsClientTest {
     public void testuploadObjectsParallel()
             throws ObsServiceException, SdkClientException {
         List<ObsUploadObject> objects = new ArrayList<>();
-        objects.add(new ObsUploadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key1", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key2", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsUploadObject("key2", ProductFamily.EDRS_SESSION,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key3", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key3", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
         uut.uploadObjects(objects, true);
 
@@ -363,11 +363,11 @@ public class AbstractObsClientTest {
     public void testuploadObjectsParallelSdkException()
             throws ObsServiceException, SdkClientException {
         List<ObsUploadObject> objects = new ArrayList<>();
-        objects.add(new ObsUploadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key1", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key-sdk", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsUploadObject("key-sdk", ProductFamily.EDRS_SESSION,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key3", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key3", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
         try {
         	uut.uploadObjects(objects, true);
@@ -391,11 +391,11 @@ public class AbstractObsClientTest {
     public void testuploadObjectsParallelServiceException()
             throws ObsServiceException, SdkClientException {
         List<ObsUploadObject> objects = new ArrayList<>();
-        objects.add(new ObsUploadObject("key1", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key1", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key2", ObsFamily.EDRS_SESSION,
+        objects.add(new ObsUploadObject("key2", ProductFamily.EDRS_SESSION,
                 new File("target-dir")));
-        objects.add(new ObsUploadObject("key-aws", ObsFamily.AUXILIARY_FILE,
+        objects.add(new ObsUploadObject("key-aws", ProductFamily.AUXILIARY_FILE,
                 new File("target-dir")));
         try {
         	uut.uploadObjects(objects, true);
@@ -407,25 +407,6 @@ public class AbstractObsClientTest {
             assertTrue(uut.getCounterGetUploadTm().get() > 0);
             assertEquals(0, uut.getCounterGetDownloadTm().get());
         }
-    }
-
-    /**
-     * Test getObsFamily
-     */
-    @Test
-    public void testGetObsFamily() {
-        assertEquals(ObsFamily.AUXILIARY_FILE, uut.getObsFamily(ProductFamily.AUXILIARY_FILE));
-        assertEquals(ObsFamily.EDRS_SESSION, uut.getObsFamily(ProductFamily.EDRS_SESSION));
-        assertEquals(ObsFamily.UNKNOWN, uut.getObsFamily(ProductFamily.BLANK));
-        assertEquals(ObsFamily.L0_ACN, uut.getObsFamily(ProductFamily.L0_ACN));
-        assertEquals(ObsFamily.L0_SLICE, uut.getObsFamily(ProductFamily.L0_SLICE));
-        assertEquals(ObsFamily.L0_SEGMENT, uut.getObsFamily(ProductFamily.L0_SEGMENT));
-        assertEquals(ObsFamily.UNKNOWN, uut.getObsFamily(ProductFamily.L0_JOB));
-        assertEquals(ObsFamily.UNKNOWN, uut.getObsFamily(ProductFamily.L0_REPORT));
-        assertEquals(ObsFamily.L1_ACN, uut.getObsFamily(ProductFamily.L1_ACN));
-        assertEquals(ObsFamily.L1_SLICE, uut.getObsFamily(ProductFamily.L1_SLICE));
-        assertEquals(ObsFamily.UNKNOWN, uut.getObsFamily(ProductFamily.L1_REPORT));
-        assertEquals(ObsFamily.UNKNOWN, uut.getObsFamily(ProductFamily.JOB_ORDER));
     }
 }
 
@@ -534,7 +515,7 @@ class AbstractObsClientIncrementImpl extends AbstractObsClient {
 
 	@Override
 	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd,
-			ObsFamily obsFamily) throws SdkClientException, ObsServiceException {
+			ProductFamily obsFamily) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return null;
 	}

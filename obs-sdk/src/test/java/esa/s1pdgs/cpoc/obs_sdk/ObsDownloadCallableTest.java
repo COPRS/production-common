@@ -14,10 +14,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadCallable;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
@@ -49,11 +49,11 @@ public class ObsDownloadCallableTest {
      * Donwload object used when nominal case
      */
     private ObsDownloadObject object = new ObsDownloadObject("key1",
-            ObsFamily.AUXILIARY_FILE, "target-dir");
+    		ProductFamily.AUXILIARY_FILE, "target-dir");
     private ObsDownloadObject objectSdk =
-            new ObsDownloadObject("key2", ObsFamily.EDRS_SESSION, "target-dir");
+            new ObsDownloadObject("key2", ProductFamily.EDRS_SESSION, "target-dir");
     private ObsDownloadObject objectAws = new ObsDownloadObject("key3",
-            ObsFamily.AUXILIARY_FILE, "target-dir");
+    		ProductFamily.AUXILIARY_FILE, "target-dir");
 
     /**
      * Initialization

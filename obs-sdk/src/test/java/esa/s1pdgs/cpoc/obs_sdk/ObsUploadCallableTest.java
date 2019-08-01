@@ -16,8 +16,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadCallable;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
@@ -51,11 +51,11 @@ public class ObsUploadCallableTest {
      * Donwload object used when nominal case
      */
     private ObsUploadObject object = new ObsUploadObject("key1",
-            ObsFamily.AUXILIARY_FILE, new File("test/key1"));
+            ProductFamily.AUXILIARY_FILE, new File("test/key1"));
     private ObsUploadObject objectSdk = new ObsUploadObject("key2",
-            ObsFamily.EDRS_SESSION, new File("test/key2"));
+            ProductFamily.EDRS_SESSION, new File("test/key2"));
     private ObsUploadObject objectAws = new ObsUploadObject("key3",
-            ObsFamily.AUXILIARY_FILE, new File("test/key3"));
+            ProductFamily.AUXILIARY_FILE, new File("test/key3"));
 
     /**
      * Initialization

@@ -14,7 +14,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
@@ -57,11 +56,11 @@ public class SwiftObsClient extends AbstractObsClient {
     }
 
 	public boolean doesContainerExist(ProductFamily family) throws ObsServiceException {
-		return swiftObsServices.containerExist(configuration.getContainerForFamily(getObsFamily(family)));
+		return swiftObsServices.containerExist(configuration.getContainerForFamily(family));
 	}
 	
 	public int numberOfObjects(ProductFamily family, String prefixKey) throws SwiftSdkClientException, ObsServiceException {
-		return swiftObsServices.getNbObjects(configuration.getContainerForFamily(getObsFamily(family)), prefixKey);
+		return swiftObsServices.getNbObjects(configuration.getContainerForFamily(family), prefixKey);
 	}
     
 	@Override
@@ -101,11 +100,11 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 	
 	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
-		swiftObsServices.createContainer(configuration.getContainerForFamily(getObsFamily(family)));
+		swiftObsServices.createContainer(configuration.getContainerForFamily(family));
 	}
 	
 	public void deleteObject(final ProductFamily family, final String key) throws SwiftSdkClientException, ObsServiceException {
-		swiftObsServices.delete(configuration.getContainerForFamily(getObsFamily(family)), key);
+		swiftObsServices.delete(configuration.getContainerForFamily(family), key);
 	}
 
 	/**
@@ -137,11 +136,11 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd,
-			ObsFamily obsFamily) throws SdkClientException, ObsServiceException {
+			ProductFamily family) throws SdkClientException, ObsServiceException {
 		long methodStartTime = System.currentTimeMillis();
 
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
-		String container = configuration.getContainerForFamily(obsFamily);
+		String container = configuration.getContainerForFamily(family);
 		Collection<StoredObject> objListing = swiftObsServices.listObjectsFromContainer(container);
 		boolean possiblyTruncated = false;
 		String marker = "";
@@ -155,7 +154,7 @@ public class SwiftObsClient extends AbstractObsClient {
 				Date lastModified = o.getLastModifiedAsDate();
 
 				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {
-					ObsObject obsObj = new ObsObject(o.getPath(), obsFamily);
+					ObsObject obsObj = new ObsObject(o.getPath(), family);
 					objectsOfTimeFrame.add(obsObj);
 				}
 			}
