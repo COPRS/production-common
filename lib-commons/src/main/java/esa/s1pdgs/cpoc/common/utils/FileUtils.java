@@ -11,9 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
 /**
@@ -22,8 +19,6 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
  * @author Viveris Technologies
  */
 public class FileUtils {
-	private static final Logger LOG = LoggerFactory.getLogger(FileUtils.class);
-
     /**
      * Write the string into the file
      * 
@@ -92,32 +87,12 @@ public class FileUtils {
     }
     
     public static void deleteWithRetries(final File file, int numRetries, long retrySleep) 
-    		throws InternalErrorException, InterruptedException {    	
-    	int attempt = 0;
-    	while (true) {
-    		try {
-    			delete(file.getPath());
-    			break;
-    		} catch (IOException e) {
-    			attempt++;  
-    			if (attempt > numRetries) {
-    				throw new InternalErrorException(
-    						String.format(
-    								"Error on deleting %s after %s attempts: %s", 
-    								file,
-    								String.valueOf(attempt),
-    								LogUtils.toString(e)
-    						)
-    				);
-    			}  			
-    			if (LOG.isWarnEnabled()) {
-        			LOG.warn("Error on deleting {} ({}/{}), retrying in {}ms: {}", file, attempt, numRetries+1, retrySleep, 
-        					LogUtils.toString(e));
-    			}
-    			Thread.sleep(retrySleep);
-    		}
-    	}
-    	
+    		throws InternalErrorException, InterruptedException {
+    	Retries.performWithRetries(
+    			() -> {	delete(file.getPath()) ; return null;}, 
+    			numRetries, 
+    			retrySleep
+    	);    	
     }
 
     /**

@@ -127,7 +127,8 @@ public class ExtractMetadata {
 			// ------------ LEVEL 0 --------------------//
 			if (productType.matches(".._RAW__0.")) {
 
-				if (productType.startsWith("WV")) {
+				if (productType.startsWith("WV")||
+					productType.startsWith("RF")) {
 					// Only 2 Nadir-Points in manifest -->
 					// PIC HANDLES WRONGLY
 					return processCoordinatesforWVL0(rawCoordinates);
