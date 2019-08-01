@@ -297,17 +297,24 @@ public class ExtractMetadata {
 		final JSONArray geoShapeCoordinates = new JSONArray();
 
 		geoShape.put("type", "polygon");
-
-		geoShapeCoordinates
-				.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
-		geoShapeCoordinates
-				.put(new JSONArray("[" + bLongitude + "," + bLatitude + "]"));
-		geoShapeCoordinates
-				.put(new JSONArray("[" + cLongitude + "," + cLatitude + "]"));
-		geoShapeCoordinates
-				.put(new JSONArray("[" + dLongitude + "," + dLatitude + "]"));
-		geoShapeCoordinates
-				.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
+//
+//		geoShapeCoordinates
+//				.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
+//		geoShapeCoordinates
+//				.put(new JSONArray("[" + bLongitude + "," + bLatitude + "]"));
+//		geoShapeCoordinates
+//				.put(new JSONArray("[" + cLongitude + "," + cLatitude + "]"));
+//		geoShapeCoordinates
+//				.put(new JSONArray("[" + dLongitude + "," + dLatitude + "]"));
+//		geoShapeCoordinates
+//				.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
+		
+		geoShapeCoordinates.put(new JSONArray("[" + cLongitude + "," + cLatitude + "]"));
+		geoShapeCoordinates.put(new JSONArray("[" + dLongitude + "," + dLatitude + "]"));
+		geoShapeCoordinates.put(new JSONArray("[" + bLongitude + "," + bLatitude + "]"));
+		geoShapeCoordinates.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
+		geoShapeCoordinates.put(new JSONArray("[" + cLongitude + "," + cLatitude + "]"));
+		
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
 		geoShape.put("orientation", "counterclockwise");
 
