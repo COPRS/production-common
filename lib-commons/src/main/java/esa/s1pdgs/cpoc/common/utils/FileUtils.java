@@ -11,9 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
 /**
@@ -22,8 +19,6 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
  * @author Viveris Technologies
  */
 public class FileUtils {
-	private static final Logger LOG = LoggerFactory.getLogger(FileUtils.class);
-
     /**
      * Write the string into the file
      * 
