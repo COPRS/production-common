@@ -56,6 +56,7 @@ public class S3ConfigurationTest {
         assertEquals("l0-acns", config.getBucketForFamily(ProductFamily.L0_ACN));
         assertEquals("l1-slices", config.getBucketForFamily(ProductFamily.L1_SLICE));
         assertEquals("l1-acns", config.getBucketForFamily(ProductFamily.L1_ACN));
+        assertEquals("invalid", config.getBucketForFamily(ProductFamily.INVALID));
     }
 
     /**
