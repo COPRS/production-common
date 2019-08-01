@@ -18,9 +18,11 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
     /**
      * Pattern for configuration files to extract data
      */
-//    private final static String PATTERN_STR ="^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_"
-//    		+ "(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)"
-//    		+ "_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
+    public final static String PATTERN_STR ="^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_"
+    		+ "(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)"
+    		+ "_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
+    
+    
     
 
 	@Override

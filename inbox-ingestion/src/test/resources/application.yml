@@ -11,10 +11,8 @@ ingestion:
   max-retries: 10                                                # the maximal number of consecutive retries for unsuccessful deletion
   tempo-retry-ms: 10000  
   types:
-    - family:  
-      regex:
-      
-      
+    - family: AUXILIARY_FILE 
+      regex: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
 
 # KAFKA
 kafka:
@@ -28,24 +26,7 @@ mqi:
   host-uri: http://localhost:8081                               # the host and port for querying MQI server
   max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
   tempo-retry-ms: 1000                                          # 
- 
-# File
-file:
 
-  product-categories:
-    auxiliary-files:
-      fixed-delay-ms: 500                                         # (fixed delay) Period in milliseconds between 2 polls of next message
-      init-delay-poll-ms: 2000                                    # Initial delay in milliseconds before starting consuming message
-    edrs-sessions:
-      fixed-delay-ms: 500                                         # 
-      init-delay-poll-ms: 2000                                    # 
-    level-products:
-      fixed-delay-ms: 500                                         # 
-      init-delay-poll-ms: 2000                                    # 
-    level-segments:
-      fixed-delay-ms: 500                                         # 
-      init-delay-poll-ms: 2000                                    # 
-    compressed-products:
-      fixed-delay-ms: 500                                         # 
-      init-delay-poll-ms: 2000                                    # 
+scheduling:
+  enable: false
      

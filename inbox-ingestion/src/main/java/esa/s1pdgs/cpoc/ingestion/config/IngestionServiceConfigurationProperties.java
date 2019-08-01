@@ -1,16 +1,17 @@
 package esa.s1pdgs.cpoc.ingestion.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("ingestion")
 public class IngestionServiceConfigurationProperties {	
-	private long pollingIntervalMs;
-	private int maxRetries;	
-	private long tempoRetryMs;
-	private String hostname;
-	private List<IngestionTypeConfiguration> types;
+	private long pollingIntervalMs = 100;
+	private int maxRetries = 2;	
+	private long tempoRetryMs = 100;
+	private String hostname = "localhost";
+	private List<IngestionTypeConfiguration> types = new ArrayList<>();
 	
 	public long getPollingIntervalMs() {
 		return pollingIntervalMs;

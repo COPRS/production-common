@@ -56,31 +56,14 @@ public class IngestionService {
 		this.productService = productService;
 	}
 
-	public void poll() {		
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOG, "Ingestion");	
-		
+	public void poll() {
 		try {
-			final GenericMessageDto<IngestionDto> message = client.next(ProductCategory.INGESTION);			
+			final GenericMessageDto<IngestionDto> message = client.next(ProductCategory.INGESTION);		
 			if (message == null || message.getBody() == null) {
 				LOG.trace("No message received: continue");
 				return;
 			}
-			final IngestionDto ingestion = message.getBody();
-			LOG.debug("received Ingestion: {}", ingestion.getProductName());
-			
-			final Reporting reporting = reportingFactory
-					.product(ingestion.getFamily().toString(), ingestion.getProductName())
-					.newReporting(0);
-			reporting.reportStart("Start processing of " + ingestion.getProductName());	
-
-			try {
-				final List<Product<AbstractDto>> result = identifyAndUpload(reportingFactory, message, ingestion);
-				publish(result, message, reportingFactory);				
-				delete(ingestion, reportingFactory);
-				reporting.reportStop("End processing of " + ingestion.getProductName());
-			} catch (Exception e) {
-				reporting.reportError("{}", LogUtils.toString(e));
-			}			
+			onMessage(message);			
 			client.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false), ProductCategory.INGESTION);
 		// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 		} catch (AbstractCodedException ace) {
@@ -89,6 +72,27 @@ public class IngestionService {
 		} catch (Exception e) {
 			LOG.error("Unexpected Error on Ingestion", e);
 		}	
+	}
+
+	public void onMessage(final GenericMessageDto<IngestionDto> message) {
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOG, "Ingestion");	
+
+		final IngestionDto ingestion = message.getBody();
+		LOG.debug("received Ingestion: {}", ingestion.getProductName());
+		
+		final Reporting reporting = reportingFactory
+				.product(ingestion.getFamily().toString(), ingestion.getProductName())
+				.newReporting(0);
+		reporting.reportStart("Start processing of " + ingestion.getProductName());	
+
+		try {
+			final List<Product<AbstractDto>> result = identifyAndUpload(reportingFactory, message, ingestion);
+			publish(result, message, reportingFactory);				
+			delete(ingestion, reportingFactory);
+			reporting.reportStop("End processing of " + ingestion.getProductName());
+		} catch (Exception e) {
+			reporting.reportError("{}", LogUtils.toString(e));
+		}
 	}
 
 	final List<Product<AbstractDto>> identifyAndUpload(
