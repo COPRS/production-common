@@ -47,8 +47,7 @@ public class ObsAdapter {
 						String.format("File %s (%s) to already exist", obsKey, to)
 				);
 			}
-			// TODO
-			//obsClient.move(from, to, obsKey);
+			obsClient.move(from, to, file);
 		} catch (ObsException e) {
 			throw new ProductException(
 					String.format("Error moving file %s from %s to %s: %s", obsKey, from, to, LogUtils.toString(e))
