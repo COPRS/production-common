@@ -151,11 +151,10 @@ public class SwiftObsClient extends AbstractObsClient {
 			}
 			
 			for (StoredObject o : objListing) {
-				marker = o.getPath();
+				marker = o.getName();
 				Date lastModified = o.getLastModifiedAsDate();
-
 				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {
-					ObsObject obsObj = new ObsObject(o.getPath(), obsFamily);
+					ObsObject obsObj = new ObsObject(o.getName(), obsFamily);
 					objectsOfTimeFrame.add(obsObj);
 				}
 			}
