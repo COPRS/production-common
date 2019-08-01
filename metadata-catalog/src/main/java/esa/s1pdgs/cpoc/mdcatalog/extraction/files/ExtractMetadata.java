@@ -378,6 +378,10 @@ public class ExtractMetadata {
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(
 					readFile("tmp/output.xml", Charset.defaultCharset()));
+			
+			// Adding also max validity stop for EOF files as it is done in SAFE
+			metadataJSONObject.put("validityStopTime",
+					"9999-12-31T23:59:59.999999Z");
 
 			try {
 				metadataJSONObject.put("validityStopTime",
