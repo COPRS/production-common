@@ -210,6 +210,7 @@ public class ExtractMetadata {
 	private JSONObject processCoordinatesforL1andL2(
 			String rawCoordinatesFromManifest) {
 
+		LOGGER.debug("l1/l2 coords: {} ",rawCoordinatesFromManifest);
 		// Snippet from manifest
 		// 12.378114,48.279240 12.829241,50.603844 11.081389,50.958828
 		// 10.625828,48.649940
@@ -255,6 +256,8 @@ public class ExtractMetadata {
 				.put(new JSONArray("[" + bLongitude + "," + bLatitude + "]"));
 		geoShapeCoordinates
 				.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
+		
+
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
 		geoShape.put("orientation", "counterclockwise");
 
@@ -266,6 +269,7 @@ public class ExtractMetadata {
 		// Snippet from manifest
 		// 36.7787,86.8273 38.7338,86.4312 38.4629,83.6235 36.5091,84.0935
 		// 36.7787,86.8273
+		LOGGER.debug("l0 coords: {} ",rawCoordinatesFromManifest);
 		String[] points = rawCoordinatesFromManifest.split(" ");
 
 		if (points.length == 5 && points[0].equals(points[4])) {
@@ -308,6 +312,7 @@ public class ExtractMetadata {
 				.put(new JSONArray("[" + dLongitude + "," + dLatitude + "]"));
 		geoShapeCoordinates
 				.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
+		
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
 		geoShape.put("orientation", "counterclockwise");
 
