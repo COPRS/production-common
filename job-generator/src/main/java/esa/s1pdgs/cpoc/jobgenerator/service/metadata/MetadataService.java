@@ -398,7 +398,8 @@ public class MetadataService {
                                         response.getStatusCode().name()));
                     }
                 } else {
-                	LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results", query.getProductFamily().toString(), query.getProductType(),response.getBody().size());
+                	LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results", 
+                			query.getProductFamily(), query.getProductType(), numResults(response));
                     return response.getBody();
                 }
             } catch (RestClientException e) {
@@ -417,6 +418,16 @@ public class MetadataService {
                 }
             }
         }
+    }
+    
+    private final int numResults(final ResponseEntity<List<SearchMetadata>> response) {
+    	if (response != null) {
+    		final List<SearchMetadata> res = response.getBody();
+    		if (res != null) {
+    			return res.size();
+    		}
+    	}
+    	return -1; // To indicate that null was returned and not an empty list
     }
 
 }
