@@ -1,22 +1,27 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 class FootPrint {
 	private Point p1 = null;
@@ -109,7 +114,6 @@ public class WVFootPrintExtension {
 		JSONObject geoShape = new JSONObject();
 		JSONArray coordinates = new JSONArray();
 
-		StringBuffer boundingPolygonAsString = new StringBuffer();
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
@@ -171,8 +175,8 @@ public class WVFootPrintExtension {
 						else {
 							// System.out.println("Good case!");
 						}
+						LOGGER.debug("Imagette #{}, scenatio: {}", i, footPrintScenario);
 					}
-
 					// System.out.println("Imagette #" + i + ", coords: " + footPrint);
 				}
 
@@ -213,19 +217,18 @@ public class WVFootPrintExtension {
 				// boundingPolygonAsString.append("</point>\n");
 
 				if (p.getLat() > 90 || p.getLat() < -90) {
-					LOGGER.error(String.format("Error Latitude is not in the range (-90|90): %s", p.getLat()));
+					LOGGER.error("Error Latitude is not in the range (-90|90): {}", p.getLat());
 				}
 
 				if (p.getLon() > 180 || p.getLon() < -180) {
-					LOGGER.error(String.format("Error Longitude is not in the range (-180|180): " + p.getLon()));
+					LOGGER.error("Error Longitude is not in the range (-180|180): {}", p.getLon());
 				}
 			}
 
-		} catch (Exception ex) {
+		} catch (DOMException | ParserConfigurationException | XPathExpressionException | SAXException | IOException  ex) {
 			LOGGER.error("Error creating bounding polygon!");
 			return null;
-		}
-
+		} 
 		geoShape.put("type", "polygon");
 		geoShape.put("orientation", "counterclockwise");
 		geoShape.put("coordinates", new JSONArray().put(coordinates));
