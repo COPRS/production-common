@@ -17,13 +17,26 @@ public final class ObsClientBuilder {
     }
 
     /**
-     * get the default ObsClient
+     * get the default ObsS3Client
      * 
      * @return
      * @throws ObsServiceException
      * @see {@link S3ObsClient}
      */
-    public static ObsClient defaultClient() throws ObsServiceException {
+    public static ObsClient defaultS3Client() throws ObsServiceException {
         return new S3ObsClient();
     }
+    
+    
+    /**
+     * get the default ObsSwiftClient
+     * 
+     * @return
+     * @throws ObsServiceException
+     * @see {@link S3ObsClient}
+     */
+    public static ObsClient defaultSwiftClient() throws ObsServiceException {
+        return new S3ObsClient();
+    }
+
 }

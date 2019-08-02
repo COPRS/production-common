@@ -22,7 +22,7 @@ public class ObsClientBuilderTest {
      */
     @Test
     public void testDefaultClient() throws ObsServiceException {
-        ObsClient client = ObsClientBuilder.defaultClient();
+        ObsClient client = ObsClientBuilder.defaultS3Client();
         assertEquals(S3ObsClient.class, client.getClass());
     }
 }
