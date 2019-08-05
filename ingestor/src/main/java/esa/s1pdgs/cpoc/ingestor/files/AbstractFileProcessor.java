@@ -194,7 +194,7 @@ public abstract class AbstractFileProcessor<T> {
 			Path productDir = pickupPath.relativize(file.toPath()).subpath(0, 1);
 			Path dirToCopy = pickupPath.resolve(productDir);
 			Path target = backupPath.resolve(productDir);
-			TreeCopier tc = new TreeCopier(dirToCopy, target, true);
+			TreeCopier tc = new TreeCopier(dirToCopy, target, true, false);
 			Files.walkFileTree(dirToCopy, tc);
 			
 			reportBackup.reportStop(String.format("End copying file %s to %s", file.getName(), backupDirectory));
@@ -204,18 +204,6 @@ public abstract class AbstractFileProcessor<T> {
 			throw e;
 		}
 	}
-	
-//	private void createDirAndCopy(File file, String pickupDir, String backupDir) throws IOException {
-//		Path relativePath = new File(pickupDir).toPath().relativize(file.toPath());
-//		Path bkpPath = new File(backupDir).toPath().resolve(relativePath);
-//		Files.createDirectories(bkpPath.getParent());
-//
-//		if (!Files.exists(bkpPath)) {
-//			Files.copy(file.toPath(), bkpPath);
-//		} else {
-//			LOGGER.warn("File exists already: {}", bkpPath);
-//		}
-//	}
 
 	private final void delete(final Reporting.Factory reportingFactory, final File file, int reportingStep) {
 		final Reporting reportDelete = reportingFactory.newReporting(reportingStep);

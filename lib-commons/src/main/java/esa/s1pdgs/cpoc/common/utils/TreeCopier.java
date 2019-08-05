@@ -21,11 +21,21 @@ public class TreeCopier implements FileVisitor<Path> {
 	private final Path source;
 	private final Path target;
 	private final boolean preserve;
+	private final boolean replaceExisting;
 
-	public TreeCopier(Path source, Path target, boolean preserve) {
+	/**
+	 * Copies directories and files recursively
+	 * 
+	 * @param source - as {@link Path}
+	 * @param target - as {@link Path}
+	 * @param preserve - if to preserve file attributes
+	 * @param replaceExisting - if to replace existing files in target
+	 */
+	public TreeCopier(Path source, Path target, boolean preserve, boolean replaceExisting) {
 		this.source = source;
 		this.target = target;
 		this.preserve = preserve;
+		this.replaceExisting = replaceExisting;
 	}
 
 	@Override
@@ -79,7 +89,7 @@ public class TreeCopier implements FileVisitor<Path> {
 	void copyFile(Path source, Path target, boolean preserve) throws IOException {
 		CopyOption[] options = (preserve) ? new CopyOption[] { COPY_ATTRIBUTES, REPLACE_EXISTING }
 				: new CopyOption[] { REPLACE_EXISTING };
-		if (Files.notExists(target)) {
+		if (replaceExisting || Files.notExists(target)) {
 			try {
 				Files.copy(source, target, options);
 			} catch (IOException x) {
