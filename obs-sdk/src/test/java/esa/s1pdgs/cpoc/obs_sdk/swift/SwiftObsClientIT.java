@@ -23,7 +23,6 @@ public class SwiftObsClientIT {
 	public final static String testFilePrefix = "abc/def/";
 	public final static String testFileName1 = "testfile1.txt";
 	public final static String testFileName2 = "testfile2.txt";
-	public final static String nonExistentFileName = "non-existent.txt";
 	public final static File testFile1 = getResource("/" + testFileName1);
 	
 	AbstractObsClient uut;
