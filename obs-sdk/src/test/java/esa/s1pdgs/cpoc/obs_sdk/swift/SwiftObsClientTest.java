@@ -334,10 +334,9 @@ public class SwiftObsClientTest {
 				ProductFamily.L0_SLICE);
 
 		assertEquals(2, returnedObjs.size());
-//		assertEquals("obj1", returnedObjs.get(0).getKey());
-//		assertEquals("obj3", returnedObjs.get(1).getKey());
-//		verify(service, times(1)).listObjectsFromContainer(Mockito.anyString());
-//		verify(service, times(1)).listNextBatchOfObjectsFromContainer(Mockito.anyString(), Mockito.any());
+		assertEquals("obj1", returnedObjs.get(0).getKey());
+		assertEquals("obj3", returnedObjs.get(1).getKey());
+		verify(service, times(1)).listObjectsFromContainer(Mockito.anyString());
 	}
 }
 
