@@ -24,7 +24,7 @@ public class ObsConfig {
 	 * @throws ObsServiceException 
 	 */
 	@Bean
-	public ObsClient obsClient(@Value("${obs.protocol}") final String obsProtocol) throws ObsServiceException {	
+	public ObsClient obsClient(@Value("${obs.protocol:S3}") final String obsProtocol) throws ObsServiceException {	
 		return  ObsClientBuilder.defaultClient(obsProtocol);
 	}
 	
