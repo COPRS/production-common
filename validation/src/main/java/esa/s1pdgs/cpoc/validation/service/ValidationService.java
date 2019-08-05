@@ -92,25 +92,14 @@ public class ValidationService {
 				reportingObs.reportError("Error occured while performing obs query task: {}", e.getMessage());
 				throw e;
 			}
-			
 
 			List<String> metadataDiscrepancies = new ArrayList<>();
 			List<String> obsDiscrepancies = new ArrayList<>();
 
 			for (SearchMetadata smd : metadataResults) {
 				if (obsResults.get(smd.getKeyObjectStorage()) == null) {
-					if (smd.getKeyObjectStorage().contains("AUX") || smd.getKeyObjectStorage().contains("MPL")) {
-						
-						if (obsResults.get(smd.getKeyObjectStorage().substring(0,smd.getKeyObjectStorage().length())) == null) {
-							LOGGER.info("Product {} is an aux and root does not exist",smd.getKeyObjectStorage());
-						} else {
-							obsDiscrepancies.add(smd.getKeyObjectStorage());
-							LOGGER.info("Product {} is an aux and root does exist, ignoring it ",smd.getKeyObjectStorage());	
-						}
-					} else {
-						obsDiscrepancies.add(smd.getKeyObjectStorage());
-						LOGGER.info("Product {} does exist in metadata catalog, but not in OBS", smd.getKeyObjectStorage());						
-					}
+					obsDiscrepancies.add(smd.getKeyObjectStorage());
+					LOGGER.info("Product {} does exist in metadata catalog, but not in OBS", smd.getKeyObjectStorage());
 				} else {
 					LOGGER.debug("Product {} does exist in metadata catalog and OBS", smd.getKeyObjectStorage());
 					obsResults.remove(smd.getKeyObjectStorage());
@@ -152,24 +141,24 @@ public class ValidationService {
 		return discrepancies;
 	}
 
-	/**
-	 * Due we are having directory products, each product might have
-	 */
-	private Set<String> flattenFileObjects(List<String> objects) {
-		Set<String> result = new HashSet<String>();
-
-		for (String object : objects) {
-			// if it is an auxiliary, we are flattening
-			if (object.contains("AUX") || object.contains("MPL")) {
-				String flat = object.substring(0, object.indexOf("/"));
-				result.add(flat);
-			} else {
-				result.add(object);
-			}
-		}
-
-		return result;
-	}
+//	/**
+//	 * Due we are having directory products, each product might have
+//	 */
+//	private Set<String> flattenFileObjects(List<String> objects) {
+//		Set<String> result = new HashSet<String>();
+//
+//		for (String object : objects) {
+//			// if it is an auxiliary, we are flattening
+//			if (object.contains("AUX") || object.contains("MPL")) {
+//				String flat = object.substring(0, object.indexOf("/"));
+//				result.add(flat);
+//			} else {
+//				result.add(object);
+//			}
+//		}
+//
+//		return result;
+//	}
 
 	private String buildProductList(List<String> products) {
 		if (products.size() == 0) {
