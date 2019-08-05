@@ -442,13 +442,13 @@ public class S3ObsServices {
 	}
 
 	public void moveFile(CopyObjectRequest request) throws S3ObsServiceException, S3SdkClientException {
-	
+
 		for (int retryCount = 1;; retryCount++) {
-			try {				
-				log(String.format("Performing %s", request));				
+			try {
+				log(String.format("Performing %s", request));
 				s3client.copyObject(request);
 			} catch (com.amazonaws.AmazonServiceException ase) {
-				throw new S3ObsServiceException(request.getSourceBucketName(), "",
+				throw new S3ObsServiceException(request.getSourceBucketName(), request.getSourceKey(),
 						String.format("Move of objects fails: %s", ase.getMessage()), ase);
 			} catch (com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
@@ -457,13 +457,13 @@ public class S3ObsServices {
 					try {
 						Thread.sleep(retryDelay);
 					} catch (InterruptedException e) {
-						throw new S3SdkClientException(request.getSourceBucketName(), "",
+						throw new S3SdkClientException(request.getSourceBucketName(), request.getSourceKey(),
 								String.format("Move of objects fails: %s", sce.getMessage()), sce);
 					}
 					continue;
 				} else {
-					throw new S3SdkClientException(request.getSourceBucketName(), "",
-							String.format("Listing next batch of objects fails: %s", sce.getMessage()), sce);
+					throw new S3SdkClientException(request.getSourceBucketName(), request.getSourceKey(),
+							String.format("Move of objects fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
