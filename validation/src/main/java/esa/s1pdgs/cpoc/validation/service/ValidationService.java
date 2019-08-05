@@ -63,7 +63,7 @@ public class ValidationService {
 			List<SearchMetadata> metadataResults = null;
 			try {
 				reportingMetadata.reportStart("Gathering discrepancies in metadata catalog");
-				metadataResults = metadataService.query(ProductFamily.valueOf(family.name()), null, startInterval,
+				metadataResults = metadataService.query(ProductFamily.valueOf(family.name()), startInterval,
 						endInterval);
 				if (metadataResults == null) {
 					// set to empty list

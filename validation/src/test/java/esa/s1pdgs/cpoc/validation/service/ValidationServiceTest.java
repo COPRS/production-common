@@ -65,7 +65,7 @@ public class ValidationServiceTest {
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product1", ob1);
 
-		doReturn(metadataResults).when(metadataService).query(family, null, localDateTimeStart, localDateTimeStop);
+		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		int discrepancies = validationService.checkConsistencyForInterval(localDateTimeStart, localDateTimeStop);
@@ -102,7 +102,7 @@ public class ValidationServiceTest {
 		obsResults.put("product1", ob1);
 		obsResults.put("product2", ob2);
 
-		doReturn(metadataResults).when(metadataService).query(family, null, localDateTimeStart, localDateTimeStop);
+		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		int discrepancies = validationService.checkConsistencyForInterval(localDateTimeStart, localDateTimeStop);
@@ -131,7 +131,7 @@ public class ValidationServiceTest {
 
 		Map<String, ObsObject> obsResults = new HashMap<>();
 
-		doReturn(metadataResults).when(metadataService).query(family, null, localDateTimeStart, localDateTimeStop);
+		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		int discrepancies = validationService.checkConsistencyForInterval(localDateTimeStart, localDateTimeStop);
@@ -166,7 +166,7 @@ public class ValidationServiceTest {
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product2", ob2);
 
-		doReturn(metadataResults).when(metadataService).query(family, null, localDateTimeStart, localDateTimeStop);
+		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		int discrepancies = validationService.checkConsistencyForInterval(localDateTimeStart, localDateTimeStop);
@@ -194,7 +194,7 @@ public class ValidationServiceTest {
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product1", ob1);
 
-		doReturn(metadataResults).when(metadataService).query(family, null, localDateTimeStart, localDateTimeStop);
+		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		int discrepancies = validationService.checkConsistencyForInterval(localDateTimeStart, localDateTimeStop);
@@ -230,7 +230,7 @@ public class ValidationServiceTest {
 		obsResults.put("product2", ob2);
 		obsResults.put("product3", ob3);
 
-		doReturn(metadataResults).when(metadataService).query(family, null, localDateTimeStart, localDateTimeStop);
+		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		int discrepancies = validationService.checkConsistencyForInterval(localDateTimeStart, localDateTimeStop);
@@ -262,7 +262,7 @@ public class ValidationServiceTest {
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("product1", ob1);
 
-		doReturn(metadataResults).when(metadataService).query(family, null, localDateTimeStart, localDateTimeStop);
+		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		int discrepancies = validationService.checkConsistencyForInterval(localDateTimeStart, localDateTimeStop);

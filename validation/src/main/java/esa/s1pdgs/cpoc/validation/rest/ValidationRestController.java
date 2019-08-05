@@ -30,6 +30,7 @@ public class ValidationRestController {
 
 		LOGGER.info("Received validation request within interval '{}' and '{}'", startInterval, endInterval);
 		
-		validationService.checkConsistencyForInterval(startInterval, endInterval);		
+		int discrepancy = validationService.checkConsistencyForInterval(startInterval, endInterval);
+		LOGGER.info("Finished validation request and finding {} discrepancies", discrepancy);
 	}
 }

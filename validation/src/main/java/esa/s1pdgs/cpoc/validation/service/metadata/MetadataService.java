@@ -55,7 +55,7 @@ public class MetadataService {
 		this.temporetryms = temporetryms;
 	}
 	
-	public List<SearchMetadata> query(ProductFamily family, String productType, LocalDateTime intervalStart, LocalDateTime intervalStop) throws MetadataQueryException {
+	public List<SearchMetadata> query(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop) throws MetadataQueryException {
 		for (int retries = 0;; retries++) {
             try {
                 String uri = this.uriBase + "/"
@@ -94,7 +94,7 @@ public class MetadataService {
                                         response.getStatusCode().name()));
                     }
                 } else {
-                	LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results", family, productType,response.getBody().size());                
+                	LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results", family, response.getBody().size());                
                     return response.getBody();
                 }
             } catch (RestClientException e) {
