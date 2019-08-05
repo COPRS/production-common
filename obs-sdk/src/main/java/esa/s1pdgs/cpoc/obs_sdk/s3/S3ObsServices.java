@@ -9,6 +9,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -439,5 +440,39 @@ public class S3ObsServices {
 			}
 		}
 	}
+
+	public void moveFile(CopyObjectRequest request) throws S3ObsServiceException, S3SdkClientException {
+	
+		for (int retryCount = 1;; retryCount++) {
+			try {				
+				log(String.format("Performing %s", request));				
+				s3client.copyObject(request);
+			} catch (com.amazonaws.AmazonServiceException ase) {
+				throw new S3ObsServiceException(request.getSourceBucketName(), "",
+						String.format("Move of objects fails: %s", ase.getMessage()), ase);
+			} catch (com.amazonaws.SdkClientException sce) {
+				if (retryCount <= numRetries) {
+					LOGGER.warn(String.format("Move of objects from bucket %s failed: Attempt : %d / %d",
+							request.getSourceBucketName(), retryCount, numRetries));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (InterruptedException e) {
+						throw new S3SdkClientException(request.getSourceBucketName(), "",
+								String.format("Move of objects fails: %s", sce.getMessage()), sce);
+					}
+					continue;
+				} else {
+					throw new S3SdkClientException(request.getSourceBucketName(), "",
+							String.format("Listing next batch of objects fails: %s", sce.getMessage()), sce);
+				}
+			}
+		}
+		
+		
+		
+	}
+
+	
+	
     
 }

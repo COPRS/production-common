@@ -8,11 +8,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -154,6 +156,22 @@ public class S3ObsClient extends AbstractObsClient {
         return configuration
                 .getIntOfConfiguration(S3Configuration.TM_S_UP_EXEC);
     }
+    
+    
+
+	@Override
+	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {	
+		try {			
+			s3Services.moveFile(new CopyObjectRequest(
+					configuration.getBucketForFamily(from), 
+					key, 
+					configuration.getBucketForFamily(to), 
+					key
+			));
+		} catch (S3SdkClientException | ObsServiceException e) {
+			throw new ObsException(from, key, e);
+		} 
+	}
 
 	/**
 	 * 
