@@ -119,7 +119,8 @@ public class IngestionService {
 			}
 			reportObs.reportStop("End uploading " + ingestion.getProductName() + " in OBS");
 		// is thrown if product shall be marked as invalid	
-		} catch (ProductException e) {		
+		} catch (ProductException e) {	
+			LOG.warn( e.getMessage());
 			productService.markInvalid(ingestion);
 			message.getBody().setFamily(ProductFamily.INVALID);					
 			final FailedProcessingDto failed = new FailedProcessingDto(
