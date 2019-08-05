@@ -24,7 +24,7 @@ public class ObsConfig {
 	 */
 	@Bean
 	public ObsClient obsClient() throws ObsServiceException {
-		return ObsClientBuilder.defaultClient();
+		return ObsClientBuilder.defaultClient("S3");
 	}
 	
 }

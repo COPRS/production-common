@@ -32,17 +32,17 @@ public class MetadataService {
 	 * Client to request REST apis
 	 */
 	private final RestTemplate restTemplate;
-	
+
 	private String uriBase;
-	
-    /**
-     * Nb max of retry for querying api rest
-     */
-    private final int nbretry;
-    /**
-     * Tempo of retry for querying api rest
-     */
-    private final int temporetryms;
+
+	/**
+	 * Nb max of retry for querying api rest
+	 */
+	private final int nbretry;
+	/**
+	 * Tempo of retry for querying api rest
+	 */
+	private final int temporetryms;
 
 	@Autowired
 	public MetadataService(@Qualifier("restValidationTemplate") final RestTemplate restTemplate,
@@ -54,64 +54,64 @@ public class MetadataService {
 		this.nbretry = nbretry;
 		this.temporetryms = temporetryms;
 	}
-	
-	public List<SearchMetadata> query(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop) throws MetadataQueryException {
-		for (int retries = 0;; retries++) {
-            try {
-                String uri = this.uriBase + "/"
-                        + family.toString() + "/searchInterval";
-                
-                UriComponentsBuilder builder = UriComponentsBuilder
-                        .fromUriString(uri)
-                        // FIXME: Maybe we not need a productType anyways!
-                        //.queryParam("productType", productType)
-                        .queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
-                        .queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
-                
-                LOGGER.debug("Call rest metadata on [{}]",
-                        builder.build().toUri());
 
-                ResponseEntity<List<SearchMetadata>> response =
-                        this.restTemplate.exchange(builder.build().toUri(),
-                                HttpMethod.GET, null,
-                                new ParameterizedTypeReference<List<SearchMetadata>>() {
-                                });
-                if (response.getStatusCode() != HttpStatus.OK) {
-                    if (retries < this.nbretry) {
-                        LOGGER.warn(
-                                "Call rest api metadata failed: Attempt : {} / {}",
-                                retries, this.nbretry);
-                        try {
-                            Thread.sleep(this.temporetryms);
-                        } catch (InterruptedException e) {
-                            throw new MetadataQueryException(e.getMessage(),
-                                    e);
-                        }
-                        continue;
-                    } else {
-                        throw new MetadataQueryException(
-                                String.format("Invalid HTTP status code %s",
-                                        response.getStatusCode().name()));
-                    }
-                } else {
-                	LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results", family, response.getBody().size());                
-                    return response.getBody();
-                }
-            } catch (RestClientException e) {
-                if (retries < this.nbretry) {
-                    LOGGER.warn(
-                            "Call rest api metadata failed: Attempt : {} / {}",
-                            retries, this.nbretry);
-                    try {
-                        Thread.sleep(this.temporetryms);
-                    } catch (InterruptedException e1) {
-                        throw new MetadataQueryException(e1.getMessage(), e1);
-                    }
-                    continue;
-                } else {
-                    throw new MetadataQueryException(e.getMessage(), e);
-                }
-            }
-        }
+	public List<SearchMetadata> query(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop)
+			throws MetadataQueryException {
+		for (int retries = 0;; retries++) {
+			try {
+				String uri = this.uriBase + "/" + family.toString() + "/searchInterval";
+
+				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+						// FIXME: Maybe we not need a productType anyways!
+						// .queryParam("productType", productType)
+						.queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
+						.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
+
+				LOGGER.debug("Call rest metadata on [{}]", builder.build().toUri());
+
+				ResponseEntity<List<SearchMetadata>> response = this.restTemplate.exchange(builder.build().toUri(),
+						HttpMethod.GET, null, new ParameterizedTypeReference<List<SearchMetadata>>() {
+						});
+				if (response.getStatusCode() != HttpStatus.OK) {
+					if (retries < this.nbretry) {
+						LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.nbretry);
+						try {
+							Thread.sleep(this.temporetryms);
+						} catch (InterruptedException e) {
+							throw new MetadataQueryException(e.getMessage(), e);
+						}
+						continue;
+					} else {
+						throw new MetadataQueryException(
+								String.format("Invalid HTTP status code %s", response.getStatusCode().name()));
+					}
+				} else {
+					LOGGER.info("Metadata query for family '{}' returned {} results", family, numResults(response));
+					return response.getBody();
+				}
+			} catch (RestClientException e) {
+				if (retries < this.nbretry) {
+					LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.nbretry);
+					try {
+						Thread.sleep(this.temporetryms);
+					} catch (InterruptedException e1) {
+						throw new MetadataQueryException(e1.getMessage(), e1);
+					}
+					continue;
+				} else {
+					throw new MetadataQueryException(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
+	private final int numResults(final ResponseEntity<List<SearchMetadata>> response) {
+		if (response != null) {
+			final List<SearchMetadata> res = response.getBody();
+			if (res != null) {
+				return res.size();
+			}
+		}
+		return -1; // To indicate that null was returned and not an empty list
 	}
 }

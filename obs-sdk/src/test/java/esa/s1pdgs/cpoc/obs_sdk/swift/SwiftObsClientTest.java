@@ -24,7 +24,6 @@ import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 import org.javaswift.joss.swift.Swift;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -37,7 +36,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
-@Ignore
 public class SwiftObsClientTest {
 
     /**

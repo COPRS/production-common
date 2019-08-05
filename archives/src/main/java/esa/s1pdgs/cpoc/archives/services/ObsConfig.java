@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.archives.services;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,8 +24,8 @@ public class ObsConfig {
 	 * @throws ObsServiceException 
 	 */
 	@Bean
-	public ObsClient obsClient() throws ObsServiceException {
-		return ObsClientBuilder.defaultS3Client();
+	public ObsClient obsClient(@Value("${obs.protocol}") final String obsProtocol) throws ObsServiceException {	
+		return  ObsClientBuilder.defaultClient(obsProtocol);
 	}
 	
 }
