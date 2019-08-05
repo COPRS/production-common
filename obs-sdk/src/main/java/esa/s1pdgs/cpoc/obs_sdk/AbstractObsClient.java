@@ -261,7 +261,9 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
 	@Override
-	public void moveFile(ProductFamily from, ProductFamily to, File file) throws ObsException {
-		throw new UnsupportedOperationException();		
+	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {
+		throw new UnsupportedOperationException();
 	}
+
+    
 }
