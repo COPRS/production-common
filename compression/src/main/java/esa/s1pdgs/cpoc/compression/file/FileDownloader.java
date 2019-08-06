@@ -13,9 +13,9 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.compression.model.obs.S3DownloadFile;
-import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -28,7 +28,7 @@ public class FileDownloader {
 	/**
 	 * Factory for accessing to the object storage
 	 */
-	private final ObsService obsService;
+	private final ObsClient obsClient;
 
 	/**
 	 * Path to the local working directory
@@ -45,9 +45,9 @@ public class FileDownloader {
 	 */
 	private final String prefixMonitorLogs;
 
-	public FileDownloader(final ObsService obsService, final String localWorkingDir, final ProductDto job,
+	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final ProductDto job,
 			final int sizeDownBatch, final String prefixMonitorLogs) {
-		this.obsService = obsService;
+		this.obsClient = obsClient;
 		this.localWorkingDir = localWorkingDir;
 		this.job = job;
 		this.prefixMonitorLogs = prefixMonitorLogs;
@@ -65,7 +65,7 @@ public class FileDownloader {
 
 		// Create necessary directories and download input with content in
 		// message
-		S3DownloadFile inputProduct = buildInput();
+		ObsDownloadFile inputProduct = buildInput();
 
 		final Reporting reporting = new LoggerReporting.Factory(LOGGER, "FileDownloader").newReporting(0);
 
@@ -101,7 +101,7 @@ public class FileDownloader {
 	 * @throws InternalErrorException
 	 * @throws UnknownFamilyException
 	 */
-	protected S3DownloadFile buildInput() throws InternalErrorException, UnknownFamilyException {
+	protected ObsDownloadFile buildInput() throws InternalErrorException, UnknownFamilyException {
 		LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 		
 		if (job.getProductName() == null) {
@@ -110,7 +110,7 @@ public class FileDownloader {
 
 		String targetFile = this.localWorkingDir+"/"+job.getProductName();
 		LOGGER.info("Input {} will be stored in {}", job.getProductName(), targetFile);
-		return new S3DownloadFile(job.getFamily(), job.getProductName(),targetFile);
+		return new ObsDownloadFile(job.getFamily(), job.getProductName(),targetFile);
 
 	}
 
@@ -121,9 +121,9 @@ public class FileDownloader {
 	 * @param inputProduct
 	 * @throws AbstractCodedException
 	 */
-	private final void downloadInputs(final S3DownloadFile inputProduct) throws AbstractCodedException {
+	private final void downloadInputs(final ObsDownloadFile inputProduct) throws AbstractCodedException {
 		LOGGER.info("4 - Starting downloading input product {}", inputProduct);
-		this.obsService.downloadFilesPerBatch(Collections.singletonList(inputProduct));
+		this.obsClient.downloadFilesPerBatch(Collections.singletonList(inputProduct));
 	}
 
 	private final long getWorkdirSize() throws InternalErrorException {

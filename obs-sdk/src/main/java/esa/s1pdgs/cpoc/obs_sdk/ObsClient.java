@@ -1,6 +1,14 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import java.io.File;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 
 /**
  * <p>
@@ -133,5 +141,31 @@ public interface ObsClient {
      * @throws ObsServiceException
      */
     int getUploadExecutionTimeoutS() throws ObsServiceException;
-
+    
+	/**
+	 * Gets the list of ObsObject's of an ObsFamily whose modification times in OBS are within the time frame provided.
+	 * 
+	 * @param timeFrameBegin as {@link Date}
+	 * @param timeFrameEnd as {@link Date}
+	 * @param obsFamily as {@link ObsFamily}
+	 * @return list of ObsObject's, never null
+	 * @throws SdkClientException
+	 * @throws ObsServiceException
+	 */
+	List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd, ProductFamily obsFamily)
+			throws SdkClientException, ObsServiceException;
+	
+	boolean exist(final ProductFamily family, final String key) throws ObsException;
+	
+	File downloadFile(final ProductFamily family, final String key, final String targetDir) throws ObsException, ObsUnknownObject;
+	
+	void downloadFilesPerBatch(final List<ObsDownloadFile> filesToDownload) throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
+	
+	void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException;
+	
+	void moveFile(final ProductFamily from, final ProductFamily to, final String key) throws ObsException;
+	
+	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
+	
+	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
 }

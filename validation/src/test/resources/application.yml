@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: s1pdgs-validation-app
+    
+logging:
+  config: classpath:log4j2.yml
+    
+# REST controller
+server:
+  port: 8080                              # port used for publishing REST API around wrapper status
+  
+metadata:
+  host: ${catalog_rest_host:metadata-catalog-svc:8080}             # 
+  rest-api_nb-retry: 3                                             #  
+  rest-api_tempo-retry-ms: 1000                                    # 
+  
+validation:
+  # How many seconds in the past should the interval start
+  intervalOffset: 86400
+  # How many seconds should be handled as to new in order to avoid false-positives
+  intervalDelay: 60

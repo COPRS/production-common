@@ -105,8 +105,7 @@ public class TaskCallable implements Callable<TaskResult> {
 
 		} catch (InterruptedException ie) {
 			reporting.reportError("Interrupted Task " + binaryPath);
-			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException {}", binaryPath, workDirectory,
-					ie.getMessage());
+			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException", binaryPath, workDirectory);
 			Thread.currentThread().interrupt();
 		} catch (IOException ioe) {
 			final InternalErrorException ex = new InternalErrorException("Cannot build the command for the task " + binaryPath, ioe);

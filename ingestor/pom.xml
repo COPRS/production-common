@@ -6,7 +6,7 @@
 	<parent>
 	  <groupId>de.werum.s1pdgs</groupId>
 	  <artifactId>s1pro-core</artifactId>
-	  <version>0.4.0-SNAPSHOT</version>
+	  <version>0.5.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1pro-core-ingestor</artifactId>
 	<packaging>jar</packaging>
@@ -17,7 +17,7 @@
 		<project.artifactId>s1pdgs-ingestor-app</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.ingestor.Application</start-class>
 	</properties>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -96,6 +96,15 @@
 
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+      		<type>test-jar</type>
+      		<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -104,6 +113,8 @@
 			<artifactId>s1pro-core-obs-sdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
+
 
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>

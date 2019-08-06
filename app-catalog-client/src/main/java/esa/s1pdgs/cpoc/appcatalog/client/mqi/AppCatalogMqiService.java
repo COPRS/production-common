@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -78,7 +79,21 @@ public class AppCatalogMqiService {
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
     }
-
+    
+	static final <T> ParameterizedTypeReference<T> forCategory(final ProductCategory category)
+	{
+		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
+				AppCatMessageDto.class, 
+				category.getDtoClass()
+		);   
+		
+		final ResolvableType type = ResolvableType.forClassWithGenerics(
+				List.class, 
+				appCatMessageType
+		);   
+		return ParameterizedTypeReference.forType(type.getType());
+	}
+    
     /**
      * @return the hostUri
      */
@@ -370,7 +385,6 @@ public class AppCatalogMqiService {
             }
         }
     }
-    
 
     public List<AppCatMessageDto<? extends AbstractDto>> next(final ProductCategory category, String podName)
             throws AbstractCodedException {
@@ -383,17 +397,20 @@ public class AppCatalogMqiService {
                     .fromUriString(uriStr).queryParam("pod", podName);
             URI uri = builder.build().toUri();
             try {
-                ResponseEntity<List<AppCatMessageDto<? extends AbstractDto>>> response =
-                        restTemplate.exchange(uri, HttpMethod.GET, null,
-                                new ParameterizedTypeReference<List<AppCatMessageDto<? extends AbstractDto>>>() {
-                                });
+    	
+                final ResponseEntity<List<AppCatMessageDto<? extends AbstractDto>>> response =
+                        restTemplate.exchange(
+                        		uri, 
+                        		HttpMethod.GET, 
+                        		null, 
+                        		forCategory(category)
+                );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     List<AppCatMessageDto<? extends AbstractDto>> body = response.getBody();
                     if (body == null) {
                         return new ArrayList<>();
                     } else {
-                        List<AppCatMessageDto<? extends AbstractDto>> ret =
-                                new ArrayList<AppCatMessageDto<? extends AbstractDto>>();
+                    	List<AppCatMessageDto<? extends AbstractDto>> ret = new ArrayList<AppCatMessageDto<? extends AbstractDto>>();
                         ret.addAll(body);
                         return ret;
                     }

@@ -289,7 +289,7 @@ public class EsServicesTest{
 		
 		//Response
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.00012Z\",\"validityStopTime\":"
+		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.000120Z\",\"validityStopTime\":"
 		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
@@ -303,7 +303,7 @@ public class EsServicesTest{
 		
 		try {
 			SearchMetadata result = esServices.closestStopValidity("type", ProductFamily.L2_ACN, 
-			        "2012-05-05T10:10:12.00012Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
+			        "2012-05-05T10:10:12.000120Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());

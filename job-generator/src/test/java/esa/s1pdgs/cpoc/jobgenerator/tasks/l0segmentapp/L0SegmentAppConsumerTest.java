@@ -161,7 +161,7 @@ public class L0SegmentAppConsumerTest {
 
 	@Test
 	public void testBuildJobNew() throws AbstractCodedException {
-		AppDataJobDto expectedData = new AppDataJobDto();
+		AppDataJobDto<ProductDto> expectedData = new AppDataJobDto<>();
 		expectedData.setLevel(processSettings.getLevel());
 		expectedData.setPod(processSettings.getHostname());
 		expectedData.getMessages().add(messages.get(0));
@@ -174,7 +174,7 @@ public class L0SegmentAppConsumerTest {
 		productDto.setSatelliteId("B");
 		expectedData.setProduct(productDto);
 
-		AppDataJobDto result = consumer.buildJob(messages.get(0));
+		AppDataJobDto<ProductDto> result = consumer.buildJob(messages.get(0));
 		assertEquals(expectedData, result);
 		verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
@@ -194,7 +194,7 @@ public class L0SegmentAppConsumerTest {
 
 	@Test
 	public void testConsumeWhenNewJob() throws AbstractCodedException {
-		AppDataJobDto expectedData = new AppDataJobDto();
+		AppDataJobDto<ProductDto> expectedData = new AppDataJobDto<>();
 		expectedData.setLevel(processSettings.getLevel());
 		expectedData.setPod(processSettings.getHostname());
 		expectedData.setState(AppDataJobDtoState.DISPATCHING);

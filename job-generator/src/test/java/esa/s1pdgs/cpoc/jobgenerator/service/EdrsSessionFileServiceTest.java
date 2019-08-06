@@ -17,16 +17,14 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.FileCopyUtils;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
-import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
-import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.s3.ObsService;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
-import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class EdrsSessionFileServiceTest {
 
@@ -34,7 +32,7 @@ public class EdrsSessionFileServiceTest {
 	 * S3 service
 	 */
 	@Mock
-	private ObsService obsService;
+	private ObsClient obsClient;
 
 	/**
 	 * XML converter
@@ -65,7 +63,7 @@ public class EdrsSessionFileServiceTest {
 
 		(new File("./tmp")).mkdirs();
 
-		service = new EdrsSessionFileService(obsService, xmlConverter, "./tmp/");
+		service = new EdrsSessionFileService(obsClient, xmlConverter, "./tmp/");
 		fileCh1 = new File("./tmp/DCS_02_L20171109175634707000125_ch1_DSIB.xml");
 		fileCh1.createNewFile();
 		fileCh2 = new File("./tmp/DCS_02_L20171109175634707000125_ch2_DSIB.xml");
@@ -78,15 +76,15 @@ public class EdrsSessionFileServiceTest {
 		// Mock the dispatcher
 		Mockito.doAnswer(i -> {
 			return fileCh1;
-		}).when(obsService).downloadFile(Mockito.any(), Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"),
+		}).when(obsClient).downloadFile(Mockito.any(), Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"),
 				Mockito.anyString());
 		Mockito.doAnswer(i -> {
 			return fileCh2;
-		}).when(obsService).downloadFile(Mockito.any(), Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"),
+		}).when(obsClient).downloadFile(Mockito.any(), Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"),
 				Mockito.anyString());
 		Mockito.doAnswer(i -> {
 			return fileCh2;
-		}).when(obsService).downloadFile(Mockito.any(), Mockito.eq("KEY_OBS_SESSION_1_2.xml"), Mockito.anyString());
+		}).when(obsClient).downloadFile(Mockito.any(), Mockito.eq("KEY_OBS_SESSION_1_2.xml"), Mockito.anyString());
 
 		// Mock the XML converter
 		Mockito.doAnswer(i -> {
@@ -102,7 +100,7 @@ public class EdrsSessionFileServiceTest {
 	public void testCreateSessionFile() throws AbstractCodedException {
 		try {
 			EdrsSessionFile r1 = service.createSessionFile("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml");
-			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
+			Mockito.verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
 					Mockito.eq("S1A/SESSION_1/ch1/KEY_OBS_SESSION_1_1.xml"),
 
 					Mockito.eq("./tmp/"));
@@ -110,7 +108,7 @@ public class EdrsSessionFileServiceTest {
 			assertEquals(session1, r1);
 
 			EdrsSessionFile r2 = service.createSessionFile("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml");
-			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
+			Mockito.verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
 					Mockito.eq("S1A/SESSION_1/ch2/KEY_OBS_SESSION_1_2.xml"),
 
 					Mockito.eq("./tmp/"));
@@ -118,7 +116,7 @@ public class EdrsSessionFileServiceTest {
 			assertEquals(session2, r2);
 
 			EdrsSessionFile r3 = service.createSessionFile("KEY_OBS_SESSION_1_2.xml");
-			Mockito.verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
+			Mockito.verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.EDRS_SESSION),
 					Mockito.eq("KEY_OBS_SESSION_1_2.xml"),
 
 					Mockito.eq("./tmp/"));

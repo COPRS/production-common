@@ -30,11 +30,11 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class LevelProductsExtractorTest {
@@ -49,7 +49,7 @@ public class LevelProductsExtractorTest {
 	 * Elasticsearch services
 	 */
 	@Mock
-	protected ObsService obsService;
+	protected ObsClient obsClient;
 
 	/**
 	 * MQI service
@@ -132,7 +132,7 @@ public class LevelProductsExtractorTest {
 				new ProductDto("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
 						"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.L0_ACN, "NRT"));
 
-		extractor = new LevelProductsExtractor(esServices, obsService, mqiService, appStatus, extractorConfig,
+		extractor = new LevelProductsExtractor(esServices, obsClient, mqiService, appStatus, extractorConfig,
 				(new File("./test/workDir/")).getAbsolutePath() + File.separator, "manifest.safe", errorAppender, config, ".safe");
 	}
 
@@ -157,7 +157,7 @@ public class LevelProductsExtractorTest {
 		(new File("./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE/manifest.safe")).createNewFile();
 		(new File("./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).createNewFile();
 
-		extractor = new LevelProductsExtractor(esServices, obsService, mqiService, appStatus, extractorConfig,
+		extractor = new LevelProductsExtractor(esServices, obsClient, mqiService, appStatus, extractorConfig,
 				"./test/workDir2/", "manifest.safe", errorAppender, config,".safe");
 		assertTrue((new File("./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).exists());
 		assertTrue((new File("./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).exists());
@@ -189,7 +189,7 @@ public class LevelProductsExtractorTest {
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_SLICE, "NRT"));
 
-		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -221,7 +221,7 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_SLICE),
+		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_SLICE),
 				Mockito.eq("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
 				Mockito.eq(extractor.localDirectory));
 
@@ -239,7 +239,7 @@ public class LevelProductsExtractorTest {
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_ACN, "NRT"));
 
-		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -270,7 +270,7 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_ACN),
+		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_ACN),
 				Mockito.eq("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
 				Mockito.eq(extractor.localDirectory));
 
@@ -288,7 +288,7 @@ public class LevelProductsExtractorTest {
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L1_SLICE, "NRT"));
 
-		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -319,7 +319,7 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.L1_SLICE),
+		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L1_SLICE),
 				Mockito.eq("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
 				Mockito.eq(extractor.localDirectory));
 
@@ -328,7 +328,7 @@ public class LevelProductsExtractorTest {
 	@Test
 	public void testExtractMetadataL1Acn() throws MetadataExtractionException, AbstractCodedException {
 
-		String l1acnName = "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE";
+		String l1acnName = "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE";
 
 		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l1acnName
 				+ File.separator + "manifest.safe");
@@ -336,7 +336,7 @@ public class LevelProductsExtractorTest {
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l1acnName, l1acnName, ProductFamily.L1_ACN, "NRT"));
 
-		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -347,11 +347,11 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductName(l1acnName);
 		descriptor.setRelativePath(l1acnName);
 		descriptor.setSwathtype("IW");
-		descriptor.setResolution("_");
+		descriptor.setResolution("H");
 		descriptor.setProductClass("A");
-		descriptor.setProductType("IW_RAW__0A");
+		descriptor.setProductType("IW_GRDH_1A");
 		descriptor.setPolarisation("DV");
-		descriptor.setDataTakeId("021735");
+		descriptor.setDataTakeId("023A69");
 		descriptor.setProductFamily(ProductFamily.L1_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_ACN);
@@ -367,7 +367,7 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.L1_ACN),
+		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L1_ACN),
 				Mockito.eq(l1acnName + "/manifest.safe"), Mockito.eq(extractor.localDirectory));
 
 	}
@@ -383,7 +383,7 @@ public class LevelProductsExtractorTest {
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l2SliceName, l2SliceName, ProductFamily.L2_SLICE, "NRT"));
 
-		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -413,7 +413,7 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.L2_SLICE),
+		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L2_SLICE),
 				Mockito.eq(l2SliceName + "/manifest.safe"), Mockito.eq(extractor.localDirectory));
 
 	}
@@ -429,7 +429,7 @@ public class LevelProductsExtractorTest {
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l2acnName, l2acnName, ProductFamily.L2_ACN, "NRT"));
 
-		doReturn(file).when(obsService).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -460,7 +460,7 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsService, times(1)).downloadFile(Mockito.eq(ProductFamily.L2_ACN),
+		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L2_ACN),
 				Mockito.eq(l2acnName + "/manifest.safe"), Mockito.eq(extractor.localDirectory));
 	}
 

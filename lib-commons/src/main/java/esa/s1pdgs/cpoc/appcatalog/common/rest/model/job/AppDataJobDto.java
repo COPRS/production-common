@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Viveris Technologies
  */
-public class AppDataJobDto {
+public class AppDataJobDto<E> {
 
     /**
      * Job identifier
@@ -49,7 +49,7 @@ public class AppDataJobDto {
     /**
      * MQI messages linked to this job
      */
-    private List<GenericMessageDto<?>> messages;
+    private List<GenericMessageDto<E>> messages;
 
     /**
      * Product of this job
@@ -164,7 +164,7 @@ public class AppDataJobDto {
     /**
      * @return the messages
      */
-    public List<GenericMessageDto<?>> getMessages() {
+    public List<GenericMessageDto<E>> getMessages() {
         return messages;
     }
 
@@ -172,7 +172,7 @@ public class AppDataJobDto {
      * @param messages
      *            the messages to set
      */
-    public void setMessages(final List<GenericMessageDto<?>> messages) {
+    public void setMessages(final List<GenericMessageDto<E>> messages) {
         this.messages = messages;
     }
 
@@ -237,7 +237,7 @@ public class AppDataJobDto {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            AppDataJobDto other = (AppDataJobDto) obj;
+            final AppDataJobDto<?> other = (AppDataJobDto<?>) obj;
             ret = identifier == other.identifier
                     && Objects.equals(level, other.level)
                     && Objects.equals(pod, other.pod)

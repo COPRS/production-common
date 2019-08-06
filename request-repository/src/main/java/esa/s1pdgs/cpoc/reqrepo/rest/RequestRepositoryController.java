@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.reqrepo.rest;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -129,9 +130,8 @@ public class RequestRepositoryController {
 			@PathVariable("id") final String id
 	) {
 		LOGGER.info("get processing with id {}", id);
-		assertValidApiKey(apiKey);
-		
-		final Processing result = requestRepository.getProcessing(Long.parseLong(id));
+		assertValidApiKey(apiKey);		
+		final Processing result = requestRepository.getProcessing(parseId(id));
 		assertElementFound("processing", result, id);
 		return result;
 	}
@@ -151,6 +151,11 @@ public class RequestRepositoryController {
 	
 	static final List<MessageState> toMessageStates(final List<String> processingStatus)
 	{
+		if (processingStatus == null)
+		{
+			return Collections.emptyList();
+		}
+		
 		try {
 			return processingStatus.stream()
 					.map(s -> MessageState.valueOf(s))

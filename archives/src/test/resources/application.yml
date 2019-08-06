@@ -3,9 +3,10 @@ spring:
   application:
     name: s1pdgs-archives
     
+# Logging     
 logging:
-  config: ./test/log4j2-test.yml
-    
+  config: classpath:log4j2-test.yml
+     
 # KAFKA
 kafka:
   bootstrap-servers: 172.17.50.10:9200

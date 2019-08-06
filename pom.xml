@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.werum.s1pdgs</groupId>
 	<artifactId>s1pro-core</artifactId>
-	<version>0.4.0-SNAPSHOT</version>
+	<version>0.5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -226,6 +226,11 @@
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
 				<version>${elasticsearch.version}</version>
 			</dependency>
+				<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-client</artifactId>
+				<version>${elasticsearch.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.elasticsearch</groupId>
 				<artifactId>elasticsearch</artifactId>
@@ -258,15 +263,18 @@
 		<module>archives</module>
 		<module>compression</module>
 		<module>ingestor</module>
+		<module>inbox-polling</module>
+		<module>inbox-ingestion</module>
 		<module>job-generator</module>
 		<module>lib-commons</module>
+		<module>wrapper</module>
+		<module>request-repository</module>
+		<module>queue-watcher</module>
 		<module>metadata-catalog</module>
 		<module>mqi-client</module>
 		<module>mqi-server</module>
 		<module>obs-sdk</module>
+		<module>validation</module>
 		<module>scaler</module>
-		<module>wrapper</module>
-		<module>request-repository</module>
-		<module>queue-watcher</module>
 	</modules>
 </project>

@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
@@ -55,9 +56,10 @@ public class MetadataBuilder {
 	 * @return the JSONObject containing the metadata to index
 	 * 
 	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
 	 */
 	public JSONObject buildConfigFileMetadata(ConfigFileDescriptor descriptor, File file)
-			throws MetadataExtractionException {
+			throws MetadataExtractionException, MetadataMalformedException {
 		JSONObject metadataToIndex = new JSONObject();
 		switch (descriptor.getExtension()) {
 		case EOF:
@@ -116,9 +118,10 @@ public class MetadataBuilder {
      * @return the JSONObject containing the metadata to index
      * 
      * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
      */
     public JSONObject buildL0SegmentOutputFileMetadata(OutputFileDescriptor descriptor, File file)
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
         JSONObject metadataToIndex = new JSONObject();
         metadataToIndex = extractor.processL0Segment(descriptor, file);        
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
@@ -136,9 +139,10 @@ public class MetadataBuilder {
      * @return the JSONObject containing the metadata to index
      * 
      * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException 
      */
     public JSONObject buildOutputFileMetadata(OutputFileDescriptor descriptor, File file, ProductFamily productFamily)
-            throws MetadataExtractionException {
+            throws MetadataExtractionException, MetadataMalformedException {
         JSONObject metadataToIndex = new JSONObject();
         metadataToIndex = extractor.processProduct(descriptor, productFamily, file);        
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());

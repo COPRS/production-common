@@ -14,11 +14,11 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
-import esa.s1pdgs.cpoc.compression.model.obs.S3UploadFile;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -52,12 +52,12 @@ public class FileUploader {
 	/**
 	 * OBS service
 	 */
-	private final ObsService obsService;
+	private final ObsClient obsClient;
 
-	public FileUploader(final ObsService obsService, final OutputProducerFactory producerFactory,
+	public FileUploader(final ObsClient obsClient, final OutputProducerFactory producerFactory,
 			final String workingDir, final GenericMessageDto<ProductDto> inputMessage,
 			final ProductDto job) {
-		this.obsService = obsService;
+		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
 		this.workingDir = workingDir;
 		this.inputMessage = inputMessage;
@@ -81,7 +81,7 @@ public class FileUploader {
 						
 			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getFamily());
 			ProductFamily zipProductFamily = getCompressedProductFamily(job.getFamily());
-			S3UploadFile uploadFile = new S3UploadFile(zipProductFamily, zipFileName, productPath);
+			ObsUploadFile uploadFile = new ObsUploadFile(zipProductFamily, zipFileName, productPath);
 			
 			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName,zipFileName);
 			outputToPublish.add(cpqm);
@@ -100,13 +100,13 @@ public class FileUploader {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
-	final void processProducts(final Reporting.Factory reportingFactory, final S3UploadFile uploadFile,
+	final void processProducts(final Reporting.Factory reportingFactory, final ObsUploadFile uploadFile,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		this.obsService.uploadFilesPerBatch(Collections.singletonList(uploadFile));
+		this.obsClient.uploadFilesPerBatch(Collections.singletonList(uploadFile));
 
 
 		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);

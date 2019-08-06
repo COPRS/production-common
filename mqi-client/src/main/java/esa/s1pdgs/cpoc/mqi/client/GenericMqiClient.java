@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -124,13 +127,15 @@ public class GenericMqiClient {
             final String uri = nextUri(category);
             try {
             	final Class<T> clazz = category.getDtoClass();
-            	
-                @SuppressWarnings("unchecked")
-				final ResponseEntity<GenericMessageDto<T>> response = (ResponseEntity<GenericMessageDto<T>>) restTemplate.exchange(
+            	final ResolvableType type = ResolvableType.forClassWithGenerics(
+            			GenericMessageDto.class, 
+            			clazz
+            	);   
+				final ResponseEntity<GenericMessageDto<T>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.GET, 
                 		null, 
-                		clazz
+                		ParameterizedTypeReference.forType(type.getType())
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     return response.getBody();
@@ -203,7 +208,7 @@ public class GenericMqiClient {
      * @param message
      * @throws AbstractCodedException
      */
-    public void publish(final GenericPublicationMessageDto<?> message, final ProductCategory category)
+    public <E extends AbstractDto> void publish(final GenericPublicationMessageDto<E> message, final ProductCategory category)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -213,14 +218,17 @@ public class GenericMqiClient {
                     String.format("[uri %s] [body %s]", uri, message));
             try {
                 ResponseEntity<Void> response =
-                        restTemplate.exchange(uri, HttpMethod.POST,
-                                new HttpEntity<GenericPublicationMessageDto<?>>(message),
-                                Void.class);
+                        restTemplate.exchange(
+                        		uri, 
+                        		HttpMethod.POST,
+                                new HttpEntity<GenericPublicationMessageDto<E>>(message),
+                                Void.class
+                );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format(
                             "[uri %s] [body %s] [ret OK]", uri, message));
                     return;
-                } else {
+                } else {                	
                     waitOrThrow(retries,
                             new MqiPublishApiError(category, message,
                                     "HTTP status code "
@@ -228,6 +236,7 @@ public class GenericMqiClient {
                             "publish");
                 }
             } catch (RestClientException rce) {
+            	LOGGER.error(rce);
                 waitOrThrow(retries, new MqiPublishApiError(category, message,
                         "RestClientException occurred: " + rce.getMessage(),
                         rce), "publish");

@@ -58,6 +58,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -71,7 +72,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  * 
  * @author Cyrielle Gailliard
  */
-public abstract class AbstractJobsGenerator<T> implements Runnable {
+public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Runnable {
 
     /**
      * Logger
@@ -332,14 +333,14 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         
         try {
         	
-            List<AppDataJobDto> jobs = appDataService
+            List<AppDataJobDto<T>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
             } else {
-                for (AppDataJobDto appDataJob : jobs) {
+                for (AppDataJobDto<T> appDataJob : jobs) {
                     // Check if we can do a loop
                     long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
@@ -414,7 +415,9 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                 "{} [productName {}] 1 - Checking the pre-requirements",
                                 this.prefixLogMonitor, productName);
                         this.preSearch(job);
-                        AppDataJobDto modifiedJob = appDataService.patchJob(
+                        
+                        @SuppressWarnings("unchecked")
+						AppDataJobDto<T> modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getIdentifier(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
@@ -515,7 +518,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 newState,
                 job.getGeneration()
         );
-        AppDataJobDto modifiedJob = appDataService.patchTaskTableOfJob(
+        @SuppressWarnings("unchecked")
+		AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
         
@@ -530,7 +534,11 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {
-            final List<String> taskTables = job.getAppDataJob().getGenerations().stream()
+        	
+        	@SuppressWarnings("unchecked")
+			final AppDataJobDto<? extends AbstractDto> jobDto = job.getAppDataJob();
+        	
+            final List<String> taskTables =  jobDto.getGenerations().stream()
             	.map(g -> g.getTaskTable())
             	.collect(Collectors.toList());
 
@@ -913,7 +921,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
 
-        this.outputFactory.sendJob(job.getAppDataJob().getMessages().get(0), r);
+		@SuppressWarnings("unchecked")
+		final AppDataJobDto<T> dto = job.getAppDataJob();
+
+        this.outputFactory.sendJob(dto.getMessages().get(0), r);
     }
 
     protected abstract void customJobOrder(JobGeneration job);

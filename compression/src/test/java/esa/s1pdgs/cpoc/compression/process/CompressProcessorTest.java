@@ -1,52 +1,11 @@
 package esa.s1pdgs.cpoc.compression.process;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
-import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
-import esa.s1pdgs.cpoc.compression.TestUtils;
-import esa.s1pdgs.cpoc.compression.file.FileDownloader;
-import esa.s1pdgs.cpoc.compression.file.FileUploader;
-import esa.s1pdgs.cpoc.compression.obs.ObsService;
-import esa.s1pdgs.cpoc.compression.test.MockPropertiesTest;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-
 //public class CompressProcessorTest extends MockPropertiesTest {
 //	/**
 //     * Output processsor
 //     */
 //    @Mock
-//    private ObsService obsService;
+//    private ObsClient obsClient;
 //    
 //    @Mock
 //    private FileDownloader fileDownloader;
@@ -111,7 +70,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 //        }
 //        //TODO FIX
 ////        processor = new CompressProcessor(appStatus, properties,
-////                obsService,mqiService, mqiStatusService);
+////                obsClient,mqiService, mqiStatusService);
 //        
 //        procExecutorSrv = Executors.newSingleThreadExecutor();
 //        procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);

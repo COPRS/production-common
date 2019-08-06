@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.appcatalog.common;
 
 import java.util.Date;
 
-import org.springframework.data.annotation.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -13,10 +13,13 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * @author Viveris Technologies
  */
 public class MqiMessage extends AbstractRequest {
+	
+	// dirty workaround to have the mongodb id mapped
+	private long id;
+	
 	/**
 	 * Identifier of the message
 	 */
-	@Id
 	protected long identifier;
 	
     /**
@@ -56,6 +59,16 @@ public class MqiMessage extends AbstractRequest {
         this.lastReadDate = lastReadDate;
     }
     
+    @JsonIgnore
+	public long getId() {
+		return id;
+	}
+
+    @JsonIgnore
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	/**
 	 * @return the identifier
 	 */

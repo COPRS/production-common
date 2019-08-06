@@ -11,12 +11,12 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.archives.DevProperties;
-import esa.s1pdgs.cpoc.archives.services.ObsService;
 import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -35,7 +35,7 @@ public class SlicesConsumer {
     /**
      * Service for Object Storage
      */
-    private final ObsService obsService;
+    private final ObsClient obsClient;
 
     /**
      * Path to the shared volume
@@ -56,10 +56,10 @@ public class SlicesConsumer {
      * @param l0SlicesS3Services
      * @param l1SlicesS3Services
      */
-    public SlicesConsumer(final ObsService obsService,
+    public SlicesConsumer(final ObsClient obsClient,
             @Value("${file.slices.local-directory}") final String sharedVolume,
             final DevProperties devProperties, final AppStatus appStatus) {
-        this.obsService = obsService;
+        this.obsClient = obsClient;
         this.sharedVolume = sharedVolume;
         this.devProperties = devProperties;
         this.appStatus = appStatus;
@@ -78,12 +78,12 @@ public class SlicesConsumer {
         this.appStatus.setProcessing("SLICES");
         try {
             if (!devProperties.getActivations().get("download-all")) {
-                this.obsService.downloadFile(dto.getFamily(),
+                this.obsClient.downloadFile(dto.getFamily(),
                         dto.getKeyObjectStorage() + "/manifest.safe",
                         this.sharedVolume + "/"
                                 + dto.getFamily().name().toLowerCase());
             } else {
-                this.obsService.downloadFile(dto.getFamily(),
+                this.obsClient.downloadFile(dto.getFamily(),
                         dto.getKeyObjectStorage(), this.sharedVolume + "/"
                                 + dto.getFamily().name().toLowerCase());
             }

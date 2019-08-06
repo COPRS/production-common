@@ -61,7 +61,6 @@ public abstract class AbstractFileDescriptorService {
         }
 
         // Check if key matches the pattern
-
         return buildDescriptor(relativePath);
     }
 

@@ -136,7 +136,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJobDto job)
+    protected List<String> getTaskTables(final AppDataJobDto<ProductDto> job)
             throws JobGenMissingRoutingEntryException {
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"
@@ -154,10 +154,6 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
                 }
             }
         });
-        if (taskTables.isEmpty()) {
-            throw new JobGenMissingRoutingEntryException(
-                    String.format("No found routing entries for %s", key));
-        }
         return taskTables;
     }
 

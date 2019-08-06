@@ -18,10 +18,10 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
-import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
 
 /**
@@ -51,7 +51,7 @@ public class InputDownloader {
     /**
      * Factory for accessing to the object storage
      */
-    private final ObsService obsService;
+    private final ObsClient obsClient;
 
     /**
      * Path to the local working directory
@@ -87,7 +87,7 @@ public class InputDownloader {
     /**
      * Constructor
      * 
-     * @param obsService
+     * @param obsClient
      * @param localWorkingDir
      * @param inputs
      * @param sizeS3DownloadBatch
@@ -95,12 +95,12 @@ public class InputDownloader {
      * @param poolProcessorExecutor
      * @param appLevel
      */
-    public InputDownloader(final ObsService obsService,
+    public InputDownloader(final ObsClient obsClient,
             final String localWorkingDir, final List<LevelJobInputDto> inputs,
             final int sizeDownBatch, final String prefixMonitorLogs,
             final PoolExecutorCallable poolProcExecutor,
             final ApplicationLevel appLevel) {
-        this.obsService = obsService;
+        this.obsClient = obsClient;
         this.localWorkingDir = localWorkingDir;
         this.inputs = inputs;
         this.sizeDownBatch = sizeDownBatch;
@@ -121,13 +121,13 @@ public class InputDownloader {
 
         // Create necessary directories and download input with content in
         // message
-        List<S3DownloadFile> downloadToBatch = sortInputs();
+        List<ObsDownloadFile> downloadToBatch = sortInputs();
         
         final Reporting reporting = new LoggerReporting.Factory(LOGGER, "InputDownloader")
         		.newReporting(0);
         
         final StringBuilder stringBuilder = new StringBuilder();
-        for (final S3DownloadFile input : downloadToBatch) {
+        for (final ObsDownloadFile input : downloadToBatch) {
         	stringBuilder.append(input.getKey()).append(' ');
         }        
         final String listinputs = stringBuilder.toString().trim();
@@ -192,11 +192,11 @@ public class InputDownloader {
      * @throws InternalErrorException
      * @throws UnknownFamilyException
      */
-    protected List<S3DownloadFile> sortInputs()
+    protected List<ObsDownloadFile> sortInputs()
             throws InternalErrorException, UnknownFamilyException {
         LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 
-        List<S3DownloadFile> downloadToBatch = new ArrayList<>();
+        List<ObsDownloadFile> downloadToBatch = new ArrayList<>();
 
         for (LevelJobInputDto input : inputs) {
             // Check if a directory shall be created
@@ -226,7 +226,7 @@ public class InputDownloader {
                     LOGGER.info("Input {}-{} will be stored in {}",
                             input.getFamily(), input.getContentRef(),
                             input.getLocalPath());
-                    downloadToBatch.add(new S3DownloadFile(
+                    downloadToBatch.add(new ObsDownloadFile(
                             ProductFamily.fromValue(input.getFamily()),
                             input.getContentRef(),
                             (new File(input.getLocalPath()).getParent())));
@@ -252,7 +252,7 @@ public class InputDownloader {
      * @param downloadToBatch
      * @throws AbstractCodedException
      */
-    private final void downloadInputs(final List<S3DownloadFile> downloadToBatch)
+    private final void downloadInputs(final List<ObsDownloadFile> downloadToBatch)
             throws AbstractCodedException {
 
         final int numberOfBatches = (int) Math.ceil(((double) downloadToBatch.size()) / ((double) sizeDownBatch));
@@ -264,8 +264,8 @@ public class InputDownloader {
             } else {
                 LOGGER.info("{} 4 - Starting downloading batch {}", prefixMonitorLogs, i);
                 int lastIndex = Math.min((i + 1) * sizeDownBatch, downloadToBatch.size());                
-                List<S3DownloadFile> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
-                this.obsService.downloadFilesPerBatch(subListS3);
+                List<ObsDownloadFile> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
+                this.obsClient.downloadFilesPerBatch(subListS3);
                 if (appLevel == ApplicationLevel.L0 && nbUploadedRaw < 2) {
                     nbUploadedRaw += subListS3.stream().filter(
                             file -> file.getFamily() == ProductFamily.EDRS_SESSION)

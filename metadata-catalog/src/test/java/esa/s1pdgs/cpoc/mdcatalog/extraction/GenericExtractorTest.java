@@ -26,13 +26,13 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class GenericExtractorTest {
@@ -47,7 +47,7 @@ public class GenericExtractorTest {
      * Elasticsearch services
      */
     @Mock
-    protected ObsService obsService;
+    protected ObsClient obsClient;
 
     /**
      * MQI service
@@ -104,7 +104,7 @@ public class GenericExtractorTest {
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         ProductFamily.L0_ACN, "NRT"));
 
-        extractor = new LevelProductsExtractor(esServices, obsService,
+        extractor = new LevelProductsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath(),
                 "manifest.safe", errorAppender, config, ".safe");
@@ -197,7 +197,7 @@ public class GenericExtractorTest {
 
         extractor.genericExtract();
         verify(mqiService, times(1)).next(Mockito.any());
-        verifyZeroInteractions(obsService);
+        verifyZeroInteractions(obsClient);
         verify(appStatus, times(1))
                 .setWaiting(Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
         verifyNoMoreInteractions(appStatus);
@@ -210,7 +210,7 @@ public class GenericExtractorTest {
 
         extractor.genericExtract();
         verify(mqiService, times(1)).next(Mockito.any());
-        verifyZeroInteractions(obsService);
+        verifyZeroInteractions(obsClient);
         verify(appStatus, times(1))
                 .setWaiting(Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
         verifyNoMoreInteractions(appStatus);

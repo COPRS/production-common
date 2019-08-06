@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
+
 /**
  * Clean empty directories (since too long) of auxiliary and EDRS session FTP
  * directories
@@ -99,7 +101,7 @@ public class LocalDirectoryCleaning {
             }
         } catch (SecurityException e) {
             LOGGER.error("[code {}] [directory {}] [age {}] [msg {}]", 202,
-                    directory, minAge, e.getMessage());
+                    directory, minAge, LogUtils.toString(e));
         }
     }
 

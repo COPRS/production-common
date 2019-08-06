@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: s1pdgs-inbox-ingestion
+    
+logging:
+  config: classpath:log4j2-test.yml
+  
+ingestion:
+  hostname: ${HOSTNAME}
+  polling-interval-ms: 10000
+  max-retries: 10                                                # the maximal number of consecutive retries for unsuccessful deletion
+  tempo-retry-ms: 10000  
+  types:
+    - family: AUXILIARY_FILE 
+      regex: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
+
+# KAFKA
+kafka:
+  bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors
+
+# MQI config
+mqi:
+  host-uri: http://localhost:8081                               # the host and port for querying MQI server
+  max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
+  tempo-retry-ms: 1000                                          # 
+
+scheduling:
+  enable: false
+     

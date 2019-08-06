@@ -10,7 +10,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
-import esa.s1pdgs.cpoc.wrapper.job.model.obs.S3DownloadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 
 public class TestUtils {
 
@@ -45,49 +45,49 @@ public class TestUtils {
         return dto;
     }
 
-    public static List<S3DownloadFile> getL0DownloadFile() {
+    public static List<ObsDownloadFile> getL0DownloadFile() {
         return getL0DownloadFile(buildL0LevelJobDto());
     }
 
-    public static List<S3DownloadFile> getL0DownloadFile(LevelJobDto l0Job) {
+    public static List<ObsDownloadFile> getL0DownloadFile(LevelJobDto l0Job) {
 
-        List<S3DownloadFile> downloadToBatch = new ArrayList<>();
-        downloadToBatch.add(new S3DownloadFile(
+        List<ObsDownloadFile> downloadToBatch = new ArrayList<>();
+        downloadToBatch.add(new ObsDownloadFile(
                 ProductFamily.fromValue(l0Job.getInputs().get(0).getFamily()),
                 l0Job.getInputs().get(0).getContentRef(),
                 (new File(l0Job.getInputs().get(0).getLocalPath())
                         .getParent())));
-        downloadToBatch.add(new S3DownloadFile(
+        downloadToBatch.add(new ObsDownloadFile(
                 ProductFamily.fromValue(l0Job.getInputs().get(1).getFamily()),
                 l0Job.getInputs().get(1).getContentRef(),
                 (new File(l0Job.getInputs().get(1).getLocalPath())
                         .getParent())));
-        downloadToBatch.add(new S3DownloadFile(
+        downloadToBatch.add(new ObsDownloadFile(
                 ProductFamily.fromValue(l0Job.getInputs().get(2).getFamily()),
                 l0Job.getInputs().get(2).getContentRef(),
                 (new File(l0Job.getInputs().get(2).getLocalPath())
                         .getParent())));
-        downloadToBatch.add(new S3DownloadFile(
+        downloadToBatch.add(new ObsDownloadFile(
                 ProductFamily.fromValue(l0Job.getInputs().get(4).getFamily()),
                 l0Job.getInputs().get(4).getContentRef(),
                 (new File(l0Job.getInputs().get(4).getLocalPath())
                         .getParent())));
-        downloadToBatch.add(new S3DownloadFile(
+        downloadToBatch.add(new ObsDownloadFile(
                 ProductFamily.fromValue(l0Job.getInputs().get(5).getFamily()),
                 l0Job.getInputs().get(5).getContentRef(),
                 (new File(l0Job.getInputs().get(5).getLocalPath())
                         .getParent())));
-        downloadToBatch.add(new S3DownloadFile(
+        downloadToBatch.add(new ObsDownloadFile(
                 ProductFamily.fromValue(l0Job.getInputs().get(6).getFamily()),
                 l0Job.getInputs().get(6).getContentRef(),
                 (new File(l0Job.getInputs().get(6).getLocalPath())
                         .getParent())));
-        downloadToBatch.add(new S3DownloadFile(
+        downloadToBatch.add(new ObsDownloadFile(
                 ProductFamily.fromValue(l0Job.getInputs().get(7).getFamily()),
                 l0Job.getInputs().get(7).getContentRef(),
                 (new File(l0Job.getInputs().get(7).getLocalPath())
                         .getParent())));
-        downloadToBatch.add(new S3DownloadFile(
+        downloadToBatch.add(new ObsDownloadFile(
                 ProductFamily.fromValue(l0Job.getInputs().get(8).getFamily()),
                 l0Job.getInputs().get(8).getContentRef(),
                 (new File(l0Job.getInputs().get(8).getLocalPath())

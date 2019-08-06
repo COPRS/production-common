@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
@@ -175,11 +176,12 @@ public class GenericMessageListener<T>
             final Acknowledgment acknowledgment) {
         try {
             acknowledgment.acknowledge();
-        } catch (Exception exc) {
+        } catch (Exception e) {
             LOGGER.error(
                     "[topic {}] [partition {}] [offset {}] Cannot ack KAFKA message: {}",
                     data.topic(), data.partition(), data.offset(),
-                    exc.getMessage());
+                    LogUtils.toString(e)
+                    );
         }
     }
 

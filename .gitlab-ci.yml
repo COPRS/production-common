@@ -7,7 +7,7 @@ variables:
   DOCKER_HOST: tcp://localhost:2375
   MODULE: s1pro-core
   BRANCH: $CI_COMMIT_REF_SLUG
-  VERSION: 0.4.0-SNAPSHOT
+  VERSION: 0.5.0-SNAPSHOT
 
 stages:
   - build
@@ -32,9 +32,12 @@ include:
   - local: compression/.gitlab-ci.yml
   - local: request-repository/.gitlab-ci.yml
   - local: ingestor/.gitlab-ci.yml
+  - local: inbox-polling/.gitlab-ci.yml
+  - local: inbox-ingestion/.gitlab-ci.yml
   - local: job-generator/.gitlab-ci.yml
   - local: metadata-catalog/.gitlab-ci.yml
   - local: mqi-server/.gitlab-ci.yml
   - local: scaler/.gitlab-ci.yml
   - local: queue-watcher/.gitlab-ci.yml
+  - local: validation/.gitlab-ci.yml
   - local: wrapper/.gitlab-ci.yml

@@ -30,11 +30,11 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class LevelSegmentsExtractorTest {
@@ -49,7 +49,7 @@ public class LevelSegmentsExtractorTest {
      * Elasticsearch services
      */
     @Mock
-    protected ObsService obsService;
+    protected ObsClient obsClient;
 
     /**
      * MQI service
@@ -137,7 +137,7 @@ public class LevelSegmentsExtractorTest {
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                         ProductFamily.L0_SEGMENT, "NRT"));
 
-        extractor = new LevelSegmentsExtractor(esServices, obsService,
+        extractor = new LevelSegmentsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath()
                         + File.separator,
@@ -173,7 +173,7 @@ public class LevelSegmentsExtractorTest {
                 "./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"))
                         .createNewFile();
 
-        extractor = new LevelSegmentsExtractor(esServices, obsService,
+        extractor = new LevelSegmentsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig, "./test/workDir2/",
                 "manifest.safe", errorAppender, config, ".safe");
         assertTrue((new File(
@@ -225,7 +225,7 @@ public class LevelSegmentsExtractorTest {
                         "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
                         ProductFamily.L0_SEGMENT, "FAST"));
 
-        doReturn(file).when(obsService).downloadFile(Mockito.any(),
+        doReturn(file).when(obsClient).downloadFile(Mockito.any(),
                 Mockito.anyString(), Mockito.anyString());
 
         OutputFileDescriptor descriptor = new OutputFileDescriptor();
@@ -264,7 +264,7 @@ public class LevelSegmentsExtractorTest {
             }
         }
 
-        verify(obsService, times(1)).downloadFile(
+        verify(obsClient, times(1)).downloadFile(
                 Mockito.eq(ProductFamily.L0_SEGMENT),
                 Mockito.eq(
                         "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe"),

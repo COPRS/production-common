@@ -110,7 +110,7 @@ public class L0SegmentAppConsumer
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
             reporting.reportStart("Start job generation using " + mqiMessage.getBody().getProductName());
-            AppDataJobDto appDataJob = buildJob(mqiMessage);
+            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -155,13 +155,13 @@ public class L0SegmentAppConsumer
         reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
     }
 
-    protected AppDataJobDto buildJob(
+    protected AppDataJobDto<ProductDto> buildJob(
             GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJobDto> existingJobs = appDataService
+        List<AppDataJobDto<ProductDto>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -179,13 +179,13 @@ public class L0SegmentAppConsumer
             String datatakeID = m.group(this.patternGroups.get("datatakeId"));
 
             // Search job for given datatake id
-            List<AppDataJobDto> existingJobsForDatatake =
+            List<AppDataJobDto<ProductDto>> existingJobsForDatatake =
                     appDataService.findByProductDataTakeId(datatakeID);
 
             if (CollectionUtils.isEmpty(existingJobsForDatatake)) {
 
                 // Create the JOB
-                AppDataJobDto jobDto = new AppDataJobDto();
+                AppDataJobDto<ProductDto> jobDto = new AppDataJobDto<>();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());

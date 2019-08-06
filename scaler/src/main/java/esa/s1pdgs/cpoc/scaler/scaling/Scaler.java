@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.common.errors.k8s.K8sUnknownResourceException;
 import esa.s1pdgs.cpoc.common.errors.k8s.PodResourceException;
 import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStopException;
 import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.scaler.DevProperties;
 import esa.s1pdgs.cpoc.scaler.k8s.K8SAdministration;
 import esa.s1pdgs.cpoc.scaler.k8s.K8SMonitoring;
@@ -38,6 +39,7 @@ import esa.s1pdgs.cpoc.scaler.k8s.model.WrapperPodMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoring;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
 import esa.s1pdgs.cpoc.scaler.openstack.OpenStackAdministration;
+import esa.s1pdgs.cpoc.scaler.openstack.OpenStackServerProperties.ServerProperties;
 
 /**
  * L1 resources scaler
@@ -141,7 +143,7 @@ public class Scaler {
                     e.getLogMessage());
         } catch (Exception e) {
             LOGGER.error("[INIT] [code {}] [msg {}]",
-                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage(), e);
+                    ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
         }
 
     }
@@ -293,7 +295,7 @@ public class Scaler {
                     e.getCode().getCode(), e.getLogMessage());
         } catch (Exception e) {
             LOGGER.error("[MONITOR] [step {}] [code {}] [msg {}]", step,
-                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage(), e);
+                    ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
         }
         LOGGER.info("[MONITOR] [step 0] End");
     }
@@ -550,18 +552,29 @@ public class Scaler {
 
         // Remove the corresponding VM
         if (!CollectionUtils.isEmpty(nodesToDelete)) {
-            nodesToDelete.forEach(node -> {
+        	for (WrapperNodeMonitor node : nodesToDelete) {
+        		/*
+            	 * Previous versions had been using externalId in order to address the server.
+            	 * This should basically never worked as expected and its not clear why this decision
+            	 * was made. We are now using the server name as this seems to be the most obvious approach.
+            	 */
+            	String serverId = osAdministration.lookUpServerId(node.getDescription().getName());
+            	if (serverId == null) {
+            		LOGGER.error(
+                            "[MONITOR] [step 6] [serverName {}] 3 - Unable to identify server",
+                            node.getDescription().getName());
+            		continue;
+            	}
                 LOGGER.info(
-                        "[MONITOR] [step 6] [serverId {}] 3 - Starting removing server",
-                        node.getDescription().getExternalId());
+                        "[MONITOR] [step 6] [serverId {}] 3 - Starting removing server '{}'",
+                        serverId, node.getDescription().getName());
                 try {
-                    this.osAdministration.deleteServer(
-                            node.getDescription().getExternalId());
+                    this.osAdministration.deleteServer(serverId);
                 } catch (OsEntityException e) {
                     LOGGER.error("[MONITOR] [step 6] [code {}] {}",
                             e.getCode().getCode(), e.getLogMessage());
                 }
-            });
+        	}        			
         }
     }
 }

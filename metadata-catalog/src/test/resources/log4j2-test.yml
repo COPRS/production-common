@@ -7,51 +7,35 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-metadata-catalog-app:1.0.0 %-5level: %msg [%thread] %n"
-    RollingFile:
-      name: FILE
-      fileName: ${env:catalog_logging_file:-./s1pdgs-metadata-catalog.log}
-      filePattern: "${env:catalog_logging_file:-./s1pdgs-metadata-catalog.log}.%d{yyyy-MM-dd-hh-mm}.gz"
-      PatternLayout:
-        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-metadata-catalog-app:1.0.0 %-5level: %msg [%thread] %n"
-      Policies:
-        SizeBasedTriggeringPolicy:
-          size: 10 MB
-      DefaultRollOverStrategy:
-        max: 30
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level: %msg [%thread] %n"
   Loggers:
     logger:
-      - name: esa.s1pdgs.cpoc
-        level: info
+      - name: esa.s1pdgs.cpoc.mdcatalog
+        level: debug
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
-      - name: org.springframework
-        level: error
+      - name: org
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
       - name: kafka
         level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
       - name: org.apache
         level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
       - name: com.amazonaws
         level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE
     Root:
-      level: error
+      level: debug
       AppenderRef:
         ref: STDOUT

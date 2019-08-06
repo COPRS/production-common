@@ -16,6 +16,7 @@ public class ProductDistributionControllerAdvice extends ResponseEntityException
     @ExceptionHandler(ProductDistributionException.class)
     @ResponseBody
 	ResponseEntity<?> handleControllerException(final HttpServletRequest request, final Throwable e) {
+    	ProductDistributionController.LOGGER.error(e);
 		return new ResponseEntity<Void>(((ProductDistributionException) e).getStatus());
 	}
 }

@@ -1,15 +1,16 @@
 package esa.s1pdgs.cpoc.ingestor.files;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
-import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 /**
  * 
@@ -19,16 +20,18 @@ public class AuxiliaryFilesProcessor
         extends AbstractFileProcessor<ProductDto> {
 
     /**
-     * @param obsService
+     * @param obsClient
      * @param publisher
      * @param extractor
      */
     @Autowired
-    public AuxiliaryFilesProcessor(final ObsService obsService,
+    public AuxiliaryFilesProcessor(final ObsClient obsClient,
             final KafkaConfigFileProducer publisher,
             final AuxiliaryFileDescriptorService extractor,
-            final AppStatus appStatus) {
-        super(obsService, publisher, extractor, ProductFamily.AUXILIARY_FILE, appStatus);
+            final AppStatus appStatus,
+            @Value("${file.auxiliary-files.local-directory}") final String pickupDirectory,
+            @Value("${file.backup-directory}") final String backupDirectory) {
+        super(obsClient, publisher, extractor, ProductFamily.AUXILIARY_FILE, appStatus, pickupDirectory, backupDirectory);
     }
 
     /**

@@ -6,6 +6,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 
 /**
  * Group products per category
@@ -19,7 +20,8 @@ public enum ProductCategory {
     LEVEL_PRODUCTS(ProductDto.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
     LEVEL_SEGMENTS(ProductDto.class), 
-    COMPRESSED_PRODUCTS(ProductDto.class);
+    COMPRESSED_PRODUCTS(ProductDto.class),
+    INGESTION(IngestionDto.class);
 
     /**
      * Get the category for a given product family
@@ -42,6 +44,10 @@ public enum ProductCategory {
             case EDRS_SESSION:
                 ret = ProductCategory.EDRS_SESSIONS;
                 break;
+            case INVALID: // --> failed ingestion    
+            case BLANK: // --> nominal polling ingestion
+            	ret = ProductCategory.INGESTION;
+            	break;
             case L0_JOB:
             case L1_JOB:
             case L2_JOB:
