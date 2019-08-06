@@ -11,10 +11,14 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * @author Viveris Technologies
  */
 public class MqiMessage extends AbstractRequest {
+	
+	// dirty workaround to have the mongodb id mapped
+	private long id;
+	
 	/**
 	 * Identifier of the message
 	 */
-	protected long id;
+	protected long identifier;
 	
     /**
      * Pod who read the message
@@ -65,14 +69,14 @@ public class MqiMessage extends AbstractRequest {
 	 * @return the identifier
 	 */
 	public long getIdentifier() {
-	    return id;
+	    return identifier;
 	}
 
 	/**
 	 * @param identifier the identifier to set
 	 */
 	public void setIdentifier(long identifier) {
-		this.id = identifier;
+		this.identifier = identifier;
 	}
 
     /**
@@ -105,7 +109,7 @@ public class MqiMessage extends AbstractRequest {
      */
     @Override
     public String toString() {
-        return "{\"category\":\"" + category + "\", \"identifier\":\"" + id
+        return "{\"category\":\"" + category + "\", \"identifier\":\"" + identifier
                 + "\", \"topic\":\"" + topic + "\", \"partition\":\"" + partition + "\", \"offset\":\""
                 + offset + "\", \"group\":\"" + group + "\", \"state\":\"" + state
                 + "\", \"readingPod\":\"" + readingPod + "\", \"lastReadDate\":\""
@@ -127,7 +131,7 @@ public class MqiMessage extends AbstractRequest {
                 + ((creationDate == null) ? 0 : creationDate.hashCode());
         result = prime * result + ((dto == null) ? 0 : dto.hashCode());
         result = prime * result + ((group == null) ? 0 : group.hashCode());
-        result = prime * result + (int) (id ^ (id >>> 32));
+        result = prime * result + (int) (identifier ^ (identifier >>> 32));
         result = prime * result
                 + ((lastAckDate == null) ? 0 : lastAckDate.hashCode());
         result = prime * result
@@ -176,7 +180,7 @@ public class MqiMessage extends AbstractRequest {
                 return false;
         } else if (!group.equals(other.group))
             return false;
-        if (id != other.id)
+        if (identifier != other.identifier)
             return false;
         if (lastAckDate == null) {
             if (other.lastAckDate != null)
