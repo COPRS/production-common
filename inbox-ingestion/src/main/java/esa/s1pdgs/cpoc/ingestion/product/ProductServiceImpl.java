@@ -4,12 +4,15 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.ingestion.IngestionService;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
@@ -17,6 +20,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Service
 public class ProductServiceImpl implements ProductService {	
+	static final Logger LOG = LogManager.getLogger(ProductServiceImpl.class);
+	
     private final ObsClient obsClient;
 	
 	@Autowired
@@ -33,13 +38,20 @@ public class ProductServiceImpl implements ProductService {
 				family, 
 				ProductCategory.fromProductFamily(family).getDtoClass()
 		);
+		LOG.debug("Using {} for {}", productFactory, family);
 		
 		final ObsAdapter obsAdapter = newObsAdapterFor(file);
 		final List<Product<E>> result = productFactory.newProducts(file, obsAdapter);					
 
 		// is restart scenario?
 		if (ingestion.getFamily() == ProductFamily.INVALID) {
-			obsAdapter.move(ProductFamily.INVALID, family, file);			
+			
+			// has been already restarted before?
+			if (family == ProductFamily.INVALID) {
+				
+			} else {
+				obsAdapter.move(ProductFamily.INVALID, family, file);	
+			}
 		} else {
 			obsAdapter.upload(family, file);
 		}		
@@ -67,13 +79,13 @@ public class ProductServiceImpl implements ProductService {
 	
 	static void assertPermissions(final IngestionDto ingestion, final File file) {
 		if (!file.exists()) {
-			throw new ProductException(String.format("File %s of %s does not exist", file, ingestion));
+			throw new RuntimeException(String.format("File %s of %s does not exist", file, ingestion));
 		}
 		if (!file.canRead()) {
-			throw new ProductException(String.format("File %s of %s is nor readable", file, ingestion));
+			throw new RuntimeException(String.format("File %s of %s is nor readable", file, ingestion));
 		}
 		if (!file.canWrite()) {
-			throw new ProductException(String.format("File %s of %s is nor writeable", file, ingestion));
+			throw new RuntimeException(String.format("File %s of %s is nor writeable", file, ingestion));
 		}
 	}
 }

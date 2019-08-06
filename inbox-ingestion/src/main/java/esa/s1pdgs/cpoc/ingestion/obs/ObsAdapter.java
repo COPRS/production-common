@@ -21,14 +21,14 @@ public class ObsAdapter {
 		this.inboxPath 	= inboxPath;
 	}
 	
-	public final void upload(final ProductFamily family, final File file) throws ProductException {
+	public final void upload(final ProductFamily family, final File file) {
 		final String obsKey = toObsKey(file);
 		try {
 			if (!obsClient.exist(family, obsKey)) {
 				obsClient.uploadFile(family, obsKey, file);
 			}
 		} catch (ObsException e) {
-			throw new ProductException(
+			throw new RuntimeException(
 					String.format("Error uploading file %s (%s): %s", file, family, LogUtils.toString(e))
 			);
 		}
@@ -42,7 +42,7 @@ public class ObsAdapter {
 						String.format("File %s (%s) to move does not exist", obsKey, from)
 				);
 			}
-			if (!obsClient.exist(to, obsKey)) {
+			if (obsClient.exist(to, obsKey)) {
 				throw new ProductException(
 						String.format("File %s (%s) to already exist", obsKey, to)
 				);

@@ -87,7 +87,7 @@ public class FileUtils {
     }
     
     public static void deleteWithRetries(final File file, int numRetries, long retrySleep) 
-    		throws InternalErrorException, InterruptedException {
+    		throws InterruptedException {
     	Retries.performWithRetries(
     			() -> {	delete(file.getPath()) ; return null;}, 
     			numRetries, 
