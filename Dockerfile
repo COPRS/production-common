@@ -16,6 +16,7 @@ COPY app-catalog-client/ /app/app-catalog-client
 COPY applicative-catalog/ /app/applicative-catalog
 COPY archives/ /app/archives
 COPY compression/ /app/compression
+COPY disseminator/ /app/disseminator
 COPY ingestor/ /app/ingestor
 COPY inbox-polling/ /app/inbox-polling
 COPY inbox-ingestion/ /app/inbox-ingestion
@@ -50,6 +51,7 @@ RUN echo ${COMMIT_ID} >> VERSION
 COPY --from=buildenv /app/applicative-catalog/target /app/applicative-catalog/target
 COPY --from=buildenv /app/archives/target /app/archives/target
 COPY --from=buildenv /app/compression/target /app/compression/target
+COPY --from=buildenv /app/disseminator/target /app/disseminator/target
 COPY --from=buildenv /app/ingestor/target /app/ingestor/target
 COPY --from=buildenv /app/inbox-polling/target /app/inbox-polling/target
 COPY --from=buildenv /app/inbox-ingestion/target /app/inbox-ingestion/target

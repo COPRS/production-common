@@ -262,6 +262,7 @@
 		<module>app-catalog-client</module>
 		<module>archives</module>
 		<module>compression</module>
+		<module>disseminator</module>
 		<module>ingestor</module>
 		<module>inbox-polling</module>
 		<module>inbox-ingestion</module>
