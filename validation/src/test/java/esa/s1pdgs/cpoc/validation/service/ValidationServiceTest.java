@@ -290,20 +290,29 @@ public class ValidationServiceTest {
 		md2.setKeyObjectStorage("MPL_SF_PRODUCT2");
 		SearchMetadata md3 = new SearchMetadata();
 		md3.setKeyObjectStorage("AUX_MPL_PRODUCT3");
+		
+		SearchMetadata md4 = new SearchMetadata();
+		md4.setKeyObjectStorage("S1B_AUX_CAL_V201600000_G201700000000.SAFE");
 
 		List<SearchMetadata> metadataResults = new ArrayList<>();
 		metadataResults.add(md1);
 		metadataResults.add(md2);
-		metadataResults.add(md3);
+		metadataResults.add(md3); // Fail
+		metadataResults.add(md4);
 
 		ObsObject ob1 = new ObsObject("AUX_PP1_PRODUCT1", family);
 		ObsObject ob2 = new ObsObject("MPL_SF_PRODUCT2", family);
+		ObsObject ob3 = new ObsObject("S1B_AUX_CAL_V201600000_G201700000000.SAFE/manifest.SAFE", family);
+		ObsObject ob4 = new ObsObject("S1B_AUX_CAL_V201600000_G201700000000.SAFE/data.dat", family);
 		
 		Map<String, ObsObject> obsResults = new HashMap<>();
 		obsResults.put("AUX_PP1/data.xsd", ob1);
 		obsResults.put("AUX_PP1/other.xsd", ob1);
 		
 		obsResults.put("MPL_SF/other.xsd", ob2);
+		
+		obsResults.put("S1B_AUX_CAL_V201600000_G201700000000.SAFE/manifest.SAFE", ob3);
+		obsResults.put("S1B_AUX_CAL_V201600000_G201700000000.SAFE/data.dat", ob4);
 
 		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);

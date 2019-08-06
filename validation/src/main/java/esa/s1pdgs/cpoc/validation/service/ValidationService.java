@@ -59,8 +59,6 @@ public class ValidationService {
 
 		final Reporting reportingMetadata = reportingFactory.newReporting(1);
 
-		int discrepancies = 0;
-
 		try {
 
 			List<SearchMetadata> metadataResults = null;
@@ -121,7 +119,7 @@ public class ValidationService {
 			} else {
 				reportingMetadata.reportError("Products not present in MetadataCatalog: {}",
 						buildProductList(metadataDiscrepancies));
-				reportingValidation.reportError("Discrepancy found for {} product(s)", discrepancies);
+				reportingValidation.reportError("Discrepancy found for {} product(s)", metadataDiscrepancies.size());
 			}
 /*
 			if (obsDiscrepancies.isEmpty()) {
@@ -160,8 +158,14 @@ public class ValidationService {
 		String key = metadata.getKeyObjectStorage();
 		
 		for (ObsObject obj: objects) {
-			String auxname = obj.getKey().substring(0,obj.getKey().length());			
-			if (key.equals(auxname)) {
+			//
+			String obsKey = obj.getKey();
+			// some products are .SAFE. In this case, we ignore everything behind the first slah
+			if (obsKey.contains(".SAFE")) {
+				obsKey = obsKey.substring(0,obsKey.indexOf("/"));
+			}
+//			LOGGER.info("key: {}, aux: {}", key, obsKey);
+			if (key.contains(obsKey)) {
 				return true;
 			}
 		}
