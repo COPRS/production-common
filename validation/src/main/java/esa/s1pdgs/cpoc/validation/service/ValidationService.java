@@ -117,9 +117,11 @@ public class ValidationService {
 
 			if (metadataDiscrepancies.isEmpty()) {
 				reportingMetadata.reportStop("No discrepancies found in MetadataCatalog");
+				reportingValidation.reportStop("No discrepancy found");
 			} else {
 				reportingMetadata.reportError("Products not present in MetadataCatalog: {}",
 						buildProductList(metadataDiscrepancies));
+				reportingValidation.reportError("Discrepancy found for {} product(s)", discrepancies);
 			}
 /*
 			if (obsDiscrepancies.isEmpty()) {
@@ -159,7 +161,6 @@ public class ValidationService {
 		
 		for (ObsObject obj: objects) {
 			String auxname = obj.getKey().substring(0,obj.getKey().length());			
-			LOGGER.info("Key: {} , aux: {}", key, auxname);
 			if (key.equals(auxname)) {
 				return true;
 			}
@@ -173,7 +174,6 @@ public class ValidationService {
 		
 		for (ObsObject obj: objects) {
 			String obsKey = obj.getKey();
-			LOGGER.info("Key: {} , obs: {}", key, obsKey);
 			if (key.equals(obsKey)) {
 				return true;
 			}
@@ -186,7 +186,6 @@ public class ValidationService {
 		
 		for (ObsObject obj: objects) {
 			String obsKey = obj.getKey().substring(0,obj.getKey().indexOf("/"));
-			LOGGER.info("Key: {} , obs: {}", key, obsKey);
 			if (key.equals(obsKey)) {
 				return true;
 			}
