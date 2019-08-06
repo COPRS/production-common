@@ -26,10 +26,8 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
     
 
 	@Override
-	public List<Product<ProductDto>> newProducts(final File file, final ObsAdapter obsAdapter) throws ProductException {	
-		
+	public List<Product<ProductDto>> newProducts(final File file, final ObsAdapter obsAdapter) throws ProductException {			
 		final List<Product<ProductDto>> result = new ArrayList<>();
-
 		result.add(newProduct(file, obsAdapter));
 		
 		// find manifest
@@ -52,6 +50,11 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
 		}
 		return result;
 	}
+	
+	@Override
+	public String toString() {
+		return "AuxiliaryProductFactory";
+	}
 
 	private final Product<ProductDto> newProduct(final File file, final ObsAdapter obsAdapter) {
 		final Product<ProductDto> prod = new Product<>();
@@ -66,4 +69,6 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
 		prod.setDto(dto);
 		return prod;
 	}
+
+
 }

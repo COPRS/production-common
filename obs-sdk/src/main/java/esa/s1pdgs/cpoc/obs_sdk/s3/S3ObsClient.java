@@ -33,144 +33,121 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
  */
 public class S3ObsClient extends AbstractObsClient {
 
-    private static final Logger LOGGER =
-            LogManager.getLogger(S3ObsClient.class);
-	
-    /**
-     * Configuration
-     */
-    protected final S3Configuration configuration;
+	private static final Logger LOGGER = LogManager.getLogger(S3ObsClient.class);
 
-    /**
-     * Amazon S3 client
-     */
-    protected final S3ObsServices s3Services;
+	/**
+	 * Configuration
+	 */
+	protected final S3Configuration configuration;
 
-    /**
-     * Default constructor
-     * 
-     * @throws ObsServiceException
-     */
-    public S3ObsClient() throws ObsServiceException {
-        super();
-        configuration = new S3Configuration();
-        AmazonS3 client = configuration.defaultS3Client();
-        TransferManager manager =
-                configuration.defaultS3TransferManager(client);
-        s3Services = new S3ObsServices(client, manager,
-                configuration.getIntOfConfiguration("retry-policy.condition.max-retries"),
-                configuration.getIntOfConfiguration("retry-policy.backoff.throttled-base-delay-ms"));
-    }
+	/**
+	 * Amazon S3 client
+	 */
+	protected final S3ObsServices s3Services;
 
-    /**
-     * Constructor using fields
-     * 
-     * @param configuration
-     * @param s3Services
-     * @throws ObsServiceException
-     */
-    protected S3ObsClient(final S3Configuration configuration,
-            final S3ObsServices s3Services) throws ObsServiceException {
-        super();
-        this.configuration = configuration;
-        this.s3Services = s3Services;
-    }
+	/**
+	 * Default constructor
+	 * 
+	 * @throws ObsServiceException
+	 */
+	public S3ObsClient() throws ObsServiceException {
+		super();
+		configuration = new S3Configuration();
+		AmazonS3 client = configuration.defaultS3Client();
+		TransferManager manager = configuration.defaultS3TransferManager(client);
+		s3Services = new S3ObsServices(client, manager,
+				configuration.getIntOfConfiguration("retry-policy.condition.max-retries"),
+				configuration.getIntOfConfiguration("retry-policy.backoff.throttled-base-delay-ms"));
+	}
 
-    /**
-     * @see ObsClient#doesObjectExist(ObsObject)
-     */
-    @Override
-    public boolean doesObjectExist(final ObsObject object)
-            throws SdkClientException, ObsServiceException {
-        return s3Services.exist(
-                configuration.getBucketForFamily(object.getFamily()),
-                object.getKey());
-    }
+	/**
+	 * Constructor using fields
+	 * 
+	 * @param configuration
+	 * @param s3Services
+	 * @throws ObsServiceException
+	 */
+	protected S3ObsClient(final S3Configuration configuration, final S3ObsServices s3Services)
+			throws ObsServiceException {
+		super();
+		this.configuration = configuration;
+		this.s3Services = s3Services;
+	}
 
-    /**
-     * @see ObsClient#doesPrefixExist(ObsObject)
-     */
-    @Override
-    public boolean doesPrefixExist(final ObsObject object)
-            throws SdkClientException, ObsServiceException {
-        return s3Services.getNbObjects(
-                configuration.getBucketForFamily(object.getFamily()),
-                object.getKey()) > 0;
-    }
+	/**
+	 * @see ObsClient#doesObjectExist(ObsObject)
+	 */
+	@Override
+	public boolean doesObjectExist(final ObsObject object) throws SdkClientException, ObsServiceException {
+		return s3Services.exist(configuration.getBucketForFamily(object.getFamily()), object.getKey());
+	}
 
-    /**
-     * @see ObsClient#downloadObject(ObsDownloadObject)
-     */
-    @Override
-    public int downloadObject(final ObsDownloadObject object)
-            throws SdkClientException, ObsServiceException {
-        return s3Services.downloadObjectsWithPrefix(
-                configuration.getBucketForFamily(object.getFamily()),
-                object.getKey(), object.getTargetDir(),
-                object.isIgnoreFolders());
-    }
+	/**
+	 * @see ObsClient#doesPrefixExist(ObsObject)
+	 */
+	@Override
+	public boolean doesPrefixExist(final ObsObject object) throws SdkClientException, ObsServiceException {
+		return s3Services.getNbObjects(configuration.getBucketForFamily(object.getFamily()), object.getKey()) > 0;
+	}
 
-    /**
-     * @see ObsClient#doesObjectExist(ObsObject)
-     */
-    @Override
-    public int uploadObject(final ObsUploadObject object)
-            throws SdkClientException, ObsServiceException {
-        int nbUpload;
-        if (object.getFile().isDirectory()) {
-            nbUpload = s3Services.uploadDirectory(
-                    configuration.getBucketForFamily(object.getFamily()),
-                    object.getKey(), object.getFile());
-        } else {
-            s3Services.uploadFile(
-                    configuration.getBucketForFamily(object.getFamily()),
-                    object.getKey(), object.getFile());
-            nbUpload = 1;
-        }
-        return nbUpload;
-    }
+	/**
+	 * @see ObsClient#downloadObject(ObsDownloadObject)
+	 */
+	@Override
+	public int downloadObject(final ObsDownloadObject object) throws SdkClientException, ObsServiceException {
+		return s3Services.downloadObjectsWithPrefix(configuration.getBucketForFamily(object.getFamily()),
+				object.getKey(), object.getTargetDir(), object.isIgnoreFolders());
+	}
 
-    /**
-     * @see ObsClient#getShutdownTimeoutS()
-     */
-    @Override
-    public int getShutdownTimeoutS() throws ObsServiceException {
-        return configuration
-                .getIntOfConfiguration(S3Configuration.TM_S_SHUTDOWN);
-    }
+	/**
+	 * @see ObsClient#doesObjectExist(ObsObject)
+	 */
+	@Override
+	public int uploadObject(final ObsUploadObject object) throws SdkClientException, ObsServiceException {
+		int nbUpload;
+		if (object.getFile().isDirectory()) {
+			nbUpload = s3Services.uploadDirectory(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
+					object.getFile());
+		} else {
+			s3Services.uploadFile(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
+					object.getFile());
+			nbUpload = 1;
+		}
+		return nbUpload;
+	}
 
-    /**
-     * @see ObsClient#getDownloadExecutionTimeoutS()
-     */
-    @Override
-    public int getDownloadExecutionTimeoutS() throws ObsServiceException {
-        return configuration
-                .getIntOfConfiguration(S3Configuration.TM_S_DOWN_EXEC);
-    }
+	/**
+	 * @see ObsClient#getShutdownTimeoutS()
+	 */
+	@Override
+	public int getShutdownTimeoutS() throws ObsServiceException {
+		return configuration.getIntOfConfiguration(S3Configuration.TM_S_SHUTDOWN);
+	}
 
-    /**
-     * @see ObsClient#getUploadExecutionTimeoutS()
-     */
-    @Override
-    public int getUploadExecutionTimeoutS() throws ObsServiceException {
-        return configuration
-                .getIntOfConfiguration(S3Configuration.TM_S_UP_EXEC);
-    }
-    
-    
+	/**
+	 * @see ObsClient#getDownloadExecutionTimeoutS()
+	 */
+	@Override
+	public int getDownloadExecutionTimeoutS() throws ObsServiceException {
+		return configuration.getIntOfConfiguration(S3Configuration.TM_S_DOWN_EXEC);
+	}
+
+	/**
+	 * @see ObsClient#getUploadExecutionTimeoutS()
+	 */
+	@Override
+	public int getUploadExecutionTimeoutS() throws ObsServiceException {
+		return configuration.getIntOfConfiguration(S3Configuration.TM_S_UP_EXEC);
+	}
 
 	@Override
-	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {	
-		try {			
-			s3Services.moveFile(new CopyObjectRequest(
-					configuration.getBucketForFamily(from), 
-					key, 
-					configuration.getBucketForFamily(to), 
-					key
-			));
+	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {
+		try {
+			s3Services.moveFile(new CopyObjectRequest(configuration.getBucketForFamily(from), key,
+					configuration.getBucketForFamily(to), key));
 		} catch (S3SdkClientException | ObsServiceException e) {
 			throw new ObsException(from, key, e);
-		} 
+		}
 	}
 
 	/**
@@ -181,9 +158,10 @@ public class S3ObsClient extends AbstractObsClient {
 			final ProductFamily family) throws SdkClientException, ObsServiceException {
 
 		long methodStartTime = System.currentTimeMillis();
-
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
 		String bucket = configuration.getBucketForFamily(family);
+		LOGGER.debug(String.format("listing objects in OBS from bucket %s within last modification time %s to %s",
+				bucket, timeFrameBegin, timeFrameEnd));
 		ObjectListing objListing = s3Services.listObjectsFromBucket(bucket);
 		boolean truncated = false;
 

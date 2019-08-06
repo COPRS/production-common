@@ -1,11 +1,11 @@
 package esa.s1pdgs.cpoc.ingestion;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 
 public class PollingTrigger {
-	private static final Logger LOG = LoggerFactory.getLogger(PollingTrigger.class);
+	static final Logger LOG = LogManager.getLogger(PollingTrigger.class);
 	
 	private final IngestionService service;
 

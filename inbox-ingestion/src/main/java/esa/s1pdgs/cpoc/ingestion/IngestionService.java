@@ -63,15 +63,21 @@ public class IngestionService {
 				LOG.trace("No message received: continue");
 				return;
 			}
-			onMessage(message);			
-			client.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false), ProductCategory.INGESTION);
+			
+			AckMessageDto ackMess;			
+			try {
+				onMessage(message);
+				ackMess = new AckMessageDto(message.getIdentifier(), Ack.OK, null, false);
+			// any other error --> dump prominently into log file but continue	
+			} catch (Exception e) {
+				LOG.error("Unexpected Error on Ingestion", e);
+				ackMess = new AckMessageDto(message.getIdentifier(), Ack.ERROR, LogUtils.toString(e), false);
+			}			
+			client.ack(ackMess, ProductCategory.INGESTION);
 		// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 		} catch (AbstractCodedException ace) {
 			LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());			
-		// any other error --> dump prominently into log file but continue	
-		} catch (Exception e) {
-			LOG.error("Unexpected Error on Ingestion", e);
-		}	
+		} 
 	}
 
 	public void onMessage(final GenericMessageDto<IngestionDto> message) {
@@ -92,6 +98,7 @@ public class IngestionService {
 			reporting.reportStop("End processing of " + ingestion.getProductName());
 		} catch (Exception e) {
 			reporting.reportError("{}", LogUtils.toString(e));
+			
 		}
 	}
 
@@ -119,7 +126,8 @@ public class IngestionService {
 			}
 			reportObs.reportStop("End uploading " + ingestion.getProductName() + " in OBS");
 		// is thrown if product shall be marked as invalid	
-		} catch (ProductException e) {		
+		} catch (ProductException e) {	
+			LOG.warn( e.getMessage());
 			productService.markInvalid(ingestion);
 			message.getBody().setFamily(ProductFamily.INVALID);					
 			final FailedProcessingDto failed = new FailedProcessingDto(
@@ -133,7 +141,7 @@ public class IngestionService {
 		return result;
 	}
 
-	void publish(
+	final void publish(
 			final List<Product<AbstractDto>> products, 
 			final GenericMessageDto<IngestionDto> message,
 			final Reporting.Factory reportingFactory
@@ -163,7 +171,7 @@ public class IngestionService {
 		}
 	}
 	
-	void delete(final IngestionDto ingestion, final Reporting.Factory reportingFactory) 
+	final void delete(final IngestionDto ingestion, final Reporting.Factory reportingFactory) 
 			throws InternalErrorException, InterruptedException {
 		final File file = new File(ingestion.getProductUrl().replace("file://", ""));
 		if (file.exists()) {			
@@ -174,7 +182,7 @@ public class IngestionService {
 		}
 	}
 
-	ProductFamily getFamilyFor(final IngestionDto dto) throws ProductException {
+	final ProductFamily getFamilyFor(final IngestionDto dto) throws ProductException {
 		for (final IngestionTypeConfiguration config : properties.getTypes()) {			
 			if (dto.getProductName().matches(config.getRegex())) {
 				LOG.debug("Found {} for {}", config, dto);
@@ -182,12 +190,7 @@ public class IngestionService {
 					return ProductFamily.valueOf(config.getFamily());
 				} catch (Exception e) {
 					throw new ProductException(
-							String.format(
-									"Invalid %s for %s (allowed: %s)", 
-									config,
-									dto,
-									Arrays.toString(ProductFamily.values())
-							)
+							String.format("Invalid %s for %s (allowed: %s)", config, dto, Arrays.toString(ProductFamily.values()))
 					);
 				}
 			}
