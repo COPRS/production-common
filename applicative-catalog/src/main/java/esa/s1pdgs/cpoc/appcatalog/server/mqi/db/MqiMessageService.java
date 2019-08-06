@@ -129,6 +129,7 @@ public class MqiMessageService {
      */
     public void insertMqiMessage(final MqiMessage messageToInsert) {
         long sequence = sequenceDao.getNextSequenceId(MQI_MSG_SEQ_KEY);
+        messageToInsert.setId(sequence);
         messageToInsert.setIdentifier(sequence);
         mongoDBDAO.insert(messageToInsert);
     }
