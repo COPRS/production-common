@@ -14,7 +14,7 @@ public class MqiMessage extends AbstractRequest {
 	/**
 	 * Identifier of the message
 	 */
-	protected long identifier;
+	protected long id;
 	
     /**
      * Pod who read the message
@@ -57,14 +57,14 @@ public class MqiMessage extends AbstractRequest {
 	 * @return the identifier
 	 */
 	public long getIdentifier() {
-	    return identifier;
+	    return id;
 	}
 
 	/**
 	 * @param identifier the identifier to set
 	 */
 	public void setIdentifier(long identifier) {
-		this.identifier = identifier;
+		this.id = identifier;
 	}
 
     /**
@@ -97,7 +97,7 @@ public class MqiMessage extends AbstractRequest {
      */
     @Override
     public String toString() {
-        return "{\"category\":\"" + category + "\", \"identifier\":\"" + identifier
+        return "{\"category\":\"" + category + "\", \"identifier\":\"" + id
                 + "\", \"topic\":\"" + topic + "\", \"partition\":\"" + partition + "\", \"offset\":\""
                 + offset + "\", \"group\":\"" + group + "\", \"state\":\"" + state
                 + "\", \"readingPod\":\"" + readingPod + "\", \"lastReadDate\":\""
@@ -119,7 +119,7 @@ public class MqiMessage extends AbstractRequest {
                 + ((creationDate == null) ? 0 : creationDate.hashCode());
         result = prime * result + ((dto == null) ? 0 : dto.hashCode());
         result = prime * result + ((group == null) ? 0 : group.hashCode());
-        result = prime * result + (int) (identifier ^ (identifier >>> 32));
+        result = prime * result + (int) (id ^ (id >>> 32));
         result = prime * result
                 + ((lastAckDate == null) ? 0 : lastAckDate.hashCode());
         result = prime * result
@@ -168,7 +168,7 @@ public class MqiMessage extends AbstractRequest {
                 return false;
         } else if (!group.equals(other.group))
             return false;
-        if (identifier != other.identifier)
+        if (id != other.id)
             return false;
         if (lastAckDate == null) {
             if (other.lastAckDate != null)
