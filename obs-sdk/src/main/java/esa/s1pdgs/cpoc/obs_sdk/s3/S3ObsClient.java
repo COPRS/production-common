@@ -160,8 +160,8 @@ public class S3ObsClient extends AbstractObsClient {
 		long methodStartTime = System.currentTimeMillis();
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
 		String bucket = configuration.getBucketForFamily(family);
-		LOGGER.debug(String.format("listing objects in OBS from bucket %s within last modification time %s to %s"),
-				bucket, timeFrameBegin, timeFrameEnd);
+		LOGGER.debug(String.format("listing objects in OBS from bucket %s within last modification time %s to %s",
+				bucket, timeFrameBegin, timeFrameEnd));
 		ObjectListing objListing = s3Services.listObjectsFromBucket(bucket);
 		boolean truncated = false;
 

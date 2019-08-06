@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -58,8 +59,6 @@ public class ValidationService {
 
 		final Reporting reportingMetadata = reportingFactory.newReporting(1);
 
-		int discrepancies = 0;
-
 		try {
 
 			List<SearchMetadata> metadataResults = null;
@@ -94,33 +93,35 @@ public class ValidationService {
 			}
 
 			List<String> metadataDiscrepancies = new ArrayList<>();
-			List<String> obsDiscrepancies = new ArrayList<>();
+//			List<String> obsDiscrepancies = new ArrayList<>();
 
 			for (SearchMetadata smd : metadataResults) {
-				if (obsResults.get(smd.getKeyObjectStorage()) == null) {
-					obsDiscrepancies.add(smd.getKeyObjectStorage());
+				//if (obsResults.get(smd.getKeyObjectStorage()) == null) {
+				if (!verifyMetadataForObject(smd, obsResults.values())) {
 					LOGGER.info("Product {} does exist in metadata catalog, but not in OBS", smd.getKeyObjectStorage());
+					metadataDiscrepancies.add(smd.getKeyObjectStorage());
 				} else {
 					LOGGER.debug("Product {} does exist in metadata catalog and OBS", smd.getKeyObjectStorage());
-					obsResults.remove(smd.getKeyObjectStorage());
 				}
 			}
 
-			if (obsResults.size() > 0) {
+			/*if (obsResults.size() > 0) {
 				LOGGER.info("Found {} products that exist in OBS, but not in MetadataCatalog", obsResults.size());
 				for (ObsObject product : obsResults.values()) {
 					metadataDiscrepancies.add(product.getKey());
 					LOGGER.info("Product {} does exist in OBS, but not in MetadataCatalog", product.getKey());
 				}
-			}
+			}*/
 
 			if (metadataDiscrepancies.isEmpty()) {
 				reportingMetadata.reportStop("No discrepancies found in MetadataCatalog");
+				reportingValidation.reportStop("No discrepancy found");
 			} else {
 				reportingMetadata.reportError("Products not present in MetadataCatalog: {}",
 						buildProductList(metadataDiscrepancies));
+				reportingValidation.reportError("Discrepancy found for {} product(s)", metadataDiscrepancies.size());
 			}
-
+/*
 			if (obsDiscrepancies.isEmpty()) {
 				reportingObs.reportStop("No discepancies found in OBS");
 			} else {
@@ -133,32 +134,69 @@ public class ValidationService {
 			} else {
 				discrepancies = metadataDiscrepancies.size() + obsDiscrepancies.size();
 				reportingValidation.reportError("Discrepancy found for {} product(s)", discrepancies);
-			}
+			}*/
+			return metadataDiscrepancies.size();
 		} catch (Exception ex) {
 			reportingValidation.reportError("Error occured while performing validation task: {}", ex.getMessage());
 		}
 
-		return discrepancies;
+		return 0;
+	}
+	
+	private boolean verifyMetadataForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
+		LOGGER.debug("Verifying if metadata entry for product {} exist in OBS", metadata.getKeyObjectStorage());
+		if (metadata.getKeyObjectStorage().contains("AUX") || metadata.getKeyObjectStorage().contains("MPL")) {
+			return verifyAuxMetadataForObject(metadata, objects);
+		} else if (metadata.getKeyObjectStorage().startsWith("S1A/") || metadata.getKeyObjectStorage().startsWith("S1B/")) {
+			return verifySessionForObject(metadata, objects);
+		} else {
+			return verifySliceForObject(metadata,objects);
+		}
+	}
+	
+	private boolean verifyAuxMetadataForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
+		String key = metadata.getKeyObjectStorage();
+		
+		for (ObsObject obj: objects) {
+			//
+			String obsKey = obj.getKey();
+			// some products are .SAFE. In this case, we ignore everything behind the first slah
+			if (obsKey.contains(".SAFE")) {
+				obsKey = obsKey.substring(0,obsKey.indexOf("/"));
+			}
+//			LOGGER.info("key: {}, aux: {}", key, obsKey);
+			if (key.contains(obsKey)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private boolean verifySessionForObject(SearchMetadata metadata, Collection<ObsObject> objects ) {
+		String key = metadata.getKeyObjectStorage();
+		
+		for (ObsObject obj: objects) {
+			String obsKey = obj.getKey();
+			if (key.equals(obsKey)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean verifySliceForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
+		String key = metadata.getKeyObjectStorage();
+		
+		for (ObsObject obj: objects) {
+			String obsKey = obj.getKey().substring(0,obj.getKey().indexOf("/"));
+			if (key.equals(obsKey)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-//	/**
-//	 * Due we are having directory products, each product might have
-//	 */
-//	private Set<String> flattenFileObjects(List<String> objects) {
-//		Set<String> result = new HashSet<String>();
-//
-//		for (String object : objects) {
-//			// if it is an auxiliary, we are flattening
-//			if (object.contains("AUX") || object.contains("MPL")) {
-//				String flat = object.substring(0, object.indexOf("/"));
-//				result.add(flat);
-//			} else {
-//				result.add(object);
-//			}
-//		}
-//
-//		return result;
-//	}
 
 	private String buildProductList(List<String> products) {
 		if (products.size() == 0) {
