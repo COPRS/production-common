@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.appcatalog.common;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
@@ -57,10 +59,12 @@ public class MqiMessage extends AbstractRequest {
         this.lastReadDate = lastReadDate;
     }
     
+    @JsonIgnore
 	public long getId() {
 		return id;
 	}
 
+    @JsonIgnore
 	public void setId(long id) {
 		this.id = id;
 	}
