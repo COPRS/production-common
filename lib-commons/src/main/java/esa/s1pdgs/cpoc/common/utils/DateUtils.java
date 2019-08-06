@@ -52,14 +52,4 @@ public class DateUtils {
     			String.format("Invalid date string '%s'. Available formats are: %s", dateString, FORMATS.values())
     	);
     }
-    
-    public static String convertToMetadataDateTimeFormat(String datetime) {
-        if (datetime.endsWith("Z")) {
-            return convertToAnotherFormat(datetime, METADATA_DATE_FORMATTER, METADATA_DATE_FORMATTER); // "convert" to validate
-        } else if (datetime.length() == 26) {
-            return convertToAnotherFormat(datetime, DATE_FORMATTER_26, METADATA_DATE_FORMATTER);
-        } else {
-            return convertToAnotherFormat(datetime, DATE_FORMATTER_LIGTH, METADATA_DATE_FORMATTER);
-        }
-    }
 }
