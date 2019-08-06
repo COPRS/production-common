@@ -41,7 +41,8 @@ public class ValidationServiceTest {
 		validationService = new ValidationService(metadataService, obsClient);
 	}
 
-	@Test
+	// TODO: Might be used again, when able to identify discrepanices in obs again
+	/*@Test
 	public void testCheckConsistencyForFamilyAndTimeFrameWhenConsistent()
 			throws SdkClientException, MetadataQueryException {
 
@@ -267,7 +268,7 @@ public class ValidationServiceTest {
 
 		int discrepancies = validationService.checkConsistencyForInterval(localDateTimeStart, localDateTimeStop);
 		assertEquals(2, discrepancies);
-	}
+	}*/
 	
 	@Test
 	public void testCheckConsistencyForAuxScenario()
