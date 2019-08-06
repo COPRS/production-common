@@ -3,11 +3,11 @@
 image: docker:latest
 
 variables:
-  MODULE_REQUEST_REPO: s1pro-core-inbox-ingestion
+  MODULE_INBOX_ING: s1pro-core-inbox-ingestion
 
 inbox-ingestion-build:
   stage: module
   script:
     - cd inbox-ingestion
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_REQUEST_REPO:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_REQUEST_REPO:$CI_COMMIT_REF_SLUG"
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INBOX_ING:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INBOX_ING:$CI_COMMIT_REF_SLUG"

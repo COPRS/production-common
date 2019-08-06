@@ -3,11 +3,11 @@
 image: docker:latest
 
 variables:
-  MODULE_REQUEST_REPO: s1pro-core-inbox-polling
+  MODULE_INBOX_POLL: s1pro-core-inbox-polling
 
 inbox-polling-build:
   stage: module
   script:
     - cd inbox-polling
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_REQUEST_REPO:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_REQUEST_REPO:$CI_COMMIT_REF_SLUG"
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INBOX_POLL:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INBOX_POLL:$CI_COMMIT_REF_SLUG"
