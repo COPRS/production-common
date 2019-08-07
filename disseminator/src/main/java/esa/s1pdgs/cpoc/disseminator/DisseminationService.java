@@ -1,5 +1,6 @@
-package esa.s1pdgs.cpoc.disseminator.service;
+package esa.s1pdgs.cpoc.disseminator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -20,10 +21,14 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration.Protocol;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 @Service
 public class DisseminationService {
@@ -32,17 +37,21 @@ public class DisseminationService {
 	private final GenericMqiClient client;
     private final ObsClient obsClient;
 	private final DisseminationProperties properties;
+	private final ErrorRepoAppender errorAppender;
+	
 	private ExecutorService service;
    
 	@Autowired
 	public DisseminationService(
 			final GenericMqiClient client,
 		    final ObsClient obsClient,
-			final DisseminationProperties properties
+			final DisseminationProperties properties,
+			final ErrorRepoAppender errorAppender
 	) {
 		this.client = client;
 		this.obsClient = obsClient;
 		this.properties = properties;
+		this.errorAppender = errorAppender;
 	}
 	
     @PostConstruct
@@ -59,8 +68,25 @@ public class DisseminationService {
     				dto -> {      		
     					final ProductDto product = dto.getBody();
     					for (final DisseminationTypeConfiguration config : entry.getValue()) {			
-    						if (product.getProductName().matches(config.getRegex())) {				
-    							transferTo(product.getFamily(), product.getKeyObjectStorage(), config.getTarget());
+    						if (product.getProductName().matches(config.getRegex())) {		
+    							final Reporting.Factory rf = new LoggerReporting.Factory(LOG, "Dissemination");
+    							final Reporting reporting = rf.product(product.getFamily().toString(), product.getProductName())
+    									.newReporting(0);
+    							reporting.reportStart("Start dissemination of product to outbox " + config.getTarget());
+    							try {
+									transferTo(product.getFamily(), product.getKeyObjectStorage(), config.getTarget(), rf);								
+    							} catch (Exception e) {
+    								final String message = (e instanceof DisseminationException) ? e.getMessage() : LogUtils.toString(e);    	
+									reporting.reportError("Error on dissemination of product to outbox {}: {}", config.getTarget(), message);									
+									errorAppender.send(new FailedProcessingDto(
+											properties.getHostname(), 
+											new Date(), 
+											message, 
+											dto
+									));									
+									throw new RuntimeException(e);
+								} 
+    							reporting.reportStop("End dissemination of product to outbox " + config.getTarget());    							
     						}			
     					}
     				},    				
@@ -69,14 +95,19 @@ public class DisseminationService {
     	}
     }
     
-	public final void transferTo(final ProductFamily family, String keyObjectStorage, String target) {		
+	final void transferTo(final ProductFamily family, String keyObjectStorage, String target, final Reporting.Factory reportingFactory) 
+			throws DisseminationException {		
 		try {
 			if (!obsClient.exist(family, keyObjectStorage)) {
 				throw new RuntimeException(String.format("OBS file %s (%s) does not exist", keyObjectStorage, family));
 			}
-			final OutboxConfiguration config = getOutboxConfigurationFor(target);	
-			if (config.getProtocol() == Protocol.FILE) {				
+			final OutboxConfiguration config = getOutboxConfigurationFor(target);
+			final Reporting reporting = reportingFactory.newReporting(1);
+			
+			if (config.getProtocol() == Protocol.FILE) {		
+				reporting.reportStart("Start downloading file from OBS " + keyObjectStorage + " to " + config.getPath());
 				obsClient.downloadFile(family, keyObjectStorage, config.getPath());
+				reporting.reportStop("End downloading file from OBS " + keyObjectStorage + " to " + config.getPath());
 			} else {
 				throw new UnsupportedOperationException(String.format("Protocol %s not implemented", config.getProtocol()));
 			}		

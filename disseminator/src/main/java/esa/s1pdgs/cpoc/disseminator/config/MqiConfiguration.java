@@ -30,9 +30,9 @@ public class MqiConfiguration {
      */
     @Autowired
     public MqiConfiguration(
-    		@Value("${file.mqi.host-uri}") final String hostUri,
-            @Value("${file.mqi.max-retries}") final int maxRetries,
-            @Value("${file.mqi.tempo-retry-ms}") final int tempoRetryMs,
+    		@Value("${mqi.host-uri}") final String hostUri,
+            @Value("${mqi.max-retries}") final int maxRetries,
+            @Value("${mqi.tempo-retry-ms}") final int tempoRetryMs,
             final RestTemplateBuilder builder) {
     	mqiClientFactory = new MqiClientFactory(hostUri, maxRetries, tempoRetryMs)
     			.restTemplateSupplier(builder::build);
