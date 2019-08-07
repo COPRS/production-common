@@ -1,36 +1,18 @@
 package esa.s1pdgs.cpoc.disseminator.service;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.LocalDateTime;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 @Service
 public class DisseminationService {
 	private static final Logger LOGGER = LogManager.getLogger(DisseminationService.class);
-	private final GenericMqiClient client;
 	
-	@Autowired
+	private final GenericMqiClient client;
 	private final DisseminationProperties properties;
    
 	@Autowired

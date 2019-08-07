@@ -15,10 +15,9 @@ public class PollingTrigger {
 		this.service = service;
 	}
 	
-    @Scheduled(fixedRateString = "${ingestion.polling-interval-ms}")   
+    @Scheduled(fixedRateString = "${dissemination.polling-interval-ms}")   
 	public void poll() {
     	LOG.debug("Trigger polling of MQI");
     	service.poll();
 	}
-
 }
