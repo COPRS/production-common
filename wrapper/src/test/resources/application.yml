@@ -18,6 +18,7 @@ kafka:
 process:
   level: L0
   hostname: "hostname"
+  workingDir: /data/localWD
   fixed-delay-ms: 500
   init-delay-poll-ms: 1000
   tm-proc-one-task-s: 600
