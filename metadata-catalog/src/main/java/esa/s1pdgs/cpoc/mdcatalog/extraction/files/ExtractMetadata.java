@@ -381,8 +381,18 @@ public class ExtractMetadata {
 					readFile("tmp/output.xml", Charset.defaultCharset()));
 			
 			// Adding also max validity stop for EOF files as it is done in SAFE
-			metadataJSONObject.put("validityStopTime",
-					"9999-12-31T23:59:59.999999Z");
+			if (!metadataJSONObject.has("validityStopTime")) {
+
+				metadataJSONObject.put("validityStopTime",
+						"9999-12-31T23:59:59.999999Z");
+			} else {
+				String validStopTime = metadataJSONObject
+						.getString("validityStopTime");
+				if (validStopTime.contains("9999-")) {
+					metadataJSONObject.put("validityStopTime",
+							"9999-12-31T23:59:59.999999Z");
+				}
+			}
 
 			try {
 				metadataJSONObject.put("validityStopTime",
@@ -523,8 +533,18 @@ public class ExtractMetadata {
 					readFile("tmp/output.xml", Charset.defaultCharset()));
 			
 			// Adding also max validity stop for EOF files as it is done in SAFE
-			metadataJSONObject.put("validityStopTime",
-					"9999-12-31T23:59:59.999999Z");
+			if (!metadataJSONObject.has("validityStopTime")) {
+
+				metadataJSONObject.put("validityStopTime",
+						"9999-12-31T23:59:59.999999Z");
+			} else {
+				String validStopTime = metadataJSONObject
+						.getString("validityStopTime");
+				if (validStopTime.contains("9999-")) {
+					metadataJSONObject.put("validityStopTime",
+							"9999-12-31T23:59:59.999999Z");
+				}
+			}
 
 			try {
 				metadataJSONObject.put("validityStopTime",
@@ -597,8 +617,19 @@ public class ExtractMetadata {
 			// JSON creation
 			JSONObject metadataJSONObject = XML.toJSONObject(
 					readFile("tmp/output.xml", Charset.defaultCharset()));
-			metadataJSONObject.put("validityStopTime",
-					"9999-12-31T23:59:59.999999Z");
+			
+			if (!metadataJSONObject.has("validityStopTime")) {
+
+				metadataJSONObject.put("validityStopTime",
+						"9999-12-31T23:59:59.999999Z");
+			} else {
+				String validStopTime = metadataJSONObject
+						.getString("validityStopTime");
+				if (validStopTime.contains("9999-")) {
+					metadataJSONObject.put("validityStopTime",
+							"9999-12-31T23:59:59.999999Z");
+				}
+			}
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productType", descriptor.getProductType());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
