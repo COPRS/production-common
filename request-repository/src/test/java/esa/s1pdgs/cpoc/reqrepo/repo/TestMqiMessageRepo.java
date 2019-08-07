@@ -245,6 +245,7 @@ public class TestMqiMessageRepo {
     private final MqiMessage newMqiMessage(long id) throws InterruptedException
     {
     	final MqiMessage proc = new MqiMessage();
+    	proc.setId(id);
     	proc.setIdentifier(id);
     	proc.setCreationDate(new Date());
     	proc.setState(MessageState.READ);

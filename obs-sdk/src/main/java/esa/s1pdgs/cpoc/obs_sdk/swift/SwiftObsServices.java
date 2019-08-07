@@ -6,15 +6,10 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.javaswift.joss.instructions.UploadInstructions;
 import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
-import org.springframework.util.CollectionUtils;
-
-import com.amazonaws.services.s3.model.ObjectListing;
-
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 
 public class SwiftObsServices {
 
@@ -39,6 +34,8 @@ public class SwiftObsServices {
     private final int retryDelay;
     
     public final int MAX_RESULTS_PER_LIST = 8000;
+    
+    public static long MAX_SEGMENT_SIZE = 5L*1024*1024*1024;
     
     public SwiftObsServices(Account client, final int numRetries, final int retryDelay) {
     	this.client = client;
@@ -152,12 +149,21 @@ public class SwiftObsServices {
             // List all objects with given prefix
             try {
             	String marker = "";
+            	String lastNonSegmentName = "";
             	
             	Collection<StoredObject> results;
             	do {
 	       			 results = client.getContainer(containerName).list(prefixKey, marker, MAX_RESULTS_PER_LIST);
 	       			 for (StoredObject object : results) {
 	       				 marker = object.getName(); // store marker for next retrival
+	       				 
+	       				 // Skip segment files (all files that have a sub directory like naming scheme with a direct parent that exists as a file (the manifest file))
+	       				 if (!lastNonSegmentName.isEmpty() &&
+	       						 object.getName().equals(lastNonSegmentName + "/" + object.getBareName())) {
+	       					continue;
+	       				 }
+	       				 lastNonSegmentName = object.getName();
+	       				 
 	       				 // Build temporarly filename
                          String key = object.getName();
                          String targetDir = directoryPath;
@@ -247,7 +253,9 @@ public class SwiftObsServices {
                 }
 
                 StoredObject object = container.getObject(keyName);
-                object.uploadObject(uploadFile);
+                UploadInstructions uploadInstructions = new UploadInstructions(uploadFile);
+                uploadInstructions.setSegmentationSize(MAX_SEGMENT_SIZE);
+                object.uploadObject(uploadInstructions);
 
                 log(String.format("Upload object %s in container %s succeeded",
                         keyName, containerName));

@@ -1,0 +1,34 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-disseminator
+    
+# Logging     
+logging:
+  config: classpath:log4j2-test.yml
+
+dissemination:
+  hostname: localhost
+  polling-interval-ms: 10000
+  max-retries: 10                                                # the maximal number of consecutive retries for unsuccessful deletion
+  tempo-retry-ms: 10000  
+  outboxes:
+    myLittleOutbox:
+      path: /tmp/foo/bar    
+  categories:
+    auxiliary-files:
+      - target: myLittleOutbox
+        regex: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
+
+# File
+file:
+  mqi:
+    host-uri: http://localhost:8081                               # the host and port for querying MQI server
+    max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
+    tempo-retry-ms: 1000                                          # 
+  product-categories:
+    auxiliary-files:
+      fixed-delay-ms: 500                                         # (fixed delay) Period in milliseconds between 2 polls of next message
+      init-delay-poll-ms: 2000                                    # Initial delay in milliseconds before starting consuming message
+ 
+ 

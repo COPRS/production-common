@@ -136,6 +136,7 @@ public class MqiMessage extends AbstractRequest {
         result = prime * result + ((dto == null) ? 0 : dto.hashCode());
         result = prime * result + ((group == null) ? 0 : group.hashCode());
         result = prime * result + (int) (identifier ^ (identifier >>> 32));
+        result = prime * result + (int) (id ^ (id >>> 32));
         result = prime * result
                 + ((lastAckDate == null) ? 0 : lastAckDate.hashCode());
         result = prime * result
@@ -185,6 +186,8 @@ public class MqiMessage extends AbstractRequest {
         } else if (!group.equals(other.group))
             return false;
         if (identifier != other.identifier)
+            return false;
+        if (id != other.id)
             return false;
         if (lastAckDate == null) {
             if (other.lastAckDate != null)

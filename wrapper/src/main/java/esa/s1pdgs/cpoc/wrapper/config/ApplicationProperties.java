@@ -62,6 +62,13 @@ public class ApplicationProperties {
     private long wapTempoS;
     
     private String hostname;
+    
+    /**
+     * Path to the working directory that should be used by the
+     * wrapper. If this path is different than the one provided in the
+     * job, it will be considered as error.
+     */
+    private String workingDir;
 
     /**
      * Default constructor
@@ -212,4 +219,14 @@ public class ApplicationProperties {
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
+
+	public String getWorkingDir() {
+		return workingDir;
+	}
+
+	public void setWorkingDir(String workingDir) {
+		this.workingDir = workingDir;
+	}
+	
+	
 }

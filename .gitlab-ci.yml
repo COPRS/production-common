@@ -30,6 +30,7 @@ include:
   - local: applicative-catalog/.gitlab-ci.yml
   - local: archives/.gitlab-ci.yml
   - local: compression/.gitlab-ci.yml
+  - local: disseminator/.gitlab-ci.yml
   - local: request-repository/.gitlab-ci.yml
   - local: ingestor/.gitlab-ci.yml
   - local: inbox-polling/.gitlab-ci.yml

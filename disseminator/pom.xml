@@ -1,3 +1,4 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,23 +8,45 @@
 		<artifactId>s1pro-core</artifactId>
 		<version>0.6.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>s1pro-core-inbox-polling</artifactId>
+	<artifactId>s1pro-core-disseminator</artifactId>
 	<packaging>jar</packaging>
+
+	<!-- <parent> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-parent</artifactId> 
+		<version>2.0.0.RELEASE</version> <relativePath /> </parent> -->
+
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-inbox-polling</project.build.finalName>
-		<project.artifactId>s1pdgs-inbox-polling</project.artifactId>
-		<start-class>esa.s1pdgs.cpoc.inbox.Application</start-class>
+		<start-class>esa.s1pdgs.cpoc.disseminator.Application</start-class>
 	</properties>
 
-	<dependencies>
 
+	<dependencies>
+	
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-	
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-mqi-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+      		<type>test-jar</type>
+      		<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -47,7 +70,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 		</dependency>
-				
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -59,6 +82,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+     	<dependency>
+        	<groupId>org.apache.commons</groupId>
+        	<artifactId>commons-csv</artifactId>
+        	<version>1.5</version>
+    	</dependency>
+    	
 	</dependencies>
 
 	<build>
