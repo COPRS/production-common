@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.mqi.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -26,7 +27,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
  * @author Viveris Technologies
  * @param <T>
  */
-public class GenericMqiClient {
+public class GenericMqiClient implements MqiClient {
 
     /**
      * Logger
@@ -120,7 +121,8 @@ public class GenericMqiClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <T> GenericMessageDto<T> next(final ProductCategory category) throws AbstractCodedException {
+    @Override
+	public <T> GenericMessageDto<T> next(final ProductCategory category) throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
@@ -165,7 +167,8 @@ public class GenericMqiClient {
      * @return
      * @throws AbstractCodedException
      */
-    public boolean ack(final AckMessageDto ack, final ProductCategory category) throws AbstractCodedException {
+    @Override
+	public boolean ack(final AckMessageDto ack, final ProductCategory category) throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
@@ -208,7 +211,8 @@ public class GenericMqiClient {
      * @param message
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> void publish(final GenericPublicationMessageDto<E> message, final ProductCategory category)
+    @Override
+	public <E extends AbstractDto> void publish(final GenericPublicationMessageDto<E> message, final ProductCategory category)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
