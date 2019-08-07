@@ -36,9 +36,10 @@ public class ApplicationTest {
 		
 		final Map<String, OutboxConfiguration> outboxes = properties.getOutboxes();
 		assertEquals(1, outboxes.size());		
+		
 		final Map.Entry<String, OutboxConfiguration> entry = outboxes.entrySet().iterator().next();
-		assertEquals("myLittleOutbox", entry.getKey());		
-		final OutboxConfiguration outbox = entry.getValue();
+		assertEquals("myLittleOutbox", entry.getKey());	
+		final OutboxConfiguration outbox = entry.getValue();		
 		assertEquals(Protocol.FILE, outbox.getProtocol());
 		assertEquals("/tmp/foo/bar", outbox.getPath());
 		

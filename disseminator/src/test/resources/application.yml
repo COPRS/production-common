@@ -30,6 +30,5 @@ file:
     auxiliary-files:
       fixed-delay-ms: 500                                         # (fixed delay) Period in milliseconds between 2 polls of next message
       init-delay-poll-ms: 2000                                    # Initial delay in milliseconds before starting consuming message
-        
-scheduling:
-  enable: false
+ 
+ 

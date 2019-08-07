@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.disseminator.config;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -105,8 +105,8 @@ public class DisseminationProperties {
 	private int maxRetries = 2;	
 	private long tempoRetryMs = 100;
 	private String hostname = "localhost";
-    private Map<String, OutboxConfiguration> outboxes = new HashMap<>();
-	private Map<ProductCategory, List<DisseminationTypeConfiguration>> categories = new HashMap<>();
+    private Map<String, OutboxConfiguration> outboxes = new LinkedHashMap<>();
+	private Map<ProductCategory, List<DisseminationTypeConfiguration>> categories = new LinkedHashMap<>();
 	
 	public long getPollingIntervalMs() {
 		return pollingIntervalMs;
