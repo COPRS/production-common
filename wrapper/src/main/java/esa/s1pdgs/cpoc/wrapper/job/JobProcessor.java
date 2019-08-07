@@ -59,172 +59,178 @@ import esa.s1pdgs.cpoc.wrapper.status.AppStatus;
 @Service
 public class JobProcessor {
 
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(JobProcessor.class);
+	/**
+	 * Logger
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(JobProcessor.class);
 
-    /**
-     * Application status
-     */
-    private final AppStatus appStatus;
+	/**
+	 * Application status
+	 */
+	private final AppStatus appStatus;
 
-    /**
-     * Development properties
-     */
-    private final DevProperties devProperties;
+	/**
+	 * Development properties
+	 */
+	private final DevProperties devProperties;
 
-    /**
-     * Application properties
-     */
-    private final ApplicationProperties properties;
+	/**
+	 * Application properties
+	 */
+	private final ApplicationProperties properties;
 
-    /**
-     * Output processsor
-     */
-    private final OutputProcuderFactory procuderFactory;
+	/**
+	 * Output processsor
+	 */
+	private final OutputProcuderFactory procuderFactory;
 
-    /**
-     * Output processsor
-     */
-    private final ObsClient obsClient;
+	/**
+	 * Output processsor
+	 */
+	private final ObsClient obsClient;
 
-    /**
-     * MQI service for reading message
-     */
-    private final GenericMqiClient mqiService;
+	/**
+	 * MQI service for reading message
+	 */
+	private final GenericMqiClient mqiService;
 
-    /**
-     * MQI service for stopping the MQI
-     */
-    private final StatusService mqiStatusService;
-    
-    private final ErrorRepoAppender errorAppender;
+	/**
+	 * MQI service for stopping the MQI
+	 */
+	private final StatusService mqiStatusService;
 
-    /**
-     * @param job
-     * @param appStatus
-     * @param properties
-     * @param devProperties
-     * @param kafkaContainerId
-     * @param kafkaRegistry
-     * @param obsClient
-     * @param procuderFactory
-     * @param outputListFile
-     */
-    @Autowired
-    public JobProcessor(final AppStatus appStatus,
-            final ApplicationProperties properties,
-            final DevProperties devProperties, final ObsClient obsClient,
-            final OutputProcuderFactory procuderFactory,
-            final GenericMqiClient mqiService,
-            final ErrorRepoAppender errorAppender,
-            final StatusService mqiStatusService) {
-        this.appStatus = appStatus;
-        this.devProperties = devProperties;
-        this.properties = properties;
-        this.obsClient = obsClient;
-        this.procuderFactory = procuderFactory;
-        this.mqiService = mqiService;
-        this.mqiStatusService = mqiStatusService;
-        this.errorAppender = errorAppender;
-    }
+	private final ErrorRepoAppender errorAppender;
 
-    /**
-     * Consume and execute jobs
-     */
-    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.init-delay-poll-ms}")
-    public void processJob() {
+	/**
+	 * @param job
+	 * @param appStatus
+	 * @param properties
+	 * @param devProperties
+	 * @param kafkaContainerId
+	 * @param kafkaRegistry
+	 * @param obsClient
+	 * @param procuderFactory
+	 * @param outputListFile
+	 */
+	@Autowired
+	public JobProcessor(final AppStatus appStatus, final ApplicationProperties properties,
+			final DevProperties devProperties, final ObsClient obsClient, final OutputProcuderFactory procuderFactory,
+			final GenericMqiClient mqiService, final ErrorRepoAppender errorAppender,
+			final StatusService mqiStatusService) {
+		this.appStatus = appStatus;
+		this.devProperties = devProperties;
+		this.properties = properties;
+		this.obsClient = obsClient;
+		this.procuderFactory = procuderFactory;
+		this.mqiService = mqiService;
+		this.mqiStatusService = mqiStatusService;
+		this.errorAppender = errorAppender;
+	}
 
-        // ----------------------------------------------------------
-        // Read Message
-        // ----------------------------------------------------------
-        LOGGER.trace("[MONITOR] [step 0] Waiting message");
-        if (appStatus.isShallBeStopped()) {
-            LOGGER.info("[MONITOR] [step 0] The wrapper shall be stopped");
-            this.appStatus.forceStopping();
-            return;
-        }
-        GenericMessageDto<LevelJobDto> message = null;
-        try {
-            message = mqiService.next(ProductCategory.LEVEL_JOBS);
-            this.appStatus.setWaiting();
-        } catch (AbstractCodedException ace) {
-            LOGGER.error("[MONITOR] [step 0] [code {}] {}",
-                    ace.getCode().getCode(), ace.getLogMessage());
-            message = null;
-            this.appStatus.setError("NEXT_MESSAGE");
-        }
-        if (message == null || message.getBody() == null) {
-            LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-            return;
-        }
-        appStatus.setProcessing(message.getIdentifier());
-        LOGGER.info("Initializing job processing {}", message);
+	/**
+	 * Consume and execute jobs
+	 */
+	@Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.init-delay-poll-ms}")
+	public void processJob() {
 
-        // ----------------------------------------------------------
-        // Initialize processing
-        // ------------------------------------------------------
-        LevelJobDto job = message.getBody();
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobProcessing");
-        
-        final Reporting report = reportingFactory.newReporting(0);
-        report.reportStart("Start job processing");
+		// ----------------------------------------------------------
+		// Read Message
+		// ----------------------------------------------------------
+		LOGGER.trace("[MONITOR] [step 0] Waiting message");
+		if (appStatus.isShallBeStopped()) {
+			LOGGER.info("[MONITOR] [step 0] The wrapper shall be stopped");
+			this.appStatus.forceStopping();
+			return;
+		}
+		GenericMessageDto<LevelJobDto> message = null;
+		try {
+			message = mqiService.next(ProductCategory.LEVEL_JOBS);
+			this.appStatus.setWaiting();
+		} catch (AbstractCodedException ace) {
+			LOGGER.error("[MONITOR] [step 0] [code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+			message = null;
+			this.appStatus.setError("NEXT_MESSAGE");
+		}
+		if (message == null || message.getBody() == null) {
+			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
+			return;
+		}
+		appStatus.setProcessing(message.getIdentifier());
+		LOGGER.info("Initializing job processing {}", message);
 
-        File workdir = new File(job.getWorkDirectory());
-        // Remove working directory if exist
-        if (workdir.exists()) {
-            this.eraseDirectory(job);
-        }
-        // Build output list
-        String outputListFile =
-                job.getWorkDirectory() + workdir.getName() + ".LIST";
-        if (properties.getLevel() == ApplicationLevel.L0) {
-            outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
-        } else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
-            outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
-        }
-        // Initialize the pool processor executor
-        PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties,
-                job, getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());
-        ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
-        ExecutorCompletionService<Boolean> procCompletionSrv =
-                new ExecutorCompletionService<>(procExecutorSrv);
-        // Initialize the input downloader
-        InputDownloader inputDownloader =
-                new InputDownloader(obsClient, job.getWorkDirectory(),
-                        job.getInputs(), this.properties.getSizeBatchDownload(),
-                        getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
-                        procExecutor, this.properties.getLevel());
-        // Initiliaze the output processor
-        OutputProcessor outputProcessor =
-                new OutputProcessor(obsClient, procuderFactory, message,
-                        outputListFile, this.properties.getSizeBatchUpload(),
-                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), this.properties.getLevel());
+		// ----------------------------------------------------------
+		// Initialize processing
+		// ------------------------------------------------------
+		LevelJobDto job = message.getBody();
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobProcessing");
 
-        // ----------------------------------------------------------
-        // Process message
-        // ----------------------------------------------------------
-        processJob(message, inputDownloader, outputProcessor, procExecutorSrv,
-                procCompletionSrv, procExecutor, report);
-        
-        report.reportStop("End job processing");
-    }
+		/*
+		 * If the working directory provided by the job order is outside the expected
+		 * and configured working directory of the wrapper, something is going on
+		 * terribly wrong. Either the working directory configured is on the wrong
+		 * location or the job order generation was providing some unexpected result.
+		 * Either way, we reject the request.
+		 */
+		if (!job.getWorkDirectory().startsWith(properties.getWorkingDir())) {
+			String errorMessage = String.format(
+					"Attempt to access directory '%s' being outside of working directory '%s'.", job.getWorkDirectory(),
+					properties.getWorkingDir());
+			LOGGER.error(errorMessage);
+			FailedProcessingDto failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage,
+					message);
 
-    /**
-     * Get the prefix for monitor logs according the step for this class
-     * instance
-     * 
-     * @param step
-     * @return
-     */
-    protected String getPrefixMonitorLog(final String step,
-            final LevelJobDto job) {
-        return MonitorLogUtils.getPrefixMonitorLog(step, job);
-    }
+			ackProcessing(message, failedProc, false, errorMessage);
+			return;
+		}
 
-    /**
+		// Everything is fine with the request, we can start processing it.
+		final Reporting report = reportingFactory.newReporting(0);
+		report.reportStart("Start job processing");
+
+		File workdir = new File(job.getWorkDirectory());
+		// Clean up the working directory with all of its content
+		eraseWorkingDirectory(properties.getWorkingDir());
+
+		// Build output list
+		String outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
+		if (properties.getLevel() == ApplicationLevel.L0) {
+			outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
+		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
+			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
+		}
+		// Initialize the pool processor executor
+		PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
+				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());
+		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
+		ExecutorCompletionService<Boolean> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
+		// Initialize the input downloader
+		InputDownloader inputDownloader = new InputDownloader(obsClient, job.getWorkDirectory(), job.getInputs(),
+				this.properties.getSizeBatchDownload(), getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
+				procExecutor, this.properties.getLevel());
+		// Initiliaze the output processor
+		OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
+				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
+				this.properties.getLevel());
+
+		// ----------------------------------------------------------
+		// Process message
+		// ----------------------------------------------------------
+		processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, report);
+
+		report.reportStop("End job processing");
+	}
+
+	/**
+	 * Get the prefix for monitor logs according the step for this class instance
+	 * 
+	 * @param step
+	 * @return
+	 */
+	protected String getPrefixMonitorLog(final String step, final LevelJobDto job) {
+		return MonitorLogUtils.getPrefixMonitorLog(step, job);
+	}
+
+	/**
      * @param job
      * @param inputDownloader
      * @param outputProcessor
@@ -311,160 +317,146 @@ public class JobProcessor {
         ackProcessing(message, failedProc, ackOk, errorMessage);
     }
 
-    /**
-     * Check if thread interrupted
-     * 
-     * @throws InterruptedException
-     */
-    protected void checkThreadInterrupted() throws InterruptedException {
-        if (Thread.currentThread().isInterrupted()) {
-            throw new InterruptedException("Current thread is interrupted");
-        }
-    }
+	/**
+	 * Check if thread interrupted
+	 * 
+	 * @throws InterruptedException
+	 */
+	protected void checkThreadInterrupted() throws InterruptedException {
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InterruptedException("Current thread is interrupted");
+		}
+	}
 
-    /**
-     * Wait for the processes execution completion
-     * 
-     * @throws InterruptedException
-     * @throws AbstractCodedException
-     */
-    protected void waitForPoolProcessesEnding(
-            final ExecutorCompletionService<Boolean> procCompletionSrv)
-            throws InterruptedException, AbstractCodedException {
-        checkThreadInterrupted();
-        try {
-            procCompletionSrv.take().get(properties.getTmProcAllTasksS(),
-                    TimeUnit.SECONDS);
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof AbstractCodedException) {
-                throw (AbstractCodedException) e.getCause();
-            } else {
-                throw new InternalErrorException(e.getMessage(), e);
-            }
-        } catch (TimeoutException e) {
-            throw new InternalErrorException(e.getMessage(), e);
-        }
-    }
+	/**
+	 * Wait for the processes execution completion
+	 * 
+	 * @throws InterruptedException
+	 * @throws AbstractCodedException
+	 */
+	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<Boolean> procCompletionSrv)
+			throws InterruptedException, AbstractCodedException {
+		checkThreadInterrupted();
+		try {
+			procCompletionSrv.take().get(properties.getTmProcAllTasksS(), TimeUnit.SECONDS);
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof AbstractCodedException) {
+				throw (AbstractCodedException) e.getCause();
+			} else {
+				throw new InternalErrorException(e.getMessage(), e);
+			}
+		} catch (TimeoutException e) {
+			throw new InternalErrorException(e.getMessage(), e);
+		}
+	}
 
-    /**
-     * @param job
-     * @param poolProcessing
-     * @param procExecutorSrv
-     */
-    protected void cleanJobProcessing(final LevelJobDto job,
-            final boolean poolProcessing,
-            final ExecutorService procExecutorSrv) {
-        if (poolProcessing) {
-            procExecutorSrv.shutdownNow();
-            try {
-                procExecutorSrv.awaitTermination(properties.getTmProcStopS(),
-                        TimeUnit.SECONDS);
-                // TODO send kill if fails
-            } catch (InterruptedException e) {
-                // Conserves the interruption
-                Thread.currentThread().interrupt();
-            }
-        }
-        this.eraseDirectory(job);
-    }
-    
-    private void eraseDirectory(final LevelJobDto job) {
-        if (devProperties.getStepsActivation().get("erasing")) {
-            try {
-                LOGGER.info("{} Erasing local working directory",
-                        getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));
-                Path p = Paths.get(job.getWorkDirectory());
-                Files.walk(p, FileVisitOption.FOLLOW_LINKS)
-                        .sorted(Comparator.reverseOrder()).map(Path::toFile)
-                        .peek(System.out::println).forEach(File::delete);
-            } catch (IOException e) {
-                LOGGER.error(
-                        "{} [code {}] Failed to erase local working directory",
-                        getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job),
-                        ErrorCode.INTERNAL_ERROR.getCode());
-                this.appStatus.setError("PROCESSING");
-            }
-        } else {
-            LOGGER.info("{} Erasing local working directory bypassed",
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERASE, job));
-        }
-    }
+	/**
+	 * @param job
+	 * @param poolProcessing
+	 * @param procExecutorSrv
+	 */
+	protected void cleanJobProcessing(final LevelJobDto job, final boolean poolProcessing,
+			final ExecutorService procExecutorSrv) {
+		if (poolProcessing) {
+			procExecutorSrv.shutdownNow();
+			try {
+				procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
+				// TODO send kill if fails
+			} catch (InterruptedException e) {
+				// Conserves the interruption
+				Thread.currentThread().interrupt();
+			}
+		}
+		
+		eraseWorkingDirectory(properties.getWorkingDir());
+	}
 
-    /**
-     * Ack job processing and stop app if needed
-     * @param dto
-     * @param ackOk
-     * @param errorMessage
-     */
-    protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto, 	final FailedProcessingDto failed,
-            final boolean ackOk, final String errorMessage) {
-        boolean stopping = appStatus.getStatus().isStopping();
+	private void eraseWorkingDirectory(final String workingDirectoryPath) {
+		if (devProperties.getStepsActivation().get("erasing")) {
+			Path workingDir = Paths.get(workingDirectoryPath);
+			if (Files.exists(workingDir)) {
+				try {
+					LOGGER.info("Erasing local working directory '{}'", workingDir.toString());
+					// TODO: possible candidate to use instead, if dumping of deleted files not required: FileUtils.delete(workingDir.toString());
+	                Files.walk(workingDir, FileVisitOption.FOLLOW_LINKS)
+                    .sorted(Comparator.reverseOrder()).map(Path::toFile)
+                    .peek(System.out::println).forEach(File::delete);
+				} catch (IOException e) {
+					LOGGER.error("Failed to erase local working directory '{}: {}'", workingDir.toString(),
+							e.getMessage());
+					this.appStatus.setError("PROCESSING");
+				}
+			}
 
-        // Ack
-        if (ackOk) {
-            ackPositively(stopping, dto);
-        } else {
-            ackNegatively(stopping, dto, errorMessage);
-            errorAppender.send(failed);
-        }
+		} else {
+			LOGGER.info("Erasing local working directory '{}' bypassed", workingDirectoryPath);
+		}
+	}
 
-        // Check status
-        LOGGER.info("{} Checking status consumer",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, dto.getBody()));
-        if (appStatus.getStatus().isStopping()) {
-            // TODO send stop to the MQI
-            try {
-                mqiStatusService.stop();
-            } catch (AbstractCodedException ace) {
-                LOGGER.error("{} {} Checking status consumer",
-                        getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS,
-                                dto.getBody()),
-                        ace.getLogMessage());
-            }
-            System.exit(0);
-        } else if (appStatus.getStatus().isFatalError()) {
-            System.exit(-1);
-        } else {
-            appStatus.setWaiting();
-        }
-    }
+	/**
+	 * Ack job processing and stop app if needed
+	 * 
+	 * @param dto
+	 * @param ackOk
+	 * @param errorMessage
+	 */
+	protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto, final FailedProcessingDto failed,
+			final boolean ackOk, final String errorMessage) {
+		boolean stopping = appStatus.getStatus().isStopping();
 
-    /**
-     * @param dto
-     * @param errorMessage
-     */
-    protected void ackNegatively(final boolean stop,
-            final GenericMessageDto<LevelJobDto> dto,
-            final String errorMessage) {
-        LOGGER.info("{} Acknowledging negatively",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
-        try {
-            mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
-                    errorMessage, stop), ProductCategory.LEVEL_JOBS);
-        } catch (AbstractCodedException ace) {
-            LOGGER.error("{} [step 5] {} [code {}] {}",
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
-                            dto.getBody()),
-                    ace.getCode().getCode(), ace.getLogMessage());
-        }
-        appStatus.setError("PROCESSING");
-    }
+		// Ack
+		if (ackOk) {
+			ackPositively(stopping, dto);
+		} else {
+			ackNegatively(stopping, dto, errorMessage);
+			errorAppender.send(failed);
+		}
 
-    protected void ackPositively(final boolean stop,
-            final GenericMessageDto<LevelJobDto> dto) {
-        LOGGER.info("{} Acknowledging positively",
-                getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
-        try {
-            mqiService.ack(
-                    new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
-        } catch (AbstractCodedException ace) {
-            LOGGER.error("{} [step 5] {} [code {}] {}",
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
-                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
-                            dto.getBody()),
-                    ace.getCode().getCode(), ace.getLogMessage());
-            appStatus.setError("PROCESSING");
-        }
-    }
+		// Check status
+		LOGGER.info("{} Checking status consumer", getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, dto.getBody()));
+		if (appStatus.getStatus().isStopping()) {
+			// TODO send stop to the MQI
+			try {
+				mqiStatusService.stop();
+			} catch (AbstractCodedException ace) {
+				LOGGER.error("{} {} Checking status consumer",
+						getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, dto.getBody()), ace.getLogMessage());
+			}
+			System.exit(0);
+		} else if (appStatus.getStatus().isFatalError()) {
+			System.exit(-1);
+		} else {
+			appStatus.setWaiting();
+		}
+	}
+
+	/**
+	 * @param dto
+	 * @param errorMessage
+	 */
+	protected void ackNegatively(final boolean stop, final GenericMessageDto<LevelJobDto> dto,
+			final String errorMessage) {
+		LOGGER.info("{} Acknowledging negatively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
+		try {
+			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop),
+					ProductCategory.LEVEL_JOBS);
+		} catch (AbstractCodedException ace) {
+			LOGGER.error("{} [step 5] {} [code {}] {}", getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
+					getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, dto.getBody()), ace.getCode().getCode(),
+					ace.getLogMessage());
+		}
+		appStatus.setError("PROCESSING");
+	}
+
+	protected void ackPositively(final boolean stop, final GenericMessageDto<LevelJobDto> dto) {
+		LOGGER.info("{} Acknowledging positively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
+		try {
+			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
+		} catch (AbstractCodedException ace) {
+			LOGGER.error("{} [step 5] {} [code {}] {}", getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
+					getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, dto.getBody()), ace.getCode().getCode(),
+					ace.getLogMessage());
+			appStatus.setError("PROCESSING");
+		}
+	}
 }
