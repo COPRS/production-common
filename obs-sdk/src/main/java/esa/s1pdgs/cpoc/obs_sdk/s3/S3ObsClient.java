@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -199,4 +201,12 @@ public class S3ObsClient extends AbstractObsClient {
 		return objectsOfTimeFrame;
 	}
 
+	@Override
+	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) throws SdkClientException {
+		final String bucket = configuration.getBucketForFamily(family);
+		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);
+		final Map<String, InputStream> result = s3Services.getAllAsInputStream(bucket, keyPrefix);
+		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
+		return result;
+	}
 }

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -168,4 +169,6 @@ public interface ObsClient {
 	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
 	
 	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
+	
+    Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) throws SdkClientException;
 }

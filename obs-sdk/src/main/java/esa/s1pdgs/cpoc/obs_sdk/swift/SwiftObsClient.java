@@ -1,9 +1,11 @@
 package esa.s1pdgs.cpoc.obs_sdk.swift;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -170,6 +172,15 @@ public class SwiftObsClient extends AbstractObsClient {
 				methodDuration));
 
 		return objectsOfTimeFrame;
+	}
+	
+	@Override
+	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) throws SdkClientException {
+		final String bucket = configuration.getContainerForFamily(family);
+		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);		
+		final Map<String, InputStream> result = swiftObsServices.getAllAsInputStream(bucket, keyPrefix);
+		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
+		return result;
 	}
 
 }

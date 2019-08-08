@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -264,6 +265,9 @@ public abstract class AbstractObsClient implements ObsClient {
 	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {
 		throw new UnsupportedOperationException();
 	}
-
-    
+	
+	@Override
+	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)  throws SdkClientException {
+		throw new UnsupportedOperationException();
+	}
 }

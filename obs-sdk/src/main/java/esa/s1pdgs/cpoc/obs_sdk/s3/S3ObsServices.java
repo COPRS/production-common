@@ -2,6 +2,11 @@ package esa.s1pdgs.cpoc.obs_sdk.s3;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +17,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
@@ -273,6 +279,28 @@ public class S3ObsServices {
             }
         }
     }
+    
+    public final List<S3ObjectSummary> getAll(final String bucketName, final String prefix) {    
+    	ObjectListing listing = s3client.listObjects(bucketName, prefix);
+    	final List<S3ObjectSummary> summaries = new ArrayList<>(listing.getObjectSummaries());
+
+    	while (listing.isTruncated()) {
+    	   listing = s3client.listNextBatchOfObjects(listing);
+    	   summaries.addAll(listing.getObjectSummaries());
+    	}
+    	return summaries;
+    }
+    
+    public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) {       	
+    	final Map<String, InputStream> result = new LinkedHashMap<>();
+    	
+    	for (final S3ObjectSummary summ : getAll(bucketName, prefix)) {
+    		final String key = summ.getKey();
+    		final S3Object obj = s3client.getObject(bucketName, key);  
+    		result.put(key, obj.getObjectContent());    		
+    	}
+    	return result; 
+    }
 
     /**
      * @param bucketName
@@ -287,7 +315,7 @@ public class S3ObsServices {
             try {
                 log(String.format("Uploading object %s in bucket %s", keyName,
                         bucketName));
-
+  
                 Upload upload = s3tm.upload(bucketName, keyName, uploadFile);
                 upload.addProgressListener((ProgressEvent progressEvent) -> {
                     log(String.format(

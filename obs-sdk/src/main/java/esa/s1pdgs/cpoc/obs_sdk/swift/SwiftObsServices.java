@@ -2,7 +2,10 @@ package esa.s1pdgs.cpoc.obs_sdk.swift;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,6 +13,9 @@ import org.javaswift.joss.instructions.UploadInstructions;
 import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
+
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 public class SwiftObsServices {
 
@@ -420,5 +426,22 @@ public class SwiftObsServices {
 			}
 		}
 	}
-
+	
+    public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) {       	
+    	final Map<String, InputStream> result = new LinkedHashMap<>();    	
+    	String lastNonSegmentName = "";
+    	
+    	for (final StoredObject object : client.getContainer(bucketName).list(prefix, "", Integer.MAX_VALUE)) {
+    		final String key = object.getName();
+    		
+			// Skip segment files (all files that have a sub directory like naming scheme with a direct parent that 
+    		// exists as a file (the manifest file))
+			if (!lastNonSegmentName.isEmpty() && key.equals(lastNonSegmentName + "/" + object.getBareName())) {
+				continue;
+			}
+			lastNonSegmentName = key;			
+			result.put(key, object.getAsObject().downloadObjectAsInputStream());
+    	}
+    	return result; 
+    }
 }
