@@ -439,6 +439,10 @@ public class SwiftObsServices {
 			if (!lastNonSegmentName.isEmpty() && key.equals(lastNonSegmentName + "/" + object.getBareName())) {
 				continue;
 			}
+			// skip directories as they will be derived from the key
+			if (object.isDirectory()) {
+				continue;
+			}			
 			lastNonSegmentName = key;			
 			result.put(key, object.getAsObject().downloadObjectAsInputStream());
     	}
