@@ -40,7 +40,7 @@ public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 				final GenericMessageDto<E> message = client.next(category);		
 				if (message == null || message.getBody() == null) {
 					LOG.trace("No message received: continue");
-					return;
+					continue;
 				}			
 				AckMessageDto ackMess;			
 				try {
