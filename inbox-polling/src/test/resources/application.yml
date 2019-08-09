@@ -19,10 +19,10 @@ logging:
 inbox:
   polling-interval-ms: 10000
   polling:
-    - directory: /tmp/foo
+    - directory: /tmp/MPS_/S1A
       ignoreRegex: .+\.tmp$
       topic: t-pdgs-ingestion
-    - directory: /tmp/bar
+    - directory: /tmp/WILE/S1B
       ignoreRegex: .+\.tmp$
       topic: t-pdgs-ingestion
   

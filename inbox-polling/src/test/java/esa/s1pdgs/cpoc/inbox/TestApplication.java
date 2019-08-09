@@ -24,29 +24,28 @@ import esa.s1pdgs.cpoc.inbox.entity.InboxEntryRepository;
 @DirtiesContext
 @TestPropertySource(properties = "scheduling.enable=false")
 @Transactional
-public class TestApplication {			
-	@Autowired 
+public class TestApplication {
+	@Autowired
 	private InboxPollingService service;
-	
+
 	@Autowired
 	private InboxEntryRepository repo;
-	
+
 	@Test
-	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws InterruptedException {		
-		final InboxEntry content = new InboxEntry("bar", "file:///tmp/foo/bar");
+	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws InterruptedException {
+		final InboxEntry content = new InboxEntry("bar", "file:///tmp/MPS_/S1A", "S1", "A", "MPS_");
 		repo.save(content);
-		
-		final InboxEntry content2 = new InboxEntry("bar2", "file:///tmp/foo/bar2");
+
+		final InboxEntry content2 = new InboxEntry("bar2", "file:///tmp/WILE/S1B", "S1", "B", "WILE");
 		repo.save(content2);
-		
+
 		service.pollAll();
-		
-		final List<InboxEntry> actual = read();		
-		assertEquals(0, actual.size());		
+
+		final List<InboxEntry> actual = read();
+		assertEquals(0, actual.size());
 	}
-	
+
 	private final List<InboxEntry> read() {
-		return StreamSupport.stream(repo.findAll().spliterator(), false)
-				.collect(Collectors.toList());
+		return StreamSupport.stream(repo.findAll().spliterator(), false).collect(Collectors.toList());
 	}
 }

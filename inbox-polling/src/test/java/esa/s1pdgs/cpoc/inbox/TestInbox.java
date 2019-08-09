@@ -8,42 +8,40 @@ import org.junit.Test;
 import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
 import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
 
-public class TestInbox {	
+public class TestInbox {
 	@Test
-	public final void testPoll_OnFindingNewProducts_ShallStoreProductsAndPutInKafkaQueue()
-	{
-		final InboxAdapter fakeAdapter = new InboxAdapter() {			
+	public final void testPoll_OnFindingNewProducts_ShallStoreProductsAndPutInKafkaQueue() {
+		final InboxAdapter fakeAdapter = new InboxAdapter() {
 			@Override
 			public Collection<InboxEntry> read(InboxFilter filter) {
-				return Arrays.asList(new InboxEntry("foo1", "bar1"), new InboxEntry("foo2", "bar2"));
-			}			
+				return Arrays.asList(new InboxEntry("foo1", "file:///tmp/MPS_/S1A", "S1", "A", "MPS_"),
+						new InboxEntry("foo2", "file:///tmp/WILE/S1B", "S1", "B", "WILE"));
+			}
+
 			@Override
 			public String description() {
 				return "fakeAdapter";
 			}
 		};
-		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(2);		
+		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(2);
 		final MockSubmissionClient fakeKafkaClient = new MockSubmissionClient(2);
 
-		final Inbox uut = new Inbox(
-				fakeAdapter, 
-				InboxFilter.ALLOW_ALL, 
-				new InboxPollingServiceTransactional(fakeRepo),
-				fakeKafkaClient
-		);
+		final Inbox uut = new Inbox(fakeAdapter, InboxFilter.ALLOW_ALL, new InboxPollingServiceTransactional(fakeRepo),
+				fakeKafkaClient);
 		uut.poll();
 		fakeRepo.verify();
 		fakeKafkaClient.verify();
 	}
-	
+
 	@Test
-	public final void testPoll_OnFindingAlreadyStoredProducts_ShallDoNothing()
-	{
-		final InboxAdapter fakeAdapter = new InboxAdapter() {			
+	public final void testPoll_OnFindingAlreadyStoredProducts_ShallDoNothing() {
+		final InboxAdapter fakeAdapter = new InboxAdapter() {
 			@Override
 			public Collection<InboxEntry> read(InboxFilter filter) {
-				return Arrays.asList(new InboxEntry("foo1", "bar1"), new InboxEntry("foo2", "bar2"));
-			}			
+				return Arrays.asList(new InboxEntry("foo1", "file:///tmp/MPS_/S1A", "S1", "A", "MPS_"),
+						new InboxEntry("foo2", "file:///tmp/WILE/S1B", "S1", "B", "WILE"));
+			}
+
 			@Override
 			public String description() {
 				return "fakeAdapter";
@@ -52,17 +50,14 @@ public class TestInbox {
 		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(0) {
 			@Override
 			public Iterable<InboxEntry> findAll() {
-				return Arrays.asList(new InboxEntry("foo2", "bar2"), new InboxEntry("foo1", "bar1"));
-			}			
+				return Arrays.asList(new InboxEntry("foo2", "file:///tmp/WILE/S1B", "S1", "B", "WILE"),
+						new InboxEntry("foo1", "file:///tmp/MPS_/S1A", "S1", "A", "MPS_"));
+			}
 		};
 		final MockSubmissionClient fakeKafkaClient = new MockSubmissionClient(0);
 
-		final Inbox uut = new Inbox(
-				fakeAdapter, 
-				InboxFilter.ALLOW_ALL, 
-				new InboxPollingServiceTransactional(fakeRepo),
-				fakeKafkaClient
-		);
+		final Inbox uut = new Inbox(fakeAdapter, InboxFilter.ALLOW_ALL, new InboxPollingServiceTransactional(fakeRepo),
+				fakeKafkaClient);
 		uut.poll();
 		fakeRepo.verify();
 		fakeKafkaClient.verify();
