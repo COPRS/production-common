@@ -101,7 +101,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         response.setValidityStop("validityStopTime");
         response.setMissionId("mission");
 		response.setSatelliteId("satellite");
-		response.setStationId("station");
+		response.setStationCode("station");
         response.setInstrumentConfigurationId(0);
         response.setNumberSlice(2);
         response.setDatatakeId("datatakeId");
@@ -184,7 +184,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setValidityStop("validityStopTime");
         l0SliceResponse.setMissionId("mission");
         l0SliceResponse.setSatelliteId("satellite");
-        l0SliceResponse.setStationId("station");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -197,7 +197,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setValidityStop("validityStopTime");
         l0AcnResponse.setMissionId("mission");
         l0AcnResponse.setSatelliteId("satellite");
-        l0AcnResponse.setStationId("station");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
@@ -250,7 +250,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setValidityStop("validityStopTime");
         l0SliceResponse.setMissionId("mission");
         l0SliceResponse.setSatelliteId("satellite");
-        l0SliceResponse.setStationId("station");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -273,7 +273,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setValidityStop("validityStopTime");
         l0SliceResponse.setMissionId("mission");
         l0SliceResponse.setSatelliteId("satellite");
-        l0SliceResponse.setStationId("station");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -303,7 +303,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setValidityStop("validityStopTime");
         l0SliceResponse.setMissionId("mission");
         l0SliceResponse.setSatelliteId("satellite");
-        l0SliceResponse.setStationId("station");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -316,7 +316,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setValidityStop("validityStopTime");
         l0AcnResponse.setMissionId("mission");
         l0AcnResponse.setSatelliteId("satellite");
-        l0AcnResponse.setStationId("station");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
@@ -365,7 +365,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setValidityStop("stopDate");
         l0SliceResponse.setMissionId("mission");
         l0SliceResponse.setSatelliteId("satellite");
-        l0SliceResponse.setStationId("station");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -378,7 +378,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setValidityStop("validityStopTime");
         l0AcnResponse.setMissionId("mission");
         l0AcnResponse.setSatelliteId("satellite");
-        l0AcnResponse.setStationId("station");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
@@ -426,7 +426,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setValidityStop("validityStopTime");
         l0SliceResponse.setMissionId("mission");
         l0SliceResponse.setSatelliteId("satellite");
-        l0SliceResponse.setStationId("station");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -439,7 +439,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setValidityStop("validityStopTime");
         l0AcnResponse.setMissionId("mission");
         l0AcnResponse.setSatelliteId("satellite");
-        l0AcnResponse.setStationId("station");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
@@ -487,7 +487,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setValidityStop("validityStopTime");
         l0SliceResponse.setMissionId("mission");
         l0SliceResponse.setSatelliteId("satellite");
-        l0SliceResponse.setStationId("station");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -500,7 +500,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setValidityStop("validityStopTime");
         l0AcnResponse.setMissionId("mission");
         l0AcnResponse.setSatelliteId("satellite");
-        l0AcnResponse.setStationId("station");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");

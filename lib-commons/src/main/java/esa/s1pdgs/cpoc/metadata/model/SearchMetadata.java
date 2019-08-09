@@ -18,11 +18,11 @@ public class SearchMetadata extends AbstractMetadata {
 	 * @param validityStop
 	 * @param missionId
      * @param satelliteId
-     * @param stationId
+     * @param stationCode
 	 */
 	public SearchMetadata(final String productName, final String productType, final String keyObjectStorage,
-			final String validityStart, final String validityStop, final String missionId, final String satelliteId, final String stationId) {
-		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationId);
+			final String validityStart, final String validityStop, final String missionId, final String satelliteId, final String stationCode) {
+		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
 	}
 	
 	public SearchMetadata() {
