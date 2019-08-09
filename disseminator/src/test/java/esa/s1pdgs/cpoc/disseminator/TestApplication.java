@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfigu
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-public class ApplicationTest {
+public class TestApplication {
 	
 	@Autowired
 	private DisseminationProperties properties;
