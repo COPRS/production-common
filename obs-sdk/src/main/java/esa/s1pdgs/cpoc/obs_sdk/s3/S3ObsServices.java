@@ -291,15 +291,38 @@ public class S3ObsServices {
     	return summaries;
     }
     
-    public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) {       	
-    	final Map<String, InputStream> result = new LinkedHashMap<>();
+    public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) 
+    		throws S3ObsServiceException, S3SdkClientException {   
     	
-    	for (final S3ObjectSummary summ : getAll(bucketName, prefix)) {
-    		final String key = summ.getKey();
-    		final S3Object obj = s3client.getObject(bucketName, key);  
-    		result.put(key, obj.getObjectContent());    		
-    	}
-    	return result; 
+        for (int retryCount = 1;; retryCount++) {
+        	final Map<String, InputStream> result = new LinkedHashMap<>();
+        	
+            try {
+            	for (final S3ObjectSummary summ : getAll(bucketName, prefix)) {
+            		final String key = summ.getKey();
+            		final S3Object obj = s3client.getObject(bucketName, key);  
+            		result.put(key, obj.getObjectContent());    		
+            	}
+            	return result;
+            } catch (com.amazonaws.AmazonServiceException ase) {
+                throw new S3ObsServiceException(bucketName, prefix, String.format("Listing fails: %s", ase.getMessage()), ase);
+            } catch (com.amazonaws.SdkClientException sce) {
+                if (retryCount <= numRetries) {
+                    LOGGER.warn(String.format(
+                            "Listing prefixed objects %s from bucket %s failed: Attempt : %d / %d",
+                            prefix, bucketName, retryCount, numRetries)
+                    );
+                    try {
+                        Thread.sleep(retryDelay);
+                    } catch (InterruptedException e) {
+                        throw new S3SdkClientException(bucketName, prefix,String.format("Listing fails: %s", sce.getMessage()),sce);
+                    }
+                    continue;
+                } else {
+                    throw new S3SdkClientException(bucketName, prefix, String.format("Upload fails: %s", sce.getMessage()), sce);
+                }
+            }
+        }
     }
 
     /**
