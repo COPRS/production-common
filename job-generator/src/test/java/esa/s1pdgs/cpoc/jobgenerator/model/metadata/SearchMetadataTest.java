@@ -18,7 +18,7 @@ public class SearchMetadataTest {
 	 */
 	@Test
 	public void testToString() {
-		SearchMetadata obj = new SearchMetadata("name", "type", "kobs", "start", "stop");
+		SearchMetadata obj = new SearchMetadata("name", "type", "kobs", "start", "stop", "mission", "satellite", "station");
 		
 		String str = obj.toString();
 		assertTrue(str.contains("productName\":\"name"));
@@ -26,6 +26,9 @@ public class SearchMetadataTest {
 		assertTrue(str.contains("keyObjectStorage\":\"kobs"));
 		assertTrue(str.contains("validityStart\":\"start"));
 		assertTrue(str.contains("validityStop\":\"stop"));
+		assertTrue(str.contains("missionId\":\"mission"));
+		assertTrue(str.contains("satelliteId\":\"satellite"));
+		assertTrue(str.contains("stationId\":\"station"));
 	}
 
 	/**

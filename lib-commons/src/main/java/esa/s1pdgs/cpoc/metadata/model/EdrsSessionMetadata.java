@@ -13,10 +13,13 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	 * @param keyObjectStorage
 	 * @param validityStart
 	 * @param validityStop
+	 * @param missionId
+     * @param satelliteId
+     * @param stationId
 	 */
 	public EdrsSessionMetadata(final String productName, final String productType, final String keyObjectStorage,
-			final String validityStart, final String validityStop) {
-		super(productName, productType, keyObjectStorage, validityStart, validityStop);
+			final String validityStart, final String validityStop, final String missionId, final String satelliteId, final String stationId) {
+		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationId);
 	}
 	
 	public EdrsSessionMetadata() {

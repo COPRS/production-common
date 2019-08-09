@@ -37,23 +37,44 @@ public abstract class AbstractMetadata {
      * Validity stop time
      */
     protected String validityStop;
-
+    
+    /**
+     * Mission ID
+     */
+    protected String missionId;
+    
+    /**
+     * Satellite ID
+     */
+    protected String satelliteId;
+    
+    /**
+     * Station ID
+     */
+    protected String stationId;
+    
     /**
      * @param productName
      * @param productType
      * @param keyObjectStorage
      * @param validityStart
      * @param validityStop
+     * @param missionId
+     * @param satelliteId
+     * @param stationId
      */
     public AbstractMetadata(final String productName, final String productType,
             final String keyObjectStorage, final String validityStart,
-            final String validityStop) {
+            final String validityStop, final String missionId, final String satelliteId, final String stationId) {
         super();
         this.productName = productName;
         this.productType = productType;
         this.keyObjectStorage = keyObjectStorage;
         this.validityStart = validityStart;
         this.validityStop = validityStop;
+        this.missionId =  missionId;
+        this.satelliteId = satelliteId;
+        this.stationId = stationId;
     }
     
     public AbstractMetadata() {
@@ -136,17 +157,59 @@ public abstract class AbstractMetadata {
 
 	public String toAbstractString() {
 		return String.format(
-				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\"",
-				productName, productType, keyObjectStorage, validityStart, validityStop);
+				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\",\"missionId\":\"%s\",\"satelliteId\":\"%s\",\"stationId\":\"%s\"",
+				productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationId);
+	}
+	
+    /**
+	 * @return the missionId
+	 */
+	public String getMissionId() {
+		return missionId;
 	}
 
-    /**
+	/**
+	 * @param missionId the missionId to set
+	 */
+	public void setMissionId(String missionId) {
+		this.missionId = missionId;
+	}
+
+	/**
+	 * @return the satelliteId
+	 */
+	public String getSatelliteId() {
+		return satelliteId;
+	}
+
+	/**
+	 * @param satelliteId the satelliteId to set
+	 */
+	public void setSatelliteId(String satelliteId) {
+		this.satelliteId = satelliteId;
+	}
+
+	/**
+	 * @return the stationId
+	 */
+	public String getStationId() {
+		return stationId;
+	}
+
+	/**
+	 * @param stationId the stationId to set
+	 */
+	public void setStationId(String stationId) {
+		this.stationId = stationId;
+	}
+
+	/**
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
         return Objects.hash(productName, productType, keyObjectStorage,
-                validityStart, validityStop);
+                validityStart, validityStop, missionId, satelliteId, stationId);
     }
 
     /**
@@ -165,7 +228,10 @@ public abstract class AbstractMetadata {
                     && Objects.equals(productType, other.productType)
                     && Objects.equals(keyObjectStorage, other.keyObjectStorage)
                     && Objects.equals(validityStart, other.validityStart)
-                    && Objects.equals(validityStop, other.validityStop);
+                    && Objects.equals(validityStop, other.validityStop)
+		            && Objects.equals(missionId, other.missionId)
+		            && Objects.equals(satelliteId, other.satelliteId)
+		            && Objects.equals(stationId, other.stationId);
         }
         return ret;
     }
