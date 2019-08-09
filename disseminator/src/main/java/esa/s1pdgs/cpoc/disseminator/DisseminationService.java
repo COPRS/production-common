@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.disseminator;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +12,12 @@ import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
@@ -34,6 +38,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
+@Service
 public class DisseminationService implements MqiListener<ProductDto> {	
 	private static final Logger LOG = LogManager.getLogger(DisseminationService.class);
 	
@@ -51,6 +56,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 	private final ErrorRepoAppender errorAppender;
 	private final Map<String,OutboxClient> clientForTargets = new HashMap<>();
 
+	@Autowired
 	public DisseminationService(
 			final GenericMqiClient client,
 		    final ObsClient obsClient,
@@ -69,13 +75,11 @@ public class DisseminationService implements MqiListener<ProductDto> {
     	for (final Map.Entry<String, OutboxConfiguration> entry : properties.getOutboxes().entrySet()) {	
     		final String target = entry.getKey();
     		final OutboxConfiguration config = entry.getValue();    		
-    		final OutboxClient.Factory factory = FACTORIES.get(config.getProtocol());
-    		if (factory == null) {
-    			throw new RuntimeException(String.format("No OutboxClient.Factory exists for protocol %s", config.getProtocol()));
-    		}    	
-    		final OutboxClient outboxClient = factory.newClient(obsClient, config);    		
-    		LOG.debug("Defining {} for target {}", outboxClient, target);
-    		clientForTargets.put(target, outboxClient);
+
+    		final OutboxClient outboxClient = FACTORIES.getOrDefault(config.getProtocol(), OutboxClient.Factory.NOT_DEFINED_ERROR)
+    				.newClient(obsClient, config);    		
+    		LOG.info("Using {} for Outbox target '{}'", outboxClient, target);
+    		put(target, outboxClient);
     	}    	
     	
         // Init the list of consumers and start them
@@ -93,69 +97,87 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		final ProductDto product = message.getBody();
 		
 		for (final DisseminationTypeConfiguration config : configsFor(product.getFamily())) {			
-			if (product.getProductName().matches(config.getRegex())) {		
-				final Reporting.Factory rf = new LoggerReporting.Factory(LOG, "Dissemination");
-				final Reporting reporting = rf.product(product.getFamily().toString(), product.getProductName())
-						.newReporting(0);
-				reporting.reportStart("Start dissemination of product to outbox " + config.getTarget());
-				try {
-					// assert source object exists in OBS
-					if (!obsClient.exist(product.getFamily(), product.getKeyObjectStorage())) {
-						throw new DisseminationException(
-								String.format(
-										"OBS file %s (%s) does not exist", 
-										product.getKeyObjectStorage(), 
-										product.getFamily()
-								)
-						);
-					}
-					final OutboxClient outboxClient = clientForTargets.get(config.getTarget());
-					
-					// assert there is an outbox configured for the given target
-					if (outboxClient == null) {
-						throw new DisseminationException(
-								String.format(
-										"No outbox configured for '%s'. Available are: %s", 
-										config.getTarget(), 
-										clientForTargets.keySet()
-								));
-					}
-					final Reporting reportingDl = rf.newReporting(1);
-					reportingDl.reportStart("Start downloading file from OBS " + product.getKeyObjectStorage() + 
-							" to " + config.getTarget());
-					try {
-						outboxClient.transfer(product.getFamily(), product.getKeyObjectStorage());
-						reportingDl.reportStop("End downloading file from OBS " + product.getKeyObjectStorage() + 
-								" to " + config.getTarget());
-					} catch (Exception e) {
-						reportingDl.reportError("Error downloading file from OBS {} to {}: {} ", 
-								product.getKeyObjectStorage(), config.getTarget(), LogUtils.toString(e));
-						throw e;
-					}							
-				} catch (Exception e) {					
-					final String errMessage = (e instanceof DisseminationException) ? e.getMessage() : LogUtils.toString(e); 
-					final String messageString = String.format(
-							"Error on dissemination of product to outbox %s: %s", 
-							config.getTarget(), 
-							errMessage
-					);
-					LOG.error(messageString,e);
-					reporting.reportError(messageString);									
-					errorAppender.send(new FailedProcessingDto(
-							properties.getHostname(), 
-							new Date(), 
-							messageString, 
-							message
-					));									
-					throw new RuntimeException(messageString, e);
-				} 
-				reporting.reportStop("End dissemination of product to outbox " + config.getTarget());    							
+			if (product.getProductName().matches(config.getRegex())) {
+				handleTransferTo(message, config.getTarget());
 			}			
 		}			
 	}
+
+	final void handleTransferTo(final GenericMessageDto<ProductDto> message, final String target) {		
+		final ProductDto product = message.getBody();
+		
+		final Reporting.Factory rf = new LoggerReporting.Factory(LOG, "Dissemination");
+		final Reporting reporting = rf.product(product.getFamily().toString(), product.getProductName())
+				.newReporting(0);
+		reporting.reportStart("Start dissemination of product to outbox " + target);
+		try {
+			assertExists(product);
+			final OutboxClient outboxClient = clientForTarget(target);
+
+			final Reporting reportingDl = rf.newReporting(1);
+			reportingDl.reportStart("Start downloading file from OBS " + product.getKeyObjectStorage() + 
+					" to " + target);
+			try {
+				outboxClient.transfer(product.getFamily(), product.getKeyObjectStorage());
+				reportingDl.reportStop("End downloading file from OBS " + product.getKeyObjectStorage() + 
+						" to " + target);
+			} catch (Exception e) {
+				reportingDl.reportError("Error downloading file from OBS {} to {}: {} ", 
+						product.getKeyObjectStorage(), target, LogUtils.toString(e));
+				throw e;
+			}							
+		} catch (Exception e) {					
+			final String errMessage = (e instanceof DisseminationException) ? e.getMessage() : LogUtils.toString(e); 
+			final String messageString = String.format(
+					"Error on dissemination of product to outbox %s: %s", 
+					target, 
+					errMessage
+			);
+			LOG.error(messageString,e);
+			reporting.reportError(messageString);									
+			errorAppender.send(new FailedProcessingDto(
+					properties.getHostname(), 
+					new Date(), 
+					messageString, 
+					message
+			));									
+			throw new RuntimeException(messageString, e);
+		} 
+		reporting.reportStop("End dissemination of product to outbox " + target);
+	}
+
+	final void assertExists(final ProductDto product) throws ObsException {
+		if (!obsClient.exist(product.getFamily(), product.getKeyObjectStorage())) {
+			throw new DisseminationException(
+					String.format(
+							"OBS file '%s' (%s) does not exist", 
+							product.getKeyObjectStorage(), 
+							product.getFamily()
+					)
+			);
+		}
+	}
     
-    final Iterable<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
-    	return properties.getCategories().get(ProductCategory.of(family));	
+    final List<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
+    	return properties.getCategories().getOrDefault(ProductCategory.of(family), Collections.emptyList());	
     }
+    
+	final void put(final String target, final OutboxClient outboxClient) {
+		clientForTargets.put(target, outboxClient);		
+	}
+	
+	final OutboxClient clientForTarget(final String target) {
+		final OutboxClient outboxClient = clientForTargets.get(target);
+		
+		// assert there is an outbox configured for the given target
+		if (outboxClient == null) {
+			throw new DisseminationException(String.format(
+					"No outbox configured for '%s'. Available are: %s", 
+					target, 
+					clientForTargets.keySet()
+			));
+		}
+		return outboxClient;
+	}
 }
 

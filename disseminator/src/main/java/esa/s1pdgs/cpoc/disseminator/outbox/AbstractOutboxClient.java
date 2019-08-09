@@ -14,6 +14,6 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 
 	@Override
 	public String toString() {
-		return "OutboxClient using protocol " + config.getProtocol() ;
+		return "OutboxClient-" + config.getProtocol() ;
 	}
 }
