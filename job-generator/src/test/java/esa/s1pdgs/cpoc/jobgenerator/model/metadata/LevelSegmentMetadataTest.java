@@ -19,12 +19,15 @@ public class LevelSegmentMetadataTest {
 	 */
 	@Test
 	public void testToString() {
-		LevelSegmentMetadata obj = new LevelSegmentMetadata("name", "type", "kobs", "start", "stop","pol","consol","14256");
+		LevelSegmentMetadata obj = new LevelSegmentMetadata("name", "type", "kobs", "start", "stop", "mission", "satellite", "station", "pol","consol","14256");
 		assertEquals("name", obj.getProductName());
         assertEquals("type", obj.getProductType());
         assertEquals("kobs", obj.getKeyObjectStorage());
         assertEquals("start", obj.getValidityStart());
         assertEquals("stop", obj.getValidityStop());
+        assertEquals("mission", obj.getMissionId());
+        assertEquals("satellite", obj.getSatelliteId());
+        assertEquals("station", obj.getStationId());
         assertEquals("14256", obj.getDatatakeId());
         assertEquals("consol", obj.getConsolidation());
         assertEquals("pol", obj.getPolarisation());
@@ -35,6 +38,9 @@ public class LevelSegmentMetadataTest {
 		assertTrue(str.contains("keyObjectStorage\":\"kobs"));
 		assertTrue(str.contains("validityStart\":\"start"));
 		assertTrue(str.contains("validityStop\":\"stop"));
+		assertTrue(str.contains("missionId\":\"mission"));
+		assertTrue(str.contains("satelliteId\":\"satellite"));
+		assertTrue(str.contains("stationId\":\"station"));
 		assertTrue(str.contains("consolidation\":\"consol"));
 		assertTrue(str.contains("polarisation\":\"pol"));
 		assertTrue(str.contains("datatakeId\":\"14256"));

@@ -58,7 +58,8 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	@Test
 	public void testSearchMetadataLastValCover() throws Exception {
 		List<SearchMetadata> expectedResult = new ArrayList<>();
-		expectedResult.add(new SearchMetadata("name", "type", "kobs", "startDate", "stopDate"));
+		expectedResult.add(new SearchMetadata("name", "type", "kobs", "startDate", "stopDate",
+                "mission", "satellite", "station"));
 		SearchMetadata response = new SearchMetadata();
 		response.setProductName("name");
 		response.setProductType("type");
@@ -74,7 +75,8 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	@Test
     public void testSearchMetadataValIntersect() throws Exception {
         List<SearchMetadata> expectedResult = new ArrayList<>();
-        expectedResult.add(new SearchMetadata("name", "type", "kobs", "startDate", "stopDate"));
+        expectedResult.add(new SearchMetadata("name", "type", "kobs", "startDate", "stopDate",
+                "mission", "satellite", "station"));
         SearchMetadata r = new SearchMetadata();
         r.setProductName("name");
         r.setProductType("type");

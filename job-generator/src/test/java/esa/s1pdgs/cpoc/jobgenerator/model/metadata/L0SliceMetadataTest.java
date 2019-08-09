@@ -18,7 +18,7 @@ public class L0SliceMetadataTest {
 	 */
 	@Test
 	public void testToString() {
-		L0SliceMetadata obj = new L0SliceMetadata("", "", "", "", "", 5, 1, "123456");
+		L0SliceMetadata obj = new L0SliceMetadata("", "", "", "", "", "", "", "", 5, 1, "123456");
 		obj.setProductName("name");
 		obj.setProductType("type");
 		obj.setKeyObjectStorage("kobs");

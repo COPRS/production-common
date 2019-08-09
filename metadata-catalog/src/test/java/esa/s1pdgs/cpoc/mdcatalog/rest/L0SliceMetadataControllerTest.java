@@ -87,7 +87,8 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     public void testGetL0SliceMetadata() throws Exception {
         // Expected Result
         L0SliceMetadata expectedResult = new L0SliceMetadata("name",
-                "type", "url", "validityStartTime", "validityStopTime");
+                "type", "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         expectedResult.setInstrumentConfigurationId(0);
         expectedResult.setNumberSlice(2);
         expectedResult.setDatatakeId("datatakeId");
@@ -98,6 +99,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         response.setKeyObjectStorage("url");
         response.setValidityStart("validityStartTime");
         response.setValidityStop("validityStopTime");
+        response.setMissionId("mission");
+		response.setSatelliteId("satellite");
+		response.setStationId("station");
         response.setInstrumentConfigurationId(0);
         response.setNumberSlice(2);
         response.setDatatakeId("datatakeId");
@@ -166,7 +170,8 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0AcnMetadata() throws Exception {
         L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -177,6 +182,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationId("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -187,12 +195,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationId("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
         L0AcnMetadata l0A = new L0AcnMetadata("name0A", "type", "url",
-                "validityStartTime", "validityStopTime");
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
@@ -236,6 +248,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationId("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -256,6 +271,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationId("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -271,7 +289,8 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0AcnMetadataOnlyOneInES() throws Exception {
         L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -282,6 +301,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationId("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -292,12 +314,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationId("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
         L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
-                "validityStartTime", "validityStopTime");
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
@@ -324,7 +350,8 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn() throws Exception {
         L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -335,6 +362,10 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setValidityStop("stopDate");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationId("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -345,12 +376,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationId("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
         L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
-                "validityStartTime", "validityStopTime");
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
@@ -377,7 +412,8 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn2() throws Exception {
         L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -388,6 +424,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationId("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -398,12 +437,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationId("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
         L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
-                "validityStartTime", "validityStopTime");
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
@@ -430,7 +473,8 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn3() throws Exception {
         L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -441,6 +485,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationId("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -451,12 +498,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationId("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
         L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
-                "validityStartTime", "validityStopTime");
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
@@ -483,7 +534,8 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0AcnMetadataNoACN() throws Exception {
         L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");

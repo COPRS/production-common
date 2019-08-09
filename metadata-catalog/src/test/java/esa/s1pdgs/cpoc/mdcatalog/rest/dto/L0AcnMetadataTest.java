@@ -16,7 +16,7 @@ public class L0AcnMetadataTest {
 	//String productName, String productType, String keyObjectStorage, String validityStart,String validityStop
 	@Test
 	public void testToString() {
-		L0AcnMetadata obj = new L0AcnMetadata("name", "type", "kobs", "startDate", "stopDate");
+		L0AcnMetadata obj = new L0AcnMetadata("name", "type", "kobs", "startDate", "stopDate", "mission", "satellite", "station");
 		obj.setInstrumentConfigurationId(1);
 		obj.setDatatakeId("dataTakeId");
 		obj.setNumberOfSlices(8);
@@ -27,6 +27,9 @@ public class L0AcnMetadataTest {
 		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
 		assertTrue(str.contains("\"validityStart\":\"startDate\""));
 		assertTrue(str.contains("\"validityStop\":\"stopDate\""));
+		assertTrue(str.contains("\"missionId\":\"mission\""));
+		assertTrue(str.contains("\"satelliteId\":\"satellite\""));
+		assertTrue(str.contains("\"stationId\":\"station\""));
 		assertTrue(str.contains("\"instrumentConfigurationId\":1"));
 		assertTrue(str.contains("\"datatakeId\":\"dataTakeId\""));
 		assertTrue(str.contains("\"numberOfSlices\":8"));
