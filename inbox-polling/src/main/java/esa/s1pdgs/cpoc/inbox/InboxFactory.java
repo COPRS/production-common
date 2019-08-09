@@ -13,7 +13,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.inbox.config.InboxConfiguration;
-import esa.s1pdgs.cpoc.inbox.config.InboxPathInformation;
 import esa.s1pdgs.cpoc.inbox.filter.BlacklistRegexNameInboxFilter;
 import esa.s1pdgs.cpoc.inbox.kafka.producer.KafkaSubmissionClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
@@ -36,16 +35,8 @@ public class InboxFactory {
 		this.inboxAdapterFactory = inboxAdapterFactory;
 	}
 
-	/**
-	 * Creates the Inbox only if the configured directory has a valid structure.
-	 * 
-	 * @param config
-	 * @return
-	 * @throws IOException
-	 */
 	public Inbox newInbox(InboxConfiguration config) throws IOException {
 
-		InboxPathInformation.assertInboxDirectoryHasExpectedStructure(config.getDirectory());
 		createDirectory(config);
 		return new Inbox(inboxAdapterFactory.newInboxAdapter(config.getDirectory()),
 				new BlacklistRegexNameInboxFilter(Pattern.compile(config.getIgnoreRegex())),
