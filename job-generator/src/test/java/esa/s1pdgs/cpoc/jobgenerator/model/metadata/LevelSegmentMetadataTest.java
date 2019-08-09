@@ -27,7 +27,7 @@ public class LevelSegmentMetadataTest {
         assertEquals("stop", obj.getValidityStop());
         assertEquals("mission", obj.getMissionId());
         assertEquals("satellite", obj.getSatelliteId());
-        assertEquals("station", obj.getStationId());
+        assertEquals("station", obj.getStationCode());
         assertEquals("14256", obj.getDatatakeId());
         assertEquals("consol", obj.getConsolidation());
         assertEquals("pol", obj.getPolarisation());
@@ -40,7 +40,7 @@ public class LevelSegmentMetadataTest {
 		assertTrue(str.contains("validityStop\":\"stop"));
 		assertTrue(str.contains("missionId\":\"mission"));
 		assertTrue(str.contains("satelliteId\":\"satellite"));
-		assertTrue(str.contains("stationId\":\"station"));
+		assertTrue(str.contains("stationCode\":\"station"));
 		assertTrue(str.contains("consolidation\":\"consol"));
 		assertTrue(str.contains("polarisation\":\"pol"));
 		assertTrue(str.contains("datatakeId\":\"14256"));

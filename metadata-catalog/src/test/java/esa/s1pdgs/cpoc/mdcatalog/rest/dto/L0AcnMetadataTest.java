@@ -29,7 +29,7 @@ public class L0AcnMetadataTest {
 		assertTrue(str.contains("\"validityStop\":\"stopDate\""));
 		assertTrue(str.contains("\"missionId\":\"mission\""));
 		assertTrue(str.contains("\"satelliteId\":\"satellite\""));
-		assertTrue(str.contains("\"stationId\":\"station\""));
+		assertTrue(str.contains("\"stationCode\":\"station\""));
 		assertTrue(str.contains("\"instrumentConfigurationId\":1"));
 		assertTrue(str.contains("\"datatakeId\":\"dataTakeId\""));
 		assertTrue(str.contains("\"numberOfSlices\":8"));

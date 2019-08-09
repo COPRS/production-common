@@ -26,7 +26,7 @@ public class EdrsSessionMetadataDtoTest {
 		assertTrue(str.contains("\"validityStop\":\"stopDate\""));
 		assertTrue(str.contains("\"missionId\":\"mission\""));
 		assertTrue(str.contains("\"satelliteId\":\"satellite\""));
-		assertTrue(str.contains("\"stationId\":\"station\""));
+		assertTrue(str.contains("\"stationCode\":\"station\""));
 	}
 
 	/**

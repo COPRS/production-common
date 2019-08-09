@@ -77,7 +77,7 @@ public class SearchMetadataController {
 			for (SearchMetadata result : results) {
 				response.add(new SearchMetadata(result.getProductName(), result.getProductType(),
 						result.getKeyObjectStorage(), result.getValidityStart(), result.getValidityStop(),
-						result.getMissionId(), result.getSatelliteId(), result.getStationId()));
+						result.getMissionId(), result.getSatelliteId(), result.getStationCode()));
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -112,7 +112,7 @@ public class SearchMetadataController {
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(), f.getStationId()));
+							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(), f.getStationCode()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else if ("ValIntersect".equals(mode)) {
@@ -134,7 +134,7 @@ public class SearchMetadataController {
 
 				for (SearchMetadata m : f) {
 					response.add(new SearchMetadata(m.getProductName(), m.getProductType(), m.getKeyObjectStorage(),
-							m.getValidityStart(), m.getValidityStop(), m.getMissionId(), m.getSatelliteId(), m.getStationId()));
+							m.getValidityStart(), m.getValidityStop(), m.getMissionId(), m.getSatelliteId(), m.getStationCode()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else if ("ClosestStartValidity".equals(mode)) {
@@ -148,7 +148,7 @@ public class SearchMetadataController {
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
 							f.getValidityStart(), f.getValidityStop(),
-							f.getMissionId(), f.getSatelliteId(), f.getStationId()));
+							f.getMissionId(), f.getSatelliteId(), f.getStationCode()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else if ("ClosestStopValidity".equals(mode)) {
@@ -161,7 +161,7 @@ public class SearchMetadataController {
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(), f.getStationId()));
+							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(), f.getStationCode()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else {
