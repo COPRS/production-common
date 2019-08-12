@@ -127,7 +127,7 @@ public class TestL0Utils {
                     new GenericMessageDto<EdrsSessionDto>(1, "input-key",
                             new EdrsSessionDto("obs1", 1,
                                     EdrsSessionFileType.SESSION, missionId,
-                                    "A"));
+                                    "A", "WILE"));
             messages.add(message1);
         }
         if (raw2) {
@@ -135,7 +135,7 @@ public class TestL0Utils {
                     new GenericMessageDto<EdrsSessionDto>(1, "input-key",
                             new EdrsSessionDto("obs2", 2,
                                     EdrsSessionFileType.SESSION, missionId,
-                                    "A"));
+                                    "A", "WILE"));
             messages.add(message2);
         }
         ret.setMessages(messages);

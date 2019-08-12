@@ -33,6 +33,11 @@ public class EdrsSessionDto extends AbstractDto {
     private String missionId;
     
     /**
+     * Station code
+     */
+    private String stationCode;
+
+    /**
      * Default constructor
      */
     public EdrsSessionDto() {
@@ -44,12 +49,13 @@ public class EdrsSessionDto extends AbstractDto {
      */
     public EdrsSessionDto(final String objectStorageKey, final int channelId,
             final EdrsSessionFileType productType, final String missionId,
-            final String satelliteId) {
+            final String satelliteId, final String stationCode) {
         super(objectStorageKey, ProductFamily.EDRS_SESSION);
         this.channelId = channelId;
         this.productType = productType;
         this.missionId = missionId;
         this.satelliteId = satelliteId;
+        this.stationCode = stationCode;
     }
 
     /**
@@ -127,15 +133,29 @@ public class EdrsSessionDto extends AbstractDto {
         this.missionId = missionId;
     }
 
+	/**
+	 * @return the stationCode
+	 */
+	public String getStationCode() {
+		return stationCode;
+	}
+
+	/**
+	 * @param stationCode the stationCode to set
+	 */
+	public void setStationCode(String stationCode) {
+		this.stationCode = stationCode;
+	}
+
     /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return String.format(
-                "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s}",
+                "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s, stationCode: %s}",
                 getKeyObjectStorage(), channelId, productType, satelliteId,
-                missionId);
+                missionId, stationCode);
     }
 
     /**
@@ -144,7 +164,7 @@ public class EdrsSessionDto extends AbstractDto {
     @Override
     public int hashCode() {
         return Objects.hash(getKeyObjectStorage(), getFamily(), channelId, productType,
-                satelliteId, missionId);
+                satelliteId, missionId, stationCode);
     }
 
     /**
@@ -165,9 +185,9 @@ public class EdrsSessionDto extends AbstractDto {
                     && channelId == other.channelId
                     && Objects.equals(productType, other.productType)
                     && Objects.equals(satelliteId, other.satelliteId)
-                    && Objects.equals(missionId, other.missionId);
+                    && Objects.equals(missionId, other.missionId)
+                    && Objects.equals(stationCode, other.stationCode);
         }
         return ret;
     }
-
 }
