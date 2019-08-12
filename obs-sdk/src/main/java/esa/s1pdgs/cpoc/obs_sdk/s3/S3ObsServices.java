@@ -294,8 +294,8 @@ public class S3ObsServices {
     public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) {       	
     	final Map<String, InputStream> result = new LinkedHashMap<>();
     	
-    	for (final S3ObjectSummary summ : getAll(bucketName, prefix)) {
-    		final String key = summ.getKey();
+    	for (final S3ObjectSummary summary : getAll(bucketName, prefix)) {
+    		final String key = summary.getKey();
     		final S3Object obj = s3client.getObject(bucketName, key);  
     		result.put(key, obj.getObjectContent());    		
     	}
