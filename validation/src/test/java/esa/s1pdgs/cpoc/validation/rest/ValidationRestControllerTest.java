@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.validation.rest;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,16 +32,6 @@ public class ValidationRestControllerTest {
 	public void testValidate200() throws Exception {
 
 		mockMvc.perform(post("/api/v1/validate").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-	}
-
-	@Test
-	public void testValidate500whenRuntimeException() throws Exception {
-
-		doThrow(new RuntimeException("test generated exception")).when(validationService)
-				.checkConsistencyForInterval(any(), any());
-
-		mockMvc.perform(post("/api/v1/validate").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError());
 	}
 
 }

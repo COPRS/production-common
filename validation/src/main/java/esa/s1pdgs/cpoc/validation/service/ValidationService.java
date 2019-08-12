@@ -6,10 +6,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,7 +62,11 @@ public class ValidationService {
 			List<SearchMetadata> metadataResults = null;
 			try {
 				reportingMetadata.reportStart("Gathering discrepancies in metadata catalog");
-				metadataResults = metadataService.query(ProductFamily.valueOf(family.name()), startInterval,
+				
+				String queryFamily = getQueryFamily(family);
+				System.out.println(family.name()+"="+queryFamily);
+				LOGGER.info("Performing metadata query for family '{}'", queryFamily);				
+				metadataResults = metadataService.query(ProductFamily.valueOf(queryFamily), startInterval,						
 						endInterval);
 				if (metadataResults == null) {
 					// set to empty list
@@ -141,6 +143,18 @@ public class ValidationService {
 		}
 
 		return 0;
+	}
+	
+	String getQueryFamily(ProductFamilyValidation family) {
+		if (family.name().endsWith("_ZIP")) {
+			/*
+			 *  Oops: We are having a zip family here. This means we are not performing
+			 *  the query on the zipped family itself, but the plain family
+			 */
+			return family.name().replace("_ZIP","");
+		}
+		
+		return family.name();
 	}
 	
 	private boolean verifyMetadataForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
