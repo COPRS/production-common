@@ -64,7 +64,6 @@ public class ValidationService {
 				reportingMetadata.reportStart("Gathering discrepancies in metadata catalog");
 				
 				String queryFamily = getQueryFamily(family);
-				System.out.println(family.name()+"="+queryFamily);
 				LOGGER.info("Performing metadata query for family '{}'", queryFamily);				
 				metadataResults = metadataService.query(ProductFamily.valueOf(queryFamily), startInterval,						
 						endInterval);
