@@ -23,7 +23,7 @@ public class EdrsSessionDtoTest {
 	 */
 	@Test
 	public void testGettersSettersConstructors() {
-		EdrsSessionDto dto = new EdrsSessionDto("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B");
+		EdrsSessionDto dto = new EdrsSessionDto("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE");
 		assertEquals("key-obs", dto.getKeyObjectStorage());
 		assertEquals(2, dto.getChannelId());
 		assertEquals(EdrsSessionFileType.RAW, dto.getProductType());
@@ -48,7 +48,7 @@ public class EdrsSessionDtoTest {
 	 */
 	@Test
 	public void testToString() {
-		EdrsSessionDto dto = new EdrsSessionDto("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B");
+		EdrsSessionDto dto = new EdrsSessionDto("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE");
 		String str = dto.toString();
 		assertTrue("toString should contain the key OBS", str.contains("objectStorageKey: key-obs"));
 		assertTrue("toString should contain the channel id", str.contains("channelId: 2"));
