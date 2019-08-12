@@ -23,7 +23,7 @@ public class EdrsSessionsMessageDtoTest {
     @Test
     public void testGettersSettersConstructors() {
         EdrsSessionDto body = new EdrsSessionDto("key-obs", 2,
-                EdrsSessionFileType.RAW, "S1", "B");
+                EdrsSessionFileType.RAW, "S1", "B", "WILE");
         
         GenericMessageDto<EdrsSessionDto> dto = new GenericMessageDto<EdrsSessionDto>(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
@@ -45,7 +45,7 @@ public class EdrsSessionsMessageDtoTest {
     @Test
     public void testToString() {
         EdrsSessionDto body = new EdrsSessionDto("key-obs", 2,
-                EdrsSessionFileType.RAW, "S1", "B");
+                EdrsSessionFileType.RAW, "S1", "B", "WILE");
         GenericMessageDto<EdrsSessionDto> dto = new GenericMessageDto<EdrsSessionDto>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",

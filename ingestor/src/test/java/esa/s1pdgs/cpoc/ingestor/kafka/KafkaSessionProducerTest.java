@@ -53,7 +53,7 @@ public class KafkaSessionProducerTest {
     @Test
     public void testGetProductName() {
         EdrsSessionDto dto = new EdrsSessionDto("key-obs", 2,
-                EdrsSessionFileType.RAW, "S1", "B");
+                EdrsSessionFileType.RAW, "S1", "B", "WILE");
         assertEquals("getProductName should return the product name", "key-obs",
                 service.extractProductName(dto));
     }

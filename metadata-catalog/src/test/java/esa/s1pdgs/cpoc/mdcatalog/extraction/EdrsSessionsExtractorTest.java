@@ -95,11 +95,11 @@ public class EdrsSessionsExtractorTest {
 
         inputMessage = new GenericMessageDto<EdrsSessionDto>(123, "",
                 new EdrsSessionDto("S1A/123/ch01/D_123_ch01_D.RAW", 1,
-                        EdrsSessionFileType.RAW, "S1", "A"));
+                        EdrsSessionFileType.RAW, "S1", "A", "WILE"));
 
         inputMessageXml = new GenericMessageDto<EdrsSessionDto>(123, "",
                 new EdrsSessionDto("S1B/123/ch02/D_123_ch03_D.XML", 2,
-                        EdrsSessionFileType.SESSION, "S1", "B"));
+                        EdrsSessionFileType.SESSION, "S1", "B", "WILE"));
 
         extractor = new EdrsSessionsExtractor(esServices, mqiService, appStatus,
                 (new File("./test/workDir/")).getAbsolutePath(),errorAppender, config,
