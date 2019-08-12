@@ -16,7 +16,7 @@ public class EdrsSessionMetadataDtoTest {
 	//String productName, String productType, String keyObjectStorage, String validityStart,String validityStop
 	@Test
 	public void testToString() {
-		EdrsSessionMetadata obj = new EdrsSessionMetadata("name", "type", "kobs", "startDate", "stopDate");
+		EdrsSessionMetadata obj = new EdrsSessionMetadata("name", "type", "kobs", "startDate", "stopDate", "mission", "satellite", "station");
 		
 		String str = obj.toString();
 		assertTrue(str.contains("\"productName\":\"name\""));
@@ -24,6 +24,9 @@ public class EdrsSessionMetadataDtoTest {
 		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
 		assertTrue(str.contains("\"validityStart\":\"startDate\""));
 		assertTrue(str.contains("\"validityStop\":\"stopDate\""));
+		assertTrue(str.contains("\"missionId\":\"mission\""));
+		assertTrue(str.contains("\"satelliteId\":\"satellite\""));
+		assertTrue(str.contains("\"stationCode\":\"station\""));
 	}
 
 	/**

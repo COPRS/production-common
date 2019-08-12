@@ -194,11 +194,17 @@ public class L0AppJobsGeneratorTest {
                 if (productName.contains("ch1")) {
                     return new EdrsSessionMetadata(productName, "RAW",
                             "S1A/L20171109175634707000125/ch01/" + productName,
-                            null, null);
+                            null, null,
+                            "S1",
+                            "A",
+                            "WILE");
                 } else {
                     return new EdrsSessionMetadata(productName, "RAW",
                             "S1A/L20171109175634707000125/ch02/" + productName,
-                            null, null);
+                            null, null,
+                            "S1",
+                            "A",
+                            "WILE");
                 }
             }).when(this.metadataService).getEdrsSession(Mockito.anyString(),
                     Mockito.anyString());
@@ -209,21 +215,30 @@ public class L0AppJobsGeneratorTest {
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                             "MPL_ORBPRE",
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
-                            "2017-12-05T20:03:09.123456Z", "2017-12-15T20:03:09.123456Z"));
+                            "2017-12-05T20:03:09.123456Z", "2017-12-15T20:03:09.123456Z",
+                            "S1",
+                            "A",
+                            "WILE"));
                 } else if ("MPL_ORBSCT"
                         .equalsIgnoreCase(query.getProductType())) {
                     return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
                             "MPL_ORBSCT",
                             "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
-                            "2014-04-03T22:46:09.123456Z", "9999-12-31T23:59:59.123456Z"));
+                            "2014-04-03T22:46:09.123456Z", "9999-12-31T23:59:59.123456Z",
+                            "S1",
+                            "A",
+                            "WILE"));
                 } else if ("AUX_OBMEMC"
                         .equalsIgnoreCase(query.getProductType())) {
                     return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                             "AUX_OBMEMC",
                             "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-                            "2014-02-01T00:00:00.123456Z", "9999-12-31T23:59:59.123456Z"));
+                            "2014-02-01T00:00:00.123456Z", "9999-12-31T23:59:59.123456Z",
+                            "S1",
+                            "A",
+                            "WILE"));
                 }
                 return null;
             }).when(this.metadataService).search(Mockito.any(), Mockito.any(),

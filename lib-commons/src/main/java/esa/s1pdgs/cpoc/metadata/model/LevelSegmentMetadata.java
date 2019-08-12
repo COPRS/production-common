@@ -18,10 +18,11 @@ public class LevelSegmentMetadata extends AbstractMetadata {
     public LevelSegmentMetadata(final String productName,
             final String productType, final String keyObjectStorage,
             final String validityStart, final String validityStop,
+            final String missionId, final String satelliteId, final String stationCode,
             final String polarisation, final String consolidation,
             final String datatakeId) {
         super(productName, productType, keyObjectStorage, validityStart,
-                validityStop);
+                validityStop, missionId, satelliteId, stationCode);
         this.polarisation = polarisation;
         this.consolidation = consolidation;
         this.datatakeId = datatakeId;
@@ -29,9 +30,10 @@ public class LevelSegmentMetadata extends AbstractMetadata {
     
     public LevelSegmentMetadata(final String productName,
             final String productType, final String keyObjectStorage,
-            final String validityStart, final String validityStop) {
+            final String validityStart, final String validityStop,
+            final String missionId, final String satelliteId, final String stationCode) {
         super(productName, productType, keyObjectStorage, validityStart,
-                validityStop);
+                validityStop, missionId, satelliteId, stationCode);
     }
     
     public LevelSegmentMetadata() {

@@ -24,17 +24,17 @@ public class L0AcnMetadata extends AbstractMetadata {
 	 * @param numberSlice
 	 */
 	public L0AcnMetadata(final String productName, final String productType, final String keyObjectStorage,
-			final String validityStart, final String validityStop, final int instrumentConfigurationId,
+			final String validityStart, final String validityStop, final String missionId, final String satelliteId, final String stationCode, final int instrumentConfigurationId,
 			final int numberOfSlices, final String dataTakeId) {
-		super(productName, productType, keyObjectStorage, validityStart, validityStop);
+		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
 		this.instrumentConfigurationId = instrumentConfigurationId;
 		this.numberOfSlices = numberOfSlices;
 		this.datatakeId = dataTakeId;
 	}
 	
 	public L0AcnMetadata(final String productName, final String productType, final String keyObjectStorage,
-			final String validityStart, final String validityStop) {
-		super(productName, productType, keyObjectStorage, validityStart, validityStop);
+			final String validityStart, final String validityStop, final String missionId, final String satelliteId, final String stationCode) {
+		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
 	}
 	
 	public L0AcnMetadata() {

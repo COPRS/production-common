@@ -217,56 +217,80 @@ public class AbstractJobsGeneratorTest {
                                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                                 "IW_RAW__0S",
                                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                                "2017-12-13T12:16:23.00000", "2017-12-13T12:16:56"));
+                                "2017-12-13T12:16:23.00000", "2017-12-13T12:16:56",
+                                "S1",
+                                "A",
+                                "WILE"));
                     } else if ("IW_RAW__0A"
                             .equalsIgnoreCase(query.getProductType())) {
                         return Arrays.asList(new SearchMetadata(
                                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
                                 "IW_RAW__0A",
                                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
-                                "2017-12-13T12:11:23", "2017-12-13T12:19:47"));
+                                "2017-12-13T12:11:23", "2017-12-13T12:19:47",
+                                "S1",
+                                "A",
+                                "WILE"));
                     } else if ("IW_RAW__0C"
                             .equalsIgnoreCase(query.getProductType())) {
                         return Arrays.asList(new SearchMetadata(
                                 "S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
                                 "IW_RAW__0C",
                                 "S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
-                                "2017-12-13T12:11:23", "2017-12-13T12:19:47"));
+                                "2017-12-13T12:11:23", "2017-12-13T12:19:47",
+                                "S1",
+                                "A",
+                                "WILE"));
                     } else if ("IW_RAW__0N"
                             .equalsIgnoreCase(query.getProductType())) {
                         return Arrays.asList(new SearchMetadata(
                                 "S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
                                 "IW_RAW__0N",
                                 "S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
-                                "2017-12-13T12:11:23", "2017-12-13T12:19:47"));
+                                "2017-12-13T12:11:23", "2017-12-13T12:19:47",
+                                "S1",
+                                "A",
+                                "WILE"));
                     } else if ("AUX_CAL"
                             .equalsIgnoreCase(query.getProductType())) {
                         return Arrays.asList(new SearchMetadata(
                                 "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
                                 "AUX_CAL",
                                 "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
-                                "2017-10-17T08:00:00", "9999-12-31T23:59:59"));
+                                "2017-10-17T08:00:00", "9999-12-31T23:59:59",
+                                "S1",
+                                "A",
+                                "WILE"));
                     } else if ("AUX_INS"
                             .equalsIgnoreCase(query.getProductType())) {
                         return Arrays.asList(new SearchMetadata(
                                 "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
                                 "AUX_INS",
                                 "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
-                                "2017-10-17T08:00:00", "9999-12-31T23:59:59"));
+                                "2017-10-17T08:00:00", "9999-12-31T23:59:59",
+                                "S1",
+                                "A",
+                                "WILE"));
                     } else if ("AUX_PP1"
                             .equalsIgnoreCase(query.getProductType())) {
                         return Arrays.asList(new SearchMetadata(
                                 "S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
                                 "AUX_PP1",
                                 "S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
-                                "2017-10-17T08:00:00", "9999-12-31T23:59:59"));
+                                "2017-10-17T08:00:00", "9999-12-31T23:59:59",
+                                "S1",
+                                "A",
+                                "WILE"));
                     } else if ("AUX_RES"
                             .equalsIgnoreCase(query.getProductType())) {
                         return Arrays.asList(new SearchMetadata(
                                 "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
                                 "AUX_OBMEMC",
                                 "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
-                                "2017-12-13T10:27:37", "2017-12-13T13:45:07"));
+                                "2017-12-13T10:27:37", "2017-12-13T13:45:07",
+                                "S1",
+                                "A",
+                                "WILE"));
                     }
                 }
                 return null;

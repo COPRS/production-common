@@ -18,7 +18,7 @@ public class EdrsSessionMetadataTest {
 	 */
 	@Test
 	public void testToString() {
-		EdrsSessionMetadata obj = new EdrsSessionMetadata("", "", "", "", "");
+		EdrsSessionMetadata obj = new EdrsSessionMetadata("", "", "", "", "", "", "", "");
 		obj.setProductName("name");
 		obj.setProductType("type");
 		obj.setKeyObjectStorage("kobs");

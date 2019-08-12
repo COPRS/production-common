@@ -29,17 +29,17 @@ public class L0SliceMetadata extends AbstractMetadata {
 	 * @param numberSlice
 	 */
 	public L0SliceMetadata(final String productName, final String productType, final String keyObjectStorage,
-			final String validityStart, final String validityStop, final int instrumentConfigurationId,
-			final int numberSlice, final String dataTakeId) {
-		super(productName, productType, keyObjectStorage, validityStart, validityStop);
+			final String validityStart, final String validityStop, final String missionId, final String satelliteId, final String stationCode,
+			final int instrumentConfigurationId, final int numberSlice, final String dataTakeId) {
+		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
 		this.instrumentConfigurationId = instrumentConfigurationId;
 		this.numberSlice = numberSlice;
 		this.datatakeId = dataTakeId;
 	}
 	
 	public L0SliceMetadata(final String productName, final String productType, final String keyObjectStorage,
-			final String validityStart, final String validityStop) {
-		super(productName, productType, keyObjectStorage, validityStart, validityStop);
+			final String validityStart, final String validityStop, final String missionId, final String satelliteId, final String stationCode) {
+		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
 	}
 	
 	public L0SliceMetadata() {

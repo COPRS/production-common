@@ -83,7 +83,10 @@ public class MetadataServiceTest {
         EdrsSessionMetadata expectedFile = new EdrsSessionMetadata(
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw", "RAW",
                 "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
-                "2017-12-01T22:15:30", "2017-12-02T22:15:30");
+                "2017-12-01T22:15:30", "2017-12-02T22:15:30",
+                "S1",
+                "A",
+                "WILE");
         ResponseEntity<EdrsSessionMetadata> r =
                 new ResponseEntity<EdrsSessionMetadata>(expectedFile,
                         HttpStatus.OK);
@@ -104,7 +107,10 @@ public class MetadataServiceTest {
         EdrsSessionMetadata expectedFile = new EdrsSessionMetadata(
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw", "RAW",
                 "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
-                "2017-12-01T22:15:30", "2017-12-02T22:15:30");
+                "2017-12-01T22:15:30", "2017-12-02T22:15:30",
+                "S1",
+                "A",
+                "WILE");
         ResponseEntity<EdrsSessionMetadata> r =
                 new ResponseEntity<EdrsSessionMetadata>(expectedFile,
                         HttpStatus.OK);
@@ -164,7 +170,9 @@ public class MetadataServiceTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                "20171213T121623", "20171213T121656", "HV", "FULL", "021735");
+                "20171213T121623", "20171213T121656",
+                "S1", "A", "WILE",
+                "HV", "FULL", "021735");
         ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
                 expectedResult, HttpStatus.OK);
         String uri = "http://" + METADATA_HOST + "/level_segment/L0_SEGMENT/" + file;
@@ -182,7 +190,9 @@ public class MetadataServiceTest {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         LevelSegmentMetadata expectedResult = new LevelSegmentMetadata(file, "IW_RAW__0S",
-                file, "2017-12-13T12:16:23", "2017-12-13T12:16:56", "HV", "START",
+                file, "2017-12-13T12:16:23", "2017-12-13T12:16:56",
+                "S1", "A", "WILE",
+                "HV", "START",
                 "021735");
         ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
                 expectedResult, HttpStatus.OK);
@@ -243,7 +253,10 @@ public class MetadataServiceTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                "20171213T121623", "20171213T121656", 6, 2, "021735");
+                "20171213T121623", "20171213T121656",
+                "S1",
+                "A",
+                "WILE", 6, 2, "021735");
         ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(
                 expectedResult, HttpStatus.OK);
         String uri = "http://" + METADATA_HOST + "/l0Slice/" + file;
@@ -261,7 +274,10 @@ public class MetadataServiceTest {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         L0SliceMetadata expectedResult = new L0SliceMetadata(file, "IW_RAW__0S",
-                file, "2017-12-13T12:16:23", "2017-12-13T12:16:56", 6, 2,
+                file, "2017-12-13T12:16:23", "2017-12-13T12:16:56",
+                "S1",
+                "A",
+                "WILE", 6, 2,
                 "021735");
         ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(
                 expectedResult, HttpStatus.OK);
@@ -322,7 +338,10 @@ public class MetadataServiceTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "IW_RAW__0S",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                "20171213T121623", "20171213T121656", 6, 2, "021735") };
+                "20171213T121623", "20171213T121656",
+                "S1",
+                "A",
+                "WILE", 6, 2, "021735") };
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
                 expectedResult, HttpStatus.OK);
         String uri = "http://" + METADATA_HOST + "/l0Slice/" + file + "/acns";
@@ -349,10 +368,16 @@ public class MetadataServiceTest {
                 "S1A_IW_RAW__0CDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         L0AcnMetadata[] expectedResult = {
                 new L0AcnMetadata(fileA, "IW_RAW__0A", fileA,
-                        "2017-12-13T12:16:23", "2017-12-13T12:16:56", 6, 2,
+                        "2017-12-13T12:16:23", "2017-12-13T12:16:56",
+                        "S1",
+                        "A",
+                        "WILE", 6, 2,
                         "021735"),
                 new L0AcnMetadata(fileN, "IW_RAW__0C", fileN,
-                        "2017-12-13T12:16:23", "2017-12-13T12:16:56", 6, 2,
+                        "2017-12-13T12:16:23", "2017-12-13T12:16:56",
+                        "S1",
+                        "A",
+                        "WILE", 6, 2,
                         "021735") };
         String uri = "http://" + METADATA_HOST + "/l0Slice/" + file + "/acns";
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
@@ -419,7 +444,10 @@ public class MetadataServiceTest {
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
-                "2017-12-05T20:03:09", "2017-12-15T20:03:09");
+                "2017-12-05T20:03:09", "2017-12-15T20:03:09",
+                "S1",
+                "A",
+                "WILE");
         ResponseEntity<List<SearchMetadata>> r =
                 new ResponseEntity<List<SearchMetadata>>(
                         Arrays.asList(expectedFile), HttpStatus.OK);
@@ -456,7 +484,10 @@ public class MetadataServiceTest {
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
-                "2017-12-05T20:03:09", "2017-12-15T20:03:09");
+                "2017-12-05T20:03:09", "2017-12-15T20:03:09",
+                "S1",
+                "A",
+                "WILE");
         ResponseEntity<List<SearchMetadata>> r =
                 new ResponseEntity<List<SearchMetadata>>(
                         Arrays.asList(expectedFile), HttpStatus.OK);
@@ -491,7 +522,10 @@ public class MetadataServiceTest {
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
-                "2017-12-05T20:03:09", "2017-12-15T20:03:09");
+                "2017-12-05T20:03:09", "2017-12-15T20:03:09",
+                "S1",
+                "A",
+                "WILE");
         ResponseEntity<List<SearchMetadata>> r =
                 new ResponseEntity<List<SearchMetadata>>(
                         Arrays.asList(expectedFile), HttpStatus.OK);

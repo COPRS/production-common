@@ -80,6 +80,7 @@ public class L0SliceMetadataController {
 			if (l0a != null) {
 				L0AcnMetadata l0aDto = new L0AcnMetadata(l0a.getProductName(), l0a.getProductType(),
 						l0a.getKeyObjectStorage(), l0a.getValidityStart(), l0a.getValidityStop(),
+						l0a.getMissionId(), l0a.getSatelliteId(), l0a.getStationCode(),
 						f.getInstrumentConfigurationId(), f.getNumberSlice(), f.getDatatakeId());
 				l0aDto.setInstrumentConfigurationId(l0a.getInstrumentConfigurationId());
 				l0aDto.setNumberOfSlices(l0a.getNumberOfSlices());
@@ -94,6 +95,7 @@ public class L0SliceMetadataController {
 			if (l0c != null) {
 				L0AcnMetadata l0cDto = new L0AcnMetadata(l0c.getProductName(), l0c.getProductType(),
 						l0c.getKeyObjectStorage(), l0c.getValidityStart(), l0c.getValidityStop(),
+						l0c.getMissionId(), l0c.getSatelliteId(), l0c.getStationCode(),
 						f.getInstrumentConfigurationId(), f.getNumberSlice(), f.getDatatakeId());
 				l0cDto.setInstrumentConfigurationId(l0c.getInstrumentConfigurationId());
 				l0cDto.setNumberOfSlices(l0c.getNumberOfSlices());
@@ -108,6 +110,7 @@ public class L0SliceMetadataController {
 			if (l0n != null) {
 				L0AcnMetadata l0nDto = new L0AcnMetadata(l0n.getProductName(), l0n.getProductType(),
 						l0n.getKeyObjectStorage(), l0n.getValidityStart(), l0n.getValidityStop(),
+						l0n.getMissionId(), l0n.getSatelliteId(), l0n.getStationCode(),
 						f.getInstrumentConfigurationId(), f.getNumberSlice(), f.getDatatakeId());
 				l0nDto.setInstrumentConfigurationId(l0n.getInstrumentConfigurationId());
 				l0nDto.setNumberOfSlices(l0n.getNumberOfSlices());

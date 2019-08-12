@@ -18,7 +18,7 @@ public class L0AcnMetadataTest {
 	 */
 	@Test
 	public void testToString() {
-		L0AcnMetadata obj = new L0AcnMetadata("", "", "", "", "", 5, 1, "123456");
+		L0AcnMetadata obj = new L0AcnMetadata("", "", "", "", "", "", "", "", 5, 1, "123456");
 		obj.setProductName("name");
 		obj.setProductType("type");
 		obj.setKeyObjectStorage("kobs");

@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.disseminator;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -13,15 +14,20 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration.Protocol;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-public class ApplicationTest {
+public class TestApplication {
 	
 	@Autowired
 	private DisseminationProperties properties;
@@ -52,5 +58,41 @@ public class ApplicationTest {
 		final DisseminationTypeConfiguration dissConfig = diss.get(0);
 		assertEquals("^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$", dissConfig.getRegex());
 		assertEquals("myLittleOutbox", dissConfig.getTarget());
+	}
+	
+	@Test
+	public final void testConfigsFor() {
+		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL);
+		
+		// noting should be configured for EDRS_SESSION
+		assertEquals(Collections.emptyList(), uut.configsFor(ProductFamily.EDRS_SESSION));
+		
+		final List<DisseminationTypeConfiguration> actual = uut.configsFor(ProductFamily.AUXILIARY_FILE);
+		assertEquals(1, actual.size());
+	}
+		
+	@Test
+	public final void testOnMessage_OnNotConfiguredFamily_ShallDoNothing() {	
+		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL);
+		
+		//final GenericMq
+		final ProductDto fakeProduct = new ProductDto("fakeProduct", "my/key", ProductFamily.BLANK);
+		final GenericMessageDto<ProductDto> fakeMessage = new GenericMessageDto<ProductDto>(123, "myKey", fakeProduct); 
+		uut.onMessage(fakeMessage);
+	}
+	
+	@Test
+	public final void testOnMessage_OnConfiguredFamily_ShallEvaluatedConfiguredRegex() {
+		final FakeObsClient fakeObsClient = new FakeObsClient() {
+			@Override public final boolean exist(ProductFamily family, String key) throws ObsException {
+				return true;
+			}			
+		};		
+		final DisseminationService uut = new DisseminationService(null, fakeObsClient, properties, ErrorRepoAppender.NULL);
+		
+		//final GenericMq
+		final ProductDto fakeProduct = new ProductDto("fakeProduct", "my/key", ProductFamily.BLANK);
+		final GenericMessageDto<ProductDto> fakeMessage = new GenericMessageDto<ProductDto>(123, "myKey", fakeProduct); 
+		uut.onMessage(fakeMessage);
 	}
 }
