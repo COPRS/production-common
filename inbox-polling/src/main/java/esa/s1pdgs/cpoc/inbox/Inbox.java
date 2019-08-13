@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.inbox;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -15,11 +16,11 @@ public final class Inbox {
 	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
 
 	private final InboxAdapter inboxAdapter;
-	private final InboxFilter filter;
+	private final List<InboxFilter> filter;
 	private final InboxPollingServiceTransactional inboxPollingServiceTransactional;
 	private final SubmissionClient client;
 
-	Inbox(final InboxAdapter inboxAdapter, final InboxFilter filter,
+	Inbox(final InboxAdapter inboxAdapter, final List<InboxFilter> filter,
 			final InboxPollingServiceTransactional inboxPollingServiceTransactional, final SubmissionClient client) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
