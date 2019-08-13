@@ -42,6 +42,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
@@ -74,10 +75,12 @@ public class L0SegmentAppJobsGeneratorTest {
     private JobGeneratorSettings jobGeneratorSettings;
 
     @Mock
-    private OutputProducerFactory JobsSender;
+    private OutputProducerFactory jobsSender;
 
     @Mock
     private AppCatalogJobClient appDataService;
+    
+    @Mock AiopProperties aiopProperties;
 
     private TaskTable expectedTaskTable;
 
@@ -104,7 +107,7 @@ public class L0SegmentAppJobsGeneratorTest {
         // TODO replace by L0_ASP
         expectedTaskTable = TestL0Utils.buildTaskTableAIOP();
 
-        // Mcokito
+        // Mockito
         MockitoAnnotations.initMocks(this);
         this.mockProcessSettings();
         this.mockJobGeneratorSettings();
@@ -113,8 +116,8 @@ public class L0SegmentAppJobsGeneratorTest {
         this.mockKafkaSender();
 
         JobsGeneratorFactory factory = new JobsGeneratorFactory(
-                l0ProcessSettings, jobGeneratorSettings, xmlConverter,
-                metadataService, JobsSender);
+                l0ProcessSettings, jobGeneratorSettings, aiopProperties,
+                xmlConverter, metadataService, jobsSender);
         generator = (L0SegmentAppJobsGenerator) factory
                 .createJobGeneratorForL0Segment(new File(
                         "./test/data/l0_segment_config/task_tables/TaskTable.AIOP.xml"),
@@ -319,7 +322,7 @@ public class L0SegmentAppJobsGeneratorTest {
             mapper.writeValue(new File("./tmp/jobDtoL0Segment.json"),
                     i.getArgument(1));
             return null;
-        }).when(this.JobsSender).sendJob(Mockito.any(), Mockito.any());
+        }).when(this.jobsSender).sendJob(Mockito.any(), Mockito.any());
     }
 
     @Test
