@@ -151,6 +151,7 @@ public class TestL0Utils {
         }
         product.setSessionId("L20171109175634707000125");
         product.setSatelliteId("A");
+        product.setStationCode("WILE");
         product.setStartTime("2017-12-13T14:59:48.123456Z");
         product.setStopTime("2017-12-13T15:17:25.142536Z");
         product.setInsConfId(-1);

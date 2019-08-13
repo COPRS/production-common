@@ -33,6 +33,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
@@ -70,6 +71,9 @@ public class L0AppJobsGeneratorTest {
     private JobGeneratorSettings jobGeneratorSettings;
 
     @Mock
+    private AiopProperties aiopProperties;
+
+    @Mock
     private OutputProducerFactory jobsSender;
 
     @Mock
@@ -91,18 +95,19 @@ public class L0AppJobsGeneratorTest {
         // Retrieve task table from the XML converter
         expectedTaskTable = TestL0Utils.buildTaskTableAIOP();
 
-        // Mcokito
+        // Mockito
         MockitoAnnotations.initMocks(this);
         this.mockProcessSettings();
         this.mockJobGeneratorSettings();
+        this.mockAiopProperties();
         this.mockXmlConverter();
         this.mockMetadataService();
         this.mockKafkaSender();
         this.mockAppDataService();
 
         JobsGeneratorFactory factory = new JobsGeneratorFactory(
-                l0ProcessSettings, jobGeneratorSettings, xmlConverter,
-                metadataService, jobsSender);
+                l0ProcessSettings, jobGeneratorSettings, aiopProperties,
+                xmlConverter, metadataService, jobsSender);
         generator = (L0AppJobsGenerator) factory
                 .createJobGeneratorForEdrsSession(new File(
                         "./test/data/generic_config/task_tables/TaskTable.AIOP.xml"),
@@ -168,6 +173,72 @@ public class L0AppJobsGeneratorTest {
         Mockito.doAnswer(i -> {
             return new WaitTempo(10000, 3);
         }).when(jobGeneratorSettings).getWaitmetadatainput();
+    }
+    
+    private void mockAiopProperties() {
+    	Mockito.doAnswer(i -> {
+    		Map<String,String> r = new HashMap<>();
+    		r.put("cgs1", "MTI_");
+    		r.put("cgs2", "SGS_");
+    		r.put("cgs3", "MPS_");
+    		r.put("cgs4", "INU_");
+    		r.put("erds", "WILE");
+    		return r;
+    	}).when(aiopProperties).getStationCodes();
+    	Mockito.doAnswer(i -> {
+    		Map<String,String> r = new HashMap<>();
+    		r.put("cgs1", "yes");
+    		r.put("cgs2", "yes");
+    		r.put("cgs3", "yes");
+    		r.put("cgs4", "yes");
+    		r.put("erds", "yes");
+    		return r;
+    	}).when(aiopProperties).getPtAssembly();
+    	Mockito.doAnswer(i -> {
+    		Map<String,String> r = new HashMap<>();
+    		r.put("cgs1", "NRT");
+    		r.put("cgs2", "NRT");
+    		r.put("cgs3", "NRT");
+    		r.put("cgs4", "NRT");
+    		r.put("erds", "NRT");
+    		return r;
+    	}).when(aiopProperties).getProcessingMode();
+    	Mockito.doAnswer(i -> {
+    		Map<String,String> r = new HashMap<>();
+    		r.put("cgs1", "FAST24");
+    		r.put("cgs2", "FAST24");
+    		r.put("cgs3", "FAST24");
+    		r.put("cgs4", "FAST24");
+    		r.put("erds", "FAST24");
+    		return r;
+    	}).when(aiopProperties).getReprocessingMode();
+    	Mockito.doAnswer(i -> {
+    		Map<String,String> r = new HashMap<>();
+    		r.put("cgs1", "300");
+    		r.put("cgs2", "300");
+    		r.put("cgs3", "300");
+    		r.put("cgs4", "360");
+    		r.put("erds", "360");
+    		return r;
+    	}).when(aiopProperties).getTimeout();
+    	Mockito.doAnswer(i -> {
+    		Map<String,String> r = new HashMap<>();
+    		r.put("cgs1", "yes");
+    		r.put("cgs2", "yes");
+    		r.put("cgs3", "yes");
+    		r.put("cgs4", "yes");
+    		r.put("erds", "yes");
+    		return r;
+    	}).when(aiopProperties).getDescramble();
+    	Mockito.doAnswer(i -> {
+    		Map<String,String> r = new HashMap<>();
+    		r.put("cgs1", "no");
+    		r.put("cgs2", "no");
+    		r.put("cgs3", "no");
+    		r.put("cgs4", "yes");
+    		r.put("erds", "yes");
+    		return r;
+    	}).when(aiopProperties).getRsEncode();
     }
 
     private void mockXmlConverter() {
