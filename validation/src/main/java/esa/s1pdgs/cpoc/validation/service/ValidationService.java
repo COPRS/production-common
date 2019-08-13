@@ -171,7 +171,7 @@ public class ValidationService {
 		}
 	}
 
-	private boolean verifyAuxMetadataForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
+	boolean verifyAuxMetadataForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
 		String key = metadata.getKeyObjectStorage();
 
 		for (ObsObject obj : objects) {
@@ -183,7 +183,7 @@ public class ValidationService {
 				obsKey = obsKey.substring(0, obsKey.indexOf("/"));
 			}
 			LOGGER.info("key: {}, aux: {}", key, obsKey);
-			if (key.contains(obsKey)) {
+			if (obsKey.contains(key)) {
 				return true;
 			}
 		}
@@ -191,7 +191,7 @@ public class ValidationService {
 		return false;
 	}
 
-	private boolean verifySessionForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
+	boolean verifySessionForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
 		String key = metadata.getKeyObjectStorage();
 
 		for (ObsObject obj : objects) {
@@ -203,7 +203,7 @@ public class ValidationService {
 		return false;
 	}
 
-	private boolean verifySliceForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
+	boolean verifySliceForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
 		String key = metadata.getKeyObjectStorage();
 
 		for (ObsObject obj : objects) {

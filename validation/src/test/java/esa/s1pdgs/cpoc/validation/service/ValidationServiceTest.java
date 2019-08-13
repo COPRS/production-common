@@ -222,4 +222,66 @@ public class ValidationServiceTest {
 		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamilyValidation.L0_SLICE, localDateTimeStart, localDateTimeStop);
 		assertEquals(1, discrepancies);
 	}
+	
+	/**
+	 * Check if a normal slice product with substructure is identified correctly
+	 */
+	@Test
+	public void testSliceVerification() {
+		SearchMetadata sm = new SearchMetadata();
+		sm.setKeyObjectStorage("S1B_WV_OCN_2SSV.SAFE");
+		
+		List<ObsObject> obs = new ArrayList<>();
+		obs.add(new ObsObject("S1B_WV_OCN_2SSV.SAFE/manifest", ProductFamily.L0_SLICE));
+		
+		assertEquals(true,validationService.verifySliceForObject(sm, obs));		
+	}
+	
+	/**
+	 * Check if a zipped slice is identified correctly with plain metadata
+	 */
+	@Test
+	public void testZippedSliceVerification() {
+		SearchMetadata sm = new SearchMetadata();
+		sm.setKeyObjectStorage("S1B_WV_OCN_2SSV.SAFE");
+		
+		List<ObsObject> obs = new ArrayList<>();
+		obs.add(new ObsObject("S1B_WV_OCN_2SSV.SAFE.zip", ProductFamily.L0_SLICE_ZIP));
+		
+		assertEquals(true,validationService.verifySliceForObject(sm, obs));
+		
+	}
+	
+	@Test
+	public void testAUXVerification() {
+		SearchMetadata sm = new SearchMetadata();
+		sm.setKeyObjectStorage("AUX_PP1.EOF");
+		
+		List<ObsObject> obs = new ArrayList<>();
+		obs.add(new ObsObject("AUX_PP1.EOF", ProductFamily.AUXILIARY_FILE));
+		
+		assertEquals(true,validationService.verifyAuxMetadataForObject(sm, obs));		
+	}
+	
+	@Test
+	public void testZippedAUXVerification() {
+		SearchMetadata sm = new SearchMetadata();
+		sm.setKeyObjectStorage("AUX_PP1.EOF");
+		
+		List<ObsObject> obs = new ArrayList<>();
+		obs.add(new ObsObject("AUX_PP1.EOF.zip", ProductFamily.AUXILIARY_FILE_ZIP));
+		
+		assertEquals(true,validationService.verifyAuxMetadataForObject(sm, obs));		
+	}
+	
+	@Test
+	public void testSessionVerification() {
+		SearchMetadata sm = new SearchMetadata();
+		sm.setKeyObjectStorage("S1B/L202020/ch02/DCS_something.raw");
+		
+		List<ObsObject> obs = new ArrayList<>();
+		obs.add(new ObsObject("S1B/L202020/ch02/DCS_something.raw", ProductFamily.AUXILIARY_FILE_ZIP));
+		
+		assertEquals(true,validationService.verifySessionForObject(sm, obs));		
+	}
 }
