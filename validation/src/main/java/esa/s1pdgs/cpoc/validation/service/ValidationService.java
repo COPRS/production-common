@@ -172,10 +172,10 @@ public class ValidationService {
 			String obsKey = obj.getKey();
 			// some products are .SAFE. In this case, we ignore everything behind the first
 			// slash
-			if (obsKey.contains(".SAFE")) {
+			if (!obsKey.contains(".zip") && obsKey.contains(".SAFE")) {
 				obsKey = obsKey.substring(0, obsKey.indexOf("/"));
 			}
-//			LOGGER.info("key: {}, aux: {}", key, obsKey);
+			LOGGER.info("key: {}, aux: {}", key, obsKey);
 			if (obsKey.contains(key)) {
 				return true;
 			}

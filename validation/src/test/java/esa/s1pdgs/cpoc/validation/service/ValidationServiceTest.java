@@ -274,6 +274,17 @@ public class ValidationServiceTest {
 	}
 	
 	@Test
+	public void testZippedAUXSafeVerification() {
+		SearchMetadata sm = new SearchMetadata();
+		sm.setKeyObjectStorage("AUX_PP1.SAFE");
+		
+		List<ObsObject> obs = new ArrayList<>();
+		obs.add(new ObsObject("AUX_PP1.SAFE.zip", ProductFamily.AUXILIARY_FILE_ZIP));
+		
+		assertEquals(true,validationService.verifyAuxMetadataForObject(sm, obs));		
+	}
+	
+	@Test
 	public void testSessionVerification() {
 		SearchMetadata sm = new SearchMetadata();
 		sm.setKeyObjectStorage("S1B/L202020/ch02/DCS_something.raw");
