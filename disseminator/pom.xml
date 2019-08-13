@@ -82,12 +82,31 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-     	<dependency>
-        	<groupId>org.apache.commons</groupId>
-        	<artifactId>commons-csv</artifactId>
-        	<version>1.5</version>
-    	</dependency>
-    	
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.sshd</groupId>
+			<artifactId>sshd-core</artifactId>
+			<version>0.14.0</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+	        <groupId>commons-net</groupId>
+	        <artifactId>commons-net</artifactId>
+	        <classifier>ftp</classifier>
+      	</dependency>    	
 	</dependencies>
 
 	<build>

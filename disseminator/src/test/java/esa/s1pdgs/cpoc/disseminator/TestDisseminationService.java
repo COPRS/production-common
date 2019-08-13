@@ -100,7 +100,7 @@ public class TestDisseminationService {
 		try {
 			uut.handleTransferTo(fakeMessage, "foo");
 		} catch (Exception e) {
-			assertEquals(true, e.getMessage().startsWith("Error on dissemination of product to outbox foo: com.amazonaws.SdkClientException: EXPECTED"));
+			assertEquals(true, e.getMessage().startsWith("Error on dissemination of product to outbox foo"));
 		}
 	}
 }

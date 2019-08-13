@@ -26,7 +26,18 @@ public class DisseminationProperties {
 		private String username = null;
 		private String password = null;
 		private String keyFile = null;
+		private String hostname = "localhost";
+		private int port = -1; // --> not defined
 		
+		private String keystoreFile = null;
+		private String keystorePass = "changeit";
+		
+		// per default, use java keystore and password
+		private String truststoreFile = System.getProperty("java.home") + "/jre/lib/security/cacerts";
+		private String truststorePass = "changeit";
+		
+		private boolean implicitSsl = true;
+						
 		public Protocol getProtocol() {
 			return protocol;
 		}
@@ -67,11 +78,69 @@ public class DisseminationProperties {
 			this.keyFile = keyFile;
 		}
 
+		public String getHostname() {
+			return hostname;
+		}
+
+		public void setHostname(String hostname) {
+			this.hostname = hostname;
+		}
+
+		public int getPort() {
+			return port;
+		}
+
+		public void setPort(int port) {
+			this.port = port;
+		}
+
+		public String getKeystoreFile() {
+			return keystoreFile;
+		}
+
+		public void setKeystoreFile(String keystoreFile) {
+			this.keystoreFile = keystoreFile;
+		}
+
+		public String getKeystorePass() {
+			return keystorePass;
+		}
+
+		public void setKeystorePass(String keystorePass) {
+			this.keystorePass = keystorePass;
+		}
+
+		public String getTruststoreFile() {
+			return truststoreFile;
+		}
+
+		public void setTruststoreFile(String truststoreFile) {
+			this.truststoreFile = truststoreFile;
+		}
+
+		public String getTruststorePass() {
+			return truststorePass;
+		}
+
+		public void setTruststorePass(String truststorePass) {
+			this.truststorePass = truststorePass;
+		}
+		
+		public boolean isImplicitSsl() {
+			return implicitSsl;
+		}
+
+		public void setImplicitSsl(boolean implicitSsl) {
+			this.implicitSsl = implicitSsl;
+		}
+
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
-					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + "]";
-		}	
+					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port
+					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
+					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl + "]";
+		}
 	}
 	
 	public static class DisseminationTypeConfiguration {

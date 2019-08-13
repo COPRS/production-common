@@ -1,9 +1,6 @@
 package esa.s1pdgs.cpoc.disseminator.outbox;
 
-import com.amazonaws.SdkClientException;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
@@ -20,10 +17,10 @@ public interface OutboxClient {
 	
 	public static final OutboxClient NULL = new OutboxClient() {
 		@Override
-		public final void transfer(ProductFamily family, String keyObjectStorage) throws SdkClientException, ObsException {
+		public final void transfer(ProductFamily family, String keyObjectStorage) throws Exception {
 			// do nothing
 		}		
 	};
 	
-	void transfer(ProductFamily family, String keyObjectStorage) throws SdkClientException, ObsException;
+	void transfer(ProductFamily family, String keyObjectStorage) throws Exception;
 }

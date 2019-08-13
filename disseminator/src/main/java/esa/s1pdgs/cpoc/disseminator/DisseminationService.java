@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
@@ -118,7 +119,14 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			reportingDl.reportStart("Start downloading file from OBS " + product.getKeyObjectStorage() + 
 					" to " + target);
 			try {
-				outboxClient.transfer(product.getFamily(), product.getKeyObjectStorage());
+				Retries.performWithRetries(
+						() -> {
+							outboxClient.transfer(product.getFamily(), product.getKeyObjectStorage());
+							return null;
+						}, 
+						properties.getMaxRetries(), 
+						properties.getTempoRetryMs()
+				);
 				reportingDl.reportStop("End downloading file from OBS " + product.getKeyObjectStorage() + 
 						" to " + target);
 			} catch (Exception e) {
