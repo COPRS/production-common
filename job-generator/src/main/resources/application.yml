@@ -131,9 +131,9 @@ aiop:
     cgs4: FAST24
     erds: FAST24
   timeout:
-    cgs1: 300
-    cgs2: 300
-    cgs3: 300
+    cgs1: 360
+    cgs2: 360
+    cgs3: 360
     cgs4: 360
     erds: 360
   descramble:

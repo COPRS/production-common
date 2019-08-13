@@ -104,15 +104,13 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     protected void customJobOrder(JobGeneration job) {
     	AbstractJobOrderConf conf = job.getJobOrder().getConf();
     	AppDataJobProductDto product = job.getAppDataJob().getProduct();
-    	boolean reprocessing = false; // TODO find out if this is a reprocessing job
+    	boolean reprocessing = false; // currently no reprocessing supported
 
     	// collect parameters
     	Map<String,String> aiopParams = new HashMap<>();
     	aiopParams.put("Mission_Id", product.getMissionId() + product.getSatelliteId());
     	aiopParams.put("Processing_Station", product.getStationCode());
     	// aiopParams.put("DownlinkTime", ); // TODO retrieve this from catalog metadata
-    	// aiopParams.put("NRTOutputPath", ); // TODO No Change required?
-    	// aiopParams.put("PTOutputPath, ) // TODO No Change required?
     	for (Entry<String,String> entrySet : aiopProperties.get(product.getStationCode()).entrySet()) {
     		switch(entrySet.getKey()) {
     			case "Processing_Mode":
