@@ -142,6 +142,8 @@ public class ValidationService {
 			reportingValidation.reportError("Error occured while performing validation task: {}", ex.getMessage());
 		}
 
+		LOGGER.info("Found no discrepancies for family '{}'",family);
+		
 		return 0;
 	}
 	
