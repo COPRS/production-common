@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 
+import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class TestFilesystemInboxAdapter {
 
 	@Test
 	public final void testRead_OnEmptyDirectory_ShallReturnNoElements() {
-		assertEquals(0, uut.read(InboxFilter.ALLOW_ALL).size());
+		assertEquals(0, uut.read(Lists.list(InboxFilter.ALLOW_ALL)).size());
 	}
 
 	@Test
@@ -50,16 +51,19 @@ public class TestFilesystemInboxAdapter {
 		final File product3 = new File(testDir, "fooBarDirectory");
 		assertTrue(product3.mkdir());
 
-		final Collection<InboxEntry> actual = uut.read(InboxFilter.ALLOW_ALL);
+		final Collection<InboxEntry> actual = uut.read(Lists.list(InboxFilter.ALLOW_ALL));
 
 		InboxPathInformation pathInformation = new InboxPathInformation();
 		pathInformation.setMissionId("S1");
 		pathInformation.setSatelliteId("A");
 		pathInformation.setStationCode("MPS_");
 
-		assertEquals(true, actual.contains(factory.newInboxEntry(pathInformation, product1.getPath())));
-		assertEquals(true, actual.contains(factory.newInboxEntry(pathInformation, product2.getPath())));
-		assertEquals(true, actual.contains(factory.newInboxEntry(pathInformation, product3.getPath())));
+		assertEquals(true,
+				actual.contains(factory.newInboxEntry(pathInformation, product1.toPath(), testDir.toPath())));
+		assertEquals(true,
+				actual.contains(factory.newInboxEntry(pathInformation, product2.toPath(), testDir.toPath())));
+		assertEquals(true,
+				actual.contains(factory.newInboxEntry(pathInformation, product3.toPath(), testDir.toPath())));
 	}
 
 	@Test
@@ -72,7 +76,7 @@ public class TestFilesystemInboxAdapter {
 		final File product3 = new File(testDir, "fooBarDirectory");
 		assertTrue(product3.mkdir());
 
-		final Collection<InboxEntry> actual = uut.read(InboxFilter.ALLOW_NONE);
+		final Collection<InboxEntry> actual = uut.read(Lists.list(InboxFilter.ALLOW_NONE));
 		assertEquals(0, actual.size());
 	}
 }

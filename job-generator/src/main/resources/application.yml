@@ -104,3 +104,48 @@ app-l0-segment:
     startTime: 6
     stopTime: 7
     datatakeId: 9
+
+aiop:
+  station-codes:
+    cgs1: MTI_
+    cgs2: SGS_
+    cgs3: MPS_
+    cgs4: INU_
+    erds: WILE
+  pt-assembly:
+    cgs1: yes
+    cgs2: yes
+    cgs3: yes
+    cgs4: yes
+    erds: yes
+  processing-mode:
+    cgs1: NRT
+    cgs2: NRT
+    cgs3: NRT
+    cgs4: NRT
+    erds: NRT
+  reprocessing-mode:
+    cgs1: FAST24
+    cgs2: FAST24
+    cgs3: FAST24
+    cgs4: FAST24
+    erds: FAST24
+  timeout:
+    cgs1: 360
+    cgs2: 360
+    cgs3: 360
+    cgs4: 360
+    erds: 360
+  descramble:
+    cgs1: yes
+    cgs2: yes
+    cgs3: yes
+    cgs4: yes
+    erds: yes
+  rs-encode:
+    cgs1: no
+    cgs2: no
+    cgs3: no
+    cgs4: yes
+    erds: yes
+

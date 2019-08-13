@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.inbox.fs;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.springframework.stereotype.Component;
 
@@ -12,12 +12,13 @@ import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
 public class FilesystemInboxEntryFactory implements InboxEntryFactory {
 
 	@Override
-	public InboxEntry newInboxEntry(InboxPathInformation inboxPathInformation, String inboxPath) {
-		final File file = new File(inboxPath.replace("file://", ""));
+	public InboxEntry newInboxEntry(InboxPathInformation inboxPathInformation, Path entryRelativePath,
+			Path inboxDirectoryPath) {
 
 		InboxEntry inboxEntry = new InboxEntry();
-		inboxEntry.setName(file.getName());
-		inboxEntry.setUrl("file://" + file.getPath());
+		inboxEntry.setName(entryRelativePath.toFile().getName());
+		inboxEntry.setRelativePath(entryRelativePath.toString());
+		inboxEntry.setUrl("file://" + inboxDirectoryPath.resolve(entryRelativePath).toString());
 		inboxEntry.setMissionId(inboxPathInformation.getMissionId());
 		inboxEntry.setSatelliteId(inboxPathInformation.getSatelliteId());
 		inboxEntry.setStationCode(inboxPathInformation.getStationCode());

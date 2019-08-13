@@ -14,6 +14,7 @@ public class InboxEntry {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 	private String name;
+	private String relativePath;
 	private String url;
 	private String missionId;
 	private String satelliteId;
@@ -22,8 +23,10 @@ public class InboxEntry {
 	public InboxEntry() {
 	}
 
-	public InboxEntry(String name, String url, String missionId, String satelliteId, String stationCode) {
+	public InboxEntry(String name, String relativePath, String url, String missionId, String satelliteId,
+			String stationCode) {
 		this.name = name;
+		this.relativePath = relativePath;
 		this.url = url;
 		this.missionId = missionId;
 		this.satelliteId = satelliteId;
@@ -44,6 +47,14 @@ public class InboxEntry {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getRelativePath() {
+		return relativePath;
+	}
+
+	public void setRelativePath(String relativePath) {
+		this.relativePath = relativePath;
 	}
 
 	public String getUrl() {
@@ -82,6 +93,8 @@ public class InboxEntry {
 	public int hashCode() {
 		return Objects.hash(url);
 	}
+
+	// FIXME add relativePath
 
 	@Override
 	public boolean equals(Object obj) {

@@ -33,10 +33,10 @@ public class TestApplication {
 
 	@Test
 	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws InterruptedException {
-		final InboxEntry content = new InboxEntry("bar", "file:///tmp/MPS_/S1A", "S1", "A", "MPS_");
+		final InboxEntry content = new InboxEntry("bar", "bar", "file:///tmp/MPS_/S1A/bar", "S1", "A", "MPS_");
 		repo.save(content);
 
-		final InboxEntry content2 = new InboxEntry("bar2", "file:///tmp/WILE/S1B", "S1", "B", "WILE");
+		final InboxEntry content2 = new InboxEntry("bar2", "bar2", "file:///tmp/WILE/S1B/bar2", "S1", "B", "WILE");
 		repo.save(content2);
 
 		service.pollAll();

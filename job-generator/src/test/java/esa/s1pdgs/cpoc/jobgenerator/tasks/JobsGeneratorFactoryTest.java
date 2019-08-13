@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
+import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
@@ -37,8 +38,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -60,6 +59,9 @@ public class JobsGeneratorFactoryTest {
     @Mock
     private JobGeneratorSettings jobGeneratorSettings;
 
+    @Mock
+    private AiopProperties aiopProperties;
+    
     @Mock
     private OutputProducerFactory JobsSender;
 
@@ -144,8 +146,8 @@ public class JobsGeneratorFactoryTest {
             }).when(l0ProcessSettings).getLevel();
 
             JobsGeneratorFactory factory = new JobsGeneratorFactory(
-                    l0ProcessSettings, jobGeneratorSettings, xmlConverter,
-                    metadataService, JobsSender);
+                    l0ProcessSettings, jobGeneratorSettings, aiopProperties,
+                    xmlConverter, metadataService, JobsSender);
 
             AbstractJobsGenerator<EdrsSessionDto> generator =
                     factory.createJobGeneratorForEdrsSession(new File(
@@ -393,8 +395,8 @@ public class JobsGeneratorFactoryTest {
                     .thenReturn(expectedTaskTable);
 
             JobsGeneratorFactory factory = new JobsGeneratorFactory(
-                    l0ProcessSettings, jobGeneratorSettings, xmlConverter,
-                    metadataService, JobsSender);
+                    l0ProcessSettings, jobGeneratorSettings, aiopProperties,
+                    xmlConverter, metadataService, JobsSender);
 
             AbstractJobsGenerator<ProductDto> generator =
                     factory.createJobGeneratorForL0Slice(new File(

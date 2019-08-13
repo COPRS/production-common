@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
+import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
@@ -33,6 +34,11 @@ public class JobsGeneratorFactory {
 	private final JobGeneratorSettings jobGeneratorSettings;
 
 	/**
+	 * 
+	 */
+	private final AiopProperties aiopProperties;
+	
+	/**
 	 * XML converter
 	 */
 	private final XmlConverter xmlConverter;
@@ -57,10 +63,12 @@ public class JobsGeneratorFactory {
 	 */
 	@Autowired
 	public JobsGeneratorFactory(final ProcessSettings l0ProcessSettings,
-			final JobGeneratorSettings jobGeneratorSettings, final XmlConverter xmlConverter,
-			final MetadataService metadataService, final OutputProducerFactory outputFactory) {
+			final JobGeneratorSettings jobGeneratorSettings, final AiopProperties aiopProperties,
+			final XmlConverter xmlConverter, final MetadataService metadataService,
+			final OutputProducerFactory outputFactory) {
 		this.l0ProcessSettings = l0ProcessSettings;
 		this.jobGeneratorSettings = jobGeneratorSettings;
+		this.aiopProperties = aiopProperties;
 		this.xmlConverter = xmlConverter;
 		this.metadataService = metadataService;
 		this.outputFactory = outputFactory;
@@ -77,7 +85,7 @@ public class JobsGeneratorFactory {
 			final AppCatalogJobClient appDataService) throws JobGenBuildTaskTableException {
 		AbstractJobsGenerator<EdrsSessionDto> processor = new L0AppJobsGenerator(this.xmlConverter,
 				this.metadataService, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,
-				appDataService);
+				appDataService, aiopProperties);
 		processor.setMode(ProductMode.SLICING);
 		processor.initialize(xmlFile);
 		return processor;

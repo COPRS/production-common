@@ -19,11 +19,13 @@ logging:
 inbox:
   polling-interval-ms: 10000
   polling:
-    - directory: /tmp/MPS_/S1A
-      ignoreRegex: .+\.tmp$
+    - directory: /tmp/MPS_/S1A/
+      matchRegex: .+
+      ignoreRegex: (^\..*|^.*/\..*|.*\.tmp$|^lost\+found$)
       topic: t-pdgs-ingestion
-    - directory: /tmp/WILE/S1B
-      ignoreRegex: .+\.tmp$
+    - directory: /tmp/WILE/S1B/
+      matchRegex: .+
+      ignoreRegex: (^\..*|^.*/\..*|.*\.tmp$|^lost\+found$)
       topic: t-pdgs-ingestion
   
 # KAFKA

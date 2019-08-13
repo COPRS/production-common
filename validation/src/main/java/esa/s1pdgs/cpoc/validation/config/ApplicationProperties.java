@@ -1,37 +1,50 @@
 package esa.s1pdgs.cpoc.validation.config;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "validation")
 public class ApplicationProperties {
-	/**
-	 * How many seconds in the past should the interval start
-	 */
-	private long intervalOffset = 86400; // 24h
-	/**
-	 * How many seconds should be handled as to new in order
-	 * to avoid false-positives
-	 */
-	private long intervalDelay = 60;
+	private Map <ProductFamily,FamilyIntervalConf> families = new LinkedHashMap<>();
 
-	public long getIntervalOffset() {
-		return intervalOffset;
+	public void setFamilies(Map<ProductFamily, FamilyIntervalConf> families) {
+		this.families = families;
 	}
 
-	public void setIntervalOffset(long intervalOffset) {
-		this.intervalOffset = intervalOffset;
+	public static class FamilyIntervalConf {
+		private long initialDelay;
+		private long lifeTime;
+
+		public long getInitialDelay() {
+			return initialDelay;
+		}
+		public void setInitialDelay(long initialDelay) {
+			this.initialDelay = initialDelay;
+		}
+		public long getLifeTime() {
+			return lifeTime;
+		}
+		public void setLifeTime(long lifeTime) {
+			this.lifeTime = lifeTime;
+		}
+		
+		@Override
+		public String toString() {
+			return "FamilyTypeConf [initialDelay=" + initialDelay +", lifeTime="+lifeTime+"]";
+		}
 	}
 
-	public long getIntervalDelay() {
-		return intervalDelay;
+	public Map<ProductFamily, FamilyIntervalConf> getFamilies() {
+		return families;
 	}
-
-	public void setIntervalDelay(long intervalDelay) {
-		this.intervalDelay = intervalDelay;
-	}
-
+	
+	
 }

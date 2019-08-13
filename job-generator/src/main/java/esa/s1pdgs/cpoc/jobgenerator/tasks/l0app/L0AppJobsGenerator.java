@@ -2,34 +2,62 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.L0SegmentAppProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
+import esa.s1pdgs.cpoc.jobgenerator.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 
 public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
 
+	private Map<String,Map<String,String>> aiopProperties;
+	
     public L0AppJobsGenerator(XmlConverter xmlConverter,
             MetadataService metadataService, ProcessSettings l0ProcessSettings,
             JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient appDataService) {
+            final AppCatalogJobClient appDataService,
+            final AiopProperties aiopProperties) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
+        
+        this.aiopProperties = new HashMap<>();
+        Map<String, String> stationCodes = aiopProperties.getStationCodes();
+        for (String key : stationCodes.keySet()) {
+        	Map<String, String> map = new HashMap<>();
+        	map.put("PT_Assembly", aiopProperties.getPtAssembly().get(key));
+        	map.put("Processing_Mode", aiopProperties.getProcessingMode().get(key));
+        	map.put("Reprocessing_Mode", aiopProperties.getReprocessingMode().get(key));
+        	map.put("Timeout", aiopProperties.getTimeout().get(key));
+        	map.put("Descramble", aiopProperties.getDescramble().get(key));
+        	map.put("RSEncode", aiopProperties.getRsEncode().get(key));
+        	
+        	if (null == map.get("PT_Assembly") || null == map.get("Processing_Mode") ||
+        	    null == map.get("Reprocessing_Mode") || null == map.get("Timeout") ||
+        	    null == map.get("Descramble") || null == map.get("RSEncode")) {
+        	    	throw new RuntimeException(String.format("Invalid AIOP configuration for %s: Station_Code=%s, PT_Assembly=%s, Processing_Mode=%s, Reprocessing_Mode=%s, Timeout=%s, Descramble=%s, RSEncode=%s",
+        	    			key, stationCodes.get(key), map.get("PT_Assembly"), map.get("Processing_Mode"), map.get("Reprocessing_Mode"), map.get("Timeout"), map.get("Descramble"), map.get("RSEncode")));
+        	    }
+        	this.aiopProperties.put(stationCodes.get(key), map);
+        }
     }
 
     @Override
@@ -74,28 +102,46 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
 
     @Override
     protected void customJobOrder(JobGeneration job) {
-        // Add/Update mission Id
-        boolean update = false;
-        if (job.getJobOrder().getConf().getProcParams() != null) {
-            for (JobOrderProcParam param : job.getJobOrder().getConf()
-                    .getProcParams()) {
-                if ("Mission_Id".equals(param.getName())) {
-                    param.setValue(
-                            job.getAppDataJob().getProduct().getMissionId()
-                                    + job.getAppDataJob().getProduct()
-                                            .getSatelliteId());
-                    update = true;
-                }
-            }
-        }
-        if (!update) {
-            job.getJobOrder().getConf()
-                    .addProcParam(new JobOrderProcParam("Mission_Id",
-                            job.getAppDataJob().getProduct().getMissionId()
-                                    + job.getAppDataJob().getProduct()
-                                            .getSatelliteId()));
-        }
+    	AbstractJobOrderConf conf = job.getJobOrder().getConf();
+    	AppDataJobProductDto product = job.getAppDataJob().getProduct();
+    	boolean reprocessing = false; // currently no reprocessing supported
 
+    	// collect parameters
+    	Map<String,String> aiopParams = new HashMap<>();
+    	aiopParams.put("Mission_Id", product.getMissionId() + product.getSatelliteId());
+    	aiopParams.put("Processing_Station", product.getStationCode());
+    	// aiopParams.put("DownlinkTime", ); // TODO retrieve this from catalog metadata
+    	for (Entry<String,String> entrySet : aiopProperties.get(product.getStationCode()).entrySet()) {
+    		switch(entrySet.getKey()) {
+    			case "Processing_Mode":
+    				if (!reprocessing) {
+    	    			aiopParams.put(entrySet.getKey(), entrySet.getValue());    					
+    				}
+    				break;
+    			case "Reprocessing_Mode":
+    				if (reprocessing) {
+    	    			aiopParams.put("Processing_Mode", entrySet.getValue());    					
+    				}
+    				break;
+    			default:
+    				aiopParams.put(entrySet.getKey(), entrySet.getValue());
+    		} 
+    	}    	
+    	
+    	for (Entry<String, String> newParam : aiopParams.entrySet()) {
+    		boolean found = false;
+    		if (null != conf.getProcParams()) {
+        		for (JobOrderProcParam existingParam : conf.getProcParams()) {
+    				if (newParam.getKey().equals(existingParam.getName())) {
+    					found = true;
+    					existingParam.setValue(newParam.getValue());
+    				}
+        		}
+        	}
+    		if (!found) {
+        		conf.addProcParam(new JobOrderProcParam(newParam.getKey(), newParam.getValue()));
+			}
+		}
     }
 
     @Override
