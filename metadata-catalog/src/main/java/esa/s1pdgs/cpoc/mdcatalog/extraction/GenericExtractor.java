@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -166,7 +167,7 @@ public abstract class GenericExtractor<T> {
         	
             final JSONObject metadata = extractMetadata(reportingFactory, message);
             if (!metadata.has("insertionTime")) {
-            	metadata.append("insertionTime", DateUtils.convertToMetadataDateTimeFormat(Instant.now()));
+            	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
             }
             
             final Reporting reportPublish = reportingFactory.newReporting(4);            

@@ -40,10 +40,6 @@ public class DateUtils {
     	return formatToMetadataDateTimeFormat(parse(dateString));
     }
 
-    public static String convertToMetadataDateTimeFormat(Instant instant) {
-    	return instant.toString().replace("Z", "000Z");
-    }
-    
     private static final DateTimeFormatter formatterFor(final String dateString) 
     		throws IllegalArgumentException {
     	// find a fitting formatter for the provided dateString or fail, if no fitting formatter is 
