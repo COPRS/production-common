@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.ProductFamilyValidation;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -50,8 +49,8 @@ public class ValidationServiceTest {
 
 	@Test
 	public void testQueryFamily() {
-		assertEquals("AUXILIARY_FILE", validationService.getQueryFamily(ProductFamilyValidation.AUXILIARY_FILE));
-		assertEquals("AUXILIARY_FILE", validationService.getQueryFamily(ProductFamilyValidation.AUXILIARY_FILE_ZIP));
+		assertEquals("AUXILIARY_FILE", validationService.getQueryFamily(ProductFamily.AUXILIARY_FILE));
+		assertEquals("AUXILIARY_FILE", validationService.getQueryFamily(ProductFamily.AUXILIARY_FILE_ZIP));
 	}
 
 	@Test
@@ -102,7 +101,7 @@ public class ValidationServiceTest {
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
-		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamilyValidation.AUXILIARY_FILE, localDateTimeStart, localDateTimeStop);
+		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamily.AUXILIARY_FILE, localDateTimeStart, localDateTimeStop);
 		assertEquals(1, discrepancies);
 	}
 	
@@ -135,7 +134,7 @@ public class ValidationServiceTest {
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
-		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamilyValidation.AUXILIARY_FILE_ZIP, localDateTimeStart, localDateTimeStop);
+		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamily.AUXILIARY_FILE_ZIP, localDateTimeStart, localDateTimeStop);
 		assertEquals(0, discrepancies);
 	}
 
@@ -176,7 +175,7 @@ public class ValidationServiceTest {
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
-		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamilyValidation.EDRS_SESSION, localDateTimeStart, localDateTimeStop);
+		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamily.EDRS_SESSION, localDateTimeStart, localDateTimeStop);
 		assertEquals(1, discrepancies);
 	}
 
@@ -219,7 +218,7 @@ public class ValidationServiceTest {
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
-		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamilyValidation.L0_SLICE, localDateTimeStart, localDateTimeStop);
+		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamily.L0_SLICE, localDateTimeStart, localDateTimeStop);
 		assertEquals(1, discrepancies);
 	}
 	

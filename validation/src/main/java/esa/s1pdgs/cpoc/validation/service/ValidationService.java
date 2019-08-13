@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.ProductFamilyValidation;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -23,6 +23,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.validation.config.ApplicationProperties;
+import esa.s1pdgs.cpoc.validation.config.ApplicationProperties.FamilyIntervalConf;
 import esa.s1pdgs.cpoc.validation.service.metadata.MetadataService;
 
 @Service
@@ -34,22 +36,31 @@ public class ValidationService {
 	private final ObsClient obsClient;
 
 	@Autowired
+	private ApplicationProperties properties;
+
+	@Autowired
 	public ValidationService(MetadataService metadataService, ObsClient obsClient) {
 		this.metadataService = metadataService;
 		this.obsClient = obsClient;
 	}
 
-	public int checkConsistencyForInterval(LocalDateTime startInterval, LocalDateTime endInterval) {
+	public int checkConsistencyForInterval() {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
 		int discrepancies = 0;
-		for (ProductFamilyValidation family : ProductFamilyValidation.values()) {
+
+		Set<ProductFamily> families = properties.getFamilies().keySet();
+		for (ProductFamily family : families) {
+			FamilyIntervalConf conf = properties.getFamilies().get(family);
+			
+			LocalDateTime startInterval = LocalDateTime.now().minusSeconds(conf.getLifeTime());
+			LocalDateTime endInterval = LocalDateTime.now().minusSeconds(conf.getInitialDelay()); 
 			discrepancies += validateProductFamily(reportingFactory, family, startInterval, endInterval);
 		}
 		return discrepancies;
 	}
 
-	int validateProductFamily(Reporting.Factory reportingFactory, ProductFamilyValidation family,
-			LocalDateTime startInterval, LocalDateTime endInterval) {
+	int validateProductFamily(Reporting.Factory reportingFactory, ProductFamily family, LocalDateTime startInterval,
+			LocalDateTime endInterval) {
 
 		final Reporting reportingValidation = reportingFactory.newReporting(0);
 		reportingValidation.reportStart(String.format("Starting validation task from %s to %s for family %s",
@@ -93,49 +104,30 @@ public class ValidationService {
 			}
 
 			List<String> metadataDiscrepancies = new ArrayList<>();
-//			List<String> obsDiscrepancies = new ArrayList<>();
-
 			for (SearchMetadata smd : metadataResults) {
-				// if (obsResults.get(smd.getKeyObjectStorage()) == null) {
 				if (!verifyMetadataForObject(smd, obsResults.values())) {
 					LOGGER.info("Product {} does exist in metadata catalog, but not in OBS", smd.getKeyObjectStorage());
-					metadataDiscrepancies.add(smd.getKeyObjectStorage());
+					if (family.name().contains("_ZIP")) {
+						// To show the actual filename we need to add zip to the metadata name
+						metadataDiscrepancies.add(smd.getKeyObjectStorage() + ".zip");
+					} else {
+						// Its a plain product, we can use the metadata directly
+						metadataDiscrepancies.add(smd.getKeyObjectStorage());
+					}
 				} else {
 					LOGGER.debug("Product {} does exist in metadata catalog and OBS", smd.getKeyObjectStorage());
 				}
 			}
 
-			/*
-			 * if (obsResults.size() > 0) {
-			 * LOGGER.info("Found {} products that exist in OBS, but not in MetadataCatalog"
-			 * , obsResults.size()); for (ObsObject product : obsResults.values()) {
-			 * metadataDiscrepancies.add(product.getKey());
-			 * LOGGER.info("Product {} does exist in OBS, but not in MetadataCatalog",
-			 * product.getKey()); } }
-			 */
-
 			if (metadataDiscrepancies.isEmpty()) {
 				reportingMetadata.reportStop("No discrepancies found in MetadataCatalog");
 				reportingValidation.reportStop("No discrepancy found");
 			} else {
-				reportingMetadata.reportError("Products not present in MetadataCatalog: {}",
+				reportingMetadata.reportError("Products present in MetadataCatalog, but not in OBS: {}",
 						buildProductList(metadataDiscrepancies));
 				reportingValidation.reportError("Discrepancy found for {} product(s)", metadataDiscrepancies.size());
 			}
-			/*
-			 * if (obsDiscrepancies.isEmpty()) {
-			 * reportingObs.reportStop("No discepancies found in OBS"); } else {
-			 * reportingObs.reportError("Product(s) not present in OBS: {}",
-			 * buildProductList(obsDiscrepancies)); }
-			 * 
-			 * if (metadataDiscrepancies.isEmpty() && obsDiscrepancies.isEmpty()) {
-			 * reportingValidation.reportStop("No discrepancy found");
-			 * 
-			 * } else { discrepancies = metadataDiscrepancies.size() +
-			 * obsDiscrepancies.size();
-			 * reportingValidation.reportError("Discrepancy found for {} product(s)",
-			 * discrepancies); }
-			 */
+
 			LOGGER.info("Found {} discrepancies for family '{}'", metadataDiscrepancies.size(), family);
 			return metadataDiscrepancies.size();
 		} catch (Exception ex) {
@@ -147,7 +139,7 @@ public class ValidationService {
 		return 0;
 	}
 
-	String getQueryFamily(ProductFamilyValidation family) {
+	String getQueryFamily(ProductFamily family) {
 		if (family.name().endsWith("_ZIP")) {
 			/*
 			 * Oops: We are having a zip family here. This means we are not performing the
@@ -178,7 +170,7 @@ public class ValidationService {
 			//
 			String obsKey = obj.getKey();
 			// some products are .SAFE. In this case, we ignore everything behind the first
-			// slah
+			// slash
 			if (obsKey.contains(".SAFE")) {
 				obsKey = obsKey.substring(0, obsKey.indexOf("/"));
 			}
@@ -213,9 +205,9 @@ public class ValidationService {
 				obsKey = obj.getKey().replace(".zip", "");
 			} else {
 				// It is an unzipped, we just take the base name
-				obsKey = obj.getKey().substring(0, obj.getKey().indexOf("/"));				
+				obsKey = obj.getKey().substring(0, obj.getKey().indexOf("/"));
 			}
-			
+
 			if (key.equals(obsKey)) {
 				return true;
 			}

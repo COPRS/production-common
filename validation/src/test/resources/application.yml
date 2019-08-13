@@ -19,3 +19,13 @@ validation:
   intervalOffset: 86400
   # How many seconds should be handled as to new in order to avoid false-positives
   intervalDelay: 60
+  
+  families:
+    L0_SLICE:
+      initialDelay: 60
+      lifeTime: 120
+      gracePeriod: 60
+    L0_SLICE_ZIP:
+      initialDelay: 10
+      lifeTime: 100
+      gracePeriod: 10
