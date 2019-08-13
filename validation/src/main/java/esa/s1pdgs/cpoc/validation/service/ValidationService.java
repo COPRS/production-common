@@ -175,7 +175,7 @@ public class ValidationService {
 			if (obsKey.contains(".SAFE")) {
 				obsKey = obsKey.substring(0, obsKey.indexOf("/"));
 			}
-			LOGGER.info("key: {}, aux: {}", key, obsKey);
+//			LOGGER.info("key: {}, aux: {}", key, obsKey);
 			if (obsKey.contains(key)) {
 				return true;
 			}
