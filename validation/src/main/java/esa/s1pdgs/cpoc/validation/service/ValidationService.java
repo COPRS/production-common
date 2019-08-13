@@ -210,7 +210,7 @@ public class ValidationService {
 			String obsKey = null;
 			if (obj.getKey().contains(".zip")) {
 				// It is a zip file, so we just take the name as key
-				obsKey = obj.getKey();
+				obsKey = obj.getKey().replace(".zip", "");
 			} else {
 				// It is an unzipped, we just take the base name
 				obsKey = obj.getKey().substring(0, obj.getKey().indexOf("/"));				
