@@ -29,27 +29,3 @@ validation:
       initialDelay: 3600
       lifeTime: 604800
       gracePeriod: 3600
-    L1_SLICE:
-      initialDelay: 3600
-      lifeTime: 604800
-      gracePeriod: 3600
-    L1_SLICE_ZIP:
-      initialDelay: 3600
-      lifeTime: 604800
-      gracePeriod: 3600
-    L2_SLICE:
-      initialDelay: 3600
-      lifeTime: 604800
-      gracePeriod: 3600
-    L2_SLICE_ZIP:
-      initialDelay: 3600
-      lifeTime: 604800
-      gracePeriod: 3600
-    AUXILIARY_FILES:
-      initialDelay: 3600
-      lifeTime: 604800
-      gracePeriod: 3600
-    AUXILIARY_FILES_ZIP:
-      initialDelay: 3600
-      lifeTime: 604800
-      gracePeriod: 3600

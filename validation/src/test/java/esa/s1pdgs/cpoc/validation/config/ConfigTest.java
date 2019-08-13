@@ -25,6 +25,6 @@ public class ConfigTest {
 		assertEquals(2,properties.getFamilies().size());
 		
 		// Verify that the values from L0 Slice are read correctly
-		assertEquals(60,properties.getFamilies().get(ProductFamily.L0_SLICE).getInitialDelay());
+		assertEquals(3600,properties.getFamilies().get(ProductFamily.L0_SLICE).getInitialDelay());
 	}
 }
