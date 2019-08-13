@@ -136,6 +136,7 @@ public class ValidationService {
 				discrepancies = metadataDiscrepancies.size() + obsDiscrepancies.size();
 				reportingValidation.reportError("Discrepancy found for {} product(s)", discrepancies);
 			}*/
+			LOGGER.info("Found {} discrepancies for family '{}'",metadataDiscrepancies.size(), family);
 			return metadataDiscrepancies.size();
 		} catch (Exception ex) {
 			reportingValidation.reportError("Error occured while performing validation task: {}", ex.getMessage());
