@@ -49,6 +49,7 @@ public class ValidationService {
 		int discrepancies = 0;
 
 		Set<ProductFamily> families = properties.getFamilies().keySet();
+		LOGGER.info("Validating {} product families", families.size());
 		for (ProductFamily family : families) {
 			FamilyIntervalConf conf = properties.getFamilies().get(family);
 			
