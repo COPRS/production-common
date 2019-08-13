@@ -105,6 +105,39 @@ public class ValidationServiceTest {
 		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamilyValidation.AUXILIARY_FILE, localDateTimeStart, localDateTimeStop);
 		assertEquals(1, discrepancies);
 	}
+	
+	@Test
+	public void testCheckConsistencyForZippedAuxScenario() throws SdkClientException, MetadataQueryException {
+
+		ProductFamily family = ProductFamily.AUXILIARY_FILE_ZIP;
+
+		String intervalStart = "2000-01-01T00:00:00.000000Z";
+		String intervalStop = "2000-01-03T00:00:00.000000Z";
+
+		LocalDateTime localDateTimeStart = LocalDateTime.parse(intervalStart, DateUtils.METADATA_DATE_FORMATTER);
+		LocalDateTime localDateTimeStop = LocalDateTime.parse(intervalStop, DateUtils.METADATA_DATE_FORMATTER);
+
+		Date startDate = Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant());
+		Date stopDate = Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant());
+
+		SearchMetadata md1 = new SearchMetadata();
+		md1.setKeyObjectStorage("S1B_AUX_CAL_V201600000_G201700000000.SAFE");
+
+		List<SearchMetadata> metadataResults = new ArrayList<>();
+		metadataResults.add(md1);
+
+		ObsObject ob1 = new ObsObject("S1B_AUX_CAL_V201600000_G201700000000.SAFE.zip", family);
+
+		Map<String, ObsObject> obsResults = new HashMap<>();
+		obsResults.put("S1B_AUX_CAL_V201600000_G201700000000.SAFE.zip", ob1);
+
+		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
+		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
+
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamilyValidation.AUXILIARY_FILE_ZIP, localDateTimeStart, localDateTimeStop);
+		assertEquals(0, discrepancies);
+	}
 
 	@Test
 	public void testCheckConsistencyForSessionScenario() throws SdkClientException, MetadataQueryException {
