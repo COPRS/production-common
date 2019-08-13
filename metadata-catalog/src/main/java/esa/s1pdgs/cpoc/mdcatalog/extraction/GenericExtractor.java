@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -163,6 +165,9 @@ public abstract class GenericExtractor<T> {
         try { 	
         	
             final JSONObject metadata = extractMetadata(reportingFactory, message);
+            if (!metadata.has("insertionTime")) {
+            	metadata.append("insertionTime", DateUtils.convertToMetadataDateTimeFormat(Instant.now()));
+            }
             
             final Reporting reportPublish = reportingFactory.newReporting(4);            
             reportPublish.reportStart("Start publishing metadata");

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.common.utils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -37,6 +38,10 @@ public class DateUtils {
     
     public static String convertToMetadataDateTimeFormat(String dateString) {
     	return formatToMetadataDateTimeFormat(parse(dateString));
+    }
+
+    public static String convertToMetadataDateTimeFormat(Instant instant) {
+    	return instant.toString().replace("Z", "000Z");
     }
     
     private static final DateTimeFormatter formatterFor(final String dateString) 
