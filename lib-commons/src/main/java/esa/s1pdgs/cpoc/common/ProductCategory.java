@@ -63,6 +63,17 @@ public enum ProductCategory {
 	            return ProductCategory.LEVEL_PRODUCTS;
 	        case L0_SEGMENT:
 	            return ProductCategory.LEVEL_SEGMENTS;
+	            
+			case AUXILIARY_FILE_ZIP:
+			case L0_ACN_ZIP:
+			case L0_BLANK_ZIP:
+			case L0_SEGMENT_ZIP:
+			case L0_SLICE_ZIP:
+			case L1_ACN_ZIP:
+			case L1_SLICE_ZIP:
+			case L2_ACN_ZIP:
+			case L2_SLICE_ZIP:
+				return ProductCategory.COMPRESSED_PRODUCTS; 
 	        default:
 	        	throw new IllegalArgumentException(
 	        			String.format("Cannot determine product category for family %s", family)
