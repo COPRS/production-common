@@ -57,6 +57,7 @@ public class ValidationService {
 			LocalDateTime endInterval = LocalDateTime.now().minusSeconds(conf.getInitialDelay()); 
 			discrepancies += validateProductFamily(reportingFactory, family, startInterval, endInterval);
 		}
+		LOGGER.info("Found {} discrepancies for all families",discrepancies);
 		return discrepancies;
 	}
 
@@ -135,9 +136,7 @@ public class ValidationService {
 			reportingValidation.reportError("Error occured while performing validation task: {}", ex.getMessage());
 		}
 
-		LOGGER.info("Found no discrepancies for family '{}'", family);
-
-		return 0;
+		return -1;
 	}
 
 	String getQueryFamily(ProductFamily family) {
@@ -175,7 +174,7 @@ public class ValidationService {
 			if (!obsKey.contains(".zip") && obsKey.contains(".SAFE")) {
 				obsKey = obsKey.substring(0, obsKey.indexOf("/"));
 			}
-			LOGGER.info("key: {}, aux: {}", key, obsKey);
+//			LOGGER.info("key: {}, aux: {}", key, obsKey);
 			if (obsKey.contains(key)) {
 				return true;
 			}
