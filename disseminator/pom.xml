@@ -112,6 +112,7 @@
 	      <groupId>org.apache.ftpserver</groupId>
 	      <artifactId>ftpserver</artifactId>
 	      <version>1.0.5</version>
+	      <type>pom</type>
 	      <scope>test</scope>
 	    </dependency>		   	
 	</dependencies>
