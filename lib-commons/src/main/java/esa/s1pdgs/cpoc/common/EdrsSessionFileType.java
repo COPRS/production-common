@@ -21,6 +21,7 @@ public enum EdrsSessionFileType {
 			ret = SESSION;
 			break;
 		case RAW:
+		case AISP:
 			ret = RAW;
 			break;
 		default:
