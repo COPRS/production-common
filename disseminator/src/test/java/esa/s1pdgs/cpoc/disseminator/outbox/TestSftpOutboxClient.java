@@ -5,9 +5,11 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -45,6 +47,7 @@ public class TestSftpOutboxClient {
 	
 	private static final String USER = "user";
 	private static final String PASS = "pass";
+	private static final int PORT = 1234;
 	
 	private static File rootDir;
 	private static SshServer sshd;
@@ -58,7 +61,7 @@ public class TestSftpOutboxClient {
 		
 		sshd = SshServer.setUpDefaultServer();
 		sshd.setHost("localhost");
-		sshd.setPort(1234);
+		sshd.setPort(PORT);
 		
 		final File keyFile = Files.createTempFile("keys", ".keys").toFile();
 		keyFile.delete();
@@ -96,15 +99,17 @@ public class TestSftpOutboxClient {
 	
 	@Test
 	public final void testUpload_OnNonExistingDirectory_ShallCreateParentDirectoriesLazily() throws Exception {
-		final FakeObsClient fakeObsClient = new FakeObsClient(
-				Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()))
-		);
-		
+		final FakeObsClient fakeObsClient = new FakeObsClient() {
+			@Override
+			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) {
+				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
+			}			
+		};		
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
 		config.setUsername(USER);
 		config.setPassword(PASS);
-		config.setPort(1234);
+		config.setPort(PORT);
 		
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
@@ -119,9 +124,12 @@ public class TestSftpOutboxClient {
 	
 	@Test
 	public final void testUpload_OnExistingDirectory_ShallTransferFile() throws Exception {
-		final FakeObsClient fakeObsClient = new FakeObsClient(
-				Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()))
-		);
+		final FakeObsClient fakeObsClient = new FakeObsClient() {
+			@Override
+			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) {
+				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
+			}			
+		};	
 		
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());

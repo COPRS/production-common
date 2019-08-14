@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.disseminator;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,16 +19,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
-public class FakeObsClient implements ObsClient {	
-	private Map<String, InputStream> inputs;
-	
-	public FakeObsClient(Map<String, InputStream> inputs) {
-		this.inputs = inputs;
-	}
-	public FakeObsClient() {
-		this.inputs = Collections.emptyMap();
-	}
-
+// dummy impl - doin nothin
+public abstract class FakeObsClient implements ObsClient {	
 	@Override
 	public boolean doesObjectExist(ObsObject object) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
@@ -151,7 +142,7 @@ public class FakeObsClient implements ObsClient {
 	@Override
 	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)
 			throws SdkClientException {
-		return inputs;
+		return null;
 	}
 
 }
