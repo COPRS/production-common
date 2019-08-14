@@ -1,73 +1,76 @@
 package esa.s1pdgs.cpoc.ingestion.product;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 
-// FIXME
 public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
-		
-	// copied from old implementation.
-    private final static String PATTERN_STR =
-    		"^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
 
-    /**
-     * Pattern
-     */
-    protected final Pattern pattern = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
+	private final static String PATTERN_STR_XML = ".+_ch(1|2)_DSIB\\.(xml|XML)";
+	private final static String PATTERN_STR_RAW = ".+_ch(1|2)_DSDB_\\w+\\.(raw|RAW|aisp|AISP)";
+
+	protected final Pattern xmlpattern = Pattern.compile(PATTERN_STR_XML);
+	protected final Pattern rawpattern = Pattern.compile(PATTERN_STR_RAW);
 
 	@Override
-	public List<Product<EdrsSessionDto>> newProducts(File file, final ObsAdapter obsAdapter) throws ProductException {
-		throw new UnsupportedOperationException();
+	public List<Product<EdrsSessionDto>> newProducts(final File file, final IngestionDto ingestionDto,
+			final ObsAdapter obsAdapter) throws ProductException {
+
+		final List<Product<EdrsSessionDto>> result = new ArrayList<>();
+
+		String objectStorageKey = ingestionDto.getRelativePath();
+		int channelId = extractChannelId(ingestionDto.getRelativePath());
+		EdrsSessionFileType edrsSessionFileType = extractEdrsSessionFileType(ingestionDto.getRelativePath());
+		String missionId = ingestionDto.getMissionId();
+		String satelliteId = ingestionDto.getSatelliteId();
+		String stationCode = ingestionDto.getStationCode();
+
+		EdrsSessionDto edrsSessionDto = new EdrsSessionDto(objectStorageKey, channelId, edrsSessionFileType, missionId,
+				satelliteId, stationCode);
+
+		final Product<EdrsSessionDto> prod = new Product<>();
+		prod.setFamily(ProductFamily.EDRS_SESSION);
+		prod.setFile(file);
+		prod.setDto(edrsSessionDto);
+
+		result.add(prod);
+		return result;
 	}
-	
-//  
-//	public Product<E> newProduct(final ProductFamily family, final String path) throws ProductException {
-//				
-//		if (family == ProductFamily.EDRS_SESSION) {
-//	        final Matcher matcher = pattern.matcher(path);
-//
-//	        if (!matcher.matches()) {
-//	            throw new ProductException(
-//	            		String.format("%s File %s does not match pattern %s", family, path, PATTERN_STR)
-//	            );
-//	        }
-//
-//	        // Ignore the IIF files
-//	        if (matcher.group(11).toLowerCase().contains("iif_")) {
-//	        	 throw new ProductException(
-//		            		String.format("%s File %s does not match pattern %s", family, path, PATTERN_STR)
-//		            );
-//	        	
-//	        	
-//	            throw new IngestorFilePathException(relativePath, family,
-//	                    "IIF file");
-//	        }
-//
-//	        // "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
-//	        FileDescriptor descriptor = new FileDescriptor();
-//	        descriptor.setRelativePath(relativePath);
-//	        descriptor.setProductName(matcher.group(9));
-//	        descriptor.setExtension(
-//	                FileExtension.valueOfIgnoreCase(matcher.group(12)));
-//	        descriptor.setProductType(EdrsSessionFileType
-//	                .valueFromExtension(descriptor.getExtension()));
-//	        descriptor.setChannel(Integer.parseInt(matcher.group(7)));
-//	        descriptor.setKeyObjectStorage(relativePath);
-//	        descriptor.setMissionId(matcher.group(1));
-//	        descriptor.setSatelliteId(matcher.group(2));
-//	        descriptor.setHasToBePublished(true);
-//			
-//		}
-//		
-//		
-//		
-//		
-//		
-//		return new Product<>();
-//	}
+
+	int extractChannelId(String relativePath) {
+		Matcher xmlmatcher = xmlpattern.matcher(relativePath);
+		Matcher rawmatcher = rawpattern.matcher(relativePath);
+
+		if (xmlmatcher.matches()) {
+			return Integer.parseInt(xmlmatcher.group(1));
+		} else if (rawmatcher.matches()) {
+			return Integer.parseInt(rawmatcher.group(1));
+		} else {
+			throw new IllegalArgumentException(String.format("can not match %s", relativePath));
+		}
+	}
+
+	EdrsSessionFileType extractEdrsSessionFileType(String relativePath) {
+
+		Matcher xmlmatcher = xmlpattern.matcher(relativePath);
+		Matcher rawmatcher = rawpattern.matcher(relativePath);
+
+		if (xmlmatcher.matches()) {
+			return EdrsSessionFileType.valueFromExtension(FileExtension.valueOfIgnoreCase(xmlmatcher.group(2)));
+		} else if (rawmatcher.matches()) {
+			return EdrsSessionFileType.valueFromExtension(FileExtension.valueOfIgnoreCase(rawmatcher.group(2)));
+		} else {
+			throw new IllegalArgumentException(String.format("can not match %s", relativePath));
+		}
+	}
 
 }

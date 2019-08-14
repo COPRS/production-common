@@ -20,7 +20,9 @@ public final class TestIngestionService {
 
 	@Test
 	public final void testOnMessage() {
-		final IngestionDto ingestion = new IngestionDto("fooBar", "file:///tmp/foo/bar");
+		final IngestionDto ingestion = new IngestionDto("fooBar");
+		ingestion.setRelativePath("fooBar");
+		ingestion.setPickupPath("/tmp");
 		
 		final GenericMessageDto<IngestionDto> mess = new GenericMessageDto<IngestionDto>();
 		mess.setIdentifier(123);

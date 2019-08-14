@@ -73,7 +73,9 @@ public final class Inbox {
 	private void handleNew(final InboxEntry entry) {
 		try {
 			LOG.info("Publishing new entry to kafka queue: {}", entry);
-			IngestionDto dto = new IngestionDto(entry.getName(), entry.getUrl());
+			IngestionDto dto = new IngestionDto(entry.getName());
+		    dto.setRelativePath(entry.getRelativePath());
+		    dto.setPickupPath(entry.getPickupPath());
 			dto.setMissionId(entry.getMissionId());
 			dto.setSatelliteId(entry.getSatelliteId());
 			dto.setStationCode(entry.getStationCode());

@@ -12,21 +12,16 @@ import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {	
     /**
      * Pattern for configuration files to extract data
      */
-    public final static String PATTERN_STR ="^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_"
-    		+ "(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)"
-    		+ "_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
-    
-    
-    
 
 	@Override
-	public List<Product<ProductDto>> newProducts(final File file, final ObsAdapter obsAdapter) throws ProductException {			
+	public List<Product<ProductDto>> newProducts(final File file, final IngestionDto ingestionDto, final ObsAdapter obsAdapter) throws ProductException {			
 		final List<Product<ProductDto>> result = new ArrayList<>();
 		result.add(newProduct(file, obsAdapter));
 		

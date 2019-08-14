@@ -30,7 +30,8 @@ public class IngestionDtoTest {
     public void testToStringAndSetters() {
     	IngestionDto dto = new IngestionDto();
         dto.setProductName("product-name");
-        dto.setProductUrl("file:///fooBar/product-name");
+        dto.setRelativePath("product-name");
+        dto.setPickupPath("/fooBar");
  
         String str = dto.toString();
         assertTrue(str.contains("product-name"));
