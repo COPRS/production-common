@@ -83,7 +83,7 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	private final Iterable<Path> listDeep() throws IOException {
 
 		Iterable<Path> list = Files.walk(inboxDirectory.toPath(), FileVisitOption.FOLLOW_LINKS)
-				.filter(p -> !p.equals(inboxDirectory.toPath())).collect(Collectors.toList());
+				.filter(p -> !p.equals(inboxDirectory.toPath())).map(p -> inboxDirectory.toPath().relativize(p)).collect(Collectors.toList());
 		LOG.trace("listing {}", list.toString());
 		return list;
 
