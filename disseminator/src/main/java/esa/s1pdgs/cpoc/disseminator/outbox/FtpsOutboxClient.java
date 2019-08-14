@@ -34,7 +34,7 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 	
 	private static final int DEFAULT_PORT = 990;
 	
-	public FtpsOutboxClient(ObsClient obsClient, OutboxConfiguration config) {
+	FtpsOutboxClient(ObsClient obsClient, OutboxConfiguration config) {
 		super(obsClient, config);
 	}
 
