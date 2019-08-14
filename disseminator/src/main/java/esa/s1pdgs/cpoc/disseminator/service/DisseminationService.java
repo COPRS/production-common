@@ -103,6 +103,10 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			}			
 		}			
 	}
+	
+    public final List<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
+    	return properties.getCategories().getOrDefault(ProductCategory.of(family), Collections.emptyList());	
+    }
 
 	final void handleTransferTo(final GenericMessageDto<ProductDto> message, final String target) {		
 		final ProductDto product = message.getBody();
@@ -165,10 +169,6 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			);
 		}
 	}
-    
-    final List<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
-    	return properties.getCategories().getOrDefault(ProductCategory.of(family), Collections.emptyList());	
-    }
     
 	final void put(final String target, final OutboxClient outboxClient) {
 		clientForTargets.put(target, outboxClient);		
