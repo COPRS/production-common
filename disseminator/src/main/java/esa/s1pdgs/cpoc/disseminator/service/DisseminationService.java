@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.disseminator;
+package esa.s1pdgs.cpoc.disseminator.service;
 
 import java.util.Collections;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.disseminator;
+package esa.s1pdgs.cpoc.disseminator.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -9,8 +9,11 @@ import com.amazonaws.SdkClientException;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
+import esa.s1pdgs.cpoc.disseminator.service.DisseminationException;
+import esa.s1pdgs.cpoc.disseminator.service.DisseminationService;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
