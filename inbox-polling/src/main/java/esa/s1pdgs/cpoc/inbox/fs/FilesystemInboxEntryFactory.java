@@ -18,7 +18,8 @@ public class FilesystemInboxEntryFactory implements InboxEntryFactory {
 		InboxEntry inboxEntry = new InboxEntry();
 		inboxEntry.setName(entryRelativePath.toFile().getName());
 		inboxEntry.setRelativePath(entryRelativePath.toString());
-		inboxEntry.setUrl("file://" + inboxDirectoryPath.resolve(entryRelativePath).toString());
+		inboxEntry.setPickupPath(inboxDirectoryPath.toString());
+		inboxEntry.setUrl(inboxDirectoryPath.resolve(entryRelativePath).toString());
 		inboxEntry.setMissionId(inboxPathInformation.getMissionId());
 		inboxEntry.setSatelliteId(inboxPathInformation.getSatelliteId());
 		inboxEntry.setStationCode(inboxPathInformation.getStationCode());

@@ -16,8 +16,8 @@ public class TestInbox {
 		final InboxAdapter fakeAdapter = new InboxAdapter() {
 			@Override
 			public Collection<InboxEntry> read(List<InboxFilter> filter) {
-				return Arrays.asList(new InboxEntry("foo1", "foo1", "file:///tmp/MPS_/S1A/foo1", "S1", "A", "MPS_"),
-						new InboxEntry("foo2", "foo2", "file:///tmp/WILE/S1B/foo2", "S1", "B", "WILE"));
+				return Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp/MPS_/S1A", "S1", "A", "MPS_"),
+						new InboxEntry("foo2", "foo2", "/tmp/WILE/S1B", "S1", "B", "WILE"));
 			}
 
 			@Override
@@ -40,8 +40,8 @@ public class TestInbox {
 		final InboxAdapter fakeAdapter = new InboxAdapter() {
 			@Override
 			public Collection<InboxEntry> read(List<InboxFilter> filter) {
-				return Arrays.asList(new InboxEntry("foo1", "foo1", "file:///tmp/MPS_/S1A/foo1", "S1", "A", "MPS_"),
-						new InboxEntry("foo2", "foo2", "file:///tmp/WILE/S1B/foo2", "S1", "B", "WILE"));
+				return Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp/MPS_/S1A", "S1", "A", "MPS_"),
+						new InboxEntry("foo2", "foo2", "/tmp/WILE/S1B", "S1", "B", "WILE"));
 			}
 
 			@Override
@@ -52,8 +52,8 @@ public class TestInbox {
 		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(0) {
 			@Override
 			public Iterable<InboxEntry> findAll() {
-				return Arrays.asList(new InboxEntry("foo2", "foo2", "file:///tmp/WILE/S1B/foo2", "S1", "B", "WILE"),
-						new InboxEntry("foo1", "foo1", "file:///tmp/MPS_/S1A/foo1", "S1", "A", "MPS_"));
+				return Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp/WILE/S1B", "S1", "B", "WILE"),
+						new InboxEntry("foo1", "foo1", "/tmp/MPS_/S1A", "S1", "A", "MPS_"));
 			}
 		};
 		final MockSubmissionClient fakeKafkaClient = new MockSubmissionClient(0);

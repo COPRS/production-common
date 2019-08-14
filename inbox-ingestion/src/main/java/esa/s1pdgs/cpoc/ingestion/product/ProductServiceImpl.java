@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ingestion.product;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.ingestion.IngestionService;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
@@ -40,8 +40,8 @@ public class ProductServiceImpl implements ProductService {
 		);
 		LOG.debug("Using {} for {}", productFactory, family);
 		
-		final ObsAdapter obsAdapter = newObsAdapterFor(file);
-		final List<Product<E>> result = productFactory.newProducts(file, obsAdapter);					
+		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()));
+		final List<Product<E>> result = productFactory.newProducts(file, ingestion, obsAdapter);					
 
 		// is restart scenario?
 		if (ingestion.getFamily() == ProductFamily.INVALID) {
@@ -61,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void markInvalid(IngestionDto ingestion) {	
 		final File file = toFile(ingestion);
-		newObsAdapterFor(file).upload(ProductFamily.INVALID, file);		
+		newObsAdapterFor(Paths.get(ingestion.getPickupPath())).upload(ProductFamily.INVALID, file);		
 	}
 	
 	final String toObsKey(final Path relPath) {
@@ -69,11 +69,10 @@ public class ProductServiceImpl implements ProductService {
 	}
 	
 	final File toFile(final IngestionDto ingestion) {
-		return new File(ingestion.getProductUrl().replace("file://", ""));
+		return Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 	}
 	
-	private final ObsAdapter newObsAdapterFor(final File file) {
-		final Path inboxPath = file.toPath().getParent();	
+	private final ObsAdapter newObsAdapterFor(final Path inboxPath) {	
 		return new ObsAdapter(obsClient, inboxPath);		
 	}
 	
