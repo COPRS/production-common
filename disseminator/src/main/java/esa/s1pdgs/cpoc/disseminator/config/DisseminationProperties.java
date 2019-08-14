@@ -170,7 +170,7 @@ public class DisseminationProperties {
 	}
 	
 	
-	private long pollingIntervalMs = 100;
+	private long pollingIntervalMs = 1000;
 	private int maxRetries = 2;	
 	private long tempoRetryMs = 100;
 	private String hostname = "localhost";
