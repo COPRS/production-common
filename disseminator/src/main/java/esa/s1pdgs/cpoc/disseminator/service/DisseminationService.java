@@ -104,7 +104,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		}			
 	}
 	
-    public final List<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
+    final List<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
     	return properties.getCategories().getOrDefault(ProductCategory.of(family), Collections.emptyList());	
     }
 

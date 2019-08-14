@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.disseminator;
+package esa.s1pdgs.cpoc.disseminator.service;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
