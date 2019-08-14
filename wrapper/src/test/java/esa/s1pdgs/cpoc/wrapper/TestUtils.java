@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.wrapper;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +16,19 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 
 public class TestUtils {
 
-    public final static String WORKDIR = "./test_work_dir/";
+    public static String WORKDIR;
+    		
+	static {
+		try {
+			final File wd = Files.createTempDirectory("testWorkDir").toFile();
+			WORKDIR = wd.getPath();			
+	        if (!wd.exists()) {
+	        	wd.mkdirs();
+	        } 
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
     public static LevelJobDto buildL0LevelJobDto() {
         LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml");

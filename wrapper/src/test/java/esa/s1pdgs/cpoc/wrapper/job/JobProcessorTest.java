@@ -125,6 +125,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDefaultAppProperties();
         mockDefaultDevProperties();
         mockDefaultStatus();
+        //devProperties.getStepsActivation().put("erasing", Boolean.FALSE);
 
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
                 TestUtils.buildL0LevelJobDto());
@@ -132,6 +133,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         if (!workingDir.exists()) {
             workingDir.mkdir();
         }
+        mockWorkingdirProperties(workingDir.toPath());
         processor = new JobProcessor(appStatus, properties, devProperties,
                 obsClient, procuderFactory, mqiService, errorAppender, mqiStatusService);
         procExecutorSrv = Executors.newSingleThreadExecutor();
@@ -255,10 +257,8 @@ public class JobProcessorTest extends MockPropertiesTest {
                 new File(inputMessage.getBody().getWorkDirectory() + "file2");
         file2.createNewFile();
         assertTrue(workingDir.exists());
-        assertTrue(file1.exists());
-
-        processor.cleanJobProcessing(inputMessage.getBody(), true,
-                procExecutorSrv);
+        assertTrue(file1.exists());      
+        processor.cleanJobProcessing(inputMessage.getBody(), true, procExecutorSrv);
 
         verify(properties, times(1)).getTmProcStopS();
         assertFalse(workingDir.exists());
