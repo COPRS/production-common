@@ -59,11 +59,11 @@ public class TestFilesystemInboxAdapter {
 		pathInformation.setStationCode("MPS_");
 
 		assertEquals(true,
-				actual.contains(factory.newInboxEntry(pathInformation, product1.toPath(), testDir.toPath())));
+				actual.contains(factory.newInboxEntry(pathInformation, testDir.toPath().relativize(product1.toPath()), testDir.toPath())));
 		assertEquals(true,
-				actual.contains(factory.newInboxEntry(pathInformation, product2.toPath(), testDir.toPath())));
+				actual.contains(factory.newInboxEntry(pathInformation, testDir.toPath().relativize(product2.toPath()), testDir.toPath())));
 		assertEquals(true,
-				actual.contains(factory.newInboxEntry(pathInformation, product3.toPath(), testDir.toPath())));
+				actual.contains(factory.newInboxEntry(pathInformation, testDir.toPath().relativize(product3.toPath()), testDir.toPath())));
 	}
 
 	@Test
