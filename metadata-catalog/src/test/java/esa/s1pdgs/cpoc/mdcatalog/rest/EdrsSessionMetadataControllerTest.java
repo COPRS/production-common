@@ -6,6 +6,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,13 +60,16 @@ public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 		response.setProductName("name");
 		response.setProductType("type");
 		response.setKeyObjectStorage("kobs");
-		response.setValidityStart("startDate");
-		response.setValidityStop("stopDate");
+		response.setStartTime("start");
+		response.setStopTime("stop");
+		response.setValidityStart("vstart");
+		response.setValidityStop("vstop");
 		response.setMissionId("mission");
 		response.setSatelliteId("satellite");
 		response.setStationCode("station");
+		response.setRawNames(Arrays.<String>asList("a","b","c"));
 		this.mockGetEdrsSession(response);
-		EdrsSessionMetadata expectedResult = new EdrsSessionMetadata("name", "type", "kobs", "startDate", "stopDate", "mission", "satellite", "station");
+		EdrsSessionMetadata expectedResult = new EdrsSessionMetadata("name", "type", "kobs", "start", "stop", "vstart", "vstop", "mission", "satellite", "station", Arrays.<String>asList("a","b","c"));
 		MvcResult result = request(get("/edrsSession/type/name")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());

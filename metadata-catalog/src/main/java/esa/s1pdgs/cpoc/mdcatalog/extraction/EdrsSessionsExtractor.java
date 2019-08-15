@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
@@ -45,9 +46,10 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
             @Value("${file.product-categories.edrs-sessions.local-directory}") final String localDirectory,
             final ErrorRepoAppender errorAppender,
             final ProcessConfiguration processConfiguration,
-            final MetadataExtractorConfig extractorConfig) {
+            final MetadataExtractorConfig extractorConfig,
+            final XmlConverter xmlConverter) {
         super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_SESSION, errorAppender, ProductCategory.EDRS_SESSIONS, processConfiguration);
+                extractorConfig, PATTERN_SESSION, errorAppender, ProductCategory.EDRS_SESSIONS, processConfiguration, xmlConverter);
     }
 
     /**

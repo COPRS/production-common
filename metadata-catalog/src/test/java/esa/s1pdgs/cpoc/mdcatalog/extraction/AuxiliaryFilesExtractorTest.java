@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -91,6 +92,8 @@ public class AuxiliaryFilesExtractorTest {
     
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
+    @Mock
+    XmlConverter xmlConverter;
 
     /**
      * Initialization
@@ -137,7 +140,7 @@ public class AuxiliaryFilesExtractorTest {
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath()
                         + File.separator,
-                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe");
+                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe", xmlConverter);
     }
 
     @Test
@@ -171,7 +174,7 @@ public class AuxiliaryFilesExtractorTest {
 
         extractor = new AuxiliaryFilesExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig, "./test/workDir2/",
-                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe");
+                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe", xmlConverter);
         assertTrue((new File(
                 "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
                         .exists());

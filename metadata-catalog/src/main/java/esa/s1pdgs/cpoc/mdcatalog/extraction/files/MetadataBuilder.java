@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 
 /**
  * Class to build metadata for configuration and ERDS session files
@@ -30,12 +31,19 @@ public class MetadataBuilder {
 	 */
 	private ExtractMetadata extractor;
 
+	private final XmlConverter xmlConverter;
+
+	/**
+     * Local directory for configurations files
+     */
+    protected final String localDirectory;
+
 	/**
 	 * Default constructor
 	 */
-	public MetadataBuilder(MetadataExtractorConfig extractorConfig) {
+	public MetadataBuilder(MetadataExtractorConfig extractorConfig, final XmlConverter xmlConverter, final String localDirectory) {
 		this(new ExtractMetadata(extractorConfig.getTypeOverlap(), extractorConfig.getTypeSliceLength(),
-				extractorConfig.getXsltDirectory()));
+				extractorConfig.getXsltDirectory(), xmlConverter, localDirectory), xmlConverter, localDirectory);
 	}
 
 	/**
@@ -43,8 +51,10 @@ public class MetadataBuilder {
 	 * 
 	 * @param extractor
 	 */
-	public MetadataBuilder(ExtractMetadata extractor) {
+	public MetadataBuilder(final ExtractMetadata extractor, final XmlConverter xmlConverter, final String localDirectory) {
 		this.extractor = extractor;
+		this.xmlConverter = xmlConverter;
+		this.localDirectory = localDirectory;
 	}
 
 	/**

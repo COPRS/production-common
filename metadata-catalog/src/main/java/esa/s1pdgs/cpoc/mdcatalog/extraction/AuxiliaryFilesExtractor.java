@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -65,9 +66,10 @@ public class AuxiliaryFilesExtractor
             @Value("${file.manifest-filename}") final String manifestFilename,
             final ErrorRepoAppender errorAppender,
             final ProcessConfiguration processConfiguration,
-            @Value("${file.file-with-manifest-ext}") final String fileManifestExt) {
+            @Value("${file.file-with-manifest-ext}") final String fileManifestExt,
+            final XmlConverter xmlConverter) {
         super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.AUXILIARY_FILES, processConfiguration);
+                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.AUXILIARY_FILES, processConfiguration, xmlConverter);
         this.obsClient = obsClient;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;

@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -91,7 +92,7 @@ public abstract class GenericExtractor<T> {
     private final ErrorRepoAppender errorAppender;
     
     private final ProcessConfiguration processConfiguration;
-
+    
     /**
      * @param esServices
      * @param mqiService
@@ -106,13 +107,14 @@ public abstract class GenericExtractor<T> {
             final MetadataExtractorConfig extractorConfig, final String pattern,
             final ErrorRepoAppender errorAppender,
             final ProductCategory category,
-            final ProcessConfiguration processConfiguration) {
+            final ProcessConfiguration processConfiguration,
+            final XmlConverter xmlConverter) {
         this.localDirectory = localDirectory;
         this.fileDescriptorBuilder =
                 new FileDescriptorBuilder(this.localDirectory,
                         Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
         this.extractorConfig = extractorConfig;
-        this.mdBuilder = new MetadataBuilder(this.extractorConfig);
+        this.mdBuilder = new MetadataBuilder(this.extractorConfig, xmlConverter, localDirectory);
         this.esServices = esServices;
         this.mqiService = mqiService;
         this.appStatus = appStatus;

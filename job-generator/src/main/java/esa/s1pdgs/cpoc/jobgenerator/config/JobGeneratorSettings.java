@@ -18,8 +18,8 @@ import org.springframework.util.StringUtils;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
+import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
@@ -495,19 +495,19 @@ public class JobGeneratorSettings {
 			final AbstractJobsDispatcher<? extends AbstractDto> jobsDispatcher,
 			final L0SegmentAppProperties appProperties, final L0SlicePatternSettings patternSettings,
 			final ProcessSettings processSettings, final GenericMqiClient mqiService,
-			final StatusService mqiStatusService, final EdrsSessionFileService edrsService,
+			final StatusService mqiStatusService,
 			@Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient appDataServiceLevelProducts,
 			@Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataServiceErdsSettions,
 			@Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataServiceLevelSegments,
-			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus) {
+			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataService metadataService) {
 
 		AbstractGenericConsumer<? extends AbstractDto> messageConsumer;
 
 		switch (processSettings.getLevel()) {
 		case L0:
 			messageConsumer = new L0AppConsumer((AbstractJobsDispatcher<EdrsSessionDto>) jobsDispatcher,
-					processSettings, mqiService, edrsService, mqiStatusService, appDataServiceErdsSettions,
-					errorRepoAppender, appStatus);
+					processSettings, mqiService, mqiStatusService, appDataServiceErdsSettions,
+					errorRepoAppender, appStatus, metadataService);
 			break;
 		case L0_SEGMENT:
 			messageConsumer = new L0SegmentAppConsumer((AbstractJobsDispatcher<ProductDto>) jobsDispatcher,

@@ -154,12 +154,6 @@ public abstract class AbstractMetadata {
     public void setProductType(final String productType) {
         this.productType = productType;
     }
-
-	public String toAbstractString() {
-		return String.format(
-				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\",\"missionId\":\"%s\",\"satelliteId\":\"%s\",\"stationCode\":\"%s\"",
-				productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
-	}
 	
     /**
 	 * @return the missionId
@@ -201,6 +195,12 @@ public abstract class AbstractMetadata {
 	 */
 	public void setStationCode(String stationCode) {
 		this.stationCode = stationCode;
+	}
+
+	public String toAbstractString() {
+		return String.format(
+				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\",\"missionId\":\"%s\",\"satelliteId\":\"%s\",\"stationCode\":\"%s\"",
+				productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
 	}
 
 	/**

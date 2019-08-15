@@ -73,8 +73,9 @@ public class EdrsSessionProcessorTest {
         desc.setMissionId("mission");
         desc.setSatelliteId("sat");
         desc.setStationCode("stat");
+        desc.setSessionId("sessionId");
         EdrsSessionDto expected = new EdrsSessionDto("key-obs", 15,
-                EdrsSessionFileType.RAW, "mission", "sat", "stat");
+                EdrsSessionFileType.RAW, "mission", "sat", "stat", "sessionId");
 
         assertEquals(expected, service.buildDto(desc));
     }

@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
@@ -81,6 +82,9 @@ public class EdrsSessionsExtractorTest {
     
     private final ProcessConfiguration config = new ProcessConfiguration();
     
+    @Mock
+    XmlConverter xmlConverter;
+    
     /**
      * Initialization
      * 
@@ -95,15 +99,15 @@ public class EdrsSessionsExtractorTest {
 
         inputMessage = new GenericMessageDto<EdrsSessionDto>(123, "",
                 new EdrsSessionDto("S1A/123/ch01/D_123_ch01_D.RAW", 1,
-                        EdrsSessionFileType.RAW, "S1", "A", "WILE"));
+                        EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId"));
 
         inputMessageXml = new GenericMessageDto<EdrsSessionDto>(123, "",
                 new EdrsSessionDto("S1B/123/ch02/D_123_ch03_D.XML", 2,
-                        EdrsSessionFileType.SESSION, "S1", "B", "WILE"));
+                        EdrsSessionFileType.SESSION, "S1", "B", "WILE", "sessionId"));
 
         extractor = new EdrsSessionsExtractor(esServices, mqiService, appStatus,
                 (new File("./test/workDir/")).getAbsolutePath(),errorAppender, config,
-                extractorConfig);
+                extractorConfig, xmlConverter);
     }
 
     @Test

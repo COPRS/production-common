@@ -2,6 +2,9 @@ package esa.s1pdgs.cpoc.mdcatalog.rest.dto;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
@@ -16,21 +19,24 @@ public class EdrsSessionMetadataDtoTest {
 	//String productName, String productType, String keyObjectStorage, String validityStart,String validityStop
 	@Test
 	public void testToString() {
-		EdrsSessionMetadata obj = new EdrsSessionMetadata("name", "type", "kobs", "startDate", "stopDate", "mission", "satellite", "station");
+		EdrsSessionMetadata obj = new EdrsSessionMetadata("name", "type", "kobs", "start", "stop", "vstart", "vstop", "mission", "satellite", "station", Arrays.<String>asList("a","b","c"));
 		
-		String str = obj.toString();
+		String str = obj.toString(); System.out.println(str);
 		assertTrue(str.contains("\"productName\":\"name\""));
 		assertTrue(str.contains("\"productType\":\"type\""));
 		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
-		assertTrue(str.contains("\"validityStart\":\"startDate\""));
-		assertTrue(str.contains("\"validityStop\":\"stopDate\""));
+		assertTrue(str.contains("\"startTime\":\"start\""));
+		assertTrue(str.contains("\"stopTime\":\"stop\""));
+		assertTrue(str.contains("\"validityStart\":\"vstart\""));
+		assertTrue(str.contains("\"validityStop\":\"vstop\""));
 		assertTrue(str.contains("\"missionId\":\"mission\""));
 		assertTrue(str.contains("\"satelliteId\":\"satellite\""));
 		assertTrue(str.contains("\"stationCode\":\"station\""));
+		assertTrue(str.contains("\"rawNames\":[\"a\",\"b\",\"c\"]"));
 	}
 
 	/**
-	 * Check equals and hascode methods
+	 * Check equals and hashcode methods
 	 */
 	@Test
 	public void testEquals() {

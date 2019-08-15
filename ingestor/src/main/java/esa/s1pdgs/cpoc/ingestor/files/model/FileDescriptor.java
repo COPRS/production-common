@@ -64,6 +64,11 @@ public class FileDescriptor {
     private String stationCode;
 
     /**
+     * Session identifier
+     */
+    private String sessionId;
+
+    /**
      * Constructor
      */
     public FileDescriptor() {
@@ -222,6 +227,20 @@ public class FileDescriptor {
     public void setStationCode(final String stationCode) {
         this.stationCode = stationCode;
     }
+
+	/**
+	 * @return the sessionId
+	 */
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	/**
+	 * @param sessionId the sessionId to set
+	 */
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
     
     /**
      * @see java.lang.Object#toString()
@@ -229,9 +248,9 @@ public class FileDescriptor {
     @Override
     public String toString() {
         return String.format(
-                "{relativePath: %s, productName: %s, keyObjectStorage: %s, hasToBePublished: %s, productType: %s, channel: %s, extension: %s, missionId: %s, satelliteId: %s, stationCode: %s}",
+                "{relativePath: %s, productName: %s, keyObjectStorage: %s, hasToBePublished: %s, productType: %s, channel: %s, extension: %s, missionId: %s, satelliteId: %s, stationCode: %s, sessionId: %s}",
                 relativePath, productName, keyObjectStorage, hasToBePublished,
-                productType, channel, extension, missionId, satelliteId, stationCode);
+                productType, channel, extension, missionId, satelliteId, stationCode, sessionId);
     }
 
     /**
@@ -241,7 +260,7 @@ public class FileDescriptor {
     public int hashCode() {
         return Objects.hash(relativePath, productName, keyObjectStorage,
                 hasToBePublished, productType, channel, extension, missionId,
-                satelliteId, stationCode);
+                satelliteId, stationCode, sessionId);
     }
 
     /**
@@ -266,7 +285,8 @@ public class FileDescriptor {
                     && Objects.equals(extension, other.extension)
                     && Objects.equals(missionId, other.missionId)
                     && Objects.equals(satelliteId, other.satelliteId)
-		            && Objects.equals(stationCode, other.stationCode);
+		            && Objects.equals(stationCode, other.stationCode)
+		            && Objects.equals(sessionId, other.sessionId);
         }
         return ret;
     }
