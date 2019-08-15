@@ -21,6 +21,21 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 	private String sessionIdentifier;
 
 	/**
+	 * Session identifier
+	 */
+	private String stationCode;
+	
+	
+	
+	public String getStationCode() {
+		return stationCode;
+	}
+
+	public void setStationCode(String stationCode) {
+		this.stationCode = stationCode;
+	}
+
+	/**
 	 * Channel number
 	 */
 	private int channel;
@@ -58,8 +73,8 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 	 */
 	public String toString() {
 		String info = String.format(
-				"{ 'relativePath': %s, 'filename': %s, 'extension': %s, 'sessionIdentifier': %s, 'productName': %s, 'productType': %s, 'channel': %d, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
-				relativePath, filename, extension, sessionIdentifier, productName, edrsSessionFileType, channel, missionId,
+				"{ 'relativePath': %s, 'stationCode': %s ,'filename': %s, 'extension': %s, 'sessionIdentifier': %s, 'productName': %s, 'productType': %s, 'channel': %d, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
+				relativePath, filename, stationCode,extension, sessionIdentifier, productName, edrsSessionFileType, channel, missionId,
 				satelliteId, keyObjectStorage);
 		return info;
 	}
@@ -83,6 +98,11 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 				return false;
 		} else if (!edrsSessionFileType.equals(other.edrsSessionFileType))
 			return false;
+		if (stationCode == null) {
+			if (other.stationCode != null)
+				return false;
+		} else if (!stationCode.equals(other.stationCode))
+			return false;
 		if (sessionIdentifier == null) {
 			if (other.sessionIdentifier != null)
 				return false;
@@ -101,6 +121,7 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 		result = prime * result + channel;
 		result = prime * result + ((edrsSessionFileType == null) ? 0 : edrsSessionFileType.hashCode());
 		result = prime * result + ((sessionIdentifier == null) ? 0 : sessionIdentifier.hashCode());
+		result = prime * result + ((stationCode == null) ? 0 : stationCode.hashCode());
 		return result;
 	}
 

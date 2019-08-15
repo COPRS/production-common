@@ -98,11 +98,11 @@ public class EdrsSessionsExtractorTest {
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         inputMessage = new GenericMessageDto<EdrsSessionDto>(123, "",
-                new EdrsSessionDto("S1A/123/ch01/D_123_ch01_D.RAW", 1,
-                        EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId"));
+                new EdrsSessionDto("123/ch01/D_123_ch01_D.RAW", 1,
+                        EdrsSessionFileType.RAW, "S1", "A", "WILE", "123"));
 
         inputMessageXml = new GenericMessageDto<EdrsSessionDto>(123, "",
-                new EdrsSessionDto("S1B/123/ch02/D_123_ch03_D.XML", 2,
+                new EdrsSessionDto("123/ch02/D_123_ch03_D.XML", 2,
                         EdrsSessionFileType.SESSION, "S1", "B", "WILE", "sessionId"));
 
         extractor = new EdrsSessionsExtractor(esServices, mqiService, appStatus,
@@ -112,9 +112,9 @@ public class EdrsSessionsExtractorTest {
 
     @Test
     public void testExtractProductName() {
-        assertEquals("S1A/123/ch01/D_123_ch01_D.RAW",
+        assertEquals("123/ch01/D_123_ch01_D.RAW",
                 extractor.extractProductNameFromDto(inputMessage.getBody()));
-        assertEquals("S1B/123/ch02/D_123_ch03_D.XML",
+        assertEquals("123/ch02/D_123_ch03_D.XML",
                 extractor.extractProductNameFromDto(inputMessageXml.getBody()));
     }
 
@@ -124,7 +124,7 @@ public class EdrsSessionsExtractorTest {
                 new EdrsSessionFileDescriptor();
         
         expectedDescriptor.setFilename("D_123_ch01_D.RAW");
-        expectedDescriptor.setRelativePath("S1A/123/ch01/D_123_ch01_D.RAW");
+        expectedDescriptor.setRelativePath("123/ch01/D_123_ch01_D.RAW");
         expectedDescriptor.setProductName("D_123_ch01_D.RAW");
         expectedDescriptor.setExtension(FileExtension.RAW);
         expectedDescriptor.setEdrsSessionFileType(EdrsSessionFileType.RAW);
@@ -132,7 +132,8 @@ public class EdrsSessionsExtractorTest {
         expectedDescriptor.setSatelliteId("A");
         expectedDescriptor.setChannel(1);
         expectedDescriptor.setSessionIdentifier("123");
-        expectedDescriptor.setKeyObjectStorage("S1A/123/ch01/D_123_ch01_D.RAW");
+        expectedDescriptor.setStationCode("WILE");
+        expectedDescriptor.setKeyObjectStorage("123/ch01/D_123_ch01_D.RAW");
         expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         
         final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(

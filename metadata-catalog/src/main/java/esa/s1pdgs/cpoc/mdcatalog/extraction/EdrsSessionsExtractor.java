@@ -37,7 +37,7 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
      * Pattern for ERDS session files to extract data
      */
     private final static String PATTERN_SESSION =
-            "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
+            "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
 
     @Autowired
     public EdrsSessionsExtractor(final EsServices esServices,
@@ -90,6 +90,13 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
         		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(this.localDirectory + productName))
         );
 
+        //FIXME uniform handling of metadata extraction
+        edrsFileDescriptor.setMissionId(message.getBody().getMissionId());
+        edrsFileDescriptor.setSatelliteId(message.getBody().getSatelliteId());
+        edrsFileDescriptor.setSessionIdentifier(message.getBody().getSessionId());
+        edrsFileDescriptor.setStationCode(message.getBody().getStationCode());
+        
+        
         final JSONObject obj = extractFromFile(
         		reportingFactory,
         		() -> mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor)

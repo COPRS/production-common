@@ -702,6 +702,7 @@ public class ExtractMetadata {
 					descriptor.getSessionIdentifier());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+			metadataJSONObject.put("stationCode", descriptor.getStationCode());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", DateUtils
 					.formatToMetadataDateTimeFormat(LocalDateTime.now()));
@@ -732,6 +733,7 @@ public class ExtractMetadata {
 					descriptor.getSessionIdentifier());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+			metadataJSONObject.put("stationCode", descriptor.getStationCode());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", DateUtils
 					.formatToMetadataDateTimeFormat(LocalDateTime.now()));
