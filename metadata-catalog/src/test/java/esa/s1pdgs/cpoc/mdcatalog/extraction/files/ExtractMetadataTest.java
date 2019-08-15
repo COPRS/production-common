@@ -10,11 +10,13 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
@@ -25,6 +27,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 
 /**
  * @author Olivier BEX-CHAUVET
@@ -33,8 +36,22 @@ public class ExtractMetadataTest {
 
     private ExtractMetadata extractor;
 
-    @Before
+    XmlConverter xmlConverter;
+    
+	private static String LOCAL_DIRECTORY = ExtractMetadataTest.class.getResource("/").getFile().concat("../../test/workDir").toString();
+
+	@Before
     public void init() {
+		xmlConverter = new XmlConverter();
+		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+		jaxb2Marshaller.setPackagesToScan("esa.s1pdgs.cpoc.mdcatalog.extraction.model");
+		Map<String, Object> map = new ConcurrentHashMap<String, Object>();
+		map.put("jaxb.formatted.output", true);
+		map.put("jaxb.encoding", "UTF-8");
+		jaxb2Marshaller.setMarshallerProperties(map);
+		xmlConverter.setMarshaller(jaxb2Marshaller);
+		xmlConverter.setUnmarshaller(jaxb2Marshaller);
+		
         // "EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"
         Map<String, Float> typeOverlap = new HashMap<String, Float>();
         typeOverlap.put("EW", 8.2F);
@@ -48,7 +65,7 @@ public class ExtractMetadataTest {
         typeSliceLength.put("SM", 25.0F);
         typeSliceLength.put("WV", 0.0F);
         extractor = new ExtractMetadata(typeOverlap, typeSliceLength,
-                "config/xsltDir/");
+                "config/xsltDir/", xmlConverter, LOCAL_DIRECTORY);
     }
 
     @Test
@@ -376,7 +393,7 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessSESSIONFile() {
         JSONObject expectedResult = new JSONObject(
-                "{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"SESSION1\",\"productName\":\"DCS_02_SESSION1_ch1_DSIB.xml\",\"satelliteId\":\"A\",\"productType\":\"SESSION\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\",\"productFamily\":\"EDRS_SESSION\"}");
+                "{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"SESSION1\",\"timeStart\":\"2017-12-13T14:59:48Z\",\"timeStop\":\"2017-12-13T15:17:25Z\",\"rawNames\":[],\"productName\":\"DCS_02_SESSION1_ch1_DSIB.xml\",\"satelliteId\":\"A\",\"productType\":\"SESSION\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\",\"productFamily\":\"EDRS_SESSION\"}");
 
         EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
         descriptor.setExtension(FileExtension.XML);
@@ -392,9 +409,9 @@ public class ExtractMetadataTest {
         descriptor.setChannel(1);
         descriptor.setSessionIdentifier("SESSION1");
         descriptor.setProductFamily(ProductFamily.EDRS_SESSION);
+        descriptor.setSessionIdentifier("sessionId");
         try {
             JSONObject result = extractor.processSESSIONFile(descriptor);
-
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -475,8 +492,7 @@ public class ExtractMetadataTest {
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
-            System.out.println(result);
-
+            
             assertNotNull("JSON object should not be null", result);
             assertEquals("linestring", result.getJSONObject("sliceCoordinates").getString("type"));
             assertEquals(new JSONArray("[108.5909,-62.2900]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").get(0).toString());
@@ -695,8 +711,6 @@ public class ExtractMetadataTest {
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
             
-            System.out.println(result);
-
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());

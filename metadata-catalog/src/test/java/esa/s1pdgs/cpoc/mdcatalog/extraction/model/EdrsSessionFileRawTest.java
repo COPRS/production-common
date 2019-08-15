@@ -1,10 +1,9 @@
-package esa.s1pdgs.cpoc.jobgenerator.model;
+package esa.s1pdgs.cpoc.mdcatalog.extraction.model;
 
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFileRaw;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

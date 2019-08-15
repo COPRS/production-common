@@ -177,7 +177,7 @@ public class MessagePublicationControllerTest {
     public void publishNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
         EdrsSessionDto dto = new EdrsSessionDto("obs-key", 1,
-                EdrsSessionFileType.RAW, "S1", "A", "WILE");
+                EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForNoPublication();
 
         thrown.expect(MqiCategoryNotAvailable.class);
@@ -191,7 +191,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishEdrsSessions() throws Exception {
         EdrsSessionDto dto = new EdrsSessionDto("obs-key", 2,
-                EdrsSessionFileType.RAW, "S1", "A", "WILE");
+                EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.EDRS_SESSIONS, dto, "NONE", "NONE");

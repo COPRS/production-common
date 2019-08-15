@@ -16,15 +16,14 @@ import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
-import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
+import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
@@ -33,28 +32,26 @@ import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
 public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
-    /**
-     * Service for EDRS session file
-     */
-    private final EdrsSessionFileService edrsService;
     
     /**
      * 
      */
     private String taskForFunctionalLog;
+    
+    private final MetadataService metadataService;
 
     public L0AppConsumer(
             final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
-            final EdrsSessionFileService edrsService,
             final StatusService mqiStatusService,
             final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
-            final AppStatus appStatus) {
+            final AppStatus appStatus,
+            final MetadataService metadataService) {
         super(jobDispatcher, processSettings, mqiService, mqiStatusService,
                 appDataService, appStatus, errorRepoAppender, ProductCategory.EDRS_SESSIONS);
-        this.edrsService = edrsService;
+        this.metadataService = metadataService; 
     }
 
     @SuppressWarnings("unchecked")
@@ -152,12 +149,11 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
-            EdrsSessionFile file = edrsService.createSessionFile(
-                    mqiMessage.getBody().getKeyObjectStorage());
+        	EdrsSessionMetadata edrsSessionMetadata = metadataService.getEdrsSession(mqiMessage.getBody().getProductType().name(), mqiMessage.getBody().getProductName());
 
             // Search if session is already in progress
             List<AppDataJobDto<EdrsSessionDto>> existingJobsForSession =
-                    appDataService.findByProductSessionId(file.getSessionId());
+                    appDataService.findByProductSessionId(mqiMessage.getBody().getSessionId());
 
             if (CollectionUtils.isEmpty(existingJobsForSession)) {
 
@@ -170,25 +166,22 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 jobDto.getMessages().add(mqiMessage);
                 // Product
                 AppDataJobProductDto productDto = new AppDataJobProductDto();
-                productDto.setSessionId(file.getSessionId());
+                productDto.setSessionId(mqiMessage.getBody().getSessionId());
                 productDto.setMissionId(mqiMessage.getBody().getMissionId());
                 productDto.setStationCode(mqiMessage.getBody().getStationCode());
-                productDto.setProductName(file.getSessionId());
+                productDto.setProductName(mqiMessage.getBody().getSessionId());
                 productDto
                         .setSatelliteId(mqiMessage.getBody().getSatelliteId());
-                productDto.setStartTime(DateUtils.convertToAnotherFormat(
-                        file.getStartTime(), EdrsSessionFile.TIME_FORMATTER,
-                        AppDataJobProductDto.TIME_FORMATTER));
-                productDto.setStopTime(DateUtils.convertToAnotherFormat(
-                        file.getStopTime(), EdrsSessionFile.TIME_FORMATTER,
-                        AppDataJobProductDto.TIME_FORMATTER));
+                productDto.setStartTime(edrsSessionMetadata.getStartTime());
+                productDto.setStopTime(edrsSessionMetadata.getStopTime());
+
                 if (mqiMessage.getBody().getChannelId() == 1) {
-                    productDto.setRaws1(file.getRawNames().stream().map(
-                            rawI -> new AppDataJobFileDto(rawI.getFileName()))
-                            .collect(Collectors.toList()));
+                    productDto.setRaws1(edrsSessionMetadata.getRawNames().stream().map(
+                            s -> new AppDataJobFileDto(s))
+                    		.collect(Collectors.toList()));
                 } else {
-                    productDto.setRaws2(file.getRawNames().stream().map(
-                            rawI -> new AppDataJobFileDto(rawI.getFileName()))
+                    productDto.setRaws2(edrsSessionMetadata.getRawNames().stream().map(
+                            s -> new AppDataJobFileDto(s))
                             .collect(Collectors.toList()));
                 }
 
@@ -219,15 +212,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                     jobDto.getMessages().add(mqiMessage);
                     if (mqiMessage.getBody().getChannelId() == 1) {
                         jobDto.getProduct()
-                                .setRaws1(file.getRawNames().stream()
-                                        .map(rawI -> new AppDataJobFileDto(
-                                                rawI.getFileName()))
+                                .setRaws1(edrsSessionMetadata.getRawNames().stream()
+                                        .map(s -> new AppDataJobFileDto(s))
                                         .collect(Collectors.toList()));
                     } else {
                         jobDto.getProduct()
-                                .setRaws2(file.getRawNames().stream()
-                                        .map(rawI -> new AppDataJobFileDto(
-                                                rawI.getFileName()))
+                                .setRaws2(edrsSessionMetadata.getRawNames().stream()
+                                        .map(s -> new AppDataJobFileDto(s))
                                         .collect(Collectors.toList()));
                     }
                     update = true;

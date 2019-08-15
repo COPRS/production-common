@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model;
+package esa.s1pdgs.cpoc.mdcatalog.extraction.model;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFile;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileRaw;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

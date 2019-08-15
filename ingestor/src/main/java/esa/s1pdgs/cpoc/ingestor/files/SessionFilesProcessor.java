@@ -38,7 +38,7 @@ public class SessionFilesProcessor extends AbstractFileProcessor<EdrsSessionDto>
 	@Override
 	protected EdrsSessionDto buildDto(final FileDescriptor descriptor) {
 		return new EdrsSessionDto(descriptor.getKeyObjectStorage(), descriptor.getChannel(),
-				descriptor.getProductType(), descriptor.getMissionId(), descriptor.getSatelliteId(), descriptor.getStationCode());
+				descriptor.getProductType(), descriptor.getMissionId(), descriptor.getSatelliteId(), descriptor.getStationCode(), descriptor.getSessionId());
 	}
 
 }

@@ -1,6 +1,8 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
+package esa.s1pdgs.cpoc.mdcatalog.extraction.model;
 
 import static org.junit.Assert.assertTrue;
+
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -18,7 +20,7 @@ public class EdrsSessionMetadataTest {
 	 */
 	@Test
 	public void testToString() {
-		EdrsSessionMetadata obj = new EdrsSessionMetadata("", "", "", "", "", "", "", "");
+		EdrsSessionMetadata obj = new EdrsSessionMetadata("", "", "", "", "", "", "", "", "", "", Collections.emptyList());
 		obj.setProductName("name");
 		obj.setProductType("type");
 		obj.setKeyObjectStorage("kobs");

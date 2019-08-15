@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -66,6 +67,9 @@ public class GenericExtractorTest {
      */
     @Mock
     protected AppStatus appStatus;
+    
+    @Mock
+    XmlConverter xmlConverter;
 
     /**
      * Extractor
@@ -107,7 +111,7 @@ public class GenericExtractorTest {
         extractor = new LevelProductsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath(),
-                "manifest.safe", errorAppender, config, ".safe");
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter);
     }
 
     /**

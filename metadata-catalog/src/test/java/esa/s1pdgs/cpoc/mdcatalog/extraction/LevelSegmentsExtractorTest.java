@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -93,6 +94,9 @@ public class LevelSegmentsExtractorTest {
     
     private final ProcessConfiguration config = new ProcessConfiguration();
 
+    @Mock
+    XmlConverter xmlConverter;
+    
     /**
      * Initialization
      * 
@@ -141,7 +145,7 @@ public class LevelSegmentsExtractorTest {
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath()
                         + File.separator,
-                "manifest.safe", errorAppender, config, ".safe");
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter);
     }
 
     @Test
@@ -175,7 +179,7 @@ public class LevelSegmentsExtractorTest {
 
         extractor = new LevelSegmentsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig, "./test/workDir2/",
-                "manifest.safe", errorAppender, config, ".safe");
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter);
         assertTrue((new File(
                 "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
                         .exists());

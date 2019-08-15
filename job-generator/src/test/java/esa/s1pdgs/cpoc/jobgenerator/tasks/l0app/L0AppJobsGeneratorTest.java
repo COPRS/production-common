@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,8 +39,6 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
-import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
-import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
@@ -47,6 +46,8 @@ import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 
@@ -266,16 +267,20 @@ public class L0AppJobsGeneratorTest {
                     return new EdrsSessionMetadata(productName, "RAW",
                             "S1A/L20171109175634707000125/ch01/" + productName,
                             null, null,
+                            null, null,
                             "S1",
                             "A",
-                            "WILE");
+                            "WILE",
+                            Collections.emptyList());
                 } else {
                     return new EdrsSessionMetadata(productName, "RAW",
                             "S1A/L20171109175634707000125/ch02/" + productName,
                             null, null,
+                            null, null,
                             "S1",
                             "A",
-                            "WILE");
+                            "WILE",
+                            Collections.emptyList());
                 }
             }).when(this.metadataService).getEdrsSession(Mockito.anyString(),
                     Mockito.anyString());

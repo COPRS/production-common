@@ -7,12 +7,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -30,13 +34,17 @@ import org.json.XML;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.WVFootPrintExtension;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileRaw;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 
 /**
  * Class to extract the metadata from various types of files
@@ -55,7 +63,7 @@ public class ExtractMetadata {
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
 	private static final String OUTPUT_XML = "tmp/output.xml";
 	private static final String OUTPUT_L0_SEGMENT_XML = "tmp/outputl0seg.xml";
-
+	
 	private final Map<ProductFamily, String> xsltMap;
 
 	/**
@@ -74,20 +82,27 @@ public class ExtractMetadata {
 	private Map<String, Float> typeSliceLength;
 
 	private String xsltDirectory;
-	
+
+	private final XmlConverter xmlConverter;
+
+	/**
+     * Local directory for configurations files
+     */
+    protected final String localDirectory;
 	 
 	private static final Logger LOGGER = LogManager.getLogger(ExtractMetadata.class);
 
 	/**
 	 * Constructor
 	 */
-	public ExtractMetadata(Map<String, Float> typeOverlap,
-			Map<String, Float> typeSliceLength, String xsltDirectory) {
+	public ExtractMetadata(final Map<String, Float> typeOverlap, final Map<String, Float> typeSliceLength,
+			final String xsltDirectory, final XmlConverter xmlConverter, final String localDirectory) {
 		this.transFactory = TransformerFactory.newInstance();
 		this.typeOverlap = typeOverlap;
 		this.typeSliceLength = typeSliceLength;
 		this.xsltDirectory = xsltDirectory;
-
+		this.xmlConverter = xmlConverter;
+		this.localDirectory = localDirectory;
 		this.xsltMap = new HashMap<>();
 		this.xsltMap.put(ProductFamily.L0_ACN, XSLT_L0_MANIFEST);
 		this.xsltMap.put(ProductFamily.L0_SLICE, XSLT_L0_MANIFEST);
@@ -281,7 +296,7 @@ public class ExtractMetadata {
 			throw new IllegalArgumentException("4 coordinates are expected");
 		}
 
-		// permutate ABCD to ABCDA
+		// permutate ABCD to ABCDAbuildEdrsSessionFileMetadata
 		final String[] aPoint = points[0].split(",");
 		final String aLatitude = aPoint[0];
 		final String aLongitude = aPoint[1];
@@ -722,8 +737,20 @@ public class ExtractMetadata {
 					.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
+			
+			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(localDirectory + File.separator + descriptor.getRelativePath());
+
+			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(
+					edrsSessionFile.getStartTime(), EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
+
+			metadataJSONObject.put("stopTime", DateUtils.convertToAnotherFormat(
+					edrsSessionFile.getStopTime(), EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
+
+			metadataJSONObject.put("rawNames", edrsSessionFile.getRawNames().stream().map(
+					r -> r.getFileName()).collect(Collectors.toList()));
+
 			return metadataJSONObject;
-		} catch (JSONException e) {
+		} catch (JSONException | IOException | JAXBException e) {
 			throw new MetadataExtractionException(e);
 		}
 	}
