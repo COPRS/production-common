@@ -85,7 +85,8 @@ public class IngestionService {
 		LOG.debug("received Ingestion: {}", ingestion.getProductName());
 
 		final Reporting reporting = reportingFactory
-				.product(ingestion.getFamily().toString(), ingestion.getProductName()).newReporting(0);
+				.product("not identified yet", ingestion.getProductName())
+				.newReporting(0);
 		reporting.reportStart("Start processing of " + ingestion.getProductName());
 
 		try {
@@ -142,7 +143,7 @@ public class IngestionService {
 			final Reporting reporting = reportingFactory
 					.product(product.getFamily().toString(), message.getBody().getProductName()).newReporting(3);
 
-			final ProductCategory category = ProductCategory.fromProductFamily(product.getFamily());
+			final ProductCategory category = ProductCategory.of(product.getFamily());
 			reporting.reportStart("Start publishing file " + message.getBody().getProductName() + " in topic");
 			try {
 				client.publish(result, category);
