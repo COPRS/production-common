@@ -10,4 +10,6 @@ public interface InboxAdapter {
 	public Collection<InboxEntry> read(final List<InboxFilter> filter);
 
 	public String description();
+	
+	public String inboxPath();
 }

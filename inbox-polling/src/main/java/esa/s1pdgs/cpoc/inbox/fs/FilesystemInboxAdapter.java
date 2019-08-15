@@ -74,6 +74,11 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	public String description() {
 		return "Inbox at file://" + inboxDirectory.getPath();
 	}
+	
+	@Override
+	public String inboxPath() {
+		return inboxDirectory.getPath();
+	}
 
 	@Override
 	public String toString() {

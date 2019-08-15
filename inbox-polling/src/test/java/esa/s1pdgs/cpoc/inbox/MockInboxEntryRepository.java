@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.inbox;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
@@ -24,5 +25,10 @@ class MockInboxEntryRepository extends AbstractInboxEntryRepository
 	
 	final void verify() throws AssertionError {
 		assertEquals(expectedSaves, saved.size());
+	}
+
+	@Override
+	public List<InboxEntry> findByPickupPath(String pickupPath) {
+		return Collections.emptyList();
 	}
 }
