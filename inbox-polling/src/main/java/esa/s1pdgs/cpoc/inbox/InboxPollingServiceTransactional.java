@@ -23,8 +23,8 @@ public class InboxPollingServiceTransactional {
 		this.repository = repository;
 	}	
 	
-	public Set<InboxEntry> getAll() {
-		return StreamSupport.stream(repository.findAll().spliterator(), false)
+	public Set<InboxEntry> getAllForPath(final String pickupPath) {
+		return StreamSupport.stream(repository.findByPickupPath(pickupPath).spliterator(), false)
 				.collect(Collectors.toCollection(HashSet::new));
 	}
 	

@@ -24,6 +24,11 @@ public class TestInbox {
 			public String description() {
 				return "fakeAdapter";
 			}
+
+			@Override
+			public String inboxPath() {
+				return "/tmp/MPS_/S1A";
+			}
 		};
 		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(2);
 		final MockSubmissionClient fakeKafkaClient = new MockSubmissionClient(2);
@@ -40,19 +45,25 @@ public class TestInbox {
 		final InboxAdapter fakeAdapter = new InboxAdapter() {
 			@Override
 			public Collection<InboxEntry> read(List<InboxFilter> filter) {
-				return Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp/MPS_/S1A", "S1", "A", "MPS_"),
-						new InboxEntry("foo2", "foo2", "/tmp/WILE/S1B", "S1", "B", "WILE"));
+				return Arrays.asList(
+						new InboxEntry("foo1", "foo1", "/tmp/MPS_/S1A", "S1", "A", "MPS_"),
+						new InboxEntry("foo2", "foo2", "/tmp/MPS_/S1A", "S1", "B", "WILE"));
 			}
 
 			@Override
 			public String description() {
 				return "fakeAdapter";
 			}
+			
+			@Override
+			public String inboxPath() {
+				return "/tmp/MPS_/S1A";
+			}
 		};
 		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(0) {
 			@Override
-			public Iterable<InboxEntry> findAll() {
-				return Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp/WILE/S1B", "S1", "B", "WILE"),
+			public List<InboxEntry> findByPickupPath(String pickupPath) {
+				return Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp/MPS_/S1A", "S1", "B", "WILE"),
 						new InboxEntry("foo1", "foo1", "/tmp/MPS_/S1A", "S1", "A", "MPS_"));
 			}
 		};

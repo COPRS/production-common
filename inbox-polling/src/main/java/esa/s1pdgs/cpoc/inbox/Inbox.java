@@ -31,7 +31,8 @@ public final class Inbox {
 	public final void poll() {
 		try {
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(filter));
-			final Set<InboxEntry> persistedContent = inboxPollingServiceTransactional.getAll();
+			final Set<InboxEntry> persistedContent = inboxPollingServiceTransactional
+					.getAllForPath(inboxAdapter.inboxPath());
 
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
 			newElements.removeAll(persistedContent);
