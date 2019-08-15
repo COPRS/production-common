@@ -51,6 +51,15 @@ public class RequestRepositoryController {
 		assertValidApiKey(apiKey);
 		return requestRepository.getFailedProcessings();
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, path = "failedProcessings/count")
+	public Long getFailedProcessingsCount(
+			@RequestHeader(name="ApiKey", required=true) final String apiKey
+	) {
+		LOGGER.info("get failed processings count");
+		assertValidApiKey(apiKey);
+		return requestRepository.getFailedProcessingsCount();
+	}
 
 	/**
 	 * Gets the failed processing by Id

@@ -9,6 +9,6 @@ import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 public interface FailedProcessingRepo extends MongoRepository<FailedProcessing, Long>{
 
 	public FailedProcessing findById(long id);
-	
+
 	public void deleteById(long id);
 }

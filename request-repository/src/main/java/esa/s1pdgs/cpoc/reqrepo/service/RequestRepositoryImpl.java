@@ -50,6 +50,11 @@ public class RequestRepositoryImpl implements RequestRepository {
 	public List<FailedProcessing> getFailedProcessings() {
 		return failedProcessingRepo.findAll(Sort.by(Direction.ASC, "creationTime"));
 	}
+	
+	@Override
+	public long getFailedProcessingsCount() {
+		return failedProcessingRepo.count();
+	}
 
 	@Override
 	public FailedProcessing getFailedProcessingById(long id) {

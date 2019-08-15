@@ -36,4 +36,6 @@ public interface RequestRepository {
 	void restartAndDeleteFailedProcessing(long id);
 
 	void deleteFailedProcessing(long id);
+
+	long getFailedProcessingsCount();
 }

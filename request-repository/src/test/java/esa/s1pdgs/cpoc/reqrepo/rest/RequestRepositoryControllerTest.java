@@ -274,4 +274,14 @@ public class RequestRepositoryControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(content().string("42"));
 	}
+	
+	@Test
+	public void test_countFailedProcessings() throws Exception {
+		doReturn(23L).when(requestRepository).getFailedProcessingsCount();		
+		uut.perform(get("/api/v1/failedProcessings/count")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("ApiKey",API_KEY))
+			.andExpect(status().isOk())
+			.andExpect(content().string("23"));
+	}
 }
