@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import esa.s1pdgs.cpoc.jobgenerator.config.AppConfig;
+import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
@@ -28,8 +29,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFile;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 
 /**
  * Test XML conversion and mapping

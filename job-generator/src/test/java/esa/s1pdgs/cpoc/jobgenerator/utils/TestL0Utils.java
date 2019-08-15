@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.jobgenerator.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
@@ -13,6 +12,8 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoS
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFile;
+import esa.s1pdgs.cpoc.jobgenerator.model.EdrsSessionFileRaw;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
@@ -20,8 +21,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFile;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileRaw;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 

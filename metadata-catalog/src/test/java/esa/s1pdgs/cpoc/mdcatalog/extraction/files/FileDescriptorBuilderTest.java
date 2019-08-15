@@ -110,24 +110,22 @@ public class FileDescriptorBuilderTest {
         expectedResult.setFilename(
                 "DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         expectedResult.setKeyObjectStorage(
-                "S1B/512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
-        expectedResult.setMissionId("S1");
-        expectedResult.setSatelliteId("B");
+                "512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         expectedResult.setProductName(
                 "DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         expectedResult.setEdrsSessionFileType(EdrsSessionFileType.RAW);
         expectedResult.setRelativePath(
-                "S1B/512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
+                "512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         expectedResult.setChannel(2);
         expectedResult.setSessionIdentifier("512000176");
 
         File file = new File(
-                "test/workDir/S1B/512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
+                "test/workDir/512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
 
         fileDescriptorBuilder = new FileDescriptorBuilder(
                 Paths.get("").toAbsolutePath() + "/test/workDir/",
                 Pattern.compile(
-                        "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
+                        "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
                         Pattern.CASE_INSENSITIVE));
         try {
             EdrsSessionFileDescriptor result =
@@ -142,25 +140,26 @@ public class FileDescriptorBuilderTest {
 
         expectedResult = new EdrsSessionFileDescriptor();
         expectedResult.setExtension(FileExtension.XML);
-        expectedResult.setFilename("DCS_02_SESSION1_ch1_DSIB.xml");
+        expectedResult.setFilename("DCS_02_L20180724144436762001030_ch1_DSIB.xml");
         expectedResult.setKeyObjectStorage(
-                "S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml");
-        expectedResult.setMissionId("S1");
-        expectedResult.setSatelliteId("A");
-        expectedResult.setProductName("DCS_02_SESSION1_ch1_DSIB.xml");
+                "L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+    
+
+        expectedResult.setProductName("DCS_02_L20180724144436762001030_ch1_DSIB.xml");
         expectedResult.setEdrsSessionFileType(EdrsSessionFileType.SESSION);
         expectedResult.setRelativePath(
-                "S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml");
+                "L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
         expectedResult.setChannel(1);
-        expectedResult.setSessionIdentifier("SESSION1");
+        expectedResult.setSessionIdentifier("L20180724144436762001030");
 
         file = new File(
-                "test/workDir/S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml");
+                "test/workDir/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+    
 
         fileDescriptorBuilder = new FileDescriptorBuilder(
                 Paths.get("").toAbsolutePath() + "/test/workDir/",
                 Pattern.compile(
-                        "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
+                        "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
                         Pattern.CASE_INSENSITIVE));
         try {
             EdrsSessionFileDescriptor result =
@@ -170,6 +169,7 @@ public class FileDescriptorBuilderTest {
             assertEquals("File descriptor are not equals",
                     expectedResult.toString(), result.toString());
         } catch (AbstractCodedException fe) {
+        	fe.printStackTrace();
             fail("Exception occurred: " + fe.getMessage());
         }
     }
