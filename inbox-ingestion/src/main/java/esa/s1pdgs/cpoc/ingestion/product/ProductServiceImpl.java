@@ -34,10 +34,7 @@ public class ProductServiceImpl implements ProductService {
 			throws ProductException, InternalErrorException {
 		final File file = toFile(ingestion);		
 		assertPermissions(ingestion, file);
-		final ProductFactory<E> productFactory = ProductFactory.newProductFactoryFor(
-				family, 
-				ProductCategory.of(family).getDtoClass()
-		);
+		final ProductFactory<E> productFactory = ProductFactory.newProductFactoryFor(family);
 		LOG.debug("Using {} for {}", productFactory, family);
 		
 		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()));

@@ -11,7 +11,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 public interface ProductFactory<E extends AbstractDto> {
 	
     @SuppressWarnings("unchecked")
-	public static <E extends AbstractDto> ProductFactory<E> newProductFactoryFor(final ProductFamily family, final Class<E> dtoType)
+	public static <E extends AbstractDto> ProductFactory<E> newProductFactoryFor(final ProductFamily family)
     {
     	if (family == ProductFamily.AUXILIARY_FILE) {
     		return (ProductFactory<E>) new AuxiliaryProductFactory();
