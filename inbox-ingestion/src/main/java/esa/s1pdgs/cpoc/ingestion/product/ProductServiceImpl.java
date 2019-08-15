@@ -36,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
 		assertPermissions(ingestion, file);
 		final ProductFactory<E> productFactory = ProductFactory.newProductFactoryFor(
 				family, 
-				ProductCategory.fromProductFamily(family).getDtoClass()
+				ProductCategory.of(family).getDtoClass()
 		);
 		LOG.debug("Using {} for {}", productFactory, family);
 		
