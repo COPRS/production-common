@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdcatalog.extraction.model;
+package esa.s1pdgs.cpoc.jobgenerator.model;
 
 import java.util.Objects;
 
