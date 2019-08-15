@@ -22,7 +22,6 @@ public class EdrsSessionFactoryTest {
 		Assert.assertEquals(1, uut.extractChannelId(RELATIVE_PATH_2));
 		Assert.assertEquals(2, uut.extractChannelId(RELATIVE_PATH_3));
 		Assert.assertEquals(2, uut.extractChannelId(RELATIVE_PATH_4));
-
 	}
 
 	@Test
@@ -35,6 +34,16 @@ public class EdrsSessionFactoryTest {
 	}
 	
 	@Test
+	public void extractSessionId() {
+
+		EdrsSessionFactory uut = new EdrsSessionFactory();
+		Assert.assertEquals("L20180724144436762001030", uut.extractSessionId(RELATIVE_PATH_1));
+		Assert.assertEquals("L20180724144436762001030", uut.extractSessionId(RELATIVE_PATH_2));
+		Assert.assertEquals("L20180724144436762001030", uut.extractSessionId(RELATIVE_PATH_3));
+		Assert.assertEquals("L20180724144436762001030", uut.extractSessionId(RELATIVE_PATH_4));
+	}
+	
+	@Test
 	public void testRegexFrom() {
 		String regex = "(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))";
 		
@@ -42,6 +51,11 @@ public class EdrsSessionFactoryTest {
 	    Assert.assertTrue(Pattern.matches(regex, RELATIVE_PATH_2));
 	    Assert.assertTrue(Pattern.matches(regex, RELATIVE_PATH_3));
 	    Assert.assertTrue(Pattern.matches(regex, RELATIVE_PATH_4));
+	    
+	    Assert.assertTrue(Pattern.matches(EdrsSessionFactory.PATTERN_STR_RAW, RELATIVE_PATH_1));
+	    Assert.assertTrue(Pattern.matches(EdrsSessionFactory.PATTERN_STR_XML, RELATIVE_PATH_2));
+	    Assert.assertTrue(Pattern.matches(EdrsSessionFactory.PATTERN_STR_RAW, RELATIVE_PATH_3));
+	    Assert.assertTrue(Pattern.matches(EdrsSessionFactory.PATTERN_STR_XML, RELATIVE_PATH_4));
 	}
 
 }
