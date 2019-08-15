@@ -135,22 +135,23 @@ public class FileDescriptorBuilder {
 		if (file.isDirectory()) {
 			throw new MetadataIgnoredFileException(file.getName());
 		}
-
 		Matcher m = pattern.matcher(relativePath);
 		if (m.matches()) {
 			EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
-			descriptor.setFilename(m.group(9));
+			descriptor.setFilename(m.group(6));
 			descriptor.setRelativePath(relativePath);
-			descriptor.setProductName(m.group(9));
-			descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(12)));
+			descriptor.setProductName(m.group(6));
+			descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(9)));
 			descriptor.setEdrsSessionFileType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));
-			descriptor.setMissionId(m.group(1));
-			descriptor.setSatelliteId(m.group(2));
-			descriptor.setChannel(Integer.parseInt(m.group(7)));
-			descriptor.setSessionIdentifier(m.group(4));
+//			descriptor.setMissionId(m.group(1));
+//			descriptor.setSatelliteId(m.group(2));
+			descriptor.setChannel(Integer.parseInt(m.group(4)));
+			descriptor.setSessionIdentifier(m.group(1));
 			descriptor.setKeyObjectStorage(relativePath);
 			descriptor.setProductFamily(ProductFamily.EDRS_SESSION);
-
+			
+				
+			
 			return descriptor;
 		} else {
 			throw new MetadataFilePathException(relativePath, "SESSION",

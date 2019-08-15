@@ -46,8 +46,13 @@ public class EdrsSessionFactoryTest {
 	@Test
 	public void testRegexFrom() {
 		String regex = "(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))";
+		String regex2= "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(xml|raw))$";
+		String regex3= ".*(DCS_[0-9]{2}_([a-zA-Z0-9_]{24})_ch([12])_DSIB\\.(xml))";
 		
-	    Assert.assertTrue(Pattern.matches(regex, RELATIVE_PATH_1));
+	    Assert.assertTrue(Pattern.matches(regex, "SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml"));
+	    Assert.assertTrue(Pattern.matches(regex2, "L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"));
+	    Assert.assertTrue(Pattern.matches(regex3, "L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"));
+	    
 	    Assert.assertTrue(Pattern.matches(regex, RELATIVE_PATH_2));
 	    Assert.assertTrue(Pattern.matches(regex, RELATIVE_PATH_3));
 	    Assert.assertTrue(Pattern.matches(regex, RELATIVE_PATH_4));
