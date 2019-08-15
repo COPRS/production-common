@@ -3,12 +3,16 @@ package esa.s1pdgs.cpoc.obs_sdk.swift;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +28,7 @@ public class SwiftObsClientIT {
 	public final static String testFileName1 = "testfile1.txt";
 	public final static String testFileName2 = "testfile2.txt";
 	public final static File testFile1 = getResource("/" + testFileName1);
+	public final static File testFile2 = getResource("/" + testFileName2);
 	
 	AbstractObsClient uut;
 	
@@ -162,5 +167,31 @@ public class SwiftObsClientIT {
 		int count = ((SwiftObsClient)uut).numberOfObjects(auxiliaryFiles, testFilePrefix);
 		assertEquals(2, count);
 	}
-
+	
+	@Test
+	public final void getAllAsStreamTest() throws Exception {
+		assertFalse(uut.exist(auxiliaryFiles, testFilePrefix + testFileName1));
+		assertFalse(uut.exist(auxiliaryFiles, testFilePrefix + testFileName2));
+		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName1, testFile1);
+		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName2, testFile2);
+		assertTrue(uut.exist(auxiliaryFiles, testFilePrefix + testFileName1));
+		assertTrue(uut.exist(auxiliaryFiles, testFilePrefix + testFileName2));
+		
+		final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix);
+		for (final Map.Entry<String,InputStream> entry : res.entrySet()) {
+			try (final InputStream in = entry.getValue()) {
+				final String content = IOUtils.toString(in);
+				
+				if ("abc/def/testfile1.txt".equals(entry.getKey())) {
+					assertEquals("test", content);
+				}
+				else if ("abc/def/testfile2.txt".equals(entry.getKey())) {
+					assertEquals("test2", content);
+				}
+				else {
+					fail();
+				}
+			}
+		}
+	}
 }

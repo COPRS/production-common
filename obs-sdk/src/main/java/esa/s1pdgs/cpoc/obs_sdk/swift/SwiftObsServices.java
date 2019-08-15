@@ -3,8 +3,10 @@ package esa.s1pdgs.cpoc.obs_sdk.swift;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -13,9 +15,6 @@ import org.javaswift.joss.instructions.UploadInstructions;
 import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
-
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 public class SwiftObsServices {
 
@@ -427,11 +426,27 @@ public class SwiftObsServices {
 		}
 	}
 	
+	private final Iterable<StoredObject> getAll(final String bucketName, final String prefix) {				
+		final List<StoredObject> result = new ArrayList<>(); 
+		String marker = "";
+		while (true) {			
+			Collection<StoredObject> batch = client.getContainer(bucketName).list(prefix, marker, MAX_RESULTS_PER_LIST);
+			for (final StoredObject thisObject : batch) {
+				result.add(thisObject);		
+				marker = thisObject.getName();
+			}
+			if (batch.size() != MAX_RESULTS_PER_LIST) {
+				break;
+			}
+		}
+		return result;		
+	}
+	
     public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) {       	
     	final Map<String, InputStream> result = new LinkedHashMap<>();    	
     	String lastNonSegmentName = "";
     	
-    	for (final StoredObject object : client.getContainer(bucketName).list(prefix, "", Integer.MAX_VALUE)) {
+    	for (final StoredObject object : getAll(bucketName, prefix)) {
     		final String key = object.getName();
     		
 			// Skip segment files (all files that have a sub directory like naming scheme with a direct parent that 
@@ -444,7 +459,7 @@ public class SwiftObsServices {
 				continue;
 			}			
 			lastNonSegmentName = key;			
-			result.put(key, object.getAsObject().downloadObjectAsInputStream());
+			result.put(key, object.getAsObject().downloadObjectAsInputStream());			
     	}
     	return result; 
     }
