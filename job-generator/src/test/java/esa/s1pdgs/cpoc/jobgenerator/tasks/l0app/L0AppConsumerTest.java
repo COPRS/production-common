@@ -1,3 +1,5 @@
+// FIXME: Get Test running again
+
 //package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 //
 //import static org.junit.Assert.assertEquals;
@@ -27,13 +29,11 @@
 //import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 //import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 //import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-//import esa.s1pdgs.cpoc.jobgenerator.service.EdrsSessionFileService;
+//import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 //import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 //import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 //import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 //import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
-//import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFile;
-//import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileRaw;
 //import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 //import esa.s1pdgs.cpoc.mqi.client.StatusService;
 //import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
@@ -46,12 +46,6 @@
 //
 //    @Mock
 //    protected ProcessSettings processSettings;
-//
-//    /**
-//     * Service for EDRS session file
-//     */
-//    @Mock
-//    private EdrsSessionFileService edrsSessionFileService;
 //
 //    @Mock
 //    private GenericMqiClient mqiService;
@@ -68,17 +62,20 @@
 //
 //    @Mock
 //    private JobStatus jobStatus;
+//    
+//    @Mock
+//    private MetadataService metadataService;
 //
 //    private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 //
 //    private EdrsSessionDto dto1 = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1,
-//            EdrsSessionFileType.SESSION, "S1", "A", "WILE");
+//            EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
 //    private EdrsSessionDto dto2 = new EdrsSessionDto("KEY_OBS_SESSION_1_2", 2,
-//            EdrsSessionFileType.SESSION, "S1", "A", "WILE");
+//            EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
 //    private EdrsSessionDto dto3 = new EdrsSessionDto("KEY_OBS_SESSION_2_1", 1,
-//            EdrsSessionFileType.SESSION, "S1", "A", "WILE");
+//            EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
 //    private EdrsSessionDto dto4 = new EdrsSessionDto("KEY_OBS_SESSION_2_2", 2,
-//            EdrsSessionFileType.SESSION, "S1", "A", "WILE");
+//            EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
 //    private GenericMessageDto<EdrsSessionDto> message1 =
 //            new GenericMessageDto<EdrsSessionDto>(1, "", dto1);
 //    private GenericMessageDto<EdrsSessionDto> message2 =
@@ -96,7 +93,7 @@
 //    @Before
 //    public void setUp() throws Exception {
 //
-//        // Mcokito
+//        // Mockito
 //        MockitoAnnotations.initMocks(this);
 //
 //        this.mockProcessSettings();
@@ -110,38 +107,6 @@
 //            }
 //            return true;
 //        }).when(jobsDispatcher).dispatch(Mockito.any());
-//
-//        // Mock the dispatcher
-//        Mockito.doAnswer(i -> {
-//            return TestL0Utils.createEdrsSessionFileChannel1(true);
-//        }).when(edrsSessionFileService)
-//                .createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"));
-//        Mockito.doAnswer(i -> {
-//            return TestL0Utils.createEdrsSessionFileChannel2(true);
-//        }).when(edrsSessionFileService)
-//                .createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_2"));
-//        Mockito.doAnswer(i -> {
-//            EdrsSessionFile r = new EdrsSessionFile();
-//            r.setSessionId("SESSION_2");
-//            r.setStartTime("2017-12-11T14:22:37Z");
-//            r.setStopTime("2017-12-11T14:42:25Z");
-//            r.setRawNames(Arrays.asList(
-//                    new EdrsSessionFileRaw("file1.raw", "file1.raw"),
-//                    new EdrsSessionFileRaw("file2.raw", "file2.raw")));
-//            return r;
-//        }).when(edrsSessionFileService)
-//                .createSessionFile(Mockito.eq("KEY_OBS_SESSION_2_1"));
-//        Mockito.doAnswer(i -> {
-//            EdrsSessionFile r = new EdrsSessionFile();
-//            r.setSessionId("SESSION_2");
-//            r.setStartTime("2017-12-11T14:22:37Z");
-//            r.setStopTime("2017-12-11T14:42:25Z");
-//            r.setRawNames(Arrays.asList(
-//                    new EdrsSessionFileRaw("file1.raw", "file1.raw"),
-//                    new EdrsSessionFileRaw("file2.raw", "file2.raw")));
-//            return r;
-//        }).when(edrsSessionFileService)
-//                .createSessionFile(Mockito.eq("KEY_OBS_SESSION_2_2"));
 //
 //        // Mock the MQI service
 //        doReturn(message1, message2, message3, message4).when(mqiService)
@@ -206,8 +171,8 @@
 //                .next(Mockito.any());
 //
 //        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
-//                processSettings, mqiService, edrsSessionFileService,
-//                mqiStatusService, appDataService, errorAppender, appStatus);
+//                processSettings, mqiService, mqiStatusService, appDataService,
+//                errorAppender, appStatus, metadataService);
 //
 //        // Job<EdrsSession> job = new Job<EdrsSession>(session.getSessionId(),
 //        // session.getStartTime(), session.getStartTime(), session);
@@ -242,48 +207,40 @@
 //    @Test
 //    public void testReceiveRaw() throws Exception {
 //        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
-//                processSettings, mqiService, edrsSessionFileService,
-//                mqiStatusService, appDataService,errorAppender, appStatus);
+//                processSettings, mqiService, mqiStatusService, appDataService,
+//                errorAppender, appStatus, metadataService);
 //        doReturn(new GenericMessageDto<EdrsSessionDto>(1, "",
 //                new EdrsSessionDto("KEY_OBS_SESSION_2_2", 2,
-//                        EdrsSessionFileType.RAW, "S1", "A", "WILE"))).when(mqiService)
+//                        EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId"))).when(mqiService)
 //                                .next(Mockito.any());
 //        edrsSessionsConsumer.consumeMessages();
-//        Mockito.verify(edrsSessionFileService, never())
-//                .createSessionFile(Mockito.anyString());
 //        Mockito.verify(jobsDispatcher, never()).dispatch(Mockito.any());
 //    }
 //
 //    @Test
 //    public void testReceivedSameMessageTwice() throws Exception {
 //        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
-//                processSettings, mqiService, edrsSessionFileService,
-//                mqiStatusService, appDataService, errorAppender, appStatus);
+//                processSettings, mqiService, mqiStatusService, appDataService,
+//                errorAppender, appStatus, metadataService);
 //        doReturn(message1, message1).when(mqiService).next(Mockito.any());
 //
 //        edrsSessionsConsumer.consumeMessages();
 //        Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
-//        Mockito.verify(edrsSessionFileService, times(1))
-//                .createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"));
 //
 //        edrsSessionsConsumer.consumeMessages();
 //        Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
-//        Mockito.verify(edrsSessionFileService, times(2))
-//                .createSessionFile(Mockito.eq("KEY_OBS_SESSION_1_1"));
 //    }
 //
 //    @Test
 //    public void testReceivedInvalidProductChannel() throws Exception {
 //        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
-//                processSettings, mqiService, edrsSessionFileService,
-//                mqiStatusService, appDataService, errorAppender, appStatus);
+//                processSettings, mqiService, mqiStatusService, appDataService,
+//                errorAppender, appStatus, metadataService);
 //        dto1.setChannelId(3);
 //        doReturn(message1).when(mqiService).next(Mockito.any());
 //
 //        edrsSessionsConsumer.consumeMessages();
 //        Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
-//        Mockito.verify(edrsSessionFileService, Mockito.never())
-//                .createSessionFile(Mockito.any());
 //    }
 //
 //    @Test
@@ -291,7 +248,7 @@
 //            throws AbstractCodedException {
 //
 //        EdrsSessionDto dto = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1,
-//                EdrsSessionFileType.SESSION, "S1", "A", "WILE");
+//                EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
 //        GenericMessageDto<EdrsSessionDto> message =
 //                new GenericMessageDto<EdrsSessionDto>(123, "", dto);
 //
@@ -301,8 +258,8 @@
 //                .findByMessagesIdentifier(Mockito.anyLong());
 //
 //        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
-//                processSettings, mqiService, edrsSessionFileService,
-//                mqiStatusService, appDataService, errorAppender, appStatus);
+//                processSettings, mqiService, mqiStatusService, appDataService,
+//                errorAppender, appStatus, metadataService);
 //
 //        AppDataJobDto<EdrsSessionDto> result = edrsSessionsConsumer.buildJob(message);
 //        verify(appDataService, never()).patchJob(Mockito.anyLong(),
@@ -316,7 +273,7 @@
 //            throws AbstractCodedException {
 //
 //        EdrsSessionDto dto = new EdrsSessionDto("KEY_OBS_SESSION_1_1", 1,
-//                EdrsSessionFileType.SESSION, "S1", "A", "WILE");
+//                EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
 //        GenericMessageDto<EdrsSessionDto> message =
 //                new GenericMessageDto<EdrsSessionDto>(123, "", dto);
 //
@@ -330,8 +287,8 @@
 //                .findByMessagesIdentifier(Mockito.anyLong());
 //
 //        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
-//                processSettings, mqiService, edrsSessionFileService,
-//                mqiStatusService, appDataService, errorAppender, appStatus);
+//                processSettings, mqiService, mqiStatusService, appDataService,
+//                errorAppender, appStatus, metadataService);
 //
 //        AppDataJobDto<EdrsSessionDto> result =
 //                edrsSessionsConsumer.buildJob(message);
@@ -344,13 +301,8 @@
 //    @Test
 //    public void testBuildWhenMessageIdNotExistNewRaw()
 //            throws AbstractCodedException {
-//
-//        Mockito.doAnswer(i -> {
-//            return TestL0Utils.createEdrsSessionFileChannel1(true);
-//        }).when(edrsSessionFileService).createSessionFile(Mockito.eq("obs1"));
-//
-//        EdrsSessionDto dto = new EdrsSessionDto("obs1", 1,
-//                EdrsSessionFileType.SESSION, "S1", "A", "WILE");
+//    	EdrsSessionDto dto = new EdrsSessionDto("obs1", 1,
+//                EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
 //        GenericMessageDto<EdrsSessionDto> message =
 //                new GenericMessageDto<EdrsSessionDto>(123, "", dto);
 //
@@ -365,8 +317,8 @@
 //                .findByProductSessionId(Mockito.anyString());
 //
 //        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
-//                processSettings, mqiService, edrsSessionFileService,
-//                mqiStatusService, appDataService, errorAppender, appStatus);
+//                processSettings, mqiService, mqiStatusService, appDataService,
+//                errorAppender, appStatus, metadataService);
 //
 //        AppDataJobDto<EdrsSessionDto> result =
 //                edrsSessionsConsumer.buildJob(message);
@@ -384,13 +336,8 @@
 //    @Test
 //    public void testBuildWhenMessageIdNotExistHostnameDifeerentAllRaw()
 //            throws AbstractCodedException {
-//
-//        Mockito.doAnswer(i -> {
-//            return TestL0Utils.createEdrsSessionFileChannel1(true);
-//        }).when(edrsSessionFileService).createSessionFile(Mockito.eq("obs1"));
-//
 //        EdrsSessionDto dto = new EdrsSessionDto("obs1", 1,
-//                EdrsSessionFileType.SESSION, "S1", "A", "WILE");
+//                EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
 //        GenericMessageDto<EdrsSessionDto> message =
 //                new GenericMessageDto<EdrsSessionDto>(123, "", dto);
 //
@@ -406,8 +353,8 @@
 //                .findByProductSessionId(Mockito.anyString());
 //
 //        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
-//                processSettings, mqiService, edrsSessionFileService,
-//                mqiStatusService, appDataService, errorAppender, appStatus);
+//                processSettings, mqiService, mqiStatusService, appDataService,
+//                errorAppender, appStatus, metadataService);
 //
 //        AppDataJobDto<EdrsSessionDto> result =
 //                edrsSessionsConsumer.buildJob(message);
