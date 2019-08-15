@@ -101,6 +101,14 @@ public class RequestRepositoryImpl implements RequestRepository {
 		return toExternal(mqiMessageRepository.findByStateInAndTopicIn(states, topics, pageable).getContent());
 	}
 	
+	@Override
+	public long getProcessingsCount(List<String> processingTypes, List<MessageState> processingStatus) {
+		final List<String> topics = processingTypes == null || processingTypes.isEmpty() ? PROCESSING_TYPES_LIST : processingTypes;
+		final List<MessageState> states = processingStatus.isEmpty() ? PROCESSING_STATE_LIST : processingStatus;
+
+		return mqiMessageRepository.countByStateInAndTopicIn(states, topics);
+	}
+
 	private final List<Processing> toExternal(final List<MqiMessage> messages)	{
 		if (messages == null)
 		{

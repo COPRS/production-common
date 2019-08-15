@@ -17,5 +17,7 @@ public interface MqiMessageRepo extends MongoRepository<MqiMessage, Long> {
 	
 	List<MqiMessage> findByStateInAndTopicInOrderByCreationDate(List<MessageState> states, List<String> topics);
 	
+	long countByStateInAndTopicIn(List<MessageState> states, List<String> topics);
+	
 	Page<MqiMessage> findByStateInAndTopicIn(List<MessageState> states, List<String> topics, Pageable pageable);	
 }

@@ -149,6 +149,17 @@ public class RequestRepositoryController {
 		return requestRepository.getProcessings(pageSize, pageNumber, processingType, toMessageStates(processingStatus));
     }
 	
+	@RequestMapping(method = RequestMethod.GET, path = "processings/count")
+	public Long getProcessingsCount(
+			@RequestHeader(value="ApiKey") final String apiKey,
+			@RequestParam(value = "processingType", required = false) final List<String> processingType,
+			@RequestParam(value = "processingStatus", required = false) final List<String> processingStatus
+	) {		
+		LOGGER.info("get processings count");
+		assertValidApiKey(apiKey);		
+		return requestRepository.getProcessingsCount(processingType, toMessageStates(processingStatus));
+    }
+	
 	static final List<MessageState> toMessageStates(final List<String> processingStatus)
 	{
 		if (processingStatus == null)

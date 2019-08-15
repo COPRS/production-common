@@ -22,6 +22,8 @@ public interface RequestRepository {
 	List<String> getProcessingTypes();
 	
 	List<Processing> getProcessings(Integer pageSize, Integer pageNumber, List<String> processingType, List<MessageState> processingStatus);
+	
+	long getProcessingsCount(List<String> processingType, List<MessageState> processingStatus);
 
 	Processing getProcessing(long id);
 

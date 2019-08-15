@@ -242,6 +242,38 @@ public class TestMqiMessageRepo {
     	uut.deleteAll();
     }
     
+    @Test
+    public final void testCountByStateInAndTopicIn_NoConstraint_ShallReturnAll() throws Exception
+    {
+    	ops.insert(newMqiMessage(1));    
+    	ops.insert(newMqiMessage(2));  
+    	ops.insert(newMqiMessage(3));  
+    	assertEquals(3L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, RequestRepository.PROCESSING_TYPES_LIST));
+    	uut.deleteAll();
+    	assertEquals(0L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, RequestRepository.PROCESSING_TYPES_LIST));
+    }
+    
+    @Test
+    public final void testCountByStateInAndTopicIn_ConstraintOnExistingType_ShallReturnAll() throws Exception
+    {
+    	ops.insert(newMqiMessage(1));    
+    	ops.insert(newMqiMessage(2));  
+    	ops.insert(newMqiMessage(3));  
+    	assertEquals(3L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, Collections.singletonList("t-pdgs-l0-segments")));
+    	uut.deleteAll();
+    }
+    
+    @Test
+    public final void testCountByStateInAndTopicIn_ConstraintOnNonExistingType_ShallReturnNone() throws Exception
+    {
+    	ops.insert(newMqiMessage(1));    
+    	ops.insert(newMqiMessage(2));  
+    	ops.insert(newMqiMessage(3));  
+    	assertEquals(0L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, Collections.singletonList("foo")));
+    	uut.deleteAll();
+    }
+    
+    
     private final MqiMessage newMqiMessage(long id) throws InterruptedException
     {
     	final MqiMessage proc = new MqiMessage();

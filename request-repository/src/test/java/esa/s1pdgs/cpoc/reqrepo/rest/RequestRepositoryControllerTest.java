@@ -265,5 +265,13 @@ public class RequestRepositoryControllerTest {
 				API_KEY)).andExpect(status().isInternalServerError());
 	}
 	
-
+	@Test
+	public void test_countProcessings() throws Exception {
+		doReturn(42L).when(requestRepository).getProcessingsCount(Mockito.any(), Mockito.any());		
+		uut.perform(get("/api/v1/processings/count")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("ApiKey",API_KEY))
+			.andExpect(status().isOk())
+			.andExpect(content().string("42"));
+	}
 }
