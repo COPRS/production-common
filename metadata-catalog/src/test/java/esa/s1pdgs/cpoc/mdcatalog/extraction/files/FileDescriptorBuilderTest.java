@@ -140,20 +140,20 @@ public class FileDescriptorBuilderTest {
 
         expectedResult = new EdrsSessionFileDescriptor();
         expectedResult.setExtension(FileExtension.XML);
-        expectedResult.setFilename("DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+        expectedResult.setFilename("DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         expectedResult.setKeyObjectStorage(
-                "L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+                "L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
     
 
-        expectedResult.setProductName("DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+        expectedResult.setProductName("DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         expectedResult.setEdrsSessionFileType(EdrsSessionFileType.SESSION);
         expectedResult.setRelativePath(
-                "L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+                "L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         expectedResult.setChannel(1);
         expectedResult.setSessionIdentifier("L20180724144436762001030");
 
-        file = new File(
-                "test/workDir/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+        file = new File(                                    
+                "test/workDir/L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
     
 
         fileDescriptorBuilder = new FileDescriptorBuilder(

@@ -7,12 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,15 +32,13 @@ import org.json.XML;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.WVFootPrintExtension;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileRaw;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 
@@ -740,7 +736,10 @@ public class ExtractMetadata {
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
 			
-			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(localDirectory + File.separator + descriptor.getRelativePath());
+			
+			//FIXME it should be downloaded to proper path
+			String dsibRelativePath = descriptor.getProductFamily().toString().toLowerCase()+ File.separator+descriptor.getFilename();
+			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(localDirectory + File.separator + dsibRelativePath);
 
 			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(
 					edrsSessionFile.getStartTime(), EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
