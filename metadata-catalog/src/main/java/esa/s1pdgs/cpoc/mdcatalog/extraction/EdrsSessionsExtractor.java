@@ -40,7 +40,7 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
      * Pattern for ERDS session files to extract data
      */
     private final static String PATTERN_SESSION =
-            "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
+            "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)(\\w{4})\\.(xml|RAW))$";
 
     /**
      * Amazon S3 service for configuration files
