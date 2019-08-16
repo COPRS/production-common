@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,28 +23,7 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
 
 	@Override
 	public List<Product<ProductDto>> newProducts(final File file, final IngestionDto ingestionDto, final ObsAdapter obsAdapter) throws ProductException {			
-		final List<Product<ProductDto>> result = new ArrayList<>();
-		result.add(newProduct(file, obsAdapter));
-		
-		// find manifest
-		if (file.isDirectory()) {
-	        try {
-				final List<Path> manifesto = Files.walk(Paths.get(file.getPath()), FileVisitOption.FOLLOW_LINKS)
-					.filter(p -> p.getFileName().toString().toLowerCase().equals("manifest.safe"))
-					.collect(Collectors.toList());
-				
-				for (final Path path : manifesto) {
-					final File mnfstFile = path.toFile();
-					result.add(newProduct(mnfstFile, obsAdapter));
-				}
-			} catch (IOException e) {
-				throw new ProductException(
-						String.format("Error traversing product %s: %s", file, e.getMessage()),
-						e
-				);
-			}
-		}
-		return result;
+		return Collections.singletonList(newProduct(file, obsAdapter));
 	}
 	
 	@Override
