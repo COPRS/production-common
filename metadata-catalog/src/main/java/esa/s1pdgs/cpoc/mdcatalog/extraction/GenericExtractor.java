@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -300,7 +299,7 @@ public abstract class GenericExtractor<T> {
             	.product(family.toString(), productName)        
             	.newReporting(1);
             
-        reportDownload.reportStart("Starting download of " + keyObs);
+        reportDownload.reportStart("Starting download of " + keyObs + " to local directory " + this.localDirectory);
 
 		try {
 			final File metadataFile = obsClient.downloadFile(family, keyObs, this.localDirectory);
