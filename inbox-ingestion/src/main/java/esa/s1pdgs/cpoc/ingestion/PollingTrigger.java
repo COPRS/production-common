@@ -15,7 +15,7 @@ public class PollingTrigger {
 	
     @Scheduled(fixedRateString = "${ingestion.polling-interval-ms}")   
 	public void poll() {
-    	LOG.debug("Trigger polling of MQI");
+    	LOG.trace("Trigger polling of MQI");
     	service.poll();
 	}
 
