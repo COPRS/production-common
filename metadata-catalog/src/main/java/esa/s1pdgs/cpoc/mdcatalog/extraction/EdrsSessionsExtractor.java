@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -22,7 +23,9 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
@@ -39,8 +42,14 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
     private final static String PATTERN_SESSION =
             "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
 
+    /**
+     * Amazon S3 service for configuration files
+     */
+    private final ObsClient obsClient;
+    
     @Autowired
     public EdrsSessionsExtractor(final EsServices esServices,
+    		final ObsClient obsClient,
             final GenericMqiClient mqiService,
             final AppStatus appStatus,
             @Value("${file.product-categories.edrs-sessions.local-directory}") final String localDirectory,
@@ -50,6 +59,7 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
             final XmlConverter xmlConverter) {
         super(esServices, mqiService, appStatus, localDirectory,
                 extractorConfig, PATTERN_SESSION, errorAppender, ProductCategory.EDRS_SESSIONS, processConfiguration, xmlConverter);
+        this.obsClient = obsClient;
     }
 
     /**
@@ -96,6 +106,13 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
         edrsFileDescriptor.setSessionIdentifier(message.getBody().getSessionId());
         edrsFileDescriptor.setStationCode(message.getBody().getStationCode());
         
+
+        //Only when it is a DSIB
+        if (edrsFileDescriptor.getEdrsSessionFileType()==EdrsSessionFileType.SESSION)
+        {
+        final String keyObs = message.getBody().getKeyObjectStorage();
+        download(reportingFactory, obsClient, family, productName, keyObs);
+        }
         
         final JSONObject obj = extractFromFile(
         		reportingFactory,
@@ -112,4 +129,6 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
             final GenericMessageDto<EdrsSessionDto> message) {
         // Nothing to do
     }
+    
+
 }
