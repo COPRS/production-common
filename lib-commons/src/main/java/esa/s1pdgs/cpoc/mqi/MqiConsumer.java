@@ -36,12 +36,13 @@ public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 		LOG.info("Starting {}", this);
 		while (!Thread.currentThread().isInterrupted()) {
 			try {
-				LOG.debug("{} polls MQI", this);
+				LOG.trace("{} polls MQI", this);
 				final GenericMessageDto<E> message = client.next(category);		
 				if (message == null || message.getBody() == null) {
 					LOG.trace("No message received: continue");
 					continue;
-				}			
+				}	
+				LOG.debug("{} received {} from MQI", this, message);
 				AckMessageDto ackMess;			
 				try {
 					mqiListener.onMessage(message);
