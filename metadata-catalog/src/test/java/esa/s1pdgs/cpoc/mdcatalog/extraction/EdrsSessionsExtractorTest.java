@@ -105,7 +105,7 @@ public class EdrsSessionsExtractorTest {
                 new EdrsSessionDto("123/ch02/D_123_ch03_D.XML", 2,
                         EdrsSessionFileType.SESSION, "S1", "B", "WILE", "sessionId"));
 
-        extractor = new EdrsSessionsExtractor(esServices, mqiService, appStatus,
+        extractor = new EdrsSessionsExtractor(esServices, obsClient, mqiService, appStatus,
                 (new File("./test/workDir/")).getAbsolutePath(),errorAppender, config,
                 extractorConfig, xmlConverter);
     }
