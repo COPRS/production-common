@@ -736,11 +736,8 @@ public class ExtractMetadata {
 			metadataJSONObject.put("productFamily",
 					descriptor.getProductFamily().name());
 			
+			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(localDirectory + File.separator + new File(descriptor.getRelativePath()).getName());
 			
-			//FIXME it should be downloaded to proper path
-			String dsibRelativePath = descriptor.getProductFamily().toString().toLowerCase()+ File.separator+descriptor.getFilename();
-			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(localDirectory + File.separator + dsibRelativePath);
-
 			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(
 					edrsSessionFile.getStartTime(), EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
 
