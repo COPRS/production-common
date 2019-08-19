@@ -82,7 +82,7 @@ public class EsServices {
 	@Autowired
 	public EsServices(final ElasticsearchDAO elasticsearchDAO,
 			@Value("${elasticsearch.index-type}") final String indexType,
-			@Value("${elasticsearch.landmask-index-type}") final String landmaskIndexType
+			@Value("${elasticsearch.landmask-index-type:metadata}") final String landmaskIndexType
 			) {
 		this.elasticsearchDAO = elasticsearchDAO;
 		this.indexType = indexType;
