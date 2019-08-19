@@ -99,7 +99,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		LOG.debug("Handling {}", message);
 		
 		for (final DisseminationTypeConfiguration config : configsFor(product.getFamily())) {	
-			LOG.debug("Checking if product {} matches {}", product.getProductName(), config.getRegex());
+			LOG.trace("Checking if product {} matches {}", product.getProductName(), config.getRegex());
 			if (product.getProductName().matches(config.getRegex())) {
 				LOG.debug("Found config {} for product {}", config, product.getProductName());
 				handleTransferTo(message, config.getTarget());
