@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -70,7 +71,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
             job.getAppDataJob().getProduct().getRaws1().forEach(raw -> {
                 try {
                     EdrsSessionMetadata file = this.metadataService
-                            .getEdrsSession("RAW", raw.getFilename());
+                            .getEdrsSession("RAW", new File(raw.getFilename()).getName());
                     if (file != null) {
                         raw.setKeyObs(file.getKeyObjectStorage());
                     } else {
@@ -84,7 +85,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
             job.getAppDataJob().getProduct().getRaws2().forEach(raw -> {
                 try {
                     EdrsSessionMetadata file = this.metadataService
-                            .getEdrsSession("RAW", raw.getFilename());
+                            .getEdrsSession("RAW", new File(raw.getFilename()).getName());
                     if (file != null) {
                         raw.setKeyObs(file.getKeyObjectStorage());
                     } else {

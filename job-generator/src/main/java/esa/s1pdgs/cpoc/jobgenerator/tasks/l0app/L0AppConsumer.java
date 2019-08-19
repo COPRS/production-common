@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -149,7 +150,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
-        	EdrsSessionMetadata edrsSessionMetadata = metadataService.getEdrsSession(mqiMessage.getBody().getProductType().name(), mqiMessage.getBody().getProductName());
+        	EdrsSessionMetadata edrsSessionMetadata = metadataService.getEdrsSession(mqiMessage.getBody().getProductType().name(), new File(mqiMessage.getBody().getProductName()).getName());
 
             // Search if session is already in progress
             List<AppDataJobDto<EdrsSessionDto>> existingJobsForSession =
