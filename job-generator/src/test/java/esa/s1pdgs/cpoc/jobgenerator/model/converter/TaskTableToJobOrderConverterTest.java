@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
+import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 
 /**
  * Test the converter TaskTable to JobOrder
@@ -27,7 +27,7 @@ public class TaskTableToJobOrderConverterTest {
 	 */
 	@Test
 	public void testConverter() {
-		TaskTable t = TestGenericUtils.buildTaskTableAIOP();
+		TaskTable t = TestL0Utils.buildTaskTableAIOP();
 		TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter();
 		JobOrder o = converter.apply(t);
 

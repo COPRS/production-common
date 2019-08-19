@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -600,6 +601,15 @@ public class EsServices {
 				throw new MetadataMalformedException("validityStopTime");
 			}
 		}
+		r.setStartTime(source.getOrDefault("startTime", "NOT_FOUND").toString());
+		r.setStopTime(source.getOrDefault("stopTime", "NOT_FOUND").toString());
+		r.setStationCode(source.getOrDefault("stationCode", "NOT_FOUND").toString());
+		r.setSatelliteId(source.getOrDefault("satelliteId", "NOT_FOUND").toString());
+		r.setMissionId(source.getOrDefault("missionId", "NOT_FOUND").toString());
+				
+		@SuppressWarnings("unchecked")
+		List<String> rawNames = (List<String>) source.getOrDefault("rawNames", Collections.emptyList());
+		r.setRawNames(rawNames);
 		return r;
 	}
 
