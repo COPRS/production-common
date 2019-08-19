@@ -18,13 +18,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 
 
 /**
@@ -154,15 +153,15 @@ public class MetadataService {
         }
     }
     
-	public int getSeaCoverage(ProductDto leveldto) {
+	public int getSeaCoverage(String productName) throws JobGenMetadataException {
         for (int retries = 0;; retries++) {
             try {
-                String uri = this.uriLevelSegment + "/" + productName;
+                String uri = this.uriLevelSegment + "/" + productName + "/seaCoverage";
                 LOGGER.debug("Call rest metadata on {}", uri);
 
-                ResponseEntity<L0SliceMetadata> response =
+                ResponseEntity<Integer> response =
                         this.restTemplate.exchange(uri, HttpMethod.GET, null,
-                                L0SliceMetadata.class);
+                        		Integer.class);
                 if (response.getStatusCode() != HttpStatus.OK) {
                     if (retries < this.nbretry) {
                         LOGGER.warn(
