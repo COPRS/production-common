@@ -155,7 +155,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
                                 + this.patternSettings.getRegexp());
             }
             
-            if (metadataService.getSeaCoverage(leveldto) > 0) {
+            if (metadataService.getSeaCoverage(leveldto.getProductName()) > 0) {
             	
             }
             

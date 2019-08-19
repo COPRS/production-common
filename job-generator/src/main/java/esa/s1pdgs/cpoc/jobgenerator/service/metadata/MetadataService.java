@@ -179,9 +179,14 @@ public class MetadataService {
                                 String.format("Invalid HTTP status code %s",
                                         response.getStatusCode().name()));
                     }
-                } else {
-                    return response.getBody();
-                }
+                } else if (response != null) {
+                    final Integer res = response.getBody();
+                    
+                    if (res == null) {
+                    	throw new JobGenMetadataException("getSeaCoverage returned null");
+                    }                    
+                    return res;
+                }                 
             } catch (RestClientException e) {
                 if (retries < this.nbretry) {
                     LOGGER.warn(

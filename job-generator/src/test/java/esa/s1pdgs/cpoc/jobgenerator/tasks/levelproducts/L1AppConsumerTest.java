@@ -29,9 +29,11 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -79,6 +81,9 @@ public class L1AppConsumerTest {
             new GenericMessageDto<ProductDto>(1, "", dtoMatch);
     private GenericMessageDto<ProductDto> message2 =
             new GenericMessageDto<ProductDto>(2, "", dtoNotMatch);
+    
+    @Mock
+    private MetadataService metadataService;
 
     @Before
     public void setUp() throws Exception {
@@ -130,6 +135,45 @@ public class L1AppConsumerTest {
                 Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
+        // Mock metadata service
+        Mockito.doAnswer(i -> {
+        	return new EdrsSessionMetadata("name", "type", "kobs", "start", "stop", "vstart", "vstop", "mission", "satellite", "station",
+        			Arrays.<String>asList("DCS_02_L20171109175634707000125_ch1_DSDB_00001.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00002.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00003.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00004.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00006.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00007.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00008.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00009.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00010.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00011.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00012.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00013.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00014.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00015.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00016.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00017.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00018.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00019.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00020.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00021.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00022.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00023.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00024.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00025.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00026.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00027.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00028.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00029.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00030.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00031.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00032.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00033.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00034.raw",
+        			"DCS_02_L20171109175634707000125_ch1_DSDB_00035.raw"));
+        }).when(metadataService).getEdrsSession(Mockito.anyString(), Mockito.anyString());
     }
 
     private void mockProcessSettings() {
@@ -163,7 +207,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, errorAppender, appStatus);
+                mqiStatusService, appDataService, errorAppender, appStatus, metadataService);
         consumer.consumeMessages();
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -177,7 +221,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
         consumer.consumeMessages();
 
         verify(appDataService, times(1)).newJob(Mockito.any());
@@ -195,7 +239,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
         consumer.consumeMessages();
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -222,7 +266,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
         consumer.consumeMessages();
 
         job1.setPod("");
@@ -254,7 +298,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
         consumer.consumeMessages();
 
         job1.setPod("");
@@ -287,7 +331,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
         consumer.consumeMessages();
 
         job1.setPod("");
