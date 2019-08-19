@@ -36,7 +36,6 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -54,11 +53,12 @@ public class EsServicesTest{
 	
 	private final static String INDEX_TYPE = "metadata";
 	
+	private final static String LANDMASK_INDEX_TYPE = "metadata";
 	
 	@Before
 	public void init() throws IOException {
 		MockitoAnnotations.initMocks(this);
-		esServices = new EsServices(elasticsearchDAO, INDEX_TYPE);
+		esServices = new EsServices(elasticsearchDAO, INDEX_TYPE, LANDMASK_INDEX_TYPE);
 		
 	}
 	
@@ -1026,5 +1026,132 @@ public class EsServicesTest{
                     "productType", ((MetadataMalformedException) e).getMissingField());
         }
         
+    }
+    
+    @Test
+    public final void getSeaCoverageTest_OnIntersection_ShallReturnZero() throws Exception {
+        final String content = "{\"productName\":\"name\","
+                + "\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\","
+                + "\"segmentCoordinates\": { \"type\":\"Polygon\","
+                + "\"coordinates\": [[ [ 31.191409132621285, -22.2515096981724 ], "
+                + "[ 30.65986535006709, -22.151567478119915 ], "
+                + "[ 30.322883335091774, -22.27161183033393 ], "
+                + "[ 29.839036899542972, -22.102216485281176 ], "
+                + "[ 29.43218834810904, -22.091312758067588 ], "
+                + "[ 28.794656202924212, -21.63945403410745 ], "
+                + "[ 28.021370070108617, -21.485975030200585 ], "
+                + "[ 27.72722781750326, -20.851801853114715 ], "
+                + "[ 27.724747348753255, -20.499058526290387 ], "
+                + "[ 27.296504754350508, -20.391519870691 ], "
+                + "[ 26.164790887158485, -19.29308562589494 ], "
+                + "[ 25.85039147309473, -18.714412937090536 ], "
+                + "[ 25.649163445750162, -18.53602589281899 ], "
+                + "[ 25.264225701608012, -17.736539808831417 ], "
+                + "[ 26.381935255648926, -17.8460421688579 ], "
+                + "[ 26.70677330903564, -17.961228936436484 ], "
+                + "[ 27.04442711763073, -17.938026218337434 ], "
+                + "[ 27.598243442502756, -17.290830580314008 ], "
+                + "[ 28.467906121542683, -16.468400160388846 ], "
+                + "[ 28.825868768028496, -16.389748630440614 ], "
+                + "[ 28.947463413211263, -16.04305144619444 ], "
+                + "[ 29.516834344203147, -15.644677829656388 ], "
+                + "[ 30.274255812305107, -15.507786960515212 ], "
+                + "[ 30.338954705534544, -15.880839125230244 ], "
+                + "[ 31.173063999157677, -15.860943698797872 ], "
+                + "[ 31.636498243951195, -16.071990248277885 ], "
+                + "[ 31.8520406430406, -16.319417006091378 ], "
+                + "[ 32.32823896661022, -16.392074069893752 ], "
+                + "[ 32.847638787575846, -16.713398125884616 ], "
+                + "[ 32.84986087416439, -17.97905730557718 ], "
+                + "[ 32.65488569512715, -18.672089939043495 ], "
+                + "[ 32.61199425632489, -19.419382826416275 ], "
+                + "[ 32.772707960752626, -19.715592136313298 ], "
+                + "[ 32.65974327976258, -20.304290052982317 ], "
+                + "[ 32.50869306817344, -20.395292250248307 ], "
+                + "[ 32.244988234188014, -21.116488539313693 ], "
+                + "[ 31.191409132621285, -22.2515096981724 ] ]]}}";        
+        BytesReference source = new BytesArray(content);
+        
+        final GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        final GetResponse getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+
+		final BytesReference hm = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.000120Z\",\"validityStopTime\":"
+		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
+		SearchHit hit = new SearchHit(1);
+		hit.sourceRef(hm);
+		SearchHit[] hits = {hit};
+		SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        this.mockSearchRequest(response);
+        
+        assertEquals(0, esServices.getSeaCoverage(ProductFamily.L0_SEGMENT, "name"));
+    }
+    
+    @Test
+    public final void getSeaCoverageTest_OnNonIntersection_ShallReturnHunderedPercent() throws Exception {
+        final String content = "{\"productName\":\"name\","
+                + "\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\","
+                + "\"segmentCoordinates\": { \"type\":\"Polygon\","
+                + "\"coordinates\": [[ [ 31.191409132621285, -22.2515096981724 ], "
+                + "[ 30.65986535006709, -22.151567478119915 ], "
+                + "[ 30.322883335091774, -22.27161183033393 ], "
+                + "[ 29.839036899542972, -22.102216485281176 ], "
+                + "[ 29.43218834810904, -22.091312758067588 ], "
+                + "[ 28.794656202924212, -21.63945403410745 ], "
+                + "[ 28.021370070108617, -21.485975030200585 ], "
+                + "[ 27.72722781750326, -20.851801853114715 ], "
+                + "[ 27.724747348753255, -20.499058526290387 ], "
+                + "[ 27.296504754350508, -20.391519870691 ], "
+                + "[ 26.164790887158485, -19.29308562589494 ], "
+                + "[ 25.85039147309473, -18.714412937090536 ], "
+                + "[ 25.649163445750162, -18.53602589281899 ], "
+                + "[ 25.264225701608012, -17.736539808831417 ], "
+                + "[ 26.381935255648926, -17.8460421688579 ], "
+                + "[ 26.70677330903564, -17.961228936436484 ], "
+                + "[ 27.04442711763073, -17.938026218337434 ], "
+                + "[ 27.598243442502756, -17.290830580314008 ], "
+                + "[ 28.467906121542683, -16.468400160388846 ], "
+                + "[ 28.825868768028496, -16.389748630440614 ], "
+                + "[ 28.947463413211263, -16.04305144619444 ], "
+                + "[ 29.516834344203147, -15.644677829656388 ], "
+                + "[ 30.274255812305107, -15.507786960515212 ], "
+                + "[ 30.338954705534544, -15.880839125230244 ], "
+                + "[ 31.173063999157677, -15.860943698797872 ], "
+                + "[ 31.636498243951195, -16.071990248277885 ], "
+                + "[ 31.8520406430406, -16.319417006091378 ], "
+                + "[ 32.32823896661022, -16.392074069893752 ], "
+                + "[ 32.847638787575846, -16.713398125884616 ], "
+                + "[ 32.84986087416439, -17.97905730557718 ], "
+                + "[ 32.65488569512715, -18.672089939043495 ], "
+                + "[ 32.61199425632489, -19.419382826416275 ], "
+                + "[ 32.772707960752626, -19.715592136313298 ], "
+                + "[ 32.65974327976258, -20.304290052982317 ], "
+                + "[ 32.50869306817344, -20.395292250248307 ], "
+                + "[ 32.244988234188014, -21.116488539313693 ], "
+                + "[ 31.191409132621285, -22.2515096981724 ] ]]}}";        
+        BytesReference source = new BytesArray(content);
+        
+        final GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        final GetResponse getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+
+
+		SearchHit hit = new SearchHit(0);
+		SearchHit[] hits = {hit};
+		SearchHits searchHits = new SearchHits(hits, 0, 1.0F);
+		SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        this.mockSearchRequest(response);
+        
+        assertEquals(100, esServices.getSeaCoverage(ProductFamily.L0_SEGMENT, "name"));
     }
 }

@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
@@ -50,6 +51,8 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
      * 
      */
     private String taskForFunctionalLog;
+    
+    private final MetadataService metadataService;
 
   
     public LevelProductsMessageConsumer(
@@ -60,12 +63,14 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             final StatusService mqiStatusService,
             final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
-            final AppStatus appStatus) {
+            final AppStatus appStatus,
+            final MetadataService metadataService) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
                 appDataService, appStatus, errorRepoAppender, ProductCategory.LEVEL_PRODUCTS);
         this.patternSettings = patternSettings;
         this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
                 Pattern.CASE_INSENSITIVE);
+        this.metadataService = metadataService;
     }
 
     /**
@@ -92,26 +97,26 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
         try {
-
             // Check if a job is already created for message identifier
-            LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job",
-                    productName);
+            LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job", productName);
             reporting.reportStart("Start job generation using " + mqiMessage.getBody().getProductName());
             AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
-            productName = appDataJob.getProduct().getProductName();
-
-            // Dispatch job
-            step++;
-            LOGGER.info(
-                    "[MONITOR] [step 2] [productName {}] Dispatching product",
-                    productName);
-            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
-                appDataJob.setState(AppDataJobDtoState.DISPATCHING);
-                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
-                        appDataJob, false, false, false);
-            }
-            jobsDispatcher.dispatch(appDataJob);
             
+            if (appDataJob != null) {
+                productName = appDataJob.getProduct().getProductName();
+
+                // Dispatch job
+                step++;
+                LOGGER.info(
+                        "[MONITOR] [step 2] [productName {}] Dispatching product",
+                        productName);
+                if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
+                    appDataJob.setState(AppDataJobDtoState.DISPATCHING);
+                    appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
+                            appDataJob, false, false, false);
+                }
+                jobsDispatcher.dispatch(appDataJob);
+            }
             // Ack
             step++;
             ackOk = true;
@@ -149,14 +154,16 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
                         "Don't match with regular expression "
                                 + this.patternSettings.getRegexp());
             }
-            String satelliteId = m.group(this.patternSettings.getMGroupSatId());
-            String missionId =
-                    m.group(this.patternSettings.getMGroupMissionId());
-            String acquisition =
-                    m.group(this.patternSettings.getMGroupAcquisition());
-            String startTime =
-                    m.group(this.patternSettings.getMGroupStartTime());
-            String stopTime = m.group(this.patternSettings.getMGroupStopTime());
+            
+            if (metadataService.getSeaCoverage(leveldto) > 0) {
+            	
+            }
+            
+            final String satelliteId = m.group(this.patternSettings.getMGroupSatId());
+            final String missionId = m.group(this.patternSettings.getMGroupMissionId());
+            final String acquisition = m.group(this.patternSettings.getMGroupAcquisition());
+            final String startTime = m.group(this.patternSettings.getMGroupStartTime());
+            final String stopTime = m.group(this.patternSettings.getMGroupStopTime());
 
             // Create the JOB
             AppDataJobDto<ProductDto> jobDto = new AppDataJobDto<>();

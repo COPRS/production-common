@@ -518,8 +518,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 newState,
                 job.getGeneration()
         );
-        @SuppressWarnings("unchecked")
-		AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
+        AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
         

@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 
 
@@ -152,6 +153,53 @@ public class MetadataService {
             }
         }
     }
+    
+	public int getSeaCoverage(ProductDto leveldto) {
+        for (int retries = 0;; retries++) {
+            try {
+                String uri = this.uriLevelSegment + "/" + productName;
+                LOGGER.debug("Call rest metadata on {}", uri);
+
+                ResponseEntity<L0SliceMetadata> response =
+                        this.restTemplate.exchange(uri, HttpMethod.GET, null,
+                                L0SliceMetadata.class);
+                if (response.getStatusCode() != HttpStatus.OK) {
+                    if (retries < this.nbretry) {
+                        LOGGER.warn(
+                                "Call rest api metadata failed: Attempt : {} / {}",
+                                retries, this.nbretry);
+                        try {
+                            Thread.sleep(this.temporetryms);
+                        } catch (InterruptedException e) {
+                            throw new JobGenMetadataException(e.getMessage(),
+                                    e);
+                        }
+                        continue;
+                    } else {
+                        throw new JobGenMetadataException(
+                                String.format("Invalid HTTP status code %s",
+                                        response.getStatusCode().name()));
+                    }
+                } else {
+                    return response.getBody();
+                }
+            } catch (RestClientException e) {
+                if (retries < this.nbretry) {
+                    LOGGER.warn(
+                            "Call rest api metadata failed: Attempt : {} / {}",
+                            retries, this.nbretry);
+                    try {
+                        Thread.sleep(this.temporetryms);
+                    } catch (InterruptedException e1) {
+                        throw new JobGenMetadataException(e1.getMessage(), e1);
+                    }
+                    continue;
+                } else {
+                    throw new JobGenMetadataException(e.getMessage(), e);
+                }
+            }
+        }
+	}
 
     /**
      * If productType = blank, the metadata catalog will extract the product
@@ -429,5 +477,7 @@ public class MetadataService {
     	}
     	return -1; // To indicate that null was returned and not an empty list
     }
+
+
 
 }

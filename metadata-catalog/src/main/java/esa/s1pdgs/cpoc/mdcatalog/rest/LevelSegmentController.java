@@ -32,6 +32,30 @@ public class LevelSegmentController {
     public LevelSegmentController(final EsServices esServices) {
         this.esServices = esServices;
     }
+    
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}/seaCoverage")
+    public ResponseEntity<Integer> getSeaCoverage(
+            @PathVariable(name = "family") ProductFamily family,
+            @PathVariable(name = "productName") String productName) {
+        try {
+			return new ResponseEntity<>(esServices.getSeaCoverage(family, productName), HttpStatus.OK);
+        } catch (MetadataNotPresentException em) {
+            LOGGER.warn("[{}] [productName {}] [code {}] {}", family, productName, 
+            		em.getCode().getCode(), em.getLogMessage());
+            
+            return new ResponseEntity<Integer>(HttpStatus.NOT_FOUND);
+        } catch (AbstractCodedException ace) {
+            LOGGER.error("[{}] [productName {}] [code {}] {}", family, productName, 
+            		ace.getCode().getCode(), ace.getLogMessage());
+            return new ResponseEntity<Integer>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("[{}] [productName {}] [code {}] [msg {}]", family, productName, 
+            		ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
+            return new ResponseEntity<Integer>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}")
     public ResponseEntity<LevelSegmentMetadata> get(

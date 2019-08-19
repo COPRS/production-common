@@ -18,8 +18,11 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
+import org.elasticsearch.common.geo.builders.PolygonBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.GeoShapeQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.rest.RestStatus;
@@ -73,12 +76,17 @@ public class EsServices {
 	 * Index type for elastic search
 	 */
 	private final String indexType;
+	
+	private final String landmaskIndexType;
 
 	@Autowired
 	public EsServices(final ElasticsearchDAO elasticsearchDAO,
-			@Value("${elasticsearch.index-type}") final String indexType) {
+			@Value("${elasticsearch.index-type}") final String indexType,
+			@Value("${elasticsearch.landmask-index-type}") final String landmaskIndexType
+			) {
 		this.elasticsearchDAO = elasticsearchDAO;
 		this.indexType = indexType;
+		this.landmaskIndexType = landmaskIndexType;
 	}
 
 	/**
@@ -157,7 +165,7 @@ public class EsServices {
 	public SearchMetadata lastValCover(String productType, ProductFamily productFamily, String beginDate,
 			String endDate, String satelliteId, int instrumentConfId, String processMode) throws Exception {
 
-		ProductCategory category = ProductCategory.fromProductFamily(productFamily);
+		ProductCategory category = ProductCategory.of(productFamily);
 
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
@@ -325,7 +333,7 @@ public class EsServices {
 
 	private final SearchRequest newQueryFor(String productType, ProductFamily productFamily, int instrumentConfId,
 			String processMode, RangeQueryBuilder rangeQueryBuilder, FieldSortBuilder sortOrder) throws InternalErrorException {
-		ProductCategory category = ProductCategory.fromProductFamily(productFamily);
+		ProductCategory category = ProductCategory.of(productFamily);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(rangeQueryBuilder);
@@ -751,12 +759,63 @@ public class EsServices {
 		}
 		return r;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public int getSeaCoverage(ProductFamily family, String productName) throws MetadataNotPresentException {		
+		try {
+			final GetResponse response = elasticsearchDAO.get(
+					new GetRequest(family.name().toLowerCase(), indexType, productName)
+			);
+			if (!response.isExists()) {
+				throw new MetadataNotPresentException(productName);				
+			}	
+			
+			// TODO FIXME this needs to be fixed to use a proper abstraction  			
+			final Map<String,Object> segmentCoordinates = (Map<String, Object>) response.getSourceAsMap()
+					.get("segmentCoordinates");
+			
+			final String type = (String) segmentCoordinates.get("type");
+			LOGGER.debug("Found segmentCoordinates of type {}", type);
+			
+			final List<Object> firstArray = (List<Object>) segmentCoordinates.get("coordinates");
+			final List<Object> secondArray = (List<Object>) firstArray.get(0);
+			
+			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();	
+
+			for (final Object arr : secondArray) {
+				final List<Double> coords = (List<Double>) arr;			
+				final double lon = coords.get(0);
+				final double lat = coords.get(1);
+				coordBuilder.coordinate(lon, lat);
+			}
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoIntersectionQuery(
+					"geometry", 
+					new PolygonBuilder(coordBuilder)
+			);
+			LOGGER.trace("Using {}", queryBuilder);			
+			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+			sourceBuilder.query(queryBuilder);
+			sourceBuilder.size(200);
+		
+			final SearchRequest request = new SearchRequest(family.name().toLowerCase());
+			request.types(landmaskIndexType);
+			request.source(sourceBuilder);
+			
+			final SearchResponse searchResponse = elasticsearchDAO.search(request);			
+			if (searchResponse.getHits().totalHits > 0) {				
+				// TODO FIXME implement coverage calculation
+				return 0;
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		return 100;
+	}
 
 	public LevelSegmentMetadata getLevelSegment(ProductFamily family, String productName) throws Exception {
 		LevelSegmentMetadata ret = null;
 		try {
 			GetRequest getRequest = new GetRequest(family.name().toLowerCase(), indexType, productName);
-
 			GetResponse response = elasticsearchDAO.get(getRequest);
 
 			if (response.isExists()) {

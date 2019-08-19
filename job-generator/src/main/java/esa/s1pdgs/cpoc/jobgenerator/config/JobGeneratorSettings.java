@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 
@@ -518,7 +519,7 @@ public class JobGeneratorSettings {
 		case L2:
 			messageConsumer = new LevelProductsMessageConsumer((AbstractJobsDispatcher<ProductDto>) jobsDispatcher,
 					patternSettings, processSettings, mqiService, mqiStatusService, appDataServiceLevelProducts,
-					errorRepoAppender, appStatus);
+					errorRepoAppender, appStatus, metadataService);
 			break;
 		default:
 			throw new IllegalArgumentException("Unsupported Application Level");
