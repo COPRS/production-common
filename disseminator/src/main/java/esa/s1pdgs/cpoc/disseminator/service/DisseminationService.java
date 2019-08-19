@@ -96,9 +96,12 @@ public class DisseminationService implements MqiListener<ProductDto> {
 	@Override
 	public void onMessage(final GenericMessageDto<ProductDto> message) {
 		final ProductDto product = message.getBody();
+		LOG.debug("Handling {}", message);
 		
-		for (final DisseminationTypeConfiguration config : configsFor(product.getFamily())) {			
+		for (final DisseminationTypeConfiguration config : configsFor(product.getFamily())) {	
+			LOG.debug("Checking if product {} matches {}", product.getProductName(), config.getRegex());
 			if (product.getProductName().matches(config.getRegex())) {
+				LOG.debug("Found config {} for product {}", config, product.getProductName());
 				handleTransferTo(message, config.getTarget());
 			}			
 		}			
