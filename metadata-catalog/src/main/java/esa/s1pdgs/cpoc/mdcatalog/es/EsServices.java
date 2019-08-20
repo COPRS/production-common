@@ -781,13 +781,13 @@ public class EsServices {
 			}	
 			
 			// TODO FIXME this needs to be fixed to use a proper abstraction  			
-			final Map<String,Object> segmentCoordinates = (Map<String, Object>) response.getSourceAsMap()
-					.get("segmentCoordinates");
+			final Map<String,Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
+					.get("sliceCoordinates");
 			
-			final String type = (String) segmentCoordinates.get("type");
-			LOGGER.debug("Found segmentCoordinates of type {}", type);
+			final String type = (String) sliceCoordinates.get("type");
+			LOGGER.debug("Found sliceCoordinates of type {}", type);
 			
-			final List<Object> firstArray = (List<Object>) segmentCoordinates.get("coordinates");
+			final List<Object> firstArray = (List<Object>) sliceCoordinates.get("coordinates");
 			final List<Object> secondArray = (List<Object>) firstArray.get(0);
 			
 			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();	
