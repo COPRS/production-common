@@ -19,10 +19,10 @@ public class SearchMetadataQueryTest {
 	 * Test toString
 	 */
 	@Test
-	public void testToString() {
+	public void testToJsonString() {
 		SearchMetadataQuery obj = new SearchMetadataQuery(12, "retrievalMode", 0.0, 1.5, "productType", ProductFamily.L0_SLICE);
 		
-		String str = obj.toString();
+		String str = obj.toJsonString();
 		assertTrue(str.contains("identifier: 12"));
 		assertTrue(str.contains("retrievalMode: retrievalMode"));
 		assertTrue(str.contains("deltaTime0: 0.0"));
@@ -37,7 +37,7 @@ public class SearchMetadataQueryTest {
 		obj.setProductType("productype");
 		obj.setProductFamily(ProductFamily.L1_SLICE);
 		
-		str = obj.toString();
+		str = obj.toJsonString();
 		assertTrue(str.contains("identifier: 1"));
 		assertTrue(str.contains("retrievalMode: retrievalode"));
 		assertTrue(str.contains("deltaTime0: 2.0"));

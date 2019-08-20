@@ -114,7 +114,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString(),
+                expectedResult.toJsonString(),
                 result.getResponse().getContentAsString());
 
     }
@@ -224,10 +224,6 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
-        assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
-                result.getResponse().getContentAsString());
-
     }
 
     @Test
@@ -342,7 +338,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
+        		 "["+ expectedResult.get(0).toJsonString()+"]".replaceAll(" ", ""),
                 result.getResponse().getContentAsString());
 
     }
@@ -404,7 +400,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
+                "["+ expectedResult.get(0).toJsonString()+"]".replaceAll(" ", ""),
                 result.getResponse().getContentAsString());
 
     }
@@ -465,7 +461,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
+        		"["+ expectedResult.get(0).toJsonString()+"]".replaceAll(" ", ""),
                 result.getResponse().getContentAsString());
 
     }
@@ -526,7 +522,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
+        		 "["+ expectedResult.get(0).toJsonString()+"]".replaceAll(" ", ""),
                 result.getResponse().getContentAsString());
 
     }
