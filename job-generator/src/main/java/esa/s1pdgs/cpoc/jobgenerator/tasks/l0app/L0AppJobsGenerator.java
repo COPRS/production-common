@@ -144,6 +144,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     				aiopParams.put(entrySet.getKey(), entrySet.getValue());
     		} 
     	}    	
+    	aiopParams.put("Processing_Station", stationCode);
     	
     	for (Entry<String, String> newParam : aiopParams.entrySet()) {
     		boolean found = false;
