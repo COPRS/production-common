@@ -197,6 +197,10 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             productDto.setStopTime(DateUtils.convertToAnotherFormat(stopTime,
                     L0SlicePatternSettings.TIME_FORMATTER,
                     AppDataJobProductDto.TIME_FORMATTER));
+            
+            // FIXME dirty workaround to get things working
+            productDto.setStationCode("WILE");
+                
             jobDto.setProduct(productDto);
 
             return appDataService.newJob(jobDto);
