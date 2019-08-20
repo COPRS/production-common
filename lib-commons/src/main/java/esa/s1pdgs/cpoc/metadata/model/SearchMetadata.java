@@ -29,11 +29,7 @@ public class SearchMetadata extends AbstractMetadata {
 		
 	}
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
+	public String toJsonString() {
 		return String.format("{%s}", super.toAbstractString());
 	}
 
@@ -51,5 +47,12 @@ public class SearchMetadata extends AbstractMetadata {
 	@Override
 	public boolean equals(final Object obj) {
 		return super.equals(obj);
+	}
+
+	@Override
+	public String toString() {
+		return "SearchMetadata [productName=" + productName + ", productType=" + productType + ", keyObjectStorage="
+				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop=" + validityStop
+				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + "]";
 	}
 }

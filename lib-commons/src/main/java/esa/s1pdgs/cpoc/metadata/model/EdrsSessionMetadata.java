@@ -94,9 +94,8 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	public void setRawNames(List<String> rawNames) {
 		this.rawNames = rawNames;
 	}
-	
-	@Override
-	public String toString() {
+
+	public String toJsonString() {
 		String superToString = super.toAbstractString();
 		return String.format("{%s,\"startTime\":\"%s\",\"stopTime\":\"%s\",\"rawNames\":[%s]}", superToString, startTime, stopTime, rawNames.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")));
 	}
@@ -125,5 +124,13 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 					&& Objects.equals(rawNames, other.rawNames);
 		}
 		return ret;
+	}
+
+	@Override
+	public String toString() {
+		return "EdrsSessionMetadata [startTime=" + startTime + ", stopTime=" + stopTime + ", rawNames=" + rawNames
+				+ ", productName=" + productName + ", productType=" + productType + ", keyObjectStorage="
+				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop=" + validityStop
+				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + "]";
 	}
 }

@@ -21,7 +21,7 @@ public class EdrsSessionMetadataDtoTest {
 	public void testToString() {
 		EdrsSessionMetadata obj = new EdrsSessionMetadata("name", "type", "kobs", "start", "stop", "vstart", "vstop", "mission", "satellite", "station", Arrays.<String>asList("a","b","c"));
 		
-		String str = obj.toString(); System.out.println(str);
+		String str = obj.toJsonString(); 
 		assertTrue(str.contains("\"productName\":\"name\""));
 		assertTrue(str.contains("\"productType\":\"type\""));
 		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));

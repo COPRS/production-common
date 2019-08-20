@@ -30,7 +30,7 @@ public class EdrsSessionMetadataTest {
 		obj.setValidityStop("vstop");
 		obj.setRawNames(Arrays.<String>asList("a","b","c"));
 		
-		String str = obj.toString();
+		String str = obj.toJsonString();
 		assertTrue(str.contains("productName\":\"name"));
 		assertTrue(str.contains("productType\":\"type"));
 		assertTrue(str.contains("keyObjectStorage\":\"kobs"));

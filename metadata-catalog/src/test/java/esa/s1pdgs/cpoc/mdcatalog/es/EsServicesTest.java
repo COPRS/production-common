@@ -463,6 +463,7 @@ public class EsServicesTest{
 			EdrsSessionMetadata result = esServices.getEdrsSession("type", "name");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail("Exception occurred: " + e.getMessage());
 		}
 	}

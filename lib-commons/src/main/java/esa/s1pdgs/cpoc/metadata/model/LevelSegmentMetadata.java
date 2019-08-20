@@ -85,11 +85,7 @@ public class LevelSegmentMetadata extends AbstractMetadata {
         this.datatakeId = datatakeId;
     }
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
+	public String toJsonString() {
 		String superToString = super.toAbstractString();
 		return String.format("{%s,\"datatakeId\":\"%s\",\"polarisation\":\"%s\",\"consolidation\":\"%s\"}",
 				superToString, datatakeId, polarisation, consolidation);
@@ -124,4 +120,12 @@ public class LevelSegmentMetadata extends AbstractMetadata {
         return ret;
     }
 
+	@Override
+	public String toString() {
+		return "LevelSegmentMetadata [polarisation=" + polarisation + ", consolidation=" + consolidation
+				+ ", datatakeId=" + datatakeId + ", productName=" + productName + ", productType=" + productType
+				+ ", keyObjectStorage=" + keyObjectStorage + ", validityStart=" + validityStart + ", validityStop="
+				+ validityStop + ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode="
+				+ stationCode + "]";
+	}
 }

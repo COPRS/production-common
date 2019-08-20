@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,11 +16,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
-import esa.s1pdgs.cpoc.mdcatalog.rest.EdrsSessionMetadataController;
+import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 
 public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 
@@ -73,7 +71,7 @@ public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 		MvcResult result = request(get("/edrsSession/type/name")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());
-		assertEquals("Result is different from the expected result", expectedResult.toString().replaceAll(" ", ""), result.getResponse().getContentAsString());
+		assertEquals("Result is different from the expected result", expectedResult.toJsonString().replaceAll(" ", ""), result.getResponse().getContentAsString());
 	}
 	
 	@Test

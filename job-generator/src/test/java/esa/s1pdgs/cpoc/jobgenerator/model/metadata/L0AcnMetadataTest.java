@@ -17,7 +17,7 @@ public class L0AcnMetadataTest {
 	 * Test toString
 	 */
 	@Test
-	public void testToString() {
+	public void testToJsonString() {
 		L0AcnMetadata obj = new L0AcnMetadata("", "", "", "", "", "", "", "", 5, 1, "123456");
 		obj.setProductName("name");
 		obj.setProductType("type");
@@ -28,7 +28,7 @@ public class L0AcnMetadataTest {
 		obj.setNumberOfSlices(11);
 		obj.setDatatakeId("14256");
 		
-		String str = obj.toString();
+		String str = obj.toJsonString();
 		assertTrue(str.contains("productName\":\"name"));
 		assertTrue(str.contains("productType\":\"type"));
 		assertTrue(str.contains("keyObjectStorage\":\"kobs"));

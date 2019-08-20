@@ -29,7 +29,7 @@ public class LevelSegmentMetadataTest {
 		obj.setConsolidation("consol");
 		obj.setPolarisation("pol");
 		
-		String str = obj.toString();
+		String str = obj.toJsonString();
 		
 		assertTrue(str.contains("\"productName\":\"name\""));
 		assertTrue(str.contains("\"productType\":\"type\""));

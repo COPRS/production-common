@@ -28,7 +28,7 @@ public class L0AcnMetadataTest {
 		obj.setNumberOfSlices(11);
 		obj.setDatatakeId("14256");
 		
-		String str = obj.toString();
+		String str = obj.toJsonString();
 		
 		assertTrue(str.contains("productName\":\"name"));
 		assertTrue(str.contains("productType\":\"type"));

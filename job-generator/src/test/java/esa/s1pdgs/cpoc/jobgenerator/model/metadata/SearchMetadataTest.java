@@ -17,10 +17,10 @@ public class SearchMetadataTest {
 	 * Test toString
 	 */
 	@Test
-	public void testToString() {
+	public void testToJsonString() {
 		SearchMetadata obj = new SearchMetadata("name", "type", "kobs", "start", "stop", "mission", "satellite", "station");
 		
-		String str = obj.toString();
+		String str = obj.toJsonString();
 		assertTrue(str.contains("productName\":\"name"));
 		assertTrue(str.contains("productType\":\"type"));
 		assertTrue(str.contains("keyObjectStorage\":\"kobs"));
