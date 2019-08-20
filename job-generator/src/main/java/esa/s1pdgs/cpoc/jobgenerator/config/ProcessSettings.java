@@ -72,6 +72,9 @@ public class ProcessSettings {
      * This is used to customize the way to match the outputs in the job
      */
     private Map<String, String> outputregexps;
+    
+    // 0 --> means that it least needs to be covered
+    private int minSeaCoveragePercentage = 0;
 
     /**
      * @return the level
@@ -193,4 +196,11 @@ public class ProcessSettings {
         this.outputregexps = outputregexps;
     }
 
+	public int getMinSeaCoveragePercentage() {
+		return minSeaCoveragePercentage;
+	}
+
+	public void setMinSeaCoveragePercentage(int minSeaCoveragePercentage) {
+		this.minSeaCoveragePercentage = minSeaCoveragePercentage;
+	}
 }

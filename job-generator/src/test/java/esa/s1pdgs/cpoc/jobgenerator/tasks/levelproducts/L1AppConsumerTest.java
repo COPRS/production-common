@@ -110,6 +110,9 @@ public class L1AppConsumerTest {
         Mockito.doReturn(4).when(l0SlicePatternSettings).getMGroupAcquisition();
         Mockito.doReturn(6).when(l0SlicePatternSettings).getMGroupStartTime();
         Mockito.doReturn(7).when(l0SlicePatternSettings).getMGroupStopTime();
+        Mockito.doReturn(
+        		"^([0-9a-zA-Z]{2})([0-9a-zA-Z]){1}_(SM|IW|EW)_RAW__0([0-9a-zA-Z_]{3})_([0-9a-zA-Z]{15})_([0-9a-zA-Z]{15})_([0-9a-zA-Z_]{6})\\w{1,}\\.SAFE$")
+                .when(l0SlicePatternSettings).getSeaCoverageCheckPattern();
         this.mockProcessSettings();
 
         // Mock the MQI service

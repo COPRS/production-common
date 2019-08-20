@@ -74,6 +74,7 @@ process:
   loglevelstdout: DEBUG
   loglevelstderr: INFO
   processingstation: WILE
+  min-sea-coverage-percentage : 0
   outputregexps: 
     SM_RAW__0S: ^S1[A-B]_S[1-6]_RAW__0S.*$
     AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$
@@ -94,6 +95,7 @@ process:
     
 pattern-l0-slices:
   regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
+  sea-coverage-check-pattern: "^([0-9a-zA-Z]{2})([0-9a-zA-Z]){1}_(SM|IW|EW)_RAW__0([0-9a-zA-Z_]{3})_([0-9a-zA-Z]{15})_([0-9a-zA-Z]{15})_([0-9a-zA-Z_]{6})\\w{1,}\\.SAFE(/.*)?$"
   m-group-sat-id: 2
   m-group-mission-id: 1
   m-group-acquisition: 4

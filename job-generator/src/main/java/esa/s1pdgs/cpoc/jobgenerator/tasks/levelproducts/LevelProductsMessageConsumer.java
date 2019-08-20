@@ -47,6 +47,8 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
      */
     private final Pattern l0SLicesPattern;
     
+    private final Pattern seaCoverageCheckPattern;
+    
     /**
      * 
      */
@@ -70,6 +72,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         this.patternSettings = patternSettings;
         this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
                 Pattern.CASE_INSENSITIVE);
+        this.seaCoverageCheckPattern = Pattern.compile(patternSettings.getSeaCoverageCheckPattern());
         this.metadataService = metadataService;
     }
 
@@ -97,26 +100,39 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
         try {
-            // Check if a job is already created for message identifier
             LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job", productName);
-            reporting.reportStart("Start job generation using " + mqiMessage.getBody().getProductName());
-            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
+            reporting.reportStart("Start job generation using " + productName);
             
-            if (appDataJob != null) {
-                productName = appDataJob.getProduct().getProductName();
-
-                // Dispatch job
-                step++;
-                LOGGER.info(
-                        "[MONITOR] [step 2] [productName {}] Dispatching product",
-                        productName);
-                if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
-                    appDataJob.setState(AppDataJobDtoState.DISPATCHING);
-                    appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
-                            appDataJob, false, false, false);
+            // S1PRO-483: check for matching products if they are over sea. If not, simply skip the
+            // production
+            if (seaCoverageCheckPattern.matcher(productName).matches()) {
+            	final Reporting reportingSeaCheck = reportingFactory.newReporting(1);
+            	reportingSeaCheck.reportStart("Start checking if " + productName + " is over sea");            	
+            	if (metadataService.getSeaCoverage(productName) > processSettings.getMinSeaCoveragePercentage()) {
+            		reportingSeaCheck.reportStop("Skip job generation using " + productName + " (not over ocean)");
+                    ackPositively(appStatus.getStatus().isStopping(), mqiMessage, productName);
+                    reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
+                    return;
                 }
-                jobsDispatcher.dispatch(appDataJob);
+               	reportingSeaCheck.reportStart("End checking if " + productName + " is over sea"); 
+            }        	
+        	
+            // Check if a job is already created for message identifier
+            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
+            productName = appDataJob.getProduct().getProductName();
+
+            // Dispatch job
+            step++;
+            LOGGER.info(
+                    "[MONITOR] [step 2] [productName {}] Dispatching product",
+                    productName);
+            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
+                appDataJob.setState(AppDataJobDtoState.DISPATCHING);
+                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
+                        appDataJob, false, false, false);
             }
+            jobsDispatcher.dispatch(appDataJob);
+
             // Ack
             step++;
             ackOk = true;
@@ -154,11 +170,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
                         "Don't match with regular expression "
                                 + this.patternSettings.getRegexp());
             }
-            
-            if (metadataService.getSeaCoverage(leveldto.getProductName()) > 0) {
-            	
-            }
-            
+
             final String satelliteId = m.group(this.patternSettings.getMGroupSatId());
             final String missionId = m.group(this.patternSettings.getMGroupMissionId());
             final String acquisition = m.group(this.patternSettings.getMGroupAcquisition());
