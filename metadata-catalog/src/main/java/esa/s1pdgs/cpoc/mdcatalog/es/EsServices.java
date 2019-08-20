@@ -621,6 +621,7 @@ public class EsServices {
 			}
 		}
 		r.setStartTime(source.getOrDefault("startTime", "NOT_FOUND").toString());
+		r.setSessionId(source.getOrDefault("sessionId", "NOT_FOUND").toString());
 		r.setStopTime(source.getOrDefault("stopTime", "NOT_FOUND").toString());
 		r.setStationCode(source.getOrDefault("stationCode", "NOT_FOUND").toString());
 		r.setSatelliteId(source.getOrDefault("satelliteId", "NOT_FOUND").toString());

@@ -133,7 +133,7 @@ public class L0AppConsumerTest {
         
         // Mock metadata service
         Mockito.doAnswer(i -> {
-        	return new EdrsSessionMetadata("name", "type", "kobs", "start", "stop", "vstart", "vstop", "mission", "satellite", "station",
+        	return new EdrsSessionMetadata("name", "type", "kobs", "session", "start", "stop", "vstart", "vstop", "mission", "satellite", "station",
         			Arrays.<String>asList("DCS_02_L20171109175634707000125_ch1_DSDB_00001.raw",
         			"DCS_02_L20171109175634707000125_ch1_DSDB_00002.raw",
         			"DCS_02_L20171109175634707000125_ch1_DSDB_00003.raw",

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.metadata.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -12,25 +13,16 @@ import java.util.stream.Collectors;
  */
 public class EdrsSessionMetadata extends AbstractMetadata {
 
-	/**
-     * Start time
-     */
+    protected String sessionId;
     protected String startTime;
-    
-    /**
-     * Stop time
-     */
     protected String stopTime;
-    
-    /**
-     * Raw names
-     */
-    protected List<String> rawNames;
+    protected List<String> rawNames = Collections.emptyList();
     
 	/**
 	 * @param productName
 	 * @param productType
 	 * @param keyObjectStorage
+	 * @param sessionId
 	 * @param startTime
 	 * @param stopTime
 	 * @param validityStart
@@ -40,10 +32,11 @@ public class EdrsSessionMetadata extends AbstractMetadata {
      * @param stationCode
      * @param rawNames
 	 */
-	public EdrsSessionMetadata(final String productName, final String productType, final String keyObjectStorage,
+	public EdrsSessionMetadata(final String productName, final String productType, final String keyObjectStorage, final String sessionId,
 			final String startTime, final String stopTime, final String validityStart, final String validityStop,
 			final String missionId, final String satelliteId, final String stationCode, final List<String> rawNames) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
+		this.sessionId = sessionId;
 		this.startTime = startTime;
 		this.stopTime = stopTime;
 		this.rawNames = null == rawNames ? Collections.emptyList() : rawNames;
@@ -95,9 +88,24 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 		this.rawNames = rawNames;
 	}
 
+	
+	/**
+	 * @return the sessionId
+	 */
+	public String getSessionId() {
+		return sessionId;
+	}
+	
+	/**
+	 * @param sessionId the sessionId to set
+	 */
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+	
 	public String toJsonString() {
 		String superToString = super.toAbstractString();
-		return String.format("{%s,\"startTime\":\"%s\",\"stopTime\":\"%s\",\"rawNames\":[%s]}", superToString, startTime, stopTime, rawNames.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")));
+		return String.format("{%s,\"sessionId\":\"%s\",\"startTime\":\"%s\",\"stopTime\":\"%s\",\"rawNames\":[%s]}", superToString, sessionId, startTime, stopTime, rawNames.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")));
 	}
 	
 	/**
@@ -105,7 +113,7 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), startTime, stopTime, rawNames);
+		return Objects.hash(super.hashCode(), sessionId, startTime, stopTime, rawNames);
 	}
 
 	/**
@@ -120,7 +128,7 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 			ret = false;
 		} else {
 			EdrsSessionMetadata other = (EdrsSessionMetadata) obj;
-			ret = super.equals(other) && Objects.equals(startTime, other.startTime) && Objects.equals(stopTime, other.stopTime)
+			ret = super.equals(other) && Objects.equals(sessionId, other.sessionId) && Objects.equals(startTime, other.startTime) && Objects.equals(stopTime, other.stopTime)
 					&& Objects.equals(rawNames, other.rawNames);
 		}
 		return ret;
