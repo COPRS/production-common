@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
@@ -29,6 +32,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 
 public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
 
+	private static final Logger LOGGER = LogManager.getLogger(L0AppJobsGenerator.class);
+	
 	private Map<String,Map<String,String>> aiopProperties;
 	
     public L0AppJobsGenerator(XmlConverter xmlConverter,
@@ -106,12 +111,14 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     	AbstractJobOrderConf conf = job.getJobOrder().getConf();
     	AppDataJobProductDto product = job.getAppDataJob().getProduct();
     	boolean reprocessing = false; // currently no reprocessing supported
+    	LOGGER.info("Configuring AIOP with station parameters for stationCode {} for product {}", product.getStationCode(), product.getProductName());
 
     	// collect parameters
     	Map<String,String> aiopParams = new HashMap<>();
     	aiopParams.put("Mission_Id", product.getMissionId() + product.getSatelliteId());
     	aiopParams.put("Processing_Station", product.getStationCode());
-    	// aiopParams.put("DownlinkTime", ); // TODO retrieve this from catalog metadata
+    	aiopParams.put("Start_Time", product.getStartTime());
+    	aiopParams.put("Stop_Time", product.getStopTime());
     	for (Entry<String,String> entrySet : aiopProperties.get(product.getStationCode()).entrySet()) {
     		switch(entrySet.getKey()) {
     			case "Processing_Mode":
