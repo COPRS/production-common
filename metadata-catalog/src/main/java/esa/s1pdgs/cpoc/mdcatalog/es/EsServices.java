@@ -45,6 +45,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -792,13 +793,21 @@ public class EsServices {
 	
 	@SuppressWarnings("unchecked")
 	public int getSeaCoverage(ProductFamily family, String productName) throws MetadataNotPresentException {		
-		try {
-			final GetResponse response = elasticsearchDAO.get(
-					new GetRequest(family.name().toLowerCase(), indexType, productName)
+		try {			
+			// dirty workaround to wait for the product to arrive
+			final GetResponse response = Retries.performWithRetries(
+					() -> {
+						final GetResponse resp = elasticsearchDAO.get(
+								new GetRequest(family.name().toLowerCase(), indexType, productName)
+						);
+						if (!resp.isExists()) {
+							throw new MetadataNotPresentException(productName);				
+						}	
+						return resp;
+					}, 
+					20, 
+					10000L
 			);
-			if (!response.isExists()) {
-				throw new MetadataNotPresentException(productName);				
-			}	
 			
 			// TODO FIXME this needs to be fixed to use a proper abstraction  			
 			final Map<String,Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
