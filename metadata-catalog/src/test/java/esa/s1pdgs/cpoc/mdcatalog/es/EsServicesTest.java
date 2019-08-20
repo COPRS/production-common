@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.elasticsearch.action.get.GetRequest;
@@ -446,13 +447,20 @@ public class EsServicesTest{
 		expectedResult.setProductName("name");
 		expectedResult.setProductType("type");
 		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setSessionId("session");
+		expectedResult.setMissionId("mission");
 		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
 		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+		expectedResult.setStartTime("2000-01-01T00:00:00.000000Z");
+		expectedResult.setStopTime("2001-01-01T00:00:00.000000Z");
+		expectedResult.setSatelliteId("satellite");
+		expectedResult.setStationCode("station");
+		expectedResult.setRawNames(Collections.emptyList());
 		
 		//Response 
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-		        + ":\"url\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
-		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
+		        + ":\"url\",\"sessionId\":\"session\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":\"2001-01-01T00:00:00.000000Z\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\", \"missionId\":\"mission\",\"satelliteId\":\"satellite\",\"stationCode\":\"station\"}");
 		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		

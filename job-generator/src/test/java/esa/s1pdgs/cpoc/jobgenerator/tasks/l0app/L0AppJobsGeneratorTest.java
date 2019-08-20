@@ -265,6 +265,7 @@ public class L0AppJobsGeneratorTest {
                 if (productName.contains("ch1")) {
                     return new EdrsSessionMetadata(productName, "RAW",
                             "S1A/L20171109175634707000125/ch01/" + productName,
+                            "session",
                             null, null,
                             null, null,
                             "S1",
@@ -274,6 +275,7 @@ public class L0AppJobsGeneratorTest {
                 } else {
                     return new EdrsSessionMetadata(productName, "RAW",
                             "S1A/L20171109175634707000125/ch02/" + productName,
+                            "session",
                             null, null,
                             null, null,
                             "S1",

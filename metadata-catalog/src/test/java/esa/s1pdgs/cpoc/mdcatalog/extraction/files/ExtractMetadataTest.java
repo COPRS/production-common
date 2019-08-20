@@ -419,6 +419,7 @@ public class ExtractMetadataTest {
                     expectedResult.get("missionId").toString(),
                     result.get("missionId").toString());
         } catch (AbstractCodedException fe) {
+        	fe.printStackTrace();
             fail("Exception occurred: " + fe.getMessage());
         }
     }

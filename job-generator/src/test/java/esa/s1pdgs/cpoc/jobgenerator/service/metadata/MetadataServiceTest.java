@@ -84,6 +84,7 @@ public class MetadataServiceTest {
         EdrsSessionMetadata expectedFile = new EdrsSessionMetadata(
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw", "RAW",
                 "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
+                "sessionId",
                 null, null,
                 "2017-12-01T22:15:30", "2017-12-02T22:15:30",
                 "S1",
@@ -109,6 +110,7 @@ public class MetadataServiceTest {
         EdrsSessionMetadata expectedFile = new EdrsSessionMetadata(
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw", "RAW",
                 "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
+                "sessionId",
                 null, null,
                 "2017-12-01T22:15:30", "2017-12-02T22:15:30",
                 "S1",

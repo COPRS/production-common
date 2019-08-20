@@ -58,6 +58,7 @@ public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 		response.setProductName("name");
 		response.setProductType("type");
 		response.setKeyObjectStorage("kobs");
+		response.setSessionId("session");
 		response.setStartTime("start");
 		response.setStopTime("stop");
 		response.setValidityStart("vstart");
@@ -67,7 +68,7 @@ public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {
 		response.setStationCode("station");
 		response.setRawNames(Arrays.<String>asList("a","b","c"));
 		this.mockGetEdrsSession(response);
-		EdrsSessionMetadata expectedResult = new EdrsSessionMetadata("name", "type", "kobs", "start", "stop", "vstart", "vstop", "mission", "satellite", "station", Arrays.<String>asList("a","b","c"));
+		EdrsSessionMetadata expectedResult = new EdrsSessionMetadata("name", "type", "kobs", "session", "start", "stop", "vstart", "vstop", "mission", "satellite", "station", Arrays.<String>asList("a","b","c"));
 		MvcResult result = request(get("/edrsSession/type/name")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 		assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());

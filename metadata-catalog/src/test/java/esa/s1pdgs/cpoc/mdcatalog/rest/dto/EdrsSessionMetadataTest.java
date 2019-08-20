@@ -11,7 +11,7 @@ import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
-public class EdrsSessionMetadataDtoTest {
+public class EdrsSessionMetadataTest {
 
 	/**
 	 * Test toString
@@ -19,9 +19,9 @@ public class EdrsSessionMetadataDtoTest {
 	//String productName, String productType, String keyObjectStorage, String validityStart,String validityStop
 	@Test
 	public void testToString() {
-		EdrsSessionMetadata obj = new EdrsSessionMetadata("name", "type", "kobs", "start", "stop", "vstart", "vstop", "mission", "satellite", "station", Arrays.<String>asList("a","b","c"));
+		EdrsSessionMetadata obj = new EdrsSessionMetadata("name", "type", "kobs", "session", "start", "stop", "vstart", "vstop", "mission", "satellite", "station", Arrays.<String>asList("a","b","c"));
 		
-		String str = obj.toJsonString(); 
+		String str = obj.toJsonString(); System.out.println(str);
 		assertTrue(str.contains("\"productName\":\"name\""));
 		assertTrue(str.contains("\"productType\":\"type\""));
 		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
