@@ -119,11 +119,13 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> {
 			try {
 				final List<JSONObject> landMasks = new LandMaskExtractor().extract(metadataFile);
 				LOGGER.info("Uploading {} land mask polygons", landMasks.size());
+				int c=0;
 				for (JSONObject land : landMasks) {
 					LOGGER.debug("Uploading land mask for {}", land.getString("name"));
 					LOGGER.trace("land mask json: {}",land.toString());
-					esServices.createGeoMetadata(land);
+					esServices.createGeoMetadata(land,"land_"+c);
 					LOGGER.debug("Uploading land mask finished for {}", land.getString("name"));
+					c++;
 				}
 			} catch (Exception ex) {
 				LOGGER.error("An error occured while ingesting land mark documents: {}", LogUtils.toString(ex));
