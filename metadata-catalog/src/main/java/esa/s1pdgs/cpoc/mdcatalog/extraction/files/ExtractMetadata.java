@@ -723,20 +723,18 @@ public class ExtractMetadata {
 		try {
 			JSONObject metadataJSONObject = new JSONObject();
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productType",
-					descriptor.getEdrsSessionFileType().name());
-			metadataJSONObject.put("sessionId",
-					descriptor.getSessionIdentifier());
+			metadataJSONObject.put("productType", descriptor.getEdrsSessionFileType().name());
+			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("stationCode", descriptor.getStationCode());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", DateUtils
-					.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-			metadataJSONObject.put("productFamily",
-					descriptor.getProductFamily().name());
+			metadataJSONObject.put("insertionTime",
+					DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
+			metadataJSONObject.put("productFamily",	descriptor.getProductFamily().name());
 			
-			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(new File(localDirectory, descriptor.getRelativePath()).getPath());
+			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(
+					new File(localDirectory, descriptor.getRelativePath()).getPath());
 			
 			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(
 					edrsSessionFile.getStartTime(), EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
@@ -749,6 +747,7 @@ public class ExtractMetadata {
 
 			return metadataJSONObject;
 		} catch (JSONException | IOException | JAXBException e) {
+			LOGGER.error("Extraction of session file metadata failed", e);
 			throw new MetadataExtractionException(e);
 		}
 	}
