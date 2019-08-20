@@ -150,6 +150,25 @@ public class EsServices {
 			throw new Exception(e);
 		}
 	}
+	
+	public void createGeoMetadata(JSONObject product) throws Exception {
+		try {
+			String landName = product.getString("name");
+
+			// indexType is usually "metadata"
+			IndexRequest request = new IndexRequest("landmask", indexType, landName).source(product.toString(),
+					XContentType.JSON);
+
+			IndexResponse response = elasticsearchDAO.index(request);
+
+			if (response.status() != RestStatus.CREATED) {
+				throw new MetadataCreationException(landName, response.status().toString(),
+						response.getResult().toString());
+			}
+		} catch (JSONException | IOException e) {
+			throw new Exception(e);
+		}
+	}
 
 	/**
 	 * Function which return the product that correspond to the lastValCover
