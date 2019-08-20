@@ -339,7 +339,7 @@ public class S3ObsServices {
   
                 Upload upload = s3tm.upload(bucketName, keyName, uploadFile);
                 upload.addProgressListener((ProgressEvent progressEvent) -> {
-                    log(String.format(
+                	LOGGER.trace(String.format(
                             "Uploading object %s in bucket %s: progress %s",
                             keyName, bucketName, progressEvent.toString()));
                 });

@@ -152,9 +152,9 @@ public class EsServices {
 		}
 	}
 	
-	public void createGeoMetadata(JSONObject product) throws Exception {
+	public void createGeoMetadata(JSONObject product, String landName) throws Exception {
 		try {
-			String landName = product.getString("name");
+//			String landName = product.getString("name");
 
 			// indexType is usually "metadata"
 			IndexRequest request = new IndexRequest("landmask", indexType, landName).source(product.toString(),

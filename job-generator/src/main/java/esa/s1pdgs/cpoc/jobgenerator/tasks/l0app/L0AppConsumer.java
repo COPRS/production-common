@@ -157,7 +157,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                     appDataService.findByProductSessionId(mqiMessage.getBody().getSessionId());
 
             if (CollectionUtils.isEmpty(existingJobsForSession)) {
-
+            	LOGGER.debug ("== creating jobDTO from {}",mqiMessage ); 
                 // Create the JOB
                 AppDataJobDto<EdrsSessionDto> jobDto = new AppDataJobDto<>();
                 // General details
@@ -167,8 +167,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 jobDto.getMessages().add(mqiMessage);
                 // Product
                 AppDataJobProductDto productDto = new AppDataJobProductDto();
+                productDto.setSessionId(mqiMessage.getBody().getSessionId());
                 productDto.setMissionId(edrsSessionMetadata.getMissionId());
-                productDto.setStationCode(edrsSessionMetadata.getStationCode());
+                productDto.setStationCode(mqiMessage.getBody().getStationCode());
                 productDto.setProductName(mqiMessage.getBody().getSessionId());
                 productDto
                         .setSatelliteId(mqiMessage.getBody().getSatelliteId());
@@ -176,10 +177,12 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 productDto.setStopTime(edrsSessionMetadata.getStopTime());
 
                 if (mqiMessage.getBody().getChannelId() == 1) {
+                    LOGGER.debug ("== ch1 ");    
                     productDto.setRaws1(edrsSessionMetadata.getRawNames().stream().map(
                             s -> new AppDataJobFileDto(s))
                     		.collect(Collectors.toList()));
                 } else {
+                	LOGGER.debug ("== ch2 ");
                     productDto.setRaws2(edrsSessionMetadata.getRawNames().stream().map(
                             s -> new AppDataJobFileDto(s))
                             .collect(Collectors.toList()));
@@ -187,6 +190,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
 
                 jobDto.setProduct(productDto);
                
+                LOGGER.debug ("== jobDTO {}",jobDto.toString());
                 return appDataService.newJob(jobDto);
 
             } else {
@@ -203,23 +207,32 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 }
                 final List<GenericMessageDto<EdrsSessionDto>> mess = jobDto.getMessages();
                 
+                LOGGER.debug ("== existing message {}",mess.toString());
+                
 				final GenericMessageDto<EdrsSessionDto> firstMess = jobDto.getMessages().get(0);
                 
+				LOGGER.debug ("== firstMessage {}",firstMess.toString());
                 // Updates messages if needed
                 final EdrsSessionDto dto = firstMess.getBody();
                 
                 if (jobDto.getMessages().size() == 1 && dto.getChannelId() != mqiMessage.getBody().getChannelId()) {
+                	LOGGER.debug ("== existing message {}",jobDto.getMessages());
+                	
                     jobDto.getMessages().add(mqiMessage);
                     if (mqiMessage.getBody().getChannelId() == 1) {
                         jobDto.getProduct()
                                 .setRaws1(edrsSessionMetadata.getRawNames().stream()
                                         .map(s -> new AppDataJobFileDto(s))
                                         .collect(Collectors.toList()));
+                        
+                        LOGGER.debug ("== channel1 ");    
+                        
                     } else {
                         jobDto.getProduct()
                                 .setRaws2(edrsSessionMetadata.getRawNames().stream()
                                         .map(s -> new AppDataJobFileDto(s))
                                         .collect(Collectors.toList()));
+                        LOGGER.debug ("== channel2 ");
                     }
                     update = true;
                     updateMessage = true;

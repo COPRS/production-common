@@ -119,7 +119,16 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     	aiopParams.put("Processing_Station", product.getStationCode());
     	aiopParams.put("Start_Time", product.getStartTime());
     	aiopParams.put("Stop_Time", product.getStopTime());
-    	for (Entry<String,String> entrySet : aiopProperties.get(product.getStationCode()).entrySet()) {
+    	
+    	//FIXME
+    	String stationCode ="WILE";
+    	if (product.getStationCode() !=null)
+    	{
+    		LOGGER.warn("================== > stationCode is null, choosing deafult ");
+    		stationCode = product.getStationCode();
+    	}
+    	
+    	for (Entry<String,String> entrySet : aiopProperties.get(stationCode).entrySet()) {
     		switch(entrySet.getKey()) {
     			case "Processing_Mode":
     				if (!reprocessing) {
@@ -135,6 +144,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     				aiopParams.put(entrySet.getKey(), entrySet.getValue());
     		} 
     	}    	
+    	aiopParams.put("Processing_Station", stationCode);
     	
     	for (Entry<String, String> newParam : aiopParams.entrySet()) {
     		boolean found = false;
