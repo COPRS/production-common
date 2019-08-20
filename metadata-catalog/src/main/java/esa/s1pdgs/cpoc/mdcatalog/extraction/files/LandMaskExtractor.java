@@ -45,7 +45,7 @@ public class LandMaskExtractor {
 
 		for (int i = 0; i < jsonArray.length(); ++i) {
 			JSONObject obj = new JSONObject();
-			obj.put("name", jsonArray.getJSONObject(i).getJSONObject("properties").get("name"));
+			obj.put("name", jsonArray.getJSONObject(i).getJSONObject("properties").get("iso_a3"));
 			obj.put("geometry", jsonArray.getJSONObject(i).getJSONObject("geometry"));
 
 			result.add(obj);
