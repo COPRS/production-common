@@ -123,7 +123,7 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> {
 				for (JSONObject land : landMasks) {
 					LOGGER.debug("Uploading land mask for {}", land.getString("name"));
 					LOGGER.trace("land mask json: {}",land.toString());
-					esServices.createGeoMetadata(land,"land_"+c);
+					esServices.createGeoMetadata(land,"land"+c);
 					LOGGER.debug("Uploading land mask finished for {}", land.getString("name"));
 					c++;
 				}
