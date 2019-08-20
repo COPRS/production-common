@@ -1,9 +1,9 @@
 package esa.s1pdgs.cpoc.reqrepo.rest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -88,18 +89,19 @@ public class RequestRepositoryController {
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, path = "failedProcessings/{id}/restart")
-	public ModelApiResponse restartFailedProcessing(
+	public ApiResponse restartFailedProcessing(
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
 	) {
 		LOGGER.info("restart the failed processing with id {}", id);
 		assertValidApiKey(apiKey);				
+		final long idInt = parseId(id);
 		try {
-			requestRepository.restartAndDeleteFailedProcessing(parseId(id));
+			requestRepository.restartAndDeleteFailedProcessing(idInt);
 		} catch (IllegalArgumentException e) {
 			assertElementFound("failed processing", null, String.format("%s: %s", id, e));
 		}
-		return newModelApiResponse("restart");
+		return new ApiResponse("FailedProcessing", "restart", Collections.singletonList(idInt), Collections.emptyList());
 	}
 	
 	/**
@@ -110,19 +112,67 @@ public class RequestRepositoryController {
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.DELETE,  path = "failedProcessings/{id}")
-	public ModelApiResponse deleteFailedProcessing(
+	public ApiResponse deleteFailedProcessing(
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
 	) {
 		LOGGER.info("delete the failed processing with id {}", id);
 		assertValidApiKey(apiKey);
+		final long idInt = parseId(id);
 		try {
-			requestRepository.deleteFailedProcessing(parseId(id));
+			requestRepository.deleteFailedProcessing(idInt);
 		} catch (IllegalArgumentException e) {
 			assertElementFound("failed processing", null, id);
 		}
-		return newModelApiResponse("delete");
+		return new ApiResponse("FailedProcessing", "delete", Collections.singletonList(idInt), Collections.emptyList());
 	}
+	
+	@RequestMapping(method = RequestMethod.POST,  path = "failedProcessings/delete")
+	public ApiResponse deleteFailedProcessings(
+			@RequestHeader("ApiKey") final String apiKey,
+			@RequestBody final List<String> ids
+	) {
+		LOGGER.info("delete the failed processings with id {}", ids);
+		assertValidApiKey(apiKey);
+		
+		final List<Long> success = new ArrayList<>();
+		final List<Long> failed = new ArrayList<>();
+		
+		for (final String id : ids) {
+			final long idInt = parseId(id);
+			try {
+				requestRepository.deleteFailedProcessing(idInt);
+				success.add(idInt);
+			} catch (IllegalArgumentException e) {
+				failed.add(idInt);
+			}
+		}
+		return new ApiResponse("FailedProcessing", "delete", success, failed);
+	}
+	
+	@RequestMapping(method = RequestMethod.POST,  path = "failedProcessings/restart")
+	public ApiResponse restartFailedProcessings(
+			@RequestHeader("ApiKey") final String apiKey,
+			@RequestBody final List<String> ids
+	) {
+		LOGGER.info("restart the failed processings with id {}", ids);
+		assertValidApiKey(apiKey);
+		
+		final List<Long> success = new ArrayList<>();
+		final List<Long> failed = new ArrayList<>();
+		
+		for (final String id : ids) {
+			final long idInt = parseId(id);
+			try {
+				requestRepository.restartAndDeleteFailedProcessing(idInt);
+				success.add(idInt);
+			} catch (IllegalArgumentException e) {
+				failed.add(idInt);
+			}
+		}
+		return new ApiResponse("FailedProcessing", "restart", success, failed);
+	}
+	
 	
 	@RequestMapping(method = RequestMethod.GET, path = "processingTypes")
 	public List<String> getProcessingTypes(
@@ -191,16 +241,7 @@ public class RequestRepositoryController {
 			);
 		}
 	}
-	
-	static final ModelApiResponse newModelApiResponse(final String action)
-	{
-		final ModelApiResponse response = new ModelApiResponse();
-		response.setCode(UUID.randomUUID());
-		response.setType(action);
-		response.setMessage(action + " success");
-		return response;
-	}
-	
+
 	static final void assertValidApiKey(final String apiKey) throws RequestRepositoryControllerException {
 		if (!API_KEY.equals(apiKey)) {
 			throw new RequestRepositoryControllerException(
