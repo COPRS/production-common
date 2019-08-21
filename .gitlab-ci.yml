@@ -1,7 +1,7 @@
 image: docker:latest
 
 services:
-  - name: docker:dind
+  - name: docker:18.06dind
 
 variables:
   DOCKER_HOST: tcp://localhost:2375
