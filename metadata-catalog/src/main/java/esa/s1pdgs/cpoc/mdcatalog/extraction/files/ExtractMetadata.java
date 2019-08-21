@@ -756,6 +756,7 @@ public class ExtractMetadata {
 			File manifestFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 		try {
+			LOGGER.debug("extracting metadata for descriptor: {} ",descriptor);
 			// XSLT Transformation
 			String xsltFilename = this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST;
 			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
@@ -816,6 +817,7 @@ public class ExtractMetadata {
 			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
+			LOGGER.error("An error occured while extracting metadata {}",e.getMessage());
 			throw new MetadataExtractionException(e);
 		}
 	}
