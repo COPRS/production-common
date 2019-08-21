@@ -733,8 +733,10 @@ public class ExtractMetadata {
 					DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			metadataJSONObject.put("productFamily",	descriptor.getProductFamily().name());
 			
-			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(
-					new File(localDirectory, descriptor.getRelativePath()).getName());
+			final String name = new File(descriptor.getRelativePath()).getName();
+			final File file = new File(localDirectory, name);
+			
+			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(file.getPath());
 			
 			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(
 					edrsSessionFile.getStartTime(), EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
