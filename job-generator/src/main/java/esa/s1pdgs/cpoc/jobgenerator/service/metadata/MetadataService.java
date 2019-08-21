@@ -144,12 +144,12 @@ public class MetadataService {
         }
     }
     
-	public int getSeaCoverage(String productName) throws JobGenMetadataException {
+	public int getSeaCoverage(ProductFamily family, String productName) throws JobGenMetadataException {
 		int notAvailableRetries = 10;
 		
+	    String uri = this.uriL0Slice + "/" + family + "/" + productName + "/seaCoverage";
         for (int retries = 0;; retries++) {
-            try {
-                String uri = this.uriL0Slice + "/" + productName + "/seaCoverage";
+            try {          
                 LOGGER.debug("Call rest metadata on {}", uri);
 
                 ResponseEntity<Integer> response = this.restTemplate.exchange(
