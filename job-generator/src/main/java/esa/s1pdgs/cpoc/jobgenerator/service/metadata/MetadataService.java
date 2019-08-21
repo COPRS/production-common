@@ -188,6 +188,7 @@ public class MetadataService {
                 	
                 } else if (response != null) {
                     final Integer res = response.getBody();
+                    LOGGER.debug("Got coverage {}", res);
                     
                     if (res == null) {
                     	throw new JobGenMetadataException("getSeaCoverage returned null");
