@@ -796,7 +796,8 @@ public class ExtractMetadata {
 
 			if (productType.contains("GP_RAW_")
 					|| productType.contains("HK_RAW_")) {
-
+				metadataJSONObject.remove("segmentCoordinates");
+				LOGGER.debug("segment coordinates removed for product {}",descriptor.getFilename());
 				// no coord
 			} else {
 
