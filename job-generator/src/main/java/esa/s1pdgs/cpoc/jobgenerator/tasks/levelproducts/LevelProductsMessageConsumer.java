@@ -110,7 +110,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             if (seaCoverageCheckPattern.matcher(productName).matches()) {
             	final Reporting reportingSeaCheck = reportingFactory.newReporting(1);
             	reportingSeaCheck.reportStart("Start checking if " + productName + " is over sea");            	
-            	if (metadataService.getSeaCoverage(family, productName) > processSettings.getMinSeaCoveragePercentage()) {
+            	if (metadataService.getSeaCoverage(family, productName) >= processSettings.getMinSeaCoveragePercentage()) {
             		reportingSeaCheck.reportStop("Skip job generation using " + productName + " (not over ocean)");
                     ackPositively(appStatus.getStatus().isStopping(), mqiMessage, productName);
                     reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
