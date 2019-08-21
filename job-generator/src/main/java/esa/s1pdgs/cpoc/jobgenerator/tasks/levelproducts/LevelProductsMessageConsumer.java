@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -96,6 +97,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         boolean ackOk = false;
         String errorMessage = "";
         String productName = mqiMessage.getBody().getProductName();
+        ProductFamily family = mqiMessage.getBody().getFamily();
 
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
@@ -108,7 +110,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             if (seaCoverageCheckPattern.matcher(productName).matches()) {
             	final Reporting reportingSeaCheck = reportingFactory.newReporting(1);
             	reportingSeaCheck.reportStart("Start checking if " + productName + " is over sea");            	
-            	if (metadataService.getSeaCoverage(productName) > processSettings.getMinSeaCoveragePercentage()) {
+            	if (metadataService.getSeaCoverage(family, productName) > processSettings.getMinSeaCoveragePercentage()) {
             		reportingSeaCheck.reportStop("Skip job generation using " + productName + " (not over ocean)");
                     ackPositively(appStatus.getStatus().isStopping(), mqiMessage, productName);
                     reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
