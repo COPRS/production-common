@@ -846,7 +846,7 @@ public class EsServices {
 				return 0;
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException("Failed to check for sea coverage", e);
 		}
 		return 100;
 	}
