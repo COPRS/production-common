@@ -790,11 +790,25 @@ public class ExtractMetadata {
 					throw new MetadataMalformedException("validityStopTime");
 				}
 			}
+			
 
-			if (metadataJSONObject.has("segmentCoordinates")) {
-				metadataJSONObject.put("segmentCoordinates", processCoordinates(
-						manifestFile, descriptor,
-						metadataJSONObject.getString("segmentCoordinates")));
+			String productType = descriptor.getProductType();
+
+			if (productType.contains("GP_RAW_")
+					|| productType.contains("HK_RAW_")) {
+
+				// no coord
+			} else {
+
+				if (metadataJSONObject.has("segmentCoordinates")) {
+					final String coords = metadataJSONObject
+							.getString("segmentCoordinates");
+					if (!coords.trim().isEmpty()) {
+						metadataJSONObject.put("segmentCoordinates",
+								processCoordinates(manifestFile, descriptor,
+										coords));
+					}
+				}
 			}
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass",
@@ -819,7 +833,6 @@ public class ExtractMetadata {
 			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
-			LOGGER.error("An error occured while extracting metadata {}",e.getMessage());
 			throw new MetadataExtractionException(e);
 		}
 	}
