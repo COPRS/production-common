@@ -122,10 +122,11 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     	
     	//FIXME
     	String stationCode ="WILE";
-    	if (product.getStationCode() !=null)
-    	{
-    		LOGGER.warn("================== > stationCode is null, choosing deafult ");
+    	if (product.getStationCode() !=null) {
     		stationCode = product.getStationCode();
+    		LOGGER.info("**** stationCode found: " + stationCode + " ****");    		
+    	} else {
+    		LOGGER.warn("**** stationCode is null, choosing default ****");    		
     	}
     	
     	for (Entry<String,String> entrySet : aiopProperties.get(stationCode).entrySet()) {
