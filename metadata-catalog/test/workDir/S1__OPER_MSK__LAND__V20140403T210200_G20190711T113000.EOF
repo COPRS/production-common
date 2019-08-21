@@ -13,7 +13,7 @@
 			<File_Type>MSK__LAND_</File_Type>
 			<Validity_Period>
 				<Validity_Start>UTC=2014-04-03T21:02:00</Validity_Start>
-				<Validity_Stop>UTC=2099-31-12T00:00:00</Validity_Stop>
+				<Validity_Stop>UTC=9999-12-31T00:00:00</Validity_Stop>
 			</Validity_Period>
 			<File_Version>0001</File_Version>
 			<EOFFS_Version>3.0</EOFFS_Version>
