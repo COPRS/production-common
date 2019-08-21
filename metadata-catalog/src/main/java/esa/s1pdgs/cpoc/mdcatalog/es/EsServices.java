@@ -793,21 +793,13 @@ public class EsServices {
 	
 	@SuppressWarnings("unchecked")
 	public int getSeaCoverage(ProductFamily family, String productName) throws MetadataNotPresentException {		
-		try {			
-			// dirty workaround to wait for the product to arrive
-			final GetResponse response = Retries.performWithRetries(
-					() -> {
-						final GetResponse resp = elasticsearchDAO.get(
-								new GetRequest(family.name().toLowerCase(), indexType, productName)
-						);
-						if (!resp.isExists()) {
-							throw new MetadataNotPresentException(productName);				
-						}	
-						return resp;
-					}, 
-					20, 
-					10000L
+		try {	
+			final GetResponse response = elasticsearchDAO.get(
+					new GetRequest(family.name().toLowerCase(), indexType, productName)
 			);
+			if (!response.isExists()) {
+				throw new MetadataNotPresentException(productName);				
+			}	
 			
 			// TODO FIXME this needs to be fixed to use a proper abstraction  			
 			final Map<String,Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
@@ -831,12 +823,12 @@ public class EsServices {
 					"geometry", 
 					new PolygonBuilder(coordBuilder)
 			);
-			LOGGER.trace("Using {}", queryBuilder);			
+			LOGGER.debug("Using {}", queryBuilder);			
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(200);
 		
-			final SearchRequest request = new SearchRequest(family.name().toLowerCase());
+			final SearchRequest request = new SearchRequest("landmask");
 			request.types(landmaskIndexType);
 			request.source(sourceBuilder);
 			
