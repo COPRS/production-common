@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
@@ -35,6 +36,24 @@ public class L0SliceMetadataController {
 	public L0SliceMetadataController(final EsServices esServices) {
 		this.esServices = esServices;
 	}
+	
+    
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}/seaCoverage")
+    public ResponseEntity<Integer> getSeaCoverage(
+            @PathVariable(name = "family") ProductFamily family,
+            @PathVariable(name = "productName") String productName) {
+        try {
+			return new ResponseEntity<>(esServices.getSeaCoverage(family, productName), HttpStatus.OK);
+        } catch (MetadataNotPresentException em) {
+            LOGGER.warn("[{}] [productName {}] [code {}] {}", family, productName, 
+            		em.getCode().getCode(), em.getLogMessage());            
+            return new ResponseEntity<Integer>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            LOGGER.error("[{}] [productName {}] [code {}] [msg {}]", family, productName, 
+            		ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
+            return new ResponseEntity<Integer>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}")
 	public ResponseEntity<L0SliceMetadata> get(@PathVariable(name = "productName") String productName) {
