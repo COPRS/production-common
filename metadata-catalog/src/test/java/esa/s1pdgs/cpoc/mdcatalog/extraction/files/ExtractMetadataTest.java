@@ -201,6 +201,45 @@ public class ExtractMetadataTest {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
+    
+    @Test
+    public void testProcessLandMskFile() {
+
+        JSONObject expectedResult = new JSONObject(
+                "{\"validityStopTime\":\"9999-12-31T00:00:00.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2019-07-11T11:33:00.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-04-03T21:02:00.000000Z\",\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"productType\":\"MSK__LAND_\",\"productFamily\":\"AUXILIARY_FILE\"}");
+
+        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        descriptor.setExtension(FileExtension.EOF);
+        descriptor.setFilename(
+                "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
+        descriptor.setKeyObjectStorage(
+                "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
+        descriptor.setMissionId("S1");
+        descriptor.setSatelliteId("_");
+        descriptor.setProductClass("OPER");
+        descriptor.setProductName(
+                "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
+        descriptor.setProductType("MSK__LAND_");
+        descriptor.setRelativePath(
+                "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
+        descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
+
+        File file = new File(
+                "test/workDir/S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
+
+        try {
+            JSONObject result = extractor.processEOFFile(descriptor, file);
+
+            assertNotNull("JSON object should not be null", result);
+            assertEquals("JSON object are not equals", expectedResult.length(),
+                    result.length());
+            assertEquals("JSON object value validityStartTime are not equals",
+                    expectedResult.getString("validityStartTime"),
+                    result.getString("validityStartTime"));
+        } catch (AbstractCodedException fe) {
+            fail("Exception occurred: " + fe.getMessage());
+        }
+    }
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessEOFMissingFileFail()
