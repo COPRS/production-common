@@ -393,25 +393,32 @@ public class S3ObsServices {
     public int uploadDirectory(final String bucketName, final String keyName,
             final File uploadDirectory)
             throws S3ObsServiceException, S3SdkClientException {
+    	return uploadDirectory(bucketName, keyName, uploadDirectory, true);
+    }
+
+    private int uploadDirectory(final String bucketName, final String keyName,
+            final File uploadDirectory, boolean isBaseDirectory)
+            throws S3ObsServiceException, S3SdkClientException {
         int ret = 0;
         if (uploadDirectory.isDirectory()) {
             File[] childs = uploadDirectory.listFiles();
             if (childs != null) {
                 for (File child : childs) {
                     if (child.isDirectory()) {
-                        ret += this.uploadDirectory(bucketName,
-                                keyName + File.separator + child.getName(),
-                                child);
+                        ret += uploadDirectory(bucketName,
+                                keyName + File.separator + child.getName(), child, false);
                     } else {
-                        this.uploadFile(bucketName,
-                                keyName + File.separator + child.getName(),
-                                child);
+                        uploadFile(bucketName,
+                                keyName + File.separator + child.getName(), child);
                         ret += 1;
                     }
                 }
             }
+            if (isBaseDirectory) {
+            	// TODO retrieve MD5 information for all uploaded files and upload a file list named directoryname.md5sum
+            }
         } else {
-            this.uploadFile(bucketName, keyName, uploadDirectory);
+            uploadFile(bucketName, keyName, uploadDirectory);
             ret = 1;
         }
         return ret;

@@ -160,13 +160,13 @@ public interface ObsClient {
 	
 	File downloadFile(final ProductFamily family, final String key, final String targetDir) throws ObsException, ObsUnknownObject;
 	
-	void downloadFilesPerBatch(final List<ObsDownloadFile> filesToDownload) throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
+	void downloadFilesPerBatch(final List<ObsDownloadFile> filesToDownload) throws AbstractCodedException;
 	
 	void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException;
 	
 	void moveFile(final ProductFamily from, final ProductFamily to, final String key) throws ObsException;
 	
-	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException; // TODO: Rename S3DownloadFile to be generic
+	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException;
 	
 	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
 	
