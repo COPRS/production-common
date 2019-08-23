@@ -336,6 +336,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             List<AppDataJobDto<T>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
+            LOGGER.debug ("== run(), jobs {}", jobs.toString());
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
@@ -345,6 +346,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                     long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
                     job = new JobGeneration(appDataJob, taskTableXmlName);
+                    LOGGER.debug ("== new JobGeneration of job {}", job.toString());
                     switch (job.getGeneration().getState()) {
                         case INITIAL:                 
                             if (job.getGeneration().getLastUpdateDate() == null
@@ -386,7 +388,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 }
             }
         } catch (AbstractCodedException ace) {
-            LOGGER.error("{} CAnnot retrieve the current jobs: {}",
+            LOGGER.error("{} cannot retrieve the current jobs: {}",
                     this.prefixLogMonitor, ace.getLogMessage());
         }
 
@@ -400,6 +402,9 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         this.prefixLogMonitor, productName,
                         job.getGeneration().getState());
 
+                
+                LOGGER.debug ("== Trying job generation for job {}", job.toString());
+                
                 // Check primary input
                 if (job.getGeneration().getState() == AppDataJobGenerationDtoState.INITIAL) {
                  	final Reporting reportInit = reportingFactory

@@ -99,6 +99,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 reporting.reportStart("Start job generation using " + mqiMessage.getBody().getKeyObjectStorage());
                 
                 AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
+                LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
                 productName = appDataJob.getProduct().getProductName();
 
                 // Dispatch
@@ -112,6 +113,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                         appDataJob = appDataService.patchJob(
                                 appDataJob.getIdentifier(), appDataJob, false,
                                 false, false);
+                        LOGGER.debug ("== appDataJob(2) {}",appDataJob.toString());
                     }
                     jobsDispatcher.dispatch(appDataJob);
                 }
@@ -191,8 +193,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 jobDto.setProduct(productDto);
                
                 LOGGER.debug ("== jobDTO {}",jobDto.toString());
-                return appDataService.newJob(jobDto);
-
+                AppDataJobDto<EdrsSessionDto> newJobDto = appDataService.newJob(jobDto);
+                LOGGER.debug ("== newJobDto {}",newJobDto.toString());
+                return newJobDto;
             } else {
 
                 // Update pod if needed
@@ -200,6 +203,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 boolean updateMessage = false;
                 boolean updateProduct = false;
                 AppDataJobDto<EdrsSessionDto> jobDto = existingJobsForSession.get(0);
+                LOGGER.debug ("== existingJobsForSession.get(0) jobDto {}", jobDto.toString());
                 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
@@ -242,6 +246,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 if (update) {
                     jobDto = appDataService.patchJob(jobDto.getIdentifier(),
                             jobDto, updateMessage, updateProduct, false);
+                    LOGGER.debug ("== updated(1) jobDto {}", jobDto.toString());
                 }
                 // Return object
                 return jobDto;
@@ -254,6 +259,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             boolean updateMessage = false;
             boolean updateProduct = false;
             AppDataJobDto jobDto = existingJobs.get(0);
+            LOGGER.debug ("== existingJobs.get(0) jobDto {}", jobDto.toString());
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
@@ -263,8 +269,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             if (update) {
                 jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
                         updateMessage, updateProduct, false);
+                LOGGER.debug ("== updated(2) jobDto {}", jobDto.toString());
             }
-            // Retrun object
+            // Return object
             return jobDto;
         }
 
