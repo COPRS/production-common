@@ -292,27 +292,35 @@ public class SwiftObsServices {
 	 * @throws SwiftSdkClientException 
 	 * @throws SwiftObsServiceException 
      */
-	public int uploadDirectory(final String containerName, final String keyName,
-            final File uploadDirectory) throws SwiftObsServiceException, SwiftSdkClientException {
+	public int uploadDirectory(final String bucketName, final String keyName,
+            final File uploadDirectory)
+            throws SwiftObsServiceException, SwiftSdkClientException {
+    	return uploadDirectory(bucketName, keyName, uploadDirectory, true);
+    }
+	
+	private int uploadDirectory(final String containerName, final String keyName,
+            final File uploadDirectory, boolean isBaseDirectory)
+            		throws SwiftObsServiceException, SwiftSdkClientException {
 		int ret = 0;
         if (uploadDirectory.isDirectory()) {
             File[] childs = uploadDirectory.listFiles();
             if (childs != null) {
                 for (File child : childs) {
                     if (child.isDirectory()) {
-                        ret += this.uploadDirectory(containerName,
-                                keyName + File.separator + child.getName(),
-                                child);
+                        ret += uploadDirectory(containerName,
+                                keyName + File.separator + child.getName(), child, false);
                     } else {
-                        this.uploadFile(containerName,
-                                keyName + File.separator + child.getName(),
-                                child);
+                        uploadFile(containerName,
+                                keyName + File.separator + child.getName(), child);
                         ret += 1;
                     }
                 }
             }
+            if (isBaseDirectory) {
+            	// TODO retrieve MD5 information for all uploaded files and upload a file list named directoryname.md5sum
+            }
         } else {
-            this.uploadFile(containerName, keyName, uploadDirectory);
+            uploadFile(containerName, keyName, uploadDirectory);
             ret = 1;
         }
         return ret;
