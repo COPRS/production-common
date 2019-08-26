@@ -115,6 +115,7 @@ public class MetadataService {
                 ResponseEntity<EdrsSessionMetadata> response =
                         this.restTemplate.exchange(uri, HttpMethod.GET, null,
                                 EdrsSessionMetadata.class);
+                
                 if (response.getStatusCode() != HttpStatus.OK) {
                     if (retries < this.nbretry) {
                         LOGGER.warn(
