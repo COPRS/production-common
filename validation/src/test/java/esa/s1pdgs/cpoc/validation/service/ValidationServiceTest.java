@@ -100,7 +100,7 @@ public class ValidationServiceTest {
 		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");
 		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamily.AUXILIARY_FILE, localDateTimeStart, localDateTimeStop);
 		assertEquals(1, discrepancies);
 	}
@@ -133,7 +133,7 @@ public class ValidationServiceTest {
 		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");
 		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamily.AUXILIARY_FILE_ZIP, localDateTimeStart, localDateTimeStop);
 		assertEquals(0, discrepancies);
 	}
@@ -174,7 +174,7 @@ public class ValidationServiceTest {
 		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");
 		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamily.EDRS_SESSION, localDateTimeStart, localDateTimeStop);
 		assertEquals(1, discrepancies);
 	}
@@ -217,7 +217,7 @@ public class ValidationServiceTest {
 		doReturn(metadataResults).when(metadataService).query(family, localDateTimeStart, localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(family, startDate, stopDate);
 
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");
 		int discrepancies = validationService.validateProductFamily(reportingFactory, ProductFamily.L0_SLICE, localDateTimeStart, localDateTimeStop);
 		assertEquals(1, discrepancies);
 	}

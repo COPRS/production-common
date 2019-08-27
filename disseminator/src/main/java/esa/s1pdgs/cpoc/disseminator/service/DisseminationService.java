@@ -114,9 +114,8 @@ public class DisseminationService implements MqiListener<ProductDto> {
 	final void handleTransferTo(final GenericMessageDto<ProductDto> message, final String target) {		
 		final ProductDto product = message.getBody();
 		
-		final Reporting.Factory rf = new LoggerReporting.Factory(LOG, "Dissemination");
-		final Reporting reporting = rf.product(product.getFamily().toString(), product.getProductName())
-				.newReporting(0);
+		final Reporting.Factory rf = new LoggerReporting.Factory("Dissemination");
+		final Reporting reporting = rf.newReporting(0);
 		reporting.begin("Start dissemination of product to outbox " + target);
 		try {
 			assertExists(product);

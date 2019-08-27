@@ -82,7 +82,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
      */
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {
-    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L1JobGeneration"); 
+    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L1JobGeneration"); 
     	final Reporting reporting = reportingFactory.newReporting(0);
     	
         // First, consume message

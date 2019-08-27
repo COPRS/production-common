@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -213,10 +212,7 @@ public class LevelProductsExtractorTest {
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_SLICE);
 
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction").product(
-						ProductFamily.L0_SLICE.toString(),
-						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
 		for (String key : expected.keySet()) {
@@ -262,10 +258,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L0_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_ACN);
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction").product(
-						ProductFamily.L0_ACN.toString(),
-						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
 		for (String key : expected.keySet()) {
@@ -311,10 +304,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_SLICE);
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction").product(
-						ProductFamily.L1_SLICE.toString(),
-						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
 		for (String key : expected.keySet()) {
@@ -360,9 +350,7 @@ public class LevelProductsExtractorTest {
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_ACN);
 
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
-						.product(ProductFamily.L1_ACN.toString(), l1acnName);
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
 		for (String key : expected.keySet()) {
@@ -406,9 +394,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L2_SLICE);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L2_SLICE);
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
-						.product(ProductFamily.L2_SLICE.toString(), l2SliceName);
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
 		for (String key : expected.keySet()) {
@@ -452,11 +438,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L2_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L2_ACN);
-
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-				LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
-						.product(ProductFamily.L2_ACN.toString(), l2acnName);
-
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
 		for (String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {

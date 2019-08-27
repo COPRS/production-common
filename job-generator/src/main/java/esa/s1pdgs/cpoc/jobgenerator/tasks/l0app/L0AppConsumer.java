@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
@@ -56,10 +55,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
         this.metadataService = metadataService; 
     }
 
-    @SuppressWarnings("unchecked")
 	@Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {    	
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L0JobGeneration");   
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0JobGeneration");   
         
         // First, consume message
         GenericMessageDto<EdrsSessionDto> mqiMessage = readMessage();

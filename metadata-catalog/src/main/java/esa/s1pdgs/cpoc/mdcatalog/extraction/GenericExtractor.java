@@ -155,8 +155,7 @@ public abstract class GenericExtractor<T> {
         
         final String productName = extractProductNameFromDto(dto);
         
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "MetadataExtraction")
-        		.product(category.toString(), productName);
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("MetadataExtraction");
         
         final Reporting report = reportingFactory.newReporting(0);        
         report.begin("Starting metadata extraction");        
@@ -296,7 +295,6 @@ public abstract class GenericExtractor<T> {
     	throws AbstractCodedException
     {
         final Reporting reportDownload = reportingFactory
-            	.product(family.toString(), productName)        
             	.newReporting(1);
             
         reportDownload.begin("Starting download of " + keyObs + " to local directory " + this.localDirectory);

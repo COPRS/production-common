@@ -105,8 +105,7 @@ public abstract class AbstractFileProcessor<T> {
     }
 
 	private final void handleFile(final File file) {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Ingestion")
-				.product(extractor.getFamily(), file.getName());
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Ingestion");
 
 		final Reporting reportProcessing = reportingFactory.newReporting(0);
 		reportProcessing.begin(String.format("Start processing of %s", file.getName()));
@@ -137,8 +136,6 @@ public abstract class AbstractFileProcessor<T> {
 		try {
 			FileDescriptor descriptor = extractor.extractDescriptor(file);
 			productName = descriptor.getProductName();
-			reportingFactory.product(extractor.getFamily(), productName);
-
 			reportUpload.begin("Start uploading file " + file.getName() + " in OBS");
 
 			// Store in object storage

@@ -14,7 +14,6 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +23,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.test.SystemUtils;
 
 public class TaskCallableTest {
-	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(TaskCallableTest.class), "TestProcessing");
+	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestProcessing");
 	  
 	private File testDir;
 	private File ipf;

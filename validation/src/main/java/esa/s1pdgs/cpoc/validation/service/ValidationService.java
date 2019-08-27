@@ -45,7 +45,7 @@ public class ValidationService {
 	}
 
 	public int checkConsistencyForInterval() {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");
 		int discrepancies = 0;
 
 		Set<ProductFamily> families = properties.getFamilies().keySet();

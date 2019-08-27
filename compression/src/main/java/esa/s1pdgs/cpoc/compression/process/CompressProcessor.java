@@ -136,7 +136,7 @@ public class CompressProcessor {
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "CompressionProcessing");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("CompressionProcessing");
 
 		String workDir = properties.getWorkingDirectory();
 

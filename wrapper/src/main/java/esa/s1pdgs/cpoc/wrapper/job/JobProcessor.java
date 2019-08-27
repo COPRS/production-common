@@ -162,7 +162,7 @@ public class JobProcessor {
 		// Initialize processing
 		// ------------------------------------------------------
 		LevelJobDto job = message.getBody();
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobProcessing");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobProcessing");
 
 		/*
 		 * If the working directory provided by the job order is outside the expected

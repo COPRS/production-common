@@ -67,7 +67,7 @@ public class FileDownloader {
 		// message
 		ObsDownloadFile inputProduct = buildInput();
 
-		final Reporting reporting = new LoggerReporting.Factory(LOGGER, "FileDownloader").newReporting(0);
+		final Reporting reporting = new LoggerReporting.Factory("FileDownloader").newReporting(0);
 
 		reporting.begin("Start download of product to compress " + inputProduct);
 

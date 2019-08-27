@@ -379,8 +379,7 @@ public class OutputProcessor {
             if (i > 0) {
                 this.publishAccordingUploadFiles(reportingFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
             }
-            final Reporting report = reportingFactory
-        			.product(null, null)            			
+            final Reporting report = reportingFactory  			
         			.newReporting(2);
             try { 
             	report.begin("Start uploading batch " + i + " of outputs " + listProducts);
@@ -428,8 +427,7 @@ public class OutputProcessor {
             if (nextKeyUpload.startsWith(msg.getKeyObs())) {
                 stop = true;
             } else {
-            	final Reporting report = reportingFactory
-            			.product(null, msg.getProductName())            			
+            	final Reporting report = reportingFactory 			
             			.newReporting(1);
             	
             	report.begin("Start publishing message");
@@ -485,7 +483,7 @@ public class OutputProcessor {
      * @throws IOException
      */
     public void processOutput() throws AbstractCodedException {    	        
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "OutputHandling");
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("OutputHandling");
         
         // Extract files
         List<String> lines = extractFiles();

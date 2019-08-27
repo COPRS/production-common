@@ -112,7 +112,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
                                 + counter * properties.getWapTempoS()
                                 + " seconds");
             }
-            final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Processing");
+            final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Processing");
             
             final Reporting reporting = reportingFactory.newReporting(0);
             reporting.begin("Start " + appLevel + " processing");

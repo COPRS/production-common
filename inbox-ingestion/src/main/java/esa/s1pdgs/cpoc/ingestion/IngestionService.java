@@ -79,14 +79,12 @@ public class IngestionService {
 	}
 
 	public void onMessage(final GenericMessageDto<IngestionDto> message) {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOG, "Ingestion");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Ingestion");
 
 		final IngestionDto ingestion = message.getBody();
 		LOG.debug("received Ingestion: {}", ingestion.getProductName());
 
-		final Reporting reporting = reportingFactory
-				.product("not identified yet", ingestion.getProductName())
-				.newReporting(0);
+		final Reporting reporting = reportingFactory.newReporting(0);
 		reporting.begin("Start processing of " + ingestion.getProductName());
 
 		try {
@@ -106,9 +104,7 @@ public class IngestionService {
 		try {
 			final ProductFamily family = getFamilyFor(ingestion);
 
-			final Reporting reportObs = reportingFactory
-					// update family information
-					.product(family.toString(), ingestion.getProductName()).newReporting(1);
+			final Reporting reportObs = reportingFactory.newReporting(1);
 
 			reportObs.begin("Start uploading " + ingestion.getProductName() + " in OBS");
 
@@ -140,8 +136,7 @@ public class IngestionService {
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 
-			final Reporting reporting = reportingFactory
-					.product(product.getFamily().toString(), message.getBody().getProductName()).newReporting(3);
+			final Reporting reporting = reportingFactory.newReporting(3);
 
 			final ProductCategory category = ProductCategory.of(product.getFamily());
 			reporting.begin("Start publishing file " + message.getBody().getProductName() + " in topic");

@@ -1,10 +1,13 @@
 package esa.s1pdgs.cpoc.report;
 
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 /**
  * not thread safe
@@ -16,112 +19,121 @@ public final class LoggerReporting implements Reporting  {
 		private final Logger logger;	
 		private final String actionName;
 		private final UUID uuid;
-		
-		private String family = null;
-		private String productName = null;
 			
-		public Factory(final Logger logger, final String action) {
-			this.logger = logger;
+		public Factory(final String action) {
+			this.logger = REPORT_LOG;
 			this.actionName = action;
 			this.uuid = UUID.randomUUID();
 		}
-		
-		@Override
-		public final Factory product(final String family, final String productName)
-		{
-			this.family = family;
-			this.productName = productName;
-			return this;
-		}
-		
+
 		@Override
 		public final Reporting newReporting(final int step) {
-			final StringBuilder prefixBuilder = new StringBuilder();
-			
-			prefixBuilder
-				.append("[REPORT] [").append(uuid).append("] ")
-				.append("[s1pdgsTask ").append(actionName).append("] ");
-				
-			if (family != null) {
-				prefixBuilder.append("[family ").append(family).append("] ");
-			}
-			
-			if (productName != null) {
-				prefixBuilder.append("[productName ").append(productName).append("] ");
-			}
-			return new LoggerReporting(logger, prefixBuilder.toString() + "[step " + step + "] ");
+			return new LoggerReporting(logger, uuid.toString(), actionName, step);
 		}		
 	}
-
+	
 	private final Logger logger;
-	private final String prefix;
-	
+	private final String uid;
+	private final String taskName;
+	private final int step;
+		
 	private long actionStart;
-	
-	public LoggerReporting(Logger logger, String prefix) {
+
+	public LoggerReporting(Logger logger, String uid, String taskName, int step) {
 		this.logger = logger;
-		this.prefix = prefix;
+		this.uid = uid;
+		this.taskName = taskName;
+		this.step = step;
 	}
 
 	@Override
-	public final void begin(String comment)
+	public final void begin(final String comment, final Object... objects)
 	{
-		report(Level.INFO, "[START] " + comment);	
 		actionStart = System.currentTimeMillis();
+		report(Level.INFO, Event.begin, comment, objects);	
 	}
 	
 	@Override
-	public final void intermediate(String comment, final Object... objects)
+	public final void intermediate(final String comment, final Object... objects)
 	{
-		report(Level.DEBUG, comment, objects);	
+		report(Level.DEBUG, Event.intermediate, comment, objects);	
 	}
 	
 	@Override
-	public final void end(String comment)
-	{
-		final long stopTime = System.currentTimeMillis();
-		final long deltaTMillis = stopTime - actionStart;
-		
-		report(Level.INFO, "[STOP OK] [DURATION " + duration(deltaTMillis) + "] " + comment);	
+	public final void end(final String comment, final Object... objects) {
+		final long deltaTMillis =  System.currentTimeMillis() - actionStart;
+		ThreadContext.put("jsonAdditional", toJson(additionalJsonFields(0, deltaTMillis, 0L)));
+		report(Level.INFO, Event.end, comment, objects);		
 	}
 	
 	@Override
-	public void endWithTransfer(String comment, long transferAmount) {
-		
-		final long stopTime = System.currentTimeMillis();
-		final long deltaTMillis = stopTime - actionStart;
-				
-		report(Level.INFO, "[STOP OK] [DURATION " + duration(deltaTMillis) + 
-				"] [SIZE " + size(transferAmount) +"] [RATE " + 
-				rate(transferAmount, deltaTMillis)+ "] " + comment);			
+	public void endWithTransfer(final String comment, final long transferAmount, final Object... objects) {		
+		final long deltaTMillis = System.currentTimeMillis() - actionStart;
+		ThreadContext.put("jsonAdditional", toJson(additionalJsonFields(0, deltaTMillis, transferAmount)));
+		report(Level.INFO, Event.end, comment, objects);			
 	}
 
 	@Override
-	public final void error(String comment, final Object... objects) {
-		final long stopTime = System.currentTimeMillis();
-		final long deltaTMillis = stopTime - actionStart;
+	public final void error(final String comment, final Object... objects) {
+		final long deltaTMillis = System.currentTimeMillis() - actionStart;
+		ThreadContext.put("jsonAdditional", toJson(additionalJsonFields(1, deltaTMillis, 0L)));		
+		report(Level.ERROR, Event.end, comment, objects);	
+	}
 		
-		report(Level.ERROR, "[STOP NOK] [DURATION " + duration(deltaTMillis) +"] " + comment, objects);	
+	final void report(final Level level, final Event thisEvent, final String message, final Object... objects) {		
+		ThreadContext.put("uid", uid);
+		ThreadContext.put("taskName", taskName);
+		ThreadContext.put("step", Integer.toString(step));
+		ThreadContext.put("event", thisEvent.toString());
+		logger.log(level, message, objects);
 	}
 	
-	final void report(final Level level, final String message, final Object... objects) {
-		logger.log(level, prefix + message, objects);		
+	static final Map<String,String> additionalJsonFields(final int errorCode, final long deltaTMillis, long transferAmount) {		
+		final String status = (errorCode == 0) ? Status.OK.toString() : Status.NOK.toString();
+		
+		final Map<String,String> elements = new HashMap<>();
+		elements.put("status", quote(status));
+		elements.put("error_code", String.valueOf(errorCode));
+		elements.put("duration_in_seconds", duration(deltaTMillis));
+		elements.put("output", "[]");
+		elements.put("quality", "[]");
+		
+		// data_rate_mebibytes_sec
+		// data_volume_mebibytes
+		if (transferAmount != 0) {
+			elements.put("data_rate_mebibytes_sec", rate(transferAmount, deltaTMillis));
+			elements.put("data_volume_mebibytes", size(transferAmount));
+		}		
+		return elements;
+	}
+		
+	static final String toJson(final Map<String,String> elements) {
+		final StringBuilder stringBuilder = new StringBuilder();
+		
+		for (final Map.Entry<String,String> entry : elements.entrySet()) {
+			stringBuilder.append(',').append(quote(entry.getKey())).append(':').append(entry.getValue());
+		}
+		return stringBuilder.toString();
 	}
 	
 	static final String duration(final long deltaTMillis)
 	{
 		// duration in seconds with millisecond granularity
-		return String.format("%.3f", deltaTMillis / 1000.0) + " s";
+		return String.format("%.6f", deltaTMillis / 1000.0);
 	}
 	
 	static final String size(final long sizeByte)
 	{
 		// calculate size in MiB
-		return String.format("%.3f", sizeByte / 1048576.0) + " MiB";
+		return String.format("%.3f", sizeByte / 1048576.0);
 	}
 	
 	static final String rate(final long sizeByte, final long deltaTMillis)
 	{
-		return String.format("%.3f", (sizeByte / 1048576.0) / (deltaTMillis / 1000.0))+ " MiB/s";
+		return String.format("%.3f", (sizeByte / 1048576.0) / (deltaTMillis / 1000.0));
+	}
+	
+	private static final String quote(final String value) {
+		return new StringBuilder().append('"').append(value).append('"').toString();
 	}
 }

@@ -174,8 +174,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
             throws AbstractCodedException {
     	LOGGER.debug ("== dispatch job {}", job.toString());
         String productName = job.getProduct().getProductName();
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Dispatch")
-    			.product(job.getProduct().getProductType(), productName);
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Dispatch");
     	
     	final Reporting reporting = reportingFactory.newReporting(0); 
     	reporting.begin("Start dispatching product");

@@ -64,7 +64,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	public TaskResult execute(final String binaryPath, final String inputPath,
             final String workDirectory) throws InternalErrorException {
 		
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Compression");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Compression");
 		final Reporting reporting = reportingFactory.newReporting(0);
 		
 		String outputPath = inputPath+".zip";

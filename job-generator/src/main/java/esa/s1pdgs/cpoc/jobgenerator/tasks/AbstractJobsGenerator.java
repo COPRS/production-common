@@ -328,7 +328,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     public void run() {
         JobGeneration job = null;
         // Get a job to generate
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobGenerator");
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobGenerator");
         final Reporting reporting = reportingFactory.newReporting(0);
         
         try {
@@ -407,9 +407,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 
                 // Check primary input
                 if (job.getGeneration().getState() == AppDataJobGenerationDtoState.INITIAL) {
-                 	final Reporting reportInit = reportingFactory
-                			.product(null, productName)                        			
-                			.newReporting(1);
+                 	final Reporting reportInit = reportingFactory.newReporting(1);
                  	
                     try {                    	
                         if (job.getGeneration().getNbErrors() == 0) { 
@@ -441,8 +439,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 // Search input
                 if (job.getGeneration().getState() == AppDataJobGenerationDtoState.PRIMARY_CHECK) {
                 	
-                	final Reporting reportInputs = reportingFactory
-                			.product(null, productName)                        			
+                	final Reporting reportInputs = reportingFactory                  			
                 			.newReporting(2);
                 	
                 	reportInputs.begin("Start searching inputs");
@@ -468,8 +465,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 // Prepare and send job if ready
                 if (job.getGeneration().getState() == AppDataJobGenerationDtoState.READY) {
                 	
-                  	final Reporting reportPrep = reportingFactory
-                			.product(null, productName)                        			
+                  	final Reporting reportPrep = reportingFactory                       			
                 			.newReporting(3);
                   	
                   	reportPrep.begin("Start job preparation and sending");

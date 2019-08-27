@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Test;
 
@@ -14,12 +13,11 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.wrapper.job.process.PoolProcessor;
 import esa.s1pdgs.cpoc.wrapper.test.SystemUtils;
 
 public class PoolProcessorTest {
 
-	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(PoolProcessorTest.class), "TestProcessing");
+	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestProcessing");
 	  
     private File testDir = new File("./3");
 

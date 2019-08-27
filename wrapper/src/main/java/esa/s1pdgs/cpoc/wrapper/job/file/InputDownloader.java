@@ -123,7 +123,7 @@ public class InputDownloader {
         // message
         List<ObsDownloadFile> downloadToBatch = sortInputs();
         
-        final Reporting reporting = new LoggerReporting.Factory(LOGGER, "InputDownloader")
+        final Reporting reporting = new LoggerReporting.Factory("InputDownloader")
         		.newReporting(0);
         
         final StringBuilder stringBuilder = new StringBuilder();

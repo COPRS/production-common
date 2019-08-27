@@ -65,7 +65,7 @@ public class FileUploader {
 	}
 
 	public void processOutput() throws AbstractCodedException {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "FileUploader");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("FileUploader");
 		final Reporting reporting = reportingFactory.newReporting(0);
 
 		List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
@@ -134,7 +134,7 @@ public class FileUploader {
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingFactory.product(null, msg.getProductName()).newReporting(1);
+				final Reporting report = reportingFactory.newReporting(1);
 
 				report.begin("Start publishing message");
 				try {
