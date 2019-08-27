@@ -221,7 +221,8 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveOk() throws AbstractCodedException, ParseException {
         doReturn(message1).when(mqiService).next(Mockito.any());
-
+        doReturn(100).when(metadataService).getSeaCoverage(Mockito.any(), Mockito.any()); 
+        
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
@@ -266,6 +267,8 @@ public class L1AppConsumerTest {
         doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
+        
+        doReturn(100).when(metadataService).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
@@ -298,6 +301,8 @@ public class L1AppConsumerTest {
         doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
+        
+        doReturn(100).when(metadataService).getSeaCoverage(Mockito.any(), Mockito.any());        
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
@@ -331,6 +336,8 @@ public class L1AppConsumerTest {
         doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
+        
+        doReturn(100).when(metadataService).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
