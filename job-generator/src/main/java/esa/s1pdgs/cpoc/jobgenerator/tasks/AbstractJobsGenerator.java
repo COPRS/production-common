@@ -336,7 +336,11 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             List<AppDataJobDto<T>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
-            LOGGER.debug ("== run(), jobs {}", jobs.toString());
+            
+            if (jobs != null) {
+                LOGGER.debug ("== run(), jobs {}", jobs);
+            }
+            
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
