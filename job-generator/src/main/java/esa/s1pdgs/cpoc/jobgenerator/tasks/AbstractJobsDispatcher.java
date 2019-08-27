@@ -178,7 +178,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
     			.product(job.getProduct().getProductType(), productName);
     	
     	final Reporting reporting = reportingFactory.newReporting(0); 
-    	reporting.reportStart("Start dispatching product");
+    	reporting.begin("Start dispatching product");
     	
         try {
             List<String> taskTables = getTaskTables(job);
@@ -231,11 +231,11 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
                         true);
             }
             LOGGER.debug ("== dispatched job {}", job.toString());
-            reporting.reportStop("End dispatching product");
+            reporting.end("End dispatching product");
 
 
         } catch (AbstractCodedException ace) {
-        	reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+        	reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
             throw ace;
         }
     }

@@ -117,13 +117,13 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		final Reporting.Factory rf = new LoggerReporting.Factory(LOG, "Dissemination");
 		final Reporting reporting = rf.product(product.getFamily().toString(), product.getProductName())
 				.newReporting(0);
-		reporting.reportStart("Start dissemination of product to outbox " + target);
+		reporting.begin("Start dissemination of product to outbox " + target);
 		try {
 			assertExists(product);
 			final OutboxClient outboxClient = clientForTarget(target);
 
 			final Reporting reportingDl = rf.newReporting(1);
-			reportingDl.reportStart("Start downloading file from OBS " + product.getKeyObjectStorage() + 
+			reportingDl.begin("Start downloading file from OBS " + product.getKeyObjectStorage() + 
 					" to " + target);
 			try {
 				Retries.performWithRetries(
@@ -134,10 +134,10 @@ public class DisseminationService implements MqiListener<ProductDto> {
 						properties.getMaxRetries(), 
 						properties.getTempoRetryMs()
 				);
-				reportingDl.reportStop("End downloading file from OBS " + product.getKeyObjectStorage() + 
+				reportingDl.end("End downloading file from OBS " + product.getKeyObjectStorage() + 
 						" to " + target);
 			} catch (Exception e) {
-				reportingDl.reportError("Error downloading file from OBS {} to {}: {} ", 
+				reportingDl.error("Error downloading file from OBS {} to {}: {} ", 
 						product.getKeyObjectStorage(), target, LogUtils.toString(e));
 				throw e;
 			}							
@@ -149,7 +149,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 					errMessage
 			);
 			LOG.error(messageString,e);
-			reporting.reportError(messageString);									
+			reporting.error(messageString);									
 			errorAppender.send(new FailedProcessingDto(
 					properties.getHostname(), 
 					new Date(), 
@@ -158,7 +158,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			));									
 			throw new RuntimeException(messageString, e);
 		} 
-		reporting.reportStop("End dissemination of product to outbox " + target);
+		reporting.end("End dissemination of product to outbox " + target);
 	}
 
 	final void assertExists(final ProductDto product) throws ObsException {

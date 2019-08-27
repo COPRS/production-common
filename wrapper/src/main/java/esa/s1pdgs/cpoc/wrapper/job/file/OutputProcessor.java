@@ -383,16 +383,16 @@ public class OutputProcessor {
         			.product(null, null)            			
         			.newReporting(2);
             try { 
-            	report.reportStart("Start uploading batch " + i + " of outputs " + listProducts);
+            	report.begin("Start uploading batch " + i + " of outputs " + listProducts);
             	
                 if (Thread.currentThread().isInterrupted()) {
                     throw new InternalErrorException("The current thread as been interrupted");
                 } 
                 this.obsClient.uploadFilesPerBatch(sublist);
-                report.reportStop("End uploading batch " + i + " of outputs " + listProducts);
+                report.end("End uploading batch " + i + " of outputs " + listProducts);
               
             } catch (AbstractCodedException e) {
-    			report.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+    			report.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
                 throw e;
             }
         }
@@ -432,12 +432,12 @@ public class OutputProcessor {
             			.product(null, msg.getProductName())            			
             			.newReporting(1);
             	
-            	report.reportStart("Start publishing message");
+            	report.begin("Start publishing message");
                 try {
                     procuderFactory.sendOutput(msg, inputMessage);
-                    report.reportStop("End publishing message");
+                    report.end("End publishing message");
                 } catch (MqiPublicationError ace) {                	
-                	report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+                	report.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
                 }
                 iter.remove();
             }
@@ -500,7 +500,7 @@ public class OutputProcessor {
                 .collect(Collectors.joining(","));
         
         final Reporting reporting = reportingFactory.newReporting(0);
-        reporting.reportStart("Start handling of outputs " + listoutputs);
+        reporting.begin("Start handling of outputs " + listoutputs);
         
         try {
 			// Upload per batch the output        
@@ -508,9 +508,9 @@ public class OutputProcessor {
 			 // Publish reports
 	        processReports(reportToPublish);
 	        
-	        reporting.reportStopWithTransfer("End handling of outputs " + listoutputs, size);
+	        reporting.endWithTransfer("End handling of outputs " + listoutputs, size);
 		} catch (AbstractCodedException e) {
-			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}       
     }    

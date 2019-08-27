@@ -109,7 +109,7 @@ public abstract class AbstractFileProcessor<T> {
 				.product(extractor.getFamily(), file.getName());
 
 		final Reporting reportProcessing = reportingFactory.newReporting(0);
-		reportProcessing.reportStart(String.format("Start processing of %s", file.getName()));
+		reportProcessing.begin(String.format("Start processing of %s", file.getName()));
 		this.appStatus.setProcessing(family);
 
 		try {
@@ -126,7 +126,7 @@ public abstract class AbstractFileProcessor<T> {
 				LOGGER.warn("failed to backup file {}, not deleted", file.getName());
 			}
 		}
-		reportProcessing.reportStop(String.format("End processing of %s", file.getName()));
+		reportProcessing.end(String.format("End processing of %s", file.getName()));
 		this.appStatus.setWaiting();
 	}
 
@@ -139,26 +139,26 @@ public abstract class AbstractFileProcessor<T> {
 			productName = descriptor.getProductName();
 			reportingFactory.product(extractor.getFamily(), productName);
 
-			reportUpload.reportStart("Start uploading file " + file.getName() + " in OBS");
+			reportUpload.begin("Start uploading file " + file.getName() + " in OBS");
 
 			// Store in object storage
 			upload(file, productName, descriptor);
-			reportUpload.reportStop("End uploading file " + file.getName() + " in OBS");
+			reportUpload.end("End uploading file " + file.getName() + " in OBS");
 
 			// Send metadata
 			publish(reportingFactory, productName, descriptor);
 
 		} catch (IngestorIgnoredFileException e) {
-			reportProcessing.reportDebug("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportProcessing.intermediate("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		} catch (ObsAlreadyExist e) {
-			reportUpload.reportError("file {} already exist in OBS", file.getName());
+			reportUpload.error("file {} already exist in OBS", file.getName());
 			throw e;
 		} catch (ObsException e) {
-			reportUpload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportUpload.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		} catch (AbstractCodedException e) {
-			reportUpload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportUpload.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}
 	}
@@ -173,12 +173,12 @@ public abstract class AbstractFileProcessor<T> {
 	private final void publish(final Reporting.Factory reportingFactory, final String productName, final FileDescriptor descriptor) throws MqiPublicationError {
 		if (descriptor.isHasToBePublished()) {			
 			final Reporting reportPublish= reportingFactory.newReporting(2);	
-			reportPublish.reportStart("Start publishing file in topic");		    
+			reportPublish.begin("Start publishing file in topic");		    
 			try {
 				publisher.send(buildDto(descriptor));
-				reportPublish.reportStop("End publishing file in topic");
+				reportPublish.end("End publishing file in topic");
 			} catch (MqiPublicationError e) {
-				reportPublish.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				reportPublish.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 				throw e;
 			}
 		}
@@ -186,7 +186,7 @@ public abstract class AbstractFileProcessor<T> {
 	
 	private void copyToBackupDirectory(final Reporting.Factory reportingFactory, final File file) throws IOException {
 		final Reporting reportBackup = reportingFactory.newReporting(3);
-		reportBackup.reportStart(String.format("Start copying file %s to %s", file.getName(), backupDirectory));
+		reportBackup.begin(String.format("Start copying file %s to %s", file.getName(), backupDirectory));
 		try {
 			Path pickupPath = new File(pickupDirectory).toPath();
 			Path backupPath = new File(backupDirectory).toPath();
@@ -197,9 +197,9 @@ public abstract class AbstractFileProcessor<T> {
 			TreeCopier tc = new TreeCopier(dirToCopy, target, true, false);
 			Files.walkFileTree(dirToCopy, tc);
 			
-			reportBackup.reportStop(String.format("End copying file %s to %s", file.getName(), backupDirectory));
+			reportBackup.end(String.format("End copying file %s to %s", file.getName(), backupDirectory));
 		} catch (IOException e) {
-			reportBackup.reportError(
+			reportBackup.error(
 					"Error copying file {} to {}: {}", file.getName(), backupDirectory, LogUtils.toString(e));
 			throw e;
 		}
@@ -207,12 +207,12 @@ public abstract class AbstractFileProcessor<T> {
 
 	private final void delete(final Reporting.Factory reportingFactory, final File file, int reportingStep) {
 		final Reporting reportDelete = reportingFactory.newReporting(reportingStep);
-		reportDelete.reportStart("Start removing file " + file.getName());
+		reportDelete.begin("Start removing file " + file.getName());
 		try {
 			Files.delete(Paths.get(file.getPath()));
-			reportDelete.reportStop("End removing file " + file.getName());
+			reportDelete.end("End removing file " + file.getName());
 		} catch (Exception e) {
-			reportDelete.reportError("[code {}] file {} cannot be removed from FTP storage: {}",
+			reportDelete.error("[code {}] file {} cannot be removed from FTP storage: {}",
 					AbstractCodedException.ErrorCode.INGESTOR_CLEAN.getCode(), file.getPath(), LogUtils.toString(e));
 			this.appStatus.setError(family);
 		}

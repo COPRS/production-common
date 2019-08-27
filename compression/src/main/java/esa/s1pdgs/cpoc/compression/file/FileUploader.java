@@ -73,7 +73,7 @@ public class FileUploader {
 		try {
 			String zipFileName = job.getProductName() + ".zip";
 			File productPath = new File(workingDir + "/" + zipFileName);
-			reporting.reportStart("Start uploading " + zipFileName);
+			reporting.begin("Start uploading " + zipFileName);
 			if (!productPath.exists()) {
 				throw new InternalErrorException(
 						"The compressed product " + productPath + " does not exist, stopping upload");
@@ -89,9 +89,9 @@ public class FileUploader {
 //// 			// Upload per batch the output
 			processProducts(reportingFactory, uploadFile, outputToPublish);
 
- 	        reporting.reportStopWithTransfer("End uploading " + zipFileName, productPath.length());
+ 	        reporting.endWithTransfer("End uploading " + zipFileName, productPath.length());
 		} catch (AbstractCodedException e) {
-			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}
 	}
@@ -136,12 +136,12 @@ public class FileUploader {
 			} else {
 				final Reporting report = reportingFactory.product(null, msg.getProductName()).newReporting(1);
 
-				report.reportStart("Start publishing message");
+				report.begin("Start publishing message");
 				try {
 					producerFactory.sendOutput(msg, inputMessage);
-					report.reportStop("End publishing message");
+					report.end("End publishing message");
 				} catch (MqiPublicationError ace) {
-					report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+					report.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 				}
 				iter.remove();
 			}

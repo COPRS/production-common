@@ -159,7 +159,7 @@ public abstract class GenericExtractor<T> {
         		.product(category.toString(), productName);
         
         final Reporting report = reportingFactory.newReporting(0);        
-        report.reportStart("Starting metadata extraction");        
+        report.begin("Starting metadata extraction");        
         appStatus.setProcessing(category, message.getIdentifier());
         
         FailedProcessingDto failedProc = new FailedProcessingDto();
@@ -172,16 +172,16 @@ public abstract class GenericExtractor<T> {
             }
             
             final Reporting reportPublish = reportingFactory.newReporting(4);            
-            reportPublish.reportStart("Start publishing metadata");
+            reportPublish.begin("Start publishing metadata");
 
             try {
 				if (!esServices.isMetadataExist(metadata)) {
 				    esServices.createMetadata(metadata);
 				}
-			    reportPublish.reportStop("End publishing metadata");
+			    reportPublish.end("End publishing metadata");
 				
 			} catch (Exception e) {
-				reportPublish.reportError("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
+				reportPublish.error("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
 				throw e;
 			}
             // Acknowledge
@@ -210,12 +210,12 @@ public abstract class GenericExtractor<T> {
         }
 
         if (appStatus.isFatalError()) {
-            report.reportError("Fatal error");
+            report.error("Fatal error");
             System.exit(-1);
         } else {
             appStatus.setWaiting(category);
         }        
-        report.reportStop("End metadata extraction");
+        report.end("End metadata extraction");
     }
 
     /**
@@ -231,13 +231,13 @@ public abstract class GenericExtractor<T> {
             final String errorMessage) {
     	
         final Reporting reportAck = reportingFactory.newReporting(5);            
-        reportAck.reportStart("Start acknowledging negatively");
+        reportAck.begin("Start acknowledging negatively");
         try {
             mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false), category);
             errorAppender.send(failedProc);            
-            reportAck.reportStop("End acknowledging negatively");
+            reportAck.end("End acknowledging negatively");
         } catch (AbstractCodedException ace) {
-        	reportAck.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());     
+        	reportAck.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());     
         }
         appStatus.setError(category, "PROCESSING");
     }
@@ -250,13 +250,13 @@ public abstract class GenericExtractor<T> {
     final void ackPositively(final Reporting.Factory reportingFactory, final GenericMessageDto<T> message) {
     	
         final Reporting reportAck = reportingFactory.newReporting(5);            
-        reportAck.reportStart("Start acknowledging positively");
+        reportAck.begin("Start acknowledging positively");
 
         try {
             mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false), category);
-            reportAck.reportStop("End acknowledging positively");            
+            reportAck.end("End acknowledging positively");            
         } catch (AbstractCodedException ace) {            
-        	reportAck.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());            
+        	reportAck.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());            
             appStatus.setError(category, "PROCESSING");
         }
     }
@@ -299,14 +299,14 @@ public abstract class GenericExtractor<T> {
             	.product(family.toString(), productName)        
             	.newReporting(1);
             
-        reportDownload.reportStart("Starting download of " + keyObs + " to local directory " + this.localDirectory);
+        reportDownload.begin("Starting download of " + keyObs + " to local directory " + this.localDirectory);
 
 		try {
 			final File metadataFile = obsClient.downloadFile(family, keyObs, this.localDirectory);
-			reportDownload.reportStop("End download of " + keyObs);
+			reportDownload.end("End download of " + keyObs);
 			return metadataFile;
 		} catch (AbstractCodedException e) {
-			reportDownload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportDownload.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}         
     }
@@ -338,14 +338,14 @@ public abstract class GenericExtractor<T> {
 		throws AbstractCodedException 
 	{
 		final Reporting reportExtractingFromFilename = reportingFactory.newReporting(step);
-		reportExtractingFromFilename.reportStart("Start extraction from " + extraction);
+		reportExtractingFromFilename.begin("Start extraction from " + extraction);
 		try {
 			E res = supplier.get();
 					//;
-			reportExtractingFromFilename.reportStop("End extraction from " + extraction);
+			reportExtractingFromFilename.end("End extraction from " + extraction);
 			return res;
 		} catch (AbstractCodedException e) {
-			reportExtractingFromFilename.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportExtractingFromFilename.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}
 	

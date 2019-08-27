@@ -74,7 +74,7 @@ public class SegmentsConsumer {
     			.product(dto.getFamily().toString(), dto.getProductName())
     			.newReporting(0);
     	
-    	reporting.reportStart("Start Distribution");    	
+    	reporting.begin("Start Distribution");    	
         this.appStatus.setProcessing("SLICES");
         try {
             if (!devProperties.getActivations().get("download-all")) {
@@ -89,13 +89,13 @@ public class SegmentsConsumer {
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {        	
-        	reporting.reportError("[resuming {}] {}", new ResumeDetails(topic, dto), e.getMessage());
+        	reporting.error("[resuming {}] {}", new ResumeDetails(topic, dto), e.getMessage());
             this.appStatus.setError("SLICES");
         } catch (Exception exc) {
-        	reporting.reportError("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
+        	reporting.error("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
             this.appStatus.setError("SLICES");
         }
-    	reporting.reportStop("End Distribution");
+    	reporting.end("End Distribution");
         this.appStatus.setWaiting();
     }
 }

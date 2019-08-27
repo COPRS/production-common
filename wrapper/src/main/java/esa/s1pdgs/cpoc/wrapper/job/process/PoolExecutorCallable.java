@@ -115,7 +115,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
             final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Processing");
             
             final Reporting reporting = reportingFactory.newReporting(0);
-            reporting.reportStart("Start " + appLevel + " processing");
+            reporting.begin("Start " + appLevel + " processing");
                        
             try {
 				for (PoolProcessor poolProcessor : processors) {
@@ -126,10 +126,10 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 				    poolProcessor.process(reportingFactory);
 				}
 			} catch (AbstractCodedException e) {
-				reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 				throw e;
 			}
-            reporting.reportStop("End " + appLevel + " processing");
+            reporting.end("End " + appLevel + " processing");
             return true;
         }
         return false;

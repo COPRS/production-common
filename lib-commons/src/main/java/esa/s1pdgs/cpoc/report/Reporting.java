@@ -9,14 +9,14 @@ public interface Reporting {
 
 	}
 
-	void reportStart(String comment);
+	void begin(String comment);
 
-	void reportDebug(String comment, Object... objects);
+	void intermediate(String comment, Object... objects);
 
-	void reportStop(String comment);
+	void end(String comment);
 	
-	void reportStopWithTransfer(String comment, long transferAmount);
+	void endWithTransfer(String comment, long transferAmount);
 
-	void reportError(String comment, Object... objects);
+	void error(String comment, Object... objects);
 
 }

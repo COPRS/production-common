@@ -64,20 +64,20 @@ public final class LoggerReporting implements Reporting  {
 	}
 
 	@Override
-	public final void reportStart(String comment)
+	public final void begin(String comment)
 	{
 		report(Level.INFO, "[START] " + comment);	
 		actionStart = System.currentTimeMillis();
 	}
 	
 	@Override
-	public final void reportDebug(String comment, final Object... objects)
+	public final void intermediate(String comment, final Object... objects)
 	{
 		report(Level.DEBUG, comment, objects);	
 	}
 	
 	@Override
-	public final void reportStop(String comment)
+	public final void end(String comment)
 	{
 		final long stopTime = System.currentTimeMillis();
 		final long deltaTMillis = stopTime - actionStart;
@@ -86,7 +86,7 @@ public final class LoggerReporting implements Reporting  {
 	}
 	
 	@Override
-	public void reportStopWithTransfer(String comment, long transferAmount) {
+	public void endWithTransfer(String comment, long transferAmount) {
 		
 		final long stopTime = System.currentTimeMillis();
 		final long deltaTMillis = stopTime - actionStart;
@@ -97,7 +97,7 @@ public final class LoggerReporting implements Reporting  {
 	}
 
 	@Override
-	public final void reportError(String comment, final Object... objects) {
+	public final void error(String comment, final Object... objects) {
 		final long stopTime = System.currentTimeMillis();
 		final long deltaTMillis = stopTime - actionStart;
 		

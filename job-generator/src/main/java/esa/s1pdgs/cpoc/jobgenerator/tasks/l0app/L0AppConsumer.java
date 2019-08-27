@@ -97,7 +97,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                     throw new InvalidFormatProduct("Invalid channel identifier "
                             + leveldto.getChannelId());
                 }
-                reporting.reportStart("Start job generation using " + mqiMessage.getBody().getKeyObjectStorage());
+                reporting.begin("Start job generation using " + mqiMessage.getBody().getKeyObjectStorage());
                 
                 AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
                 LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
@@ -128,7 +128,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                         step, productName, ace.getCode().getCode(),
                         ace.getLogMessage());
                 
-                reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+                reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
                 
                 failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
             }  
@@ -140,7 +140,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,
                     leveldto.getKeyObjectStorage());
             
-            reporting.reportStop("End job generation using " + mqiMessage.getBody().getKeyObjectStorage());
+            reporting.end("End job generation using " + mqiMessage.getBody().getKeyObjectStorage());
         }
 
     }

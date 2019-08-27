@@ -69,14 +69,14 @@ public class FileDownloader {
 
 		final Reporting reporting = new LoggerReporting.Factory(LOGGER, "FileDownloader").newReporting(0);
 
-		reporting.reportStart("Start download of product to compress " + inputProduct);
+		reporting.begin("Start download of product to compress " + inputProduct);
 
 		// Download input from object storage in batch
 		try {
 			downloadInputs(inputProduct);
-			reporting.reportStopWithTransfer("End download of products " + inputProduct, getWorkdirSize());
+			reporting.endWithTransfer("End download of products " + inputProduct, getWorkdirSize());
 		} catch (AbstractCodedException e) {
-			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}
 	}
