@@ -111,10 +111,10 @@ public class IngestionService {
 			try {
 				result = productService.ingest(family, ingestion);
 			} catch (ProductException e) {
-				reportObs.error("Error uploading " + ingestion.getProductName() + " in OBS: {}", e.getMessage());
+				reportObs.error("Error uploading {} in OBS: {}", ingestion.getProductName(), e.getMessage());
 				throw e;
 			}
-			reportObs.end("End uploading " + ingestion.getProductName() + " in OBS");
+			reportObs.end("End uploading {} in OBS", ingestion.getProductName());
 			// is thrown if product shall be marked as invalid
 		} catch (ProductException e) {
 			LOG.warn(e.getMessage());
@@ -139,10 +139,10 @@ public class IngestionService {
 			final Reporting reporting = reportingFactory.newReporting(3);
 
 			final ProductCategory category = ProductCategory.of(product.getFamily());
-			reporting.begin("Start publishing file " + message.getBody().getProductName() + " in topic");
+			reporting.begin("Start publishing file {} in topic", message.getBody().getProductName());
 			try {
 				client.publish(result, category);
-				reporting.end("End publishing file " + message.getBody().getProductName() + " in topic");
+				reporting.end("End publishing file {} in topic", message.getBody().getProductName());
 			} catch (AbstractCodedException e) {
 				reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			}
@@ -154,7 +154,7 @@ public class IngestionService {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
 			final Reporting reporting = reportingFactory.newReporting(2);
-			reporting.begin("Start removing file " + file.getPath());
+			reporting.begin("Start removing file {}", file.getPath());
 
 			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
 		}

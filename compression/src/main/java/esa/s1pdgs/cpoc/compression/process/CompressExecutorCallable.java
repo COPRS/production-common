@@ -97,7 +97,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 			err.get();
 
 		} catch (InterruptedException ie) {
-			reporting.error("Interrupted Task " + binaryPath);
+			reporting.error("Interrupted Task {}", binaryPath);
 			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException", binaryPath, workDirectory);
 			Thread.currentThread().interrupt();
 		} catch (IOException ioe) {

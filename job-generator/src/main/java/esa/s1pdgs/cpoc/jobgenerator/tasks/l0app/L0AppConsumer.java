@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -153,7 +153,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
         if (CollectionUtils.isEmpty(existingJobs)) {
         	final EdrsSessionDto sessionDto = mqiMessage.getBody();        	
         	final String productType = sessionDto.getProductType().name();
-        	final String productName = Paths.get(sessionDto.getProductName()).getFileName().toString();
+        	final String productName = new File(sessionDto.getProductName()).getName();
         	LOGGER.debug("Querying metadata for product {} of type {}", productName, productType); 
         	final EdrsSessionMetadata edrsSessionMetadata = metadataService.getEdrsSession(productType, productName);
            	LOGGER.debug ("Got result {}", edrsSessionMetadata); 
