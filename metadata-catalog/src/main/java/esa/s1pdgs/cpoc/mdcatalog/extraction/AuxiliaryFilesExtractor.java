@@ -17,7 +17,6 @@ import org.springframework.stereotype.Controller;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
@@ -96,8 +95,6 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> {
 		// Upload file
 		final String keyObs = getKeyObs(message);
 		final String productName = extractProductNameFromDto(message.getBody());
-
-		reportingFactory.product(ProductFamily.AUXILIARY_FILE.toString(), productName);
 
 		final File metadataFile = download(reportingFactory, obsClient, ProductFamily.AUXILIARY_FILE, productName,
 				keyObs);

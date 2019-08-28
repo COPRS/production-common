@@ -80,7 +80,7 @@ public class TaskCallable implements Callable<TaskResult> {
      */
     @Override
     public TaskResult call() throws InternalErrorException {        
-        reporting.reportStart("Start Task " + binaryPath);
+        reporting.begin("Start Task " + binaryPath);
 
         int r = -1;
 
@@ -104,23 +104,23 @@ public class TaskCallable implements Callable<TaskResult> {
 			err.get();
 
 		} catch (InterruptedException ie) {
-			reporting.reportError("Interrupted Task " + binaryPath);
+			reporting.error("Interrupted Task {}", binaryPath);
 			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException", binaryPath, workDirectory);
 			Thread.currentThread().interrupt();
 		} catch (IOException ioe) {
 			final InternalErrorException ex = new InternalErrorException("Cannot build the command for the task " + binaryPath, ioe);
-			reporting.reportError("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage());
+			reporting.error("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage());
 			throw ex;
 		} catch (ExecutionException e) {
 			final InternalErrorException ex =  new InternalErrorException("Error on consuming stdout/stderr of task " + binaryPath, e);
-			reporting.reportError("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage());
+			reporting.error("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage());
 			throw ex;
 		} finally {
 			if (process != null) {
 				process.destroy();
 			}
 		}        
-        reporting.reportStop("End Task " + binaryPath + " with exit code " + r);
+        reporting.end("End Task {} with exit code {}", binaryPath, r);
 
         return new TaskResult(binaryPath, r);
     }

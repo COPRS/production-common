@@ -97,8 +97,6 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
         final String productName = extractProductNameFromDto(dto);
         final ProductFamily family = message.getBody().getFamily();
         
-        reportingFactory.product(family.toString(), productName);
-        
         final File metadataFile = download(reportingFactory, obsClient, family, productName, keyObs);        
         return extract(reportingFactory, dto, metadataFile, productName, family);
     }

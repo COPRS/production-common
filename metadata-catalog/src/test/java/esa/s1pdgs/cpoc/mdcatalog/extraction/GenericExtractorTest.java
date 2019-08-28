@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -85,9 +84,7 @@ public class GenericExtractorTest {
      */
     private GenericMessageDto<ProductDto> inputMessage;
     
-    private final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-    		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
-    		.product("testType", "testProduct");
+    private final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction")	;
 
     /**
      * Initialization

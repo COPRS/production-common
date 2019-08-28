@@ -7,7 +7,11 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} ${env:HOSTNAME} s1pdgs-disseminator %-5level: %msg [%thread] %n"       
+        Pattern: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} | %-5level | %logger{1.} [%thread]: %msg %n"
+    Console:
+      name: REPORT
+      PatternLayout:
+        Pattern: "{\"header\":{\"type\":\"LOG\",\"timestamp\":\"%d{yyyy-MM-dd'T'HH:mm:ss.nnnnnn}Z\",\"level\":\"%level\",\"line\":%L,\"file\":\"%.255F\",\"thread\":\"%.255t\"}%n,\"message\":{\"content\":\"%enc{%m%xEx}{JSON}\"},\"custom\": {\"logger_string\":\"%logger\"}}%n"
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc
@@ -15,6 +19,11 @@ Configuration:
         additivity: false
         AppenderRef:
           - ref: STDOUT
+      - name: esa.s1pdgs.cpoc.report.Reporting
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: REPORT   
       - name: org.springframework
         level: error
         additivity: false

@@ -45,7 +45,7 @@ public class ValidationService {
 	}
 
 	public int checkConsistencyForInterval() {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "ValidationService");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");
 		int discrepancies = 0;
 
 		Set<ProductFamily> families = properties.getFamilies().keySet();
@@ -65,7 +65,7 @@ public class ValidationService {
 			LocalDateTime endInterval) {
 
 		final Reporting reportingValidation = reportingFactory.newReporting(0);
-		reportingValidation.reportStart(String.format("Starting validation task from %s to %s for family %s",
+		reportingValidation.begin(String.format("Starting validation task from %s to %s for family %s",
 				startInterval, endInterval, family));
 
 		final Reporting reportingMetadata = reportingFactory.newReporting(1);
@@ -74,7 +74,7 @@ public class ValidationService {
 
 			List<SearchMetadata> metadataResults = null;
 			try {
-				reportingMetadata.reportStart("Gathering discrepancies in metadata catalog");
+				reportingMetadata.begin("Gathering discrepancies in metadata catalog");
 
 				String queryFamily = getQueryFamily(family);
 				LOGGER.info("Performing metadata query for family '{}'", queryFamily);
@@ -84,7 +84,7 @@ public class ValidationService {
 					metadataResults = new ArrayList<>();
 				}
 			} catch (MetadataQueryException e) {
-				reportingMetadata.reportError("Error occured while performing metadata catalog query task [code {}] {}",
+				reportingMetadata.error("Error occured while performing metadata catalog query task [code {}] {}",
 						e.getCode().getCode(), e.getLogMessage());
 				throw e;
 			}
@@ -92,7 +92,7 @@ public class ValidationService {
 			final Reporting reportingObs = reportingFactory.newReporting(2);
 			Map<String, ObsObject> obsResults = null;
 			try {
-				reportingObs.reportStart("Gathering discrepancies in OBS");
+				reportingObs.begin("Gathering discrepancies in OBS");
 
 				Date startDate = Date.from(startInterval.atZone(ZoneId.of("UTC")).toInstant());
 				Date endDate = Date.from(endInterval.atZone(ZoneId.of("UTC")).toInstant());
@@ -101,7 +101,7 @@ public class ValidationService {
 				LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 
 			} catch (SdkClientException | DateTimeParseException e) {
-				reportingObs.reportError("Error occured while performing obs query task: {}", e.getMessage());
+				reportingObs.error("Error occured while performing obs query task: {}", e.getMessage());
 				throw e;
 			}
 
@@ -122,18 +122,18 @@ public class ValidationService {
 			}
 
 			if (metadataDiscrepancies.isEmpty()) {
-				reportingMetadata.reportStop("No discrepancies found in MetadataCatalog");
-				reportingValidation.reportStop("No discrepancy found");
+				reportingMetadata.end("No discrepancies found in MetadataCatalog");
+				reportingValidation.end("No discrepancy found");
 			} else {
-				reportingMetadata.reportError("Products present in MetadataCatalog, but not in OBS: {}",
+				reportingMetadata.error("Products present in MetadataCatalog, but not in OBS: {}",
 						buildProductList(metadataDiscrepancies));
-				reportingValidation.reportError("Discrepancy found for {} product(s)", metadataDiscrepancies.size());
+				reportingValidation.error("Discrepancy found for {} product(s)", metadataDiscrepancies.size());
 			}
 
 			LOGGER.info("Found {} discrepancies for family '{}'", metadataDiscrepancies.size(), family);
 			return metadataDiscrepancies.size();
 		} catch (Exception ex) {
-			reportingValidation.reportError("Error occured while performing validation task: {}", ex.getMessage());
+			reportingValidation.error("Error occured while performing validation task: {}", ex.getMessage());
 		}
 
 		return -1;

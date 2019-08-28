@@ -123,7 +123,7 @@ public class InputDownloader {
         // message
         List<ObsDownloadFile> downloadToBatch = sortInputs();
         
-        final Reporting reporting = new LoggerReporting.Factory(LOGGER, "InputDownloader")
+        final Reporting reporting = new LoggerReporting.Factory("InputDownloader")
         		.newReporting(0);
         
         final StringBuilder stringBuilder = new StringBuilder();
@@ -132,16 +132,16 @@ public class InputDownloader {
         }        
         final String listinputs = stringBuilder.toString().trim();
   
-        reporting.reportStart("Start download of products " + listinputs);
+        reporting.begin("Start download of products " + listinputs);
 
         // Download input from object storage in batch
         try {
 			downloadInputs(downloadToBatch);
 			 // Complete download
 	        completeDownload();	      	
-	        reporting.reportStopWithTransfer("End download of products " + listinputs, getWorkdirSize());			
+	        reporting.endWithTransfer("End download of products " + listinputs, getWorkdirSize());			
 		} catch (AbstractCodedException e) {
-			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}       
     }

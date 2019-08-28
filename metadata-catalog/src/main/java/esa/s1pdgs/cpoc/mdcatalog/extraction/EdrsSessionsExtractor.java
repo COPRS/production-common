@@ -23,7 +23,6 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -92,8 +91,6 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
     	
         final String productName = extractProductNameFromDto(message.getBody());
         final ProductFamily family = ProductFamily.EDRS_SESSION;
-        
-        reportingFactory.product(family.toString(), productName); 
         
         final EdrsSessionFileDescriptor edrsFileDescriptor = extractFromFilename(
         		reportingFactory, 

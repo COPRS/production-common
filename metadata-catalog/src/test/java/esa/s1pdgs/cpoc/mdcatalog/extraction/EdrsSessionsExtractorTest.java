@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -136,9 +135,7 @@ public class EdrsSessionsExtractorTest {
         expectedDescriptor.setKeyObjectStorage("123/ch01/D_123_ch01_D.RAW");
         expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         
-        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
-        		.product(ProductFamily.EDRS_SESSION.toString(), "D_123_ch01_D.RAW");
+        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
         
         JSONObject expected = extractor.mdBuilder
                 .buildEdrsSessionFileMetadata(expectedDescriptor);

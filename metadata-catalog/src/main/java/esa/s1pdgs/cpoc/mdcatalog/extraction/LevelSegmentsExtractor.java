@@ -98,8 +98,6 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> {
         final String productName = extractProductNameFromDto(dto);
         final ProductFamily family = message.getBody().getFamily();
         
-        reportingFactory.product(family.toString(), productName);
-        
         final File metadataFile = download(reportingFactory, obsClient, family, productName, keyObs);  
 
     	final OutputFileDescriptor l0SegmentDesc = extractFromFilename(

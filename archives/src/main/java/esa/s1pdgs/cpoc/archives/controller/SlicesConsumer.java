@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.archives.controller;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -26,12 +24,6 @@ import esa.s1pdgs.cpoc.report.Reporting;
 @Component
 @ConditionalOnProperty(prefix = "kafka.enable-consumer", name = "slice")
 public class SlicesConsumer {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(SlicesConsumer.class);
     /**
      * Service for Object Storage
      */
@@ -70,11 +62,10 @@ public class SlicesConsumer {
             final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
     	
-       	final Reporting reporting = new LoggerReporting.Factory(LOGGER, "Archiver")
-    			.product(dto.getFamily().toString(), dto.getProductName())
+       	final Reporting reporting = new LoggerReporting.Factory("Archiver")
     			.newReporting(0);
        	
-    	reporting.reportStart("Start Distribution");    
+    	reporting.begin("Start Distribution");    
         this.appStatus.setProcessing("SLICES");
         try {
             if (!devProperties.getActivations().get("download-all")) {
@@ -89,13 +80,13 @@ public class SlicesConsumer {
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {
-        	reporting.reportError("[resuming {}] {}", new ResumeDetails(topic, dto), e.getMessage());
+        	reporting.error("[resuming {}] {}", new ResumeDetails(topic, dto), e.getMessage());
             this.appStatus.setError("SLICES");
         } catch (Exception exc) {
-        	reporting.reportError("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
+        	reporting.error("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
             this.appStatus.setError("SLICES");
         }
-    	reporting.reportStop("End Distribution");
+    	reporting.end("End Distribution");
         this.appStatus.setWaiting();
     }
 }

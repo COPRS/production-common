@@ -172,12 +172,12 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
      */
     public void dispatch(final AppDataJobDto<T> job)
             throws AbstractCodedException {
+    	LOGGER.debug ("== dispatch job {}", job.toString());
         String productName = job.getProduct().getProductName();
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Dispatch")
-    			.product(job.getProduct().getProductType(), productName);
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Dispatch");
     	
     	final Reporting reporting = reportingFactory.newReporting(0); 
-    	reporting.reportStart("Start dispatching product");
+    	reporting.begin("Start dispatching product");
     	
         try {
             List<String> taskTables = getTaskTables(job);
@@ -187,6 +187,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
             }
             List<String> notDealTaskTables = new ArrayList<>(taskTables);
             List<AppDataJobGenerationDto> jobGens = job.getGenerations();
+            LOGGER.debug ("== job.getGenerations() {}", jobGens.toString());
 
             // Build the new job generations
             boolean needUpdate = false;
@@ -228,11 +229,12 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
                 appDataService.patchJob(job.getIdentifier(), job, false, false,
                         true);
             }
-            reporting.reportStop("End dispatching product");
+            LOGGER.debug ("== dispatched job {}", job.toString());
+            reporting.end("End dispatching product");
 
 
         } catch (AbstractCodedException ace) {
-        	reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+        	reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
             throw ace;
         }
     }

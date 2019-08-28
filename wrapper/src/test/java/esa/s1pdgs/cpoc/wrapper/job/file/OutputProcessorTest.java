@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -83,7 +82,7 @@ public class OutputProcessorTest {
      */
     private List<FileQueueMessage> reportToPublish;
     
-    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(OutputProcessorTest.class), "TestOutputHandling");
+    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestOutputHandling");
 	
 
     /**

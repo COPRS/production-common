@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -254,11 +253,7 @@ public class LevelSegmentsExtractorTest {
 
         JSONObject expected = extractor.mdBuilder
                 .buildL0SegmentOutputFileMetadata(descriptor, file);
-        
-        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
-        		.product(ProductFamily.L0_SEGMENT.toString(), "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE");
-        
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
         
         JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
         for (String key : expected.keySet()) {

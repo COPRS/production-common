@@ -17,4 +17,11 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY --from=build /app/wrapper/target/s1pro-core-wrapper-*.jar s1pdgs-wrapper.jar
 COPY --from=build /app/wrapper/config/start/start_l1.sh /app/start_l1.sh
 RUN chmod +x /app/start_l1.sh
-ENTRYPOINT "/app/start_l1.sh"
+
+# Add Tini as entry point
+ENV TINI_VERSION v0.18.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
+
+CMD ["/app/start_l1.sh"]

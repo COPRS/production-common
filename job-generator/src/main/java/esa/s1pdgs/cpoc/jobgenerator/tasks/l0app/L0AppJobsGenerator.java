@@ -16,7 +16,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
-import esa.s1pdgs.cpoc.jobgenerator.config.L0SegmentAppProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.AbstractJobOrderConf;
@@ -125,7 +124,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     	String stationCode ="WILE";
     	if (product.getStationCode() !=null) {
     		stationCode = product.getStationCode();
-    		LOGGER.info("**** stationCode found: " + stationCode + " ****");    		
+    		LOGGER.info("**** stationCode found: {} ****", stationCode);    		
     	} else {
     		LOGGER.warn("**** stationCode is null, choosing default ****");    		
     	}

@@ -162,7 +162,7 @@ public class JobProcessor {
 		// Initialize processing
 		// ------------------------------------------------------
 		LevelJobDto job = message.getBody();
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobProcessing");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobProcessing");
 
 		/*
 		 * If the working directory provided by the job order is outside the expected
@@ -185,7 +185,7 @@ public class JobProcessor {
 
 		// Everything is fine with the request, we can start processing it.
 		final Reporting report = reportingFactory.newReporting(0);
-		report.reportStart("Start job processing");
+		report.begin("Start job processing");
 
 		File workdir = new File(job.getWorkDirectory());
 		// Clean up the working directory with all of its content
@@ -217,7 +217,7 @@ public class JobProcessor {
 		// ----------------------------------------------------------
 		processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, report);
 
-		report.reportStop("End job processing");
+		report.end("End job processing");
 	}
 
 	/**
@@ -295,7 +295,7 @@ public class JobProcessor {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
-            report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            report.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
             
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
             
@@ -307,7 +307,7 @@ public class JobProcessor {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ErrorCode.INTERNAL_ERROR.getCode(),
                     properties.getLevel());
-            report.reportError("Interrupted job processing");
+            report.error("Interrupted job processing");
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
         } finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);

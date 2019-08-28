@@ -79,23 +79,21 @@ public class IngestionService {
 	}
 
 	public void onMessage(final GenericMessageDto<IngestionDto> message) {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOG, "Ingestion");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Ingestion");
 
 		final IngestionDto ingestion = message.getBody();
 		LOG.debug("received Ingestion: {}", ingestion.getProductName());
 
-		final Reporting reporting = reportingFactory
-				.product("not identified yet", ingestion.getProductName())
-				.newReporting(0);
-		reporting.reportStart("Start processing of " + ingestion.getProductName());
+		final Reporting reporting = reportingFactory.newReporting(0);
+		reporting.begin("Start processing of " + ingestion.getProductName());
 
 		try {
 			final List<Product<AbstractDto>> result = identifyAndUpload(reportingFactory, message, ingestion);
 			publish(result, message, reportingFactory);
 			delete(ingestion, reportingFactory);
-			reporting.reportStop("End processing of " + ingestion.getProductName());
+			reporting.end("End processing of " + ingestion.getProductName());
 		} catch (Exception e) {
-			reporting.reportError("{}", LogUtils.toString(e));
+			reporting.error("{}", LogUtils.toString(e));
 
 		}
 	}
@@ -106,19 +104,17 @@ public class IngestionService {
 		try {
 			final ProductFamily family = getFamilyFor(ingestion);
 
-			final Reporting reportObs = reportingFactory
-					// update family information
-					.product(family.toString(), ingestion.getProductName()).newReporting(1);
+			final Reporting reportObs = reportingFactory.newReporting(1);
 
-			reportObs.reportStart("Start uploading " + ingestion.getProductName() + " in OBS");
+			reportObs.begin("Start uploading " + ingestion.getProductName() + " in OBS");
 
 			try {
 				result = productService.ingest(family, ingestion);
 			} catch (ProductException e) {
-				reportObs.reportError("Error uploading " + ingestion.getProductName() + " in OBS: {}", e.getMessage());
+				reportObs.error("Error uploading {} in OBS: {}", ingestion.getProductName(), e.getMessage());
 				throw e;
 			}
-			reportObs.reportStop("End uploading " + ingestion.getProductName() + " in OBS");
+			reportObs.end("End uploading {} in OBS", ingestion.getProductName());
 			// is thrown if product shall be marked as invalid
 		} catch (ProductException e) {
 			LOG.warn(e.getMessage());
@@ -140,16 +136,15 @@ public class IngestionService {
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 
-			final Reporting reporting = reportingFactory
-					.product(product.getFamily().toString(), message.getBody().getProductName()).newReporting(3);
+			final Reporting reporting = reportingFactory.newReporting(3);
 
 			final ProductCategory category = ProductCategory.of(product.getFamily());
-			reporting.reportStart("Start publishing file " + message.getBody().getProductName() + " in topic");
+			reporting.begin("Start publishing file {} in topic", message.getBody().getProductName());
 			try {
 				client.publish(result, category);
-				reporting.reportStop("End publishing file " + message.getBody().getProductName() + " in topic");
+				reporting.end("End publishing file {} in topic", message.getBody().getProductName());
 			} catch (AbstractCodedException e) {
-				reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			}
 		}
 	}
@@ -159,7 +154,7 @@ public class IngestionService {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
 			final Reporting reporting = reportingFactory.newReporting(2);
-			reporting.reportStart("Start removing file " + file.getPath());
+			reporting.begin("Start removing file {}", file.getPath());
 
 			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
 		}

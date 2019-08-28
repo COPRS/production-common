@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -109,7 +108,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     
-    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(JobProcessorTest.class), "TestOutputHandling");
+    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestOutputHandling");
 	
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 

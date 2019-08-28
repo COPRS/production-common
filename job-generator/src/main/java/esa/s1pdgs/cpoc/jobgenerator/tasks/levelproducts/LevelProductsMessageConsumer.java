@@ -82,7 +82,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
      */
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {
-    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L1JobGeneration"); 
+    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L1JobGeneration"); 
     	final Reporting reporting = reportingFactory.newReporting(0);
     	
         // First, consume message
@@ -103,20 +103,20 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         
         try {
             LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job", productName);
-            reporting.reportStart("Start job generation using " + productName);
+            reporting.begin("Start job generation using " + productName);
             
             // S1PRO-483: check for matching products if they are over sea. If not, simply skip the
             // production
             if (seaCoverageCheckPattern.matcher(productName).matches()) {
             	final Reporting reportingSeaCheck = reportingFactory.newReporting(1);
-            	reportingSeaCheck.reportStart("Start checking if " + productName + " is over sea");            	
+            	reportingSeaCheck.begin("Start checking if " + productName + " is over sea");            	
             	if (metadataService.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
-            		reportingSeaCheck.reportStop("Skip job generation using " + productName + " (not over ocean)");
+            		reportingSeaCheck.end("Skip job generation using " + productName + " (not over ocean)");
                     ackPositively(appStatus.getStatus().isStopping(), mqiMessage, productName);
-                    reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
+                    reporting.end("End job generation using " + mqiMessage.getBody().getProductName());
                     return;
                 }
-               	reportingSeaCheck.reportStart("End checking if " + productName + " is over sea"); 
+               	reportingSeaCheck.begin("End checking if " + productName + " is over sea"); 
             }        	
         	
             // Check if a job is already created for message identifier
@@ -144,7 +144,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             errorMessage = String.format(
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(), ace.getLogMessage());
-            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
             
             failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);  
         }
@@ -153,7 +153,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         ackProcessing(mqiMessage, failedProc, ackOk, productName, errorMessage);
 
         LOGGER.info("[MONITOR] [step 0] [productName {}] End", productName);
-        reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
+        reporting.end("End job generation using " + mqiMessage.getBody().getProductName());
     }
 
     protected AppDataJobDto<ProductDto> buildJob(GenericMessageDto<ProductDto> mqiMessage)

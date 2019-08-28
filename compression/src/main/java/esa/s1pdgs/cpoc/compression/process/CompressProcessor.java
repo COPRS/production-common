@@ -136,12 +136,12 @@ public class CompressProcessor {
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "CompressionProcessing");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("CompressionProcessing");
 
 		String workDir = properties.getWorkingDirectory();
 
 		final Reporting report = reportingFactory.newReporting(0);
-		report.reportStart("Start compression processing");
+		report.begin("Start compression processing");
 
 		ProductDto job = message.getBody();
 
@@ -165,7 +165,7 @@ public class CompressProcessor {
 		// ----------------------------------------------------------
 		processTask(message, fileDownloader, fileUploader, procExecutorSrv, procCompletionSrv, procExecutor, report);
 
-		report.reportStop("End compression processing");
+		report.end("End compression processing");
 	}
 
 	protected void processTask(final GenericMessageDto<ProductDto> message, final FileDownloader fileDownloader,
@@ -210,7 +210,7 @@ public class CompressProcessor {
 																														// job),
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ace.getCode().getCode(), ace.getLogMessage());
-			report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+			report.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 
 			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 
@@ -221,7 +221,7 @@ public class CompressProcessor {
 					"LOG_DFT", // getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job),
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ErrorCode.INTERNAL_ERROR.getCode());
-			report.reportError("Interrupted job processing");
+			report.error("Interrupted job processing");
 			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 			cleanCompressionProcessing(job, procExecutorSrv);
 		}

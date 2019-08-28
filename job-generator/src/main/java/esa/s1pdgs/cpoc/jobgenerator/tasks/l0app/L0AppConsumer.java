@@ -55,10 +55,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
         this.metadataService = metadataService; 
     }
 
-    @SuppressWarnings("unchecked")
 	@Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {    	
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L0JobGeneration");   
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0JobGeneration");   
         
         // First, consume message
         GenericMessageDto<EdrsSessionDto> mqiMessage = readMessage();
@@ -96,9 +95,10 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                     throw new InvalidFormatProduct("Invalid channel identifier "
                             + leveldto.getChannelId());
                 }
-                reporting.reportStart("Start job generation using " + mqiMessage.getBody().getKeyObjectStorage());
+                reporting.begin("Start job generation using " + mqiMessage.getBody().getKeyObjectStorage());
                 
                 AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
+                LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
                 productName = appDataJob.getProduct().getProductName();
 
                 // Dispatch
@@ -112,6 +112,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                         appDataJob = appDataService.patchJob(
                                 appDataJob.getIdentifier(), appDataJob, false,
                                 false, false);
+                        LOGGER.debug ("== appDataJob(2) {}",appDataJob.toString());
                     }
                     jobsDispatcher.dispatch(appDataJob);
                 }
@@ -125,7 +126,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                         step, productName, ace.getCode().getCode(),
                         ace.getLogMessage());
                 
-                reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+                reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
                 
                 failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
             }  
@@ -137,7 +138,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,
                     leveldto.getKeyObjectStorage());
             
-            reporting.reportStop("End job generation using " + mqiMessage.getBody().getKeyObjectStorage());
+            reporting.end("End job generation using " + mqiMessage.getBody().getKeyObjectStorage());
         }
 
     }
@@ -150,8 +151,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
-        	EdrsSessionMetadata edrsSessionMetadata = metadataService.getEdrsSession(mqiMessage.getBody().getProductType().name(), new File(mqiMessage.getBody().getProductName()).getName());
-
+        	final EdrsSessionDto sessionDto = mqiMessage.getBody();        	
+        	final String productType = sessionDto.getProductType().name();
+        	final String productName = new File(sessionDto.getProductName()).getName();
+        	LOGGER.debug("Querying metadata for product {} of type {}", productName, productType); 
+        	final EdrsSessionMetadata edrsSessionMetadata = metadataService.getEdrsSession(productType, productName);
+           	LOGGER.debug ("Got result {}", edrsSessionMetadata); 
+        	
             // Search if session is already in progress
             List<AppDataJobDto<EdrsSessionDto>> existingJobsForSession =
                     appDataService.findByProductSessionId(mqiMessage.getBody().getSessionId());
@@ -191,8 +197,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 jobDto.setProduct(productDto);
                
                 LOGGER.debug ("== jobDTO {}",jobDto.toString());
-                return appDataService.newJob(jobDto);
-
+                AppDataJobDto<EdrsSessionDto> newJobDto = appDataService.newJob(jobDto);
+                LOGGER.debug ("== newJobDto {}",newJobDto.toString());
+                return newJobDto;
             } else {
 
                 // Update pod if needed
@@ -200,6 +207,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 boolean updateMessage = false;
                 boolean updateProduct = false;
                 AppDataJobDto<EdrsSessionDto> jobDto = existingJobsForSession.get(0);
+                LOGGER.debug ("== existingJobsForSession.get(0) jobDto {}", jobDto.toString());
                 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
@@ -242,6 +250,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 if (update) {
                     jobDto = appDataService.patchJob(jobDto.getIdentifier(),
                             jobDto, updateMessage, updateProduct, false);
+                    LOGGER.debug ("== updated(1) jobDto {}", jobDto.toString());
                 }
                 // Return object
                 return jobDto;
@@ -254,6 +263,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             boolean updateMessage = false;
             boolean updateProduct = false;
             AppDataJobDto jobDto = existingJobs.get(0);
+            LOGGER.debug ("== existingJobs.get(0) jobDto {}", jobDto.toString());
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
@@ -263,8 +273,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             if (update) {
                 jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
                         updateMessage, updateProduct, false);
+                LOGGER.debug ("== updated(2) jobDto {}", jobDto.toString());
             }
-            // Retrun object
+            // Return object
             return jobDto;
         }
 

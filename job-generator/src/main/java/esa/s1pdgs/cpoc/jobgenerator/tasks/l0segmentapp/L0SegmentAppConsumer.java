@@ -79,7 +79,7 @@ public class L0SegmentAppConsumer
      */
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {    	
-    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L0_SEGMENTJobGeneration"); 
+    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
     	
         // First, consume message
         GenericMessageDto<ProductDto> mqiMessage = readMessage();
@@ -109,7 +109,7 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
-            reporting.reportStart("Start job generation using " + mqiMessage.getBody().getProductName());
+            reporting.begin("Start job generation using " + mqiMessage.getBody().getProductName());
             AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
@@ -141,7 +141,7 @@ public class L0SegmentAppConsumer
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(),
                     ace.getLogMessage());
-            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
 
             failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
         }
@@ -152,7 +152,7 @@ public class L0SegmentAppConsumer
         LOGGER.info("[MONITOR] [step 0] [productName {}] End",
                 productName);
         
-        reporting.reportStop("End job generation using " + mqiMessage.getBody().getProductName());
+        reporting.end("End job generation using " + mqiMessage.getBody().getProductName());
     }
 
     protected AppDataJobDto<ProductDto> buildJob(

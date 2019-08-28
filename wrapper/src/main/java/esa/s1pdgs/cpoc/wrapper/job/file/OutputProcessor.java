@@ -379,20 +379,19 @@ public class OutputProcessor {
             if (i > 0) {
                 this.publishAccordingUploadFiles(reportingFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
             }
-            final Reporting report = reportingFactory
-        			.product(null, null)            			
+            final Reporting report = reportingFactory  			
         			.newReporting(2);
             try { 
-            	report.reportStart("Start uploading batch " + i + " of outputs " + listProducts);
+            	report.begin("Start uploading batch " + i + " of outputs " + listProducts);
             	
                 if (Thread.currentThread().isInterrupted()) {
                     throw new InternalErrorException("The current thread as been interrupted");
                 } 
                 this.obsClient.uploadFilesPerBatch(sublist);
-                report.reportStop("End uploading batch " + i + " of outputs " + listProducts);
+                report.end("End uploading batch " + i + " of outputs " + listProducts);
               
             } catch (AbstractCodedException e) {
-    			report.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+    			report.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
                 throw e;
             }
         }
@@ -428,16 +427,15 @@ public class OutputProcessor {
             if (nextKeyUpload.startsWith(msg.getKeyObs())) {
                 stop = true;
             } else {
-            	final Reporting report = reportingFactory
-            			.product(null, msg.getProductName())            			
+            	final Reporting report = reportingFactory 			
             			.newReporting(1);
             	
-            	report.reportStart("Start publishing message");
+            	report.begin("Start publishing message");
                 try {
                     procuderFactory.sendOutput(msg, inputMessage);
-                    report.reportStop("End publishing message");
+                    report.end("End publishing message");
                 } catch (MqiPublicationError ace) {                	
-                	report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+                	report.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
                 }
                 iter.remove();
             }
@@ -485,7 +483,7 @@ public class OutputProcessor {
      * @throws IOException
      */
     public void processOutput() throws AbstractCodedException {    	        
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "OutputHandling");
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("OutputHandling");
         
         // Extract files
         List<String> lines = extractFiles();
@@ -500,7 +498,7 @@ public class OutputProcessor {
                 .collect(Collectors.joining(","));
         
         final Reporting reporting = reportingFactory.newReporting(0);
-        reporting.reportStart("Start handling of outputs " + listoutputs);
+        reporting.begin("Start handling of outputs " + listoutputs);
         
         try {
 			// Upload per batch the output        
@@ -508,9 +506,9 @@ public class OutputProcessor {
 			 // Publish reports
 	        processReports(reportToPublish);
 	        
-	        reporting.reportStopWithTransfer("End handling of outputs " + listoutputs, size);
+	        reporting.endWithTransfer("End handling of outputs " + listoutputs, size);
 		} catch (AbstractCodedException e) {
-			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}       
     }    

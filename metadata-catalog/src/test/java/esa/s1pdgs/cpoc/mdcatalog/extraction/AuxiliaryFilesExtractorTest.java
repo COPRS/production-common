@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -275,9 +274,7 @@ public class AuxiliaryFilesExtractorTest {
 			String productType) throws AbstractCodedException {
 		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + metadataFile);
 		
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
-        		.product("test", file.getName());
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
