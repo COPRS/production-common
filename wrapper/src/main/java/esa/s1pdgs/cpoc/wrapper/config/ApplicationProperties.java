@@ -69,6 +69,11 @@ public class ApplicationProperties {
      * job, it will be considered as error.
      */
     private String workingDir;
+    
+    private long thresholdEs;
+    private long thresholdIw;
+    private long thresholdSm;
+    private long thresholdWv;
 
     /**
      * Default constructor
@@ -227,6 +232,39 @@ public class ApplicationProperties {
 	public void setWorkingDir(String workingDir) {
 		this.workingDir = workingDir;
 	}
+
+	public long getThresholdEs() {
+		return thresholdEs;
+	}
+
+	public void setThresholdEs(long thresholdEs) {
+		this.thresholdEs = thresholdEs;
+	}
+
+	public long getThresholdIw() {
+		return thresholdIw;
+	}
+
+	public void setThresholdIw(long thresholdIw) {
+		this.thresholdIw = thresholdIw;
+	}
+
+	public long getThresholdSm() {
+		return thresholdSm;
+	}
+
+	public void setThresholdSm(long thresholdSm) {
+		this.thresholdSm = thresholdSm;
+	}
+
+	public long getThresholdWv() {
+		return thresholdWv;
+	}
+
+	public void setThresholdWv(long thresholdWv) {
+		this.thresholdWv = thresholdWv;
+	}
+	
 	
 	
 }

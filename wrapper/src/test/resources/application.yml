@@ -29,6 +29,10 @@ process:
   size-batch-download: 5
   wap-nb-max-loop: 12
   wap-tempo-s: 10
+  threshold-es : 2
+  threshold-iw : 2
+  threshold-sm : 2
+  threshold-wv : 30
   mqi:
     host-uri: http://localhost:8081
     max-retries: 3
