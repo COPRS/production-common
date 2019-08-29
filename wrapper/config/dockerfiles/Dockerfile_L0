@@ -23,4 +23,7 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
+# Remove ghost removal logic from script
+ADD patch/makeListFile.sh /usr/local/components/AIOP/bin/makeListFile.sh
+
 CMD ["/app/start_l0.sh"]
