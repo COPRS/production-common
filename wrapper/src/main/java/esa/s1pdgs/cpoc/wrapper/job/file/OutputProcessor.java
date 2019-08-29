@@ -171,7 +171,8 @@ public class OutputProcessor {
         LOGGER.info("{} 2 - Starting organizing outputs", prefixMonitorLogs);
 
         for (String line : lines) {
-
+        	LOGGER.trace("Processing line of list file: {}",line);
+        	
             // Extract the product name, the complete filepath, job output and
             // the mode
             String productName = getProductName(line);
@@ -295,6 +296,11 @@ public class OutputProcessor {
 
         }
         return productSize;
+    }
+    
+    boolean isGhostCandidate(String productName) {
+    	//TODO TBD
+    	return false;
     }
 
 	/**
