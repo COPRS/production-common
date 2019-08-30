@@ -173,12 +173,12 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 jobDto.getMessages().add(mqiMessage);
                 // Product
                 AppDataJobProductDto productDto = new AppDataJobProductDto();
+                productDto.setProductType(productType);
                 productDto.setSessionId(mqiMessage.getBody().getSessionId());
                 productDto.setMissionId(edrsSessionMetadata.getMissionId());
                 productDto.setStationCode(mqiMessage.getBody().getStationCode());
                 productDto.setProductName(mqiMessage.getBody().getSessionId());
-                productDto
-                        .setSatelliteId(mqiMessage.getBody().getSatelliteId());
+                productDto.setSatelliteId(mqiMessage.getBody().getSatelliteId());
                 productDto.setStartTime(edrsSessionMetadata.getStartTime());
                 productDto.setStopTime(edrsSessionMetadata.getStopTime());
 
