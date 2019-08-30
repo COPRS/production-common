@@ -160,7 +160,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
         	
             // Search if session is already in progress
             List<AppDataJobDto<EdrsSessionDto>> existingJobsForSession =
-                    appDataService.findByProductSessionId(mqiMessage.getBody().getSessionId());
+                    appDataService.findByProductSessionId(sessionDto.getSessionId());
 
             if (CollectionUtils.isEmpty(existingJobsForSession)) {
             	LOGGER.debug ("== creating jobDTO from {}",mqiMessage ); 
@@ -174,15 +174,15 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 // Product
                 AppDataJobProductDto productDto = new AppDataJobProductDto();
                 productDto.setProductType(productType);
-                productDto.setSessionId(mqiMessage.getBody().getSessionId());
+                productDto.setSessionId(sessionDto.getSessionId());
                 productDto.setMissionId(edrsSessionMetadata.getMissionId());
-                productDto.setStationCode(mqiMessage.getBody().getStationCode());
-                productDto.setProductName(mqiMessage.getBody().getSessionId());
-                productDto.setSatelliteId(mqiMessage.getBody().getSatelliteId());
+                productDto.setStationCode(sessionDto.getStationCode());
+                productDto.setProductName(sessionDto.getSessionId());
+                productDto.setSatelliteId(sessionDto.getSatelliteId());
                 productDto.setStartTime(edrsSessionMetadata.getStartTime());
                 productDto.setStopTime(edrsSessionMetadata.getStopTime());
 
-                if (mqiMessage.getBody().getChannelId() == 1) {
+                if (sessionDto.getChannelId() == 1) {
                     LOGGER.debug ("== ch1 ");    
                     productDto.setRaws1(edrsSessionMetadata.getRawNames().stream().map(
                             s -> new AppDataJobFileDto(s))
