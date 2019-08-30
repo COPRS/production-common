@@ -140,6 +140,7 @@ public class JobConverter {
         if (jobProductDb != null) {
             jobProductDto = new AppDataJobProductDto();
             jobProductDto.setProductName(jobProductDb.getProductName());
+            jobProductDto.setStationCode(jobProductDb.getStationCode());
             jobProductDto.setMissionId(jobProductDb.getMissionId());
             jobProductDto.setSatelliteId(jobProductDb.getSatelliteId());
             jobProductDto.setSessionId(jobProductDb.getSessionId());
@@ -182,6 +183,7 @@ public class JobConverter {
         if (jobProductDto != null) {
             jobProductDb = new AppDataJobProduct();
             jobProductDb.setProductName(jobProductDto.getProductName());
+            jobProductDb.setStationCode(jobProductDto.getStationCode());
             jobProductDb.setMissionId(jobProductDto.getMissionId());
             jobProductDb.setSatelliteId(jobProductDto.getSatelliteId());
             jobProductDb.setSessionId(jobProductDto.getSessionId());

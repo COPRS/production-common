@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterUtils;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 
 /**
  * @author Viveris Technologies
@@ -178,13 +179,18 @@ public class JobController {
     		@RequestBody final AppDataJobDto newJob)
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
+    	LOGGER.debug ("== newJob {}",newJob.toString());
     	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());
         // Convert into database message
         AppDataJob newJobDb = jobConverter.convertJobFromDtoToDb(newJob, category);
+    	LOGGER.debug ("== newJobDb {}",newJobDb.toString());
 
-        // Create it
-        return jobConverter
-                .convertJobFromDbToDto(appDataJobService.newJob(newJobDb), category);
+    	// Create it
+    	AppDataJobDto<AbstractDto> jobResult = jobConverter
+        .convertJobFromDbToDto(appDataJobService.newJob(newJobDb), category);
+    	LOGGER.debug ("== jobResult {}", jobResult.toString());
+
+        return jobResult;
     }
 
     /**
