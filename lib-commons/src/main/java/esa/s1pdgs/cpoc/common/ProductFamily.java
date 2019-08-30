@@ -10,6 +10,7 @@ public enum ProductFamily {
     AUXILIARY_FILE, //
     BLANK, //
     INVALID,
+    GHOST,
     JOB_ORDER, //
     L0_ACN, //
     L0_BLANK, //

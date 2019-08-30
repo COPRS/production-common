@@ -32,6 +32,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
+import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
@@ -64,6 +65,9 @@ public class OutputProcessorTest {
      */
     @Mock
     private OutputProcuderFactory procuderFactory;
+    
+    @Mock
+    private ApplicationProperties properties;
 
     /**
      * List of outputs in job
@@ -161,7 +165,7 @@ public class OutputProcessorTest {
 
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
 
         // Mocks
         doNothing().when(obsClient).uploadFilesPerBatch(Mockito.any());
@@ -367,7 +371,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForLOSegmentFast() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties);
         
         List<ObsUploadFile> uploadBatch = new ArrayList<>();
         List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -449,7 +453,7 @@ public class OutputProcessorTest {
         inputMessage.getBody().setProductProcessMode("NRT");
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
         
         List<ObsUploadFile> uploadBatch = new ArrayList<>();
         List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -517,7 +521,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForL1RealOutputs() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
         
         List<ObsUploadFile> uploadBatch = new ArrayList<>();
         List<ObsQueueMessage> outputToPublish = new ArrayList<>();

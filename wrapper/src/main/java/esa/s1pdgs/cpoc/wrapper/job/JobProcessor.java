@@ -210,7 +210,7 @@ public class JobProcessor {
 		// Initiliaze the output processor
 		OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
 				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
-				this.properties.getLevel());
+				this.properties.getLevel(), properties);
 
 		// ----------------------------------------------------------
 		// Process message
