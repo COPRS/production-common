@@ -70,7 +70,7 @@ public class ApplicationProperties {
      */
     private String workingDir;
     
-    private long thresholdEs;
+    private long thresholdEw;
     private long thresholdIw;
     private long thresholdSm;
     private long thresholdWv;
@@ -233,12 +233,12 @@ public class ApplicationProperties {
 		this.workingDir = workingDir;
 	}
 
-	public long getThresholdEs() {
-		return thresholdEs;
+	public long getThresholdEw() {
+		return thresholdEw;
 	}
 
-	public void setThresholdEs(long thresholdEs) {
-		this.thresholdEs = thresholdEs;
+	public void setThresholdEw(long thresholdEw) {
+		this.thresholdEw = thresholdEw;
 	}
 
 	public long getThresholdIw() {

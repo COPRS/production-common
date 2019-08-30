@@ -116,7 +116,7 @@ public class OutputProcessor {
 	private final ApplicationProperties properties;
 
 	public static enum Polarisation {
-		ES, IW, SM, WV
+		EW, IW, SM, WV
 	}
 
 	/**
@@ -315,7 +315,8 @@ public class OutputProcessor {
 		LOGGER.info("Performing ghost candidate check for product '{}'", productName);
 
 		// Something completely unexpected was provided as product Name
-		if (productName.length() < 32) {
+		if (productName.length() < 48) {
+			LOGGER.info("Product length was less than 48 characters");
 			return false;
 		}
 
@@ -353,7 +354,7 @@ public class OutputProcessor {
 			polarisation = Polarisation.valueOf(polarisationStr);
 			LOGGER.trace("Extracted polarisation from ghost candidate: polarisation {}", polarisation);
 		} catch (IllegalArgumentException ex) {
-			LOGGER.error("Polarisation from product Name is not valid: polarisation={}", polarisation);
+			LOGGER.error("Polarisation from product name is not valid: polarisation={}", polarisation);
 			return false;
 		}
 
@@ -382,8 +383,8 @@ public class OutputProcessor {
 	 */
 	private long ghostLength(Polarisation polarisation) {
 		switch (polarisation) {
-		case ES:
-			return properties.getThresholdEs();
+		case EW:
+			return properties.getThresholdEw();
 		case IW:
 			return properties.getThresholdIw();
 		case SM:

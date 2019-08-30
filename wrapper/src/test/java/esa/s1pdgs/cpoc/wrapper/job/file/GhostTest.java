@@ -28,7 +28,7 @@ public class GhostTest {
 				new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order"));
 		
 		ApplicationProperties properties = new ApplicationProperties();
-		properties.setThresholdEs(2);
+		properties.setThresholdEw(2);
 		properties.setThresholdIw(2);
 		properties.setThresholdSm(2);
 		properties.setThresholdWv(30);
@@ -57,5 +57,12 @@ public class GhostTest {
 				processor.isGhostCandidate("S1A_IW_RAW__0SVH_20190810T225412_20190810T225412_028513_033938_271A"));
 		assertEquals(true,
 				processor.isGhostCandidate("S1A_IW_RAW__0SVV_20190810T225412_20190810T225412_028513_033938_CFA2"));
+	}
+	
+	@Test
+	public void testPolarisation() {
+		assertEquals(false,
+				processor.isGhostCandidate("S1B_EW_RAW__0SHH_20181001T065647_20181001T065649_012955_017ED9_79B7.SAFE"));
+		
 	}
 }
