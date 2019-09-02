@@ -19,23 +19,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public final class FtpsOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
-		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config) {
-			return new FtpsOutboxClient(obsClient, config);
+		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config, final PathEvaluater eval) {
+			return new FtpsOutboxClient(obsClient, config, eval);
 		}			
 	}
 	
 	private static final Logger LOG = LogManager.getLogger(FtpsOutboxClient.class);
 	
 	private static final int DEFAULT_PORT = 990;
-	
-	FtpsOutboxClient(ObsClient obsClient, OutboxConfiguration config) {
-		super(obsClient, config);
+
+	public FtpsOutboxClient(ObsClient obsClient, OutboxConfiguration config, PathEvaluater pathEvaluator) {
+		super(obsClient, config, pathEvaluator);
 	}
 
 	@Override
@@ -92,7 +93,7 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 			final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
     		
     		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {
-    			final String path = entry.getKey();		    		
+    			final String path = evaluatePathFor(new ObsObject(entry.getKey(), obsObject.getFamily()));		    		
     			Utils.assertValidPath(path);
     			
     			final Path dest = remoteDir.resolve(path);	

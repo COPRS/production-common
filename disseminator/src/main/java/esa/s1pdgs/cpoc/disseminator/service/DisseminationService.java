@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.disseminator.outbox.FtpsOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.LocalOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.SftpOutboxClient;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.MqiConsumer;
@@ -76,10 +77,11 @@ public class DisseminationService implements MqiListener<ProductDto> {
     	// Init list of configured outboxes    	
     	for (final Map.Entry<String, OutboxConfiguration> entry : properties.getOutboxes().entrySet()) {	
     		final String target = entry.getKey();
-    		final OutboxConfiguration config = entry.getValue();    		
+    		final OutboxConfiguration config = entry.getValue();    	
+    		final PathEvaluater eval = PathEvaluater.newInstance(config);
 
     		final OutboxClient outboxClient = FACTORIES.getOrDefault(config.getProtocol(), OutboxClient.Factory.NOT_DEFINED_ERROR)
-    				.newClient(obsClient, config);    		
+    				.newClient(obsClient, config, eval);    		
     		LOG.info("Using {} for Outbox target '{}'", outboxClient, target);
     		put(target, outboxClient);
     	}    	

@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public class TestSftpOutboxClient {
@@ -114,7 +115,7 @@ public class TestSftpOutboxClient {
 		
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config);		
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
 		uut.transfer(new ObsObject("my/little/file", ProductFamily.BLANK));
 		
 		final File expectedFile = new File(dir, "my/little/file");
@@ -141,7 +142,7 @@ public class TestSftpOutboxClient {
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		dir.mkdirs();
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config);		
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
 		uut.transfer(new ObsObject("my/little/file", ProductFamily.BLANK));
 		
 		final File expectedFile = new File(dir, "my/little/file");
