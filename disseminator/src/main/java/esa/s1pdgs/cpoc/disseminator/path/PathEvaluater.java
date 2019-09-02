@@ -12,7 +12,10 @@ public interface PathEvaluater {
 		}
 	};
 	
-	public static PathEvaluater newInstance(OutboxConfiguration _config) {
+	public static PathEvaluater newInstance(OutboxConfiguration config) {		
+		if ("ISIP".equalsIgnoreCase(config.getPathEvaluator())) {
+			return new IsipPathEvaluater();
+		}
 		return NULL;
 	}
 	

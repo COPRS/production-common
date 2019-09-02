@@ -31,6 +31,7 @@ public class DisseminationProperties {
 		
 		private String keystoreFile = null;
 		private String keystorePass = "changeit";
+		private String pathEvaluator = null;
 		
 		// per default, use java keystore and password
 		private String truststoreFile = System.getProperty("java.home") + "/jre/lib/security/cacerts";
@@ -133,11 +134,28 @@ public class DisseminationProperties {
 		public void setImplicitSsl(boolean implicitSsl) {
 			this.implicitSsl = implicitSsl;
 		}
+		
+		public String getPathEvaluator() {
+			return pathEvaluator;
+		}
 
+		public void setPathEvaluator(String pathEvaluator) {
+			this.pathEvaluator = pathEvaluator;
+		}
+		
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
-					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port
+					+ ", password=" + password + ", keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port
+					+ ", keystoreFile=" + keystoreFile + ", keystorePass=" + keystorePass + ", pathEvaluator="
+					+ pathEvaluator + ", truststoreFile=" + truststoreFile + ", truststorePass=" + truststorePass
+					+ ", implicitSsl=" + implicitSsl + "]";
+		}
+
+		public String stoString() {
+			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
+					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port + 
+					", pathEvaluator=" + pathEvaluator 
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
 					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl + "]";
 		}
