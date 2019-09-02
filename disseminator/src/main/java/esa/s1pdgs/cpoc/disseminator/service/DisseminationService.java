@@ -36,6 +36,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -127,7 +128,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			try {
 				Retries.performWithRetries(
 						() -> {
-							outboxClient.transfer(product.getFamily(), product.getKeyObjectStorage());
+							outboxClient.transfer(new ObsObject(product.getKeyObjectStorage(), product.getFamily()));
 							return null;
 						}, 
 						properties.getMaxRetries(), 

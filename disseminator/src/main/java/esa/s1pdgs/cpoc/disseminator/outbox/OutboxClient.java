@@ -1,8 +1,8 @@
 package esa.s1pdgs.cpoc.disseminator.outbox;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public interface OutboxClient {		
 	public static interface Factory {
@@ -17,10 +17,10 @@ public interface OutboxClient {
 	
 	public static final OutboxClient NULL = new OutboxClient() {
 		@Override
-		public final void transfer(ProductFamily family, String keyObjectStorage) throws Exception {
+		public final void transfer(ObsObject obsObject) throws Exception {
 			// do nothing
 		}		
 	};
 	
-	void transfer(ProductFamily family, String keyObjectStorage) throws Exception;
+	void transfer(ObsObject obsObject) throws Exception;
 }

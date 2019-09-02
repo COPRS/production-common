@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public class TestLocalOutboxClient {
 	private File testDir;
@@ -47,7 +48,7 @@ public class TestLocalOutboxClient {
 		config.setPath(testDir.getPath());
 		
 		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config);
-		outbox.transfer(ProductFamily.BLANK, "foo.bar");
+		outbox.transfer(new ObsObject("foo.bar", ProductFamily.BLANK));
 		
 		final File expected = new File(testDir, "foo.bar");
 		assertEquals(true, expected.exists());

@@ -18,9 +18,9 @@ import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public final class FtpsOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
@@ -39,7 +39,7 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 	}
 
 	@Override
-	public void transfer(ProductFamily family, String keyObjectStorage) throws Exception {
+	public void transfer(final ObsObject obsObject) throws Exception {
 		final FTPSClient ftpsClient = new FTPSClient("TLS", true);
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply
@@ -89,7 +89,7 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 	        assertPositiveCompletion(ftpsClient);
 	        
 	        final Path remoteDir = Paths.get(config.getPath());
-			final Map<String, InputStream> elements = obsClient.getAllAsInputStream(family, keyObjectStorage);
+			final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
     		
     		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {
     			final String path = entry.getKey();		    		
