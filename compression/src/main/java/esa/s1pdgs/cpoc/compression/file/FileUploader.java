@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.compression.file;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -106,7 +105,7 @@ public class FileUploader {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		this.obsClient.uploadFilesPerBatch(Collections.singletonList(uploadFile));
+		this.obsClient.uploadFile(uploadFile.getFamily(), uploadFile.getKey(), uploadFile.getFile());
 
 
 		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
