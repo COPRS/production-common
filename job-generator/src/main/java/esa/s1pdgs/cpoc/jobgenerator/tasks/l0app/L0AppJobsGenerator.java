@@ -116,8 +116,6 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     	Map<String,String> aiopParams = new HashMap<>();
     	aiopParams.put("Mission_Id", product.getMissionId() + product.getSatelliteId());
     	aiopParams.put("Processing_Station", product.getStationCode());
-//    	aiopParams.put("Start_Time", product.getStartTime());
-//    	aiopParams.put("Stop_Time", product.getStopTime());
     	aiopParams.put("DownlinkTime", product.getStartTime());
     	
     	//FIXME
