@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.disseminator.outbox;
 
+import java.io.File;
+import java.nio.file.Path;
+
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
@@ -19,7 +22,19 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 	}
 
 	@Override
-	public void transfer(final ObsObject obsObject) throws ObsException {
-		obsClient.downloadFile(obsObject.getFamily(), obsObject.getKey(), config.getPath());
+	public final void transfer(final ObsObject obsObject) throws ObsException {		
+		final Path path = evaluatePathFor(obsObject);	
+		
+		final Path parentPath = path.getParent();
+		
+		if (parentPath == null) {
+			throw new RuntimeException("Invalid parent path in " + path);
+		}
+		
+		final File parent = parentPath.toFile();
+		if (!parent.exists()) {
+			parent.mkdirs();
+		}		
+		obsClient.downloadFile(obsObject.getFamily(), obsObject.getKey(), parent.getPath());
 	}
 }

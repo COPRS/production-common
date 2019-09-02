@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.disseminator.outbox;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -40,8 +39,6 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 		final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
 		
-		final Path remoteDir = Paths.get(config.getPath());
-		
 		if (config.getKeyFile() != null) {
 			client.addIdentity(config.getKeyFile());
 		}
@@ -57,10 +54,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 		    channel.connect();
 	    	try {		    		
 	    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {
-	    			final String path = entry.getKey();		    		
-	    			Utils.assertValidPath(path);
-	    			
-	    			final Path dest = remoteDir.resolve(path);	
+	       			final Path dest = evaluatePathFor(new ObsObject(entry.getKey(), obsObject.getFamily()));	
 	    			String currentPath = "";
 	    			
 	    			final Path parentPath = dest.getParent();    			
@@ -81,7 +75,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 						}
 	    			}		    			
 	    			try (final InputStream in = entry.getValue()) {
-	    				LOG.info("Uploading {} to {}", path, dest);
+	    				LOG.info("Uploading {} to {}", entry.getKey(), dest);
 	    				channel.put(in, dest.toString());	    				
 	    			}
 	    		}

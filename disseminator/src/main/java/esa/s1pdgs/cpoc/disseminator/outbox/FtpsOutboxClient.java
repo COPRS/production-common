@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.disseminator.outbox;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.Map;
 
@@ -88,15 +87,12 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 	        ftpsClient.setFileType(FTP.BINARY_FILE_TYPE);
 	        ftpsClient.enterLocalPassiveMode();
 	        assertPositiveCompletion(ftpsClient);
-	        
-	        final Path remoteDir = Paths.get(config.getPath());
+
 			final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
     		
-    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {
-    			final String path = evaluatePathFor(new ObsObject(entry.getKey(), obsObject.getFamily()));		    		
-    			Utils.assertValidPath(path);
+    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {    			
+    			final Path dest = evaluatePathFor(new ObsObject(entry.getKey(), obsObject.getFamily()));	
     			
-    			final Path dest = remoteDir.resolve(path);	
     			String currentPath = "";
     			
     			final Path parentPath = dest.getParent();    			
@@ -119,7 +115,7 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
     			}		    
     			
     			try (final InputStream in = entry.getValue()) {
-    				LOG.info("Uploading {} to {}", path, dest);
+    				LOG.info("Uploading {} to {}", entry.getKey(), dest);
     				ftpsClient.storeFile(dest.toString(), in);
     				assertPositiveCompletion(ftpsClient);	    				
     			}
