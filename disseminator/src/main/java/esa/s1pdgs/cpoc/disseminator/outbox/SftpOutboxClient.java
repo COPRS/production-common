@@ -82,13 +82,13 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	    		}
 	    	}
 	    	finally {
-			    LOG.debug("Disconneting ChannelSftp on {}", config.getHostname());
+			    LOG.debug("Disconnecting ChannelSftp on {}", config.getHostname());
 	    		channel.disconnect();
 	    	}
 	    	
 	    }
 	    finally {
-	    	LOG.debug("Disconneting Session on {}", config.getHostname());
+	    	LOG.debug("Disconnecting Session on {}", config.getHostname());
 	    	session.disconnect();
 	    }	
 	}

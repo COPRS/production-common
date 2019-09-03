@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration.Protocol;
+import esa.s1pdgs.cpoc.disseminator.outbox.FtpOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.FtpsOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.LocalOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
@@ -52,6 +53,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		FACTORIES.put(Protocol.FILE, new LocalOutboxClient.Factory());
 		FACTORIES.put(Protocol.FTPS, new FtpsOutboxClient.Factory());
 		FACTORIES.put(Protocol.SFTP, new SftpOutboxClient.Factory());
+		FACTORIES.put(Protocol.FTP, new FtpOutboxClient.Factory());
 	}
 	
 	private final GenericMqiClient client;

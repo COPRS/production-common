@@ -18,7 +18,8 @@ public class DisseminationProperties {
 		public enum Protocol {
 			FILE,
 			SFTP,
-			FTPS
+			FTPS,
+			FTP
 		}
 		
 		private Protocol protocol = Protocol.FILE;
