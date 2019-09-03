@@ -26,7 +26,7 @@ public class ObsUploadObject extends ObsObject {
      */
     public ObsUploadObject(final String key, final ProductFamily family,
             final File file) {
-        super(key, family);
+        super(family, key);
         this.file = file;
     }
 

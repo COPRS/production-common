@@ -166,7 +166,7 @@ public class TestFtpsOutboxClient {
 		final File dir = new File(userDir, testDir.toPath().toString());
 		
 		final FtpsOutboxClient uut = new FtpsOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
-		uut.transfer(new ObsObject("my/little/file", ProductFamily.BLANK));
+		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"));
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertEquals(true, expectedFile.exists());

@@ -153,7 +153,7 @@ public class SwiftObsClientTest {
     }
 
     /**
-     * Test doesObjectExist
+     * Test exist
      * 
      * @throws ObsServiceException
      * @throws SdkClientException
@@ -162,19 +162,19 @@ public class SwiftObsClientTest {
     public void testDoesObjectExist()
             throws ObsServiceException, SdkClientException {
         boolean ret = client
-                .doesObjectExist(new ObsObject("key-exist", ProductFamily.L0_ACN));
+                .exists(new ObsObject(ProductFamily.L0_ACN, "key-exist"));
         assertTrue(ret);
         verify(service, times(1)).exist(Mockito.eq("l0-acns"), Mockito.eq("key-exist"));
 
-        ret = client.doesObjectExist(
-                new ObsObject("key-not-exist", ProductFamily.L1_SLICE));
+        ret = client.exists(
+                new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
         assertFalse(ret);
         verify(service, times(1)).exist(Mockito.eq("l1-slices"),
                 Mockito.eq("key-not-exist"));
     }
 
     /**
-     * Test doesPrefixExist
+     * Test prefixExist
      * 
      * @throws ObsServiceException
      * @throws SdkClientException
@@ -182,14 +182,14 @@ public class SwiftObsClientTest {
     @Test
     public void testDoesPrefixExist()
             throws ObsServiceException, SdkClientException {
-        boolean ret = client.doesPrefixExist(
-                new ObsObject("key-exist", ProductFamily.L0_SLICE));
+        boolean ret = client.prefixExists(
+                new ObsObject(ProductFamily.L0_SLICE, "key-exist"));
         assertTrue(ret);
         verify(service, times(1)).getNbObjects(Mockito.eq("l0-slices"),
                 Mockito.eq("key-exist"));
 
-        ret = client.doesPrefixExist(
-                new ObsObject("key-not-exist", ProductFamily.L1_SLICE));
+        ret = client.prefixExists(
+                new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
         assertFalse(ret);
         verify(service, times(1)).getNbObjects(Mockito.eq("l1-slices"),
                 Mockito.eq("key-not-exist"));

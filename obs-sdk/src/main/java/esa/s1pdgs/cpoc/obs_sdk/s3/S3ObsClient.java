@@ -80,7 +80,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 * @see ObsClient#doesObjectExist(ObsObject)
 	 */
 	@Override
-	public boolean doesObjectExist(final ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		return s3Services.exist(configuration.getBucketForFamily(object.getFamily()), object.getKey());
 	}
 
@@ -88,7 +88,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 * @see ObsClient#doesPrefixExist(ObsObject)
 	 */
 	@Override
-	public boolean doesPrefixExist(final ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean prefixExists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		return s3Services.getNbObjects(configuration.getBucketForFamily(object.getFamily()), object.getKey()) > 0;
 	}
 
@@ -143,12 +143,12 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {
+	public void move(ObsObject from, ProductFamily to) throws ObsException {
 		try {
-			s3Services.moveFile(new CopyObjectRequest(configuration.getBucketForFamily(from), key,
-					configuration.getBucketForFamily(to), key));
+			s3Services.moveFile(new CopyObjectRequest(configuration.getBucketForFamily(from.getFamily()), from.getKey(),
+					configuration.getBucketForFamily(to), from.getKey()));
 		} catch (S3SdkClientException | ObsServiceException e) {
-			throw new ObsException(from, key, e);
+			throw new ObsException(from.getFamily(), from.getKey(), e);
 		}
 	}
 
@@ -182,7 +182,7 @@ public class S3ObsClient extends AbstractObsClient {
 				Date lastModified = s.getLastModified();
 
 				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {
-					ObsObject obsObj = new ObsObject(s.getKey(), family);
+					ObsObject obsObj = new ObsObject(family, s.getKey());
 					objectsOfTimeFrame.add(obsObj);
 				}
 			}

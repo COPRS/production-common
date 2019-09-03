@@ -295,29 +295,33 @@ public class SwiftObsServices {
 	public int uploadDirectory(final String bucketName, final String keyName,
             final File uploadDirectory)
             throws SwiftObsServiceException, SwiftSdkClientException {
-    	return uploadDirectory(bucketName, keyName, uploadDirectory, true);
+    	return uploadDirectory(bucketName, keyName, uploadDirectory, new ArrayList<String>(), true);
     }
 	
 	private int uploadDirectory(final String containerName, final String keyName,
-            final File uploadDirectory, boolean isBaseDirectory)
+            final File uploadDirectory, List<String> fileList, boolean isBaseDirectory)
             		throws SwiftObsServiceException, SwiftSdkClientException {
 		int ret = 0;
         if (uploadDirectory.isDirectory()) {
             File[] childs = uploadDirectory.listFiles();
             if (childs != null) {
                 for (File child : childs) {
+                	String childKey = keyName + File.separator + child.getName();
                     if (child.isDirectory()) {
-                        ret += uploadDirectory(containerName,
-                                keyName + File.separator + child.getName(), child, false);
+                        ret += uploadDirectory(containerName, childKey, child, fileList, false);
                     } else {
-                        uploadFile(containerName,
-                                keyName + File.separator + child.getName(), child);
+                        uploadFile(containerName, childKey, child);
+                        fileList.add(childKey);
                         ret += 1;
                     }
                 }
             }
             if (isBaseDirectory) {
             	// TODO retrieve MD5 information for all uploaded files and upload a file list named directoryname.md5sum
+            	String fileListTxt;
+            	for (String file : fileList) {
+            		
+            	}
             }
         } else {
             uploadFile(containerName, keyName, uploadDirectory);

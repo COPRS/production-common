@@ -22,12 +22,33 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
- * parralel is done
+ * parallel is done
  * 
  * @author Viveris Technologies
  */
 public abstract class AbstractObsClient implements ObsClient {
 
+    /**
+     * Get the timeout for waiting threads termination in seconds
+     * @return
+     * @throws ObsServiceException
+     */
+	protected abstract int getShutdownTimeoutS() throws ObsServiceException;
+
+    /**
+     * Get the timeout for download execution in seconds
+     * @return
+     * @throws ObsServiceException
+     */
+	protected abstract int getDownloadExecutionTimeoutS() throws ObsServiceException;
+
+    /**
+     * Get the timeout for upload execution in seconds
+     * @return
+     * @throws ObsServiceException
+     */
+	protected abstract int getUploadExecutionTimeoutS() throws ObsServiceException;
+	
     /**
      * @see ObsClient#downloadObjects(List)
      * @see #downloadObjects(List, boolean)
@@ -139,25 +160,7 @@ public abstract class AbstractObsClient implements ObsClient {
         } catch (InterruptedException | TimeoutException e) {
             throw new ObsServiceException(e.getMessage(), e);
         }
-    }
-    
-    /**
-     * Check if given file exist in OBS
-     * 
-     * @param family
-     * @param key
-     * @return
-     * @throws ObsException
-     */
-	public boolean exist(final ProductFamily family, final String key)
-            throws ObsException {
-        final ObsObject object = new ObsObject(key, family);
-        try {
-            return doesObjectExist(object);
-        } catch (SdkClientException exc) {
-            throw new ObsException(family, key, exc);
-        }
-    }
+    }    
 
 	/**
 	 * Download a file
@@ -262,7 +265,7 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
 	@Override
-	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {
+	public void move(ObsObject from, ProductFamily to) throws ObsException {
 		throw new UnsupportedOperationException();
 	}
 	

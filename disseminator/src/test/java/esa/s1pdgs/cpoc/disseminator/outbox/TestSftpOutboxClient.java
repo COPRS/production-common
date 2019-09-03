@@ -116,7 +116,7 @@ public class TestSftpOutboxClient {
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
 		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
-		uut.transfer(new ObsObject("my/little/file", ProductFamily.BLANK));
+		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"));
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertEquals(true, expectedFile.exists());
@@ -143,7 +143,7 @@ public class TestSftpOutboxClient {
 		dir.mkdirs();
 		
 		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
-		uut.transfer(new ObsObject("my/little/file", ProductFamily.BLANK));
+		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"));
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertEquals(true, expectedFile.exists());

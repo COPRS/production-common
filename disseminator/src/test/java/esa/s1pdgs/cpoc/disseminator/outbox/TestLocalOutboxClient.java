@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +53,7 @@ public class TestLocalOutboxClient {
 		config.setPath(testDir.getPath());
 		
 		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config, PathEvaluater.NULL);
-		outbox.transfer(new ObsObject("foo.bar", ProductFamily.BLANK));
+		outbox.transfer(new ObsObject(ProductFamily.BLANK, "foo.bar"));
 		
 		final File expected = new File(testDir, "foo.bar");
 		assertEquals(true, expected.exists());
@@ -80,7 +79,7 @@ public class TestLocalOutboxClient {
 		config.setPath(testDir.getPath());
 		
 		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config, new IsipPathEvaluater());
-		outbox.transfer(new ObsObject("S1A_AUX_CAL_V20171017T080000_G20180622T082918.SAFE", ProductFamily.BLANK));
+		outbox.transfer(new ObsObject(ProductFamily.BLANK, "S1A_AUX_CAL_V20171017T080000_G20180622T082918.SAFE"));
 		
 		final File expected = new File(testDir, "S1A_AUX_CAL_V20171017T080000_G20180622T082918.ISIP/S1A_AUX_CAL_V20171017T080000_G20180622T082918.SAFE");
 		assertEquals(true, expected.exists());

@@ -54,7 +54,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 		    channel.connect();
 	    	try {		    		
 	    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {
-	       			final Path dest = evaluatePathFor(new ObsObject(entry.getKey(), obsObject.getFamily()));	
+	       			final Path dest = evaluatePathFor(new ObsObject(obsObject.getFamily(), entry.getKey()));	
 	    			String currentPath = "";
 	    			
 	    			final Path parentPath = dest.getParent();    			
