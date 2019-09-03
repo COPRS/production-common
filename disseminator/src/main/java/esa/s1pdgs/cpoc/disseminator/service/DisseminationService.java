@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.disseminator.outbox.FtpsOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.LocalOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.SftpOutboxClient;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.MqiConsumer;
@@ -36,6 +37,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -75,10 +77,11 @@ public class DisseminationService implements MqiListener<ProductDto> {
     	// Init list of configured outboxes    	
     	for (final Map.Entry<String, OutboxConfiguration> entry : properties.getOutboxes().entrySet()) {	
     		final String target = entry.getKey();
-    		final OutboxConfiguration config = entry.getValue();    		
+    		final OutboxConfiguration config = entry.getValue();    	
+    		final PathEvaluater eval = PathEvaluater.newInstance(config);
 
     		final OutboxClient outboxClient = FACTORIES.getOrDefault(config.getProtocol(), OutboxClient.Factory.NOT_DEFINED_ERROR)
-    				.newClient(obsClient, config);    		
+    				.newClient(obsClient, config, eval);    		
     		LOG.info("Using {} for Outbox target '{}'", outboxClient, target);
     		put(target, outboxClient);
     	}    	
@@ -127,7 +130,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			try {
 				Retries.performWithRetries(
 						() -> {
-							outboxClient.transfer(product.getFamily(), product.getKeyObjectStorage());
+							outboxClient.transfer(new ObsObject(product.getKeyObjectStorage(), product.getFamily()));
 							return null;
 						}, 
 						properties.getMaxRetries(), 

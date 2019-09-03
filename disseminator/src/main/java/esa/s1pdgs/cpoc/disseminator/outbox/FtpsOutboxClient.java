@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.disseminator.outbox;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.Map;
 
@@ -18,28 +17,29 @@ import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public final class FtpsOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
-		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config) {
-			return new FtpsOutboxClient(obsClient, config);
+		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config, final PathEvaluater eval) {
+			return new FtpsOutboxClient(obsClient, config, eval);
 		}			
 	}
 	
 	private static final Logger LOG = LogManager.getLogger(FtpsOutboxClient.class);
 	
 	private static final int DEFAULT_PORT = 990;
-	
-	FtpsOutboxClient(ObsClient obsClient, OutboxConfiguration config) {
-		super(obsClient, config);
+
+	public FtpsOutboxClient(ObsClient obsClient, OutboxConfiguration config, PathEvaluater pathEvaluator) {
+		super(obsClient, config, pathEvaluator);
 	}
 
 	@Override
-	public void transfer(ProductFamily family, String keyObjectStorage) throws Exception {
+	public void transfer(final ObsObject obsObject) throws Exception {
 		final FTPSClient ftpsClient = new FTPSClient("TLS", true);
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply
@@ -87,15 +87,12 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 	        ftpsClient.setFileType(FTP.BINARY_FILE_TYPE);
 	        ftpsClient.enterLocalPassiveMode();
 	        assertPositiveCompletion(ftpsClient);
-	        
-	        final Path remoteDir = Paths.get(config.getPath());
-			final Map<String, InputStream> elements = obsClient.getAllAsInputStream(family, keyObjectStorage);
+
+			final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
     		
-    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {
-    			final String path = entry.getKey();		    		
-    			Utils.assertValidPath(path);
+    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {    			
+    			final Path dest = evaluatePathFor(new ObsObject(entry.getKey(), obsObject.getFamily()));	
     			
-    			final Path dest = remoteDir.resolve(path);	
     			String currentPath = "";
     			
     			final Path parentPath = dest.getParent();    			
@@ -118,7 +115,7 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
     			}		    
     			
     			try (final InputStream in = entry.getValue()) {
-    				LOG.info("Uploading {} to {}", path, dest);
+    				LOG.info("Uploading {} to {}", entry.getKey(), dest);
     				ftpsClient.storeFile(dest.toString(), in);
     				assertPositiveCompletion(ftpsClient);	    				
     			}

@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.disseminator.outbox;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,15 +12,16 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
 		@Override
-		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config) {		
-			return new SftpOutboxClient(obsClient, config);
+		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config, final PathEvaluater eval) {		
+			return new SftpOutboxClient(obsClient, config, eval);
 		}			
 	}
 	
@@ -29,17 +29,15 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	
 	private static final int DEFAULT_PORT = 22;
 	
-	SftpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config) {
-		super(obsClient, config);
+	SftpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+		super(obsClient, config, eval);
 	}
 
 	@Override
-	public final void transfer(ProductFamily family, String keyObjectStorage) throws Exception {	
+	public final void transfer(final ObsObject obsObject) throws Exception {	
 		final JSch client = new JSch();
-		final Map<String, InputStream> elements = obsClient.getAllAsInputStream(family, keyObjectStorage);
+		final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
-		
-		final Path remoteDir = Paths.get(config.getPath());
 		
 		if (config.getKeyFile() != null) {
 			client.addIdentity(config.getKeyFile());
@@ -56,10 +54,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 		    channel.connect();
 	    	try {		    		
 	    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {
-	    			final String path = entry.getKey();		    		
-	    			Utils.assertValidPath(path);
-	    			
-	    			final Path dest = remoteDir.resolve(path);	
+	       			final Path dest = evaluatePathFor(new ObsObject(entry.getKey(), obsObject.getFamily()));	
 	    			String currentPath = "";
 	    			
 	    			final Path parentPath = dest.getParent();    			
@@ -80,7 +75,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 						}
 	    			}		    			
 	    			try (final InputStream in = entry.getValue()) {
-	    				LOG.info("Uploading {} to {}", path, dest);
+	    				LOG.info("Uploading {} to {}", entry.getKey(), dest);
 	    				channel.put(in, dest.toString());	    				
 	    			}
 	    		}

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -123,7 +122,7 @@ public class FileDownloader {
 	 */
 	private final void downloadInputs(final ObsDownloadFile inputProduct) throws AbstractCodedException {
 		LOGGER.info("4 - Starting downloading input product {}", inputProduct);
-		this.obsClient.downloadFilesPerBatch(Collections.singletonList(inputProduct));
+		this.obsClient.downloadFile(inputProduct.getFamily(), inputProduct.getKey(), inputProduct.getTargetDir());
 	}
 
 	private final long getWorkdirSize() throws InternalErrorException {
