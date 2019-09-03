@@ -166,7 +166,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 	}
 
 	final void assertExists(final ProductDto product) throws ObsServiceException, SdkClientException {
-		if (!obsClient.exists(new ObsObject(product.getFamily(), product.getKeyObjectStorage()))) {
+		if (!obsClient.prefixExists(new ObsObject(product.getFamily(), product.getKeyObjectStorage()))) {
 			throw new DisseminationException(
 					String.format(
 							"OBS file '%s' (%s) does not exist", 

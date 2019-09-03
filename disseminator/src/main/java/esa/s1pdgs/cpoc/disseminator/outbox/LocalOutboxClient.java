@@ -38,6 +38,6 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 		if (!parent.exists()) {
 			parent.mkdirs();
 		}		
-		obsClient.downloadObject(new ObsDownloadObject(obsObject.getKey(), obsObject.getFamily(), parent.getPath()));
+		obsClient.downloadFile(obsObject.getFamily(), obsObject.getKey(), parent.getPath());
 	}
 }
