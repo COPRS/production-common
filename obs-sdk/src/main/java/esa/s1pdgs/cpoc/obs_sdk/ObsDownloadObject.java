@@ -30,7 +30,7 @@ public class ObsDownloadObject extends ObsObject {
      */
     public ObsDownloadObject(final String key, final ProductFamily family,
             final String targetDir) {
-        super(key, family);
+        super(family, key);
         this.targetDir = targetDir;
         if (family == ProductFamily.EDRS_SESSION) {
             this.ignoreFolders = true;

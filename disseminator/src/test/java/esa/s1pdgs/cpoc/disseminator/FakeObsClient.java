@@ -22,13 +22,13 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 // dummy impl - doin nothin
 public abstract class FakeObsClient implements ObsClient {	
 	@Override
-	public boolean doesObjectExist(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean doesPrefixExist(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -97,12 +97,6 @@ public abstract class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public boolean exist(ProductFamily family, String key) throws ObsException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public File downloadFile(ProductFamily family, String key, String targetDir) throws ObsException, ObsUnknownObject {
 		// TODO Auto-generated method stub
 		return null;
@@ -121,7 +115,7 @@ public abstract class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {
+	public void moveFile(ObsObject from, ProductFamily to) throws ObsException {
 		// TODO Auto-generated method stub
 
 	}

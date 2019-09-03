@@ -139,25 +139,7 @@ public abstract class AbstractObsClient implements ObsClient {
         } catch (InterruptedException | TimeoutException e) {
             throw new ObsServiceException(e.getMessage(), e);
         }
-    }
-    
-    /**
-     * Check if given file exist in OBS
-     * 
-     * @param family
-     * @param key
-     * @return
-     * @throws ObsException
-     */
-	public boolean exist(final ProductFamily family, final String key)
-            throws ObsException {
-        final ObsObject object = new ObsObject(key, family);
-        try {
-            return doesObjectExist(object);
-        } catch (SdkClientException exc) {
-            throw new ObsException(family, key, exc);
-        }
-    }
+    }    
 
 	/**
 	 * Download a file
@@ -262,7 +244,7 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
 	@Override
-	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {
+	public void moveFile(ObsObject from, ProductFamily to) throws ObsException {
 		throw new UnsupportedOperationException();
 	}
 	

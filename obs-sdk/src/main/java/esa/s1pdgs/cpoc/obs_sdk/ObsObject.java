@@ -24,12 +24,12 @@ public class ObsObject {
     /**
      * Constructor
      * 
-     * @param key
      * @param family
+     * @param key
      */
-    public ObsObject(final String key, final ProductFamily family) {
-        this.key = key;
+    public ObsObject(final ProductFamily family, final String key) {
         this.family = family;
+        this.key = key;
     }
 
     /**

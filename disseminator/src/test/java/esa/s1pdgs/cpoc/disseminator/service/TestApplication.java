@@ -15,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
@@ -24,6 +23,9 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfigu
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -85,7 +87,7 @@ public class TestApplication {
 	@Test
 	public final void testOnMessage_OnConfiguredFamily_ShallEvaluatedConfiguredRegex() {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
-			@Override public final boolean exist(ProductFamily family, String key) throws ObsException {
+			@Override public final boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
 				return true;
 			}			
 		};		

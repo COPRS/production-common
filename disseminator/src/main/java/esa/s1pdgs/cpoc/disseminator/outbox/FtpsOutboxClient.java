@@ -91,7 +91,7 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 			final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
     		
     		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {    			
-    			final Path dest = evaluatePathFor(new ObsObject(entry.getKey(), obsObject.getFamily()));	
+    			final Path dest = evaluatePathFor(new ObsObject(obsObject.getFamily(), entry.getKey()));	
     			
     			String currentPath = "";
     			

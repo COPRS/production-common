@@ -57,7 +57,7 @@ public class SwiftObsClient extends AbstractObsClient {
         this.swiftObsServices = swiftObsServices;
     }
 
-	public boolean doesContainerExist(ProductFamily family) throws ObsServiceException {
+	public boolean containerExists(ProductFamily family) throws ObsServiceException {
 		return swiftObsServices.containerExist(configuration.getContainerForFamily(family));
 	}
 	
@@ -66,12 +66,12 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
     
 	@Override
-	public boolean doesObjectExist(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
 		return swiftObsServices.exist(configuration.getContainerForFamily(object.getFamily()), object.getKey());
 	}
 
 	@Override
-	public boolean doesPrefixExist(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
 		return swiftObsServices.getNbObjects(
                 configuration.getContainerForFamily(object.getFamily()),
                 object.getKey()) > 0;
@@ -112,7 +112,6 @@ public class SwiftObsClient extends AbstractObsClient {
 	/**
      * @see ObsClient#getShutdownTimeoutS()
      */
-    @Override
     public int getShutdownTimeoutS() throws ObsServiceException {
         return configuration
                 .getIntOfConfiguration(SwiftConfiguration.TM_S_SHUTDOWN);
@@ -121,7 +120,6 @@ public class SwiftObsClient extends AbstractObsClient {
     /**
      * @see ObsClient#getDownloadExecutionTimeoutS()
      */
-    @Override
     public int getDownloadExecutionTimeoutS() throws ObsServiceException {
         return configuration
                 .getIntOfConfiguration(SwiftConfiguration.TM_S_DOWN_EXEC);
@@ -130,7 +128,6 @@ public class SwiftObsClient extends AbstractObsClient {
     /**
      * @see ObsClient#getUploadExecutionTimeoutS()
      */
-    @Override
     public int getUploadExecutionTimeoutS() throws ObsServiceException {
         return configuration
                 .getIntOfConfiguration(SwiftConfiguration.TM_S_UP_EXEC);
@@ -155,7 +152,7 @@ public class SwiftObsClient extends AbstractObsClient {
 				marker = o.getName();
 				Date lastModified = o.getLastModifiedAsDate();
 				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {
-					ObsObject obsObj = new ObsObject(o.getName(), family);
+					ObsObject obsObj = new ObsObject(family, o.getName());
 					objectsOfTimeFrame.add(obsObj);
 				}
 			}

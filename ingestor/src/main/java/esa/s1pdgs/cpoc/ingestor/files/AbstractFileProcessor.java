@@ -23,8 +23,11 @@ import esa.s1pdgs.cpoc.ingestor.files.services.AbstractFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;;
 
 public abstract class AbstractFileProcessor<T> {
 
@@ -115,13 +118,13 @@ public abstract class AbstractFileProcessor<T> {
 			uploadAndPublish(reportingFactory, reportProcessing, file);
 			delete(reportingFactory, file, 3);
 
-		} catch (AbstractCodedException ace) {
+		} catch (AbstractCodedException | SdkClientException e) {
 			// is already logged
 			this.appStatus.setError(family);
 			try {
 				copyToBackupDirectory(reportingFactory, file);
 				delete(reportingFactory, file, 4);
-			} catch (IOException e) {
+			} catch (IOException e2) {
 				LOGGER.warn("failed to backup file {}, not deleted", file.getName());
 			}
 		}
@@ -130,7 +133,7 @@ public abstract class AbstractFileProcessor<T> {
 	}
 
 	private final void uploadAndPublish(final Reporting.Factory reportingFactory, final Reporting reportProcessing,
-			final File file) throws AbstractCodedException {
+			final File file) throws AbstractCodedException, SdkClientException {
 		String productName = file.getName();
 		final Reporting reportUpload = reportingFactory.newReporting(1);
 		try {
@@ -154,14 +157,17 @@ public abstract class AbstractFileProcessor<T> {
 		} catch (ObsException e) {
 			reportUpload.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
+		} catch (SdkClientException e) {
+			reportUpload.error("[code {}] {}", AbstractCodedException.ErrorCode.OBS_ERROR, e.getMessage());
+			throw e;
 		} catch (AbstractCodedException e) {
 			reportUpload.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;
 		}
 	}
 
-	private final void upload(final File file, final String productName, final FileDescriptor descriptor) throws ObsException, ObsAlreadyExist {		
-		if (obsClient.exist(family,descriptor.getKeyObjectStorage())) {
+	private final void upload(final File file, final String productName, final FileDescriptor descriptor) throws ObsException, ObsAlreadyExist, ObsServiceException, SdkClientException {		
+		if (obsClient.exists(new ObsObject(family,descriptor.getKeyObjectStorage()))) {
 			throw new ObsAlreadyExist(family, descriptor.getProductName(), new Exception("File already exist in object storage"));
 		}
 		obsClient.uploadFile(family,descriptor.getKeyObjectStorage(), file);

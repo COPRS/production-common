@@ -29,7 +29,7 @@ public interface ObsClient {
      * @throws SdkClientException
      * @throws ObsServiceException
      */
-    boolean doesObjectExist(ObsObject object)
+    boolean exists(ObsObject object)
             throws SdkClientException, ObsServiceException;
 
     /**
@@ -41,7 +41,7 @@ public interface ObsClient {
      * @throws SdkClientException
      * @throws ObsServiceException
      */
-    boolean doesPrefixExist(ObsObject object)
+    boolean prefixExists(ObsObject object)
             throws SdkClientException, ObsServiceException;
 
     /**
@@ -156,15 +156,13 @@ public interface ObsClient {
 	List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd, ProductFamily obsFamily)
 			throws SdkClientException, ObsServiceException;
 	
-	boolean exist(final ProductFamily family, final String key) throws ObsException;
-	
 	File downloadFile(final ProductFamily family, final String key, final String targetDir) throws ObsException, ObsUnknownObject;
 	
 	void downloadFilesPerBatch(final List<ObsDownloadFile> filesToDownload) throws AbstractCodedException;
 	
 	void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException;
 	
-	void moveFile(final ProductFamily from, final ProductFamily to, final String key) throws ObsException;
+	void moveFile(final ObsObject from, final ProductFamily to) throws ObsException;
 	
 	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException;
 	

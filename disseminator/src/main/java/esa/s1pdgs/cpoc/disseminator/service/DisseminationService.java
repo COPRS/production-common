@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
@@ -38,6 +37,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -130,7 +131,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			try {
 				Retries.performWithRetries(
 						() -> {
-							outboxClient.transfer(new ObsObject(product.getKeyObjectStorage(), product.getFamily()));
+							outboxClient.transfer(new ObsObject(product.getFamily(), product.getKeyObjectStorage()));
 							return null;
 						}, 
 						properties.getMaxRetries(), 
@@ -163,8 +164,8 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		reporting.end("End dissemination of product to outbox " + target);
 	}
 
-	final void assertExists(final ProductDto product) throws ObsException {
-		if (!obsClient.exist(product.getFamily(), product.getKeyObjectStorage())) {
+	final void assertExists(final ProductDto product) throws ObsServiceException, SdkClientException {
+		if (!obsClient.exists(new ObsObject(product.getFamily(), product.getKeyObjectStorage()))) {
 			throw new DisseminationException(
 					String.format(
 							"OBS file '%s' (%s) does not exist", 
