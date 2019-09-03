@@ -34,7 +34,7 @@ public class DisseminationProperties {
 		private String pathEvaluator = null;
 		
 		// per default, use java keystore and password
-		private String truststoreFile = System.getProperty("java.home") + "/jre/lib/security/cacerts";
+		private String truststoreFile = System.getProperty("java.home") + "/lib/security/cacerts";
 		private String truststorePass = "changeit";
 		
 		private boolean implicitSsl = true;

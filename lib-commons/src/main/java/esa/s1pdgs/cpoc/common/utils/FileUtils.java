@@ -90,6 +90,7 @@ public class FileUtils {
     		throws InterruptedException {
     	Retries.performWithRetries(
     			() -> {	delete(file.getPath()) ; return null;}, 
+    			"Deletion of " + file,
     			numRetries, 
     			retrySleep
     	);    	
