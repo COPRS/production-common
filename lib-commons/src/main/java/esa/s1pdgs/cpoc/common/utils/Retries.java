@@ -10,6 +10,7 @@ public class Retries {
 	
 	public static <E> E performWithRetries(
 			final Callable<E> command, 
+			final String name,
 			final int numRetries, 
 			final long retrySleep
 	) throws InterruptedException {
@@ -23,14 +24,14 @@ public class Retries {
     				throw new RuntimeException(
     						String.format(
     								"Error on performing %s after %s attempts: %s", 
-    								command,
-    								String.valueOf(attempt),
-    								LogUtils.toString(e)
+    								 name,
+    								 String.valueOf(attempt),
+    								 LogUtils.toString(e)
     						)
     				);
     			}  			
     			if (LOG.isWarnEnabled()) {
-        			LOG.warn("Error on performing {} ({}/{}), retrying in {}ms: {}", command, attempt, numRetries+1, retrySleep, 
+        			LOG.warn("Error on performing {} ({}/{}), retrying in {}ms: {}",  name, attempt, numRetries+1, retrySleep, 
         					LogUtils.toString(e));
     			}
     			Thread.sleep(retrySleep);

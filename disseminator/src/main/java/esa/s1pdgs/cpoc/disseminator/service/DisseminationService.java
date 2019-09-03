@@ -133,6 +133,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 							outboxClient.transfer(new ObsObject(product.getKeyObjectStorage(), product.getFamily()));
 							return null;
 						}, 
+						"Transfer of " + product.getKeyObjectStorage() + " to " + target,
 						properties.getMaxRetries(), 
 						properties.getTempoRetryMs()
 				);
