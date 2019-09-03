@@ -146,14 +146,6 @@ public class DisseminationProperties {
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
-					+ ", password=" + password + ", keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port
-					+ ", keystoreFile=" + keystoreFile + ", keystorePass=" + keystorePass + ", pathEvaluator="
-					+ pathEvaluator + ", truststoreFile=" + truststoreFile + ", truststorePass=" + truststorePass
-					+ ", implicitSsl=" + implicitSsl + "]";
-		}
-
-		public String stoString() {
-			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
 					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port + 
 					", pathEvaluator=" + pathEvaluator 
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
