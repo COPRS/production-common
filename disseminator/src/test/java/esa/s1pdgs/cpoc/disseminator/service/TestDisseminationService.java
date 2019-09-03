@@ -22,7 +22,7 @@ public class TestDisseminationService {
 	@Test
 	public final void testAssertExists_OnNonExistingFile_ShallThrowException() throws ObsException, ObsServiceException, esa.s1pdgs.cpoc.obs_sdk.SdkClientException {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
-			@Override public final boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
+			@Override public final boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
 				return false;
 			}			
 		};		
@@ -40,7 +40,7 @@ public class TestDisseminationService {
 	@Test
 	public final void testAssertExists_OnExistingFile_ShallNotFail() throws ObsException, ObsServiceException, esa.s1pdgs.cpoc.obs_sdk.SdkClientException {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
-			@Override public final boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
+			@Override public final boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
 				return true;
 			}			
 		};		
@@ -71,7 +71,7 @@ public class TestDisseminationService {
 	@Test
 	public final void testHandleTransferTo_OnSuccessfulTransfer_ShallNotFail() {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
-			@Override public final boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
+			@Override public final boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
 				return true;
 			}			
 		};		
@@ -85,7 +85,7 @@ public class TestDisseminationService {
 	@Test
 	public final void testHandleTransferTo_OnTransferError_ShallThrowException() {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
-			@Override public final boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
+			@Override public final boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
 				return true;
 			}			
 		};		
