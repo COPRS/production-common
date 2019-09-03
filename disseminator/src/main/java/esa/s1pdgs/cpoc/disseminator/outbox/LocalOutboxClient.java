@@ -7,7 +7,10 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 public final class LocalOutboxClient extends AbstractOutboxClient {	
 	public static final class Factory implements OutboxClient.Factory {
@@ -22,7 +25,7 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 	}
 
 	@Override
-	public final void transfer(final ObsObject obsObject) throws ObsException {		
+	public final void transfer(final ObsObject obsObject) throws ObsException, ObsServiceException, SdkClientException {		
 		final Path path = evaluatePathFor(obsObject);	
 		
 		final Path parentPath = path.getParent();
@@ -35,6 +38,6 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 		if (!parent.exists()) {
 			parent.mkdirs();
 		}		
-		obsClient.downloadFile(obsObject.getFamily(), obsObject.getKey(), parent.getPath());
+		obsClient.downloadObject(new ObsDownloadObject(obsObject.getKey(), obsObject.getFamily(), parent.getPath()));
 	}
 }

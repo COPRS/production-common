@@ -18,7 +18,10 @@ import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.IsipPathEvaluater;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 public class TestLocalOutboxClient {
 	private File testDir;
@@ -37,15 +40,15 @@ public class TestLocalOutboxClient {
 	public final void testTransfer() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public File downloadFile(ProductFamily family, String key, String targetDir) {
-				final File file = new File(targetDir, key);
+			public int downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException {
+				final File file = new File(object.getTargetDir(), object.getKey());
 				try {
 					FileUtils.writeFile(file, "expected content");
 				} catch (InternalErrorException e) {
 					throw new RuntimeException("foo bar");
 				}
-				return file;
-			}			
+				return 42;
+			}	
 		};
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
@@ -61,18 +64,17 @@ public class TestLocalOutboxClient {
 	
 	@Test
 	public final void testTransfer_ISIP() throws Exception {
-		final FakeObsClient fakeObsClient = new FakeObsClient() {
+		final FakeObsClient fakeObsClient = new FakeObsClient() {			
 			@Override
-			public File downloadFile(ProductFamily family, String key, String targetDir) {
-				final File file = new File(targetDir, key);
+			public int downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException {
+				final File file = new File(object.getTargetDir(), object.getKey());
 				try {
 					FileUtils.writeFile(file, "expected content");
 				} catch (InternalErrorException e) {
-					e.printStackTrace();
 					throw new RuntimeException("foo bar");
 				}
-				return file;
-			}			
+				return 42;
+			}	
 		};
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
