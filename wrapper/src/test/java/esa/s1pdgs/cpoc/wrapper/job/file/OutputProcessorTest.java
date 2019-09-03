@@ -324,7 +324,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish);
+                reportToPublish,reportingFactory);
 
         // Check products
         assertEquals(4, uploadBatch.size());
@@ -394,7 +394,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish);
+                reportToPublish, reportingFactory);
 
         // Check products
         assertEquals(5, uploadBatch.size());
@@ -474,7 +474,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish);
+                reportToPublish, reportingFactory);
 
         // Check products
         assertEquals(4, uploadBatch.size());
@@ -542,7 +542,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish);
+                reportToPublish, reportingFactory);
 
         // Check products
         assertEquals(4, uploadBatch.size());
