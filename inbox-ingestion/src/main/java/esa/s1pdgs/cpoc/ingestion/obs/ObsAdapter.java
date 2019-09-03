@@ -49,7 +49,7 @@ public class ObsAdapter {
 						String.format("File %s (%s) to already exist", obsKey, to)
 				);
 			}
-			obsClient.moveFile(new ObsObject(from, obsKey), to);
+			obsClient.move(new ObsObject(from, obsKey), to);
 		} catch (ObsException | SdkClientException e) {
 			throw new ProductException(
 					String.format("Error moving file %s from %s to %s: %s", obsKey, from, to, LogUtils.toString(e))

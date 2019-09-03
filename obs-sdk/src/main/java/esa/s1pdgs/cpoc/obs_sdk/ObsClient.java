@@ -162,7 +162,7 @@ public interface ObsClient {
 	
 	void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException;
 	
-	void moveFile(final ObsObject from, final ProductFamily to) throws ObsException;
+	void move(final ObsObject from, final ProductFamily to) throws ObsException;
 	
 	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException;
 	

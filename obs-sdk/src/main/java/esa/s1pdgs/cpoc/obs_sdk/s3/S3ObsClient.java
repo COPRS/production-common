@@ -143,7 +143,7 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public void moveFile(ObsObject from, ProductFamily to) throws ObsException {
+	public void move(ObsObject from, ProductFamily to) throws ObsException {
 		try {
 			s3Services.moveFile(new CopyObjectRequest(configuration.getBucketForFamily(from.getFamily()), from.getKey(),
 					configuration.getBucketForFamily(to), from.getKey()));
