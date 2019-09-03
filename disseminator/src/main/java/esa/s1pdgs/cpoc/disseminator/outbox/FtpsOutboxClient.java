@@ -14,8 +14,6 @@ import javax.net.ssl.TrustManagerFactory;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.ftp.FTPSClient;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
@@ -29,8 +27,6 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 			return new FtpsOutboxClient(obsClient, config, eval);
 		}			
 	}
-	
-	private static final Logger LOG = LogManager.getLogger(FtpsOutboxClient.class);
 	
 	private static final int DEFAULT_PORT = 990;
 
@@ -87,11 +83,11 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
 	        ftpsClient.setFileType(FTP.BINARY_FILE_TYPE);
 	        ftpsClient.enterLocalPassiveMode();
 	        assertPositiveCompletion(ftpsClient);
-
-			final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
-    		
-    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {    			
-    			final Path dest = evaluatePathFor(new ObsObject(obsObject.getFamily(), entry.getKey()));	
+	        
+			final Path path = evaluatePathFor(obsObject);	
+			for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
+				
+				final Path dest = path.resolve(entry.getKey());
     			
     			String currentPath = "";
     			
@@ -103,19 +99,19 @@ public final class FtpsOutboxClient extends AbstractOutboxClient {
     			for (final Path pathElement : parentPath) {
     				currentPath = currentPath + "/" + pathElement;
     	 	    	 			
-	 				LOG.debug("current path is {}", currentPath);
+	 				logger.debug("current path is {}", currentPath);
 	 				
 	 				boolean directoryExists = ftpsClient.changeWorkingDirectory(currentPath);
 	 				if (directoryExists) {
 	 					continue;
 	 				}
-	 				LOG.debug("creating directory {}", currentPath);
+	 				logger.debug("creating directory {}", currentPath);
 	 				ftpsClient.makeDirectory(currentPath);
 	 				assertPositiveCompletion(ftpsClient);	    	 
     			}		    
     			
     			try (final InputStream in = entry.getValue()) {
-    				LOG.info("Uploading {} to {}", entry.getKey(), dest);
+    				logger.info("Uploading {} to {}", entry.getKey(), dest);
     				ftpsClient.storeFile(dest.toString(), in);
     				assertPositiveCompletion(ftpsClient);	    				
     			}

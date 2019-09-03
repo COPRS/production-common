@@ -36,7 +36,6 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	@Override
 	public final void transfer(final ObsObject obsObject) throws Exception {	
 		final JSch client = new JSch();
-		final Map<String, InputStream> elements = obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey());
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
 		
 		if (config.getKeyFile() != null) {
@@ -52,9 +51,11 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	    try {
 	    	final ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
 		    channel.connect();
-	    	try {		    		
-	    		for (final Map.Entry<String, InputStream> entry : elements.entrySet()) {
-	       			final Path dest = evaluatePathFor(new ObsObject(obsObject.getFamily(), entry.getKey()));	
+		
+	    	try {	
+				final Path path = evaluatePathFor(obsObject);	
+				for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {					
+					final Path dest = path.resolve(entry.getKey());
 	    			String currentPath = "";
 	    			
 	    			final Path parentPath = dest.getParent();    			

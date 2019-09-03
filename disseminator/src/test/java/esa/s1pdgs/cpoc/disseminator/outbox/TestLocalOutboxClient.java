@@ -2,22 +2,26 @@ package esa.s1pdgs.cpoc.disseminator.outbox;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Collections;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.IsipPathEvaluater;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 public class TestLocalOutboxClient {
 	private File testDir;
@@ -34,17 +38,12 @@ public class TestLocalOutboxClient {
 	
 	@Test
 	public final void testTransfer() throws Exception {
-		final FakeObsClient fakeObsClient = new FakeObsClient() {
+		final FakeObsClient fakeObsClient = new FakeObsClient() {			
 			@Override
-			public File downloadFile(ProductFamily family, String key, String targetDir) {
-				final File file = new File(targetDir, key);
-				try {
-					FileUtils.writeFile(file, "expected content");
-				} catch (InternalErrorException e) {
-					throw new RuntimeException("foo bar");
-				}
-				return file;
-			}			
+			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)
+					throws SdkClientException {
+				return Collections.singletonMap(keyPrefix, new ByteArrayInputStream("expected content".getBytes()));
+			}		
 		};
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
@@ -62,14 +61,9 @@ public class TestLocalOutboxClient {
 	public final void testTransfer_ISIP() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public File downloadFile(ProductFamily family, String key, String targetDir) {
-				final File file = new File(targetDir, key);
-				try {
-					FileUtils.writeFile(file, "expected content");
-				} catch (InternalErrorException e) {
-					throw new RuntimeException("foo bar");
-				}
-				return file;
+			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)
+					throws SdkClientException {
+				return Collections.singletonMap(keyPrefix, new ByteArrayInputStream("expected content".getBytes()));
 			}			
 		};
 		final OutboxConfiguration config = new OutboxConfiguration();
