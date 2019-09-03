@@ -72,24 +72,6 @@ public abstract class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public int getShutdownTimeoutS() throws ObsServiceException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getDownloadExecutionTimeoutS() throws ObsServiceException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getUploadExecutionTimeoutS() throws ObsServiceException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd,
 			ProductFamily obsFamily) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub

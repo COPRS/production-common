@@ -121,27 +121,6 @@ public interface ObsClient {
      */
     void uploadObjects(List<ObsUploadObject> objects, boolean parralel)
             throws SdkClientException, ObsServiceException;
-
-    /**
-     * Get the timeout for waiting threads termination in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getShutdownTimeoutS() throws ObsServiceException;
-
-    /**
-     * Get the timeout for download execution in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getDownloadExecutionTimeoutS() throws ObsServiceException;
-
-    /**
-     * Get the timeout for upload execution in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getUploadExecutionTimeoutS() throws ObsServiceException;
     
 	/**
 	 * Gets the list of ObsObject's of an ObsFamily whose modification times in OBS are within the time frame provided.

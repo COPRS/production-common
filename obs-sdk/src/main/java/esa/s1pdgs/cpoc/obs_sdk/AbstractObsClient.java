@@ -22,12 +22,33 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
- * parralel is done
+ * parallel is done
  * 
  * @author Viveris Technologies
  */
 public abstract class AbstractObsClient implements ObsClient {
 
+    /**
+     * Get the timeout for waiting threads termination in seconds
+     * @return
+     * @throws ObsServiceException
+     */
+	protected abstract int getShutdownTimeoutS() throws ObsServiceException;
+
+    /**
+     * Get the timeout for download execution in seconds
+     * @return
+     * @throws ObsServiceException
+     */
+	protected abstract int getDownloadExecutionTimeoutS() throws ObsServiceException;
+
+    /**
+     * Get the timeout for upload execution in seconds
+     * @return
+     * @throws ObsServiceException
+     */
+	protected abstract int getUploadExecutionTimeoutS() throws ObsServiceException;
+	
     /**
      * @see ObsClient#downloadObjects(List)
      * @see #downloadObjects(List, boolean)
