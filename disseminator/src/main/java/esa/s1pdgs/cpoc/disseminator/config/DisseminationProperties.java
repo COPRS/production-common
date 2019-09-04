@@ -18,7 +18,8 @@ public class DisseminationProperties {
 		public enum Protocol {
 			FILE,
 			SFTP,
-			FTPS
+			FTPS,
+			FTP
 		}
 		
 		private Protocol protocol = Protocol.FILE;
@@ -34,10 +35,14 @@ public class DisseminationProperties {
 		private String pathEvaluator = null;
 		
 		// per default, use java keystore and password
-		private String truststoreFile = System.getProperty("java.home") + "/jre/lib/security/cacerts";
+		private String truststoreFile = System.getProperty("java.home") + "/lib/security/cacerts";
 		private String truststorePass = "changeit";
 		
+		private int bufferSize = 8 * 1014 * 1024;
+		
 		private boolean implicitSsl = true;
+		
+		private boolean ftpPasv = false;
 						
 		public Protocol getProtocol() {
 			return protocol;
@@ -143,19 +148,27 @@ public class DisseminationProperties {
 			this.pathEvaluator = pathEvaluator;
 		}
 		
+		public int getBufferSize() {
+			return bufferSize;
+		}
+
+		public void setBufferSize(int bufferSize) {
+			this.bufferSize = bufferSize;
+		}
+		
+		public boolean isFtpPasv() {
+			return ftpPasv;
+		}
+
+		public void setFtpPasv(boolean ftpPasv) {
+			this.ftpPasv = ftpPasv;
+		}
+
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
-					+ ", password=" + password + ", keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port
-					+ ", keystoreFile=" + keystoreFile + ", keystorePass=" + keystorePass + ", pathEvaluator="
-					+ pathEvaluator + ", truststoreFile=" + truststoreFile + ", truststorePass=" + truststorePass
-					+ ", implicitSsl=" + implicitSsl + "]";
-		}
-
-		public String stoString() {
-			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
 					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port + 
-					", pathEvaluator=" + pathEvaluator 
+					", pathEvaluator=" + pathEvaluator + ", bufferSize=" + bufferSize+ ", ftpPasv=" + ftpPasv
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
 					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl + "]";
 		}

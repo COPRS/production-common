@@ -44,7 +44,7 @@ public class ObsObjectTest {
      */
     @Test
     public void obsObjTest() {
-        ObsObject obj = new ObsObject("key-t", ProductFamily.L0_ACN);
+        ObsObject obj = new ObsObject(ProductFamily.L0_ACN, "key-t");
         assertEquals("key-t", obj.getKey());
         assertEquals(ProductFamily.L0_ACN, obj.getFamily());
 
@@ -60,7 +60,7 @@ public class ObsObjectTest {
      */
     @Test
     public void obsObjTestToString() {
-        ObsObject obj = new ObsObject("key-t", ProductFamily.L0_ACN);
+        ObsObject obj = new ObsObject(ProductFamily.L0_ACN, "key-t");
         String str = obj.toString();
         assertTrue(str.contains("key: key-t"));
         assertTrue(str.contains("family: L0_ACN"));

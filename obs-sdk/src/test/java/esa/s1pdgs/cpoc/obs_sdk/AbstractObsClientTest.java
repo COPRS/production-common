@@ -462,13 +462,13 @@ class AbstractObsClientIncrementImpl extends AbstractObsClient {
     }
 
     @Override
-    public boolean doesObjectExist(ObsObject object)
+    public boolean exists(ObsObject object)
             throws SdkClientException, ObsServiceException {
         throw new ObsServiceException("Method not implemented");
     }
 
     @Override
-    public boolean doesPrefixExist(ObsObject object)
+    public boolean prefixExists(ObsObject object)
             throws SdkClientException, ObsServiceException {
         throw new ObsServiceException("Method not implemented");
     }

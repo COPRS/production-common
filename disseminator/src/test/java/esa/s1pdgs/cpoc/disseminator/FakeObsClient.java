@@ -22,13 +22,13 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 // dummy impl - doin nothin
 public abstract class FakeObsClient implements ObsClient {	
 	@Override
-	public boolean doesObjectExist(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean doesPrefixExist(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -72,34 +72,10 @@ public abstract class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public int getShutdownTimeoutS() throws ObsServiceException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getDownloadExecutionTimeoutS() throws ObsServiceException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getUploadExecutionTimeoutS() throws ObsServiceException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd,
 			ProductFamily obsFamily) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public boolean exist(ProductFamily family, String key) throws ObsException {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
@@ -121,7 +97,7 @@ public abstract class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public void moveFile(ProductFamily from, ProductFamily to, String key) throws ObsException {
+	public void move(ObsObject from, ProductFamily to) throws ObsException {
 		// TODO Auto-generated method stub
 
 	}

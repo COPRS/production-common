@@ -17,13 +17,13 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration.Protocol;
+import esa.s1pdgs.cpoc.disseminator.outbox.FtpOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.FtpsOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.LocalOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
@@ -38,6 +38,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -51,6 +53,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		FACTORIES.put(Protocol.FILE, new LocalOutboxClient.Factory());
 		FACTORIES.put(Protocol.FTPS, new FtpsOutboxClient.Factory());
 		FACTORIES.put(Protocol.SFTP, new SftpOutboxClient.Factory());
+		FACTORIES.put(Protocol.FTP, new FtpOutboxClient.Factory());
 	}
 	
 	private final GenericMqiClient client;
@@ -130,9 +133,10 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			try {
 				Retries.performWithRetries(
 						() -> {
-							outboxClient.transfer(new ObsObject(product.getKeyObjectStorage(), product.getFamily()));
+							outboxClient.transfer(new ObsObject(product.getFamily(), product.getKeyObjectStorage()));
 							return null;
 						}, 
+						"Transfer of " + product.getKeyObjectStorage() + " to " + target,
 						properties.getMaxRetries(), 
 						properties.getTempoRetryMs()
 				);
@@ -163,8 +167,8 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		reporting.end("End dissemination of product to outbox " + target);
 	}
 
-	final void assertExists(final ProductDto product) throws ObsException {
-		if (!obsClient.exist(product.getFamily(), product.getKeyObjectStorage())) {
+	final void assertExists(final ProductDto product) throws ObsServiceException, SdkClientException {
+		if (!obsClient.prefixExists(new ObsObject(product.getFamily(), product.getKeyObjectStorage()))) {
 			throw new DisseminationException(
 					String.format(
 							"OBS file '%s' (%s) does not exist", 

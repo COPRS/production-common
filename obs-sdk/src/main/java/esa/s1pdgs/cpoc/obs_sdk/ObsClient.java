@@ -29,7 +29,7 @@ public interface ObsClient {
      * @throws SdkClientException
      * @throws ObsServiceException
      */
-    boolean doesObjectExist(ObsObject object)
+    boolean exists(ObsObject object)
             throws SdkClientException, ObsServiceException;
 
     /**
@@ -41,7 +41,7 @@ public interface ObsClient {
      * @throws SdkClientException
      * @throws ObsServiceException
      */
-    boolean doesPrefixExist(ObsObject object)
+    boolean prefixExists(ObsObject object)
             throws SdkClientException, ObsServiceException;
 
     /**
@@ -121,27 +121,6 @@ public interface ObsClient {
      */
     void uploadObjects(List<ObsUploadObject> objects, boolean parralel)
             throws SdkClientException, ObsServiceException;
-
-    /**
-     * Get the timeout for waiting threads termination in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getShutdownTimeoutS() throws ObsServiceException;
-
-    /**
-     * Get the timeout for download execution in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getDownloadExecutionTimeoutS() throws ObsServiceException;
-
-    /**
-     * Get the timeout for upload execution in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getUploadExecutionTimeoutS() throws ObsServiceException;
     
 	/**
 	 * Gets the list of ObsObject's of an ObsFamily whose modification times in OBS are within the time frame provided.
@@ -156,15 +135,13 @@ public interface ObsClient {
 	List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd, ProductFamily obsFamily)
 			throws SdkClientException, ObsServiceException;
 	
-	boolean exist(final ProductFamily family, final String key) throws ObsException;
-	
 	File downloadFile(final ProductFamily family, final String key, final String targetDir) throws ObsException, ObsUnknownObject;
 	
 	void downloadFilesPerBatch(final List<ObsDownloadFile> filesToDownload) throws AbstractCodedException;
 	
 	void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException;
 	
-	void moveFile(final ProductFamily from, final ProductFamily to, final String key) throws ObsException;
+	void move(final ObsObject from, final ProductFamily to) throws ObsException;
 	
 	void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)  throws AbstractCodedException;
 	

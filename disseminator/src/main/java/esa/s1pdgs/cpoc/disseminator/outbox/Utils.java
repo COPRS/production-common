@@ -7,17 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Utils {
-	
-	static final void assertValidPath(final String path) {
-		if (path.startsWith("/")) {
-			throw new IllegalArgumentException("path must not start with '/': " + path);
-		}
-		
-		if (path.contains("..")) {
-			throw new IllegalArgumentException("path must not contain '..': " + path);
-		}
-	}
-
 	static final InputStream getInputStream(final String _filename) throws Exception {
 		final File input = new File(_filename);
 
