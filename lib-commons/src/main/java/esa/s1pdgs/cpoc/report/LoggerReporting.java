@@ -62,25 +62,31 @@ public final class LoggerReporting implements Reporting  {
 	@Override
 	public final void end(final String comment, final Object... objects) {
 		final long deltaTMillis =  System.currentTimeMillis() - actionStart;
-		ThreadContext.put("jsonAdditional", toJson(additionalJsonFields(0, deltaTMillis, 0L)));
-		report(Level.INFO, Event.end, comment, objects);	
-		ThreadContext.remove("jsonAdditional");
+		report(Level.INFO, Event.end, additionalJsonFields(0, deltaTMillis, 0L), comment, objects);	
 	}
 	
 	@Override
 	public void endWithTransfer(final String comment, final long transferAmount, final Object... objects) {		
 		final long deltaTMillis = System.currentTimeMillis() - actionStart;
-		ThreadContext.put("jsonAdditional", toJson(additionalJsonFields(0, deltaTMillis, transferAmount)));
-		report(Level.INFO, Event.end, comment, objects);
-		ThreadContext.remove("jsonAdditional");
+		report(Level.INFO, Event.end, additionalJsonFields(0, deltaTMillis, transferAmount), comment, objects);
 	}
 
 	@Override
 	public final void error(final String comment, final Object... objects) {
-		final long deltaTMillis = System.currentTimeMillis() - actionStart;
-		ThreadContext.put("jsonAdditional", toJson(additionalJsonFields(1, deltaTMillis, 0L)));		
-		report(Level.ERROR, Event.end, comment, objects);	
+		final long deltaTMillis = System.currentTimeMillis() - actionStart;		
+		report(Level.ERROR, Event.end, additionalJsonFields(1, deltaTMillis, 0L), comment, objects);	
+	}
+	
+	final void report(final Level level, final Event thisEvent, final Map<String,String> addProps, final String message, final Object... objects) {	
+		for (final Map.Entry<String,String> entry : addProps.entrySet()) {
+			ThreadContext.put(entry.getKey(), entry.getValue());	
+		}		
+		ThreadContext.put("jsonAdditional", toJson(addProps));		
+		report(level, thisEvent, message, objects);	
 		ThreadContext.remove("jsonAdditional");
+		for (final String key : addProps.keySet()) {
+			ThreadContext.remove(key);
+		}	
 	}
 		
 	final void report(final Level level, final Event thisEvent, final String message, final Object... objects) {		
