@@ -136,7 +136,7 @@ public class IngestionService {
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 
-			final Reporting reporting = reportingFactory.newReporting(3);
+			final Reporting reporting = reportingFactory.newReporting(2);
 
 			final ProductCategory category = ProductCategory.of(product.getFamily());
 			reporting.begin("Start publishing file {} in topic", message.getBody().getProductName());
@@ -153,7 +153,7 @@ public class IngestionService {
 			throws InternalErrorException, InterruptedException {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
-			final Reporting reporting = reportingFactory.newReporting(2);
+			final Reporting reporting = reportingFactory.newReporting(3);
 			reporting.begin("Start removing file {}", file.getPath());
 
 			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
