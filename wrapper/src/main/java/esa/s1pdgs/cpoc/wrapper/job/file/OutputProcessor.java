@@ -115,7 +115,7 @@ public class OutputProcessor {
 	 */
 	private final ApplicationProperties properties;
 
-	public static enum Polarisation {
+	public static enum AcquisitionMode {
 		EW, IW, SM, WV
 	}
 
@@ -196,6 +196,8 @@ public class OutputProcessor {
 				ProductFamily family = ProductFamily.fromValue(matchOutput.getFamily());
 
 				final File file = new File(filePath);
+				
+				final Reporting reporting = reportingFactory.newReporting(0);
 
 				switch (family) {
 				case L0_REPORT:
@@ -209,7 +211,6 @@ public class OutputProcessor {
 					productSize += size(file);
 					break;
 				case L0_SLICE:
-					final Reporting reporting = reportingFactory.newReporting(0);
 					reporting.begin("Starting ghost candidate detection");
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
@@ -222,24 +223,24 @@ public class OutputProcessor {
 							 * If it is a ghost in NRT workflow, we simply ignore it.
 							 */
 							if (!ghostCandidate) {
-								reporting.intermediate("Product {} is not a possible ghost candidate in NRT scenario", productName);
+								reporting.intermediate("Product {} is not a ghost candidate in NRT scenario", productName);
 								uploadBatch.add(new ObsUploadFile(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
 								productSize += size(file);
 							} else {
-								reporting.intermediate("Product {} is a possible ghost candidate in NRT scenario", productName);
+								reporting.intermediate("Product {} is a ghost candidate in NRT scenario", productName);
 							}
 
 						} else if (line.contains("FAST24")) {
 							LOGGER.info("Output {} (L0_SLICE FAST24) is considered as belonging to the family {}", productName,
 									ProductFamily.L0_SEGMENT);
 							if (!ghostCandidate) {
-								reporting.intermediate("Product {} is not a possible ghost candidate in FAST scenario", productName);
+								reporting.intermediate("Product {} is not a ghost candidate in FAST scenario", productName);
 								uploadBatch.add(new ObsUploadFile(ProductFamily.L0_SEGMENT, productName, file));
 								outputToPublish.add(
 									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24"));
 							} else {
-								reporting.intermediate("Product {} is a possible ghost candidate in FAST scenario", productName);
+								reporting.intermediate("Product {} is a ghost candidate in FAST scenario", productName);
 								uploadBatch.add(new ObsUploadFile(ProductFamily.GHOST, productName, file));
 							}
 							productSize += size(file);
@@ -259,24 +260,37 @@ public class OutputProcessor {
 				case L0_ACN:
 				case L0_BLANK:
 					// Specific case of the L0 wrapper
+					reporting.begin("Starting ghost candidate detection");
 					if (appLevel == ApplicationLevel.L0) {
+						boolean ghostCandidate = isGhostCandidate(productName);
 						if (line.contains("NRT")) {
-							LOGGER.info("Output {} is considered as belonging to the family {}", productName,
+							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 									matchOutput.getFamily());
-							uploadBatch.add(new ObsUploadFile(family, productName, file));
-							outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
-							productSize += size(file);
+							if (!ghostCandidate) {
+								reporting.intermediate("Product {} is not a ghost candidate in NRT scenario", productName);
+								uploadBatch.add(new ObsUploadFile(family, productName, file));
+								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
+								productSize += size(file);
+							} else {
+								reporting.intermediate("Product {} is a ghost candidate in NRT scenario", productName);
+							}
 						} else if (line.contains("FAST24")) {
-							LOGGER.info("Output {} is considered as belonging to the family {}", productName,
+							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 									matchOutput.getFamily());
-							uploadBatch.add(new ObsUploadFile(family, productName, file));
-							outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
-							productSize += size(file);
+							
+							if (!ghostCandidate) {
+								reporting.intermediate("Product {} is not a ghost candidate in FAST scenario", productName);
+								uploadBatch.add(new ObsUploadFile(family, productName, file));
+								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
+								productSize += size(file);
+							} else {
+								reporting.intermediate("Product {} is a ghost candidate in FAST scenario", productName);
+							}
 						} else {
-							LOGGER.warn("Output {} ignored because unknown mode", productName);
+							LOGGER.warn("Output {} (ACN, BLANK) ignored because unknown mode", productName);
 						}
 					} else {
-						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
+						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
 						uploadBatch.add(new ObsUploadFile(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
@@ -353,23 +367,28 @@ public class OutputProcessor {
 					endDateString);
 			return false;
 		}
-
-		// Now we are also trying to extract the polarisation from the product.
-		Polarisation polarisation = null;
+		
+		// Now we are also trying to extract the acquisition mode from the product.
+		AcquisitionMode acquisitionMode = null;		
 		try {
-			String polarisationStr = productName.substring(4, 6);
-			polarisation = Polarisation.valueOf(polarisationStr);
-			LOGGER.trace("Extracted polarisation from ghost candidate: polarisation {}", polarisation);
+			String acquisitionModeStr = productName.substring(4, 6);
+			
+			// This is a special case for ACN being actual SM
+			if (acquisitionModeStr.matches("S[0-6]")) {
+				acquisitionModeStr = "SM";
+			}
+			acquisitionMode = AcquisitionMode.valueOf(acquisitionModeStr);
+			LOGGER.trace("Extracted acquisition mode from ghost candidate: acquisitionMode={}", acquisitionMode);
 		} catch (IllegalArgumentException ex) {
-			LOGGER.error("Polarisation from product name is not valid: polarisation={}. This is not a ghost candidate.", polarisation);
+			LOGGER.error("Acquisition mode from product name is not valid: acquisitionMode={}. This is not a ghost candidate.", acquisitionMode);
 			return false;
 		}
 
-		LOGGER.info("Information used for ghost candidate detection: duration {}, polarisation {}",
-				duration.getSeconds(), polarisation);
+		LOGGER.info("Information used for ghost candidate detection: duration {}, acquisitionMode {}",
+				duration.getSeconds(), acquisitionMode);
 
 		// if the configured length is smaller than the duration, its a candidate
-		long ghostLength = ghostLength(polarisation);
+		long ghostLength = ghostLength(acquisitionMode);
 		if (duration.getSeconds() <= ghostLength) {
 			LOGGER.info("Ghost length is {}, but duration is {}. This is a ghost candidate!", ghostLength,
 					duration.getSeconds());
@@ -388,7 +407,7 @@ public class OutputProcessor {
 	 * @param polarisation The polarisaton that shall be looked up
 	 * @return Length in seconds when it is decided to be a ghost candidate
 	 */
-	private long ghostLength(Polarisation polarisation) {
+	private long ghostLength(AcquisitionMode polarisation) {
 		switch (polarisation) {
 		case EW:
 			return properties.getThresholdEw();
