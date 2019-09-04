@@ -5,12 +5,14 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Map;
 
+import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
@@ -32,7 +34,9 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	@Override
 	public void transfer(final ObsObject obsObject) throws Exception {
 		final FTPClient ftpClient = new FTPClient();
-
+		ftpClient.addProtocolCommandListener(
+				new PrintCommandListener(new LogPrintWriter(s -> logger.debug(s)), true)
+		);
 		final int port = (config.getPort() > 0) ? config.getPort(): DEFAULT_PORT;
 		ftpClient.connect(config.getHostname(), port);
 	    assertPositiveCompletion(ftpClient);
