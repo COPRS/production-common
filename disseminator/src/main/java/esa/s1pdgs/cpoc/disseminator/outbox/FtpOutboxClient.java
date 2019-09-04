@@ -48,7 +48,10 @@ public class FtpOutboxClient extends AbstractOutboxClient {
         
     	try {
 	        ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-	        ftpClient.enterLocalPassiveMode();
+	        
+	        if (config.isFtpPasv()) {
+		        ftpClient.enterLocalPassiveMode();
+	        }
 	        assertPositiveCompletion(ftpClient);
 	        
 			final Path path = evaluatePathFor(obsObject);	

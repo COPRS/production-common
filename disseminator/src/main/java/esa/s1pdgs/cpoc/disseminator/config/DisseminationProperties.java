@@ -41,6 +41,8 @@ public class DisseminationProperties {
 		private int bufferSize = 8 * 1014 * 1024;
 		
 		private boolean implicitSsl = true;
+		
+		private boolean ftpPasv = false;
 						
 		public Protocol getProtocol() {
 			return protocol;
@@ -153,12 +155,20 @@ public class DisseminationProperties {
 		public void setBufferSize(int bufferSize) {
 			this.bufferSize = bufferSize;
 		}
+		
+		public boolean isFtpPasv() {
+			return ftpPasv;
+		}
+
+		public void setFtpPasv(boolean ftpPasv) {
+			this.ftpPasv = ftpPasv;
+		}
 
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
 					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port + 
-					", pathEvaluator=" + pathEvaluator + ", bufferSize=" + bufferSize
+					", pathEvaluator=" + pathEvaluator + ", bufferSize=" + bufferSize+ ", ftpPasv=" + ftpPasv
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
 					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl + "]";
 		}
