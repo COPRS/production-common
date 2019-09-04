@@ -51,8 +51,10 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	        
 	        if (config.isFtpPasv()) {
 		        ftpClient.enterLocalPassiveMode();
+	        } else {
+		        ftpClient.enterLocalActiveMode();
 	        }
-	        assertPositiveCompletion(ftpClient);
+	        assertPositiveCompletion(ftpClient);        
 	        
 			final Path path = evaluatePathFor(obsObject);	
 			for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
