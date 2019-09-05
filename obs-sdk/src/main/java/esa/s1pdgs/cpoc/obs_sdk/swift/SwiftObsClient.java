@@ -180,4 +180,10 @@ public class SwiftObsClient extends AbstractObsClient {
 		return result;
 	}
 
+	@Override
+	public void validate(ObsObject object) throws ObsServiceException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

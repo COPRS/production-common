@@ -519,4 +519,10 @@ class AbstractObsClientIncrementImpl extends AbstractObsClient {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void validate(ObsObject object) throws ObsServiceException {
+		// TODO Auto-generated method stub
+		
+	}
 }
