@@ -2,13 +2,16 @@ package esa.s1pdgs.cpoc.ingestion.obs;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.product.ProductException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 public class ObsAdapter {
@@ -27,9 +30,9 @@ public class ObsAdapter {
 		final String obsKey = toObsKey(file);
 		try {
 			if (!obsClient.exists(new ObsObject(family, obsKey))) {
-				obsClient.uploadFile(family, obsKey, file);
+				obsClient.upload(Arrays.asList(new ObsUploadObject(family, obsKey, file)));
 			}
-		} catch (ObsException | SdkClientException e) {
+		} catch (AbstractCodedException | SdkClientException e) {
 			throw new RuntimeException(
 					String.format("Error uploading file %s (%s): %s", file, family, LogUtils.toString(e))
 			);

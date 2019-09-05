@@ -168,7 +168,7 @@ public class OutputProcessorTest {
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
 
         // Mocks
-        doNothing().when(obsClient).uploadFilesPerBatch(Mockito.any());
+        doNothing().when(obsClient).upload(Mockito.any());
         doNothing().when(procuderFactory)
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         doNothing().when(procuderFactory)
@@ -700,11 +700,11 @@ public class OutputProcessorTest {
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
 
         // check OBS service
-        verify(obsClient, times(2)).uploadFilesPerBatch(Mockito.any());
+        verify(obsClient, times(2)).upload(Mockito.any());
         List<ObsUploadFile> batch1 = uploadBatch.subList(0, 2);
-        verify(obsClient, times(1)).uploadFilesPerBatch(Mockito.eq(batch1));
+        verify(obsClient, times(1)).upload(Mockito.eq(batch1));
         List<ObsUploadFile> batch2 = uploadBatch.subList(2, 3);
-        verify(obsClient, times(1)).uploadFilesPerBatch(Mockito.eq(batch2));
+        verify(obsClient, times(1)).upload(Mockito.eq(batch2));
     }
 
     @Test
@@ -718,6 +718,6 @@ public class OutputProcessorTest {
                 .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
 
         // check OBS service
-        verify(obsClient, times(2)).uploadFilesPerBatch(Mockito.any());
+        verify(obsClient, times(2)).upload(Mockito.any());
     }
 }

@@ -181,21 +181,21 @@ public class S3ObsServices {
      * @param prefixKey
      * @param directoryPath
      * @param ignoreFolders
-     * @return the number of download objects
+     * @return the download files
      * @throws SdkClientException
      * @throws ObsServiceException
      */
-    public int downloadObjectsWithPrefix(final String bucketName,
+    public List<File> downloadObjectsWithPrefix(final String bucketName,
             final String prefixKey, final String directoryPath,
             final boolean ignoreFolders)
             throws S3ObsServiceException, S3SdkClientException {
-        int nbObj;
         log(String.format(
                 "Downloading objects with prefix %s from bucket %s in %s",
                 prefixKey, bucketName, directoryPath));
-
+        List<File> files = new ArrayList<>();
+        int nbObj;
         for (int retryCount = 1;; retryCount++) {
-            nbObj = 0;
+        	nbObj = 0;
             // List all objects with given prefix
             try {
                 ObjectListing objectListing =
@@ -241,16 +241,17 @@ public class S3ObsServices {
                             if (!key.equals(filename)) {
                                 File fTo = new File(targetDir + filename);
                                 localFile.renameTo(fTo);
+                                localFile = fTo;
                             }
                         }
+                        files.add(localFile);
                         nbObj++;
                     }
                 }
-
                 log(String.format(
                         "Download %d objects with prefix %s from bucket %s in %s succeeded",
                         nbObj, prefixKey, bucketName, directoryPath));
-                return nbObj;
+                return files;
             } catch (com.amazonaws.AmazonServiceException ase) {
                 throw new S3ObsServiceException(bucketName, prefixKey,
                         String.format("Download in %s fails: %s", directoryPath,

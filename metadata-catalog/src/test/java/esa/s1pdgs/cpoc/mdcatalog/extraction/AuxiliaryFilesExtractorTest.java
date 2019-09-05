@@ -10,12 +10,15 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -35,6 +38,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class AuxiliaryFilesExtractorTest {
@@ -269,14 +273,15 @@ public class AuxiliaryFilesExtractorTest {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void testExtractMetadata(GenericMessageDto<ProductDto> inputMessage, String productFileName,
 			String metadataFile, FileExtension fileExtension, String missionId, String satelliteId, String productClass,
 			String productType) throws AbstractCodedException {
-		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + metadataFile);
+		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + metadataFile));
 		
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
-		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(files).when(obsClient).download(Mockito.anyList());
 
 		ConfigFileDescriptor expectedDescriptor = new ConfigFileDescriptor();
 		expectedDescriptor.setExtension(fileExtension);
@@ -290,7 +295,7 @@ public class AuxiliaryFilesExtractorTest {
 		expectedDescriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		expectedDescriptor.setRelativePath(productFileName);
 
-		JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, file);
+		JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, files.get(0));
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessage);
 		for (String key : expected.keySet()) {
 			if (!"insertionTime".equals(key)) {
@@ -298,8 +303,8 @@ public class AuxiliaryFilesExtractorTest {
 			}
 		}
 
-		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(metadataFile),
-				Mockito.eq(extractor.localDirectory));
+		verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+				new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, metadataFile, extractor.localDirectory))));
 	}
 
 }

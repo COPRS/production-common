@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,7 @@ import esa.s1pdgs.cpoc.ingestor.kafka.PublicationServices;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -166,11 +168,11 @@ public abstract class AbstractFileProcessor<T> {
 		}
 	}
 
-	private final void upload(final File file, final String productName, final FileDescriptor descriptor) throws ObsException, ObsAlreadyExist, ObsServiceException, SdkClientException {		
+	private final void upload(final File file, final String productName, final FileDescriptor descriptor) throws ObsServiceException, SdkClientException, AbstractCodedException {		
 		if (obsClient.exists(new ObsObject(family,descriptor.getKeyObjectStorage()))) {
 			throw new ObsAlreadyExist(family, descriptor.getProductName(), new Exception("File already exist in object storage"));
 		}
-		obsClient.uploadFile(family,descriptor.getKeyObjectStorage(), file);
+		obsClient.upload(Arrays.asList(new ObsUploadObject(family,descriptor.getKeyObjectStorage(), file)));
 	}
 
 	private final void publish(final Reporting.Factory reportingFactory, final String productName, final FileDescriptor descriptor) throws MqiPublicationError {

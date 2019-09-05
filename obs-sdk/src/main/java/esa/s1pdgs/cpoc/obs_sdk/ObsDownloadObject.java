@@ -28,8 +28,7 @@ public class ObsDownloadObject extends ObsObject {
      * @param family
      * @param targetDir
      */
-    public ObsDownloadObject(final String key, final ProductFamily family,
-            final String targetDir) {
+    public ObsDownloadObject(final ProductFamily family, final String key, final String targetDir) {
         super(family, key);
         this.targetDir = targetDir;
         if (family == ProductFamily.EDRS_SESSION) {

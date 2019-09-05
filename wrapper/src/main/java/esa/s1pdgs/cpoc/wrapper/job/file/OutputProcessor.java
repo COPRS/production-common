@@ -505,7 +505,7 @@ public class OutputProcessor {
 				if (Thread.currentThread().isInterrupted()) {
 					throw new InternalErrorException("The current thread as been interrupted");
 				}
-				this.obsClient.uploadFilesPerBatch(sublist);
+				this.obsClient.upload(sublist);
 				report.end("End uploading batch " + i + " of outputs " + listProducts);
 
 			} catch (AbstractCodedException e) {

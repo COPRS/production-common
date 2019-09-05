@@ -265,7 +265,7 @@ public class InputDownloader {
                 LOGGER.info("{} 4 - Starting downloading batch {}", prefixMonitorLogs, i);
                 int lastIndex = Math.min((i + 1) * sizeDownBatch, downloadToBatch.size());                
                 List<ObsDownloadFile> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
-                this.obsClient.downloadFilesPerBatch(subListS3);
+                this.obsClient.download(subListS3);
                 if (appLevel == ApplicationLevel.L0 && nbUploadedRaw < 2) {
                     nbUploadedRaw += subListS3.stream().filter(
                             file -> file.getFamily() == ProductFamily.EDRS_SESSION)

@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.archives.controller;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,6 +17,8 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -69,14 +73,14 @@ public class SlicesConsumer {
         this.appStatus.setProcessing("SLICES");
         try {
             if (!devProperties.getActivations().get("download-all")) {
-                this.obsClient.downloadFile(dto.getFamily(),
+                this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getFamily(),
                         dto.getKeyObjectStorage() + "/manifest.safe",
                         this.sharedVolume + "/"
-                                + dto.getFamily().name().toLowerCase());
+                                + dto.getFamily().name().toLowerCase())));
             } else {
-                this.obsClient.downloadFile(dto.getFamily(),
+                this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getFamily(),
                         dto.getKeyObjectStorage(), this.sharedVolume + "/"
-                                + dto.getFamily().name().toLowerCase());
+                                + dto.getFamily().name().toLowerCase())));
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {

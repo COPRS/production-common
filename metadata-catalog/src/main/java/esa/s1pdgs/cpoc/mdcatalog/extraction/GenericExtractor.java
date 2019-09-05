@@ -2,7 +2,9 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +30,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -300,9 +303,9 @@ public abstract class GenericExtractor<T> {
         reportDownload.begin("Starting download of " + keyObs + " to local directory " + this.localDirectory);
 
 		try {
-			final File metadataFile = obsClient.downloadFile(family, keyObs, this.localDirectory);
+			final List<File> files = obsClient.download(Arrays.asList(new ObsDownloadObject(family, keyObs, this.localDirectory)));
 			reportDownload.end("End download of " + keyObs);
-			return metadataFile;
+			return files.size() == 1 ? files.get(0) : null;
 		} catch (AbstractCodedException e) {
 			reportDownload.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
 			throw e;

@@ -9,13 +9,10 @@ import java.util.Map;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
@@ -34,76 +31,25 @@ public abstract class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public int downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void downloadObjects(List<ObsDownloadObject> objects) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void downloadObjects(List<ObsDownloadObject> objects, boolean parralel)
-			throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public int uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void uploadObjects(List<ObsUploadObject> objects) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void uploadObjects(List<ObsUploadObject> objects, boolean parralel)
-			throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd,
-			ProductFamily obsFamily) throws SdkClientException, ObsServiceException {
+	public List<File> download(final List<ObsDownloadObject> objects) throws AbstractCodedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public File downloadFile(ProductFamily family, String key, String targetDir) throws ObsException, ObsUnknownObject {
+	public void upload(final List<ObsUploadObject> objects) throws AbstractCodedException {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily obsFamily,
+			Date timeFrameBegin, Date timeFrameEnd) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void downloadFilesPerBatch(List<ObsDownloadFile> filesToDownload) throws AbstractCodedException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void uploadFile(ProductFamily family, String key, File file) throws ObsException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void move(ObsObject from, ProductFamily to) throws ObsException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void uploadFilesPerBatch(List<ObsUploadFile> filesToUpload) throws AbstractCodedException {
 		// TODO Auto-generated method stub
 
 	}
@@ -119,6 +65,12 @@ public abstract class FakeObsClient implements ObsClient {
 	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)
 			throws SdkClientException {
 		return null;
+	}
+	
+	@Override
+	public void validate(ObsObject object) throws ObsServiceException {
+	    // TODO Auto-generated method stub
+
 	}
 
 }

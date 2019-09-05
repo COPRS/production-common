@@ -71,7 +71,7 @@ public class InputDownloaderTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(this.obsClient).downloadFilesPerBatch(Mockito.any());
+        doNothing().when(this.obsClient).download(Mockito.any());
         doNothing().when(this.poolProcessorExecutor)
                 .setActive(Mockito.anyBoolean());
 
@@ -152,10 +152,10 @@ public class InputDownloaderTest {
 
         // We have one file per input + status.txt
         assertEquals(0, workDirectory.list().length);
-        verify(obsClient, times(2)).downloadFilesPerBatch(Mockito.any());
-        verify(obsClient, times(1)).downloadFilesPerBatch(
+        verify(obsClient, times(2)).download(Mockito.any());
+        verify(obsClient, times(1)).download(
                 Mockito.eq(downloadToBatch.subList(0, 5)));
-        verify(obsClient, times(1)).downloadFilesPerBatch(
+        verify(obsClient, times(1)).download(
                 Mockito.eq(downloadToBatch.subList(5, 8)));
 
         // Check jobOrder.txt
@@ -187,10 +187,10 @@ public class InputDownloaderTest {
 
         // We have one file per input + status.txt
         assertEquals(0, workDirectory.list().length);
-        verify(this.obsClient, times(2)).downloadFilesPerBatch(Mockito.any());
-        verify(this.obsClient, times(1)).downloadFilesPerBatch(
+        verify(this.obsClient, times(2)).download(Mockito.any());
+        verify(this.obsClient, times(1)).download(
                 Mockito.eq(downloadToBatch.subList(0, 5)));
-        verify(this.obsClient, times(1)).downloadFilesPerBatch(
+        verify(this.obsClient, times(1)).download(
                 Mockito.eq(downloadToBatch.subList(5, 8)));
 
         // Check jobOrder.txt

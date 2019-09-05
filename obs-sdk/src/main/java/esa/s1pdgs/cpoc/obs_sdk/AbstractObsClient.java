@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -50,47 +52,62 @@ public abstract class AbstractObsClient implements ObsClient {
 	protected abstract int getUploadExecutionTimeoutS() throws ObsServiceException;
 	
     /**
+     * @throws ExecutionException 
+     * @throws InterruptedException 
      * @see ObsClient#downloadObjects(List)
      * @see #downloadObjects(List, boolean)
      */
-    @Override
-    public void downloadObjects(final List<ObsDownloadObject> objects)
+    public List<File> downloadObjects(final List<ObsDownloadObject> objects)
             throws SdkClientException, ObsServiceException {
-        downloadObjects(objects, false);
+        return downloadObjects(objects, false);
     }
 
+    protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException;
+    
+    protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException;
+    
     /**
      * @see ObsClient#downloadObjects(List, boolean)
      */
-    @Override
-    public void downloadObjects(final List<ObsDownloadObject> objects,
-            final boolean parralel)
+    public List<File> downloadObjects(final List<ObsDownloadObject> objects,
+            final boolean parallel)
             throws SdkClientException, ObsServiceException {
-        if (parralel) {
+    	List<File> files = new ArrayList<>();
+        if (objects.size() > 1 && parallel) {
             // Download objects in parallel
             ExecutorService workerThread =
                     Executors.newFixedThreadPool(objects.size());
-            CompletionService<Integer> service =
+            CompletionService<List<File>> service =
                     new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
+            List<Future<List<File>>> futures = new ArrayList<>();
             for (ObsDownloadObject object : objects) {
-                service.submit(new ObsDownloadCallable(this, object));
+            	futures.add(service.submit(new ObsDownloadCallable(this, object)));
             }
+            
+            waitForCompletion(workerThread, service, objects.size(),
+            		getDownloadExecutionTimeoutS());
 
-            this.waitForCompletion(workerThread, service, objects.size(),
-                    getDownloadExecutionTimeoutS());
+            for (Future<List<File>> future : futures) {
+	            try {
+	            	files.addAll(future.get());
+	            } catch (InterruptedException | ExecutionException e) {
+	            	// unlikely case, because waitForCompletion() already ensured that the executions are finished...
+	            	throw new ObsServiceException(e.getMessage(), e);
+	            }
+            }
         } else {
             // Download object in sequential
             for (ObsDownloadObject object : objects) {
-                this.downloadObject(object);
+                files.addAll(downloadObject(object));
             }
         }
+        return files;
     }
 
     /**
      * @see ObsClient#uploadFiles(List)
      */
-    @Override
     public void uploadObjects(final List<ObsUploadObject> objects)
             throws SdkClientException, ObsServiceException {
         uploadObjects(objects, false);
@@ -99,28 +116,26 @@ public abstract class AbstractObsClient implements ObsClient {
     /**
      * @see ObsClient#uploadFiles(List, boolean)
      */
-    @Override
     public void uploadObjects(final List<ObsUploadObject> objects,
-            final boolean parralel)
+            final boolean parallel)
             throws SdkClientException, ObsServiceException {
-        if (parralel) {
-
+        if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
             ExecutorService workerThread =
                     Executors.newFixedThreadPool(objects.size());
-            CompletionService<Integer> service =
+            CompletionService<Void> service =
                     new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
             for (ObsUploadObject object : objects) {
                 service.submit(new ObsUploadCallable(this, object));
             }
-            this.waitForCompletion(workerThread, service, objects.size(),
+            waitForCompletion(workerThread, service, objects.size(),
                     getUploadExecutionTimeoutS());
 
         } else {
             // Upload object in sequential
             for (ObsUploadObject object : objects) {
-                this.uploadObject(object);
+                uploadObject(object);
             }
         }
     }
@@ -135,7 +150,7 @@ public abstract class AbstractObsClient implements ObsClient {
      * @throws ObsServiceException
      */
     private void waitForCompletion(final ExecutorService workerThread,
-            final CompletionService<Integer> service, final int nbTasks,
+            final CompletionService<?> service, final int nbTasks,
             final int timeout) throws ObsServiceException {
         try {
             try {
@@ -152,7 +167,7 @@ public abstract class AbstractObsClient implements ObsClient {
                     }
                 }
             } finally {
-                // Shutdown thread in case of rasied exceptions
+                // Shutdown thread in case of raised exceptions
                 workerThread.shutdownNow();
                 workerThread.awaitTermination(getShutdownTimeoutS(),
                         TimeUnit.SECONDS);
@@ -183,12 +198,13 @@ public abstract class AbstractObsClient implements ObsClient {
 			}
 		}
 		// Download object
-		ObsDownloadObject object = new ObsDownloadObject(key, family, targetDir);
+		ObsDownloadObject object = new ObsDownloadObject(family, key, targetDir);
 		try {
-			int nbObjects = downloadObject(object);
-			if (nbObjects <= 0) {
+			downloadObject(object);
+			/* FIXME handle not found situations differently
+			   if (nbObjects <= 0) {
 				throw new ObsUnknownObject(family, key);
-			}
+			} */
 		} catch (SdkClientException exc) {
 			throw new ObsException(family, key, exc);
 		}
@@ -199,19 +215,14 @@ public abstract class AbstractObsClient implements ObsClient {
 	/**
      * Download files per batch
      * 
-     * @param filesToDownload
+     * @param objects
      * @throws AbstractCodedException
      */
-    public void downloadFilesPerBatch(
-            final List<ObsDownloadFile> filesToDownload)
+    public List<File> download(
+            final List<ObsDownloadObject> objects)
             throws AbstractCodedException {
-        // Build objects
-        List<ObsDownloadObject> objects = filesToDownload.stream()
-                .map(file -> new ObsDownloadObject(file.getKey(),file.getFamily(), file.getTargetDir()))
-                .collect(Collectors.toList());
-        // Download
         try {
-            downloadObjects(objects, true);
+            return downloadObjects(objects, true);
         } catch (SdkClientException exc) {
             throw new ObsParallelAccessException(exc);
         }
@@ -226,7 +237,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	 * @throws ObsException
 	 */
 	public void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException {
-		ObsUploadObject object = new ObsUploadObject(key, family, file);
+		ObsUploadObject object = new ObsUploadObject(family, key, file);
 		try {
 			uploadObject(object);
 		} catch (SdkClientException exc) {
@@ -237,17 +248,11 @@ public abstract class AbstractObsClient implements ObsClient {
 	/**
      * Upload files per batch
      * 
-     * @param filesToUpload
+     * @param objects
      * @throws AbstractCodedException
      */
-    public void uploadFilesPerBatch(final List<ObsUploadFile> filesToUpload)
+    public void upload(final List<ObsUploadObject> objects)
             throws AbstractCodedException {
-
-        // Build objects
-        List<ObsUploadObject> objects = filesToUpload.stream()
-                .map(file -> new ObsUploadObject(file.getKey(),file.getFamily(), file.getFile()))
-                .collect(Collectors.toList());
-        // Upload
         try {
             uploadObjects(objects, true);
         } catch (SdkClientException exc) {
@@ -257,7 +262,7 @@ public abstract class AbstractObsClient implements ObsClient {
 
     public Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException {
     	
-    	List<ObsObject> results = getListOfObjectsOfTimeFrameOfFamily(intervalStart, intervalEnd, family);
+    	List<ObsObject> results = getObsObjectsOfFamilyWithinTimeFrame(family, intervalStart, intervalEnd);
     	Map<String, ObsObject> map = results.stream()
     		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
     	    	
