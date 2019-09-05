@@ -148,4 +148,15 @@ public interface ObsClient {
 	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
 	
     Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) throws SdkClientException;
+    
+    /**
+     * Performing a validation check on the given product. All checksum of the product manifest are verified and it
+     * is checked if there are superfluous files stored for directory products.
+     * @param object
+     * A ObsObject containing family and key of the object that shall be validated
+     * @throws ObsServiceException
+     * If a consistency issue is found an exception is raised providing the product name it occured
+     * and the violation being found
+     */
+    void validate(ObsObject object) throws ObsServiceException;
 }
