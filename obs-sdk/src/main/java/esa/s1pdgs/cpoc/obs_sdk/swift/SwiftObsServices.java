@@ -136,21 +136,21 @@ public class SwiftObsServices {
      * @param prefixKey
      * @param directoryPath
      * @param ignoreFolders
-     * @return the number of download objects
+     * @return the downloaded files
 	 * @throws SwiftObsServiceException
 	 * @throws SwiftSdkClientException
      */
-	public int downloadObjectsWithPrefix(final String containerName,
+	public List<File> downloadObjectsWithPrefix(final String containerName,
             final String prefixKey, final String directoryPath,
             final boolean ignoreFolders)
             throws SwiftObsServiceException, SwiftSdkClientException {
-        int nbObj;
         log(String.format(
                 "Downloading objects with prefix %s from bucket %s in %s",
                 prefixKey, containerName, directoryPath));
-
+        List<File> files = new ArrayList<>();
+        int nbObj;
         for (int retryCount = 1;; retryCount++) {
-            nbObj = 0;
+        	nbObj = 0;
             // List all objects with given prefix
             try {
             	String marker = "";
@@ -206,15 +206,17 @@ public class SwiftObsServices {
                             if (!key.equals(filename)) {
                                 File fTo = new File(targetDir + filename);
                                 localFile.renameTo(fTo);
+                                localFile = fTo;
                             }
                         }
+                        files.add(localFile);
                         nbObj++;
 	       			 }
             	} while (results.size() == MAX_RESULTS_PER_LIST);           	
                 log(String.format(
                         "Download %d objects with prefix %s from bucket %s in %s succeeded",
                         nbObj, prefixKey, containerName, directoryPath));
-                return nbObj;
+                return files;
             } catch (Exception e) {
                 if (retryCount <= numRetries) {
                     LOGGER.warn(String.format(

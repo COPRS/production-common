@@ -60,9 +60,11 @@ public class GhostTest {
 	}
 	
 	@Test
-	public void testPolarisation() {
+	public void testSMAquisitionMode() {
+		assertEquals(true,
+				processor.isGhostCandidate("S1B_S6_RAW__0SHH_20181001T065647_20181001T065649_012955_017ED9_79B7.SAFE"));
 		assertEquals(false,
-				processor.isGhostCandidate("S1B_EW_RAW__0SHH_20181001T065647_20181001T065649_012955_017ED9_79B7.SAFE"));
+				processor.isGhostCandidate("S1B_S7_RAW__0SHH_20181001T065647_20181001T065649_012955_017ED9_79B7.SAFE"));
 		
 	}
 }

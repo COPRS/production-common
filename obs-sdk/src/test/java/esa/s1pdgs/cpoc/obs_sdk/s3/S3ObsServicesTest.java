@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -318,15 +319,15 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixNoObjects()
             throws S3ObsServiceException, S3SdkClientException {
-        int nbObjectsNull = service.downloadObjectsWithPrefix(BCK_OBJ_NOT_EXIST,
+    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_NOT_EXIST,
                 "null-prefix", "directory-path", true);
-        assertEquals(0, nbObjectsNull);
+        assertEquals(0, files.size());
         verify(s3client, never()).getObject(Mockito.any(GetObjectRequest.class),
                 Mockito.any(File.class));
 
-        int nbObjectsEmpty = service.downloadObjectsWithPrefix(
+        files = service.downloadObjectsWithPrefix(
                 BCK_OBJ_NOT_EXIST, "prefix", "directory-path", true);
-        assertEquals(0, nbObjectsEmpty);
+        assertEquals(0, files.size());
         verify(s3client, never()).getObject(Mockito.any(GetObjectRequest.class),
                 Mockito.any(File.class));
     }
@@ -340,9 +341,9 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
-        int nbObjects = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
+    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
                 "test/", true);
-        assertEquals(3, nbObjects);
+        assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
         verify(s3client, times(1)).getObject(
@@ -367,9 +368,9 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixNotIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
-        int nbObjects = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
+    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
                 "test", false);
-        assertEquals(3, nbObjects);
+        assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
         verify(s3client, times(1)).getObject(
@@ -512,7 +513,7 @@ public class S3ObsServicesTest {
         file3.mkdirs();
         file4.createNewFile();
         file5.mkdirs();
-
+        
         service.uploadDirectory(BCK_OBJ_EXIST, "key-test", new File("test"));
         verify(s3tm, times(3)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.anyString(), Mockito.any(File.class));

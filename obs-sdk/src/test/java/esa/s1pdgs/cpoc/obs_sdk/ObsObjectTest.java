@@ -85,7 +85,7 @@ public class ObsObjectTest {
     @Test
     public void obsDwObjTest() {
         ObsDownloadObject obj =
-                new ObsDownloadObject("key-t", ProductFamily.L0_ACN, "targetDir-t");
+                new ObsDownloadObject(ProductFamily.L0_ACN, "key-t", "targetDir-t");
         assertEquals("key-t", obj.getKey());
         assertEquals(ProductFamily.L0_ACN, obj.getFamily());
         assertEquals("targetDir-t", obj.getTargetDir());
@@ -109,8 +109,7 @@ public class ObsObjectTest {
      */
     @Test
     public void obsDownObjTestToString() {
-        ObsDownloadObject obj = new ObsDownloadObject("key-t",
-                ProductFamily.EDRS_SESSION, "local-path-t");
+        ObsDownloadObject obj = new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key-t", "local-path-t");
         String str = obj.toString();
         assertTrue(str.contains("key: key-t"));
         assertTrue(str.contains("family: EDRS_SESSION"));
@@ -122,26 +121,22 @@ public class ObsObjectTest {
      */
     @Test
     public void obsDownObjTestIgnoreFolders() {
-        ObsDownloadObject obj = new ObsDownloadObject("key-t",
-                ProductFamily.EDRS_SESSION, "local-path-t");
+        ObsDownloadObject obj = new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key-t", "local-path-t");
         assertTrue(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ProductFamily.AUXILIARY_FILE,
-                "local-path-t");
+        obj = new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key-t", "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ProductFamily.L0_SLICE,
-                "local-path-t");
+        obj = new ObsDownloadObject(ProductFamily.L0_SLICE, "key-t", "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ProductFamily.L0_ACN, "local-path-t");
+        obj = new ObsDownloadObject(ProductFamily.L0_ACN, "key-t", "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ProductFamily.L1_SLICE,
-                "local-path-t");
+        obj = new ObsDownloadObject(ProductFamily.L1_SLICE, "key-t", "local-path-t");
         assertFalse(obj.isIgnoreFolders());
 
-        obj = new ObsDownloadObject("key-t", ProductFamily.L1_ACN, "local-path-t");
+        obj = new ObsDownloadObject(ProductFamily.L1_ACN, "key-t", "local-path-t");
         assertFalse(obj.isIgnoreFolders());
     }
 
@@ -165,7 +160,7 @@ public class ObsObjectTest {
     public void obsUpObjTest() {
         File file = new File("./test");
         ObsUploadObject obj =
-                new ObsUploadObject("key-t", ProductFamily.L0_ACN, file);
+                new ObsUploadObject(ProductFamily.L0_ACN, "key-t", file);
         assertEquals("key-t", obj.getKey());
         assertEquals(ProductFamily.L0_ACN, obj.getFamily());
         assertEquals(file, obj.getFile());
@@ -188,7 +183,7 @@ public class ObsObjectTest {
     public void obsUpObjTestToString() {
         File file = new File("./test");
         ObsUploadObject obj =
-                new ObsUploadObject("key-t", ProductFamily.EDRS_SESSION, file);
+                new ObsUploadObject(ProductFamily.EDRS_SESSION, "key-t", file);
         String str = obj.toString();
         assertTrue(str.contains("key: key-t"));
         assertTrue(str.contains("family: EDRS_SESSION"));

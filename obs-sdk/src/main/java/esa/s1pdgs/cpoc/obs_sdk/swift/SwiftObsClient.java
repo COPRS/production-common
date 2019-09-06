@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.obs_sdk.swift;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,7 +79,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public int downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException {
+	public List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException {
 		return swiftObsServices.downloadObjectsWithPrefix(
                 configuration.getContainerForFamily(object.getFamily()),
                 object.getKey(), object.getTargetDir(),
@@ -86,19 +87,16 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public int uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException {
-		int nbUpload;
+	public void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException {
         if (object.getFile().isDirectory()) {
-            nbUpload = swiftObsServices.uploadDirectory(
+            swiftObsServices.uploadDirectory(
                     configuration.getContainerForFamily(object.getFamily()),
                     object.getKey(), object.getFile());
         } else {
             swiftObsServices.uploadFile(
                     configuration.getContainerForFamily(object.getFamily()),
                     object.getKey(), object.getFile());
-            nbUpload = 1;
         }
-        return nbUpload;
 	}
 	
 	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
@@ -134,8 +132,8 @@ public class SwiftObsClient extends AbstractObsClient {
     }
 
 	@Override
-	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(Date timeFrameBegin, Date timeFrameEnd,
-			ProductFamily family) throws SdkClientException, ObsServiceException {
+	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily family, Date timeFrameBegin, Date timeFrameEnd)
+			throws SdkClientException, ObsServiceException {
 		long methodStartTime = System.currentTimeMillis();
 
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
@@ -180,4 +178,9 @@ public class SwiftObsClient extends AbstractObsClient {
 		return result;
 	}
 
+	@Override
+    public void validate(ObsObject object) throws ObsServiceException {
+        // TODO Auto-generated method stub
+        
+    }
 }

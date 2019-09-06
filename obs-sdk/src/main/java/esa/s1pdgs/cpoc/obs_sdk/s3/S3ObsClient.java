@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -96,7 +97,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 * @see ObsClient#downloadObject(ObsDownloadObject)
 	 */
 	@Override
-	public int downloadObject(final ObsDownloadObject object) throws SdkClientException, ObsServiceException {
+	public List<File> downloadObject(final ObsDownloadObject object) throws SdkClientException, ObsServiceException {
 		return s3Services.downloadObjectsWithPrefix(configuration.getBucketForFamily(object.getFamily()),
 				object.getKey(), object.getTargetDir(), object.isIgnoreFolders());
 	}
@@ -105,17 +106,14 @@ public class S3ObsClient extends AbstractObsClient {
 	 * @see ObsClient#doesObjectExist(ObsObject)
 	 */
 	@Override
-	public int uploadObject(final ObsUploadObject object) throws SdkClientException, ObsServiceException {
-		int nbUpload;
+	public void uploadObject(final ObsUploadObject object) throws SdkClientException, ObsServiceException {
 		if (object.getFile().isDirectory()) {
-			nbUpload = s3Services.uploadDirectory(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
+			s3Services.uploadDirectory(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
 					object.getFile());
 		} else {
 			s3Services.uploadFile(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
 					object.getFile());
-			nbUpload = 1;
 		}
-		return nbUpload;
 	}
 
 	/**
@@ -156,8 +154,8 @@ public class S3ObsClient extends AbstractObsClient {
 	 * 
 	 */
 	@Override
-	public List<ObsObject> getListOfObjectsOfTimeFrameOfFamily(final Date timeFrameBegin, final Date timeFrameEnd,
-			final ProductFamily family) throws SdkClientException, ObsServiceException {
+	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(final ProductFamily family, final Date timeFrameBegin, final Date timeFrameEnd)
+			throws SdkClientException, ObsServiceException {
 
 		long methodStartTime = System.currentTimeMillis();
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
@@ -209,4 +207,10 @@ public class S3ObsClient extends AbstractObsClient {
 		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
 		return result;
 	}
+
+	@Override
+    public void validate(ObsObject object) throws ObsServiceException {
+        // TODO Auto-generated method stub
+        
+    }
 }

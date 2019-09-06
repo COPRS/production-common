@@ -81,16 +81,6 @@ public class SwiftObsClientTest {
                 Mockito.eq("key-exist"));
         doReturn(0).when(service).getNbObjects(Mockito.anyString(),
                 Mockito.eq("key-not-exist"));
-        doReturn(2).when(service).downloadObjectsWithPrefix(Mockito.anyString(),
-                Mockito.eq("key-exist"), Mockito.anyString(),
-                Mockito.anyBoolean());
-        doReturn(0).when(service).downloadObjectsWithPrefix(Mockito.anyString(),
-                Mockito.eq("key-not-exist"), Mockito.anyString(),
-                Mockito.anyBoolean());
-        doReturn(2).when(service).uploadDirectory(Mockito.anyString(),
-                Mockito.eq("key-exist"), Mockito.any());
-        doReturn(0).when(service).uploadDirectory(Mockito.anyString(),
-                Mockito.eq("key-not-exist"), Mockito.any());
         doNothing().when(service).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
 
@@ -159,7 +149,7 @@ public class SwiftObsClientTest {
      * @throws SdkClientException
      */
     @Test
-    public void testDoesObjectExist()
+    public void testExist()
             throws ObsServiceException, SdkClientException {
         boolean ret = client
                 .exists(new ObsObject(ProductFamily.L0_ACN, "key-exist"));
@@ -180,7 +170,7 @@ public class SwiftObsClientTest {
      * @throws SdkClientException
      */
     @Test
-    public void testDoesPrefixExist()
+    public void testPrefixExist()
             throws ObsServiceException, SdkClientException {
         boolean ret = client.prefixExists(
                 new ObsObject(ProductFamily.L0_SLICE, "key-exist"));
@@ -202,15 +192,11 @@ public class SwiftObsClientTest {
      */
     @Test
     public void testDownloadObject() throws ObsServiceException, SdkClientException {
-        int ret = client.downloadObject(new ObsDownloadObject("key-exist",
-                ProductFamily.AUXILIARY_FILE, "target-dir"));
-        assertEquals(2, ret);
+        client.downloadObject(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key-exist", "target-dir"));
         verify(service, times(1)).downloadObjectsWithPrefix(Mockito.eq("auxiliary-files"),
                 Mockito.eq("key-exist"), Mockito.eq("target-dir"), Mockito.eq(false));
 
-        ret = client.downloadObject(new ObsDownloadObject("key-not-exist",
-                ProductFamily.EDRS_SESSION, "target-dir"));
-        assertEquals(0, ret);
+        client.downloadObject(new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key-not-exist", "target-dir"));
         verify(service, times(1)).downloadObjectsWithPrefix(Mockito.eq("edrs-sessions"),
                 Mockito.eq("key-not-exist"), Mockito.eq("target-dir"), Mockito.eq(true));
     }
@@ -222,15 +208,13 @@ public class SwiftObsClientTest {
      */
     @Test
     public void testUploadObjectDirectory() throws ObsServiceException, SdkClientException {
-        int ret = client.uploadObject(new ObsUploadObject("key-exist", ProductFamily.L0_ACN, new File("target")));
-        assertEquals(2, ret);
+        client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("target")));
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
                 Mockito.eq("key-exist"), Mockito.eq(new File("target")));
         verify(service, never()).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
         
-        ret = client.uploadObject(new ObsUploadObject("key-not-exist", ProductFamily.L0_ACN, new File("target")));
-        assertEquals(0, ret);
+        client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-not-exist", new File("target")));
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
                 Mockito.eq("key-not-exist"), Mockito.eq(new File("target")));
         verify(service, never()).uploadFile(Mockito.anyString(),
@@ -244,8 +228,7 @@ public class SwiftObsClientTest {
      */
     @Test
     public void testUploadObjectFile() throws ObsServiceException, SdkClientException {
-        int ret = client.uploadObject(new ObsUploadObject("key-exist", ProductFamily.L0_ACN, new File("pom.xml")));
-        assertEquals(1, ret);
+        client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("pom.xml")));
         verify(service, times(1)).uploadFile(Mockito.eq("l0-acns"),
                 Mockito.eq("key-exist"), Mockito.eq(new File("pom.xml")));
         verify(service, never()).uploadDirectory(Mockito.anyString(),
@@ -268,8 +251,7 @@ public class SwiftObsClientTest {
 
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
 
-		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
-				ProductFamily.L0_SLICE);
+		List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
 
 		assertEquals(1, returnedObjs.size());
 		assertEquals("obj1", returnedObjs.get(0).getKey());
@@ -296,8 +278,7 @@ public class SwiftObsClientTest {
 		objListing1.add(obj1);
 
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
-		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
-				ProductFamily.L0_SLICE);
+		List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
 
 		assertEquals(0, returnedObjs.size());
 		verify(service, times(1)).listObjectsFromContainer("l0-slices");
@@ -330,8 +311,7 @@ public class SwiftObsClientTest {
 
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
 
-		List<ObsObject> returnedObjs = client.getListOfObjectsOfTimeFrameOfFamily(timeFrameBegin, timeFrameEnd,
-				ProductFamily.L0_SLICE);
+		List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
 
 		assertEquals(2, returnedObjs.size());
 		assertEquals("obj1", returnedObjs.get(0).getKey());

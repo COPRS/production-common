@@ -1,13 +1,16 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 
 /**
  * Callable to upload a file / folder in the OBS
  * 
  * @author Viveris Technologies
  */
-public class ObsUploadCallable implements Callable<Integer> {
+public class ObsUploadCallable implements Callable<Void> {
 
     /**
      * OBS client
@@ -33,10 +36,12 @@ public class ObsUploadCallable implements Callable<Integer> {
 
     /**
      * Call
+     * @throws AbstractCodedException 
      */
     @Override
-    public Integer call() throws ObsServiceException, SdkClientException {
-        return obsClient.uploadObject(object);
+    public Void call() throws AbstractCodedException {
+    	obsClient.upload(Arrays.asList(object));
+        return null;
     }
 
 }

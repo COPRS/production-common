@@ -10,12 +10,15 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -35,6 +38,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class LevelProductsExtractorTest {
@@ -180,19 +184,20 @@ public class LevelProductsExtractorTest {
 		FileUtils.delete("./test/workDir2");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testExtractMetadataL0Slice() throws MetadataExtractionException, AbstractCodedException {
 
-		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
+		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
 				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
-				+ "manifest.safe");
+				+ "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_SLICE, "NRT"));
 
-		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(files).when(obsClient).download(Mockito.anyList());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -210,7 +215,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L0_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_SLICE);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L0_SLICE);
 
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
@@ -221,25 +226,27 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_SLICE),
-				Mockito.eq("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
-				Mockito.eq(extractor.localDirectory));
+		verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+				new ObsDownloadObject(ProductFamily.L0_SLICE,
+				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
+				extractor.localDirectory))));
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testExtractMetadataL0Acn() throws MetadataExtractionException, AbstractCodedException {
 
-		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
+		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
 				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
-				+ "manifest.safe");
+				+ "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_ACN, "NRT"));
 
-		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(files).when(obsClient).download(Mockito.anyList());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -257,7 +264,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L0_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_ACN);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L0_ACN);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
@@ -267,25 +274,27 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L0_ACN),
-				Mockito.eq("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
-				Mockito.eq(extractor.localDirectory));
+		verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+				new ObsDownloadObject(ProductFamily.L0_ACN,
+				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
+				extractor.localDirectory))));
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testExtractMetadataL1Slice() throws MetadataExtractionException, AbstractCodedException {
 
-		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
+		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
 				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
-				+ "manifest.safe");
+				+ "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L1_SLICE, "NRT"));
 
-		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(files).when(obsClient).download(Mockito.anyList());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -303,7 +312,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_SLICE);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L1_SLICE);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
@@ -313,24 +322,26 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L1_SLICE),
-				Mockito.eq("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"),
-				Mockito.eq(extractor.localDirectory));
+		verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+				new ObsDownloadObject(ProductFamily.L1_SLICE,
+				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
+				extractor.localDirectory))));
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testExtractMetadataL1Acn() throws MetadataExtractionException, AbstractCodedException {
 
 		String l1acnName = "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE";
 
-		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l1acnName
-				+ File.separator + "manifest.safe");
+		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l1acnName
+				+ File.separator + "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l1acnName, l1acnName, ProductFamily.L1_ACN, "NRT"));
 
-		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(files).when(obsClient).download(Mockito.anyList());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -348,7 +359,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("023A69");
 		descriptor.setProductFamily(ProductFamily.L1_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_ACN);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L1_ACN);
 
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
@@ -359,23 +370,24 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L1_ACN),
-				Mockito.eq(l1acnName + "/manifest.safe"), Mockito.eq(extractor.localDirectory));
+		verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+				new ObsDownloadObject(ProductFamily.L1_ACN, l1acnName + "/manifest.safe", extractor.localDirectory))));
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testExtractMetadataL2Slice() throws AbstractCodedException {
 
 		String l2SliceName = "S1A_WV_OCN__2SSV_20190518T160559_20190518T161434_027284_0313A0_46F2.SAFE";
 
-		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l2SliceName
-				+ File.separator + "manifest.safe");
+		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l2SliceName
+				+ File.separator + "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l2SliceName, l2SliceName, ProductFamily.L2_SLICE, "NRT"));
 
-		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(files).when(obsClient).download(Mockito.anyList());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -393,7 +405,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("0313A0");
 		descriptor.setProductFamily(ProductFamily.L2_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L2_SLICE);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L2_SLICE);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
@@ -403,23 +415,24 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L2_SLICE),
-				Mockito.eq(l2SliceName + "/manifest.safe"), Mockito.eq(extractor.localDirectory));
+		verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+				new ObsDownloadObject(ProductFamily.L2_SLICE, l2SliceName + "/manifest.safe", extractor.localDirectory))));
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testExtractMetadataL2Acn() throws AbstractCodedException {
 
 		String l2acnName = "S1A_WV_OCN__2ASV_20190518T160559_20190518T161434_027284_0313A0_2960.SAFE";
 
-		File file = new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l2acnName
-				+ File.separator + "manifest.safe");
+		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l2acnName
+				+ File.separator + "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l2acnName, l2acnName, ProductFamily.L2_ACN, "NRT"));
 
-		doReturn(file).when(obsClient).downloadFile(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+		doReturn(files).when(obsClient).download(Mockito.anyList());
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -437,7 +450,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("0313A0");
 		descriptor.setProductFamily(ProductFamily.L2_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L2_ACN);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L2_ACN);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
 		for (String key : expected.keySet()) {
@@ -446,8 +459,8 @@ public class LevelProductsExtractorTest {
 			}
 		}
 
-		verify(obsClient, times(1)).downloadFile(Mockito.eq(ProductFamily.L2_ACN),
-				Mockito.eq(l2acnName + "/manifest.safe"), Mockito.eq(extractor.localDirectory));
+		verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+				new ObsDownloadObject(ProductFamily.L2_ACN, l2acnName + "/manifest.safe", extractor.localDirectory))));
 	}
 
 }

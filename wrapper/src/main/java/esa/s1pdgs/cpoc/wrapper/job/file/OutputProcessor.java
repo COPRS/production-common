@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -116,7 +116,7 @@ public class OutputProcessor {
 	 */
 	private final ApplicationProperties properties;
 
-	public static enum Polarisation {
+	public static enum AcquisitionMode {
 		EW, IW, SM, WV
 	}
 
@@ -173,7 +173,7 @@ public class OutputProcessor {
 	 * @param reportToPublish
 	 * @throws UnknownFamilyException
 	 */
-	final long sortOutputs(final List<String> lines, final List<ObsUploadFile> uploadBatch,
+	final long sortOutputs(final List<String> lines, final List<ObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish, final List<FileQueueMessage> reportToPublish, Reporting.Factory reportingFactory)
 			throws AbstractCodedException {
 
@@ -197,7 +197,8 @@ public class OutputProcessor {
 				ProductFamily family = ProductFamily.fromValue(matchOutput.getFamily());
 
 				final File file = new File(filePath);
-
+				final Reporting reporting = reportingFactory.newReporting(0);
+				
 				switch (family) {
 				case L0_REPORT:
 				case L1_REPORT:
@@ -209,8 +210,7 @@ public class OutputProcessor {
 					reportToPublish.add(new FileQueueMessage(family, productName, file));
 					productSize += size(file);
 					break;
-				case L0_SLICE:
-					final Reporting reporting = reportingFactory.newReporting(0);
+				case L0_SLICE:		
 					reporting.begin(new ReportingMessage("Starting ghost candidate detection"));
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
@@ -223,25 +223,25 @@ public class OutputProcessor {
 							 * If it is a ghost in NRT workflow, we simply ignore it.
 							 */
 							if (!ghostCandidate) {
-								reporting.intermediate(new ReportingMessage("Product {} is not a possible ghost candidate in NRT scenario", productName));
-								uploadBatch.add(new ObsUploadFile(family, productName, file));
+								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in NRT scenario", productName));
+								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
 								productSize += size(file);
 							} else {
-								reporting.intermediate(new ReportingMessage("Product {} is a possible ghost candidate in NRT scenario", productName));
+								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in NRT scenario", productName));
 							}
 
 						} else if (line.contains("FAST24")) {
 							LOGGER.info("Output {} (L0_SLICE FAST24) is considered as belonging to the family {}", productName,
 									ProductFamily.L0_SEGMENT);
 							if (!ghostCandidate) {
-								reporting.intermediate(new ReportingMessage("Product {} is not a possible ghost candidate in FAST scenario", productName));
-								uploadBatch.add(new ObsUploadFile(ProductFamily.L0_SEGMENT, productName, file));
+								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in FAST scenario", productName));
+								uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SEGMENT, productName, file));
 								outputToPublish.add(
 									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24"));
 							} else {
-								reporting.intermediate(new ReportingMessage("Product {} is a possible ghost candidate in FAST scenario", productName));
-								uploadBatch.add(new ObsUploadFile(ProductFamily.GHOST, productName, file));
+								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in FAST scenario", productName));
+								uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
 							}
 							productSize += size(file);
 						} else {
@@ -250,7 +250,7 @@ public class OutputProcessor {
 					} else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(new ObsUploadFile(family, productName, file));
+						uploadBatch.add(new ObsUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode()));
 						productSize += size(file);
@@ -260,26 +260,40 @@ public class OutputProcessor {
 				case L0_ACN:
 				case L0_BLANK:
 					// Specific case of the L0 wrapper
+					// Specific case of the L0 wrapper
+					reporting.begin(new ReportingMessage("Starting ghost candidate detection"));
 					if (appLevel == ApplicationLevel.L0) {
+						boolean ghostCandidate = isGhostCandidate(productName);
 						if (line.contains("NRT")) {
-							LOGGER.info("Output {} is considered as belonging to the family {}", productName,
+							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 									matchOutput.getFamily());
-							uploadBatch.add(new ObsUploadFile(family, productName, file));
-							outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
-							productSize += size(file);
+							if (!ghostCandidate) {
+								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in NRT scenario", productName));
+								uploadBatch.add(new ObsUploadObject(family, productName, file));
+								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
+								productSize += size(file);
+							} else {
+								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in NRT scenario", productName));
+							}
 						} else if (line.contains("FAST24")) {
-							LOGGER.info("Output {} is considered as belonging to the family {}", productName,
+							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 									matchOutput.getFamily());
-							uploadBatch.add(new ObsUploadFile(family, productName, file));
-							outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
-							productSize += size(file);
+							
+							if (!ghostCandidate) {
+								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in FAST scenario", productName));
+								uploadBatch.add(new ObsUploadObject(family, productName, file));
+								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
+								productSize += size(file);
+							} else {
+								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in FAST scenario", productName));
+							}
 						} else {
-							LOGGER.warn("Output {} ignored because unknown mode", productName);
+							LOGGER.warn("Output {} (ACN, BLANK) ignored because unknown mode", productName);
 						}
 					} else {
-						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
+						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(new ObsUploadFile(family, productName, file));
+						uploadBatch.add(new ObsUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode()));
 						productSize += size(file);
@@ -293,7 +307,7 @@ public class OutputProcessor {
 					// upload per batch
 					LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 							matchOutput.getFamily());
-					uploadBatch.add(new ObsUploadFile(family, productName, file));
+					uploadBatch.add(new ObsUploadObject(family, productName, file));
 					outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 							inputMessage.getBody().getProductProcessMode()));
 					productSize += size(file);
@@ -354,23 +368,28 @@ public class OutputProcessor {
 					endDateString);
 			return false;
 		}
-
-		// Now we are also trying to extract the polarisation from the product.
-		Polarisation polarisation = null;
+		
+		// Now we are also trying to extract the acquisition mode from the product.
+		AcquisitionMode acquisitionMode = null;		
 		try {
-			String polarisationStr = productName.substring(4, 6);
-			polarisation = Polarisation.valueOf(polarisationStr);
-			LOGGER.trace("Extracted polarisation from ghost candidate: polarisation {}", polarisation);
+			String acquisitionModeStr = productName.substring(4, 6);
+			
+			// This is a special case for ACN being actual SM
+			if (acquisitionModeStr.matches("S[0-6]")) {
+				acquisitionModeStr = "SM";
+			}
+			acquisitionMode = AcquisitionMode.valueOf(acquisitionModeStr);
+			LOGGER.trace("Extracted acquisition mode from ghost candidate: acquisitionMode={}", acquisitionMode);
 		} catch (IllegalArgumentException ex) {
-			LOGGER.error("Polarisation from product name is not valid: polarisation={}. This is not a ghost candidate.", polarisation);
+			LOGGER.error("Acquisition mode from product name is not valid: acquisitionMode={}. This is not a ghost candidate.", acquisitionMode);
 			return false;
 		}
 
-		LOGGER.info("Information used for ghost candidate detection: duration {}, polarisation {}",
-				duration.getSeconds(), polarisation);
+		LOGGER.info("Information used for ghost candidate detection: duration {}, acquisitionMode {}",
+				duration.getSeconds(), acquisitionMode);
 
 		// if the configured length is smaller than the duration, its a candidate
-		long ghostLength = ghostLength(polarisation);
+		long ghostLength = ghostLength(acquisitionMode);
 		if (duration.getSeconds() <= ghostLength) {
 			LOGGER.info("Ghost length is {}, but duration is {}. This is a ghost candidate!", ghostLength,
 					duration.getSeconds());
@@ -389,7 +408,7 @@ public class OutputProcessor {
 	 * @param polarisation The polarisaton that shall be looked up
 	 * @return Length in seconds when it is decided to be a ghost candidate
 	 */
-	private long ghostLength(Polarisation polarisation) {
+	private long ghostLength(AcquisitionMode polarisation) {
 		switch (polarisation) {
 		case EW:
 			return properties.getThresholdEw();
@@ -466,7 +485,7 @@ public class OutputProcessor {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	final void processProducts(final Reporting.Factory reportingFactory, final List<ObsUploadFile> uploadBatch,
+	final void processProducts(final Reporting.Factory reportingFactory, final List<ObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		double size = Double.valueOf(uploadBatch.size());
@@ -474,8 +493,8 @@ public class OutputProcessor {
 
 		for (int i = 0; i < nbPool; i++) {
 			int lastIndex = Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());
-			List<ObsUploadFile> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
-			String listProducts = sublist.stream().map(ObsUploadFile::getKey).collect(Collectors.joining(","));
+			List<ObsUploadObject> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
+			String listProducts = sublist.stream().map(ObsUploadObject::getKey).collect(Collectors.joining(","));
 
 			if (i > 0) {
 				this.publishAccordingUploadFiles(reportingFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
@@ -487,7 +506,7 @@ public class OutputProcessor {
 				if (Thread.currentThread().isInterrupted()) {
 					throw new InternalErrorException("The current thread as been interrupted");
 				}
-				this.obsClient.uploadFilesPerBatch(sublist);
+				this.obsClient.upload(sublist);
 				report.end(new ReportingMessage("End uploading batch " + i + " of outputs " + listProducts));
 
 			} catch (AbstractCodedException e) {
@@ -577,13 +596,13 @@ public class OutputProcessor {
 		List<String> lines = extractFiles();
 
 		// Sort outputs
-		List<ObsUploadFile> uploadBatch = new ArrayList<>();
+		List<ObsUploadObject> uploadBatch = new ArrayList<>();
 		List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 		List<FileQueueMessage> reportToPublish = new ArrayList<>();
 		
 		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 
-		final String listoutputs = uploadBatch.stream().map(ObsUploadFile::getKey).collect(Collectors.joining(","));
+		final String listoutputs = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.joining(","));
 
 		final Reporting reporting = reportingFactory.newReporting(1);
 		reporting.begin(new ReportingMessage("Start handling of outputs " + listoutputs));

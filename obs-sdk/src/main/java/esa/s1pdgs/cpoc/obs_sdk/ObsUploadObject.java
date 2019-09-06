@@ -24,8 +24,7 @@ public class ObsUploadObject extends ObsObject {
      * @param family
      * @param localPath
      */
-    public ObsUploadObject(final String key, final ProductFamily family,
-            final File file) {
+    public ObsUploadObject(final ProductFamily family, final String key, final File file) {
         super(family, key);
         this.file = file;
     }

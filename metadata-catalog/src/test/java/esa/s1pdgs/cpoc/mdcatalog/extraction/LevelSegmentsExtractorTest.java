@@ -10,12 +10,15 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -35,6 +38,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class LevelSegmentsExtractorTest {
@@ -213,14 +217,15 @@ public class LevelSegmentsExtractorTest {
         FileUtils.delete("./test/workDir2");
     }
 
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testExtractMetadataL0Segment()
             throws MetadataExtractionException, AbstractCodedException {
 
-        File file = new File((new File("./test/workDir/")).getAbsolutePath()
+        List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath()
                 + File.separator
                 + "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE"
-                + File.separator + "manifest.safe");
+                + File.separator + "manifest.safe"));
 
         inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
                 new ProductDto(
@@ -228,8 +233,7 @@ public class LevelSegmentsExtractorTest {
                         "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
                         ProductFamily.L0_SEGMENT, "FAST"));
 
-        doReturn(file).when(obsClient).downloadFile(Mockito.any(),
-                Mockito.anyString(), Mockito.anyString());
+        doReturn(files).when(obsClient).download(Mockito.anyList());
 
         OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -252,7 +256,7 @@ public class LevelSegmentsExtractorTest {
         descriptor.setMode("FAST");
 
         JSONObject expected = extractor.mdBuilder
-                .buildL0SegmentOutputFileMetadata(descriptor, file);
+                .buildL0SegmentOutputFileMetadata(descriptor, files.get(0));
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
         
         JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
@@ -263,11 +267,10 @@ public class LevelSegmentsExtractorTest {
             }
         }
 
-        verify(obsClient, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L0_SEGMENT),
-                Mockito.eq(
-                        "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe"),
-                Mockito.eq(extractor.localDirectory));
+        verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+        		new ObsDownloadObject(ProductFamily.L0_SEGMENT,
+        		"S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe",
+                extractor.localDirectory))));
 
     }
 

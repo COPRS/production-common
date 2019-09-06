@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -65,7 +66,7 @@ public class FileDownloader {
 
 		// Create necessary directories and download input with content in
 		// message
-		ObsDownloadFile inputProduct = buildInput();
+		ObsDownloadObject inputProduct = buildInput();
 
 		final Reporting reporting = new LoggerReporting.Factory("FileDownloader").newReporting(0);
 
@@ -101,7 +102,7 @@ public class FileDownloader {
 	 * @throws InternalErrorException
 	 * @throws UnknownFamilyException
 	 */
-	protected ObsDownloadFile buildInput() throws InternalErrorException, UnknownFamilyException {
+	protected ObsDownloadObject buildInput() throws InternalErrorException, UnknownFamilyException {
 		LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 		
 		if (job.getProductName() == null) {
@@ -110,7 +111,7 @@ public class FileDownloader {
 
 		String targetFile = this.localWorkingDir+"/"+job.getProductName();
 		LOGGER.info("Input {} will be stored in {}", job.getProductName(), targetFile);
-		return new ObsDownloadFile(job.getFamily(), job.getProductName(),targetFile);
+		return new ObsDownloadObject(job.getFamily(), job.getProductName(),targetFile);
 
 	}
 
@@ -121,9 +122,9 @@ public class FileDownloader {
 	 * @param inputProduct
 	 * @throws AbstractCodedException
 	 */
-	private final void downloadInputs(final ObsDownloadFile inputProduct) throws AbstractCodedException {
+	private final void downloadInputs(final ObsDownloadObject inputProduct) throws AbstractCodedException {
 		LOGGER.info("4 - Starting downloading input product {}", inputProduct);
-		this.obsClient.downloadFile(inputProduct.getFamily(), inputProduct.getKey(), inputProduct.getTargetDir());
+		this.obsClient.download(Arrays.asList(new ObsDownloadObject(inputProduct.getFamily(), inputProduct.getKey(), inputProduct.getTargetDir())));
 	}
 
 	private final long getWorkdirSize() throws InternalErrorException {

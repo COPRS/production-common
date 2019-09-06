@@ -3,30 +3,36 @@ package esa.s1pdgs.cpoc.obs_sdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
- * Test the object S3DownloadFile
+ * Test the object S3CustomObject
  * 
  * @author Viveris Technologies
  */
-public class ObsDownloadFileTest {
+public class ObsUploadObjectTest {
+
+    /**
+     * File
+     */
+    private static final File FILE = new File("test-file");
 
     /**
      * Test constructors
      */
     @Test
     public void testConstructors() {
-        ObsDownloadFile obj = new ObsDownloadFile(ProductFamily.AUXILIARY_FILE,
-                "key-obs", "target-dir");
+        ObsUploadObject obj =
+                new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key-obs", FILE);
         assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
         assertEquals("key-obs", obj.getKey());
-        assertEquals("target-dir", obj.getTargetDir());
+        assertEquals(FILE, obj.getFile());
     }
 
     /**
@@ -34,12 +40,12 @@ public class ObsDownloadFileTest {
      */
     @Test
     public void testToString() {
-        ObsDownloadFile obj = new ObsDownloadFile(ProductFamily.L0_SLICE,
-                "key-obs", "target-dir");
+    	ObsUploadObject obj =
+                new ObsUploadObject(ProductFamily.L0_SLICE, "key-obs", FILE);
         String str = obj.toString();
         assertTrue(str.contains("family: L0_SLICE"));
         assertTrue(str.contains("key: key-obs"));
-        assertTrue(str.contains("targetDir: target-dir"));
+        assertTrue(str.contains("file: " + FILE));
     }
 
     /**
@@ -47,7 +53,7 @@ public class ObsDownloadFileTest {
      */
     @Test
     public void testEquals() {
-        EqualsVerifier.forClass(ObsDownloadFile.class).usingGetClass()
+        EqualsVerifier.forClass(ObsUploadObject.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 
