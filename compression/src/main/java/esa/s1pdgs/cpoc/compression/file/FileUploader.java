@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.compression.file;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -80,13 +81,13 @@ public class FileUploader {
 						
 			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getFamily());
 			ProductFamily zipProductFamily = getCompressedProductFamily(job.getFamily());
-			ObsUploadFile uploadFile = new ObsUploadFile(zipProductFamily, zipFileName, productPath);
+			ObsUploadObject uploadObject = new ObsUploadObject(zipProductFamily, zipFileName, productPath);
 			
 			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName,zipFileName);
 			outputToPublish.add(cpqm);
 			
 //// 			// Upload per batch the output
-			processProducts(reportingFactory, uploadFile, outputToPublish);
+			processProducts(reportingFactory, uploadObject, outputToPublish);
 
  	        reporting.endWithTransfer("End uploading " + zipFileName, productPath.length());
 		} catch (AbstractCodedException e) {
@@ -99,13 +100,13 @@ public class FileUploader {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
-	final void processProducts(final Reporting.Factory reportingFactory, final ObsUploadFile uploadFile,
+	final void processProducts(final Reporting.Factory reportingFactory, final ObsUploadObject uploadFile,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		this.obsClient.uploadFile(uploadFile.getFamily(), uploadFile.getKey(), uploadFile.getFile());
+		obsClient.upload(Arrays.asList(new ObsUploadObject(uploadFile.getFamily(), uploadFile.getKey(), uploadFile.getFile())));
 
 
 		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
