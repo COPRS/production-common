@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
@@ -172,7 +172,7 @@ public class OutputProcessor {
 	 * @param reportToPublish
 	 * @throws UnknownFamilyException
 	 */
-	final long sortOutputs(final List<String> lines, final List<ObsUploadFile> uploadBatch,
+	final long sortOutputs(final List<String> lines, final List<ObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish, final List<FileQueueMessage> reportToPublish, Reporting.Factory reportingFactory)
 			throws AbstractCodedException {
 
@@ -224,7 +224,7 @@ public class OutputProcessor {
 							 */
 							if (!ghostCandidate) {
 								reporting.intermediate("Product {} is not a ghost candidate in NRT scenario", productName);
-								uploadBatch.add(new ObsUploadFile(family, productName, file));
+								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
 								productSize += size(file);
 							} else {
@@ -236,12 +236,12 @@ public class OutputProcessor {
 									ProductFamily.L0_SEGMENT);
 							if (!ghostCandidate) {
 								reporting.intermediate("Product {} is not a ghost candidate in FAST scenario", productName);
-								uploadBatch.add(new ObsUploadFile(ProductFamily.L0_SEGMENT, productName, file));
+								uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SEGMENT, productName, file));
 								outputToPublish.add(
 									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24"));
 							} else {
 								reporting.intermediate("Product {} is a ghost candidate in FAST scenario", productName);
-								uploadBatch.add(new ObsUploadFile(ProductFamily.GHOST, productName, file));
+								uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
 							}
 							productSize += size(file);
 						} else {
@@ -250,7 +250,7 @@ public class OutputProcessor {
 					} else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(new ObsUploadFile(family, productName, file));
+						uploadBatch.add(new ObsUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode()));
 						productSize += size(file);
@@ -268,7 +268,7 @@ public class OutputProcessor {
 									matchOutput.getFamily());
 							if (!ghostCandidate) {
 								reporting.intermediate("Product {} is not a ghost candidate in NRT scenario", productName);
-								uploadBatch.add(new ObsUploadFile(family, productName, file));
+								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
 								productSize += size(file);
 							} else {
@@ -280,7 +280,7 @@ public class OutputProcessor {
 							
 							if (!ghostCandidate) {
 								reporting.intermediate("Product {} is not a ghost candidate in FAST scenario", productName);
-								uploadBatch.add(new ObsUploadFile(family, productName, file));
+								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
 								productSize += size(file);
 							} else {
@@ -292,7 +292,7 @@ public class OutputProcessor {
 					} else {
 						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(new ObsUploadFile(family, productName, file));
+						uploadBatch.add(new ObsUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode()));
 						productSize += size(file);
@@ -306,7 +306,7 @@ public class OutputProcessor {
 					// upload per batch
 					LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 							matchOutput.getFamily());
-					uploadBatch.add(new ObsUploadFile(family, productName, file));
+					uploadBatch.add(new ObsUploadObject(family, productName, file));
 					outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 							inputMessage.getBody().getProductProcessMode()));
 					productSize += size(file);
@@ -484,7 +484,7 @@ public class OutputProcessor {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	final void processProducts(final Reporting.Factory reportingFactory, final List<ObsUploadFile> uploadBatch,
+	final void processProducts(final Reporting.Factory reportingFactory, final List<ObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		double size = Double.valueOf(uploadBatch.size());
@@ -492,8 +492,8 @@ public class OutputProcessor {
 
 		for (int i = 0; i < nbPool; i++) {
 			int lastIndex = Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());
-			List<ObsUploadFile> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
-			String listProducts = sublist.stream().map(ObsUploadFile::getKey).collect(Collectors.joining(","));
+			List<ObsUploadObject> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
+			String listProducts = sublist.stream().map(ObsUploadObject::getKey).collect(Collectors.joining(","));
 
 			if (i > 0) {
 				this.publishAccordingUploadFiles(reportingFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
@@ -595,13 +595,13 @@ public class OutputProcessor {
 		List<String> lines = extractFiles();
 
 		// Sort outputs
-		List<ObsUploadFile> uploadBatch = new ArrayList<>();
+		List<ObsUploadObject> uploadBatch = new ArrayList<>();
 		List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 		List<FileQueueMessage> reportToPublish = new ArrayList<>();
 		
 		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 
-		final String listoutputs = uploadBatch.stream().map(ObsUploadFile::getKey).collect(Collectors.joining(","));
+		final String listoutputs = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.joining(","));
 
 		final Reporting reporting = reportingFactory.newReporting(1);
 		reporting.begin("Start handling of outputs " + listoutputs);

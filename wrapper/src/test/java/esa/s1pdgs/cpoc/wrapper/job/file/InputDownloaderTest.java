@@ -4,15 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -26,7 +26,7 @@ import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
 
@@ -71,7 +71,8 @@ public class InputDownloaderTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(this.obsClient).download(Mockito.any());
+        
+        doReturn(Collections.emptyList()).when(this.obsClient).download(Mockito.any());
         doNothing().when(this.poolProcessorExecutor)
                 .setActive(Mockito.anyBoolean());
 
@@ -92,11 +93,10 @@ public class InputDownloaderTest {
      */
     @Test
     public void testSortInputs() throws AbstractCodedException, IOException {
-
         dtol0.addInput(TestUtils.buildBlankInputDto());
 
-        List<ObsDownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
-        List<ObsDownloadFile> result = downloaderL0.sortInputs();
+        List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
+        List<ObsDownloadObject> result = downloaderL0.sortInputs();
 
         // Check work directory and subdirectories are created     
         
@@ -143,7 +143,7 @@ public class InputDownloaderTest {
 
         downloaderL0.processInputs();
 
-        List<ObsDownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
+        List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
 
         // Check work directory and subdirectories are created
         assertTrue(workDirectory.isDirectory());
@@ -178,7 +178,7 @@ public class InputDownloaderTest {
             throws AbstractCodedException, IOException {
         downloaderL1.processInputs();
 
-        List<ObsDownloadFile> downloadToBatch = TestUtils.getL0DownloadFile();
+        List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
 
         // Check work directory and subdirectories are created
         assertTrue(workDirectory.isDirectory());
