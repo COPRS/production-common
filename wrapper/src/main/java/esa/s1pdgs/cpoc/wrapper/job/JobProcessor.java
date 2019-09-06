@@ -37,6 +37,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
 import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
@@ -185,7 +186,7 @@ public class JobProcessor {
 
 		// Everything is fine with the request, we can start processing it.
 		final Reporting report = reportingFactory.newReporting(0);
-		report.begin("Start job processing");
+		report.begin(new ReportingMessage("Start job processing"));
 
 		File workdir = new File(job.getWorkDirectory());
 		// Clean up the working directory with all of its content
@@ -217,7 +218,7 @@ public class JobProcessor {
 		// ----------------------------------------------------------
 		processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, report);
 
-		report.end("End job processing");
+		report.end(new ReportingMessage("End job processing"));
 	}
 
 	/**
@@ -295,7 +296,7 @@ public class JobProcessor {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
-            report.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
             
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
             
@@ -307,7 +308,7 @@ public class JobProcessor {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ErrorCode.INTERNAL_ERROR.getCode(),
                     properties.getLevel());
-            report.error("Interrupted job processing");
+            report.error(new ReportingMessage("Interrupted job processing"));
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
         } finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);

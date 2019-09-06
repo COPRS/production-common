@@ -42,6 +42,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
 public class DisseminationService implements MqiListener<ProductDto> {	
@@ -122,14 +123,13 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		
 		final Reporting.Factory rf = new LoggerReporting.Factory("Dissemination");
 		final Reporting reporting = rf.newReporting(0);
-		reporting.begin("Start dissemination of product to outbox " + target);
+		reporting.begin(new ReportingMessage("Start dissemination of product to outbox {}", target) );
 		try {
 			assertExists(product);
 			final OutboxClient outboxClient = clientForTarget(target);
 
 			final Reporting reportingDl = rf.newReporting(1);
-			reportingDl.begin("Start downloading file from OBS " + product.getKeyObjectStorage() + 
-					" to " + target);
+			reportingDl.begin(new ReportingMessage("Start downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
 			try {
 				Retries.performWithRetries(
 						() -> {
@@ -140,11 +140,10 @@ public class DisseminationService implements MqiListener<ProductDto> {
 						properties.getMaxRetries(), 
 						properties.getTempoRetryMs()
 				);
-				reportingDl.end("End downloading file from OBS " + product.getKeyObjectStorage() + 
-						" to " + target);
+				reportingDl.end(new ReportingMessage("End downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
 			} catch (Exception e) {
-				reportingDl.error("Error downloading file from OBS {} to {}: {} ", 
-						product.getKeyObjectStorage(), target, LogUtils.toString(e));
+				reportingDl.error(new ReportingMessage("Error downloading file from OBS {} to {}: {} ", 
+						product.getKeyObjectStorage(), target, LogUtils.toString(e)));
 				throw e;
 			}							
 		} catch (Exception e) {					
@@ -155,7 +154,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 					errMessage
 			);
 			LOG.error(messageString,e);
-			reporting.error(messageString);									
+			reporting.error(new ReportingMessage(messageString));									
 			errorAppender.send(new FailedProcessingDto(
 					properties.getHostname(), 
 					new Date(), 
@@ -164,7 +163,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			));									
 			throw new RuntimeException(messageString, e);
 		} 
-		reporting.end("End dissemination of product to outbox " + target);
+		reporting.end(new ReportingMessage("End dissemination of product to outbox {}", target));
 	}
 
 	final void assertExists(final ProductDto product) throws ObsServiceException, SdkClientException {

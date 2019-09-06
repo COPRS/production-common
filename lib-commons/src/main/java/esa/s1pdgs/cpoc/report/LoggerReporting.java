@@ -47,54 +47,48 @@ public final class LoggerReporting implements Reporting  {
 	}
 
 	@Override
-	public final void begin(final String comment, final Object... objects)
+	public final void begin(final ReportingMessage reportingMessage)
 	{
 		actionStart = System.currentTimeMillis();
-		report(Level.INFO, Event.begin, comment, objects);	
+		report(Level.INFO, Event.begin, reportingMessage);	
 	}
 	
 	@Override
-	public final void intermediate(final String comment, final Object... objects)
+	public final void intermediate(final ReportingMessage reportingMessage)
 	{
-		report(Level.DEBUG, Event.intermediate, comment, objects);	
+		report(Level.DEBUG, Event.intermediate, reportingMessage);	
 	}
 	
 	@Override
-	public final void end(final String comment, final Object... objects) {
+	public final void end(final ReportingMessage reportingMessage) {
 		final long deltaTMillis =  System.currentTimeMillis() - actionStart;
-		report(Level.INFO, Event.end, additionalJsonFields(0, deltaTMillis, 0L), comment, objects);	
-	}
-	
-	@Override
-	public void endWithTransfer(final String comment, final long transferAmount, final Object... objects) {		
-		final long deltaTMillis = System.currentTimeMillis() - actionStart;
-		report(Level.INFO, Event.end, additionalJsonFields(0, deltaTMillis, transferAmount), comment, objects);
+		report(Level.INFO, Event.end, additionalJsonFields(0, deltaTMillis, reportingMessage.getTransferAmount()), reportingMessage);	
 	}
 
 	@Override
-	public final void error(final String comment, final Object... objects) {
+	public final void error(final ReportingMessage reportingMessage) {
 		final long deltaTMillis = System.currentTimeMillis() - actionStart;		
-		report(Level.ERROR, Event.end, additionalJsonFields(1, deltaTMillis, 0L), comment, objects);	
+		report(Level.ERROR, Event.end, additionalJsonFields(1, deltaTMillis, 0L), reportingMessage);	
 	}
 	
-	final void report(final Level level, final Event thisEvent, final Map<String,String> addProps, final String message, final Object... objects) {	
+	final void report(final Level level, final Event thisEvent, final Map<String,String> addProps, final ReportingMessage reportingMessage) {	
 		for (final Map.Entry<String,String> entry : addProps.entrySet()) {
 			ThreadContext.put(entry.getKey(), entry.getValue());	
 		}		
 		ThreadContext.put("jsonAdditional", toJson(addProps));		
-		report(level, thisEvent, message, objects);	
+		report(level, thisEvent, reportingMessage);	
 		ThreadContext.remove("jsonAdditional");
 		for (final String key : addProps.keySet()) {
 			ThreadContext.remove(key);
 		}	
 	}
 		
-	final void report(final Level level, final Event thisEvent, final String message, final Object... objects) {		
+	final void report(final Level level, final Event thisEvent, final ReportingMessage reportingMessage) {		
 		ThreadContext.put("uid", uid);
 		ThreadContext.put("taskName", taskName);
 		ThreadContext.put("step", Integer.toString(step));
 		ThreadContext.put("event", thisEvent.toString());
-		logger.log(level, message, objects);
+		logger.log(level, reportingMessage.getMessage(), reportingMessage.getArgs());
 		ThreadContext.remove("uid");
 		ThreadContext.remove("taskName");
 		ThreadContext.remove("step");

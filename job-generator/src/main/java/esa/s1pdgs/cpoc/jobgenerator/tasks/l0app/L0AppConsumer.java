@@ -31,6 +31,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
     
@@ -95,7 +96,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                     throw new InvalidFormatProduct("Invalid channel identifier "
                             + leveldto.getChannelId());
                 }
-                reporting.begin("Start job generation using " + mqiMessage.getBody().getKeyObjectStorage());
+                reporting.begin(new ReportingMessage("Start job generation using  {}", mqiMessage.getBody().getKeyObjectStorage()));
                 
                 AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
                 LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
@@ -126,7 +127,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                         step, productName, ace.getCode().getCode(),
                         ace.getLogMessage());
                 
-                reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+                reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
                 
                 failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
             }  
@@ -138,7 +139,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,
                     leveldto.getKeyObjectStorage());
             
-            reporting.end("End job generation using " + mqiMessage.getBody().getKeyObjectStorage());
+            reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getKeyObjectStorage()));
         }
 
     }

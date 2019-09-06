@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;;
 
 public abstract class AbstractFileProcessor<T> {
@@ -111,7 +112,7 @@ public abstract class AbstractFileProcessor<T> {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Ingestion");
 
 		final Reporting reportProcessing = reportingFactory.newReporting(0);
-		reportProcessing.begin(String.format("Start processing of %s", file.getName()));
+		reportProcessing.begin(new ReportingMessage("Start processing of {}", file.getName()));
 		this.appStatus.setProcessing(family);
 
 		try {
@@ -128,7 +129,7 @@ public abstract class AbstractFileProcessor<T> {
 				LOGGER.warn("failed to backup file {}, not deleted", file.getName());
 			}
 		}
-		reportProcessing.end(String.format("End processing of %s", file.getName()));
+		reportProcessing.end(new ReportingMessage("End processing of {}", file.getName()));
 		this.appStatus.setWaiting();
 	}
 
@@ -139,29 +140,29 @@ public abstract class AbstractFileProcessor<T> {
 		try {
 			FileDescriptor descriptor = extractor.extractDescriptor(file);
 			productName = descriptor.getProductName();
-			reportUpload.begin("Start uploading file " + file.getName() + " in OBS");
+			reportUpload.begin(new ReportingMessage("Start uploading file {} in OBS", file.getName()));
 
 			// Store in object storage
 			upload(file, productName, descriptor);
-			reportUpload.end("End uploading file " + file.getName() + " in OBS");
+			reportUpload.end(new ReportingMessage("End uploading file {} in OBS", file.getName()));
 
 			// Send metadata
 			publish(reportingFactory, productName, descriptor);
 
 		} catch (IngestorIgnoredFileException e) {
-			reportProcessing.intermediate("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportProcessing.intermediate(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		} catch (ObsAlreadyExist e) {
-			reportUpload.error("file {} already exist in OBS", file.getName());
+			reportUpload.error(new ReportingMessage("file {} already exist in OBS", file.getName()));
 			throw e;
 		} catch (ObsException e) {
-			reportUpload.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportUpload.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		} catch (SdkClientException e) {
-			reportUpload.error("[code {}] {}", AbstractCodedException.ErrorCode.OBS_ERROR, e.getMessage());
+			reportUpload.error(new ReportingMessage("[code {}] {}", AbstractCodedException.ErrorCode.OBS_ERROR, e.getMessage()));
 			throw e;
 		} catch (AbstractCodedException e) {
-			reportUpload.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportUpload.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	}
@@ -176,12 +177,12 @@ public abstract class AbstractFileProcessor<T> {
 	private final void publish(final Reporting.Factory reportingFactory, final String productName, final FileDescriptor descriptor) throws MqiPublicationError {
 		if (descriptor.isHasToBePublished()) {			
 			final Reporting reportPublish= reportingFactory.newReporting(2);	
-			reportPublish.begin("Start publishing file in topic");		    
+			reportPublish.begin(new ReportingMessage("Start publishing file in topic"));		    
 			try {
 				publisher.send(buildDto(descriptor));
-				reportPublish.end("End publishing file in topic");
+				reportPublish.end(new ReportingMessage("End publishing file in topic"));
 			} catch (MqiPublicationError e) {
-				reportPublish.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				reportPublish.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 				throw e;
 			}
 		}
@@ -189,7 +190,7 @@ public abstract class AbstractFileProcessor<T> {
 	
 	private void copyToBackupDirectory(final Reporting.Factory reportingFactory, final File file) throws IOException {
 		final Reporting reportBackup = reportingFactory.newReporting(3);
-		reportBackup.begin(String.format("Start copying file %s to %s", file.getName(), backupDirectory));
+		reportBackup.begin(new ReportingMessage("Start copying file {} to {}", file.getName(), backupDirectory));
 		try {
 			Path pickupPath = new File(pickupDirectory).toPath();
 			Path backupPath = new File(backupDirectory).toPath();
@@ -200,23 +201,23 @@ public abstract class AbstractFileProcessor<T> {
 			TreeCopier tc = new TreeCopier(dirToCopy, target, true, false);
 			Files.walkFileTree(dirToCopy, tc);
 			
-			reportBackup.end(String.format("End copying file %s to %s", file.getName(), backupDirectory));
+			reportBackup.end(new ReportingMessage("End copying file {} to {}", file.getName(), backupDirectory));
 		} catch (IOException e) {
-			reportBackup.error(
-					"Error copying file {} to {}: {}", file.getName(), backupDirectory, LogUtils.toString(e));
+			reportBackup.error(new ReportingMessage(
+					"Error copying file {} to {}: {}", file.getName(), backupDirectory, LogUtils.toString(e)));
 			throw e;
 		}
 	}
 
 	private final void delete(final Reporting.Factory reportingFactory, final File file, int reportingStep) {
 		final Reporting reportDelete = reportingFactory.newReporting(reportingStep);
-		reportDelete.begin("Start removing file " + file.getName());
+		reportDelete.begin(new ReportingMessage("Start removing file {}", file.getName()));
 		try {
 			Files.delete(Paths.get(file.getPath()));
-			reportDelete.end("End removing file " + file.getName());
+			reportDelete.end(new ReportingMessage("End removing file {}", file.getName()));
 		} catch (Exception e) {
-			reportDelete.error("[code {}] file {} cannot be removed from FTP storage: {}",
-					AbstractCodedException.ErrorCode.INGESTOR_CLEAN.getCode(), file.getPath(), LogUtils.toString(e));
+			reportDelete.error(new ReportingMessage("[code {}] file {} cannot be removed from FTP storage: {}",
+					AbstractCodedException.ErrorCode.INGESTOR_CLEAN.getCode(), file.getPath(), LogUtils.toString(e)));
 			this.appStatus.setError(family);
 		}
 	}

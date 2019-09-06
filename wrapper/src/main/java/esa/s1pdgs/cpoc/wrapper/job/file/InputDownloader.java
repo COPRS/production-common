@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadFile;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
 
 /**
@@ -132,16 +133,16 @@ public class InputDownloader {
         }        
         final String listinputs = stringBuilder.toString().trim();
   
-        reporting.begin("Start download of products " + listinputs);
+        reporting.begin(new ReportingMessage("Start download of products {}", listinputs));
 
         // Download input from object storage in batch
         try {
 			downloadInputs(downloadToBatch);
 			 // Complete download
 	        completeDownload();	      	
-	        reporting.endWithTransfer("End download of products " + listinputs, getWorkdirSize());			
+	        reporting.end(new ReportingMessage(getWorkdirSize(), "End download of products {}", listinputs));			
 		} catch (AbstractCodedException e) {
-			reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}       
     }
