@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.queuewatcher.kafka;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -49,10 +50,10 @@ public class KafkaLoggerService {
 				LOGGER.info("Received message from topic {}: {} ", topic, record.value());
 
 				String fileName = properties.getKafkaFolder() + "/kafka-" + topic;
-				FileWriter writer = null;
+				BufferedWriter writer = null;
 				try {
-					writer = new FileWriter(new File(fileName));
-					writer.append(record.value());
+					writer = new BufferedWriter(new FileWriter(new File(fileName),true));
+					writer.write(record.value());
 				} catch (IOException ex) {
 					LOGGER.error("An IO error occured while accessing {}", fileName);
 				} finally {
