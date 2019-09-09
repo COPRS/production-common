@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
@@ -106,7 +107,7 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
-		uut.upload(Arrays.asList(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, testDirectoryName, testDirectory)));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
@@ -168,6 +169,33 @@ public class SwiftObsClientIT {
 		assertEquals(send1, received1);
 	}
 
+	@Test
+	public void downloadForDirectoryTest() throws IOException, SdkClientException, AbstractCodedException {	
+		// upload
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName2)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		
+		// multi file download
+		String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
+		uut.download(Arrays.asList(new ObsDownloadObject(auxiliaryFiles, testDirectoryName + "/", targetDir)));
+
+		System.out.println(new File(testDirectory, testFileName1).toPath());
+		String send1 = new String(Files.readAllBytes(new File(testDirectory, testFileName1).toPath()));
+		String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testDirectoryName + "/" + testFileName1)).toPath()));
+		assertEquals(send1, received1);
+		
+		String send2 = new String(Files.readAllBytes(new File(testDirectory, testFileName2).toPath()));
+		String received2 = new String(Files.readAllBytes((new File(targetDir + "/" + testDirectoryName + "/" + testFileName2)).toPath()));
+		assertEquals(send2, received2);
+		
+		assertFalse(new File(targetDir + "/" + testDirectoryName + ".md5sum").exists());
+	}
+	
 	@Test
 	public void numberOfObjectsWithoutPrefixTest() throws ObsException, IOException, SdkClientException {	
 		// upload
