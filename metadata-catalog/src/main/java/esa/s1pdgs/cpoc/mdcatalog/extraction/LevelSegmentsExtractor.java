@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +32,10 @@ import esa.s1pdgs.cpoc.report.Reporting;
  */
 @Service
 public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> {
+	
+	private static final Logger LOGGER = LogManager.getLogger(LevelSegmentsExtractor.class);
+
+	
     /**
      * Pattern for configuration files to extract data
      */
@@ -100,10 +106,14 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> {
         
         final File metadataFile = download(reportingFactory, obsClient, family, productName, keyObs);  
 
+        LOGGER.debug("segment metadata file dowloaded:{} for product: {}",metadataFile.getAbsolutePath(),productName);
+        
     	final OutputFileDescriptor l0SegmentDesc = extractFromFilename(
     			reportingFactory, 
     			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, dto, dto.getFamily())
     	);
+    	LOGGER.debug("OutputFileDescriptor:{} for product: {}",l0SegmentDesc.toString(),productName);
+    	
     	return extractFromFile(
     			reportingFactory, 
     			() -> mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc, metadataFile)
