@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.queuewatcher.kafka;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -28,7 +29,7 @@ public class KafkaLoggerService {
 	@Autowired
 	private ApplicationProperties properties;
 	
-	private List<ConcurrentMessageListenerContainer<String, String>> containers;
+	private List<ConcurrentMessageListenerContainer<String, String>> containers = new ArrayList<>();
 
 	@Autowired
 	public KafkaLoggerService(final ConsumerFactory<String, String> factory) {
