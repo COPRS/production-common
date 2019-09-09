@@ -170,6 +170,7 @@ public abstract class GenericExtractor<T> {
         try { 	
         	
             final JSONObject metadata = extractMetadata(reportingFactory, message);
+        	LOGGER.debug("Metadata extracted :{} for product: {}",metadata,productName);
             if (!metadata.has("insertionTime")) {
             	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
             }
