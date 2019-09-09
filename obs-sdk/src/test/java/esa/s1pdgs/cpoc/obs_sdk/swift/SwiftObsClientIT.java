@@ -72,12 +72,12 @@ public class SwiftObsClientIT {
 			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFilePrefix + testFileName2);
 		}
 
-		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName1))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + testFileName1);
+		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1))) {
+			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
 		}
 
-		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName2))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + testFileName2);
+		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2))) {
+			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum"))) {
