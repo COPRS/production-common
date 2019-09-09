@@ -22,10 +22,14 @@ public interface Reporting {
 	public static final Logger REPORT_LOG = LogManager.getLogger(Reporting.class); 
 
 	void begin(ReportingMessage reportingMessage);
+	
+	void begin(ReportingInput input, ReportingMessage reportingMessage);
 
 	void intermediate(ReportingMessage reportingMessage);
 
 	void end(ReportingMessage reportingMessage);
+	
+	void end(ReportingOutput output, ReportingMessage reportingMessage);
 
 	void error(ReportingMessage reportingMessage);
 

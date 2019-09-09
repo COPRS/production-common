@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.report;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,6 +14,10 @@ public class FilenameReportingInput implements ReportingInput {
 	public FilenameReportingInput(List<String> filenames) {
 		this.filenames = filenames;
 	}
+	
+	public FilenameReportingInput(String ... filenames) {
+		this(Arrays.asList(filenames));
+	}	
 	
 	public FilenameReportingInput() {
 		this(Collections.emptyList());

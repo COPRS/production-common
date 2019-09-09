@@ -54,11 +54,21 @@ public final class LoggerReporting implements Reporting  {
 		this.taskName = taskName;
 		this.step = step;
 	}
-
+	
 	@Override
 	public final void begin(final ReportingMessage reportingMessage) {
+		begin(ReportingInput.NULL, reportingMessage);
+	}
+	
+	@Override
+	public final void end(final ReportingMessage reportingMessage) {
+		end(ReportingOutput.NULL, reportingMessage);
+	}
+
+	@Override
+	public final void begin(final ReportingInput in, final ReportingMessage reportingMessage) {
 		actionStart = System.currentTimeMillis();
-		report(Level.INFO, Event.begin, Collections.singletonMap("input", reportingMessage.getInput()), reportingMessage);	
+		report(Level.INFO, Event.begin, Collections.singletonMap("input", in), reportingMessage);	
 	}
 	
 	@Override
@@ -67,15 +77,15 @@ public final class LoggerReporting implements Reporting  {
 	}
 	
 	@Override
-	public final void end(final ReportingMessage reportingMessage) {
+	public final void end(final ReportingOutput out, final ReportingMessage reportingMessage) {
 		final long deltaTMillis =  System.currentTimeMillis() - actionStart;		
-		report(Level.INFO, Event.end, additionalEndJsonFields(0, deltaTMillis, reportingMessage.getTransferAmount(), reportingMessage.getOutput()), reportingMessage);	
+		report(Level.INFO, Event.end, additionalEndJsonFields(0, deltaTMillis, reportingMessage.getTransferAmount(), out), reportingMessage);	
 	}
 
 	@Override
 	public final void error(final ReportingMessage reportingMessage) {
 		final long deltaTMillis = System.currentTimeMillis() - actionStart;		
-		report(Level.ERROR, Event.end, additionalEndJsonFields(1, deltaTMillis, 0L, reportingMessage.getOutput()), reportingMessage);	
+		report(Level.ERROR, Event.end, additionalEndJsonFields(1, deltaTMillis, 0L, ReportingOutput.NULL), reportingMessage);	
 	}
 	
 	final void report(final Level level, final Event thisEvent, final Map<String,Object> addProps, final ReportingMessage reportingMessage) {	
