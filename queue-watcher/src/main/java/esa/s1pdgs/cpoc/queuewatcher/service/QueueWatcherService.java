@@ -107,7 +107,7 @@ public class QueueWatcherService {
 		            LOGGER.trace(" No message received: continue");
 		            return;
 		        }
-			LOGGER.info("reveived {}: {}", category, message.getBody().getProductName());
+			LOGGER.info("received {}: {}", category, message.getBody().getProductName());
 			writeCSV(DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()),  message.getBody().getProductName());
 			this.service.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true), category);
 
