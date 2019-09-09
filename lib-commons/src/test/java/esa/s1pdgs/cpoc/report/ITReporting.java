@@ -12,9 +12,9 @@ public final class ITReporting {
 		
 		final Reporting uut= new LoggerReporting.Factory("test").newReporting(0);
 		
-		uut.begin("Foo");		
-		uut.intermediate("bar");
-		uut.endWithTransfer("baz", 42000);	
+		uut.begin(new ReportingMessage("Foo"));		
+		uut.intermediate(new ReportingMessage("bar"));
+		uut.end(new ReportingMessage(42000L, "baz"));	
 		
 		LOG.debug("foo bar");
 	}

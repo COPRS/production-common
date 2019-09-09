@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class FileDownloader {
 	/**
@@ -69,14 +70,14 @@ public class FileDownloader {
 
 		final Reporting reporting = new LoggerReporting.Factory("FileDownloader").newReporting(0);
 
-		reporting.begin("Start download of product to compress " + inputProduct);
+		reporting.begin(new ReportingMessage("Start download of product to compress {}", inputProduct));
 
 		// Download input from object storage in batch
 		try {
 			downloadInputs(inputProduct);
-			reporting.endWithTransfer("End download of products " + inputProduct, getWorkdirSize());
+			reporting.end(new ReportingMessage(getWorkdirSize(), "End download of products {}", inputProduct));
 		} catch (AbstractCodedException e) {
-			reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	}

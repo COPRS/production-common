@@ -28,6 +28,7 @@ public class ObsAdapter {
 	
 	public final void upload(final ProductFamily family, final File file) {
 		final String obsKey = toObsKey(file);
+		
 		try {
 			if (!obsClient.exists(new ObsObject(family, obsKey))) {
 				obsClient.upload(Arrays.asList(new ObsUploadObject(family, obsKey, file)));

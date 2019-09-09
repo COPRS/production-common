@@ -32,6 +32,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
@@ -196,9 +197,8 @@ public class OutputProcessor {
 				ProductFamily family = ProductFamily.fromValue(matchOutput.getFamily());
 
 				final File file = new File(filePath);
-				
 				final Reporting reporting = reportingFactory.newReporting(0);
-
+				
 				switch (family) {
 				case L0_REPORT:
 				case L1_REPORT:
@@ -210,8 +210,8 @@ public class OutputProcessor {
 					reportToPublish.add(new FileQueueMessage(family, productName, file));
 					productSize += size(file);
 					break;
-				case L0_SLICE:
-					reporting.begin("Starting ghost candidate detection");
+				case L0_SLICE:		
+					reporting.begin(new ReportingMessage("Starting ghost candidate detection"));
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
 						boolean ghostCandidate = isGhostCandidate(productName);
@@ -223,24 +223,24 @@ public class OutputProcessor {
 							 * If it is a ghost in NRT workflow, we simply ignore it.
 							 */
 							if (!ghostCandidate) {
-								reporting.intermediate("Product {} is not a ghost candidate in NRT scenario", productName);
+								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in NRT scenario", productName));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
 								productSize += size(file);
 							} else {
-								reporting.intermediate("Product {} is a ghost candidate in NRT scenario", productName);
+								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in NRT scenario", productName));
 							}
 
 						} else if (line.contains("FAST24")) {
 							LOGGER.info("Output {} (L0_SLICE FAST24) is considered as belonging to the family {}", productName,
 									ProductFamily.L0_SEGMENT);
 							if (!ghostCandidate) {
-								reporting.intermediate("Product {} is not a ghost candidate in FAST scenario", productName);
+								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in FAST scenario", productName));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SEGMENT, productName, file));
 								outputToPublish.add(
 									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24"));
 							} else {
-								reporting.intermediate("Product {} is a ghost candidate in FAST scenario", productName);
+								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in FAST scenario", productName));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
 							}
 							productSize += size(file);
@@ -255,36 +255,37 @@ public class OutputProcessor {
 								inputMessage.getBody().getProductProcessMode()));
 						productSize += size(file);
 					}
-					reporting.end("End of ghost candidate detection");
+					reporting.end(new ReportingMessage("End of ghost candidate detection"));
 					break;
 				case L0_ACN:
 				case L0_BLANK:
 					// Specific case of the L0 wrapper
-					reporting.begin("Starting ghost candidate detection");
+					// Specific case of the L0 wrapper
+					reporting.begin(new ReportingMessage("Starting ghost candidate detection"));
 					if (appLevel == ApplicationLevel.L0) {
 						boolean ghostCandidate = isGhostCandidate(productName);
 						if (line.contains("NRT")) {
 							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 									matchOutput.getFamily());
 							if (!ghostCandidate) {
-								reporting.intermediate("Product {} is not a ghost candidate in NRT scenario", productName);
+								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in NRT scenario", productName));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
 								productSize += size(file);
 							} else {
-								reporting.intermediate("Product {} is a ghost candidate in NRT scenario", productName);
+								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in NRT scenario", productName));
 							}
 						} else if (line.contains("FAST24")) {
 							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 									matchOutput.getFamily());
 							
 							if (!ghostCandidate) {
-								reporting.intermediate("Product {} is not a ghost candidate in FAST scenario", productName);
+								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in FAST scenario", productName));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
 								productSize += size(file);
 							} else {
-								reporting.intermediate("Product {} is a ghost candidate in FAST scenario", productName);
+								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in FAST scenario", productName));
 							}
 						} else {
 							LOGGER.warn("Output {} (ACN, BLANK) ignored because unknown mode", productName);
@@ -500,16 +501,16 @@ public class OutputProcessor {
 			}
 			final Reporting report = reportingFactory.newReporting(3);
 			try {
-				report.begin("Start uploading batch " + i + " of outputs " + listProducts);
+				report.begin(new ReportingMessage("Start uploading batch " + i + " of outputs " + listProducts));
 
 				if (Thread.currentThread().isInterrupted()) {
 					throw new InternalErrorException("The current thread as been interrupted");
 				}
 				this.obsClient.upload(sublist);
-				report.end("End uploading batch " + i + " of outputs " + listProducts);
+				report.end(new ReportingMessage("End uploading batch " + i + " of outputs " + listProducts));
 
 			} catch (AbstractCodedException e) {
-				report.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				report.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 				throw e;
 			}
 		}
@@ -541,12 +542,12 @@ public class OutputProcessor {
 			} else {
 				final Reporting report = reportingFactory.newReporting(2);
 
-				report.begin("Start publishing message");
+				report.begin(new ReportingMessage("Start publishing message"));
 				try {
 					procuderFactory.sendOutput(msg, inputMessage);
-					report.end("End publishing message");
+					report.end(new ReportingMessage("End publishing message"));
 				} catch (MqiPublicationError ace) {
-					report.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+					report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 				}
 				iter.remove();
 			}
@@ -604,7 +605,7 @@ public class OutputProcessor {
 		final String listoutputs = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.joining(","));
 
 		final Reporting reporting = reportingFactory.newReporting(1);
-		reporting.begin("Start handling of outputs " + listoutputs);
+		reporting.begin(new ReportingMessage("Start handling of outputs " + listoutputs));
 
 		try {
 			// Upload per batch the output
@@ -612,9 +613,9 @@ public class OutputProcessor {
 			// Publish reports
 			processReports(reportToPublish);
 
-			reporting.endWithTransfer("End handling of outputs " + listoutputs, size);
+			reporting.end(new ReportingMessage(size, "End handling of outputs " + listoutputs));
 		} catch (AbstractCodedException e) {
-			reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	}

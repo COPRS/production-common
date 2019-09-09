@@ -66,6 +66,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Class for processing product for a given task table
@@ -415,8 +416,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                  	
                     try {                    	
                         if (job.getGeneration().getNbErrors() == 0) { 
-                            reporting.begin("Start job generation");
-                        	reportInit.begin("Start init job generation");
+                            reporting.begin(new ReportingMessage("Start job generation"));
+                        	reportInit.begin(new ReportingMessage("Start init job generation"));
                         }                        
                         LOGGER.info(
                                 "{} [productName {}] 1 - Checking the pre-requirements",
@@ -429,14 +430,14 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
                         updateState(job, AppDataJobGenerationDtoState.PRIMARY_CHECK, reportInit);
-                        reportInit.end("End init job generation");
+                        reportInit.end(new ReportingMessage("End init job generation"));
                     } catch (AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());                      
                         updateState(job, AppDataJobGenerationDtoState.INITIAL, reportInit);
-                        reportInit.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+                        reportInit.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
 
@@ -446,7 +447,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 	final Reporting reportInputs = reportingFactory                  			
                 			.newReporting(2);
                 	
-                	reportInputs.begin("Start searching inputs");
+                	reportInputs.begin(new ReportingMessage("Start searching inputs"));
                 	
                     try {
                         LOGGER.info("{} [productName {}] 2 - Searching inputs",
@@ -454,7 +455,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                         .getProduct().getProductName());
                         this.inputsSearch(job);
                         updateState(job, AppDataJobGenerationDtoState.READY, reportInputs);
-                        reportInputs.end("End searching inputs");
+                        reportInputs.end(new ReportingMessage("End searching inputs"));
                         
                     } catch (AbstractCodedException e) {
                         LOGGER.error(
@@ -462,7 +463,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
                         updateState(job,AppDataJobGenerationDtoState.PRIMARY_CHECK, reportInputs);
-                        reportInputs.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+                        reportInputs.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
 
@@ -472,7 +473,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                   	final Reporting reportPrep = reportingFactory                       			
                 			.newReporting(3);
                   	
-                  	reportPrep.begin("Start job preparation and sending");
+                  	reportPrep.begin(new ReportingMessage("Start job preparation and sending"));
                 	
                     try {
                         LOGGER.info("{} [productName {}] 2 - Searching inputs",
@@ -487,26 +488,26 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         updateState(job, AppDataJobGenerationDtoState.SENT, reportPrep);
                        
 						if (job.getGeneration().getState() == AppDataJobGenerationDtoState.SENT) {
-							reportPrep.end("End job preparation and sending");
+							reportPrep.end(new ReportingMessage("End job preparation and sending"));
 
 						} else {
-							reportPrep.error("Job generation finished but job not sent");
+							reportPrep.error(new ReportingMessage("Job generation finished but job not sent"));
 						}
                     } catch (AbstractCodedException e) {
                         LOGGER.error("{} [productName {}] 3 - Job not send: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
                         updateState(job, AppDataJobGenerationDtoState.READY, reportPrep);
-                        reportPrep.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+                        reportPrep.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
-                reporting.end("End job generation");
+                reporting.end(new ReportingMessage("End job generation"));
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "{} [productName {}] [code ] Cannot generate job: {}",
                         this.prefixLogMonitor, productName,
                         ace.getCode().getCode(), ace.getLogMessage());
-                reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+                reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
             }        
         }
     }
@@ -517,12 +518,12 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     )
         throws AbstractCodedException {
     	
-    	report.intermediate("Job generation before update: {} - {} - {} - {}", 
+    	report.intermediate(new ReportingMessage("Job generation before update: {} - {} - {} - {}", 
     			job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), 
                 newState,
                 job.getGeneration()
-        );
+        ));
         AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
@@ -532,10 +533,10 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         	throw new InternalErrorException("Catalog query returned null");
         }       
         
-    	report.intermediate("Modified job generations: {}",  modifiedJob.getGenerations());
+    	report.intermediate(new ReportingMessage("Modified job generations: {}",  modifiedJob.getGenerations()));
         job.updateAppDataJob(modifiedJob, taskTableXmlName);        
-    	report.intermediate("Job generation after update: {}", job.getGeneration());
-
+    	report.intermediate(new ReportingMessage("Job generation after update: {}", job.getGeneration()));
+    	
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {
         	

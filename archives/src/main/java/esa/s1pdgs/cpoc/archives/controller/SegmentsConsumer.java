@@ -64,11 +64,7 @@ public class SegmentsConsumer {
     public void receive(final ProductDto dto,
             final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
-    	
-    	final Reporting reporting = new LoggerReporting.Factory("Archiver")
-    			.newReporting(0);
-    	
-    	reporting.begin("Start Distribution");    	
+  	
         this.appStatus.setProcessing("SLICES");
         try {
             if (!devProperties.getActivations().get("download-all")) {
@@ -83,13 +79,10 @@ public class SegmentsConsumer {
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {        	
-        	reporting.error("[resuming {}] {}", new ResumeDetails(topic, dto), e.getMessage());
             this.appStatus.setError("SLICES");
         } catch (Exception exc) {
-        	reporting.error("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
             this.appStatus.setError("SLICES");
         }
-    	reporting.end("End Distribution");
         this.appStatus.setWaiting();
     }
 }

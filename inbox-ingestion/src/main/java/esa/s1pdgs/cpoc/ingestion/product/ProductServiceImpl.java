@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +30,16 @@ public class ProductServiceImpl implements ProductService {
 	}
 	
 	@Override
-	public <E extends AbstractDto> List<Product<E>> ingest(final ProductFamily family, final IngestionDto ingestion) 
+	public IngestionResult ingest(final ProductFamily family, final IngestionDto ingestion) 
 			throws ProductException, InternalErrorException {
 		final File file = toFile(ingestion);		
 		assertPermissions(ingestion, file);
-		final ProductFactory<E> productFactory = ProductFactory.newProductFactoryFor(family);
+		final ProductFactory<AbstractDto> productFactory = ProductFactory.newProductFactoryFor(family);
 		LOG.debug("Using {} for {}", productFactory, family);
 		
 		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()));
-		final List<Product<E>> result = productFactory.newProducts(file, ingestion, obsAdapter);					
-
+		final List<Product<AbstractDto>> result = productFactory.newProducts(file, ingestion, obsAdapter);					
+		long transferAmount = 0L;
 		// is restart scenario?
 		if (ingestion.getFamily() == ProductFamily.INVALID) {
 			
@@ -50,8 +51,9 @@ public class ProductServiceImpl implements ProductService {
 			}
 		} else {
 			obsAdapter.upload(family, file);
+			transferAmount = FileUtils.sizeOf(file);
 		}		
-		return result;	
+		return new IngestionResult(result, transferAmount);	
 	}
 
 	@Override

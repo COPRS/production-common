@@ -21,14 +21,12 @@ public interface Reporting {
 	
 	public static final Logger REPORT_LOG = LogManager.getLogger(Reporting.class); 
 
-	void begin(String comment, final Object... objects);
+	void begin(ReportingMessage reportingMessage);
 
-	void intermediate(String comment, Object... objects);
+	void intermediate(ReportingMessage reportingMessage);
 
-	void end(String comment, final Object... objects);
-	
-	void endWithTransfer(String comment, long transferAmount, final Object... objects);
+	void end(ReportingMessage reportingMessage);
 
-	void error(String comment, Object... objects);
+	void error(ReportingMessage reportingMessage);
 
 }

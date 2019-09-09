@@ -17,12 +17,14 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties.FamilyIntervalConf;
 import esa.s1pdgs.cpoc.validation.service.metadata.MetadataService;
@@ -65,7 +67,7 @@ public class ValidationService {
 			LocalDateTime endInterval) {
 
 		final Reporting reportingValidation = reportingFactory.newReporting(0);
-		reportingValidation.begin(String.format("Starting validation task from %s to %s for family %s",
+		reportingValidation.begin(new ReportingMessage("Starting validation task from {} to {} for family {}",
 				startInterval, endInterval, family));
 
 		final Reporting reportingMetadata = reportingFactory.newReporting(1);
@@ -74,7 +76,7 @@ public class ValidationService {
 
 			List<SearchMetadata> metadataResults = null;
 			try {
-				reportingMetadata.begin("Gathering discrepancies in metadata catalog");
+				reportingMetadata.begin(new ReportingMessage("Gathering discrepancies in metadata catalog"));
 
 				String queryFamily = getQueryFamily(family);
 				LOGGER.info("Performing metadata query for family '{}'", queryFamily);
@@ -84,15 +86,15 @@ public class ValidationService {
 					metadataResults = new ArrayList<>();
 				}
 			} catch (MetadataQueryException e) {
-				reportingMetadata.error("Error occured while performing metadata catalog query task [code {}] {}",
-						e.getCode().getCode(), e.getLogMessage());
+				reportingMetadata.error(new ReportingMessage("Error occured while performing metadata catalog query task [code {}] {}",
+						e.getCode().getCode(), e.getLogMessage()));
 				throw e;
 			}
 
 			final Reporting reportingObs = reportingFactory.newReporting(2);
 			Map<String, ObsObject> obsResults = null;
 			try {
-				reportingObs.begin("Gathering discrepancies in OBS");
+				reportingObs.begin(new ReportingMessage("Gathering discrepancies in OBS"));
 
 				Date startDate = Date.from(startInterval.atZone(ZoneId.of("UTC")).toInstant());
 				Date endDate = Date.from(endInterval.atZone(ZoneId.of("UTC")).toInstant());
@@ -101,7 +103,7 @@ public class ValidationService {
 				LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 
 			} catch (SdkClientException | DateTimeParseException e) {
-				reportingObs.error("Error occured while performing obs query task: {}", e.getMessage());
+				reportingObs.error(new ReportingMessage("Error occured while performing obs query task: {}", e.getMessage()));
 				throw e;
 			}
 
@@ -122,18 +124,18 @@ public class ValidationService {
 			}
 
 			if (metadataDiscrepancies.isEmpty()) {
-				reportingMetadata.end("No discrepancies found in MetadataCatalog");
-				reportingValidation.end("No discrepancy found");
+				reportingMetadata.end(new ReportingMessage("No discrepancies found in MetadataCatalog"));
+				reportingValidation.end(new ReportingMessage("No discrepancy found"));
 			} else {
-				reportingMetadata.error("Products present in MetadataCatalog, but not in OBS: {}",
-						buildProductList(metadataDiscrepancies));
-				reportingValidation.error("Discrepancy found for {} product(s)", metadataDiscrepancies.size());
+				reportingMetadata.error(new ReportingMessage("Products present in MetadataCatalog, but not in OBS: {}",
+						buildProductList(metadataDiscrepancies)));
+				reportingValidation.error(new ReportingMessage("Discrepancy found for {} product(s)", metadataDiscrepancies.size()));
 			}
 
 			LOGGER.info("Found {} discrepancies for family '{}'", metadataDiscrepancies.size(), family);
 			return metadataDiscrepancies.size();
 		} catch (Exception ex) {
-			reportingValidation.error("Error occured while performing validation task: {}", ex.getMessage());
+			reportingValidation.error(new ReportingMessage("Error occured while performing validation task: {}", LogUtils.toString(ex)));
 		}
 
 		return -1;

@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class L0SegmentAppConsumer
         extends AbstractGenericConsumer<ProductDto> {
@@ -109,7 +110,7 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
-            reporting.begin("Start job generation using " + mqiMessage.getBody().getProductName());
+            reporting.begin(new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName()));
             AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
@@ -141,7 +142,7 @@ public class L0SegmentAppConsumer
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(),
                     ace.getLogMessage());
-            reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 
             failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
         }
@@ -152,7 +153,7 @@ public class L0SegmentAppConsumer
         LOGGER.info("[MONITOR] [step 0] [productName {}] End",
                 productName);
         
-        reporting.end("End job generation using " + mqiMessage.getBody().getProductName());
+        reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getProductName()));
     }
 
     protected AppDataJobDto<ProductDto> buildJob(

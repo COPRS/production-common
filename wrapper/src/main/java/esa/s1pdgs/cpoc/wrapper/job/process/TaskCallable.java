@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Execute one process and wait for its completion
@@ -80,8 +81,8 @@ public class TaskCallable implements Callable<TaskResult> {
      */
     @Override
     public TaskResult call() throws InternalErrorException {        
-        reporting.begin("Start Task " + binaryPath);
-
+        reporting.begin(new ReportingMessage("Start Task " + binaryPath));
+        
         int r = -1;
 
         Process process = null;
@@ -104,23 +105,23 @@ public class TaskCallable implements Callable<TaskResult> {
 			err.get();
 
 		} catch (InterruptedException ie) {
-			reporting.error("Interrupted Task {}", binaryPath);
+			reporting.error(new ReportingMessage("Interrupted Task {}", binaryPath));
 			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException", binaryPath, workDirectory);
 			Thread.currentThread().interrupt();
 		} catch (IOException ioe) {
 			final InternalErrorException ex = new InternalErrorException("Cannot build the command for the task " + binaryPath, ioe);
-			reporting.error("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage());
+			reporting.error(new ReportingMessage("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage()));
 			throw ex;
 		} catch (ExecutionException e) {
 			final InternalErrorException ex =  new InternalErrorException("Error on consuming stdout/stderr of task " + binaryPath, e);
-			reporting.error("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage());
+			reporting.error(new ReportingMessage("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage()));
 			throw ex;
 		} finally {
 			if (process != null) {
 				process.destroy();
 			}
 		}        
-        reporting.end("End Task {} with exit code {}", binaryPath, r);
+        reporting.end(new ReportingMessage("End Task {} with exit code {}", binaryPath, r));
 
         return new TaskResult(binaryPath, r);
     }

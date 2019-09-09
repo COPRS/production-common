@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Job dispatcher<br/>
@@ -177,7 +178,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Dispatch");
     	
     	final Reporting reporting = reportingFactory.newReporting(0); 
-    	reporting.begin("Start dispatching product");
+    	reporting.begin(new ReportingMessage("Start dispatching product"));
     	
         try {
             List<String> taskTables = getTaskTables(job);
@@ -230,11 +231,11 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
                         true);
             }
             LOGGER.debug ("== dispatched job {}", job.toString());
-            reporting.end("End dispatching product");
+            reporting.end(new ReportingMessage("End dispatching product"));
 
 
         } catch (AbstractCodedException ace) {
-        	reporting.error("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+        	reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
             throw ace;
         }
     }

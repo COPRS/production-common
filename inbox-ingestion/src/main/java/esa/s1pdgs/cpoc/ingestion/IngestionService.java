@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ingestion;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +21,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ingestion.config.IngestionServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.config.IngestionTypeConfiguration;
+import esa.s1pdgs.cpoc.ingestion.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.product.Product;
 import esa.s1pdgs.cpoc.ingestion.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.product.ProductService;
@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
 public class IngestionService {
@@ -85,36 +86,35 @@ public class IngestionService {
 		LOG.debug("received Ingestion: {}", ingestion.getProductName());
 
 		final Reporting reporting = reportingFactory.newReporting(0);
-		reporting.begin("Start processing of " + ingestion.getProductName());
+		reporting.begin(new ReportingMessage("Start processing of {}", ingestion.getProductName()));
 
 		try {
-			final List<Product<AbstractDto>> result = identifyAndUpload(reportingFactory, message, ingestion);
-			publish(result, message, reportingFactory);
+			final IngestionResult result = identifyAndUpload(reportingFactory, message, ingestion);
+			publish(result.getIngestedProducts(), message, reportingFactory);
 			delete(ingestion, reportingFactory);
-			reporting.end("End processing of " + ingestion.getProductName());
+			reporting.end(new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getProductName()));
 		} catch (Exception e) {
-			reporting.error("{}", LogUtils.toString(e));
-
+			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 		}
 	}
 
-	final List<Product<AbstractDto>> identifyAndUpload(final Reporting.Factory reportingFactory,
+	final IngestionResult identifyAndUpload(final Reporting.Factory reportingFactory,
 			final GenericMessageDto<IngestionDto> message, final IngestionDto ingestion) throws InternalErrorException {
-		List<Product<AbstractDto>> result = new ArrayList<>();
+		IngestionResult result = IngestionResult.NULL;
 		try {
 			final ProductFamily family = getFamilyFor(ingestion);
 
 			final Reporting reportObs = reportingFactory.newReporting(1);
 
-			reportObs.begin("Start uploading " + ingestion.getProductName() + " in OBS");
+			reportObs.begin(new ReportingMessage("Start uploading {} in OBS", ingestion.getProductName()));
 
 			try {
 				result = productService.ingest(family, ingestion);
 			} catch (ProductException e) {
-				reportObs.error("Error uploading {} in OBS: {}", ingestion.getProductName(), e.getMessage());
+				reportObs.error(new ReportingMessage("Error uploading {} in OBS: {}", ingestion.getProductName(), e.getMessage()));
 				throw e;
 			}
-			reportObs.end("End uploading {} in OBS", ingestion.getProductName());
+			reportObs.end(new ReportingMessage("End uploading {} in OBS", ingestion.getProductName()));
 			// is thrown if product shall be marked as invalid
 		} catch (ProductException e) {
 			LOG.warn(e.getMessage());
@@ -139,12 +139,12 @@ public class IngestionService {
 			final Reporting reporting = reportingFactory.newReporting(2);
 
 			final ProductCategory category = ProductCategory.of(product.getFamily());
-			reporting.begin("Start publishing file {} in topic", message.getBody().getProductName());
+			reporting.begin(new ReportingMessage("Start publishing file {} in topic", message.getBody().getProductName()));
 			try {
 				client.publish(result, category);
-				reporting.end("End publishing file {} in topic", message.getBody().getProductName());
+				reporting.end(new ReportingMessage("End publishing file {} in topic", message.getBody().getProductName()));
 			} catch (AbstractCodedException e) {
-				reporting.error("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			}
 		}
 	}
@@ -154,7 +154,7 @@ public class IngestionService {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
 			final Reporting reporting = reportingFactory.newReporting(3);
-			reporting.begin("Start removing file {}", file.getPath());
+			reporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
 
 			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
 		}
