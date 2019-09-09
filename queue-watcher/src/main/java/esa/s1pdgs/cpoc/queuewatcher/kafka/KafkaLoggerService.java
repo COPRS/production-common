@@ -1,10 +1,14 @@
 package esa.s1pdgs.cpoc.queuewatcher.kafka;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,30 +26,34 @@ public class KafkaLoggerService {
 	private static final Logger LOGGER = LogManager.getLogger(KafkaLoggerService.class);
 
 	private ConsumerFactory<String, String> factory;
-	private ApplicationProperties properties;
 
 	@Autowired
-	public KafkaLoggerService(ApplicationProperties properties, final ConsumerFactory<String, String> factory) {
-		this.properties = properties;
+	private ApplicationProperties properties;
+	
+	private List<ConcurrentMessageListenerContainer<String, String>> containers = new ArrayList<>();
+
+	@Autowired
+	public KafkaLoggerService(final ConsumerFactory<String, String> factory) {
 		this.factory = factory;
 	}
 
 	@PostConstruct
 	public void init() {
 		LOGGER.info("Starting kafka logger service...");
+		new File(properties.getKafkaFolder()).mkdir();
 
 		for (String topic : properties.getKafkaTopics()) {
 			LOGGER.info("Subscribing to kafka topic {}", topic);
 			ContainerProperties containerProperties = new ContainerProperties(topic);
 			containerProperties.setMessageListener((MessageListener<String, String>) record -> {
 				// do something with received record
-				LOGGER.debug("Received message from topic {}: {} ",topic, record.value());
+				LOGGER.info("Received message from topic {}: {} ", topic, record.value());
 
 				String fileName = properties.getKafkaFolder() + "/kafka-" + topic;
-				FileWriter writer = null;
+				BufferedWriter writer = null;
 				try {
-					writer = new FileWriter(new File(fileName));
-					writer.append(record.value());
+					writer = new BufferedWriter(new FileWriter(new File(fileName),true));
+					writer.write(record.value());
 				} catch (IOException ex) {
 					LOGGER.error("An IO error occured while accessing {}", fileName);
 				} finally {
@@ -55,12 +63,20 @@ public class KafkaLoggerService {
 						LOGGER.error("An IO error occured while closing {}", fileName);
 					}
 				}
-
-				ConcurrentMessageListenerContainer<String, String> container = new ConcurrentMessageListenerContainer<>(factory,
-						containerProperties);
-				container.start();
 			});
-
+			ConcurrentMessageListenerContainer<String, String> container = new ConcurrentMessageListenerContainer<>(
+					factory, containerProperties);
+			containers.add(container);
+			container.start();
 		}
 	}
+	
+	@PreDestroy
+	public void destroy() {
+		LOGGER.info("Having {} containers running, stopping them!", containers.size());
+		for (ConcurrentMessageListenerContainer<String, String> container: containers) {
+			container.stop();
+		}
+	}
+	
 }
