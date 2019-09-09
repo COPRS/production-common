@@ -64,7 +64,7 @@ public abstract class AbstractObsClient implements ObsClient {
 
     protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException;
     
-    protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException;
+    protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
     
     /**
      * @see ObsClient#downloadObjects(List, boolean)
@@ -109,7 +109,7 @@ public abstract class AbstractObsClient implements ObsClient {
      * @see ObsClient#uploadFiles(List)
      */
     public void uploadObjects(final List<ObsUploadObject> objects)
-            throws SdkClientException, ObsServiceException {
+            throws SdkClientException, ObsServiceException, ObsException {
         uploadObjects(objects, false);
     }
 
@@ -118,7 +118,7 @@ public abstract class AbstractObsClient implements ObsClient {
      */
     public void uploadObjects(final List<ObsUploadObject> objects,
             final boolean parallel)
-            throws SdkClientException, ObsServiceException {
+            throws SdkClientException, ObsServiceException, ObsException {
         if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
             ExecutorService workerThread =

@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 
 /**
  * Test the class AbstractObsClientImpl
@@ -233,10 +234,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testuploadObjectsSequential()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsUploadObject> objects = new ArrayList<>();
         objects.add(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File("target-dir")));
         objects.add(new ObsUploadObject(ProductFamily.EDRS_SESSION, "key2", new File("target-dir")));
@@ -255,10 +257,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testuploadObjectsSequentialSdkException()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsUploadObject> objects = new ArrayList<>();
         objects.add(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File("target-dir")));
         objects.add(new ObsUploadObject(ProductFamily.EDRS_SESSION, "key-sdk", new File("target-dir")));
@@ -280,10 +283,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testuploadObjectsSequentialServiceException()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsUploadObject> objects = new ArrayList<>();
         objects.add(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File("target-dir")));
         objects.add(new ObsUploadObject(ProductFamily.EDRS_SESSION, "key2", new File("target-dir")));
@@ -305,10 +309,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testuploadObjectsParallel()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsUploadObject> objects = new ArrayList<>();
         objects.add(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File("target-dir")));
         objects.add(new ObsUploadObject(ProductFamily.EDRS_SESSION, "key2", new File("target-dir")));
@@ -327,10 +332,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testuploadObjectsParallelSdkException()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsUploadObject> objects = new ArrayList<>();
         objects.add(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File("target-dir")));
         objects.add(new ObsUploadObject(ProductFamily.EDRS_SESSION, "key-sdk", new File("target-dir")));
@@ -352,10 +358,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testuploadObjectsParallelServiceException()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsUploadObject> objects = new ArrayList<>();
         objects.add(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File("target-dir")));
         objects.add(new ObsUploadObject(ProductFamily.EDRS_SESSION, "key2", new File("target-dir")));

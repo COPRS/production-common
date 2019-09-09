@@ -145,7 +145,7 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName2)));
 		uut.uploadFile(auxiliaryFiles, testFileName1, testFile1);
-		uut.uploadFile(auxiliaryFiles, testFileName2, testFile1);
+		uut.uploadFile(auxiliaryFiles, testFileName2, testFile2);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName2)));
 		
@@ -160,7 +160,7 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName1, testFile1);
-		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName2, testFile1);
+		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName2, testFile2);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		

@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.obs_sdk.swift;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -14,6 +16,7 @@ import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.StoredObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -29,7 +32,7 @@ public class SwiftObsClient extends AbstractObsClient {
     
     private static final Logger LOGGER =
             LogManager.getLogger(SwiftObsClient.class);
-    
+        
 	/**
      * Default constructor
      * 
@@ -87,16 +90,36 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException {
+	public void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
         if (object.getFile().isDirectory()) {
-            swiftObsServices.uploadDirectory(
+        	List<String> fileList = new ArrayList<>();
+        	fileList.addAll(swiftObsServices.uploadDirectory(
                     configuration.getContainerForFamily(object.getFamily()),
-                    object.getKey(), object.getFile());
+                    object.getKey(), object.getFile()));
+			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
+				// TODO check DSIB file list, upload md5sum when product is complete
+			} else {
+				uploadMd5Sum(object, fileList);
+			}
+
         } else {
-            swiftObsServices.uploadFile(
-                    configuration.getContainerForFamily(object.getFamily()),
-                    object.getKey(), object.getFile());
+        	swiftObsServices.uploadFile(configuration.getContainerForFamily(object.getFamily()), object.getKey(), object.getFile());
         }
+	}
+	
+	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, ObsException, SwiftSdkClientException {
+		File file;
+		try {
+			file = File.createTempFile(object.getKey(), SwiftObsServices.MD5SUM_SUFFIX);
+			try(PrintWriter writer = new PrintWriter(file)) {
+				for (String fileInfo : fileList) {
+					writer.println(fileInfo);
+				}
+			}
+		} catch (IOException e) {
+			throw new ObsException(object.getFamily(), "Could not store md5sum temp file", e);
+		}
+		swiftObsServices.uploadFile(configuration.getContainerForFamily(object.getFamily()), object.getKey() + SwiftObsServices.MD5SUM_SUFFIX, file);
 	}
 	
 	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
