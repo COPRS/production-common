@@ -3,8 +3,10 @@ package esa.s1pdgs.cpoc.queuewatcher.kafka;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +27,8 @@ public class KafkaLoggerService {
 
 	@Autowired
 	private ApplicationProperties properties;
+	
+	private List<ConcurrentMessageListenerContainer<String, String>> containers;
 
 	@Autowired
 	public KafkaLoggerService(final ConsumerFactory<String, String> factory) {
@@ -60,7 +64,17 @@ public class KafkaLoggerService {
 			});
 			ConcurrentMessageListenerContainer<String, String> container = new ConcurrentMessageListenerContainer<>(
 					factory, containerProperties);
+			containers.add(container);
 			container.start();
 		}
 	}
+	
+	@PreDestroy
+	public void destroy() {
+		LOGGER.info("Having {} containers running, stopping them!", containers.size());
+		for (ConcurrentMessageListenerContainer<String, String> container: containers) {
+			container.stop();
+		}
+	}
+	
 }
