@@ -22,7 +22,7 @@ public class KafkaProperties {
 	 */
 	private String bootstrapServers;
 
-	private String groupString;
+	private String groupId;
 
 	public String getBootstrapServers() {
 		return bootstrapServers;
@@ -32,19 +32,19 @@ public class KafkaProperties {
 		this.bootstrapServers = bootstrapServers;
 	}
 
-	public String getGroupString() {
-		return groupString;
+	public String getGroupId() {
+		return groupId;
 	}
 
-	public void setGroupString(String groupString) {
-		this.groupString = groupString;
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
 
 	@Bean
 	public ConsumerFactory<String, String> consumerFactory() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootstrapServers);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, this.groupString);
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, this.groupId);
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		return new DefaultKafkaConsumerFactory<>(props);
