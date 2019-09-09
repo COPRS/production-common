@@ -22,24 +22,26 @@ public class KafkaLoggerService {
 	private static final Logger LOGGER = LogManager.getLogger(KafkaLoggerService.class);
 
 	private ConsumerFactory<String, String> factory;
+
+	@Autowired
 	private ApplicationProperties properties;
 
 	@Autowired
-	public KafkaLoggerService(ApplicationProperties properties, final ConsumerFactory<String, String> factory) {
-		this.properties = properties;
+	public KafkaLoggerService(final ConsumerFactory<String, String> factory) {
 		this.factory = factory;
 	}
 
 	@PostConstruct
 	public void init() {
 		LOGGER.info("Starting kafka logger service...");
+		new File(properties.getKafkaFolder()).mkdir();
 
 		for (String topic : properties.getKafkaTopics()) {
 			LOGGER.info("Subscribing to kafka topic {}", topic);
 			ContainerProperties containerProperties = new ContainerProperties(topic);
 			containerProperties.setMessageListener((MessageListener<String, String>) record -> {
 				// do something with received record
-				LOGGER.debug("Received message from topic {}: {} ",topic, record.value());
+				LOGGER.info("Received message from topic {}: {} ", topic, record.value());
 
 				String fileName = properties.getKafkaFolder() + "/kafka-" + topic;
 				FileWriter writer = null;
@@ -55,12 +57,10 @@ public class KafkaLoggerService {
 						LOGGER.error("An IO error occured while closing {}", fileName);
 					}
 				}
-
-				ConcurrentMessageListenerContainer<String, String> container = new ConcurrentMessageListenerContainer<>(factory,
-						containerProperties);
-				container.start();
 			});
-
+			ConcurrentMessageListenerContainer<String, String> container = new ConcurrentMessageListenerContainer<>(
+					factory, containerProperties);
+			container.start();
 		}
 	}
 }
