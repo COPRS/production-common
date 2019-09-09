@@ -102,7 +102,7 @@ public class SwiftObsClientIT {
 	}
 
 	@Test
-	public void uploadForDirectoryTest() throws IOException, SdkClientException, AbstractCodedException {	
+	public void uploadOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName2)));
@@ -170,7 +170,7 @@ public class SwiftObsClientIT {
 	}
 
 	@Test
-	public void downloadForDirectoryTest() throws IOException, SdkClientException, AbstractCodedException {	
+	public void downloadOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName2)));
