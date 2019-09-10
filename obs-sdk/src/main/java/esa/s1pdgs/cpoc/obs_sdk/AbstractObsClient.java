@@ -328,27 +328,31 @@ public abstract class AbstractObsClient implements ObsClient {
 		try {
 			Path tempDir = Files.createTempDirectory("");
 			String fileName = object.getKey() + MD5SUM_SUFFIX;
-			downloadFile(object.getFamily(), fileName, tempDir.toFile().getAbsolutePath());
-			File file = new File(tempDir.toFile(), fileName);
-			List<String> lines = Files.readAllLines(file.toPath());
-			Map<String,String> md5sums = collectMd5Sums(object);
-			for (String line : lines) {
-				int idx = line.indexOf("  ");
-				if (idx >= 0 && line.length() > (idx + 2)) {
-					String md5 = line.substring(0, idx);
-					String key = line.substring(idx + 2);
-					String currentMd5 = md5sums.get(key);
-					if (null == currentMd5) {
-						throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
+			if (!exists(new ObsObject(object.getFamily(), fileName))) {
+				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
+			} else {
+				downloadFile(object.getFamily(), fileName, tempDir.toFile().getAbsolutePath());
+				File file = new File(tempDir.toFile(), fileName);
+				List<String> lines = Files.readAllLines(file.toPath());
+				Map<String,String> md5sums = collectMd5Sums(object);
+				for (String line : lines) {
+					int idx = line.indexOf("  ");
+					if (idx >= 0 && line.length() > (idx + 2)) {
+						String md5 = line.substring(0, idx);
+						String key = line.substring(idx + 2);
+						String currentMd5 = md5sums.get(key);
+						if (null == currentMd5) {
+							throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
+						}
+						if (!md5.equals(currentMd5)) {
+							throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
+						}
+						md5sums.remove(key);
 					}
-					if (!md5.equals(currentMd5)) {
-						throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
-					}
-					md5sums.remove(key);
 				}
-			}
-			for (String key : md5sums.keySet()) {
-				throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
+				for (String key : md5sums.keySet()) {
+					throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
+				}
 			}
 		} catch (SdkClientException | ObsException | IOException e) {
 			throw new ObsServiceException(e.getMessage(), e);
