@@ -415,7 +415,8 @@ public class SwiftObsServices {
 	 * @return
 	 * @throws SwiftSdkClientException 
 	 */
-	public Collection<StoredObject> listNextBatchOfObjectsFromContainer(String containerName, String marker) throws SwiftSdkClientException {
+	public Collection<StoredObject> listNextBatchOfObjectsFromContainer(String containerName, String leMarker) throws SwiftSdkClientException {
+		String marker = leMarker;		
 		for (int retryCount = 1;; retryCount++) {
 			try {
 				log(String.format("Listing objects from bucket %s", containerName));

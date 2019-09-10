@@ -9,6 +9,8 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -108,5 +110,15 @@ public class FileUtils {
                 .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
                 .forEach(File::delete);
+    }
+    
+    public static final long size(final Collection<File> files) {
+    	return files.stream()
+    			.mapToLong(f -> f.length())
+    			.sum();
+    }
+    
+    public static final long size(final File ... files) {
+    	return size(Arrays.asList(files));
     }
 }

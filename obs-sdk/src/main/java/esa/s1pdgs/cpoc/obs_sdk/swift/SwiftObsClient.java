@@ -47,7 +47,12 @@ public class SwiftObsClient extends AbstractObsClient {
         		configuration.getIntOfConfiguration("retry-policy.backoff.throttled-base-delay-ms"));
     }
     
-    /**
+    @Override
+	protected String getBucketFor(ProductFamily family) throws ObsServiceException {
+		return configuration.getContainerForFamily(family);
+	}
+
+	/**
      * Constructor using fields
      * 
      * @param configuration
@@ -62,39 +67,39 @@ public class SwiftObsClient extends AbstractObsClient {
     }
 
 	public boolean containerExists(ProductFamily family) throws ObsServiceException {
-		return swiftObsServices.containerExist(configuration.getContainerForFamily(family));
+		return swiftObsServices.containerExist(getBucketFor(family));
 	}
 	
 	public int numberOfObjects(ProductFamily family, String prefixKey) throws SwiftSdkClientException, ObsServiceException {
-		return swiftObsServices.getNbObjects(configuration.getContainerForFamily(family), prefixKey);
+		return swiftObsServices.getNbObjects(getBucketFor(family), prefixKey);
 	}
     
 	@Override
 	public boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
-		return swiftObsServices.exist(configuration.getContainerForFamily(object.getFamily()), object.getKey());
+		return swiftObsServices.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
 
 	@Override
 	public boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
 		return swiftObsServices.getNbObjects(
-                configuration.getContainerForFamily(object.getFamily()),
+                getBucketFor(object.getFamily()),
                 object.getKey()) > 0;
 	}
 
 	@Override
 	public List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException {
 		return swiftObsServices.downloadObjectsWithPrefix(
-                configuration.getContainerForFamily(object.getFamily()),
+                getBucketFor(object.getFamily()),
                 object.getKey(), object.getTargetDir(),
                 object.isIgnoreFolders());
 	}
 
 	@Override
 	public void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
+		List<String> fileList = new ArrayList<>();
         if (object.getFile().isDirectory()) {
-        	List<String> fileList = new ArrayList<>();
         	fileList.addAll(swiftObsServices.uploadDirectory(
-                    configuration.getContainerForFamily(object.getFamily()),
+                    getBucketFor(object.getFamily()),
                     object.getKey(), object.getFile()));
 			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
 				// TODO check DSIB file list, upload md5sum when product is complete
@@ -103,11 +108,12 @@ public class SwiftObsClient extends AbstractObsClient {
 			}
 
         } else {
-        	swiftObsServices.uploadFile(configuration.getContainerForFamily(object.getFamily()), object.getKey(), object.getFile());
+        	fileList.add(swiftObsServices.uploadFile(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
+			uploadMd5Sum(object, fileList);
         }
 	}
 	
-	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, ObsException, SwiftSdkClientException {
+	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, SwiftSdkClientException {
 		File file;
 		try {
 			file = File.createTempFile(object.getKey(), AbstractObsClient.MD5SUM_SUFFIX);
@@ -117,17 +123,17 @@ public class SwiftObsClient extends AbstractObsClient {
 				}
 			}
 		} catch (IOException e) {
-			throw new ObsException(object.getFamily(), "Could not store md5sum temp file", e);
+			throw new SwiftObsServiceException(configuration.getContainerForFamily(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
-		swiftObsServices.uploadFile(configuration.getContainerForFamily(object.getFamily()), object.getKey() + AbstractObsClient.MD5SUM_SUFFIX, file);
+		swiftObsServices.uploadFile(getBucketFor(object.getFamily()), object.getKey() + AbstractObsClient.MD5SUM_SUFFIX, file);
 	}
 	
 	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
-		swiftObsServices.createContainer(configuration.getContainerForFamily(family));
+		swiftObsServices.createContainer(getBucketFor(family));
 	}
 	
 	public void deleteObject(final ProductFamily family, final String key) throws SwiftSdkClientException, ObsServiceException {
-		swiftObsServices.delete(configuration.getContainerForFamily(family), key);
+		swiftObsServices.delete(getBucketFor(family), key);
 	}
 
 	/**
@@ -160,7 +166,7 @@ public class SwiftObsClient extends AbstractObsClient {
 		long methodStartTime = System.currentTimeMillis();
 
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
-		String container = configuration.getContainerForFamily(family);
+		String container = getBucketFor(family);
 		Collection<StoredObject> objListing = swiftObsServices.listObjectsFromContainer(container);
 		boolean possiblyTruncated = false;
 		String marker = "";
@@ -194,7 +200,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	
 	@Override
 	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) throws SdkClientException {
-		final String bucket = configuration.getContainerForFamily(family);
+		final String bucket = getBucketFor(family);
 		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);		
 		final Map<String, InputStream> result = swiftObsServices.getAllAsInputStream(bucket, keyPrefix);
 		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
@@ -204,7 +210,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	@Override
 	public Map<String,String> collectMd5Sums(ObsObject object) throws ObsException {
 		try {
-			return swiftObsServices.collectMd5Sums(configuration.getContainerForFamily(object.getFamily()), object.getKey());
+			return swiftObsServices.collectMd5Sums(getBucketFor(object.getFamily()), object.getKey());
 		} catch (SwiftSdkClientException | ObsServiceException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);
 		}

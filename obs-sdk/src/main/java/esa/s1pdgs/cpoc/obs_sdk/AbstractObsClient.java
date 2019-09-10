@@ -24,6 +24,13 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.ObsReportingInput;
+import esa.s1pdgs.cpoc.report.ObsReportingOutput;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
@@ -34,6 +41,8 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 public abstract class AbstractObsClient implements ObsClient {
 
 	public static final String MD5SUM_SUFFIX = ".md5sum";
+	
+	protected abstract String getBucketFor(ProductFamily family) throws ObsServiceException;
 	
     /**
      * Get the timeout for waiting threads termination in seconds
@@ -77,6 +86,7 @@ public abstract class AbstractObsClient implements ObsClient {
     public List<File> downloadObjects(final List<ObsDownloadObject> objects,
             final boolean parallel)
             throws SdkClientException, ObsServiceException {
+     	
     	List<File> files = new ArrayList<>();
         if (objects.size() > 1 && parallel) {
             // Download objects in parallel
@@ -102,9 +112,23 @@ public abstract class AbstractObsClient implements ObsClient {
 	            }
             }
         } else {
+         	final Reporting reporting = new LoggerReporting.Factory("Read")
+         			.newReporting(0);            	
             // Download object in sequential
-            for (ObsDownloadObject object : objects) {
-                files.addAll(downloadObject(object));
+            for (final ObsDownloadObject object : objects) {            
+             	reporting.begin(
+             			new ObsReportingInput(getBucketFor(object.getFamily()), object.getKey()),
+             			new ReportingMessage("Start downloading from OBS")
+             	);
+             	try {
+					final List<File> results = downloadObject(object);
+					final long dlSize =	FileUtils.size(files);
+					reporting.end(new ReportingMessage(dlSize, "End downloading from OBS"));             	
+					files.addAll(results);
+				} catch (SdkClientException | RuntimeException e) {
+					reporting.error(new ReportingMessage("Error on downloading from OBS: {}", LogUtils.toString(e)));
+					throw e;
+				}
             }
         }
         return files;
@@ -138,9 +162,24 @@ public abstract class AbstractObsClient implements ObsClient {
                     getUploadExecutionTimeoutS());
 
         } else {
+        	final Reporting reporting = new LoggerReporting.Factory("Write")
+         			.newReporting(0); 
+        	
             // Upload object in sequential
-            for (ObsUploadObject object : objects) {
-                uploadObject(object);
+            for (final ObsUploadObject object : objects) {            	
+             	reporting.begin(new ReportingMessage("Start uploading to OBS"));
+             	
+             	try {
+    				uploadObject(object);
+    				final long dlSize =	FileUtils.size(object.getFile());
+    				reporting.end( 
+    						new ObsReportingOutput(getBucketFor(object.getFamily()), object.getKey()), 
+    						new ReportingMessage(dlSize, "End uploading to OBS")
+    				);             	
+    			} catch (SdkClientException | RuntimeException e) {
+    				reporting.error(new ReportingMessage("Error on uploading to OBS: {}", LogUtils.toString(e)));
+    				throw e;
+    			}
             }
         }
     }
@@ -290,7 +329,8 @@ public abstract class AbstractObsClient implements ObsClient {
 			Path tempDir = Files.createTempDirectory("");
 			String fileName = object.getKey() + MD5SUM_SUFFIX;
 			downloadFile(object.getFamily(), fileName, tempDir.toFile().getAbsolutePath());
-			List<String> lines = Files.readAllLines(new File(tempDir.toFile(), fileName).toPath());
+			File file = new File(tempDir.toFile(), fileName);
+			List<String> lines = Files.readAllLines(file.toPath());
 			Map<String,String> md5sums = collectMd5Sums(object);
 			for (String line : lines) {
 				int idx = line.indexOf("  ");
@@ -310,15 +350,8 @@ public abstract class AbstractObsClient implements ObsClient {
 			for (String key : md5sums.keySet()) {
 				throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
 			}
-		} catch (SdkClientException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ObsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (SdkClientException | ObsException | IOException e) {
+			throw new ObsServiceException(e.getMessage(), e);
 		}
     }
 	
