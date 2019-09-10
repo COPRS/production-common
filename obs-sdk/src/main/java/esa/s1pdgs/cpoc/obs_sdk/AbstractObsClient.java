@@ -325,49 +325,39 @@ public abstract class AbstractObsClient implements ObsClient {
 	
 	@Override
     public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
-		InputStream is = null;
 		try {
 			Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
-			is = isMap.get(object.getKey() + MD5SUM_SUFFIX);
-			if (null == is) {
+			if (!isMap.containsKey(object.getKey() + MD5SUM_SUFFIX)) {
 				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
 			} else {
-				Map<String,String> md5sums = collectMd5Sums(object);
-				try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-					String line;
-	                while ((line = reader.readLine()) != null) {    
-	                	int idx = line.indexOf("  ");
-	                	if (idx >= 0 && line.length() > (idx + 2)) {
-	                		String md5 = line.substring(0, idx);
-	                		String key = line.substring(idx + 2);
-	                		String currentMd5 = md5sums.get(key);
-	                		if (null == currentMd5) {
-	                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
-	                		}
-	                		if (!md5.equals(currentMd5)) {
-	                			throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
-	                		}
-	                		md5sums.remove(key);
-	                	}
-		            }
-                }
-				for (String key : md5sums.keySet()) {
-					throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
+				try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
+					Map<String,String> md5sums = collectMd5Sums(object);
+					try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+						String line;
+		                while ((line = reader.readLine()) != null) {    
+		                	int idx = line.indexOf("  ");
+		                	if (idx >= 0 && line.length() > (idx + 2)) {
+		                		String md5 = line.substring(0, idx);
+		                		String key = line.substring(idx + 2);
+		                		String currentMd5 = md5sums.get(key);
+		                		if (null == currentMd5) {
+		                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
+		                		}
+		                		if (!md5.equals(currentMd5)) {
+		                			throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
+		                		}
+		                		md5sums.remove(key);
+		                	}
+			            }
+	                }
+					for (String key : md5sums.keySet()) {
+						throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
+					}
 				}
 			}
 		} catch (SdkClientException | ObsException | IOException e) {
 			throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
-		} finally {
-			try {
-				if (null != is) {
-					is.close();
-				}
-			} catch (IOException e) {
-				throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
-			}
-			
 		}
-			
     }
 	
 	public abstract Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException;
