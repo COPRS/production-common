@@ -35,6 +35,8 @@ public abstract class AbstractObsClient implements ObsClient {
 
 	public static final String MD5SUM_SUFFIX = ".md5sum";
 	
+	protected abstract String getBucketFor(ProductFamily family) throws ObsServiceException;
+	
     /**
      * Get the timeout for waiting threads termination in seconds
      * @return
@@ -77,6 +79,7 @@ public abstract class AbstractObsClient implements ObsClient {
     public List<File> downloadObjects(final List<ObsDownloadObject> objects,
             final boolean parallel)
             throws SdkClientException, ObsServiceException {
+     	
     	List<File> files = new ArrayList<>();
         if (objects.size() > 1 && parallel) {
             // Download objects in parallel

@@ -78,13 +78,18 @@ public class S3ObsClient extends AbstractObsClient {
 		this.configuration = configuration;
 		this.s3Services = s3Services;
 	}
+	
+	@Override
+	protected String getBucketFor(ProductFamily family) throws ObsServiceException {
+		return configuration.getBucketForFamily(family);
+	}
 
 	/**
 	 * @see ObsClient#doesObjectExist(ObsObject)
 	 */
 	@Override
 	public boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
-		return s3Services.exist(configuration.getBucketForFamily(object.getFamily()), object.getKey());
+		return s3Services.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
 
 	/**
@@ -92,7 +97,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 */
 	@Override
 	public boolean prefixExists(final ObsObject object) throws SdkClientException, ObsServiceException {
-		return s3Services.getNbObjects(configuration.getBucketForFamily(object.getFamily()), object.getKey()) > 0;
+		return s3Services.getNbObjects(getBucketFor(object.getFamily()), object.getKey()) > 0;
 	}
 
 	/**
@@ -100,7 +105,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 */
 	@Override
 	public List<File> downloadObject(final ObsDownloadObject object) throws SdkClientException, ObsServiceException {
-		return s3Services.downloadObjectsWithPrefix(configuration.getBucketForFamily(object.getFamily()),
+		return s3Services.downloadObjectsWithPrefix(getBucketFor(object.getFamily()),
 				object.getKey(), object.getTargetDir(), object.isIgnoreFolders());
 	}
 
@@ -108,7 +113,7 @@ public class S3ObsClient extends AbstractObsClient {
 	public void uploadObject(final ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
 		if (object.getFile().isDirectory()) {
 			List<String> fileList = new ArrayList<>();
-			fileList.addAll(s3Services.uploadDirectory(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
+			fileList.addAll(s3Services.uploadDirectory(getBucketFor(object.getFamily()), object.getKey(),
 					object.getFile()));
 			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
 				// TODO check DSIB file list, upload md5sum when product is complete
@@ -116,7 +121,7 @@ public class S3ObsClient extends AbstractObsClient {
 				uploadMd5Sum(object, fileList);
 			}
 		} else {
-			s3Services.uploadFile(configuration.getBucketForFamily(object.getFamily()), object.getKey(), object.getFile());
+			s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey(), object.getFile());
 		}
 		
 	}
@@ -133,7 +138,7 @@ public class S3ObsClient extends AbstractObsClient {
 		} catch (IOException e) {
 			throw new ObsException(object.getFamily(), "Could not store md5sum temp file", e);
 		}
-		s3Services.uploadFile(configuration.getBucketForFamily(object.getFamily()), object.getKey() + MD5SUM_SUFFIX, file);
+		s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey() + MD5SUM_SUFFIX, file);
 	}
 
 	/**
@@ -163,8 +168,8 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public void move(ObsObject from, ProductFamily to) throws ObsException {
 		try {
-			s3Services.moveFile(new CopyObjectRequest(configuration.getBucketForFamily(from.getFamily()), from.getKey(),
-					configuration.getBucketForFamily(to), from.getKey()));
+			s3Services.moveFile(new CopyObjectRequest(getBucketFor(from.getFamily()), from.getKey(),
+					getBucketFor(to), from.getKey()));
 		} catch (S3SdkClientException | ObsServiceException e) {
 			throw new ObsException(from.getFamily(), from.getKey(), e);
 		}
@@ -179,7 +184,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 		long methodStartTime = System.currentTimeMillis();
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
-		String bucket = configuration.getBucketForFamily(family);
+		String bucket = getBucketFor(family);
 		LOGGER.debug(String.format("listing objects in OBS from bucket %s within last modification time %s to %s",
 				bucket, timeFrameBegin, timeFrameEnd));
 		ObjectListing objListing = s3Services.listObjectsFromBucket(bucket);
@@ -225,7 +230,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 	@Override
 	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) throws SdkClientException {
-		final String bucket = configuration.getBucketForFamily(family);
+		final String bucket = getBucketFor(family);
 		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);
 		final Map<String, InputStream> result = s3Services.getAllAsInputStream(bucket, keyPrefix);
 		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
