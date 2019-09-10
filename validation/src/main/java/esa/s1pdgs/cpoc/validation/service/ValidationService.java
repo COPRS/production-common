@@ -6,6 +6,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -39,6 +41,22 @@ public class ValidationService {
 
 	@Autowired
 	private ApplicationProperties properties;
+	
+	private static class Discrepancy {
+		public String obsKey;
+		public String reason;
+		
+		public Discrepancy(String obsKey, String reason) {
+			this.obsKey = obsKey;
+			this.reason = reason;
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			return sb.append(obsKey).append(" (reason:").append(reason).append(")").toString();
+		}
+	}
 
 	@Autowired
 	public ValidationService(MetadataService metadataService, ObsClient obsClient) {
@@ -74,17 +92,23 @@ public class ValidationService {
 
 		try {
 
+			/*
+			 * Step 1: We are gathering all information from catalog and obs at the moment we are performing
+			 * the change to ensure that no data is changed or added meanwhile giving false positives.
+			 */
 			List<SearchMetadata> metadataResults = null;
 			try {
 				reportingMetadata.begin(new ReportingMessage("Gathering discrepancies in metadata catalog"));
 
 				String queryFamily = getQueryFamily(family);
 				LOGGER.info("Performing metadata query for family '{}'", queryFamily);
-				metadataResults = metadataService.query(ProductFamily.valueOf(queryFamily), startInterval, endInterval);
+				metadataResults = metadataService.query(ProductFamily.valueOf(queryFamily), startInterval, endInterval);				
 				if (metadataResults == null) {
 					// set to empty list
 					metadataResults = new ArrayList<>();
 				}
+				
+				LOGGER.info("Metadata query for family '{}' returned {} hits", queryFamily, metadataResults.size());				
 			} catch (MetadataQueryException e) {
 				reportingMetadata.error(new ReportingMessage("Error occured while performing metadata catalog query task [code {}] {}",
 						e.getCode().getCode(), e.getLogMessage()));
@@ -106,39 +130,78 @@ public class ValidationService {
 				reportingObs.error(new ReportingMessage("Error occured while performing obs query task: {}", e.getMessage()));
 				throw e;
 			}
+			
+			/*
+			 * Step 2: We are doing a query on the metadata of the family and getting all entries form the
+			 * catalog that is available. Then we instruct the obs client to validate if these entries are valid.
+			 */
 
-			List<String> metadataDiscrepancies = new ArrayList<>();
+			List<Discrepancy> discrepancies = new ArrayList<>();
 			for (SearchMetadata smd : metadataResults) {
-				if (!verifyMetadataForObject(smd, obsResults.values())) {
-					LOGGER.info("Product {} does exist in metadata catalog, but not in OBS", smd.getKeyObjectStorage());
-					if (family.name().contains("_ZIP")) {
-						// To show the actual filename we need to add zip to the metadata name
-						metadataDiscrepancies.add(smd.getKeyObjectStorage() + ".zip");
-					} else {
-						// Its a plain product, we can use the metadata directly
-						metadataDiscrepancies.add(smd.getKeyObjectStorage());
-					}
-				} else {
-					LOGGER.debug("Product {} does exist in metadata catalog and OBS", smd.getKeyObjectStorage());
+				try {
+					obsClient.validate(new ObsObject(family, smd.getKeyObjectStorage()));
+				} catch (ObsServiceException ex) {
+					// Validation failed for that object.
+					discrepancies.add(new Discrepancy(smd.getKeyObjectStorage(), ex.getMessage()));
 				}
 			}
+			
+			/*
+			 * Step 3: After we know that the catalog data is valid within the OBS, we check if there are additional
+			 * products stored within that are not expects.
+			 */
+			Set<String> realKeys = extractRealKeys(obsResults.values());
+			for (SearchMetadata smd : metadataResults) {
+				realKeys.remove(smd.getKeyObjectStorage());
+			}
+			
+			LOGGER.info("Found {} keys that are in OBS, but not in MetadataCatalog", realKeys.size());
+			for (String key: realKeys) {
+				Discrepancy discrepancy = new Discrepancy(key,"Exists in OBS, but not in MDC");
+				discrepancies.add(discrepancy);
+			}
+			
+			/*
+			 * Step 4: Presenting the results of the discrepancies check
+			 */
 
-			if (metadataDiscrepancies.isEmpty()) {
+			if (discrepancies.isEmpty()) {
 				reportingMetadata.end(new ReportingMessage("No discrepancies found in MetadataCatalog"));
 				reportingValidation.end(new ReportingMessage("No discrepancy found"));
 			} else {
 				reportingMetadata.error(new ReportingMessage("Products present in MetadataCatalog, but not in OBS: {}",
-						buildProductList(metadataDiscrepancies)));
-				reportingValidation.error(new ReportingMessage("Discrepancy found for {} product(s)", metadataDiscrepancies.size()));
+						buildProductList(discrepancies)));
+				reportingValidation.error(new ReportingMessage("Discrepancy found for {} product(s)", discrepancies.size()));
 			}
 
-			LOGGER.info("Found {} discrepancies for family '{}'", metadataDiscrepancies.size(), family);
-			return metadataDiscrepancies.size();
+			LOGGER.info("Found {} discrepancies for family '{}'", discrepancies.size(), family);
+			return discrepancies.size();
 		} catch (Exception ex) {
 			reportingValidation.error(new ReportingMessage("Error occured while performing validation task: {}", LogUtils.toString(ex)));
 		}
 
 		return -1;
+	}
+	
+	Set<String> extractRealKeys(Collection<ObsObject> obsResults) {
+		Set<String> realProducts = new HashSet<>();
+		for (ObsObject obsResult: obsResults) {
+			String key = obsResult.getKey();
+			int index = key.indexOf("/");
+			String realKey = null;
+			if (index != -1) {
+				realKey = key.substring(0, index);
+			} else {
+				realKey = key;
+				if (key.endsWith(".zip")) {
+					// Special case zipped products. The MDC key does not contain the zip!
+					realKey = realKey.substring(0,key.lastIndexOf(".zip"));
+				}				
+			}
+			realProducts.add(realKey);
+		}
+		
+		return realProducts;
 	}
 
 	String getQueryFamily(ProductFamily family) {
@@ -153,79 +216,15 @@ public class ValidationService {
 		return family.name();
 	}
 
-	private boolean verifyMetadataForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
-		LOGGER.debug("Verifying if metadata entry for product {} exist in OBS", metadata.getKeyObjectStorage());
-		if (metadata.getKeyObjectStorage().contains("AUX") || metadata.getKeyObjectStorage().contains("MPL")) {
-			return verifyAuxMetadataForObject(metadata, objects);
-		} else if (metadata.getKeyObjectStorage().startsWith("S1A/")
-				|| metadata.getKeyObjectStorage().startsWith("S1B/")) {
-			return verifySessionForObject(metadata, objects);
-		} else {
-			return verifySliceForObject(metadata, objects);
-		}
-	}
-
-	boolean verifyAuxMetadataForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
-		String key = metadata.getKeyObjectStorage();
-
-		for (ObsObject obj : objects) {
-			//
-			String obsKey = obj.getKey();
-			// some products are .SAFE. In this case, we ignore everything behind the first
-			// slash
-			if (!obsKey.contains(".zip") && obsKey.contains(".SAFE")) {
-				obsKey = obsKey.substring(0, obsKey.indexOf("/"));
-			}
-//			LOGGER.info("key: {}, aux: {}", key, obsKey);
-			if (obsKey.contains(key)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	boolean verifySessionForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
-		String key = metadata.getKeyObjectStorage();
-
-		for (ObsObject obj : objects) {
-			String obsKey = obj.getKey();
-			if (key.equals(obsKey)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	boolean verifySliceForObject(SearchMetadata metadata, Collection<ObsObject> objects) {
-		String key = metadata.getKeyObjectStorage();
-
-		for (ObsObject obj : objects) {
-			String obsKey = null;
-			if (obj.getKey().contains(".zip")) {
-				// It is a zip file, so we just take the name as key
-				obsKey = obj.getKey().replace(".zip", "");
-			} else {
-				// It is an unzipped, we just take the base name
-				obsKey = obj.getKey().substring(0, obj.getKey().indexOf("/"));
-			}
-
-			if (key.equals(obsKey)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private String buildProductList(List<String> products) {
-		if (products.size() == 0) {
+	private String buildProductList(List<Discrepancy> discrepancies) {
+		if (discrepancies.size() == 0) {
 			return "";
 		}
 		StringBuilder builder = new StringBuilder();
 		builder.append("[");
-		for (int i = 0; i < products.size(); i++) {
-			builder.append(products.get(i));
-			if (i < products.size() - 1) {
+		for (int i = 0; i < discrepancies.size(); i++) {
+			builder.append(discrepancies.get(i));
+			if (i < discrepancies.size() - 1) {
 				builder.append(",");
 			}
 		}
