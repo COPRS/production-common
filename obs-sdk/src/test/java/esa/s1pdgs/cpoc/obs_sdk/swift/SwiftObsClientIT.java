@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 public class SwiftObsClientIT {
@@ -102,10 +103,10 @@ public class SwiftObsClientIT {
 	}
 
 	@Test
-	public void uploadOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException {	
+	public void uploadOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
 		// upload
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName1)));
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName2)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
@@ -172,8 +173,8 @@ public class SwiftObsClientIT {
 	@Test
 	public void downloadOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException {	
 		// upload
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName1)));
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + testFileName2)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
