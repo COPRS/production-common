@@ -18,10 +18,11 @@ public interface OutboxClient {
 	
 	public static final OutboxClient NULL = new OutboxClient() {
 		@Override
-		public final void transfer(ObsObject obsObject) throws Exception {
+		public final String transfer(ObsObject obsObject) throws Exception {
 			// do nothing
+			return "";
 		}		
 	};
 	
-	void transfer(ObsObject obsObject) throws Exception;
+	String transfer(ObsObject obsObject) throws Exception;
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -40,6 +42,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
@@ -64,9 +67,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.report.JobOrderReportingInput;
+import esa.s1pdgs.cpoc.report.JobOrderReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingOutput;
 
 /**
  * Class for processing product for a given task table
@@ -501,7 +507,10 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         reportPrep.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
-                reporting.end(new ReportingMessage("End job generation"));
+                reporting.end(
+                		new JobOrderReportingOutput("TODO", toProcParamMap(job)), 
+                		new ReportingMessage("End job generation")
+                );
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "{} [productName {}] [code ] Cannot generate job: {}",
@@ -510,6 +519,17 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
             }        
         }
+    }
+    
+    private final Map<String,String> toProcParamMap(final JobGeneration jobGen) {    	
+    	try {
+			return jobGen.getJobOrder().getConf().getProcParams().stream()
+				.collect(Collectors.toMap(JobOrderProcParam::getName, JobOrderProcParam::getValue));
+		} catch (Exception e) {
+			// this is only used for reporting so don't break anything if this goes wrong here and provide the error message
+			LOGGER.error(e);
+			return Collections.singletonMap("error", LogUtils.toString(e));
+		}
     }
 
     private void updateState(JobGeneration job,

@@ -6,14 +6,17 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +38,8 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -127,6 +132,12 @@ public class JobProcessor {
 		this.mqiStatusService = mqiStatusService;
 		this.errorAppender = errorAppender;
 	}
+	
+	private final List<String> toReportFilenames(final LevelJobDto job) {
+		return job.getInputs().stream()
+			.map(j -> Paths.get(j.getLocalPath()).getFileName().toString())
+			.collect(Collectors.toList());
+	}
 
 	/**
 	 * Consume and execute jobs
@@ -186,7 +197,7 @@ public class JobProcessor {
 
 		// Everything is fine with the request, we can start processing it.
 		final Reporting report = reportingFactory.newReporting(0);
-		report.begin(new ReportingMessage("Start job processing"));
+		report.begin(new FilenameReportingInput(toReportFilenames(job)), new ReportingMessage("Start job processing"));
 
 		File workdir = new File(job.getWorkDirectory());
 		// Clean up the working directory with all of its content
@@ -216,9 +227,9 @@ public class JobProcessor {
 		// ----------------------------------------------------------
 		// Process message
 		// ----------------------------------------------------------
-		processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, report);
+		final List<String> outputs = processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, report);
 
-		report.end(new ReportingMessage("End job processing"));
+		report.end(new FilenameReportingOutput(outputs),new ReportingMessage("End job processing"));
 	}
 
 	/**
@@ -239,7 +250,7 @@ public class JobProcessor {
      * @param procCompletionSrv
      * @param procExecutor
      */
-    protected void processJob(final GenericMessageDto<LevelJobDto> message,
+    protected List<String> processJob(final GenericMessageDto<LevelJobDto> message,
             final InputDownloader inputDownloader,
             final OutputProcessor outputProcessor,
             final ExecutorService procExecutorSrv,
@@ -251,6 +262,8 @@ public class JobProcessor {
         int step = 0;
         boolean ackOk = false;
         String errorMessage = "";
+        
+        List<String> result = new ArrayList<>();
         
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
@@ -281,7 +294,7 @@ public class JobProcessor {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-                outputProcessor.processOutput();
+                result = outputProcessor.processOutput();
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
@@ -316,6 +329,7 @@ public class JobProcessor {
 
         // Ack and check if application shall stopped
         ackProcessing(message, failedProc, ackOk, errorMessage);
+        return result;
     }
 
 	/**

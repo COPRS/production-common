@@ -29,7 +29,7 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 
 	@Override
 	public String toString() {
-		return "OutboxClient-" + config.getProtocol() ;
+		return "OutboxClient-" + config.getProtocol();
 	}
 	
 	protected final Iterable<Map.Entry<String, InputStream>> entries(final ObsObject obsObject) throws SdkClientException {

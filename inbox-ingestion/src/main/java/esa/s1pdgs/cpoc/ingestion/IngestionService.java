@@ -32,6 +32,8 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
+import esa.s1pdgs.cpoc.report.InboxReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -86,13 +88,19 @@ public class IngestionService {
 		LOG.debug("received Ingestion: {}", ingestion.getProductName());
 
 		final Reporting reporting = reportingFactory.newReporting(0);
-		reporting.begin(new ReportingMessage("Start processing of {}", ingestion.getProductName()));
+		reporting.begin(
+				new InboxReportingInput(ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getPickupPath()), 
+				new ReportingMessage("Start processing of {}", ingestion.getProductName())
+		);
 
 		try {
 			final IngestionResult result = identifyAndUpload(reportingFactory, message, ingestion);
 			publish(result.getIngestedProducts(), message, reportingFactory);
 			delete(ingestion, reportingFactory);
-			reporting.end(new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getProductName()));
+			reporting.end(
+					new FilenameReportingOutput(ingestion.getProductName()),
+					new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getProductName())
+			);
 		} catch (Exception e) {
 			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 		}

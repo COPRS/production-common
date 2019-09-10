@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.report;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,6 +13,10 @@ public class FilenameReportingOutput implements ReportingOutput {
 	
 	public FilenameReportingOutput(List<String> filenames) {
 		this.filenames = filenames;
+	}
+	
+	public FilenameReportingOutput(String ... filenames) {
+		this(Arrays.asList(filenames));
 	}
 	
 	public FilenameReportingOutput() {

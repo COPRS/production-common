@@ -32,7 +32,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	}
 	
 	@Override
-	public void transfer(final ObsObject obsObject) throws Exception {
+	public String transfer(final ObsObject obsObject) throws Exception {
 		final FTPClient ftpClient = new FTPClient();
 		ftpClient.addProtocolCommandListener(
 				new PrintCommandListener(new LogPrintWriter(s -> logger.debug(s)), true)
@@ -41,10 +41,10 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 		ftpClient.connect(config.getHostname(), port);
 	    assertPositiveCompletion(ftpClient);
         
-        performTransfer(obsObject, ftpClient);
+        return performTransfer(obsObject, ftpClient);
 	}
 
-	protected void performTransfer(final ObsObject obsObject, final FTPClient ftpClient)
+	protected String performTransfer(final ObsObject obsObject, final FTPClient ftpClient)
 			throws IOException, SdkClientException {
 		if (!ftpClient.login(config.getUsername(), config.getPassword())) {
         	throw new RuntimeException("Could not authenticate user " + config.getUsername());
@@ -63,6 +63,9 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	        assertPositiveCompletion(ftpClient);        
 	        
 			final Path path = evaluatePathFor(obsObject);	
+			final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
+					path.toString();
+					
 			for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
 				
 				final Path dest = path.resolve(entry.getKey());
@@ -94,6 +97,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
     				assertPositiveCompletion(ftpClient);	    				
     			}
     		}
+			return retVal;
     	}
     	finally { 
     		try {

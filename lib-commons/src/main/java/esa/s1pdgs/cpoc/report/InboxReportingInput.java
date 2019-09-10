@@ -3,22 +3,47 @@ package esa.s1pdgs.cpoc.report;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InboxReportingInput implements ReportingInput {	
-	@JsonProperty("inbox_url_string")
-	private String url;
 	
-	public InboxReportingInput(String url) {
-		this.url = url;
+	@JsonProperty("inbox_name_string")
+	private String name;
+	
+	@JsonProperty("inbox_relative_path_string")
+	private String relativePath;
+	
+	@JsonProperty("inbox_pickup_path_string")
+	private String pickupPath;
+
+	public InboxReportingInput(String name, String relativePath, String pickupPath) {
+		this.name = name;
+		this.relativePath = relativePath;
+		this.pickupPath = pickupPath;
 	}
-	
+
 	public InboxReportingInput() {
-		this(null);
+		this(null, null, null);
 	}
 
-	public String getUrl() {
-		return url;
+	public String getName() {
+		return name;
 	}
 
-	public void setUrl(String url) {
-		this.url = url;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getRelativePath() {
+		return relativePath;
+	}
+
+	public void setRelativePath(String relativePath) {
+		this.relativePath = relativePath;
+	}
+
+	public String getPickupPath() {
+		return pickupPath;
+	}
+
+	public void setPickupPath(String pickupPath) {
+		this.pickupPath = pickupPath;
 	}
 }

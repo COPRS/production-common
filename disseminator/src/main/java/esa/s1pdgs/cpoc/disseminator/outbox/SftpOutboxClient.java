@@ -34,7 +34,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	}
 
 	@Override
-	public final void transfer(final ObsObject obsObject) throws Exception {	
+	public final String transfer(final ObsObject obsObject) throws Exception {	
 		final JSch client = new JSch();
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
 		
@@ -54,6 +54,9 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 		
 	    	try {	
 				final Path path = evaluatePathFor(obsObject);	
+				final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
+						path.toString();
+				
 				for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {					
 					final Path dest = path.resolve(entry.getKey());
 	    			String currentPath = "";
@@ -80,6 +83,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	    				channel.put(in, dest.toString());	    				
 	    			}
 	    		}
+				return retVal;
 	    	}
 	    	finally {
 			    LOG.debug("Disconnecting ChannelSftp on {}", config.getHostname());

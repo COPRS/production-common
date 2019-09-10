@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -96,9 +98,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                     throw new InvalidFormatProduct("Invalid channel identifier "
                             + leveldto.getChannelId());
                 }
-                reporting.begin(new ReportingMessage("Start job generation using  {}", mqiMessage.getBody().getKeyObjectStorage()));
+                reporting.begin(
+                		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getKeyObjectStorage())),
+                		new ReportingMessage("Start job generation using  {}", mqiMessage.getBody().getKeyObjectStorage())
+                );
                 
                 AppDataJobDto<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
+                
                 LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
                 productName = appDataJob.getProduct().getProductName();
 
@@ -138,7 +144,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             step = 0;
             LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,
                     leveldto.getKeyObjectStorage());
-            
+                       
             reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getKeyObjectStorage()));
         }
 

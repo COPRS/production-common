@@ -65,7 +65,7 @@ public class FileUploader {
 		this.job = job;
 	}
 
-	public void processOutput() throws AbstractCodedException {
+	public String processOutput() throws AbstractCodedException {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("FileUploader");
 		final Reporting reporting = reportingFactory.newReporting(0);
 
@@ -86,11 +86,13 @@ public class FileUploader {
 			
 			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName,zipFileName);
 			outputToPublish.add(cpqm);
-			
+		
 //// 			// Upload per batch the output
 			processProducts(reportingFactory, uploadObject, outputToPublish);
 			
  	        reporting.end(new ReportingMessage(productPath.length(), "End uploading {}", zipFileName));
+ 	        
+ 	        return zipFileName;
 		} catch (AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;

@@ -28,7 +28,7 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 	}
 
 	@Override
-	public final void transfer(final ObsObject obsObject) throws Exception {		
+	public final String transfer(final ObsObject obsObject) throws Exception {		
 		final Path path = evaluatePathFor(obsObject);	
 		for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
 			
@@ -42,5 +42,6 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 				IOUtils.copyLarge(in, out, new byte[config.getBufferSize()]);    				
 			}
 		}
+		return path.toString();
 	}
 }

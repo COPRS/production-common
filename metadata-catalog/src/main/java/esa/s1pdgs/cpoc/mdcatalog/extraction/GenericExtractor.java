@@ -31,6 +31,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -162,7 +163,7 @@ public abstract class GenericExtractor<T> {
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("MetadataExtraction");
         
         final Reporting report = reportingFactory.newReporting(0);        
-        report.begin(new ReportingMessage("Starting metadata extraction"));        
+        report.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));        
         appStatus.setProcessing(category, message.getIdentifier());
         
         FailedProcessingDto failedProc = new FailedProcessingDto();

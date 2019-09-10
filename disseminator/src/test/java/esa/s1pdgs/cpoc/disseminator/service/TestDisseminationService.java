@@ -91,7 +91,7 @@ public class TestDisseminationService {
 		};		
 		final OutboxClient failOuboxClient = new OutboxClient() {			
 			@Override
-			public void transfer(final ObsObject obsObjext) throws SdkClientException, ObsException {
+			public String transfer(final ObsObject obsObjext) throws SdkClientException, ObsException {
 				throw new SdkClientException("EXPECTED");
 			}
 		};

@@ -589,9 +589,11 @@ public class OutputProcessor {
 	 * @throws ObsException
 	 * @throws IOException
 	 */
-	public void processOutput() throws AbstractCodedException {
+	public List<String> processOutput() throws AbstractCodedException {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("OutputHandling");
 
+		List<String> result = new ArrayList<>();
+		
 		// Extract files
 		List<String> lines = extractFiles();
 
@@ -601,11 +603,11 @@ public class OutputProcessor {
 		List<FileQueueMessage> reportToPublish = new ArrayList<>();
 		
 		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
-
-		final String listoutputs = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.joining(","));
+		
+		result = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.toList());
 
 		final Reporting reporting = reportingFactory.newReporting(1);
-		reporting.begin(new ReportingMessage("Start handling of outputs " + listoutputs));
+		reporting.begin(new ReportingMessage("Start handling of outputs " + result));
 
 		try {
 			// Upload per batch the output
@@ -613,11 +615,12 @@ public class OutputProcessor {
 			// Publish reports
 			processReports(reportToPublish);
 
-			reporting.end(new ReportingMessage(size, "End handling of outputs " + listoutputs));
+			reporting.end(new ReportingMessage(size, "End handling of outputs " + result));
 		} catch (AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
+		return result;
 	}
 
 	private long size(File file) throws InternalErrorException {

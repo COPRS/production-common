@@ -40,7 +40,9 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.OutboxReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
@@ -123,7 +125,13 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		
 		final Reporting.Factory rf = new LoggerReporting.Factory("Dissemination");
 		final Reporting reporting = rf.newReporting(0);
-		reporting.begin(new ReportingMessage("Start dissemination of product to outbox {}", target) );
+		
+		String targetUrl = "";
+		
+		reporting.begin(
+				new FilenameReportingInput(product.getProductName()),
+				new ReportingMessage("Start dissemination of product to outbox {}", target) 
+		);
 		try {
 			assertExists(product);
 			final OutboxClient outboxClient = clientForTarget(target);
@@ -131,11 +139,8 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			final Reporting reportingDl = rf.newReporting(1);
 			reportingDl.begin(new ReportingMessage("Start downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
 			try {
-				Retries.performWithRetries(
-						() -> {
-							outboxClient.transfer(new ObsObject(product.getFamily(), product.getKeyObjectStorage()));
-							return null;
-						}, 
+				targetUrl = Retries.performWithRetries(
+						() -> outboxClient.transfer(new ObsObject(product.getFamily(), product.getKeyObjectStorage())), 
 						"Transfer of " + product.getKeyObjectStorage() + " to " + target,
 						properties.getMaxRetries(), 
 						properties.getTempoRetryMs()
@@ -163,7 +168,10 @@ public class DisseminationService implements MqiListener<ProductDto> {
 			));									
 			throw new RuntimeException(messageString, e);
 		} 
-		reporting.end(new ReportingMessage("End dissemination of product to outbox {}", target));
+		reporting.end(
+				new OutboxReportingOutput(targetUrl),
+				new ReportingMessage("End dissemination of product to outbox {}", target)
+		);
 	}
 
 	final void assertExists(final ProductDto product) throws ObsServiceException, SdkClientException {

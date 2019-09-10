@@ -39,6 +39,8 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -141,8 +143,11 @@ public class CompressProcessor {
 
 		String workDir = properties.getWorkingDirectory();
 
-		final Reporting report = reportingFactory.newReporting(0);
-		report.begin(new ReportingMessage("Start compression processing"));
+		final Reporting report = reportingFactory.newReporting(0);	
+		report.begin(
+				new FilenameReportingInput(message.getBody().getProductName()),
+				new ReportingMessage("Start compression processing")
+		);
 
 		ProductDto job = message.getBody();
 
@@ -164,12 +169,15 @@ public class CompressProcessor {
 		// ----------------------------------------------------------
 		// Process message
 		// ----------------------------------------------------------
-		processTask(message, fileDownloader, fileUploader, procExecutorSrv, procCompletionSrv, procExecutor, report);
+		final String outputName = processTask(message, fileDownloader, fileUploader, procExecutorSrv, procCompletionSrv, procExecutor, report);
 
-		report.end(new ReportingMessage("End compression processing"));
+		report.end(
+				new FilenameReportingOutput(outputName), 
+				new ReportingMessage("End compression processing")
+		);
 	}
 
-	protected void processTask(final GenericMessageDto<ProductDto> message, final FileDownloader fileDownloader,
+	protected String processTask(final GenericMessageDto<ProductDto> message, final FileDownloader fileDownloader,
 			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
 			final ExecutorCompletionService<Void> procCompletionSrv, final CompressExecutorCallable procExecutor,
 			final Reporting report) {
@@ -177,7 +185,8 @@ public class CompressProcessor {
 		int step = 0;
 		boolean ackOk = false;
 		String errorMessage = "";
-
+		String filename = "NOT_DEFINED";
+		
 		FailedProcessingDto failedProc = null;
 
 		try {
@@ -200,7 +209,7 @@ public class CompressProcessor {
 			LOGGER.info("{} Processing l0 outputs", "LOG_OUTPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT
 					job);
 
-			fileUploader.processOutput();
+			filename = fileUploader.processOutput();
 
 			ackOk = true;
 		} catch (AbstractCodedException ace) {
@@ -229,6 +238,7 @@ public class CompressProcessor {
 
 		// Ack and check if application shall stopped
 		ackProcessing(message, failedProc, ackOk, errorMessage);
+		return filename;
 	}
 
 	/**
