@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +28,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 /**
@@ -235,8 +238,31 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-    public void validate(ObsObject object) throws ObsServiceException {
-        // TODO Auto-generated method stub
+    public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
+		try {
+			Path tempDir = Files.createTempDirectory("");
+			String fileName = object.getKey() + S3ObsServices.MD5SUM_SUFFIX;
+			downloadFile(object.getFamily(), fileName, tempDir.toFile().getAbsolutePath());
+			List<String> lines = Files.readAllLines(new File(tempDir.toFile(), fileName).toPath());
+			for (String line : lines) {
+				int idx = line.indexOf("  ");
+				if (idx >= 0 && line.length() > (idx + 2)) {
+					String key = line.substring(idx + 2);
+					if (!exists(new ObsObject(object.getFamily(), key))) {
+						throw new ObsValidationException("Object not found {} of family {}", key, object.getFamily());
+					}
+				}
+			}
+		} catch (SdkClientException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ObsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
     }
 }

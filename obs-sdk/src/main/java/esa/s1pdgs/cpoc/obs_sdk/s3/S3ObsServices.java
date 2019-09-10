@@ -59,7 +59,7 @@ public class S3ObsServices {
      */
     private final int retryDelay;
 
-    private static final String MD5SUM_SUFFIX = ".md5sum";
+    public static final String MD5SUM_SUFFIX = ".md5sum";
     
     /**
      * @param s3client

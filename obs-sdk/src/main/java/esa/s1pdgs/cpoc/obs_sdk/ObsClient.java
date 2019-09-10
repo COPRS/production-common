@@ -74,6 +74,7 @@ public interface ObsClient {
      * @throws ObsServiceException
      * If a consistency issue is found an exception is raised providing the product name it occured
      * and the violation being found
+     * @throws ObsValidationException 
      */
-    void validate(ObsObject object) throws ObsServiceException;
+    void validate(ObsObject object) throws ObsServiceException, ObsValidationException;
 }
