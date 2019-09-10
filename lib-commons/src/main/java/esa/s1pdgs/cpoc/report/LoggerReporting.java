@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.report;
 
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -119,15 +121,15 @@ public final class LoggerReporting implements Reporting  {
 		final Map<String,Object> elements = new HashMap<>();
 		elements.put("status", status);
 		elements.put("error_code", errorCode);
-		elements.put("duration_in_seconds", duration(deltaTMillis));
+		elements.put("duration_in_seconds", calcDuration(deltaTMillis));
 		elements.put("output", output);
 		elements.put("quality", Collections.emptyList());
 		
 		// data_rate_mebibytes_sec
 		// data_volume_mebibytes
 		if (transferAmount != 0) {
-			elements.put("data_rate_mebibytes_sec", rate(transferAmount, deltaTMillis));
-			elements.put("data_volume_mebibytes", size(transferAmount));
+			elements.put("data_rate_mebibytes_sec", calcRate(transferAmount, deltaTMillis));
+			elements.put("data_volume_mebibytes", calcSize(transferAmount));
 		}		
 		return elements;
 	}
@@ -137,6 +139,7 @@ public final class LoggerReporting implements Reporting  {
 		final ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 		
+				
 		final StringBuilder stringBuilder = new StringBuilder();		
 		for (final Map.Entry<String,Object> entry : elements.entrySet()) {			
 			try {
@@ -148,21 +151,36 @@ public final class LoggerReporting implements Reporting  {
 		return stringBuilder.toString();
 	}
 	
-	static final String duration(final long deltaTMillis)
-	{
+	static final String duration(final long deltaTMillis) {
 		// duration in seconds with millisecond granularity
-		return String.format("%.6f", deltaTMillis / 1000.0);
+		return String.format("%.6f", calcDuration(deltaTMillis));
 	}
 	
-	static final String size(final long sizeByte)
-	{
+	static final String size(final long sizeByte) {
 		// calculate size in MiB
-		return String.format("%.3f", sizeByte / 1048576.0);
+		return String.format("%.3f", calcSize(sizeByte));
 	}
 	
-	static final String rate(final long sizeByte, final long deltaTMillis)
-	{
-		return String.format("%.3f", (sizeByte / 1048576.0) / (deltaTMillis / 1000.0));
+	static final String rate(final long sizeByte, final long deltaTMillis) {
+		return String.format("%.3f", calcRate(sizeByte, deltaTMillis));
+	}
+	
+	private static final double calcDuration(final long deltaTMillis) {
+		return new BigDecimal(deltaTMillis / 1000.0)
+				.setScale(6, RoundingMode.FLOOR)
+				.doubleValue();
+	}
+	
+	private static final double calcSize(final long sizeByte) {
+		return new BigDecimal(sizeByte / 1048576.0)
+				.setScale(3, RoundingMode.FLOOR)
+				.doubleValue();
+	}
+	
+	private static final double calcRate(final long sizeByte, final long deltaTMillis) {
+		return new BigDecimal(((double) sizeByte / 1048576.0) / ((double) deltaTMillis / 1000.0))
+				.setScale(3, RoundingMode.FLOOR)
+				.doubleValue();
 	}
 	
 	private static final String quote(final String value) {

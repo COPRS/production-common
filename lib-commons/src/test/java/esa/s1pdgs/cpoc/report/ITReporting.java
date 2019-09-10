@@ -23,11 +23,12 @@ public final class ITReporting {
 		uut= fct.newReporting(1);
 		uut.begin(new ReportingMessage("Foo"));		
 		uut.intermediate(new ReportingMessage("bar"));
+		uut.intermediate(new ReportingMessage("baaz"));
 		uut.end(new JobOrderReportingOutput(UUID.randomUUID().toString(), Collections.singletonMap("foo_string", "bar")), new ReportingMessage(42000L, "baz"));
 		
 		uut = new LoggerReporting.Factory("test2").newReporting(0);
 		uut.begin(new ReportingMessage("Foo"));
-		uut.end(new FilenameReportingOutput(Collections.singletonList("fooBar.txt")), new ReportingMessage(23000L,"Foo"));
+		uut.end(new FilenameReportingOutput(Collections.singletonList("fooBar.txt")), new ReportingMessage(230000000L,"Foo"));
 		
 		LOG.debug("foo bar");
 	}

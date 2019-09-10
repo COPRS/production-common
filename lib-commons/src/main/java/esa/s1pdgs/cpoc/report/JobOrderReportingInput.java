@@ -8,10 +8,10 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JobOrderReportingInput extends FilenameReportingInput {	
-	@JsonProperty("jobOrderId_uuid")
+	@JsonProperty("job_order_id_string")
 	private String jobOrderUuid;
 	
-	@JsonProperty("jobOrderParameters_object")
+	@JsonProperty("job_order_parameters_object")
 	private Map<String,String> jobOrderParameters;
 	
 	public JobOrderReportingInput(List<String> filenames, String jobOrderUuid, Map<String, String> jobOrderParameters) {

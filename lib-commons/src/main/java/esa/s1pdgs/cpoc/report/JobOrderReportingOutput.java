@@ -6,10 +6,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JobOrderReportingOutput implements ReportingOutput {	
-	@JsonProperty("jobOrderId_uuid")
+	@JsonProperty("job_order_id_string")
 	private String jobOrderUuid;
 	
-	@JsonProperty("jobOrderParameters_object")
+	@JsonProperty("job_order_parameters_object")
 	private Map<String,String> jobOrderParameters;
 	
 	public JobOrderReportingOutput(String jobOrderUuid, Map<String, String> jobOrderParameters) {
