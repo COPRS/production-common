@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -38,11 +39,15 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingOutput;
+import esa.s1pdgs.cpoc.report.WrapperReportingOutput;
+import esa.s1pdgs.cpoc.report.WrapperReportingOutput.Segment;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
 import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
@@ -227,9 +232,8 @@ public class JobProcessor {
 		// ----------------------------------------------------------
 		// Process message
 		// ----------------------------------------------------------
-		final List<String> outputs = processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, report);
-
-		report.end(new FilenameReportingOutput(outputs),new ReportingMessage("End job processing"));
+		final ReportingOutput repOut = processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, report);
+		report.end(repOut, new ReportingMessage("End job processing"));
 	}
 
 	/**
@@ -250,7 +254,7 @@ public class JobProcessor {
      * @param procCompletionSrv
      * @param procExecutor
      */
-    protected List<String> processJob(final GenericMessageDto<LevelJobDto> message,
+    protected ReportingOutput processJob(final GenericMessageDto<LevelJobDto> message,
             final InputDownloader inputDownloader,
             final OutputProcessor outputProcessor,
             final ExecutorService procExecutorSrv,
@@ -263,7 +267,7 @@ public class JobProcessor {
         boolean ackOk = false;
         String errorMessage = "";
         
-        List<String> result = new ArrayList<>();
+        ReportingOutput result = ReportingOutput.NULL;
         
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
