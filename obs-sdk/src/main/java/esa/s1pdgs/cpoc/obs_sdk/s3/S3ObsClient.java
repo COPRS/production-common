@@ -43,8 +43,6 @@ public class S3ObsClient extends AbstractObsClient {
 
 	private static final Logger LOGGER = LogManager.getLogger(S3ObsClient.class);
 	
-	private static final String MD5SUM_SUFFIX = ".md5sum";
-
 	/**
 	 * Configuration
 	 */
@@ -236,33 +234,4 @@ public class S3ObsClient extends AbstractObsClient {
 		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
 		return result;
 	}
-
-	@Override
-    public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
-		try {
-			Path tempDir = Files.createTempDirectory("");
-			String fileName = object.getKey() + S3ObsServices.MD5SUM_SUFFIX;
-			downloadFile(object.getFamily(), fileName, tempDir.toFile().getAbsolutePath());
-			List<String> lines = Files.readAllLines(new File(tempDir.toFile(), fileName).toPath());
-			for (String line : lines) {
-				int idx = line.indexOf("  ");
-				if (idx >= 0 && line.length() > (idx + 2)) {
-					String key = line.substring(idx + 2);
-					if (!exists(new ObsObject(object.getFamily(), key))) {
-						throw new ObsValidationException("Object not found {} of family {}", key, object.getFamily());
-					}
-				}
-			}
-		} catch (SdkClientException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ObsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-    }
 }

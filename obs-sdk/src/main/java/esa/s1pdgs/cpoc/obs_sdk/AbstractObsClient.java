@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsServices;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
@@ -30,6 +34,8 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
  */
 public abstract class AbstractObsClient implements ObsClient {
 
+	public static final String MD5SUM_SUFFIX = ".md5sum";
+	
     /**
      * Get the timeout for waiting threads termination in seconds
      * @return
@@ -278,4 +284,32 @@ public abstract class AbstractObsClient implements ObsClient {
 	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)  throws SdkClientException {
 		throw new UnsupportedOperationException();
 	}
+	
+	@Override
+    public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
+		try {
+			Path tempDir = Files.createTempDirectory("");
+			String fileName = object.getKey() + MD5SUM_SUFFIX;
+			downloadFile(object.getFamily(), fileName, tempDir.toFile().getAbsolutePath());
+			List<String> lines = Files.readAllLines(new File(tempDir.toFile(), fileName).toPath());
+			for (String line : lines) {
+				int idx = line.indexOf("  ");
+				if (idx >= 0 && line.length() > (idx + 2)) {
+					String key = line.substring(idx + 2);
+					if (!exists(new ObsObject(object.getFamily(), key))) {
+						throw new ObsValidationException("Object not found {} of family {}", key, object.getFamily());
+					}
+				}
+			}
+		} catch (SdkClientException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ObsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 }

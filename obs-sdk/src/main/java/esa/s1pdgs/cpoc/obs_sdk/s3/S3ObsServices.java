@@ -23,6 +23,7 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
 
+import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
@@ -59,8 +60,6 @@ public class S3ObsServices {
      */
     private final int retryDelay;
 
-    public static final String MD5SUM_SUFFIX = ".md5sum";
-    
     /**
      * @param s3client
      */
@@ -144,7 +143,7 @@ public class S3ObsServices {
                 if (objectListing != null && !CollectionUtils
                         .isEmpty(objectListing.getObjectSummaries())) {
         			for (S3ObjectSummary s : objectListing.getObjectSummaries()) {
-        				if (!s.getKey().endsWith(MD5SUM_SUFFIX)) {
+        				if (!s.getKey().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
         					nbObj++;
         				}
         			}
@@ -215,7 +214,7 @@ public class S3ObsServices {
                     	String key = objectSummary.getKey();
 
                     	// Skip MD5sum files
-                    	if (key.endsWith(MD5SUM_SUFFIX)) {
+                    	if (key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
                     		continue;
                     	}
                     	
@@ -301,7 +300,7 @@ public class S3ObsServices {
     	do {
    			listing = listing == null ? s3client.listObjects(bucketName, prefix) : s3client.listNextBatchOfObjects(listing);
 	    	for(S3ObjectSummary object : listing.getObjectSummaries()) {
-	    		if (!object.getKey().endsWith(MD5SUM_SUFFIX)) {
+	    		if (!object.getKey().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
 	    			result.add(object);
 	    		}
 	    	}
@@ -534,12 +533,6 @@ public class S3ObsServices {
 				}
 			}
 		}
-		
-		
-		
 	}
-
-	
-	
     
 }
