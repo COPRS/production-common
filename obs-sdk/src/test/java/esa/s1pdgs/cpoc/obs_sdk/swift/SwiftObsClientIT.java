@@ -15,7 +15,9 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -37,6 +39,9 @@ public class SwiftObsClientIT {
 	public final static File testFile1 = getResource("/" + testFileName1);
 	public final static File testFile2 = getResource("/" + testFileName2);
 	public final static File testDirectory = getResource("/" + testDirectoryName);
+	
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 	
 	AbstractObsClient uut;
 	
@@ -112,21 +117,15 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+
+		// validate complete directory
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
-	}
-	
-	@Test(expected = ObsValidationException.class)
-	public void uploadAndNegativeValidationOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
-		// upload
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		
+		// validate incomplete directory
 		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		exception.expect(ObsValidationException.class);
+		exception.expectMessage("Object not found: " + testDirectoryName + "/" + testFileName1 + " of family " + auxiliaryFiles); 
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));		
 	}
 

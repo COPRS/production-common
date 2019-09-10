@@ -296,7 +296,7 @@ public abstract class AbstractObsClient implements ObsClient {
 				if (idx >= 0 && line.length() > (idx + 2)) {
 					String key = line.substring(idx + 2);
 					if (!exists(new ObsObject(object.getFamily(), key))) {
-						throw new ObsValidationException("Object not found {} of family {}", key, object.getFamily());
+						throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
 					}
 				}
 			}
