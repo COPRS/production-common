@@ -110,7 +110,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, ObsException, SwiftSdkClientException {
 		File file;
 		try {
-			file = File.createTempFile(object.getKey(), SwiftObsServices.MD5SUM_SUFFIX);
+			file = File.createTempFile(object.getKey(), AbstractObsClient.MD5SUM_SUFFIX);
 			try(PrintWriter writer = new PrintWriter(file)) {
 				for (String fileInfo : fileList) {
 					writer.println(fileInfo);
@@ -119,7 +119,7 @@ public class SwiftObsClient extends AbstractObsClient {
 		} catch (IOException e) {
 			throw new ObsException(object.getFamily(), "Could not store md5sum temp file", e);
 		}
-		swiftObsServices.uploadFile(configuration.getContainerForFamily(object.getFamily()), object.getKey() + SwiftObsServices.MD5SUM_SUFFIX, file);
+		swiftObsServices.uploadFile(configuration.getContainerForFamily(object.getFamily()), object.getKey() + AbstractObsClient.MD5SUM_SUFFIX, file);
 	}
 	
 	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
@@ -200,10 +200,4 @@ public class SwiftObsClient extends AbstractObsClient {
 		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
 		return result;
 	}
-
-	@Override
-    public void validate(ObsObject object) throws ObsServiceException {
-        // TODO Auto-generated method stub
-        
-    }
 }

@@ -103,7 +103,7 @@ public class SwiftObsClientIT {
 	}
 
 	@Test
-	public void uploadOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+	public void uploadAndValidationOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
@@ -112,8 +112,24 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
 	}
 	
+	@Test(expected = ObsValidationException.class)
+	public void uploadAndNegativeValidationOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+		// upload
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));		
+	}
+
 	@Test
 	public void deleteWithoutPrefixTest() throws ObsException, IOException, SdkClientException {	
 		// upload

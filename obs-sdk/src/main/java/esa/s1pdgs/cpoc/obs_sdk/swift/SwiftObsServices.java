@@ -16,6 +16,8 @@ import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 
+import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+
 public class SwiftObsServices {
 
 	/**
@@ -41,8 +43,6 @@ public class SwiftObsServices {
     public final int MAX_RESULTS_PER_LIST = 8000;
     
     public static long MAX_SEGMENT_SIZE = 5L*1024*1024*1024;
-    
-    public static final String MD5SUM_SUFFIX = ".md5sum";
     
     public SwiftObsServices(Account client, final int numRetries, final int retryDelay) {
     	this.client = client;
@@ -105,7 +105,7 @@ public class SwiftObsServices {
                 	objectListing = container.list(prefixKey, marker, MAX_RESULTS_PER_LIST);
                 	for (StoredObject o : objectListing) {
                 		marker = o.getName();
-                		if (!o.getName().endsWith(MD5SUM_SUFFIX)) {
+                		if (!o.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
                 			nbObj++;
                 		}
                 	}
@@ -173,8 +173,8 @@ public class SwiftObsServices {
 	       				 }
 	       				 lastNonSegmentName = object.getName();
 	       				 
-	       				 // Skip MD5sum files
-	       				 if (object.getName().endsWith(MD5SUM_SUFFIX)) {
+	       				 // only download md5sum files if it has been explicitly asked for a md5sum file
+	       				 if (!prefixKey.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && object.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
 	       					 continue;
 	       				 }
 	       				 
@@ -425,7 +425,7 @@ public class SwiftObsServices {
 					objects = container.list("", marker, MAX_RESULTS_PER_LIST);
 					for (StoredObject object : objects) {
 						marker = object.getName();
-						if (!object.getName().endsWith(MD5SUM_SUFFIX)) {
+						if (!object.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
 							result.add(object);
 						}
 					}
@@ -458,7 +458,7 @@ public class SwiftObsServices {
 			Collection<StoredObject> batch = client.getContainer(containerName).list(prefix, marker, MAX_RESULTS_PER_LIST);
 			for (final StoredObject thisObject : batch) {
 				final String key = thisObject.getName();
-				if (key.endsWith(MD5SUM_SUFFIX)) {
+				if (key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
 					continue;
 				}
 

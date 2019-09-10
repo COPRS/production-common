@@ -213,10 +213,10 @@ public class S3ObsServices {
                     	
                     	String key = objectSummary.getKey();
 
-                    	// Skip MD5sum files
-                    	if (key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
-                    		continue;
-                    	}
+                    	// only download md5sum files if it has been explicitly asked for a md5sum file
+	       				if (!prefixKey.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+	       					continue;
+	       				}
                     	
                         // Build temporarly filename
                         String targetDir = directoryPath;
