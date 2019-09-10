@@ -103,6 +103,7 @@ public class SwiftObsClient extends AbstractObsClient {
                     object.getKey(), object.getFile()));
 			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
 				// TODO check DSIB file list, upload md5sum when product is complete
+				
 			} else {
 				uploadMd5Sum(object, fileList);
 			}

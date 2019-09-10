@@ -460,9 +460,10 @@ public class SwiftObsServices {
 			Collection<StoredObject> batch = client.getContainer(containerName).list(prefix, marker, MAX_RESULTS_PER_LIST);
 			for (final StoredObject thisObject : batch) {
 				final String key = thisObject.getName();
-				if (key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
-					continue;
-				}
+				// only download md5sum files if it has been explicitly asked for a md5sum file
+        		if (!prefix.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+   					continue;
+   				}
 
 				// Skip segment files (all files that have a sub directory like naming scheme with a direct parent that 
 				// exists as a file (the manifest file))
@@ -500,9 +501,7 @@ public class SwiftObsServices {
             try {
             	for(StoredObject storedObject : getAll(bucketName, prefix)) {
             		final String key = storedObject.getName();
-            		if (!key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
-            			result.put(key, storedObject.getEtag());
-            		}
+           			result.put(key, storedObject.getEtag());
             	}
             	return result;
             } catch (Exception e) {

@@ -317,8 +317,14 @@ public class S3ObsServices {
             try {
             	for (final S3ObjectSummary summary : getAll(bucketName, prefix)) {
             		final String key = summary.getKey();
-            		final S3Object obj = s3client.getObject(bucketName, key);  
-            		result.put(key, obj.getObjectContent());
+            		
+            		// only download md5sum files if it has been explicitly asked for a md5sum file
+            		if (!prefix.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+       					continue;
+       				}
+            		
+       				final S3Object obj = s3client.getObject(bucketName, key);  
+       				result.put(key, obj.getObjectContent());
             	}
             	return result;
             } catch (com.amazonaws.AmazonServiceException ase) {
