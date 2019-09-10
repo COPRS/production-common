@@ -126,7 +126,7 @@ public class S3ObsClient extends AbstractObsClient {
 		
 	}
 	
-	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws S3ObsServiceException, S3SdkClientException, ObsServiceException, ObsException {
+	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, S3SdkClientException {
 		File file;
 		try {
 			file = File.createTempFile(object.getKey(), MD5SUM_SUFFIX);
@@ -136,7 +136,7 @@ public class S3ObsClient extends AbstractObsClient {
 				}
 			}
 		} catch (IOException e) {
-			throw new ObsException(object.getFamily(), "Could not store md5sum temp file", e);
+			throw new S3ObsServiceException(configuration.getBucketForFamily(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
 		s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey() + MD5SUM_SUFFIX, file);
 	}
