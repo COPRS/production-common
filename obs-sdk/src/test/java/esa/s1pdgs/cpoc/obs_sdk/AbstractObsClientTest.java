@@ -503,4 +503,10 @@ class AbstractObsClientIncrementImpl extends AbstractObsClient {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	protected String getBucketFor(ProductFamily family) throws ObsServiceException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
