@@ -111,8 +111,8 @@ public class S3ObsClient extends AbstractObsClient {
 
 	@Override
 	public void uploadObject(final ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
+		List<String> fileList = new ArrayList<>();
 		if (object.getFile().isDirectory()) {
-			List<String> fileList = new ArrayList<>();
 			fileList.addAll(s3Services.uploadDirectory(getBucketFor(object.getFamily()), object.getKey(),
 					object.getFile()));
 			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
@@ -121,7 +121,8 @@ public class S3ObsClient extends AbstractObsClient {
 				uploadMd5Sum(object, fileList);
 			}
 		} else {
-			s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey(), object.getFile());
+			fileList.add(s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
+			uploadMd5Sum(object, fileList);
 		}
 		
 	}
