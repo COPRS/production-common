@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -489,5 +490,38 @@ public class SwiftObsServices {
 			result.put(object.getName(), object.getAsObject().downloadObjectAsInputStream());			
     	}
     	return result; 
+    }
+    
+    public final Map<String,String> collectMd5Sums(final String bucketName, final String prefix) throws SwiftObsServiceException, SwiftSdkClientException {
+    	Map<String,String> result;
+    	for (int retryCount = 1;; retryCount++) {
+    		result = new HashMap<>();
+            try {
+            	for(StoredObject storedObject : getAll(bucketName, prefix)) {
+            		final String key = storedObject.getName();
+            		if (!key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+            			result.put(key, storedObject.getEtag());
+            		}
+            	}
+            	return result;
+            } catch (com.amazonaws.AmazonServiceException ase) {
+                throw new SwiftObsServiceException(bucketName, prefix, String.format("Listing fails: %s", ase.getMessage()), ase);
+            } catch (com.amazonaws.SdkClientException sce) {
+                if (retryCount <= numRetries) {
+                    LOGGER.warn(String.format(
+                            "Listing prefixed objects %s from bucket %s failed: Attempt : %d / %d",
+                            prefix, bucketName, retryCount, numRetries)
+                    );
+                    try {
+                        Thread.sleep(retryDelay);
+                    } catch (InterruptedException e) {
+                        throw new SwiftSdkClientException(bucketName, prefix,String.format("Listing fails: %s", sce.getMessage()),sce);
+                    }
+                    continue;
+                } else {
+                    throw new SwiftSdkClientException(bucketName, prefix, String.format("Upload fails: %s", sce.getMessage()), sce);
+                }
+            }
+        }
     }
 }

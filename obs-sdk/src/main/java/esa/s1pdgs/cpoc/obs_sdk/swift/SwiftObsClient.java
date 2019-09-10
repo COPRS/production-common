@@ -200,4 +200,13 @@ public class SwiftObsClient extends AbstractObsClient {
 		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
 		return result;
 	}
+
+	@Override
+	public Map<String,String> collectMd5Sums(ObsObject object) throws ObsException {
+		try {
+			return swiftObsServices.collectMd5Sums(configuration.getContainerForFamily(object.getFamily()), object.getKey());
+		} catch (SwiftSdkClientException | ObsServiceException e) {
+			throw new ObsException(object.getFamily(), object.getKey(), e);
+		}
+	}
 }

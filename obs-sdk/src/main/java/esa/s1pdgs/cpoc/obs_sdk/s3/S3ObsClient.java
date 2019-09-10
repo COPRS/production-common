@@ -231,4 +231,10 @@ public class S3ObsClient extends AbstractObsClient {
 		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);		
 		return result;
 	}
+
+	@Override
+	public Map<String,String> collectMd5Sums(ObsObject object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

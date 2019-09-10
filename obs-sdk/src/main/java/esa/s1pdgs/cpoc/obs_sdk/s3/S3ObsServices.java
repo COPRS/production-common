@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -294,7 +295,7 @@ public class S3ObsServices {
         }
     }
     
-    public final List<S3ObjectSummary> getAll(final String bucketName, final String prefix) {    
+    private final List<S3ObjectSummary> getAll(final String bucketName, final String prefix) {    
     	final List<S3ObjectSummary> result = new ArrayList<>();
     	ObjectListing listing = null;
     	do {
@@ -308,7 +309,7 @@ public class S3ObsServices {
     	
     	return result;
     }
-    
+       
     public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) throws S3ObsServiceException, S3SdkClientException {       	    	
         for (int retryCount = 1;; retryCount++) {
         	final Map<String, InputStream> result = new LinkedHashMap<>();
@@ -318,6 +319,40 @@ public class S3ObsServices {
             		final String key = summary.getKey();
             		final S3Object obj = s3client.getObject(bucketName, key);  
             		result.put(key, obj.getObjectContent());
+            	}
+            	return result;
+            } catch (com.amazonaws.AmazonServiceException ase) {
+                throw new S3ObsServiceException(bucketName, prefix, String.format("Listing fails: %s", ase.getMessage()), ase);
+            } catch (com.amazonaws.SdkClientException sce) {
+                if (retryCount <= numRetries) {
+                    LOGGER.warn(String.format(
+                            "Listing prefixed objects %s from bucket %s failed: Attempt : %d / %d",
+                            prefix, bucketName, retryCount, numRetries)
+                    );
+                    try {
+                        Thread.sleep(retryDelay);
+                    } catch (InterruptedException e) {
+                        throw new S3SdkClientException(bucketName, prefix,String.format("Listing fails: %s", sce.getMessage()),sce);
+                    }
+                    continue;
+                } else {
+                    throw new S3SdkClientException(bucketName, prefix, String.format("Upload fails: %s", sce.getMessage()), sce);
+                }
+            }
+        }
+    }
+    
+    public final Map<String,String> collectMd5Sum(final String bucketName, final String prefix) throws S3ObsServiceException, S3SdkClientException {
+    	Map<String,String> result;
+    	for (int retryCount = 1;; retryCount++) {
+    		result = new HashMap<>();
+            try {
+            	for (final S3ObjectSummary summary : getAll(bucketName, prefix)) {
+            		final String key = summary.getKey();
+            		final S3Object obj = s3client.getObject(bucketName, key);
+            		if (!key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+            			result.put(key, obj.getObjectMetadata().getETag());
+            		}
             	}
             	return result;
             } catch (com.amazonaws.AmazonServiceException ase) {

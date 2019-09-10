@@ -35,6 +35,7 @@ public class SwiftObsClientIT {
 	public final static String testFilePrefix = "abc/def/";
 	public final static String testFileName1 = "testfile1.txt";
 	public final static String testFileName2 = "testfile2.txt";
+	public final static String testUnexptectedFileName = "unexpected.txt";
 	public final static String testDirectoryName = "testdir";
 	public final static File testFile1 = getResource("/" + testFileName1);
 	public final static File testFile2 = getResource("/" + testFileName2);
@@ -86,6 +87,10 @@ public class SwiftObsClientIT {
 			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2);
 		}
 
+		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName))) {
+			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName);
+		}
+
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum"))) {
 			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + ".md5sum");
 		}
@@ -112,6 +117,7 @@ public class SwiftObsClientIT {
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
@@ -120,13 +126,30 @@ public class SwiftObsClientIT {
 
 		// validate complete directory
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
+
+		// validate directory with unexpected file
+		uut.uploadFile(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName, testFile1);		
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
+		exception.expect(ObsValidationException.class);
+		exception.expectMessage("Unexpected object found: " + testDirectoryName + "/" + testUnexptectedFileName + " for " + testDirectoryName  + " of family " + auxiliaryFiles); 
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));				
+		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName);
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
 		
 		// validate incomplete directory
 		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		exception.expect(ObsValidationException.class);
 		exception.expectMessage("Object not found: " + testDirectoryName + "/" + testFileName1 + " of family " + auxiliaryFiles); 
-		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));		
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
+		
+		// validate wrong checksum situation
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		uut.uploadFile(auxiliaryFiles, testDirectoryName + "/" + testFileName1, testFile1);		
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		exception.expect(ObsValidationException.class);
+		exception.expectMessage("Checksum is wrong for object: " + testDirectoryName + "/" + testFileName1 + " of family " + auxiliaryFiles); 
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
 	}
 
 	@Test

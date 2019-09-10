@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Before;
@@ -32,7 +33,7 @@ public class AbstractObsClientTest {
      */
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    
+
 	@Before
 	public void before() throws ObsServiceException, SdkClientException {
       uut = new AbstractObsClientIncrementImpl();
@@ -492,9 +493,14 @@ class AbstractObsClientIncrementImpl extends AbstractObsClient {
 		return null;
 	}
 
-  @Override
-  public void validate(ObsObject object) throws ObsServiceException {
-    // TODO Auto-generated method stub
-    
-  }
+	@Override
+	public void validate(ObsObject object) throws ObsServiceException {
+	  // TODO Auto-generated method stub
+	}
+
+	@Override
+	public Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
