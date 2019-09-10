@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +39,8 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 public class S3ObsClient extends AbstractObsClient {
 
 	private static final Logger LOGGER = LogManager.getLogger(S3ObsClient.class);
+	
+	private static final String MD5SUM_SUFFIX = ".md5sum";
 
 	/**
 	 * Configuration
@@ -102,18 +106,36 @@ public class S3ObsClient extends AbstractObsClient {
 				object.getKey(), object.getTargetDir(), object.isIgnoreFolders());
 	}
 
-	/**
-	 * @see ObsClient#doesObjectExist(ObsObject)
-	 */
 	@Override
-	public void uploadObject(final ObsUploadObject object) throws SdkClientException, ObsServiceException {
+	public void uploadObject(final ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
 		if (object.getFile().isDirectory()) {
-			s3Services.uploadDirectory(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
-					object.getFile());
+			List<String> fileList = new ArrayList<>();
+			fileList.addAll(s3Services.uploadDirectory(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
+					object.getFile()));
+			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
+				// TODO check DSIB file list, upload md5sum when product is complete
+			} else {
+				uploadMd5Sum(object, fileList);
+			}
 		} else {
-			s3Services.uploadFile(configuration.getBucketForFamily(object.getFamily()), object.getKey(),
-					object.getFile());
+			s3Services.uploadFile(configuration.getBucketForFamily(object.getFamily()), object.getKey(), object.getFile());
 		}
+		
+	}
+	
+	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws S3ObsServiceException, S3SdkClientException, ObsServiceException, ObsException {
+		File file;
+		try {
+			file = File.createTempFile(object.getKey(), MD5SUM_SUFFIX);
+			try(PrintWriter writer = new PrintWriter(file)) {
+				for (String fileInfo : fileList) {
+					writer.println(fileInfo);
+				}
+			}
+		} catch (IOException e) {
+			throw new ObsException(object.getFamily(), "Could not store md5sum temp file", e);
+		}
+		s3Services.uploadFile(configuration.getBucketForFamily(object.getFamily()), object.getKey() + MD5SUM_SUFFIX, file);
 	}
 
 	/**
@@ -177,6 +199,10 @@ public class S3ObsClient extends AbstractObsClient {
 			}
 
 			for (S3ObjectSummary s : objSum) {
+				if (s.getKey().endsWith(MD5SUM_SUFFIX)) {
+					continue;
+				}
+				
 				Date lastModified = s.getLastModified();
 
 				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {

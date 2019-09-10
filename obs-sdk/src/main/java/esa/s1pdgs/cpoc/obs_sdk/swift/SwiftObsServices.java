@@ -42,6 +42,8 @@ public class SwiftObsServices {
     
     public static long MAX_SEGMENT_SIZE = 5L*1024*1024*1024;
     
+    public static final String MD5SUM_SUFFIX = ".md5sum";
+    
     public SwiftObsServices(Account client, final int numRetries, final int retryDelay) {
     	this.client = client;
         this.numRetries = numRetries;
@@ -94,19 +96,21 @@ public class SwiftObsServices {
      */
 	public int getNbObjects(String containerName, String prefixKey) throws SwiftSdkClientException {
         for (int retryCount = 1;; retryCount++) {
+        	int nbObj = 0;
             try {
+            	Collection<StoredObject> objectListing;
                 Container container = client.getContainer(containerName);
-                Collection<StoredObject> objectListing = container.list(prefixKey, "", MAX_RESULTS_PER_LIST);
-                Collection<StoredObject> tmpCol = objectListing;
-                while (tmpCol.size() == MAX_RESULTS_PER_LIST) { // possibly more results available to fetch
-                    String marker = "";
-                	for (StoredObject o : tmpCol) {
-                		marker = o.getName(); 
+                String marker = "";
+                do {
+                	objectListing = container.list(prefixKey, marker, MAX_RESULTS_PER_LIST);
+                	for (StoredObject o : objectListing) {
+                		marker = o.getName();
+                		if (!o.getName().endsWith(MD5SUM_SUFFIX)) {
+                			nbObj++;
+                		}
                 	}
-                	tmpCol = container.list(prefixKey, marker, MAX_RESULTS_PER_LIST);
-              		objectListing.addAll(tmpCol);
-                }
-                return objectListing.size();
+                } while (objectListing.size() == MAX_RESULTS_PER_LIST); // possibly more results available to fetch
+                return nbObj;
             } catch (Exception e) {
                 if (retryCount <= numRetries) {
                     LOGGER.warn(String.format(
@@ -161,7 +165,7 @@ public class SwiftObsServices {
 	       			 results = client.getContainer(containerName).list(prefixKey, marker, MAX_RESULTS_PER_LIST);
 	       			 for (StoredObject object : results) {
 	       				 marker = object.getName(); // store marker for next retrival
-	       				 
+
 	       				 // Skip segment files (all files that have a sub directory like naming scheme with a direct parent that exists as a file (the manifest file))
 	       				 if (!lastNonSegmentName.isEmpty() &&
 	       						 object.getName().equals(lastNonSegmentName + "/" + object.getBareName())) {
@@ -169,7 +173,12 @@ public class SwiftObsServices {
 	       				 }
 	       				 lastNonSegmentName = object.getName();
 	       				 
-	       				 // Build temporarly filename
+	       				 // Skip MD5sum files
+	       				 if (object.getName().endsWith(MD5SUM_SUFFIX)) {
+	       					 continue;
+	       				 }
+	       				 
+	       				 // Build temporary filename
                          String key = object.getName();
                          String targetDir = directoryPath;
                          if (!targetDir.endsWith(File.separator)) {
@@ -243,11 +252,13 @@ public class SwiftObsServices {
 	 * @param containerName
 	 * @param keyName
 	 * @param uploadDirectory
-	 * @return
+	 * @return file information (md5 sum with filename)
 	 * @throws SwiftObsServiceException
 	 * @throws SwiftSdkClientException
 	 */
-	public void uploadFile(String containerName, String keyName, final File uploadFile) throws SwiftObsServiceException, SwiftSdkClientException {
+	public String uploadFile(String containerName, String keyName, final File uploadFile)
+			throws SwiftObsServiceException, SwiftSdkClientException {
+		String md5 = null;
 	    for (int retryCount = 1;; retryCount++) {
             try {
                 log(String.format("Uploading object %s in container %s", keyName,
@@ -263,6 +274,7 @@ public class SwiftObsServices {
                 UploadInstructions uploadInstructions = new UploadInstructions(uploadFile);
                 uploadInstructions.setSegmentationSize(MAX_SEGMENT_SIZE);
                 object.uploadObject(uploadInstructions);
+                md5 = object.getEtag();
 
                 log(String.format("Upload object %s in container %s succeeded",
                         keyName, containerName));
@@ -285,51 +297,38 @@ public class SwiftObsServices {
                 }
             }
         }
+	    return md5 + "  " + keyName;
 	}
 
 	/**
      * @param containerName
      * @param keyName
      * @param uploadFile
+     * @return file informations (list of md5 sums with filenames)
 	 * @throws SwiftSdkClientException 
 	 * @throws SwiftObsServiceException 
      */
-	public int uploadDirectory(final String bucketName, final String keyName,
+	public List<String> uploadDirectory(final String containerName, final String keyName,
             final File uploadDirectory)
             throws SwiftObsServiceException, SwiftSdkClientException {
-    	return uploadDirectory(bucketName, keyName, uploadDirectory, new ArrayList<String>(), true);
-    }
-	
-	private int uploadDirectory(final String containerName, final String keyName,
-            final File uploadDirectory, List<String> fileList, boolean isBaseDirectory)
-            		throws SwiftObsServiceException, SwiftSdkClientException {
-		int ret = 0;
+		List<String> fileList = new ArrayList<>(); 
         if (uploadDirectory.isDirectory()) {
             File[] childs = uploadDirectory.listFiles();
             if (childs != null) {
                 for (File child : childs) {
-                	String childKey = keyName + File.separator + child.getName();
                     if (child.isDirectory()) {
-                        ret += uploadDirectory(containerName, childKey, child, fileList, false);
+                        fileList.addAll(uploadDirectory(containerName,
+                        		keyName + File.separator + child.getName(), child));
                     } else {
-                        uploadFile(containerName, childKey, child);
-                        fileList.add(childKey);
-                        ret += 1;
+                        fileList.add(uploadFile(containerName,
+                        		keyName + File.separator + child.getName(), child));
                     }
                 }
-            }
-            if (isBaseDirectory) {
-            	// TODO retrieve MD5 information for all uploaded files and upload a file list named directoryname.md5sum
-            	String fileListTxt;
-            	for (String file : fileList) {
-            		
-            	}
-            }
+            }           
         } else {
-            uploadFile(containerName, keyName, uploadDirectory);
-            ret = 1;
+        	fileList.add(uploadFile(containerName, keyName, uploadDirectory));
         }
-        return ret;
+        return fileList;
 	}
 	
 	public void createContainer(String containerName) throws SwiftSdkClientException {
@@ -420,7 +419,18 @@ public class SwiftObsServices {
 			try {
 				log(String.format("Listing objects from bucket %s", containerName));
 				Container container = client.getContainer(containerName);
-                return container.list("", marker, MAX_RESULTS_PER_LIST);
+				Collection<StoredObject> objects;
+				List<StoredObject> result = new ArrayList<>();
+				do {
+					objects = container.list("", marker, MAX_RESULTS_PER_LIST);
+					for (StoredObject object : objects) {
+						marker = object.getName();
+						if (!object.getName().endsWith(MD5SUM_SUFFIX)) {
+							result.add(object);
+						}
+					}
+				} while(objects.size() != 0 && result.size() == 0); // when result is completely filtered, fetch again
+                return result;
 			} catch (Exception e) {
 				if (retryCount <= numRetries) {
 					LOGGER.warn(String.format("Listing objects from bucket %s failed: Attempt : %d / %d", containerName,
@@ -440,12 +450,29 @@ public class SwiftObsServices {
 		}
 	}
 	
-	private final Iterable<StoredObject> getAll(final String bucketName, final String prefix) {				
+	private final Iterable<StoredObject> getAll(final String containerName, final String prefix) {				
 		final List<StoredObject> result = new ArrayList<>(); 
 		String marker = "";
-		while (true) {			
-			Collection<StoredObject> batch = client.getContainer(bucketName).list(prefix, marker, MAX_RESULTS_PER_LIST);
+		String lastNonSegmentName = "";
+		while (true) {
+			Collection<StoredObject> batch = client.getContainer(containerName).list(prefix, marker, MAX_RESULTS_PER_LIST);
 			for (final StoredObject thisObject : batch) {
+				final String key = thisObject.getName();
+				if (key.endsWith(MD5SUM_SUFFIX)) {
+					continue;
+				}
+
+				// Skip segment files (all files that have a sub directory like naming scheme with a direct parent that 
+				// exists as a file (the manifest file))
+				if (!lastNonSegmentName.isEmpty() && key.equals(lastNonSegmentName + "/" + thisObject.getBareName())) {
+					continue;
+				}
+				// skip directories as they will be derived from the key
+				if (thisObject.isDirectory()) {
+					continue;
+				}
+				lastNonSegmentName = key;
+
 				result.add(thisObject);		
 				marker = thisObject.getName();
 			}
@@ -458,22 +485,8 @@ public class SwiftObsServices {
 	
     public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) {       	
     	final Map<String, InputStream> result = new LinkedHashMap<>();    	
-    	String lastNonSegmentName = "";
-    	
     	for (final StoredObject object : getAll(bucketName, prefix)) {
-    		final String key = object.getName();
-    		
-			// Skip segment files (all files that have a sub directory like naming scheme with a direct parent that 
-    		// exists as a file (the manifest file))
-			if (!lastNonSegmentName.isEmpty() && key.equals(lastNonSegmentName + "/" + object.getBareName())) {
-				continue;
-			}
-			// skip directories as they will be derived from the key
-			if (object.isDirectory()) {
-				continue;
-			}			
-			lastNonSegmentName = key;			
-			result.put(key, object.getAsObject().downloadObjectAsInputStream());			
+			result.put(object.getName(), object.getAsObject().downloadObjectAsInputStream());			
     	}
     	return result; 
     }
