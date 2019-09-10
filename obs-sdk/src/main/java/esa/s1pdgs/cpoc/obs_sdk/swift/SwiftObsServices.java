@@ -505,9 +505,7 @@ public class SwiftObsServices {
             		}
             	}
             	return result;
-            } catch (com.amazonaws.AmazonServiceException ase) {
-                throw new SwiftObsServiceException(bucketName, prefix, String.format("Listing fails: %s", ase.getMessage()), ase);
-            } catch (com.amazonaws.SdkClientException sce) {
+            } catch (Exception e) {
                 if (retryCount <= numRetries) {
                     LOGGER.warn(String.format(
                             "Listing prefixed objects %s from bucket %s failed: Attempt : %d / %d",
@@ -515,12 +513,12 @@ public class SwiftObsServices {
                     );
                     try {
                         Thread.sleep(retryDelay);
-                    } catch (InterruptedException e) {
-                        throw new SwiftSdkClientException(bucketName, prefix,String.format("Listing fails: %s", sce.getMessage()),sce);
+                    } catch (InterruptedException ie) {
+                        throw new SwiftSdkClientException(bucketName, prefix,String.format("Listing fails: %s", e.getMessage()), e);
                     }
                     continue;
                 } else {
-                    throw new SwiftSdkClientException(bucketName, prefix, String.format("Upload fails: %s", sce.getMessage()), sce);
+                    throw new SwiftSdkClientException(bucketName, prefix, String.format("Upload fails: %s", e.getMessage()), e);
                 }
             }
         }
