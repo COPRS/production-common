@@ -329,7 +329,8 @@ public abstract class AbstractObsClient implements ObsClient {
 			Path tempDir = Files.createTempDirectory("");
 			String fileName = object.getKey() + MD5SUM_SUFFIX;
 			downloadFile(object.getFamily(), fileName, tempDir.toFile().getAbsolutePath());
-			List<String> lines = Files.readAllLines(new File(tempDir.toFile(), fileName).toPath());
+			File file = new File(tempDir.toFile(), fileName);
+			List<String> lines = Files.readAllLines(file.toPath());
 			Map<String,String> md5sums = collectMd5Sums(object);
 			for (String line : lines) {
 				int idx = line.indexOf("  ");
@@ -349,15 +350,8 @@ public abstract class AbstractObsClient implements ObsClient {
 			for (String key : md5sums.keySet()) {
 				throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
 			}
-		} catch (SdkClientException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ObsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (SdkClientException | ObsException | IOException e) {
+			throw new ObsServiceException(e.getMessage(), e);
 		}
     }
 	
