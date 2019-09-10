@@ -47,13 +47,13 @@ public class KafkaLoggerService {
 			ContainerProperties containerProperties = new ContainerProperties(topic);
 			containerProperties.setMessageListener((MessageListener<String, String>) record -> {
 				// do something with received record
-				LOGGER.info("Received message from topic {}: {} ", topic, record.value());
+				LOGGER.debug("Received message from topic {}: {} ", topic, record.value());
 
-				String fileName = properties.getKafkaFolder() + "/kafka-" + topic;
+				String fileName = properties.getKafkaFolder() + "/kafka-" + topic+".log";
 				BufferedWriter writer = null;
 				try {
 					writer = new BufferedWriter(new FileWriter(new File(fileName),true));
-					writer.write(record.value());
+					writer.write(record.value()+"\n");
 				} catch (IOException ex) {
 					LOGGER.error("An IO error occured while accessing {}", fileName);
 				} finally {

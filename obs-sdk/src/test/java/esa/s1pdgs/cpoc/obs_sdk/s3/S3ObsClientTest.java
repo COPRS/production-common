@@ -26,6 +26,7 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -92,7 +93,7 @@ public class S3ObsClientTest {
                 Mockito.eq("key-exist"));
         doReturn(0).when(service).getNbObjects(Mockito.anyString(),
                 Mockito.eq("key-not-exist"));
-        doNothing().when(service).uploadFile(Mockito.anyString(),
+        doReturn("dummy").when(service).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
 
         // Mock configuration
@@ -228,29 +229,31 @@ public class S3ObsClientTest {
      * Test uploadObject when directory
      * @throws ObsServiceException
      * @throws SdkClientException
+     * @throws ObsException 
      */
     @Test
-    public void testUploadObjectDirectory() throws ObsServiceException, SdkClientException {
+    public void testUploadObjectDirectory() throws ObsServiceException, SdkClientException, ObsException {
         client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("target")));
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
                 Mockito.eq("key-exist"), Mockito.eq(new File("target")));
-        verify(service, never()).uploadFile(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any());
+        verify(service, times(1)).uploadFile(Mockito.anyString(),
+                Mockito.anyString(), Mockito.any()); // for the 1st md5sum
         
         client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-not-exist", new File("target")));
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
                 Mockito.eq("key-not-exist"), Mockito.eq(new File("target")));
-        verify(service, never()).uploadFile(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any());
+        verify(service, times(2)).uploadFile(Mockito.anyString(),
+                Mockito.anyString(), Mockito.any()); // for the 2nd md5sum
     }
     
     /**
      * Test uploadObject when file
      * @throws ObsServiceException
      * @throws SdkClientException
+     * @throws ObsException 
      */
     @Test
-    public void testUploadObjectFile() throws ObsServiceException, SdkClientException {
+    public void testUploadObjectFile() throws ObsServiceException, SdkClientException, ObsException {
         client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("pom.xml")));
         verify(service, times(1)).uploadFile(Mockito.eq("l0-acns"),
                 Mockito.eq("key-exist"), Mockito.eq(new File("pom.xml")));

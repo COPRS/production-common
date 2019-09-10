@@ -35,6 +35,7 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
+import com.amazonaws.services.s3.transfer.model.UploadResult;
 
 /**
  * Test the services to access to the OBS via the amazon S3 API
@@ -152,7 +153,7 @@ public class S3ObsServicesTest {
                 "amazon SDK exception")).when(s3tm).upload(
                         Mockito.eq(BCK_EXC_AWS), Mockito.anyString(),
                         Mockito.any());
-        doNothing().when(upload).waitForCompletion();
+        doReturn(new UploadResult()).when(upload).waitForUploadResult();
 
     }
 
@@ -485,9 +486,9 @@ public class S3ObsServicesTest {
     @Test
     public void testUploadDirectoryNominalWhenFile()
             throws S3ObsServiceException, S3SdkClientException {
-        int ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test",
+        List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test",
                 new File("pom.xml"));
-        assertEquals(1, ret);
+        assertEquals(1, ret.size());
         verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.eq("key-test"), Mockito.eq(new File("pom.xml")));
     }
@@ -548,9 +549,9 @@ public class S3ObsServicesTest {
         File file3 = new File("test/key");
         file3.mkdirs();
 
-        int ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test",
+        List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test",
                 new File("test/key"));
-        assertEquals(0, ret);
+        assertEquals(0, ret.size());
         verify(s3tm, never()).upload(Mockito.anyString(), Mockito.anyString(),
                 Mockito.any(File.class));
 
