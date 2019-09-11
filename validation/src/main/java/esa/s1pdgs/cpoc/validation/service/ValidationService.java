@@ -158,7 +158,7 @@ public class ValidationService {
 			 * Step 3: After we know that the catalog data is valid within the OBS, we check if there are additional
 			 * products stored within that are not expects.
 			 */
-			Set<String> realKeys = extractRealKeys(obsResults.values(), family);
+			Set<String> realKeys = extractRealKeys(obsResults.values());
 			for (SearchMetadata smd : metadataResults) {
 				realKeys.remove(smd.getKeyObjectStorage());
 			}
@@ -191,7 +191,7 @@ public class ValidationService {
 		return 0;
 	}
 	
-	Set<String> extractRealKeys(Collection<ObsObject> obsResults, ProductFamily family) {
+	Set<String> extractRealKeys(Collection<ObsObject> obsResults) {
 		Set<String> realProducts = new HashSet<>();
 		for (ObsObject obsResult: obsResults) {
 			String key = obsResult.getKey();
