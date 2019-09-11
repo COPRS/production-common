@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -378,6 +379,57 @@ public class AbstractObsClientTest {
             assertTrue(uut.getCounterGetUploadTm().get() > 0);
             assertEquals(0, uut.getCounterGetDownloadTm().get());
         }
+    }
+    
+    @Test
+    public final void testGetDsibNames() throws Exception {
+    	final String content = "<DCSU_Session_Information_Block>\n" + 
+    			"    <session_id>L20180724144436762001030</session_id>\n" + 
+    			"    <time_start>2018-10-01T15:16:09Z</time_start>\n" + 
+    			"    <time_stop>2018-10-01T15:33:46Z</time_stop>\n" + 
+    			"    <time_created>2018-10-01T15:16:09Z</time_created>\n" + 
+    			"    <time_finished>2018-10-01T15:33:19Z</time_finished>\n" + 
+    			"    <data_size>36014919890</data_size>\n" + 
+    			"    <dsdb_list>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00001.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00002.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00003.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00004.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00005.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00006.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00007.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00008.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00009.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00010.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00011.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00012.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00013.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00014.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00015.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00016.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00017.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00018.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00019.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00020.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00021.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00022.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00023.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00024.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00025.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00026.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00027.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00028.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00029.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00030.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00031.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00032.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00033.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00034.raw</dsdb_name>\n" + 
+    			"        <dsdb_name>DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw</dsdb_name>\n" + 
+    			"    </dsdb_list>\n" + 
+    			"</DCSU_Session_Information_Block>";
+    	List<String> result = uut.getDsibNames(new ByteArrayInputStream(content.getBytes()));
+    	assertEquals(35, result.size());
     }
 }
 
