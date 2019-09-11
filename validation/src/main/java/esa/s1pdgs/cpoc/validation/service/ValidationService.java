@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -140,7 +141,7 @@ public class ValidationService {
 			for (SearchMetadata smd : metadataResults) {
 				try {
 					obsClient.validate(new ObsObject(family, smd.getKeyObjectStorage()));
-				} catch (ObsServiceException ex) {
+				} catch (ObsServiceException | ObsValidationException ex) {
 					// Validation failed for that object.
 					discrepancies.add(new Discrepancy(smd.getKeyObjectStorage(), ex.getMessage()));
 				}
