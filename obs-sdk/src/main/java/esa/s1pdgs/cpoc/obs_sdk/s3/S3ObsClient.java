@@ -249,8 +249,11 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public Map<String,String> collectMd5Sums(ObsObject object) {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String,String> collectMd5Sums(ObsObject object) throws ObsException {
+		try {
+			return s3Services.collectMd5Sums(getBucketFor(object.getFamily()), object.getKey());
+		} catch (S3SdkClientException | ObsServiceException e) {
+			throw new ObsException(object.getFamily(), object.getKey(), e);
+		}
 	}
 }
