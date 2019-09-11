@@ -70,7 +70,7 @@ public class SearchMetadataController {
 					ProductFamily.fromValue(productFamily));
 			if (results == null) {
 				LOGGER.info("No results returned.");
-				return new ResponseEntity<List<SearchMetadata>>(HttpStatus.OK);
+				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			}
 			LOGGER.debug("Query returned {} results", results.size());
 

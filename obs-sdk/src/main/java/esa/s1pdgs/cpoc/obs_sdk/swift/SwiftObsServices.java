@@ -102,10 +102,20 @@ public class SwiftObsServices {
             	Collection<StoredObject> objectListing;
                 Container container = client.getContainer(containerName);
                 String marker = "";
+            	String lastNonSegmentName = "";
+
                 do {
                 	objectListing = container.list(prefixKey, marker, MAX_RESULTS_PER_LIST);
                 	for (StoredObject o : objectListing) {
                 		marker = o.getName();
+
+                		// Skip segment files (all files that have a sub directory like naming scheme with a direct parent that exists as a file (the manifest file))
+                		if (!lastNonSegmentName.isEmpty() &&
+	       					o.getName().equals(lastNonSegmentName + "/" + o.getBareName())) {
+	       					continue;
+	       				}
+	       				lastNonSegmentName = o.getName();
+                		
                 		if (!o.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
                 			nbObj++;
                 		}

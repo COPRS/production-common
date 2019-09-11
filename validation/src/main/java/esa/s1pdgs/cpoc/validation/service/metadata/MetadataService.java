@@ -86,7 +86,7 @@ public class MetadataService {
 								String.format("Invalid HTTP status code %s", response.getStatusCode().name()));
 					}
 				} else {
-					LOGGER.info("Metadata query for family '{}' returned {} results", family, numResults(response));
+					LOGGER.debug("Metadata query for family '{}' returned {} results", family, numResults(response));
 					return response.getBody();
 				}
 			} catch (RestClientException e) {

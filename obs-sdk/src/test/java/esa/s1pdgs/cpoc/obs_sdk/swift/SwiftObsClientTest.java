@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.obs_sdk.swift;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -321,7 +320,9 @@ public class SwiftObsClientTest {
 		assertEquals("obj3", returnedObjs.get(1).getKey());
 		verify(service, times(1)).listObjectsFromContainer(Mockito.anyString());
 	}
+
 }
+
 
 class StoredObjectCustomMock extends AbstractStoredObject {
 
