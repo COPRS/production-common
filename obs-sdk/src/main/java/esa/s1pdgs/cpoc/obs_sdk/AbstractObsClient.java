@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+
+import com.amazonaws.util.IOUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -333,38 +336,55 @@ public abstract class AbstractObsClient implements ObsClient {
 		throw new UnsupportedOperationException();
 	}
 	
+	private final void closeQuietly(Iterable<? extends Closeable> streams) {
+		for (final Closeable closeable : streams) {
+			try {
+				closeable.close();
+			} catch (IOException e) {
+				// do nothing on close exception
+			}
+		}
+	}
+	
 	@Override
     public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
 		try {
 			Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
-			if (!isMap.containsKey(object.getKey() + MD5SUM_SUFFIX)) {
+			if (isMap.size() > 1) {
+				closeQuietly(isMap.values());
+				throw new ObsValidationException("More than one checksum file returned");
+			}	
+			if (isMap.isEmpty()) {
+				closeQuietly(isMap.values());
 				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
-			} else {
-				try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
-					Map<String,String> md5sums = collectMd5Sums(object);
-					try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-						String line;
-		                while ((line = reader.readLine()) != null) {    
-		                	int idx = line.indexOf("  ");
-		                	if (idx >= 0 && line.length() > (idx + 2)) {
-		                		String md5 = line.substring(0, idx);
-		                		String key = line.substring(idx + 2);
-		                		String currentMd5 = md5sums.get(key);
-		                		if (null == currentMd5) {
-		                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
-		                		}
-		                		if (!md5.equals(currentMd5)) {
-		                			throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
-		                		}
-		                		md5sums.remove(key);
-		                	}
-			            }
-	                }
-					for (String key : md5sums.keySet()) {
-						throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
-					}
+			} 
+			try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
+				Map<String,String> md5sums = collectMd5Sums(object);
+				try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+					String line;
+	                while ((line = reader.readLine()) != null) {    
+	                	int idx = line.indexOf("  ");
+	                	if (idx >= 0 && line.length() > (idx + 2)) {
+	                		String md5 = line.substring(0, idx);
+	                		String key = line.substring(idx + 2);
+	                		String currentMd5 = md5sums.get(key);
+	                		if (null == currentMd5) {
+	                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
+	                		}
+	                		if (!md5.equals(currentMd5)) {
+	                			throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
+	                		}
+	                		md5sums.remove(key);
+	                	}
+		            }
+                }
+				for (String key : md5sums.keySet()) {
+					throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
 				}
 			}
+			finally {
+				closeQuietly(isMap.values());
+			}			
 		} catch (SdkClientException | ObsException | IOException e) {
 			throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
 		}
