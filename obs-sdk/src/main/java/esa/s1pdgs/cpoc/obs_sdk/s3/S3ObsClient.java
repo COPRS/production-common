@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -143,6 +144,12 @@ public class S3ObsClient extends AbstractObsClient {
 			throw new S3ObsServiceException(configuration.getBucketForFamily(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
 		s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey() + MD5SUM_SUFFIX, file);
+		
+		try {
+			Files.delete(file.toPath());
+		} catch(IOException e) {
+			file.deleteOnExit();
+		}
 	}
 
 	/**

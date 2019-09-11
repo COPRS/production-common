@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -129,6 +130,12 @@ public class SwiftObsClient extends AbstractObsClient {
 			throw new SwiftObsServiceException(configuration.getContainerForFamily(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
 		swiftObsServices.uploadFile(getBucketFor(object.getFamily()), object.getKey() + AbstractObsClient.MD5SUM_SUFFIX, file);
+		
+		try {
+			Files.delete(file.toPath());
+		} catch(IOException e) {
+			file.deleteOnExit();
+		}
 	}
 	
 	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
