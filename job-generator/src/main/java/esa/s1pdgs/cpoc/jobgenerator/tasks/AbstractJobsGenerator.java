@@ -344,10 +344,6 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
             
-            if (jobs != null) {
-                LOGGER.debug ("== run(), jobs {}", jobs);
-            }
-            
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
