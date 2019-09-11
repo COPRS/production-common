@@ -41,6 +41,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
 import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.wrapper.job.file.OutputProcessor;
@@ -283,7 +284,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Step 2
         doNothing().when(inputDownloader).processInputs();
         // Step 4
-        doReturn(Collections.emptyList()).when(outputProcessor).processOutput();
+        doReturn(ReportingOutput.NULL).when(outputProcessor).processOutput();
         // Step 5
         File folder1 =
                 new File(inputMessage.getBody().getWorkDirectory() + "folder1");
