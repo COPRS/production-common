@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -116,7 +115,7 @@ public class ValidationServiceTest {
 				Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant()));
 		
 		// OBS does have 6 elements, but two are actually the same product
-		assertEquals(5,validationService.extractRealKeys(obsResults.values()).size());
+		assertEquals(5,validationService.extractRealKeys(obsResults.values(),ProductFamily.AUXILIARY_FILE).size());
 
 		validationService.validateProductFamily(reportingFactory, ProductFamily.AUXILIARY_FILE, localDateTimeStart,
 				localDateTimeStop);
