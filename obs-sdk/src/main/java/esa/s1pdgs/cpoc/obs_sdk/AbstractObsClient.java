@@ -30,8 +30,6 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import com.amazonaws.util.IOUtils;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
@@ -409,33 +407,38 @@ public abstract class AbstractObsClient implements ObsClient {
 			final List<String> dsibElements = new ArrayList<>();
 			Map<String, InputStream> ch1DsibMap = getAllAsInputStream(object.getFamily(), ch1DsibFileName);
 			Map<String, InputStream> ch2DsibMap = getAllAsInputStream(object.getFamily(), ch2DsibFileName);
-			if (ch1DsibMap.containsKey(ch1DsibFileName) && ch2DsibMap.containsKey(ch2DsibFileName)) {						
-				try (final InputStream in = ch1DsibMap.get(ch1DsibFileName)) {
+			try {
+				if (ch1DsibMap.containsKey(ch1DsibFileName) && ch2DsibMap.containsKey(ch2DsibFileName)) {						
+					try (final InputStream in = ch1DsibMap.get(ch1DsibFileName)) {
+							dsibElements.addAll(getDsibNames(in));
+					} catch (Exception e) {
+						throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
+					}
+					try (final InputStream in = ch2DsibMap.get(ch2DsibFileName)) {
 						dsibElements.addAll(getDsibNames(in));
-				} catch (Exception e) {
-					throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
-				}
-				try (final InputStream in = ch2DsibMap.get(ch2DsibFileName)) {
-					dsibElements.addAll(getDsibNames(in));
-				} catch (Exception e) {
-					throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
-				}
-			}
-			boolean isComplete = true;
-			for(String inDsib : dsibElements) {
-				boolean found = false;
-				for (String inMd5Sums : md5sums.keySet()) {
-					if (inMd5Sums.endsWith(inDsib)) {
-						found = true;
-						break;
+					} catch (Exception e) {
+						throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
 					}
 				}
-				isComplete = found && isComplete;
-			}
-			if (isComplete) {
-				for (Entry<String, String> entrySet : md5sums.entrySet()) {
-					result.add(entrySet.getValue() + "  " + entrySet.getKey());
+				boolean isComplete = true;
+				for(String inDsib : dsibElements) {
+					boolean found = false;
+					for (String inMd5Sums : md5sums.keySet()) {
+						if (inMd5Sums.endsWith(inDsib)) {
+							found = true;
+							break;
+						}
+					}
+					isComplete = found && isComplete;
 				}
+				if (isComplete) {
+					for (Entry<String, String> entrySet : md5sums.entrySet()) {
+						result.add(entrySet.getValue() + "  " + entrySet.getKey());
+					}
+				}
+			} finally {
+				closeQuietly(ch1DsibMap.values());
+				closeQuietly(ch2DsibMap.values());
 			}
 		}
 		return result;
