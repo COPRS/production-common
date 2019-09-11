@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +28,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+
+import com.amazonaws.util.IOUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -334,13 +335,10 @@ public abstract class AbstractObsClient implements ObsClient {
 		throw new UnsupportedOperationException();
 	}
 	
-	private final void closeQuietly(Iterable<? extends Closeable> streams) {
-		for (final Closeable closeable : streams) {
-			try {
-				closeable.close();
-			} catch (IOException e) {
-				// do nothing on close exception
-			}
+	private final void closeQuietly(Iterable<InputStream> streams) {
+		for (final InputStream in : streams) {	
+			IOUtils.drainInputStream(in);
+			IOUtils.closeQuietly(in, null);		
 		}
 	}
 	
@@ -438,7 +436,7 @@ public abstract class AbstractObsClient implements ObsClient {
 				}
 			} finally {
 				closeQuietly(ch1DsibMap.values());
-				closeQuietly(ch2DsibMap.values());
+				closeQuietly(ch2DsibMap.values());	
 			}
 		}
 		return result;
