@@ -170,7 +170,7 @@ public class ValidationService {
 				reportingMetadata.end(new ReportingMessage("No discrepancies found in MetadataCatalog"));
 				reportingValidation.end(new ReportingMessage("No discrepancy found"));
 			} else {
-				reportingMetadata.error(new ReportingMessage("Products present in MetadataCatalog, but not in OBS: {}",
+				reportingMetadata.error(new ReportingMessage("Discrepancies found for following products: {}",
 						buildProductList(discrepancies)));
 				reportingValidation.error(new ReportingMessage("Discrepancy found for {} product(s)", discrepancies.size()));
 			}
