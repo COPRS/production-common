@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -158,7 +157,7 @@ public class ValidationService {
 			 * Step 3: After we know that the catalog data is valid within the OBS, we check if there are additional
 			 * products stored within that are not expects.
 			 */
-			Set<String> realKeys = extractRealKeys(obsResults.values());
+			Set<String> realKeys = extractRealKeys(obsResults.values(), family);
 			for (SearchMetadata smd : metadataResults) {
 				realKeys.remove(smd.getKeyObjectStorage());
 			}
@@ -191,17 +190,16 @@ public class ValidationService {
 		return 0;
 	}
 	
-	Set<String> extractRealKeys(Collection<ObsObject> obsResults) {
+	Set<String> extractRealKeys(Collection<ObsObject> obsResults, ProductFamily family) {
 		Set<String> realProducts = new HashSet<>();
 		for (ObsObject obsResult: obsResults) {
 			String key = obsResult.getKey();
 			int index = key.indexOf("/");
 			String realKey = null;
-//			
-//			if (family == ProductFamily.EDRS_SESSION) {
-//				realKey = key.substring(key.lastIndexOf('/'));
-//			}			
-			if (index != -1) {
+			
+			if (family == ProductFamily.EDRS_SESSION) {
+				realKey = key;
+			} else if (index != -1) {
 				realKey = key.substring(0, index);
 			} else {
 				realKey = key;
@@ -212,7 +210,6 @@ public class ValidationService {
 			}
 			realProducts.add(realKey);
 		}
-		
 		return realProducts;
 	}
 
