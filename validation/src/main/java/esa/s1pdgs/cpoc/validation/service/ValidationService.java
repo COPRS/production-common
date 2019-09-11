@@ -127,9 +127,10 @@ public class ValidationService {
 				obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate);
 				LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 
-			} catch (SdkClientException | DateTimeParseException e) {
-				reportingObs.error(new ReportingMessage("Error occured while performing obs query task: {}", e.getMessage()));
-				throw e;
+			} catch (SdkClientException | DateTimeParseException ex) {
+				reportingObs.error(new ReportingMessage("Error occured while performing obs query task: {}", ex.getMessage()));
+				ex.printStackTrace();
+				throw ex;
 			}
 			
 			/*
@@ -149,6 +150,7 @@ public class ValidationService {
 				} catch (ObsServiceException | ObsValidationException ex) {
 					// Validation failed for that object.
 					discrepancies.add(new Discrepancy(smd.getKeyObjectStorage(), ex.getMessage()));
+					ex.printStackTrace();
 				}
 			}
 			
@@ -184,6 +186,7 @@ public class ValidationService {
 			return discrepancies.size();
 		} catch (Exception ex) {
 			reportingValidation.error(new ReportingMessage("Error occured while performing validation task: {}", LogUtils.toString(ex)));
+			ex.printStackTrace();
 		}
 
 		return 0;
