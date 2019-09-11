@@ -181,7 +181,7 @@ public class ValidationService {
 			reportingValidation.error(new ReportingMessage("Error occured while performing validation task: {}", LogUtils.toString(ex)));
 		}
 
-		return -1;
+		return 0;
 	}
 	
 	Set<String> extractRealKeys(Collection<ObsObject> obsResults) {
