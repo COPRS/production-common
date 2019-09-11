@@ -350,7 +350,7 @@ public class S3ObsServices {
         }
     }
     
-    public final Map<String,String> collectMd5Sum(final String bucketName, final String prefix) throws S3ObsServiceException, S3SdkClientException {
+    public final Map<String,String> collectMd5Sums(final String bucketName, final String prefix) throws S3ObsServiceException, S3SdkClientException {
     	Map<String,String> result;
     	for (int retryCount = 1;; retryCount++) {
     		result = new HashMap<>();
