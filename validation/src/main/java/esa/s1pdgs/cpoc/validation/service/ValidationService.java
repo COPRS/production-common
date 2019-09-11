@@ -202,12 +202,13 @@ public class ValidationService {
 			} else if (index != -1) {
 				realKey = key.substring(0, index);
 			} else {
-				realKey = key;
-				if (key.endsWith(".zip")) {
-					// Special case zipped products. The MDC key does not contain the zip!
-					realKey = realKey.substring(0,key.lastIndexOf(".zip"));
-				}				
+				realKey = key;							
 			}
+			if (key.endsWith(".zip")) {
+				// Special case zipped products. The MDC key does not contain the zip!
+				realKey = realKey.substring(0,key.lastIndexOf(".zip"));
+			}	
+			LOGGER.trace("key is {}", realKey);
 			realProducts.add(realKey);
 		}
 		return realProducts;
