@@ -301,9 +301,11 @@ public class S3ObsServices {
     	do {
    			listing = listing == null ? s3client.listObjects(bucketName, prefix) : s3client.listNextBatchOfObjects(listing);
 	    	for(S3ObjectSummary object : listing.getObjectSummaries()) {
-	    		if (!object.getKey().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
-	    			result.add(object);
-	    		}
+        		// only download md5sum files if it has been explicitly asked for a md5sum file
+        		if (!prefix.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && object.getKey().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+   					continue;
+   				}
+	    		result.add(object);
 	    	}
     	} while (listing.isTruncated());
     	
