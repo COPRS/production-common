@@ -150,6 +150,12 @@ public class SwiftObsClientIT {
 		exception.expect(ObsValidationException.class);
 		exception.expectMessage("Checksum is wrong for object: " + testDirectoryName + "/" + testFileName1 + " of family " + auxiliaryFiles); 
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
+		
+		// validate not existing checksum file
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, "not-existing.md5sum")));
+		exception.expect(ObsValidationException.class);
+		exception.expectMessage("Checksum file not found for: not-existing of family " + auxiliaryFiles); 
+		uut.validate(new ObsObject(auxiliaryFiles, "not-existing"));
 	}
 
 	@Test

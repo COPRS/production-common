@@ -96,18 +96,21 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
-		List<String> fileList = new ArrayList<>();
         if (object.getFile().isDirectory()) {
+        	List<String> fileList = new ArrayList<>();
         	fileList.addAll(swiftObsServices.uploadDirectory(
                     getBucketFor(object.getFamily()),
                     object.getKey(), object.getFile()));
 			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
-				// TODO check DSIB file list, upload md5sum when product is complete
+				fileList = tryToGenerateEdrsMd5Sum(object);
+				if (!fileList.isEmpty()) {
+					uploadMd5Sum(object, fileList);
+				}
 			} else {
 				uploadMd5Sum(object, fileList);
 			}
-
         } else {
+        	List<String> fileList = new ArrayList<>();
         	fileList.add(swiftObsServices.uploadFile(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
 			uploadMd5Sum(object, fileList);
         }

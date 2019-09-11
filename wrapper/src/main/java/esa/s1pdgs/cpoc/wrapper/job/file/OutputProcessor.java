@@ -30,9 +30,13 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingOutput;
+import esa.s1pdgs.cpoc.report.WrapperReportingOutput;
+import esa.s1pdgs.cpoc.report.WrapperReportingOutput.Segment;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
@@ -239,6 +243,11 @@ public class OutputProcessor {
 								uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SEGMENT, productName, file));
 								outputToPublish.add(
 									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24"));
+								
+								
+								
+								
+								
 							} else {
 								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in FAST scenario", productName));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
@@ -589,10 +598,11 @@ public class OutputProcessor {
 	 * @throws ObsException
 	 * @throws IOException
 	 */
-	public List<String> processOutput() throws AbstractCodedException {
+	public ReportingOutput processOutput() throws AbstractCodedException {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("OutputHandling");
 
 		List<String> result = new ArrayList<>();
+		List<Segment> segments = new ArrayList<>();
 		
 		// Extract files
 		List<String> lines = extractFiles();
@@ -614,13 +624,25 @@ public class OutputProcessor {
 			processProducts(reportingFactory, uploadBatch, outputToPublish);
 			// Publish reports
 			processReports(reportToPublish);
-
+			
+			for (final ObsUploadObject obj : uploadBatch) {
+				if (obj.getFamily() == ProductFamily.L0_SEGMENT) {
+					segments.add(new Segment(obj.getKey(), "TODO", "TODO"));
+				}
+			}
 			reporting.end(new ReportingMessage(size, "End handling of outputs " + result));
 		} catch (AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
-		return result;
+		
+		final ReportingOutput reportOut;
+		if (!segments.isEmpty()) {
+			reportOut = new WrapperReportingOutput(result, segments);
+		} else {
+			reportOut = new FilenameReportingOutput(result);
+		}
+		return reportOut;
 	}
 
 	private long size(File file) throws InternalErrorException {

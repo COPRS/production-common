@@ -116,7 +116,10 @@ public class S3ObsClient extends AbstractObsClient {
 			fileList.addAll(s3Services.uploadDirectory(getBucketFor(object.getFamily()), object.getKey(),
 					object.getFile()));
 			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
-				// TODO check DSIB file list, upload md5sum when product is complete
+				fileList = tryToGenerateEdrsMd5Sum(object);
+				if (!fileList.isEmpty()) {
+					uploadMd5Sum(object, fileList);
+				}
 			} else {
 				uploadMd5Sum(object, fileList);
 			}

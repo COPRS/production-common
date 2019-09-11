@@ -1,14 +1,15 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -18,6 +19,15 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -326,34 +336,103 @@ public abstract class AbstractObsClient implements ObsClient {
 	@Override
     public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
 		try {
-			Path tempDir = Files.createTempDirectory("");
-			String fileName = object.getKey() + MD5SUM_SUFFIX;
-			downloadFile(object.getFamily(), fileName, tempDir.toFile().getAbsolutePath());
-			File file = new File(tempDir.toFile(), fileName);
-			List<String> lines = Files.readAllLines(file.toPath());
-			Map<String,String> md5sums = collectMd5Sums(object);
-			for (String line : lines) {
-				int idx = line.indexOf("  ");
-				if (idx >= 0 && line.length() > (idx + 2)) {
-					String md5 = line.substring(0, idx);
-					String key = line.substring(idx + 2);
-					String currentMd5 = md5sums.get(key);
-					if (null == currentMd5) {
-						throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
+			Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
+			if (!isMap.containsKey(object.getKey() + MD5SUM_SUFFIX)) {
+				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
+			} else {
+				try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
+					Map<String,String> md5sums = collectMd5Sums(object);
+					try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+						String line;
+		                while ((line = reader.readLine()) != null) {    
+		                	int idx = line.indexOf("  ");
+		                	if (idx >= 0 && line.length() > (idx + 2)) {
+		                		String md5 = line.substring(0, idx);
+		                		String key = line.substring(idx + 2);
+		                		String currentMd5 = md5sums.get(key);
+		                		if (null == currentMd5) {
+		                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
+		                		}
+		                		if (!md5.equals(currentMd5)) {
+		                			throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
+		                		}
+		                		md5sums.remove(key);
+		                	}
+			            }
+	                }
+					for (String key : md5sums.keySet()) {
+						throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
 					}
-					if (!md5.equals(currentMd5)) {
-						throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
-					}
-					md5sums.remove(key);
 				}
 			}
-			for (String key : md5sums.keySet()) {
-				throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
-			}
 		} catch (SdkClientException | ObsException | IOException e) {
-			throw new ObsServiceException(e.getMessage(), e);
+			throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
 		}
     }
 	
 	public abstract Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException;
+	
+	public List<String> tryToGenerateEdrsMd5Sum(ObsObject object) throws SdkClientException, ObsException {
+		List<String> result = new ArrayList<>();
+		Map<String, String> md5sums = collectMd5Sums(object);
+		String ch1DsibFileName = "";
+		String ch2DsibFileName = "";
+		for(String key : md5sums.keySet()) {
+			if (key.endsWith("ch1_DSIB.xml")) {
+				ch1DsibFileName = key;
+			}
+			else if (key.endsWith("ch2_DSIB.xml")) {
+				ch2DsibFileName = key;
+			}
+		}
+		if (!ch1DsibFileName.isEmpty() && !ch2DsibFileName.isEmpty()) {
+			final List<String> dsibElements = new ArrayList<>();
+			Map<String, InputStream> ch1DsibMap = getAllAsInputStream(object.getFamily(), ch1DsibFileName);
+			Map<String, InputStream> ch2DsibMap = getAllAsInputStream(object.getFamily(), ch2DsibFileName);
+			if (ch1DsibMap.containsKey(ch1DsibFileName) && ch2DsibMap.containsKey(ch2DsibFileName)) {						
+				try (final InputStream in = ch1DsibMap.get(ch1DsibFileName)) {
+						dsibElements.addAll(getDsibNames(in));
+				} catch (Exception e) {
+					throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
+				}
+				try (final InputStream in = ch2DsibMap.get(ch2DsibFileName)) {
+					dsibElements.addAll(getDsibNames(in));
+				} catch (Exception e) {
+					throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
+				}
+			}
+			boolean isComplete = true;
+			for(String inDsib : dsibElements) {
+				boolean found = false;
+				for (String inMd5Sums : md5sums.keySet()) {
+					if (inMd5Sums.endsWith(inDsib)) {
+						found = true;
+						break;
+					}
+				}
+				isComplete = found && isComplete;
+			}
+			if (isComplete) {
+				for (Entry<String, String> entrySet : md5sums.entrySet()) {
+					result.add(entrySet.getValue() + "  " + entrySet.getKey());
+				}
+			}
+		}
+		return result;
+	}
+	
+	public List<String> getDsibNames(final InputStream in) throws Exception {		
+		List<String> result = new ArrayList<>();
+		
+		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = builderFactory.newDocumentBuilder();
+		Document xmlDocument = builder.parse(in);
+		XPath xPath = XPathFactory.newInstance().newXPath();
+		
+		NodeList nodeList = (NodeList) xPath.compile("//dsdb_name").evaluate(xmlDocument, XPathConstants.NODESET);
+		for (int i=0; i<nodeList.getLength(); i++) {
+			result.add(nodeList.item(i).getTextContent());
+		}
+		return result;									
+	}
 }
