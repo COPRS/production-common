@@ -6,8 +6,10 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -431,6 +433,94 @@ public class AbstractObsClientTest {
     	List<String> result = uut.getDsibNames(new ByteArrayInputStream(content.getBytes()));
     	assertEquals(35, result.size());
     }
+    
+    @Test
+    public void validateTest_onMd5SumNotFound() throws ObsServiceException, ObsValidationException {
+    	uut.onGetAllAsInputStreamReturn(new HashMap<>());
+    	ObsObject obsObject = new ObsObject(ProductFamily.AUXILIARY_FILE, "md5sum-not-existing");
+    	thrown.expect(ObsValidationException.class);
+    	thrown.expectMessage("Checksum file not found for: md5sum-not-existing of family " + ProductFamily.AUXILIARY_FILE);
+    	uut.validate(obsObject);
+    }
+    
+    @Test
+    public void validateTest_onMultipleMd5() throws ObsServiceException, ObsValidationException {
+    	HashMap<String,InputStream> isMap = new HashMap<>();
+    	isMap.put("multiple-results.md5sum", new ByteArrayInputStream("".getBytes()));
+    	isMap.put("multiple-results.md5sum2", new ByteArrayInputStream("".getBytes()));
+    	uut.onGetAllAsInputStreamReturn(isMap);
+    	ObsObject obsObject = new ObsObject(ProductFamily.AUXILIARY_FILE, "multiple-results");
+    	thrown.expect(ObsValidationException.class);
+    	thrown.expectMessage("More than one checksum file returned");
+    	uut.validate(obsObject);
+    }
+    
+    @Test
+    public void validateTest_onNominalValidation() throws ObsServiceException, ObsValidationException {
+    	HashMap<String,String> md5Sums = new HashMap<>();
+    	md5Sums.put("key/file1","00000000000000000000000000000001");
+    	md5Sums.put("key/file2","00000000000000000000000000000002");
+    	uut.onCollectMd5SumsReturn(md5Sums);
+    	HashMap<String,InputStream> isMap = new HashMap<>();
+    	isMap.put("key.md5sum", new ByteArrayInputStream("00000000000000000000000000000001  key/file1\n00000000000000000000000000000002  key/file2".getBytes()));
+    	uut.onGetAllAsInputStreamReturn(isMap);
+    	ObsObject obsObject = new ObsObject(ProductFamily.AUXILIARY_FILE, "key");
+    	uut.validate(obsObject);
+    }
+    
+    @Test
+    public void validateTest_onDifferentChecksum() throws ObsServiceException, ObsValidationException {
+    	HashMap<String,String> md5Sums = new HashMap<>();
+    	md5Sums.put("key/file1","00000000000000000000000000000001");
+    	md5Sums.put("key/file2","00000000000000000000000000000002");
+    	uut.onCollectMd5SumsReturn(md5Sums);
+    	HashMap<String,InputStream> isMap = new HashMap<>();
+    	isMap.put("key.md5sum", new ByteArrayInputStream("00000000000000000000000000000023  key/file1\n00000000000000000000000000000002  key/file2".getBytes()));
+    	uut.onGetAllAsInputStreamReturn(isMap);    	
+    	ObsObject obsObject = new ObsObject(ProductFamily.AUXILIARY_FILE, "key");
+    	thrown.expect(ObsValidationException.class);
+    	thrown.expectMessage("Checksum is wrong for object: key/file1 of family " + ProductFamily.AUXILIARY_FILE);
+    	uut.validate(obsObject);
+    }
+
+    @Test
+    public void validateTest_onMissingObject() throws ObsServiceException, ObsValidationException {
+    	HashMap<String,String> md5Sums = new HashMap<>();
+    	md5Sums.put("key/file1","00000000000000000000000000000001");
+    	uut.onCollectMd5SumsReturn(md5Sums);
+    	HashMap<String,InputStream> isMap = new HashMap<>();
+    	isMap.put("key.md5sum", new ByteArrayInputStream("00000000000000000000000000000001  key/file1\n00000000000000000000000000000002  key/file2".getBytes()));
+    	uut.onGetAllAsInputStreamReturn(isMap);    	
+    	ObsObject obsObject = new ObsObject(ProductFamily.AUXILIARY_FILE, "key");
+    	thrown.expect(ObsValidationException.class);
+    	thrown.expectMessage("Object not found: key/file2 of family " + ProductFamily.AUXILIARY_FILE);
+    	uut.validate(obsObject);
+    }
+
+    @Test
+    public void validateTest_onUnexpectedObject() throws ObsServiceException, ObsValidationException {
+    	HashMap<String,String> md5Sums = new HashMap<>();
+    	md5Sums.put("key/file1","00000000000000000000000000000001");
+    	md5Sums.put("key/file2","00000000000000000000000000000002");
+    	md5Sums.put("key/unexpected","00000000000000000000000000000003");
+    	uut.onCollectMd5SumsReturn(md5Sums);
+    	HashMap<String,InputStream> isMap = new HashMap<>();
+    	isMap.put("key.md5sum", new ByteArrayInputStream("00000000000000000000000000000001  key/file1\n00000000000000000000000000000002  key/file2".getBytes()));
+    	uut.onGetAllAsInputStreamReturn(isMap);    	
+    	ObsObject obsObject = new ObsObject(ProductFamily.AUXILIARY_FILE, "key");
+    	thrown.expect(ObsValidationException.class);
+    	thrown.expectMessage("Unexpected object found: key/unexpected for key of family " + ProductFamily.AUXILIARY_FILE);
+    	uut.validate(obsObject);
+    }
+
+    @Test
+    public void validateTest_onObjectNotFound() throws ObsServiceException, ObsValidationException {
+    	uut.onGetAllAsInputStreamReturn(new HashMap<>());
+    	ObsObject obsObject = new ObsObject(ProductFamily.AUXILIARY_FILE, "md5sum-not-existing");
+    	thrown.expect(ObsValidationException.class);
+    	thrown.expectMessage("Checksum file not found for: md5sum-not-existing of family " + ProductFamily.AUXILIARY_FILE);
+    	uut.validate(obsObject);
+    }
 }
 
 class AbstractObsClientIncrementImpl extends AbstractObsClient {
@@ -440,6 +530,16 @@ class AbstractObsClientIncrementImpl extends AbstractObsClient {
     private final AtomicInteger counterGetShutdownTm;
     private final AtomicInteger counterGetDownloadTm;
     private final AtomicInteger counterGetUploadTm;
+    
+    private Map<String,String> resultOfCollectMd5Sums;
+    public void onCollectMd5SumsReturn(Map<String,String> resultOfCollectMd5Sums) {
+    	this.resultOfCollectMd5Sums = resultOfCollectMd5Sums;
+    }
+    
+    private Map<String,InputStream> resultOfGetAllAsInputStream;
+    public void onGetAllAsInputStreamReturn(Map<String,InputStream> resultOfGetAllAsInputStream) {
+    	this.resultOfGetAllAsInputStream = resultOfGetAllAsInputStream;
+    }
 
     public AbstractObsClientIncrementImpl() {
         counterUpload = new AtomicInteger();
@@ -546,19 +646,18 @@ class AbstractObsClientIncrementImpl extends AbstractObsClient {
 	}
 
 	@Override
-	public void validate(ObsObject object) throws ObsServiceException {
-	  // TODO Auto-generated method stub
-	}
-
-	@Override
 	public Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException {
-		// TODO Auto-generated method stub
-		return null;
+		return resultOfCollectMd5Sums;
 	}
 
 	@Override
 	protected String getBucketFor(ProductFamily family) throws ObsServiceException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)  throws SdkClientException {
+		return resultOfGetAllAsInputStream;
 	}
 }
