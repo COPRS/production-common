@@ -67,6 +67,8 @@ public class EsServices {
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(EsServices.class);
 	
+	private static int SIZE_LIMIT = 1000;
+	
 
 	/**
 	 * Elasticsearch client
@@ -485,7 +487,7 @@ public class EsServices {
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
-		sourceBuilder.size(20);
+		sourceBuilder.size(SIZE_LIMIT);
 		SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
@@ -536,7 +538,7 @@ public class EsServices {
 		LOGGER.debug("query composed is {}", queryBuilder);
 		
 		sourceBuilder.query(queryBuilder);
-		sourceBuilder.size(20);
+		sourceBuilder.size(SIZE_LIMIT);
 		
 		String index = null;
 		if (ProductFamily.EDRS_SESSION.equals(productFamily)) {
@@ -825,7 +827,7 @@ public class EsServices {
 			LOGGER.debug("Using {}", queryBuilder);			
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(200);
+			sourceBuilder.size(SIZE_LIMIT);
 		
 			final SearchRequest request = new SearchRequest("landmask");
 			request.types(landmaskIndexType);
