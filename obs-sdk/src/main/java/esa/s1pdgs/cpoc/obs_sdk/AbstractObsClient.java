@@ -332,7 +332,6 @@ public abstract class AbstractObsClient implements ObsClient {
 				throw new ObsValidationException("More than one checksum file returned");
 			}	
 			if (isMap.isEmpty()) {
-				Utils.closeQuietly(isMap.values());
 				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
 			} 
 			try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
