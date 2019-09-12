@@ -526,7 +526,7 @@ public class EsServices {
 	}
 	
 	
-	public List<SearchMetadata> intervalQuery(String startTime, String stopTime, ProductFamily productFamily) throws Exception {
+	public List<SearchMetadata> intervalQuery(String startTime, String stopTime, ProductFamily productFamily, String productType) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("insertionTime").from(startTime).to(stopTime));
@@ -544,7 +544,7 @@ public class EsServices {
 		if (ProductFamily.EDRS_SESSION.equals(productFamily)) {
 			index = "raw";
 		} else if (ProductFamily.AUXILIARY_FILE.equals(productFamily)) {
-			index = "aux*";
+			index = productType;
 		} else {
 			index = productFamily.name().toLowerCase();
 		}
