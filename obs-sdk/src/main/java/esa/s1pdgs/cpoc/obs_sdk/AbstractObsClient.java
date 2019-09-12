@@ -325,23 +325,16 @@ public abstract class AbstractObsClient implements ObsClient {
 		throw new UnsupportedOperationException();
 	}
 	
-	private final void closeQuietly(Iterable<InputStream> streams) {
-		for (final InputStream in : streams) {	
-			IOUtils.drainInputStream(in);
-			IOUtils.closeQuietly(in, null);		
-		}
-	}
-	
 	@Override
     public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
 		try {
 			Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
 			if (isMap.size() > 1) {
-				closeQuietly(isMap.values());
+				Utils.closeQuietly(isMap.values());
 				throw new ObsValidationException("More than one checksum file returned");
 			}	
 			if (isMap.isEmpty()) {
-				closeQuietly(isMap.values());
+				Utils.closeQuietly(isMap.values());
 				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
 			} 
 			try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
@@ -369,7 +362,7 @@ public abstract class AbstractObsClient implements ObsClient {
 				}
 			}
 			finally {
-				closeQuietly(isMap.values());
+				Utils.closeQuietly(isMap.values());
 			}			
 		} catch (SdkClientException | ObsException | IOException e) {
 			throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
