@@ -192,13 +192,20 @@ public class ValidationService {
 	
 	Set<String> extractRealKeys(Collection<ObsObject> obsResults, ProductFamily family) {
 		Set<String> realProducts = new HashSet<>();
-		for (ObsObject obsResult: obsResults) {
+		for (ObsObject obsResult: obsResults) {			
 			String key = obsResult.getKey();
 			int index = key.indexOf("/");
 			String realKey = null;
 			
 			if (family == ProductFamily.EDRS_SESSION) {
 				realKey = key;
+				/*
+				 *  EDRS_Sessions are just queried on raw and not containg DSIB.
+				 *  So we are removing them from the check
+				 */
+				if (realKey.endsWith(".DSIB.xml")) {
+					continue;
+				}
 			} else if (index != -1) {
 				realKey = key.substring(0, index);
 			} else {
