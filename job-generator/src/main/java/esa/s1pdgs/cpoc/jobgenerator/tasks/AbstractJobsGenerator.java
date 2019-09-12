@@ -47,8 +47,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
-import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
@@ -61,18 +59,18 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
+import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
-import esa.s1pdgs.cpoc.report.JobOrderReportingInput;
 import esa.s1pdgs.cpoc.report.JobOrderReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingOutput;
 
 /**
  * Class for processing product for a given task table
@@ -519,8 +517,12 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     
     private final Map<String,String> toProcParamMap(final JobGeneration jobGen) {    	
     	try {
-			return jobGen.getJobOrder().getConf().getProcParams().stream()
-				.collect(Collectors.toMap(JobOrderProcParam::getName, JobOrderProcParam::getValue));
+    		final Map<String,String> result = new HashMap<>();
+    		
+    		for (final JobOrderProcParam param : jobGen.getJobOrder().getConf().getProcParams()) {
+    			result.put(param.getName()+"_string", param.getValue());
+    		}
+    		return result;
 		} catch (Exception e) {
 			// this is only used for reporting so don't break anything if this goes wrong here and provide the error message
 			LOGGER.error(e);
