@@ -86,7 +86,7 @@ public abstract class AbstractObsClient implements ObsClient {
     public List<File> downloadObjects(final List<ObsDownloadObject> objects,
             final boolean parallel)
             throws SdkClientException, ObsServiceException {
-     	
+    	
     	List<File> files = new ArrayList<>();
         if (objects.size() > 1 && parallel) {
             // Download objects in parallel
