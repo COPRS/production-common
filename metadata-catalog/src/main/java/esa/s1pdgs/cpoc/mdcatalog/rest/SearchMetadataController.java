@@ -66,8 +66,19 @@ public class SearchMetadataController {
 
 		LOGGER.info("Performing metadata interval search in interval between {} and {}", startTime, stopTime);
 		try {
-			List<SearchMetadata> results = esServices.intervalQuery(startTime, stopTime,
-					ProductFamily.fromValue(productFamily));
+			List<SearchMetadata> results = new ArrayList<>();
+			if (productFamily.equals(ProductFamily.AUXILIARY_FILE.name())) {
+				List<SearchMetadata> results1 = esServices.intervalQuery(startTime, stopTime,
+						ProductFamily.fromValue(productFamily), "aux*");
+				List<SearchMetadata> results2 = esServices.intervalQuery(startTime, stopTime,
+						ProductFamily.fromValue(productFamily), "mpl*");
+
+				results.addAll(results1);
+				results.addAll(results2);
+			} else {
+				results = esServices.intervalQuery(startTime, stopTime, ProductFamily.fromValue(productFamily), null);
+			}
+
 			if (results == null) {
 				LOGGER.info("No results returned.");
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
@@ -112,7 +123,8 @@ public class SearchMetadataController {
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(), f.getStationCode()));
+							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
+							f.getStationCode()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else if ("ValIntersect".equals(mode)) {
@@ -134,7 +146,8 @@ public class SearchMetadataController {
 
 				for (SearchMetadata m : f) {
 					response.add(new SearchMetadata(m.getProductName(), m.getProductType(), m.getKeyObjectStorage(),
-							m.getValidityStart(), m.getValidityStop(), m.getMissionId(), m.getSatelliteId(), m.getStationCode()));
+							m.getValidityStart(), m.getValidityStop(), m.getMissionId(), m.getSatelliteId(),
+							m.getStationCode()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else if ("ClosestStartValidity".equals(mode)) {
@@ -147,8 +160,8 @@ public class SearchMetadataController {
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(),
-							f.getMissionId(), f.getSatelliteId(), f.getStationCode()));
+							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
+							f.getStationCode()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else if ("ClosestStopValidity".equals(mode)) {
@@ -161,7 +174,8 @@ public class SearchMetadataController {
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(), f.getStationCode()));
+							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
+							f.getStationCode()));
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else {
