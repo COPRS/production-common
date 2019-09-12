@@ -9,7 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
@@ -24,6 +23,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
+import com.amazonaws.util.IOUtils;
 
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -52,8 +52,9 @@ public class S3ObsServices {
 
 		@Override
 		public void close() throws IOException {
-			IOUtils.closeQuietly(in);
-			IOUtils.closeQuietly(obj);
+			IOUtils.drainInputStream(in);
+			IOUtils.closeQuietly(in, null);
+			IOUtils.closeQuietly(obj, null);
 		}
     }
        
