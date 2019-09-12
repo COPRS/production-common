@@ -116,19 +116,10 @@ public class S3ObsClient extends AbstractObsClient {
 		if (object.getFile().isDirectory()) {
 			fileList.addAll(s3Services.uploadDirectory(getBucketFor(object.getFamily()), object.getKey(),
 					object.getFile()));
-			if (object.getFamily().equals(ProductFamily.EDRS_SESSION)) {
-				fileList = tryToGenerateEdrsMd5Sum(object);
-				if (!fileList.isEmpty()) {
-					uploadMd5Sum(object, fileList);
-				}
-			} else {
-				uploadMd5Sum(object, fileList);
-			}
 		} else {
 			fileList.add(s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
-			uploadMd5Sum(object, fileList);
 		}
-		
+		uploadMd5Sum(object, fileList);
 	}
 	
 	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, S3SdkClientException {

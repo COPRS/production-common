@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -19,15 +18,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
 import com.amazonaws.util.IOUtils;
 
@@ -388,72 +378,4 @@ public abstract class AbstractObsClient implements ObsClient {
 	
 	public abstract Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException;
 	
-	public List<String> tryToGenerateEdrsMd5Sum(ObsObject object) throws SdkClientException, ObsException {
-		List<String> result = new ArrayList<>();
-		Map<String, String> md5sums = collectMd5Sums(object);
-		String ch1DsibFileName = "";
-		String ch2DsibFileName = "";
-		for(String key : md5sums.keySet()) {
-			if (key.endsWith("ch1_DSIB.xml")) {
-				ch1DsibFileName = key;
-			}
-			else if (key.endsWith("ch2_DSIB.xml")) {
-				ch2DsibFileName = key;
-			}
-		}
-		if (!ch1DsibFileName.isEmpty() && !ch2DsibFileName.isEmpty()) {
-			final List<String> dsibElements = new ArrayList<>();
-			Map<String, InputStream> ch1DsibMap = getAllAsInputStream(object.getFamily(), ch1DsibFileName);
-			Map<String, InputStream> ch2DsibMap = getAllAsInputStream(object.getFamily(), ch2DsibFileName);
-			try {
-				if (ch1DsibMap.containsKey(ch1DsibFileName) && ch2DsibMap.containsKey(ch2DsibFileName)) {						
-					try (final InputStream in = ch1DsibMap.get(ch1DsibFileName)) {
-							dsibElements.addAll(getDsibNames(in));
-					} catch (Exception e) {
-						throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
-					}
-					try (final InputStream in = ch2DsibMap.get(ch2DsibFileName)) {
-						dsibElements.addAll(getDsibNames(in));
-					} catch (Exception e) {
-						throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
-					}
-				}
-				boolean isComplete = true;
-				for(String inDsib : dsibElements) {
-					boolean found = false;
-					for (String inMd5Sums : md5sums.keySet()) {
-						if (inMd5Sums.endsWith(inDsib)) {
-							found = true;
-							break;
-						}
-					}
-					isComplete = found && isComplete;
-				}
-				if (isComplete) {
-					for (Entry<String, String> entrySet : md5sums.entrySet()) {
-						result.add(entrySet.getValue() + "  " + entrySet.getKey());
-					}
-				}
-			} finally {
-				closeQuietly(ch1DsibMap.values());
-				closeQuietly(ch2DsibMap.values());	
-			}
-		}
-		return result;
-	}
-	
-	public List<String> getDsibNames(final InputStream in) throws Exception {		
-		List<String> result = new ArrayList<>();
-		
-		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = builderFactory.newDocumentBuilder();
-		Document xmlDocument = builder.parse(in);
-		XPath xPath = XPathFactory.newInstance().newXPath();
-		
-		NodeList nodeList = (NodeList) xPath.compile("//dsdb_name").evaluate(xmlDocument, XPathConstants.NODESET);
-		for (int i=0; i<nodeList.getLength(); i++) {
-			result.add(nodeList.item(i).getTextContent());
-		}
-		return result;									
-	}
 }
