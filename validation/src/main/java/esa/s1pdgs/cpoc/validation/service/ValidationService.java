@@ -203,7 +203,8 @@ public class ValidationService {
 				 *  EDRS_Sessions are just queried on raw and not containg DSIB.
 				 *  So we are removing them from the check
 				 */
-				if (realKey.endsWith(".DSIB.xml")) {
+				if (realKey.endsWith("DSIB.xml")) {
+					LOGGER.debug("Ignoring DSIB file: {}",realKey);
 					continue;
 				}
 			} else if (index != -1) {
