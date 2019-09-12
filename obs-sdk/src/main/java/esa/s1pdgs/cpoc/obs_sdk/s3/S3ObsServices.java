@@ -18,6 +18,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -358,16 +359,15 @@ public class S3ObsServices {
             try {
             	for (final S3ObjectSummary summary : getAll(bucketName, prefix)) {
             		final String key = summary.getKey();
-            		try (final S3Object obj = s3client.getObject(bucketName, key)) {
-            			if (!key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
-                			result.put(key, obj.getObjectMetadata().getETag());
-                		}
+        			if (!key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+        				ObjectMetadata objectMetadata = s3client.getObjectMetadata(bucketName, key);
+            			result.put(key, objectMetadata.getETag());
             		}            		
             	}
             	return result;
             } catch (com.amazonaws.AmazonServiceException ase) {
                 throw new S3ObsServiceException(bucketName, prefix, String.format("Listing fails: %s", ase.getMessage()), ase);
-            } catch (com.amazonaws.SdkClientException | IOException sce) {
+            } catch (com.amazonaws.SdkClientException sce) {
                 if (retryCount <= numRetries) {
                     LOGGER.warn(String.format(
                             "Listing prefixed objects %s from bucket %s failed: Attempt : %d / %d",
