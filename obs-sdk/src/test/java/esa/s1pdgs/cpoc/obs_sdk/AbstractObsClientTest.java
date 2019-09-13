@@ -91,10 +91,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testdownloadObjectsSequential()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
 
         List<ObsDownloadObject> objects = new ArrayList<>();
         objects.add(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key1", "target-dir"));
@@ -116,10 +117,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testdownloadObjectsSequentialSdkException()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsDownloadObject> objects = new ArrayList<>();
         objects.add(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key1", "target-dir"));
         objects.add(new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key-sdk", "target-dir"));
@@ -141,10 +143,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testdownloadObjectsSequentialServiceException()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsDownloadObject> objects = new ArrayList<>();
         objects.add(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key1", "target-dir"));
         objects.add(new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key2", "target-dir"));
@@ -166,10 +169,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testdownloadObjectsParallel()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsDownloadObject> objects = new ArrayList<>();
         objects.add(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key1", "target-dir"));
         objects.add(new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key2", "target-dir"));
@@ -188,10 +192,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testdownloadObjectsParallelSdkException()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsDownloadObject> objects = new ArrayList<>();
         objects.add(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key1", "target-dir"));
         objects.add(new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key-sdk", "target-dir"));
@@ -213,10 +218,11 @@ public class AbstractObsClientTest {
      * 
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws ObsException 
      */
     @Test
     public void testdownloadObjectsParallelServiceException()
-            throws ObsServiceException, SdkClientException {
+            throws ObsServiceException, SdkClientException, ObsException {
         List<ObsDownloadObject> objects = new ArrayList<>();
         objects.add(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key1", "target-dir"));
         objects.add(new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key2", "target-dir"));
