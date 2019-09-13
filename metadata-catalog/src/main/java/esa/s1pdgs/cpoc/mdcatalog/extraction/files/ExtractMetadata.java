@@ -834,6 +834,7 @@ public class ExtractMetadata {
 			LOGGER.debug("composed Json: {} ",metadataJSONObject);
 			return metadataJSONObject;
 		} catch (IOException | TransformerException | JSONException e) {
+			LOGGER.error(e);
 			throw new MetadataExtractionException(e);
 		}
 	}
