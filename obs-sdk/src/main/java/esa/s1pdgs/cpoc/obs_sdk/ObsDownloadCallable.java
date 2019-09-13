@@ -41,14 +41,13 @@ public class ObsDownloadCallable implements Callable<List<File>> {
      * @throws AbstractCodedException 
      */
     @Override
-    public List<File> call() throws AbstractCodedException {
-        return obsClient.download(Arrays.asList(object));
-        /* FIXME handle not found situations in another way
-            if (nbObj <= 0) {
-            throw new ObsServiceException(
-                    String.format("Unknown object %s with family %s",
-                            object.getKey(), object.getFamily()));
-        } */
+    public List<File> call() throws ObsServiceException, AbstractCodedException {
+        final List<File> files = obsClient.download(Arrays.asList(object));
+		if (files.size() <= 0) {
+			throw new ObsServiceException(
+					String.format("Unknown object %s with family %s", object.getKey(), object.getFamily()));
+		}
+		return files;
     }
 
 }
