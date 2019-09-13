@@ -140,7 +140,6 @@ public class WVFootPrintExtension {
 				boundingPolygon.add(firstFootPrint.getP2());
 				boundingPolygon.add(firstFootPrint.getP3());
 				boundingPolygon.add(firstFootPrint.getP4());
-				boundingPolygon.add(firstFootPrint.getP1());
 			} else {
 				// first iteration to get right boundaries
 				for (int i = 0; i < nodeFootprints.getLength(); i++) {
@@ -199,7 +198,6 @@ public class WVFootPrintExtension {
 			boundingPolygon.add(pointB);
 			boundingPolygon.add(pointC);
 			boundingPolygon.add(pointD);
-			boundingPolygon.add(pointA);
 
 			;
 
@@ -229,7 +227,9 @@ public class WVFootPrintExtension {
 			LOGGER.error("Error creating bounding polygon!");
 			return null;
 		} 
-		geoShape.put("type", "polygon");
+		//add the last one again
+		coordinates.put(coordinates.get(0));
+		geoShape.put("type", "Polygon");
 		geoShape.put("orientation", "counterclockwise");
 		geoShape.put("coordinates", new JSONArray().put(coordinates));
 
