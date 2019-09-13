@@ -244,11 +244,10 @@ public abstract class AbstractObsClient implements ObsClient {
 		// Download object
 		ObsDownloadObject object = new ObsDownloadObject(family, key, targetDir);
 		try {
-			downloadObject(object);
-			/* FIXME handle not found situations differently
-			   if (nbObjects <= 0) {
+			final List<File> obj = downloadObject(object);
+			if (obj.size() <= 0) {
 				throw new ObsUnknownObject(family, key);
-			} */
+			}
 		} catch (SdkClientException exc) {
 			throw new ObsException(family, key, exc);
 		}
