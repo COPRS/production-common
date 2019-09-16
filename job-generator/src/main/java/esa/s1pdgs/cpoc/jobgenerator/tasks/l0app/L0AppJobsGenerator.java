@@ -9,8 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
@@ -108,7 +108,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     @Override
     protected void customJobOrder(JobGeneration job) {
     	AbstractJobOrderConf conf = job.getJobOrder().getConf();
-    	AppDataJobProductDto product = job.getAppDataJob().getProduct();
+    	AppDataJobProduct product = job.getAppDataJob().getProduct();
     	boolean reprocessing = false; // currently no reprocessing supported
     	LOGGER.info("Configuring AIOP with station parameters for stationCode {} for product {}", product.getStationCode(), product.getProductName());
 
@@ -181,7 +181,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
             int nb = Math.max(nb1, nb2);
             for (int i = 0; i < nb; i++) {
                 if (i < nb1) {
-                    AppDataJobFileDto raw =
+                    AppDataJobFile raw =
                             job.getAppDataJob().getProduct().getRaws1().get(i);
                     dto.addInput(
                             new LevelJobInputDto(
@@ -191,7 +191,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
                                     raw.getKeyObs()));
                 }
                 if (i < nb2) {
-                    AppDataJobFileDto raw =
+                    AppDataJobFile raw =
                             job.getAppDataJob().getProduct().getRaws2().get(i);
                     dto.addInput(
                             new LevelJobInputDto(

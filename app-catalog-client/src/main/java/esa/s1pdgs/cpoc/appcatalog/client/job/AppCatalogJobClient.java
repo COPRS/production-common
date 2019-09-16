@@ -20,10 +20,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
@@ -97,8 +97,8 @@ public class AppCatalogJobClient {
     
 	static final <T> ParameterizedTypeReference<T> forCategory(final ProductCategory category)
 	{
-		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-				AppDataJobDto.class, 
+		final ResolvableType appCatMessageType = ResolvableType.forClass(
+				AppDataJob.class, 
 				category.getDtoClass()
 		);   
 		
@@ -168,7 +168,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJobDto<E>> search(final Map<String, String> filters)
+    public <E extends AbstractDto> List<AppDataJob> search(final Map<String, String> filters)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -183,7 +183,7 @@ public class AppCatalogJobClient {
             final URI uri = builder.build().toUri();
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-                final ResponseEntity<List<AppDataJobDto<E>>> response = restTemplate.exchange(
+                final ResponseEntity<List<AppDataJob>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.GET, 
                 		null,
@@ -226,7 +226,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJobDto<E>> findByMessagesIdentifier(final long messageId)
+    public <E extends AbstractDto> List<AppDataJob> findByMessagesIdentifier(final long messageId)
             throws AbstractCodedException {   	
         return search(Collections.singletonMap("messages.identifier", Long.toString(messageId)));        
     }
@@ -238,7 +238,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJobDto<E>> findByProductSessionId(final String sessionId)
+    public <E extends AbstractDto> List<AppDataJob> findByProductSessionId(final String sessionId)
             throws AbstractCodedException {
         return search(Collections.singletonMap("product.sessionId", sessionId));
     }
@@ -250,7 +250,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJobDto<E>> findByProductDataTakeId(final String dataTakeId)
+    public <E extends AbstractDto> List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
             throws AbstractCodedException {
         return search(Collections.singletonMap("product.dataTakeId", dataTakeId));
     }
@@ -263,8 +263,8 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJobDto<E>> findByPodAndState(final String pod,
-            final AppDataJobDtoState state) throws AbstractCodedException {
+    public <E extends AbstractDto> List<AppDataJob> findByPodAndState(final String pod,
+            final AppDataJobState state) throws AbstractCodedException {
     	final Map<String, String> filters = new HashMap<>();
     	filters.put("state", state.name());
     	filters.put("pod", pod);
@@ -279,12 +279,12 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJobDto<E>> findNByPodAndGenerationTaskTableWithNotSentGeneration(
+    public <E extends AbstractDto> List<AppDataJob> findNByPodAndGenerationTaskTableWithNotSentGeneration(
             final String pod, final String taskTable)
             throws AbstractCodedException {       
     	final Map<String, String> filters = new HashMap<>();  
         filters.put("pod", pod);
-        filters.put("generations.state[neq]", AppDataJobGenerationDtoState.SENT.name());
+        filters.put("generations.state[neq]", AppDataJobGenerationState.SENT.name());
         filters.put("generations.taskTable", taskTable);
         filters.put("[orderByAsc]", "generations.lastUpdateDate");
         return search(filters);     
@@ -297,7 +297,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> AppDataJobDto<E> newJob(final AppDataJobDto<E> job)
+    public AppDataJob newJob(final AppDataJob job)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -305,14 +305,12 @@ public class AppCatalogJobClient {
             String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-        		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-        				AppDataJobDto.class, 
-        				category.getDtoClass()
-        		);               	
-                final ResponseEntity<AppDataJobDto<E>> response = restTemplate.exchange(
+        		final ResolvableType appCatMessageType = ResolvableType.forClass(
+        				AppDataJob.class);               	
+                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.POST,
-                		new HttpEntity<AppDataJobDto<E>>(job),
+                		new HttpEntity<AppDataJob>(job),
                 		ParameterizedTypeReference.forType(appCatMessageType.getType())
                 );
                 
@@ -344,8 +342,8 @@ public class AppCatalogJobClient {
         }
     }
 
-    public <E extends AbstractDto> AppDataJobDto<E> patchJob(final long identifier,
-            final AppDataJobDto<E> job, final boolean patchMessages,
+    public AppDataJob patchJob(final long identifier,
+            final AppDataJob job, final boolean patchMessages,
             final boolean patchProduct, final boolean patchGenerations)
             throws AbstractCodedException {
     	job.setIdentifier(identifier);
@@ -364,15 +362,15 @@ public class AppCatalogJobClient {
             String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs/" + identifier;
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-            	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-        				AppDataJobDto.class, 
+            	final ResolvableType appCatMessageType = ResolvableType.forClass(
+        				AppDataJob.class, 
         				category.getDtoClass()
         		);  
             	
-                final ResponseEntity<AppDataJobDto<E>> response = restTemplate.exchange(
+                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
-                		new HttpEntity<AppDataJobDto<E>>(job),
+                		new HttpEntity<AppDataJob>(job),
                 		ParameterizedTypeReference.forType(appCatMessageType.getType())
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
@@ -412,27 +410,27 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> AppDataJobDto<E> patchTaskTableOfJob(final long identifier,
-            final String taskTable, final AppDataJobGenerationDtoState state)
+    public AppDataJob patchTaskTableOfJob(final long identifier,
+            final String taskTable, final AppDataJobGenerationState state)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
             String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs/" + identifier
                     + "/generations/" + taskTable;
-            AppDataJobGenerationDto body = new AppDataJobGenerationDto();
+            AppDataJobGeneration body = new AppDataJobGeneration();
             body.setTaskTable(taskTable);
             body.setState(state);
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-            	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-        				AppDataJobDto.class, 
+            	final ResolvableType appCatMessageType = ResolvableType.forClass(
+        				AppDataJob.class, 
         				category.getDtoClass()
         		);              	
-                final ResponseEntity<AppDataJobDto<E>> response = restTemplate.exchange(
+                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
-                		new HttpEntity<AppDataJobGenerationDto>(body),
+                		new HttpEntity<AppDataJobGeneration>(body),
                 		ParameterizedTypeReference.forType(appCatMessageType.getType())
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {

@@ -19,9 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.server.RestControllerTest;
-import esa.s1pdgs.cpoc.appcatalog.server.job.converter.JobConverter;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobService;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
@@ -37,15 +35,12 @@ public class JobControllerTest extends RestControllerTest{
     @Mock
     private AppDataJobService appDataJobService;
 
-    @Mock
-    private JobConverter jobConverter;
-    
     private JobController jobController;
     
     @Before
     public void init() throws IOException {
         MockitoAnnotations.initMocks(this);
-        this.jobController = new JobController(appDataJobService, jobConverter, new JobControllerConfiguration());
+        this.jobController = new JobController(appDataJobService, new JobControllerConfiguration());
         this.initMockMvc(this.jobController);
     }
     
@@ -57,8 +52,7 @@ public class JobControllerTest extends RestControllerTest{
     
     @Test
     public void patchJobTest() throws AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException, AppCatalogJobNotFoundException {
-        doReturn(new AppDataJobDto()).when(jobConverter).convertJobFromDbToDto(Mockito.any(), Mockito.any());
-        this.jobController.patchJob(ProductCategory.LEVEL_JOBS.toString().toLowerCase(), 123L, new AppDataJobDto());
+        this.jobController.patchJob(ProductCategory.LEVEL_JOBS.toString().toLowerCase(), 123L, new AppDataJob());
     }
     
     @Test

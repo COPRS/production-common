@@ -9,9 +9,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -121,7 +121,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             }        	
         	
             // Check if a job is already created for message identifier
-            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
+            AppDataJob appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -129,8 +129,8 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             LOGGER.info(
                     "[MONITOR] [step 2] [productName {}] Dispatching product",
                     productName);
-            if (appDataJob.getState() == AppDataJobDtoState.WAITING) {
-                appDataJob.setState(AppDataJobDtoState.DISPATCHING);
+            if (appDataJob.getState() == AppDataJobState.WAITING) {
+                appDataJob.setState(AppDataJobState.DISPATCHING);
                 appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
                         appDataJob, false, false, false);
             }
@@ -157,12 +157,12 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         reporting.end(new ReportingMessage("End job generation using {}", productName));
     }
 
-    protected AppDataJobDto<ProductDto> buildJob(GenericMessageDto<ProductDto> mqiMessage)
+    protected AppDataJob buildJob(GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJobDto<ProductDto>> existingJobs = appDataService
+        List<AppDataJob> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -181,14 +181,14 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             final String stopTime = m.group(this.patternSettings.getMGroupStopTime());
 
             // Create the JOB
-            AppDataJobDto<ProductDto> jobDto = new AppDataJobDto<>();
+            AppDataJob jobDto = new AppDataJob();
             // General details
             jobDto.setLevel(processSettings.getLevel());
             jobDto.setPod(processSettings.getHostname());
             // Messages
             jobDto.getMessages().add(mqiMessage);
             // Product
-            AppDataJobProductDto productDto = new AppDataJobProductDto();
+            AppDataJobProduct productDto = new AppDataJobProduct();
             productDto.setAcquisition(acquisition);
             productDto.setMissionId(missionId);
             productDto.setProductName(leveldto.getProductName());
@@ -196,10 +196,10 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             productDto.setSatelliteId(satelliteId);
             productDto.setStartTime(DateUtils.convertToAnotherFormat(startTime,
                     L0SlicePatternSettings.TIME_FORMATTER,
-                    AppDataJobProductDto.TIME_FORMATTER));
+                    AppDataJobProduct.TIME_FORMATTER));
             productDto.setStopTime(DateUtils.convertToAnotherFormat(stopTime,
                     L0SlicePatternSettings.TIME_FORMATTER,
-                    AppDataJobProductDto.TIME_FORMATTER));
+                    AppDataJobProduct.TIME_FORMATTER));
             
             // FIXME dirty workaround to get things working
             productDto.setStationCode("WILE");
@@ -210,7 +210,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
 
         } else {
             // Update pod if needed
-            AppDataJobDto<ProductDto> jobDto = existingJobs.get(0);
+            AppDataJob jobDto = existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());

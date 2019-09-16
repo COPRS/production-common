@@ -10,9 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
@@ -111,7 +111,7 @@ public class L0SegmentAppConsumer
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
             reporting.begin(new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName()));
-            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
+            AppDataJob appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -119,10 +119,10 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 2] [productName {}] Dispatching product",
                     productName);
-            if (appDataJob.getState() == AppDataJobDtoState.WAITING
+            if (appDataJob.getState() == AppDataJobState.WAITING
                     || appDataJob
-                            .getState() == AppDataJobDtoState.DISPATCHING) {
-                appDataJob.setState(AppDataJobDtoState.DISPATCHING);
+                            .getState() == AppDataJobState.DISPATCHING) {
+                appDataJob.setState(AppDataJobState.DISPATCHING);
                 appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
                         appDataJob, false, false, false);
                 jobsDispatcher.dispatch(appDataJob);
@@ -156,13 +156,13 @@ public class L0SegmentAppConsumer
         reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getProductName()));
     }
 
-    protected AppDataJobDto<ProductDto> buildJob(
+    protected AppDataJob buildJob(
             GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJobDto<ProductDto>> existingJobs = appDataService
+        List<AppDataJob> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -180,20 +180,20 @@ public class L0SegmentAppConsumer
             String datatakeID = m.group(this.patternGroups.get("datatakeId"));
 
             // Search job for given datatake id
-            List<AppDataJobDto<ProductDto>> existingJobsForDatatake =
+            List<AppDataJob> existingJobsForDatatake =
                     appDataService.findByProductDataTakeId(datatakeID);
 
             if (CollectionUtils.isEmpty(existingJobsForDatatake)) {
 
                 // Create the JOB
-                AppDataJobDto<ProductDto> jobDto = new AppDataJobDto<>();
+                AppDataJob jobDto = new AppDataJob();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
                 // Messages
                 jobDto.getMessages().add(mqiMessage);
                 // Product
-                AppDataJobProductDto productDto = new AppDataJobProductDto();
+                AppDataJobProduct productDto = new AppDataJobProduct();
                 productDto.setAcquisition(acquisition);
                 productDto.setMissionId(missionId);
                 productDto.setDataTakeId(datatakeID);
@@ -204,7 +204,7 @@ public class L0SegmentAppConsumer
 
                 return appDataService.newJob(jobDto);
             } else {
-                AppDataJobDto jobDto = existingJobsForDatatake.get(0);
+                AppDataJob jobDto = existingJobsForDatatake.get(0);
 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
@@ -217,7 +217,7 @@ public class L0SegmentAppConsumer
 
         } else {
             // Update pod if needed
-            AppDataJobDto jobDto = existingJobs.get(0);
+            AppDataJob jobDto = existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());

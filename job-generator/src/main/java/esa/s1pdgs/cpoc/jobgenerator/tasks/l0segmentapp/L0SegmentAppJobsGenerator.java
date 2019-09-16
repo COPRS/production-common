@@ -7,12 +7,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -56,7 +57,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
     }
 
     /**
-     * Check the product and retrieve usefull information before searching
+     * Check the product and retrieve useful information before searching
      * inputs
      */
     @Override
@@ -72,9 +73,9 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
         String lastName = "";
         try {
         	@SuppressWarnings("unchecked")
-			final AppDataJobDto<ProductDto> appDataJob = job.getAppDataJob();
+			final AppDataJob appDataJob = job.getAppDataJob();
         	
-            for (GenericMessageDto<ProductDto> message : appDataJob.getMessages()) {
+            for (GenericMessageDto<ProductDto> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<ProductDto>)s).collect(Collectors.toList())) {
                 ProductDto dto = (ProductDto) message.getBody();
                 lastName = dto.getProductName();
                 LevelSegmentMetadata metadata = metadataService
@@ -133,9 +134,9 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
             }
             // Get sensing start and stop
             sensingStart = getStartSensingDate(segmentsA,
-                    AppDataJobProductDto.TIME_FORMATTER);
+                    AppDataJobProduct.TIME_FORMATTER);
             sensingStop = getStopSensingDate(segmentsA,
-                    AppDataJobProductDto.TIME_FORMATTER);
+                    AppDataJobProduct.TIME_FORMATTER);
 
         } else {
             String polA = pols.get(0);
@@ -177,7 +178,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
                         "Invalid double polarisation " + polA + " - " + polB);
             }
             // Get sensing start and stop
-            DateTimeFormatter formatter = AppDataJobProductDto.TIME_FORMATTER;
+            DateTimeFormatter formatter = AppDataJobProduct.TIME_FORMATTER;
             sensingStart = least(getStartSensingDate(segmentsA, formatter),
                     getStartSensingDate(segmentsB, formatter), formatter);
             sensingStop = more(getStopSensingDate(segmentsA, formatter),

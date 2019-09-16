@@ -25,8 +25,8 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -47,7 +47,6 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 
 /**
@@ -344,28 +343,28 @@ public class L0AppJobsGeneratorTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<EdrsSessionDto> primaryCheckAppJob =
+        AppDataJob primaryCheckAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         primaryCheckAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<EdrsSessionDto> readyAppJob =
+                .setState(AppDataJobGenerationState.PRIMARY_CHECK);
+        AppDataJob readyAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         readyAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<EdrsSessionDto> sentAppJob =
+                .setState(AppDataJobGenerationState.READY);
+        AppDataJob sentAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         sentAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.SENT);
+                .setState(AppDataJobGenerationState.SENT);
 
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
         doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.READY));
+                Mockito.eq(AppDataJobGenerationState.READY));
         doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.SENT));
+                Mockito.eq(AppDataJobGenerationState.SENT));
         Mockito.doAnswer(i -> {
             return i.getArgument(1);
         }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
@@ -375,9 +374,9 @@ public class L0AppJobsGeneratorTest {
 
     @Test
     public void testPreSearch() {
-        AppDataJobDto<EdrsSessionDto> appDataJob =
+        AppDataJob appDataJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJobDto<EdrsSessionDto> appDataJobComplete =
+        AppDataJob appDataJobComplete =
                 TestL0Utils.buildAppDataEdrsSession(false);
         JobGeneration job =
                 new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
@@ -410,7 +409,7 @@ public class L0AppJobsGeneratorTest {
         }).when(this.metadataService).getEdrsSession(Mockito.anyString(),
                 Mockito.anyString());
 
-        AppDataJobDto<EdrsSessionDto> appDataJob =
+        AppDataJob appDataJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         JobGeneration job =
                 new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
@@ -428,7 +427,7 @@ public class L0AppJobsGeneratorTest {
 // FIXME: Enable test
 //    @Test
 //    public void testCustomDto() {
-//        AppDataJobDto<EdrsSessionDto> appDataJob =
+//        AppDataJob appDataJob =
 //                TestL0Utils.buildAppDataEdrsSession(false);
 //        JobGeneration job =
 //                new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
@@ -466,7 +465,7 @@ public class L0AppJobsGeneratorTest {
 // FIXME: Enable test
 //    @Test
 //    public void testCustomJobOrder() {
-//        AppDataJobDto<EdrsSessionDto> appDataJob =
+//        AppDataJob appDataJob =
 //                TestL0Utils.buildAppDataEdrsSession(false);
 //        JobGeneration job =
 //                new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
@@ -478,7 +477,7 @@ public class L0AppJobsGeneratorTest {
 //            }
 //        });
 //
-//        AppDataJobDto<EdrsSessionDto> appDataJob1 =
+//        AppDataJob appDataJob1 =
 //                TestL0Utils.buildAppDataEdrsSession(false, "S2", true, true);
 //        JobGeneration job1 =
 //                new JobGeneration(appDataJob1, "TaskTable.AIOP.xml");

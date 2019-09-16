@@ -9,7 +9,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
@@ -77,7 +77,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
      */
     @Override
     protected List<String> getTaskTables(
-            final AppDataJobDto job) {
+            final AppDataJob job) {
         return Arrays.asList(TASK_TABLE_NAME);
     }
 

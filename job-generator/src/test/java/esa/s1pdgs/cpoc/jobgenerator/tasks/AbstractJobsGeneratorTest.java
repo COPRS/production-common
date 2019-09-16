@@ -33,9 +33,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -48,7 +48,6 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
-import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
@@ -57,6 +56,7 @@ import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class AbstractJobsGeneratorTest {
@@ -317,27 +317,27 @@ public class AbstractJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<ProductDto> primaryCheckAppJob = TestL1Utils.buildJobGeneration(true);
+        AppDataJob primaryCheckAppJob = TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<ProductDto> readyAppJob = TestL1Utils.buildJobGeneration(true);
+                .setState(AppDataJobGenerationState.PRIMARY_CHECK);
+        AppDataJob readyAppJob = TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<ProductDto> sentAppJob = TestL1Utils.buildJobGeneration(true);
+                .setState(AppDataJobGenerationState.READY);
+        AppDataJob sentAppJob = TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.SENT);
+                .setState(AppDataJobGenerationState.SENT);
         doReturn(TestL1Utils.buildJobGeneration(true)).when(appDataPService)
                 .patchJob(Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean(),
                         Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataPService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
         doReturn(readyAppJob).when(appDataPService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.READY));
+                Mockito.eq(AppDataJobGenerationState.READY));
         doReturn(sentAppJob).when(appDataPService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.SENT));
+                Mockito.eq(AppDataJobGenerationState.SENT));
     }
 
     // ---------------------------------------------------------
@@ -444,11 +444,11 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(jobGeneratorSettings).getWaitmetadatainput();
         
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJob job1 = new AppDataJob();
         job1.setIdentifier(12L);
-        job1.getGenerations().add(new AppDataJobGenerationDto());
+        job1.getGenerations().add(new AppDataJobGeneration());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
-        job1.getGenerations().get(0).setState(AppDataJobGenerationDtoState.INITIAL);
+        job1.getGenerations().get(0).setState(AppDataJobGenerationState.INITIAL);
         job1.getGenerations().get(0).setLastUpdateDate(new Date());
 
         doReturn(Arrays.asList(job1)).when(appDataPService)
@@ -474,18 +474,18 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(jobGeneratorSettings).getWaitmetadatainput();
         
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJob job1 = new AppDataJob();
         job1.setIdentifier(12L);
-        job1.getGenerations().add(new AppDataJobGenerationDto());
+        job1.getGenerations().add(new AppDataJobGeneration());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
-        job1.getGenerations().get(0).setState(AppDataJobGenerationDtoState.INITIAL);
+        job1.getGenerations().get(0).setState(AppDataJobGenerationState.INITIAL);
         job1.getGenerations().get(0).setLastUpdateDate(new Date());
         
-        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
+        AppDataJob job2 = new AppDataJob();
         job2.setIdentifier(12L);
-        job2.getGenerations().add(new AppDataJobGenerationDto());
+        job2.getGenerations().add(new AppDataJobGeneration());
         job2.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
-        job2.getGenerations().get(0).setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
+        job2.getGenerations().get(0).setState(AppDataJobGenerationState.PRIMARY_CHECK);
         job2.getGenerations().get(0).setLastUpdateDate(new Date());
 
         doReturn(Arrays.asList(job1, job2)).when(appDataPService)

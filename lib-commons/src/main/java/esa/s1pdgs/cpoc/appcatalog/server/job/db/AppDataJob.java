@@ -5,9 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
@@ -16,13 +13,12 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * 
  * @author Viveris Technologies
  */
-@Document(collection = "jobs")
+//@Document(collection = "jobs")
 public class AppDataJob {
 
     /**
      * Job identifier
      */
-    @Id
     private long identifier;
 
     /**

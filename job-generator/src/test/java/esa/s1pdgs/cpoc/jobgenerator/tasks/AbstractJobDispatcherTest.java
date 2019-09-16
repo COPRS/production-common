@@ -26,11 +26,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -40,9 +40,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class AbstractJobDispatcherTest {
@@ -141,17 +138,17 @@ public class AbstractJobDispatcherTest {
 
     private void mockAppDataService()
             throws InternalErrorException, AbstractCodedException {
-        AppDataJobDto<ProductDto> appData1 = new AppDataJobDto<>();
+        AppDataJob appData1 = new AppDataJob();
         appData1.setIdentifier(12);
-        appData1.setProduct(new AppDataJobProductDto());
+        appData1.setProduct(new AppDataJobProduct());
         appData1.getProduct().setProductName("p1");
-        AppDataJobDto<ProductDto> appData2 = new AppDataJobDto<>();
+        AppDataJob appData2 = new AppDataJob();
         appData2.setIdentifier(12);
-        appData2.setProduct(new AppDataJobProductDto());
+        appData2.setProduct(new AppDataJobProduct());
         appData2.getProduct().setProductName("p2");
-        AppDataJobDto<ProductDto> appData3 = new AppDataJobDto<>();
+        AppDataJob appData3 = new AppDataJob();
         appData3.setIdentifier(12);
-        appData3.setProduct(new AppDataJobProductDto());
+        appData3.setProduct(new AppDataJobProduct());
         appData3.getProduct().setProductName("p3");
         doReturn(Arrays.asList(appData1, appData2, appData3))
                 .when(appDataService)
@@ -270,7 +267,7 @@ public class AbstractJobDispatcherTest {
 
             verify(appDataService, times(1)).findByPodAndState(
                     Mockito.eq("hostname"),
-                    Mockito.eq(AppDataJobDtoState.GENERATING));
+                    Mockito.eq(AppDataJobState.GENERATING));
 
             assertTrue(dispatcher.getCounterDispatch() == 3);
 
@@ -286,19 +283,19 @@ public class AbstractJobDispatcherTest {
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
-        AppDataJobDto<ProductDto> dto = new AppDataJobDto<>();
+        AppDataJob dto = new AppDataJob();
         dto.setIdentifier(12);
-        dto.setProduct(new AppDataJobProductDto());
+        dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
 
-        AppDataJobDto<ProductDto> expected = new AppDataJobDto<>();
+        AppDataJob expected = new AppDataJob();
         expected.setIdentifier(12);
-        expected.setProduct(new AppDataJobProductDto());
+        expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
-        expected.setState(AppDataJobDtoState.GENERATING);
-        expected.getGenerations().add(new AppDataJobGenerationDto());
+        expected.setState(AppDataJobState.GENERATING);
+        expected.getGenerations().add(new AppDataJobGeneration());
         expected.getGenerations().get(0).setTaskTable("tt1");
-        expected.getGenerations().add(new AppDataJobGenerationDto());
+        expected.getGenerations().add(new AppDataJobGeneration());
         expected.getGenerations().get(1).setTaskTable("tt2");
 
         testDispatcher.dispatch(dto);
@@ -314,27 +311,27 @@ public class AbstractJobDispatcherTest {
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
-        AppDataJobDto<ProductDto> dto = new AppDataJobDto<>();
+        AppDataJob dto = new AppDataJob();
         dto.setIdentifier(12);
-        dto.setProduct(new AppDataJobProductDto());
+        dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
-        dto.setState(AppDataJobDtoState.GENERATING);
-        dto.getGenerations().add(new AppDataJobGenerationDto());
+        dto.setState(AppDataJobState.GENERATING);
+        dto.getGenerations().add(new AppDataJobGeneration());
         dto.getGenerations().get(0).setTaskTable("tt1");
-        dto.getGenerations().add(new AppDataJobGenerationDto());
+        dto.getGenerations().add(new AppDataJobGeneration());
         dto.getGenerations().get(1).setTaskTable("tt2");
-        dto.getGenerations().get(1).setState(AppDataJobGenerationDtoState.READY);
+        dto.getGenerations().get(1).setState(AppDataJobGenerationState.READY);
 
-        AppDataJobDto<ProductDto> expected = new AppDataJobDto<>();
+        AppDataJob expected = new AppDataJob();
         expected.setIdentifier(12);
-        expected.setProduct(new AppDataJobProductDto());
+        expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
-        expected.setState(AppDataJobDtoState.GENERATING);
-        expected.getGenerations().add(new AppDataJobGenerationDto());
+        expected.setState(AppDataJobState.GENERATING);
+        expected.getGenerations().add(new AppDataJobGeneration());
         expected.getGenerations().get(0).setTaskTable("tt1");
-        expected.getGenerations().add(new AppDataJobGenerationDto());
+        expected.getGenerations().add(new AppDataJobGeneration());
         expected.getGenerations().get(1).setTaskTable("tt2");
-        expected.getGenerations().get(1).setState(AppDataJobGenerationDtoState.READY);
+        expected.getGenerations().get(1).setState(AppDataJobGenerationState.READY);
 
         testDispatcher.dispatch(dto);
         verifyZeroInteractions(appDataService);
@@ -348,9 +345,9 @@ public class AbstractJobDispatcherTest {
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
-        AppDataJobDto<ProductDto> dto = new AppDataJobDto<>();
+        AppDataJob dto = new AppDataJob();
         dto.setIdentifier(12);
-        dto.setProduct(new AppDataJobProductDto());
+        dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
 
         testDispatcher.dispatch(dto);
@@ -364,26 +361,26 @@ public class AbstractJobDispatcherTest {
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
-        AppDataJobDto<ProductDto> dto = new AppDataJobDto<>();
+        AppDataJob dto = new AppDataJob();
         dto.setIdentifier(12);
-        dto.setProduct(new AppDataJobProductDto());
+        dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
-        dto.setState(AppDataJobDtoState.GENERATING);
-        dto.getGenerations().add(new AppDataJobGenerationDto());
+        dto.setState(AppDataJobState.GENERATING);
+        dto.getGenerations().add(new AppDataJobGeneration());
         dto.getGenerations().get(0).setTaskTable("tt3");
-        dto.getGenerations().add(new AppDataJobGenerationDto());
+        dto.getGenerations().add(new AppDataJobGeneration());
         dto.getGenerations().get(1).setTaskTable("tt1");
-        dto.getGenerations().get(1).setState(AppDataJobGenerationDtoState.READY);
+        dto.getGenerations().get(1).setState(AppDataJobGenerationState.READY);
 
-        AppDataJobDto<ProductDto> expected = new AppDataJobDto<>();
+        AppDataJob expected = new AppDataJob();
         expected.setIdentifier(12);
-        expected.setProduct(new AppDataJobProductDto());
+        expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
-        expected.setState(AppDataJobDtoState.GENERATING);
-        expected.getGenerations().add(new AppDataJobGenerationDto());
+        expected.setState(AppDataJobState.GENERATING);
+        expected.getGenerations().add(new AppDataJobGeneration());
         expected.getGenerations().get(0).setTaskTable("tt1");
-        expected.getGenerations().get(0).setState(AppDataJobGenerationDtoState.READY);
-        expected.getGenerations().add(new AppDataJobGenerationDto());
+        expected.getGenerations().get(0).setState(AppDataJobGenerationState.READY);
+        expected.getGenerations().add(new AppDataJobGeneration());
         expected.getGenerations().get(1).setTaskTable("tt2");
 
         testDispatcher.dispatch(dto);
@@ -417,14 +414,14 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<ProductDto> {
         return null;
     }
 
-    public void dispatch(final AppDataJobDto<ProductDto> job)
+    public void dispatch(final AppDataJob job)
             throws AbstractCodedException {
         counterDispatch++;
         super.dispatch(job);
     }
 
     @Override
-    public List<String> getTaskTables(final AppDataJobDto<ProductDto> job)
+    public List<String> getTaskTables(final AppDataJob job)
             throws AbstractCodedException {
         return Arrays.asList("tt1", "tt2");
     }

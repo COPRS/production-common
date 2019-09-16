@@ -3,13 +3,14 @@ package esa.s1pdgs.cpoc.jobgenerator.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobFileDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
@@ -94,22 +95,22 @@ public class TestL0Utils {
 //        return r;
 //    }
 //
-    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSession(
+    public static AppDataJob buildAppDataEdrsSession(
             boolean xmlOnlyForRaws) {
         return buildAppDataEdrsSession(xmlOnlyForRaws, "S1", true, true);
     }
 
-    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSessionWithRaw2(
+    public static AppDataJob buildAppDataEdrsSessionWithRaw2(
             boolean xmlOnlyForRaws) {
         return buildAppDataEdrsSession(xmlOnlyForRaws, "S1", false, true);
     }
 
-    public static AppDataJobDto<EdrsSessionDto> buildAppDataEdrsSession(
+    public static AppDataJob buildAppDataEdrsSession(
             boolean xmlOnlyForRaws, String missionId, boolean raw1,
             boolean raw2) {
-        AppDataJobDto<EdrsSessionDto> ret = new AppDataJobDto<>();
+        AppDataJob ret = new AppDataJob();
         ret.setIdentifier(123);
-        ret.setState(AppDataJobDtoState.GENERATING);
+        ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);
 
@@ -130,9 +131,10 @@ public class TestL0Utils {
                                     "A", "WILE", "sessionId"));
             messages.add(message2);
         }
-        ret.setMessages(messages);
+        
+        ret.setMessages(messages.stream().collect(Collectors.toList()));
 
-        AppDataJobProductDto product = new AppDataJobProductDto();
+        AppDataJobProduct product = new AppDataJobProduct();
         product.setMissionId(missionId);
         product.setProductName("L20171109175634707000125");
         if (raw1) {
@@ -150,374 +152,374 @@ public class TestL0Utils {
         product.setProcessMode("");
         ret.setProduct(product);
 
-        AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();
+        AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("TaskTable.AIOP.xml");
-        gen1.setState(AppDataJobGenerationDtoState.INITIAL);
+        gen1.setState(AppDataJobGenerationState.INITIAL);
         ret.setGenerations(Arrays.asList(gen1));
 
         return ret;
     }
 
-    public static List<AppDataJobFileDto> getRawsChannel1(
+    public static List<AppDataJobFile> getRawsChannel1(
             boolean xmlOnlyForRaws) {
         if (xmlOnlyForRaws) {
-            return Arrays.asList(new AppDataJobFileDto(
+            return Arrays.asList(new AppDataJobFile(
                     "DCS_02_L20171109175634707000125_ch1_DSDB_00001.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00002.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00003.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00004.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00006.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00007.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00008.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00009.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00010.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00011.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00012.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00013.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00014.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00015.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00016.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00017.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00018.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00019.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00020.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00021.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00022.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00023.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00024.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00025.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00026.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00027.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00028.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00029.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00030.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00031.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00032.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00033.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00034.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch1_DSDB_00035.raw"));
         }
 
-        return Arrays.asList(new AppDataJobFileDto(
+        return Arrays.asList(new AppDataJobFile(
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00001.raw",
                 "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00001.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00002.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00002.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00003.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00003.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00004.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00004.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00006.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00006.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00007.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00007.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00008.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00008.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00009.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00009.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00010.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00010.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00011.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00011.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00012.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00012.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00013.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00013.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00014.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00014.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00015.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00015.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00016.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00016.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00017.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00017.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00018.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00018.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00019.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00019.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00020.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00020.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00021.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00021.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00022.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00022.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00023.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00023.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00024.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00024.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00025.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00025.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00026.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00026.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00027.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00027.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00028.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00028.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00029.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00029.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00030.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00030.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00031.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00031.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00032.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00032.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00033.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00033.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00034.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00034.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch1_DSDB_00035.raw",
                         "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00035.raw"));
     }
 
-    public static List<AppDataJobFileDto> getRawsChannel2(
+    public static List<AppDataJobFile> getRawsChannel2(
             boolean xmlOnlyForRaws) {
         if (xmlOnlyForRaws) {
-            return Arrays.asList(new AppDataJobFileDto(
+            return Arrays.asList(new AppDataJobFile(
                     "DCS_02_L20171109175634707000125_ch2_DSDB_00001.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00002.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00003.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00004.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00005.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00006.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00007.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00008.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00009.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00010.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00011.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00012.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00013.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00014.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00015.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00016.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00017.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00018.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00019.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00020.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00021.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00022.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00023.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00024.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00025.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00026.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00027.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00028.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00029.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00030.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00031.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00032.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00033.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00034.raw"),
-                    new AppDataJobFileDto(
+                    new AppDataJobFile(
                             "DCS_02_L20171109175634707000125_ch2_DSDB_00035.raw"));
         }
 
-        return Arrays.asList(new AppDataJobFileDto(
+        return Arrays.asList(new AppDataJobFile(
                 "DCS_02_L20171109175634707000125_ch2_DSDB_00001.raw",
                 "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00001.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00002.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00002.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00003.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00003.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00004.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00004.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00005.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00005.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00006.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00006.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00007.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00007.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00008.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00008.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00009.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00009.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00010.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00010.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00011.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00011.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00012.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00012.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00013.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00013.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00014.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00014.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00015.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00015.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00016.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00016.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00017.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00017.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00018.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00018.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00019.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00019.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00020.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00020.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00021.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00021.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00022.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00022.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00023.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00023.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00024.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00024.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00025.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00025.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00026.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00026.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00027.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00027.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00028.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00028.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00029.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00029.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00030.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00030.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00031.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00031.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00032.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00032.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00033.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00033.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00034.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00034.raw"),
-                new AppDataJobFileDto(
+                new AppDataJobFile(
                         "DCS_02_L20171109175634707000125_ch2_DSDB_00035.raw",
                         "S1A/L20171109175634707000125/ch02/DCS_02_L20171109175634707000125_ch2_DSDB_00035.raw"));
     }

@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
@@ -136,7 +136,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJobDto<ProductDto> job)
+    protected List<String> getTaskTables(final AppDataJob job)
             throws JobGenMissingRoutingEntryException {
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"

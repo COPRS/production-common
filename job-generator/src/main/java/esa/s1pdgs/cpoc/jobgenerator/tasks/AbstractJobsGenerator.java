@@ -21,10 +21,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -67,6 +67,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.JobOrderReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -338,7 +339,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         
         try {
         	
-            List<AppDataJobDto<T>> jobs = appDataService
+            List<AppDataJob> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
             
@@ -346,7 +347,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
             } else {
-                for (AppDataJobDto<T> appDataJob : jobs) {
+                for (AppDataJob appDataJob : jobs) {
                     // Check if we can do a loop
                     long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
@@ -411,7 +412,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 LOGGER.debug ("== Trying job generation for job {}", job.toString());
                 
                 // Check primary input
-                if (job.getGeneration().getState() == AppDataJobGenerationDtoState.INITIAL) {
+                if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
                  	final Reporting reportInit = reportingFactory.newReporting(1);
                  	
                     try {                    	
@@ -425,24 +426,24 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         this.preSearch(job);
                         
                         @SuppressWarnings("unchecked")
-						AppDataJobDto<T> modifiedJob = appDataService.patchJob(
+						AppDataJob modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getIdentifier(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
-                        updateState(job, AppDataJobGenerationDtoState.PRIMARY_CHECK, reportInit);
+                        updateState(job, AppDataJobGenerationState.PRIMARY_CHECK, reportInit);
                         reportInit.end(new ReportingMessage("End init job generation"));
                     } catch (AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());                      
-                        updateState(job, AppDataJobGenerationDtoState.INITIAL, reportInit);
+                        updateState(job, AppDataJobGenerationState.INITIAL, reportInit);
                         reportInit.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
 
                 // Search input
-                if (job.getGeneration().getState() == AppDataJobGenerationDtoState.PRIMARY_CHECK) {
+                if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
                 	
                 	final Reporting reportInputs = reportingFactory                  			
                 			.newReporting(2);
@@ -454,7 +455,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                 this.prefixLogMonitor, job.getAppDataJob()
                                         .getProduct().getProductName());
                         this.inputsSearch(job);
-                        updateState(job, AppDataJobGenerationDtoState.READY, reportInputs);
+                        updateState(job, AppDataJobGenerationState.READY, reportInputs);
                         reportInputs.end(new ReportingMessage("End searching inputs"));
                         
                     } catch (AbstractCodedException e) {
@@ -462,13 +463,13 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                 "{} [productName {}] 2 - Inputs not found: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
-                        updateState(job,AppDataJobGenerationDtoState.PRIMARY_CHECK, reportInputs);
+                        updateState(job,AppDataJobGenerationState.PRIMARY_CHECK, reportInputs);
                         reportInputs.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
 
                 // Prepare and send job if ready
-                if (job.getGeneration().getState() == AppDataJobGenerationDtoState.READY) {
+                if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
                 	
                   	final Reporting reportPrep = reportingFactory                       			
                 			.newReporting(3);
@@ -485,9 +486,9 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                         .getProduct().getProductName());
                         this.send(job);
                 
-                        updateState(job, AppDataJobGenerationDtoState.SENT, reportPrep);
+                        updateState(job, AppDataJobGenerationState.SENT, reportPrep);
                        
-						if (job.getGeneration().getState() == AppDataJobGenerationDtoState.SENT) {
+						if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
 							reportPrep.end(new ReportingMessage("End job preparation and sending"));
 
 						} else {
@@ -497,7 +498,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         LOGGER.error("{} [productName {}] 3 - Job not send: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
-                        updateState(job, AppDataJobGenerationDtoState.READY, reportPrep);
+                        updateState(job, AppDataJobGenerationState.READY, reportPrep);
                         reportPrep.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
@@ -531,7 +532,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     }
 
     private void updateState(JobGeneration job,
-            AppDataJobGenerationDtoState newState,
+            AppDataJobGenerationState newState,
             Reporting report
     )
         throws AbstractCodedException {
@@ -542,7 +543,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 newState,
                 job.getGeneration()
         ));
-        AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
+        AppDataJob modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
         
@@ -556,10 +557,10 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     	report.intermediate(new ReportingMessage("Job generation after update: {}", job.getGeneration()));
     	
         // Log functional logs, not clear when this is called
-        if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {
+        if (job.getAppDataJob().getState() == AppDataJobState.TERMINATED) {
         	
         	@SuppressWarnings("unchecked")
-			final AppDataJobDto<? extends AbstractDto> jobDto = job.getAppDataJob();
+			final AppDataJob jobDto = job.getAppDataJob();
         	
             final List<String> taskTables =  jobDto.getGenerations().stream()
             	.map(g -> g.getTaskTable())
@@ -590,12 +591,12 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                     DateUtils.convertToAnotherFormat(
                                             job.getAppDataJob().getProduct()
                                                     .getStartTime(),
-                                            AppDataJobProductDto.TIME_FORMATTER,
+                                            AppDataJobProduct.TIME_FORMATTER,
                                             AbstractMetadata.METADATA_DATE_FORMATTER),
                                     DateUtils.convertToAnotherFormat(
                                             job.getAppDataJob().getProduct()
                                                     .getStopTime(),
-                                            AppDataJobProductDto.TIME_FORMATTER,
+                                            AppDataJobProduct.TIME_FORMATTER,
                                             AbstractMetadata.METADATA_DATE_FORMATTER),
                                     job.getAppDataJob().getProduct()
                                             .getSatelliteId(),
@@ -732,14 +733,14 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                                     job.getAppDataJob()
                                                             .getProduct()
                                                             .getStartTime(),
-                                                    AppDataJobProductDto.TIME_FORMATTER,
+                                                    AppDataJobProduct.TIME_FORMATTER,
                                                     outFormatter);
                                     String stopDate =
                                             DateUtils.convertToAnotherFormat(
                                                     job.getAppDataJob()
                                                             .getProduct()
                                                             .getStopTime(),
-                                                    AppDataJobProductDto.TIME_FORMATTER,
+                                                    AppDataJobProduct.TIME_FORMATTER,
                                                     outFormatter);
                                     String filename = alt.getFileType();
                                     if (this.jobGeneratorSettings
@@ -833,12 +834,12 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 .setSensingTime(new JobOrderSensingTime(
                         DateUtils.convertToAnotherFormat(
                                 job.getAppDataJob().getProduct().getStartTime(),
-                                AppDataJobProductDto.TIME_FORMATTER,
+                                AppDataJobProduct.TIME_FORMATTER,
                                 JobOrderSensingTime.DATETIME_FORMATTER),
 
                         DateUtils.convertToAnotherFormat(
                                 job.getAppDataJob().getProduct().getStopTime(),
-                                AppDataJobProductDto.TIME_FORMATTER,
+                                AppDataJobProduct.TIME_FORMATTER,
                                 JobOrderSensingTime.DATETIME_FORMATTER)));
 
         // Custom Job order according implementation
@@ -939,15 +940,15 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             throw new InternalErrorException("Cannot send the job", e);
         }
 
-        // Thrid, send the job
+        // Third, send the job
         LOGGER.info("{} [productName {}] 3c - Publishing job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
 
 		@SuppressWarnings("unchecked")
-		final AppDataJobDto<T> dto = job.getAppDataJob();
+		final AppDataJob dto = job.getAppDataJob();
 
-        this.outputFactory.sendJob(dto.getMessages().get(0), r);
+        this.outputFactory.sendJob((GenericMessageDto<?>) dto.getMessages().get(0), r);
     }
 
     protected abstract void customJobOrder(JobGeneration job);
