@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class ProcessConfiguration {
 
 	private String hostname = "";
-	private int numObsDownloadRetries = 10;
+	private int numObsDownloadRetries = 99;
 	private long sleepBetweenObsRetriesMillis = 3000L; 
 
 	public String getHostname() {
