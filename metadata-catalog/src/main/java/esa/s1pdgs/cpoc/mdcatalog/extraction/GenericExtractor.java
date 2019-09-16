@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
@@ -305,13 +306,23 @@ public abstract class GenericExtractor<T> {
         reportDownload.begin(new ReportingMessage("Starting download of " + keyObs + " to local directory " + this.localDirectory));
 
 		try {
-			final List<File> files = obsClient.download(Arrays.asList(new ObsDownloadObject(family, keyObs, this.localDirectory)));
+			final List<File> files = Retries.performWithRetries(
+					() -> obsClient.download(Arrays.asList(new ObsDownloadObject(family, keyObs, this.localDirectory))), 
+					"Download of " + keyObs + " to " + localDirectory, 
+					processConfiguration.getNumObsDownloadRetries(), 
+					processConfiguration.getSleepBetweenObsRetriesMillis()
+			);
 			reportDownload.end(new ReportingMessage("End download of " + keyObs));
 			return files.size() == 1 ? files.get(0) : null;
-		} catch (AbstractCodedException e) {
-			reportDownload.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
-		}         
+		} catch (Exception e) {
+			if (e instanceof AbstractCodedException) {
+				final AbstractCodedException ace = (AbstractCodedException) e;
+				reportDownload.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
+				throw ace;
+			}
+			reportDownload.error(new ReportingMessage("Error downloading {} to local directory {}", keyObs, localDirectory));
+			throw new RuntimeException(e);     
+		}
     }
     
     final <E> E extractFromFilename(

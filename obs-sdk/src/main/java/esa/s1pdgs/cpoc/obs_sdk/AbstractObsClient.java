@@ -72,7 +72,7 @@ public abstract class AbstractObsClient implements ObsClient {
      * @see #downloadObjects(List, boolean)
      */
     public List<File> downloadObjects(final List<ObsDownloadObject> objects)
-            throws SdkClientException, ObsServiceException {
+            throws SdkClientException, ObsServiceException, ObsException {
         return downloadObjects(objects, false);
     }
 
@@ -85,7 +85,7 @@ public abstract class AbstractObsClient implements ObsClient {
      */
     public List<File> downloadObjects(final List<ObsDownloadObject> objects,
             final boolean parallel)
-            throws SdkClientException, ObsServiceException {
+            throws SdkClientException, ObsServiceException, ObsException {
     	
     	List<File> files = new ArrayList<>();
         if (objects.size() > 1 && parallel) {
@@ -122,6 +122,9 @@ public abstract class AbstractObsClient implements ObsClient {
              	);
              	try {
 					final List<File> results = downloadObject(object);
+					if (results.size() <= 0) {
+						throw new ObsUnknownObject(object.getFamily(), object.getKey());
+					}					
 					final long dlSize =	FileUtils.size(files);
 					reporting.end(new ReportingMessage(dlSize, "End downloading from OBS"));             	
 					files.addAll(results);
@@ -244,11 +247,10 @@ public abstract class AbstractObsClient implements ObsClient {
 		// Download object
 		ObsDownloadObject object = new ObsDownloadObject(family, key, targetDir);
 		try {
-			downloadObject(object);
-			/* FIXME handle not found situations differently
-			   if (nbObjects <= 0) {
+			final List<File> obj = downloadObject(object);
+			if (obj.size() <= 0) {
 				throw new ObsUnknownObject(family, key);
-			} */
+			}
 		} catch (SdkClientException exc) {
 			throw new ObsException(family, key, exc);
 		}

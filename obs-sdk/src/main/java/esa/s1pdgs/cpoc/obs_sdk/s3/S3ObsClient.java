@@ -106,8 +106,13 @@ public class S3ObsClient extends AbstractObsClient {
 	 */
 	@Override
 	public List<File> downloadObject(final ObsDownloadObject object) throws SdkClientException, ObsServiceException {
-		return s3Services.downloadObjectsWithPrefix(getBucketFor(object.getFamily()),
+		final String bucket = getBucketFor(object.getFamily());
+		LOGGER.debug("downloadObjectsWithPrefix from bucket {} with prefix {}", bucket, object.getKey());
+		final List<File> res = s3Services.downloadObjectsWithPrefix(bucket,
 				object.getKey(), object.getTargetDir(), object.isIgnoreFolders());
+		LOGGER.debug("downloadObjectsWithPrefix from bucket {} with prefix {} got {} results", bucket, object.getKey(), 
+				res.size());
+		return res;
 	}
 
 	@Override
