@@ -7,7 +7,7 @@ variables:
   DOCKER_HOST: tcp://localhost:2375
   MODULE: s1pro-core
   BRANCH: $CI_COMMIT_REF_SLUG
-  VERSION: 0.7.0
+  VERSION: 0.8.0-SNAPSHOT
 
 stages:
   - build
