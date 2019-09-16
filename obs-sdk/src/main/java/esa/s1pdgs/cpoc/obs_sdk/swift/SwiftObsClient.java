@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 
 public class SwiftObsClient extends AbstractObsClient {
 
@@ -77,11 +78,13 @@ public class SwiftObsClient extends AbstractObsClient {
     
 	@Override
 	public boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		return swiftObsServices.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
 
 	@Override
 	public boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		return swiftObsServices.getNbObjects(
                 getBucketFor(object.getFamily()),
                 object.getKey()) > 0;
@@ -164,8 +167,11 @@ public class SwiftObsClient extends AbstractObsClient {
 	@Override
 	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily family, Date timeFrameBegin, Date timeFrameEnd)
 			throws SdkClientException, ObsServiceException {
-		long methodStartTime = System.currentTimeMillis();
+		ValidArgumentAssertion.assertValidArgument(family);
+		ValidArgumentAssertion.assertValidArgument(timeFrameBegin);
+		ValidArgumentAssertion.assertValidArgument(timeFrameEnd);
 
+		long methodStartTime = System.currentTimeMillis();
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
 		String container = getBucketFor(family);
 		Collection<StoredObject> objListing = swiftObsServices.listObjectsFromContainer(container);
@@ -201,6 +207,8 @@ public class SwiftObsClient extends AbstractObsClient {
 	
 	@Override
 	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) throws SdkClientException {
+		ValidArgumentAssertion.assertValidArgument(family);
+		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
 		final String bucket = getBucketFor(family);
 		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);		
 		final Map<String, InputStream> result = swiftObsServices.getAllAsInputStream(bucket, keyPrefix);

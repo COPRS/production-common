@@ -263,10 +263,10 @@ public abstract class AbstractObsClient implements ObsClient {
      * 
      * @param objects
      * @throws AbstractCodedException
+     * @throws IllegalArgumentException
      */
-    public List<File> download(
-            final List<ObsDownloadObject> objects)
-            throws AbstractCodedException {
+    public List<File> download(final List<ObsDownloadObject> objects) throws AbstractCodedException {
+    	ValidArgumentAssertion.assertValidArgument(objects);
         try {
             return downloadObjects(objects, true);
         } catch (SdkClientException exc) {
@@ -299,6 +299,7 @@ public abstract class AbstractObsClient implements ObsClient {
      */
     public void upload(final List<ObsUploadObject> objects)
             throws AbstractCodedException {
+    	ValidArgumentAssertion.assertValidArgument(objects);
         try {
             uploadObjects(objects, true);
         } catch (SdkClientException exc) {
@@ -307,6 +308,9 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
     public Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException {
+    	ValidArgumentAssertion.assertValidArgument(family);
+    	ValidArgumentAssertion.assertValidArgument(intervalStart);
+    	ValidArgumentAssertion.assertValidArgument(intervalEnd);
     	
     	List<ObsObject> results = getObsObjectsOfFamilyWithinTimeFrame(family, intervalStart, intervalEnd);
     	Map<String, ObsObject> map = results.stream()
@@ -327,6 +331,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	
 	@Override
     public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		try {
 			Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
 			if (isMap.size() > 1) {
