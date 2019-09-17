@@ -44,7 +44,7 @@ public class ProductDto extends AbstractDto {
      */
     @Override
     public String toString() {
-        return String.format("{productName: %s, keyObjectStorage: %s, family: %s, mode: %s}", getProductName(), keyObjectStorage, getFamily(), mode);
+        return String.format("{productName: %s, keyObjectStorage: %s, family: %s, mode: %s, hostname: %s, creationDate: %s}", getProductName(), keyObjectStorage, getFamily(), mode, getHostname(), getCreationDate());
     }
 
     /**

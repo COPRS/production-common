@@ -122,7 +122,7 @@ public class IngestionDto extends AbstractDto {
 	@Override
 	public String toString() {
 		return String.format(
-				"IngestionDto [relativePath=%s, pickupPath=%s, missionId=%s, satelliteId=%s, stationCode=%s]",
-				relativePath, pickupPath, missionId, satelliteId, stationCode);
+				"IngestionDto [relativePath=%s, pickupPath=%s, missionId=%s, satelliteId=%s, stationCode=%s, hostname: %s, creationDate: %s]",
+				relativePath, pickupPath, missionId, satelliteId, stationCode, getHostname(), getCreationDate());
 	}
 }

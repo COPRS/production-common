@@ -173,9 +173,9 @@ public class EdrsSessionDto extends AbstractDto {
     @Override
     public String toString() {
         return String.format(
-                "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s, stationCode: %s, sessionId: %s}",
+                "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s, stationCode: %s, sessionId: %s, hostname: %s, creationDate: %s}",
                 getKeyObjectStorage(), channelId, productType, satelliteId,
-                missionId, stationCode, sessionId);
+                missionId, stationCode, sessionId, getHostname(), getCreationDate());
     }
 
     /**

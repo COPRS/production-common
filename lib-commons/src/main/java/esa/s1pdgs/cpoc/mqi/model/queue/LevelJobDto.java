@@ -216,9 +216,9 @@ public class LevelJobDto extends AbstractDto {
     @Override
     public String toString() {
         return String.format(
-                "{family: %s, productIdentifier: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s}",
+                "{family: %s, productIdentifier: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s, hostname: %s, creationDate: %s}",
                 getFamily(), getProductIdentifier(), productProcessMode, workDirectory, jobOrder, inputs,
-                outputs, pools);
+                outputs, pools, getHostname(), getCreationDate());
     }
 
     /**
