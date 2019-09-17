@@ -88,7 +88,4 @@ public class LevelSegmentControllerTest extends RestControllerTest {
         .andExpect(MockMvcResultMatchers.status().is5xxServerError());
         verify(esServices, times(1)).getLevelSegment(Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq("name"));
     }
-    
-    
-    
 }
