@@ -130,8 +130,15 @@ public class SwiftObsClient extends AbstractObsClient {
 		} catch(IOException e) {
 			file.deleteOnExit();
 		}
-	}
+	}	
 	
+	@Override
+	public void move(ObsObject from, ProductFamily to) throws ObsException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(from);
+		ValidArgumentAssertion.assertValidArgument(to);
+		swiftObsServices.move(from.getKey(), getBucketFor(from.getFamily()), getBucketFor(to));
+	}
+
 	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
 		swiftObsServices.createContainer(getBucketFor(family));
 	}

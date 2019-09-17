@@ -63,7 +63,7 @@ public interface ObsClient {
 	
 	void upload(final List<ObsUploadObject> objects) throws AbstractCodedException;
 	
-	void move(final ObsObject from, final ProductFamily to) throws ObsException;
+	void move(final ObsObject from, final ProductFamily to) throws ObsException, ObsServiceException;
 
 	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
 	

@@ -18,6 +18,7 @@ import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public class SwiftObsServices {
 
@@ -369,6 +370,16 @@ public class SwiftObsServices {
                 }
             }
         }		
+	}
+	
+	public final void move(final String obsKey, final String sourceContainer, final String targetContainer) {
+		final Container source = client.getContainer(sourceContainer);
+		final StoredObject object = source.getObject(obsKey);
+		
+		final Container target = client.getContainer(targetContainer);
+		final StoredObject newObject = target.getObject(obsKey);
+		object.copyObject(target, newObject);
+		object.delete();
 	}
 
 	public void delete(String containerName, String keyName) throws SwiftSdkClientException {
