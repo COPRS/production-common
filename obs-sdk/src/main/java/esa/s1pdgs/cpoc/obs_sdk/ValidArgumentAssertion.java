@@ -39,8 +39,8 @@ public class ValidArgumentAssertion {
     		if (null == f) {
     			throw new IllegalArgumentException("Invalid file: null");
     		}
-    		if (f.getAbsolutePath().isEmpty()) {
-    			throw new IllegalArgumentException("Invalid file (empty)");
+    		if (f.getName().isEmpty()) {
+    			throw new IllegalArgumentException("Invalid file (empty filename)");
     		}
     	}
 	}
@@ -62,7 +62,7 @@ public class ValidArgumentAssertion {
     		throw new IllegalArgumentException("Invalid key: null");
     	}
     	if (key.isEmpty()) {
-    		throw new IllegalArgumentException("Invalid key: (empty)");
+    		throw new IllegalArgumentException("Invalid key (empty)");
     	}
 	}
 
@@ -71,7 +71,7 @@ public class ValidArgumentAssertion {
     		throw new IllegalArgumentException("Invalid prefix: null");
     	}
     	if (prefix.isEmpty()) {
-    		throw new IllegalArgumentException("Invalid prefix: (empty)");
+    		throw new IllegalArgumentException("Invalid prefix (empty)");
     	}
 	}	
 }
