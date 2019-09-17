@@ -276,7 +276,6 @@ public class SwiftObsClientIT {
 		String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
 		uut.download(Arrays.asList(new ObsDownloadObject(auxiliaryFiles, testDirectoryName + "/", targetDir)));
 
-		System.out.println(new File(testDirectory, testFileName1).toPath());
 		String send1 = new String(Files.readAllBytes(new File(testDirectory, testFileName1).toPath()));
 		String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testDirectoryName + "/" + testFileName1)).toPath()));
 		assertEquals(send1, received1);
