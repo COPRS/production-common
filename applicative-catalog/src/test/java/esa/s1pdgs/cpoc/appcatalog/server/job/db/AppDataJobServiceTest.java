@@ -93,7 +93,7 @@ public class AppDataJobServiceTest {
         
         this.appDataJobService.newJob(newJob);
         
-        verify(sequenceDao, times(1)).getNextSequenceId(Mockito.eq("jobs"));
+        verify(sequenceDao, times(1)).getNextSequenceId(Mockito.eq("appDataJob"));
         verify(appDataJobDao, times(1)).save(Mockito.eq(newJob));
     }
     
