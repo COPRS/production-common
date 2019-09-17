@@ -227,7 +227,7 @@ public class LevelJobDto extends AbstractDto {
     @Override
     public int hashCode() {
         return Objects.hash(getFamily(), getProductIdentifier(), productProcessMode, workDirectory, jobOrder, 
-                inputs, outputs, pools);
+                inputs, outputs, pools, getHostname(), getCreationDate());
     }
 
     /**
@@ -250,7 +250,11 @@ public class LevelJobDto extends AbstractDto {
                     && Objects.equals(jobOrder, other.jobOrder)
                     && Objects.equals(inputs, other.inputs)
                     && Objects.equals(outputs, other.outputs)
-                    && Objects.equals(pools, other.pools);
+                    && Objects.equals(pools, other.pools)
+                    && Objects.equals(getHostname(), other.getHostname())
+            		&& Objects.equals(getCreationDate(), other.getCreationDate())
+            		&& Objects.equals(getHostname(), other.getHostname())
+                    && Objects.equals(getCreationDate(), other.getCreationDate());
         }
         return ret;
 

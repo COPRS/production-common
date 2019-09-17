@@ -184,7 +184,7 @@ public class EdrsSessionDto extends AbstractDto {
     @Override
     public int hashCode() {
         return Objects.hash(getKeyObjectStorage(), getFamily(), channelId, productType,
-                satelliteId, missionId, stationCode, sessionId);
+                satelliteId, missionId, stationCode, sessionId, getHostname(), getCreationDate());
     }
 
     /**
@@ -207,7 +207,9 @@ public class EdrsSessionDto extends AbstractDto {
                     && Objects.equals(satelliteId, other.satelliteId)
                     && Objects.equals(missionId, other.missionId)
                     && Objects.equals(stationCode, other.stationCode)
-            		&& Objects.equals(sessionId, other.sessionId);
+            		&& Objects.equals(sessionId, other.sessionId)
+            		&& Objects.equals(getHostname(), other.getHostname())
+            		&& Objects.equals(getCreationDate(), other.getCreationDate());
         }
         return ret;
     }

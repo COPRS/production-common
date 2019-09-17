@@ -69,6 +69,8 @@ public class IngestionDto extends AbstractDto {
 		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
 		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
 		result = prime * result + ((stationCode == null) ? 0 : stationCode.hashCode());
+		result = prime * result + ((getHostname() == null) ? 0 : getHostname().hashCode());
+		result = prime * result + ((getCreationDate() == null) ? 0 : getCreationDate().hashCode());
 		return result;
 	}
 
@@ -115,6 +117,16 @@ public class IngestionDto extends AbstractDto {
 			if (other.stationCode != null)
 				return false;
 		} else if (!stationCode.equals(other.stationCode))
+			return false;
+		if (getHostname() == null) {
+			if (other.getHostname() != null)
+				return false;
+		} else if (!getHostname().equals(other.getHostname()))
+			return false;
+		if (getCreationDate() == null) {
+			if (other.getCreationDate() != null)
+				return false;
+		} else if (!getCreationDate().equals(other.getCreationDate()))
 			return false;
 		return true;
 	}

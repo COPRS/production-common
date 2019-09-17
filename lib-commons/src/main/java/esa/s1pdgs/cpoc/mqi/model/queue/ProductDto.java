@@ -52,7 +52,7 @@ public class ProductDto extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getProductName(), keyObjectStorage, getFamily(), mode);
+        return Objects.hash(getProductName(), keyObjectStorage, getFamily(), mode, getHostname(), getCreationDate());
     }
     
 
@@ -72,7 +72,9 @@ public class ProductDto extends AbstractDto {
             ret = Objects.equals(getProductName(), other.getProductName())
                     && Objects.equals(keyObjectStorage, other.keyObjectStorage)
                     && Objects.equals(getFamily(), other.getFamily())
-                    && Objects.equals(mode, other.mode);
+                    && Objects.equals(mode, other.mode)
+                    && Objects.equals(getHostname(), other.getHostname())
+            		&& Objects.equals(getCreationDate(), other.getCreationDate());
         }
         return ret;
     }

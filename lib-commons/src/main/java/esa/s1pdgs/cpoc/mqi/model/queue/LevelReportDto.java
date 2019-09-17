@@ -63,7 +63,7 @@ public class LevelReportDto extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getProductName(), content, getFamily());
+        return Objects.hash(getProductName(), content, getFamily(), getHostname(), getCreationDate());
     }
 
     /**
@@ -81,7 +81,9 @@ public class LevelReportDto extends AbstractDto {
             // field comparison
             ret = Objects.equals(getProductName(), other.getProductName())
                     && Objects.equals(content, other.content)
-                    && Objects.equals(getFamily(), other.getFamily());
+                    && Objects.equals(getFamily(), other.getFamily())
+                    && Objects.equals(getHostname(), other.getHostname())
+            		&& Objects.equals(getCreationDate(), other.getCreationDate());
         }
         return ret;
     }
