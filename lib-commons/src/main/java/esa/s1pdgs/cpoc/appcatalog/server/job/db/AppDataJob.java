@@ -13,7 +13,6 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * 
  * @author Viveris Technologies
  */
-//@Document(collection = "jobs")
 public class AppDataJob {
 
     /**

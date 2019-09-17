@@ -25,7 +25,7 @@ public class AppDataJobService {
     /**
      * Key used for generating identifiers
      */
-    public static final String JOB_SEQ_KEY = "jobs";
+    public static final String JOB_SEQ_KEY = "appDataJob";
 
     /**
      * Dao for job
