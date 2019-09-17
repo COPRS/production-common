@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -7,8 +8,6 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.assertj.core.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,8 +24,6 @@ import org.junit.rules.ExpectedException;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * Test the class AbstractObsClientImpl
@@ -513,6 +509,7 @@ public class AbstractObsClientTest {
     	assertThatThrownBy(() -> uut.validate(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
     	assertThatThrownBy(() -> uut.validate(new ObsObject(null, "key"))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
     	assertThatThrownBy(() -> uut.validate(new ObsObject(ProductFamily.AUXILIARY_FILE, null))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key: null");
+    	assertThatThrownBy(() -> uut.validate(new ObsObject(ProductFamily.AUXILIARY_FILE, ""))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key (empty)");
     }
     
     @Test
