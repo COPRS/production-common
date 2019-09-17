@@ -62,7 +62,7 @@ public class ValidArgumentAssertion {
     		throw new IllegalArgumentException("Invalid key: null");
     	}
     	if (key.isEmpty()) {
-    		throw new IllegalArgumentException("Invalid key: (empty)");
+    		throw new IllegalArgumentException("Invalid key (empty)");
     	}
 	}
 
@@ -71,7 +71,7 @@ public class ValidArgumentAssertion {
     		throw new IllegalArgumentException("Invalid prefix: null");
     	}
     	if (prefix.isEmpty()) {
-    		throw new IllegalArgumentException("Invalid prefix: (empty)");
+    		throw new IllegalArgumentException("Invalid prefix (empty)");
     	}
 	}	
 }
