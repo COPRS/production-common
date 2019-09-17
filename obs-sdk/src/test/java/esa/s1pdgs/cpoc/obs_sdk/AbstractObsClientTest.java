@@ -7,20 +7,27 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.assertj.core.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Test the class AbstractObsClientImpl
@@ -476,6 +483,45 @@ public class AbstractObsClientTest {
     	thrown.expectMessage("Checksum file not found for: md5sum-not-existing of family " + ProductFamily.AUXILIARY_FILE);
     	uut.validate(obsObject);
     }
+    
+    @Test
+    public void testDownloadValidArgumentAssertion() throws AbstractCodedException {
+    	assertThatThrownBy(() -> uut.download(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
+    	assertThatThrownBy(() -> uut.download(Collections.emptyList())).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid collection (empty)");
+    	assertThatThrownBy(() -> uut.download(java.util.Arrays.asList((ObsDownloadObject)null))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
+    	assertThatThrownBy(() -> uut.download(java.util.Arrays.asList(new ObsDownloadObject(null, "key", "targetDir")))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
+    	assertThatThrownBy(() -> uut.download(java.util.Arrays.asList(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, null, "targetDir")))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key: null");
+    	assertThatThrownBy(() -> uut.download(java.util.Arrays.asList(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "", "targetDir")))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key (empty)");
+    	assertThatThrownBy(() -> uut.download(java.util.Arrays.asList(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key", null)))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid targetDir: null");
+    	assertThatThrownBy(() -> uut.download(java.util.Arrays.asList(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key", "")))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid targetDir (empty)");
+    }
+    
+    @Test
+    public void testUploadValidArgumentAssertion() throws AbstractCodedException {
+    	assertThatThrownBy(() -> uut.upload(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
+    	assertThatThrownBy(() -> uut.upload(Collections.emptyList())).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid collection (empty)");
+    	assertThatThrownBy(() -> uut.upload(java.util.Arrays.asList((ObsUploadObject)null))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
+    	assertThatThrownBy(() -> uut.upload(java.util.Arrays.asList(new ObsUploadObject(null, "key", new File("filepath"))))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
+    	assertThatThrownBy(() -> uut.upload(java.util.Arrays.asList(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, null, new File("filepath"))))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key: null");
+    	assertThatThrownBy(() -> uut.upload(java.util.Arrays.asList(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "",  new File("filepath"))))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key (empty)");
+    	assertThatThrownBy(() -> uut.upload(java.util.Arrays.asList(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key", null)))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid file: null");
+    	assertThatThrownBy(() -> uut.upload(java.util.Arrays.asList(new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key", new File(""))))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid file (empty filename)");
+    }
+
+    @Test
+    public void testValidateValidArgumentAssertion() throws AbstractCodedException {
+    	assertThatThrownBy(() -> uut.validate(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
+    	assertThatThrownBy(() -> uut.validate(new ObsObject(null, "key"))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
+    	assertThatThrownBy(() -> uut.validate(new ObsObject(ProductFamily.AUXILIARY_FILE, null))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key: null");
+    }
+    
+    @Test
+    public void testListIntervalValidArgumentAssertion() throws AbstractCodedException {
+    	assertThatThrownBy(() -> uut.listInterval(null, new Date(), new Date())).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
+    	assertThatThrownBy(() -> uut.listInterval(ProductFamily.AUXILIARY_FILE, null, new Date())).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid date: null");
+    	assertThatThrownBy(() -> uut.listInterval(ProductFamily.AUXILIARY_FILE, new Date(), null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid date: null");
+    }
+
 }
 
 class AbstractObsClientIncrementImpl extends AbstractObsClient {
